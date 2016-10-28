@@ -50,7 +50,7 @@ namespace awl
 		template<typename ... Args>
 		void Notify(void (IObserver::*func)(Args ...), Args ... args)
 		{
-			for (OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
+			for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
 			{
 				//p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
 				IObserver * p_observer = *(i++);
