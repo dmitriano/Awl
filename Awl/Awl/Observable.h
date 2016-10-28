@@ -48,7 +48,7 @@ namespace awl
     protected:
         
 		template<typename ... Args>
-		void FireEvent(void (IObserver::*func)(Args ...), Args ... args)
+		void Notify(void (IObserver::*func)(Args ...), Args ... args)
 		{
 			for (OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
 			{

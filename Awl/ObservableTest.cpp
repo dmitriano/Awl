@@ -29,7 +29,7 @@ public:
 	{
 		It = it;
 
-		FireEvent(&INotifySomethingChanged::ItChanged, 25);
+		Notify(&INotifySomethingChanged::ItChanged, 25);
 	}
 };
 
