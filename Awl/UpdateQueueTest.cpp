@@ -1,9 +1,9 @@
-#include "Awl/UpdateQueue.h"
-
 #include <iostream>
 #include <sstream>
 #include <thread>
 #include <chrono>
+
+#include "Awl/UpdateQueue.h"
 
 class GameScene
 {

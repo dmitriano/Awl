@@ -27,12 +27,18 @@
     <ClInclude Include="Awl\UpdateQueue.h">
       <Filter>Awl</Filter>
     </ClInclude>
+    <ClInclude Include="Awl\Observable.h">
+      <Filter>Awl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestUpdateQueue.cpp">
+    <ClCompile Include="UpdateQueueTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ObservableTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

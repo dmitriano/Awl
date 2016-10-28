@@ -146,13 +146,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Awl\Observable.h" />
     <ClInclude Include="Awl\QuickList.h" />
     <ClInclude Include="Awl\SingleList.h" />
     <ClInclude Include="Awl\UpdateQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TestUpdateQueue.cpp" />
+    <ClCompile Include="ObservableTest.cpp" />
+    <ClCompile Include="UpdateQueueTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
