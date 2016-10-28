@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <chrono>
 
 class GameScene
 {
@@ -50,6 +51,9 @@ void SceneRenderingFunc()
 	GameScene scene;
 
 	scene.Draw();
+
+	//This sleep simulates the delay between flips that can be 1000/60 = 16.66ms, for example.
+	std::this_thread::sleep_for(std::chrono::microseconds(17));
 	
 	updateQueue.ApplyUpdates(scene);
 
