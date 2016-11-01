@@ -85,6 +85,22 @@ public:
 		std::cout << std::endl;
 	}
 
+	void PrintListAuto()
+	{
+		int val = 0;
+
+		std::cout << "The list content is:";
+
+		for (auto e : list)
+		{
+			std::cout << " " << e->Value;
+
+			Assert::AreEqual(val++, e->Value);
+		}
+
+		std::cout << std::endl;
+	}
+
 	void PrintListConst() const
 	{
 		int val = 0;
@@ -191,6 +207,8 @@ void TestList()
 	holder.AutoRemoveTest();
 
 	holder.PrintList();
+
+	holder.PrintListAuto();
 
 	holder.PrintListConst();
 

@@ -78,20 +78,4 @@ namespace UnitTesting
 			}
 		}
 	};
-
-	class Test
-	{
-	public:
-
-		void Run()
-		{
-			testFunc();
-		}
-
-	private:
-
-		std::string testName;
-
-		std::function<void()> testFunc;
-	};
 }
