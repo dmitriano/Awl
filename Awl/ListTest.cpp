@@ -224,6 +224,11 @@ public:
 		std::cout << std::endl;
 	}
 
+	void InsertTest()
+	{
+
+	}
+
 	~ListHolder()
 	{
 		while (!list.empty())

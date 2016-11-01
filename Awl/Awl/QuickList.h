@@ -6,108 +6,6 @@
 
 namespace awl
 {
-	//! The base class for quick_list iterators.
-	/*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization 
-		of std::iterator.*/
-	template <class T, class Link>
-	class base_quick_iterator : public std::iterator<std::forward_iterator_tag, T *>
-	{
-	public:
-
-		typedef T * value_type;
-
-		base_quick_iterator(T *p) : pCur(p) {}
-
-		T * operator-> () const { return cur(); }
-
-		T * operator* () const { return cur(); }
-
-	protected:
-
-		T * cur() const { return pCur; }
-
-		void MoveNext() { pCur = pCur->Link::next; }
-
-	private:
-
-		T * pCur;
-	};
-
-	template <class T, class Link>
-	class quick_iterator : public base_quick_iterator<T, Link>
-	{
-	public:
-
-		quick_iterator(T *p) : base_quick_iterator(p) {}
-
-		quick_iterator(const quick_iterator & other) : quick_iterator(*other) {}
-
-		quick_iterator& operator++ ()
-		{
-			MoveNext();
-
-			return *this;
-		}
-
-		quick_iterator operator++ (int)
-		{
-			quick_iterator tmp = *this;
-
-			MoveNext();
-
-			return tmp;
-		}
-
-		bool operator == (const quick_iterator & r) const
-		{
-			return cur() == r.cur();
-		}
-
-		bool operator != (const quick_iterator & r)  const
-		{
-			return !(*this == r);
-		}
-	};
-
-	template <class T, class Link>
-	class const_quick_iterator : public base_quick_iterator<const T, Link>
-	{
-	public:
-
-		const_quick_iterator(const T *p) : base_quick_iterator(p) {}
-
-		const_quick_iterator(const const_quick_iterator & other) : const_quick_iterator(*other) {}
-
-		//! The only differece between quick_iterator and const_quick_iterator is that quick_iterator can be converted to const_quick_iterator but not vice versa.
-		const_quick_iterator(const quick_iterator<T, Link> & other) : const_quick_iterator(*other) {}
-
-		const_quick_iterator& operator++ ()
-		{
-			MoveNext();
-
-			return *this;
-		}
-
-		const_quick_iterator operator++ (int)
-		{
-			const_quick_iterator tmp = *this;
-
-			MoveNext();
-
-			return tmp;
-		}
-
-		bool operator == (const const_quick_iterator & r) const
-		{
-			return cur() == r.cur();
-		}
-
-		bool operator != (const const_quick_iterator & r)  const
-		{
-			return !(*this == r);
-		}
-	};
-
 	template <class T>
 	class TForwardLink : public single_link<T>
 	{
@@ -126,6 +24,7 @@ namespace awl
 		TBackwardLink(T * n) : single_link<T>(n) {}
 	};
 
+	//! Double link consisting of two single links.
 	template <class T>
 	class quick_link : public TForwardLink<T>, public TBackwardLink<T>
 	{
@@ -154,8 +53,8 @@ namespace awl
 			TBackwardList::remove_after(next);
 		}
 
+		//! There should not be template parameter defaults in forward declaration.
 		template <class T1, class DLink> friend class quick_list;
-		//friend class quick_list<T, quick_link<T>>;
 
 	public:
 
@@ -164,7 +63,8 @@ namespace awl
 		}
 	};
 
-	template < class T, class DLink = quick_link<T>> //previously the default was removed because it already defaulted in above forward declaration
+	//! Doubly linked list consisting of two singly linked lists.
+	template < class T, class DLink = quick_link<T>>
 	class quick_list
 	{
 	private:
@@ -179,11 +79,11 @@ namespace awl
 
 		typedef T * value_type;
 
-		typedef quick_iterator<T, ForwardLink> iterator;
-		typedef const_quick_iterator<T, ForwardLink> const_iterator;
+		typedef typename TForwardList::iterator iterator;
+		typedef typename TForwardList::const_iterator const_iterator;
 
-		typedef quick_iterator<T, BackwardLink> reverse_iterator;
-		typedef const_quick_iterator<T, BackwardLink> const_reverse_iterator;
+		typedef typename TBackwardList::iterator reverse_iterator;
+		typedef typename TBackwardList::const_iterator const_reverse_iterator;
 
 		T * front() { return Forward.front(); }
 		const T * front() const { return Forward.front(); }
@@ -191,17 +91,17 @@ namespace awl
 		T * back() { return Backward.front(); }
 		const T * back() const { return Backward.front(); }
 
-		iterator begin() { return Forward.front(); }
-		const_iterator begin() const { return Forward.front(); }
+		iterator begin() { return Forward.begin(); }
+		const_iterator begin() const { return Forward.begin();}
 
-		iterator end() { return iterator(Forward.null()); }
-		const_iterator end() const { return const_iterator(Forward.null()); }
+		iterator end() { return Forward.end(); }
+		const_iterator end() const { return Forward.end(); }
 
-		reverse_iterator rbegin() { return Backward.front(); }
-		const_reverse_iterator rbegin() const { return Backward.front(); }
+		reverse_iterator rbegin() { return Backward.begin(); }
+		const_reverse_iterator rbegin() const { return Backward.begin(); }
 
-		reverse_iterator rend() { return Backward.null(); }
-		const_reverse_iterator rend() const { return Backward.null(); }
+		reverse_iterator rend() { return Backward.end(); }
+		const_reverse_iterator rend() const { return Backward.end(); }
 
 		//returns true if the list is empty
 		bool empty() const { return Forward.empty(); }
@@ -236,8 +136,7 @@ namespace awl
 		void push_front(T * a) { insert_after(Forward.null(), a); }
 		void push_back(T * a) { insert_before(Forward.null(), a); }
 
-		//excludes specified element from the list
-
+		//! Excludes specified element from the list.
 		static T * remove(T * a)
 		{
 			a->exclude();
@@ -246,8 +145,6 @@ namespace awl
 
 		T * pop_front() { return remove(Forward.front()); }
 		T * pop_back() { return remove(Backward.front()); }
-
-		//void erase(T * a) { GC::destroy(remove(a));}
 
 		void attach(T * first, T * last)
 		{

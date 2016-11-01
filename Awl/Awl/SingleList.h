@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iterator>
+
 namespace awl
 {
 	template <class T>
@@ -7,8 +9,9 @@ namespace awl
 	{
 	public:
 
-		T * next;
 		single_link(T * n) : next(n) {}
+
+		T * next;
 
 	protected:
 
@@ -18,26 +21,46 @@ namespace awl
 		{
 			return next != nullptr;
 		}
+
+		//! There should not be template parameter defaults in forward declaration.
+		template <class T1, class DLink> friend class single_list;
 	};
 
+	//! The base class for list iterators.
+	/*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
+	of std::iterator.*/
 	template <class T, class Link>
-	class single_iterator
+	class base_single_iterator : public std::iterator<std::forward_iterator_tag, T *>
 	{
 	public:
 
-		typedef T * value_type;
-
-		single_iterator(T *p) : pPrev(p) {}
-
-		single_iterator(const single_iterator & r) : pPrev(r.pPrev)
-		{
-		}
+		base_single_iterator(T *p) : pCur(p) {}
 
 		T * operator-> () const { return cur(); }
 
 		T * operator* () const { return cur(); }
 
-		single_iterator& operator++ ()
+	protected:
+
+		T * cur() const { return pCur; }
+
+		void MoveNext() { pCur = pCur->Link::next; }
+
+	private:
+
+		T * pCur;
+	};
+
+	template <class T, class Link>
+	class single_iterator : public base_single_iterator<T, Link>
+	{
+	public:
+
+		single_iterator(T *p) : base_single_iterator(p) {}
+
+		single_iterator(const single_iterator & other) : single_iterator(*other) {}
+
+		single_iterator & operator++ ()
 		{
 			MoveNext();
 
@@ -53,25 +76,54 @@ namespace awl
 			return tmp;
 		}
 
-		bool operator == (const single_iterator & r)
+		bool operator == (const single_iterator & r) const
 		{
-			return pPrev == r.pPrev;
+			return cur() == r.cur();
 		}
 
-		bool operator != (const single_iterator & r)
+		bool operator != (const single_iterator & r)  const
 		{
 			return !(*this == r);
 		}
+	};
 
-		T * prev() const { return pPrev; }
+	template <class T, class Link>
+	class const_single_iterator : public base_single_iterator<const T, Link>
+	{
+	public:
 
-		T * cur() const { return pPrev->Link::next; }
+		const_single_iterator(const T *p) : base_single_iterator(p) {}
 
-	private:
+		const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
 
-		void MoveNext() { pPrev = pPrev->Link::next; }
+		//! The only differece between single_iterator and const_single_iterator is that single_iterator can be converted to const_single_iterator but not vice versa.
+		const_single_iterator(const single_iterator<T, Link> & other) : const_single_iterator(*other) {}
 
-		T * pPrev;
+		const_single_iterator& operator++ ()
+		{
+			MoveNext();
+
+			return *this;
+		}
+
+		const_single_iterator operator++ (int)
+		{
+			const_single_iterator tmp = *this;
+
+			MoveNext();
+
+			return tmp;
+		}
+
+		bool operator == (const const_single_iterator & r) const
+		{
+			return cur() == r.cur();
+		}
+
+		bool operator != (const const_single_iterator & r)  const
+		{
+			return !(*this == r);
+		}
 	};
 
 	template < class T, class Link = single_link<T> >
@@ -82,7 +134,7 @@ namespace awl
 		typedef T * value_type;
 
 		typedef single_iterator<T, Link> iterator;
-		typedef single_iterator<const T, Link> const_iterator;
+		typedef const_single_iterator<T, Link> const_iterator;
 
 		single_list() : m_null(null()) {}
 		~single_list() {}
@@ -93,14 +145,11 @@ namespace awl
 		T * front() { return m_null.next; }
 		const T * front() const { return m_null.next; }
 
-		iterator begin() { return null(); }
-		const_iterator begin() const { return null(); }
+		iterator begin() { return front(); }
+		const_iterator begin() const { return front(); }
 
-		//TSingleList can't access the last element
-		//i != list.end() should be replaced with *i != list.null()
-
-		//iterator end() { return iterator(back());}
-		//const_iterator end() const { return const_iterator(back());}
+		iterator end() { return null();}
+		const_iterator end() const { return null();}
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
@@ -123,8 +172,8 @@ namespace awl
 		T * pop_front() { return remove_after(null()); }
 
 		bool empty() const { return front() == null(); }
-		bool has_one_or_less() const { return front()->Link::next == null(); }
-		bool has_one() const { return !empty() && has_one_or_less(); }
+		bool contains_one_or_less() const { return front()->Link::next == null(); }
+		bool contains_one() const { return !empty() && contains_one_or_less(); }
 
 		//void erase_after(T * p) { GC::destroy(remove_after(p));}
 
