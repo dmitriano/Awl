@@ -73,7 +73,7 @@ public:
 	{
 		int val = 0;
 		
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 		
 		for (Element * e : list)
 		{
@@ -89,7 +89,7 @@ public:
 	{
 		int val = 0;
 
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		for (auto e : list)
 		{
@@ -105,7 +105,7 @@ public:
 	{
 		int val = 0;
 
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		for (const Element * e : list)
 		{
@@ -119,7 +119,7 @@ public:
 
 	void PrintListIter()
 	{
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		int val = 0;
 
@@ -137,7 +137,7 @@ public:
 
 	void PrintListIterConst()
 	{
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		int val = 0;
 
@@ -155,7 +155,7 @@ public:
 
 	void PrintListReverseIter()
 	{
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		int val = 2;
 
@@ -173,7 +173,7 @@ public:
 
 	void PrintListReverseIterConst()
 	{
-		std::cout << "The list content is:";
+		std::cout << _T("The list content is:");
 
 		int val = 2;
 
@@ -195,6 +195,33 @@ public:
 		ELEMENT_LIST::const_iterator i = list.begin();
 
 		ELEMENT_LIST::const_reverse_iterator r_i = list.rbegin();
+	}
+
+	void ConstAlgorithmTest() const
+	{
+		//This code does not complile with MSVC in Debug configuration.
+		
+		auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 1; });
+
+		if (i == list.end())
+		{
+			throw TestException("Element 1 not found.");
+		}
+
+		std::cout << _T("The found element is: ") << i->Value << std::endl;
+
+		i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 25; });
+
+		if (i != list.end())
+		{
+			throw TestException("Non-existing element 25 found.");
+		}
+
+		std::cout << _T("The list content is:");
+
+		std::for_each(list.begin(), list.end(), [](const Element * e) { std::cout << " " << e->Value; });
+
+		std::cout << std::endl;
 	}
 
 	~ListHolder()
@@ -227,4 +254,6 @@ void TestList()
 	holder.PrintListReverseIterConst();
 
 	holder.PrintListReverseIter();
+
+	holder.ConstAlgorithmTest();
 }

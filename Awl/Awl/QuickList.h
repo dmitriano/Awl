@@ -1,7 +1,5 @@
 #pragma once
 
-//test
-
 #include "Awl/SingleList.h"
 
 namespace awl
