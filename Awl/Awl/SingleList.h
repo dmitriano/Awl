@@ -63,13 +63,13 @@ namespace awl
 	{
 	public:
 
-		single_iterator(T *p) : base_single_iterator(p) {}
+		single_iterator(T *p) : base_single_iterator<T, Link>(p) {}
 
 		single_iterator(const single_iterator & other) : single_iterator(*other) {}
 
 		single_iterator & operator++ ()
 		{
-			MoveNext();
+			this->MoveNext();
 
 			return *this;
 		}
@@ -78,14 +78,14 @@ namespace awl
 		{
 			single_iterator tmp = *this;
 
-			MoveNext();
+			this->MoveNext();
 
 			return tmp;
 		}
 
 		bool operator == (const single_iterator & r) const
 		{
-			return cur() == r.cur();
+			return this->cur() == r.cur();
 		}
 
 		bool operator != (const single_iterator & r)  const
@@ -99,7 +99,7 @@ namespace awl
 	{
 	public:
 
-		const_single_iterator(const T *p) : base_single_iterator(p) {}
+		const_single_iterator(const T *p) : base_single_iterator<const T, Link>(p) {}
 
 		const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
 
@@ -108,7 +108,7 @@ namespace awl
 
 		const_single_iterator& operator++ ()
 		{
-			MoveNext();
+			this->MoveNext();
 
 			return *this;
 		}
@@ -117,14 +117,14 @@ namespace awl
 		{
 			const_single_iterator tmp = *this;
 
-			MoveNext();
+			this->MoveNext();
 
 			return tmp;
 		}
 
 		bool operator == (const const_single_iterator & r) const
 		{
-			return cur() == r.cur();
+			return this->cur() == r.cur();
 		}
 
 		bool operator != (const const_single_iterator & r)  const
