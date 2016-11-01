@@ -103,8 +103,8 @@ namespace awl
 
 		//returns true if the list is empty
 		bool empty() const { return Forward.empty(); }
-		bool has_one_or_less() const { return Forward.has_one_or_less(); }
-		bool has_one() const { return Forward.has_one(); }
+		bool empty_or_contains_one() const { return Forward.empty_or_contains_one(); }
+		bool contains_one() const { return Forward.contains_one(); }
 
 		//Add... includes specified element to the list
 

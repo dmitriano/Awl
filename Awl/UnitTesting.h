@@ -60,6 +60,11 @@ namespace UnitTesting
 			}
 		}
 
+		static void IsFalse(bool val, const TCHAR * message = nullptr)
+		{
+			IsTrue(!val, message);
+		}
+
 		template <typename T>
 		static void AreEqual(T left, T right, const TCHAR * message = nullptr)
 		{

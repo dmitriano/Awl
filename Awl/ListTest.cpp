@@ -36,9 +36,26 @@ public:
 
 	ListHolder()
 	{
-		list.push_back(new Element(0));
+		Assert::IsTrue(list.empty());
+		Assert::AreEqual(size_t(0), list.size());
+		Assert::IsTrue(list.empty_or_contains_one());
+		Assert::IsFalse(list.contains_one());
+
 		list.push_back(new Element(1));
+
+		Assert::IsFalse(list.empty());
+		Assert::AreEqual(size_t(1), list.size());
+		Assert::IsTrue(list.empty_or_contains_one());
+		Assert::IsTrue(list.contains_one());
+
 		list.push_back(new Element(2));
+		
+		Assert::IsFalse(list.empty());
+		Assert::AreEqual(size_t(2), list.size());
+		Assert::IsFalse(list.empty_or_contains_one());
+		Assert::IsFalse(list.contains_one());
+
+		list.push_front(new Element(0));
 
 		Assert::AreEqual(size_t(3), list.size());
 	}

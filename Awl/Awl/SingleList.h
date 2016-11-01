@@ -55,6 +55,9 @@ namespace awl
 		T * pCur;
 	};
 
+	//! A singly linked list containing elements derived from single_link<T>.
+	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last. 
+		Null element takes only sizeof(T*) bytes, but not sizeof(T). */
 	template <class T, class Link>
 	class single_iterator : public base_single_iterator<T, Link>
 	{
@@ -176,8 +179,8 @@ namespace awl
 		T * pop_front() { return remove_after(null()); }
 
 		bool empty() const { return front() == null(); }
-		bool contains_one_or_less() const { return front()->Link::pNext == null(); }
-		bool contains_one() const { return !empty() && contains_one_or_less(); }
+		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }
+		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
 		//void erase_after(T * p) { GC::destroy(remove_after(p));}
 
