@@ -9,17 +9,21 @@ namespace awl
 	{
 	public:
 
-		single_link(T * n) : next(n) {}
+		single_link(T * n) : pNext(n) {}
 
-		T * next;
+		T * next() { return pNext; }
+
+		const T * next() const { return pNext; }
 
 	protected:
 
-		single_link() : next(nullptr) {}
+		T * pNext;
+
+		single_link() : pNext(nullptr) {}
 
 		bool included() const
 		{
-			return next != nullptr;
+			return pNext != nullptr;
 		}
 
 		//! There should not be template parameter defaults in forward declaration.
@@ -44,7 +48,7 @@ namespace awl
 
 		T * cur() const { return pCur; }
 
-		void MoveNext() { pCur = pCur->Link::next; }
+		void MoveNext() { pCur = pCur->Link::next(); }
 
 	private:
 
@@ -142,8 +146,8 @@ namespace awl
 		T * null() { return (T *)&m_null; }
 		const T * null() const { return (T *)&m_null; }
 
-		T * front() { return m_null.next; }
-		const T * front() const { return m_null.next; }
+		T * front() { return m_null.next(); }
+		const T * front() const { return m_null.next(); }
 
 		iterator begin() { return front(); }
 		const_iterator begin() const { return front(); }
@@ -155,15 +159,15 @@ namespace awl
 
 		static void insert_after(T * p, T * a)
 		{
-			a->Link::next = p->Link::next;
-			p->Link::next = a;
+			a->Link::pNext = p->Link::pNext;
+			p->Link::pNext = a;
 		}
 
 		static T * remove_after(T * p)
 		{
-			T * r = p->Link::next;
-			p->Link::next = r->Link::next;
-			r->Link::next = nullptr;
+			T * r = p->Link::pNext;
+			p->Link::pNext = r->Link::pNext;
+			r->Link::pNext = nullptr;
 			return r;
 		}
 
@@ -172,7 +176,7 @@ namespace awl
 		T * pop_front() { return remove_after(null()); }
 
 		bool empty() const { return front() == null(); }
-		bool contains_one_or_less() const { return front()->Link::next == null(); }
+		bool contains_one_or_less() const { return front()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && contains_one_or_less(); }
 
 		//void erase_after(T * p) { GC::destroy(remove_after(p));}
@@ -186,13 +190,13 @@ namespace awl
 
 		//void erase_all() { erase_range(null(), null());}
 
-		void clear() { m_null.next = null(); }
+		void clear() { m_null.pNext = null(); }
 
 		void attach(T * first, T * last)
 		{
-			m_null.next = first;
+			m_null.pNext = first;
 
-			last->Link::next = null();
+			last->Link::pNext = null();
 		}
 
 		//SingList does not know its last element so it should be provided by QuickList
@@ -201,16 +205,16 @@ namespace awl
 		{
 			T * old_first = front();
 
-			m_null.next = first;
+			m_null.pNext = first;
 
-			last->Link::next = old_first;
+			last->Link::pNext = old_first;
 		}
 
 		void push_back(T * first, T * last, T * old_last)
 		{
-			old_last->Link::next = first;
+			old_last->Link::pNext = first;
 
-			last->Link::next = null();
+			last->Link::pNext = null();
 		}
 
 	protected:

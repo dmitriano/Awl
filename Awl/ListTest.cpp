@@ -226,7 +226,51 @@ public:
 
 	void InsertTest()
 	{
+		list.push_back(new Element(4));
 
+		auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 2; });
+
+		if (i == list.end())
+		{
+			throw TestException("Element 2 not found.");
+		}
+
+		list.insert(i, new Element(3));
+
+		Assert::AreEqual((size_t)(5), list.size());
+
+		PrintList();
+
+		++i;
+		
+		list.erase(i++);
+
+		list.erase(i++);
+
+		Assert::AreEqual((size_t)(3), list.size());
+
+		PrintList();
+	}
+
+	void AttachTest()
+	{
+		ELEMENT_LIST other_list;
+
+		Assert::AreEqual((size_t)(3), list.size());
+
+		other_list.attach(list);
+
+		Assert::AreEqual((size_t)(0), list.size());
+
+		Assert::AreEqual((size_t)(3), other_list.size());
+
+		list.attach(other_list);
+
+		Assert::AreEqual((size_t)(0), other_list.size());
+
+		Assert::AreEqual((size_t)(3), list.size());
+
+		PrintList();
 	}
 
 	~ListHolder()
@@ -261,4 +305,8 @@ void TestList()
 	holder.PrintListReverseIter();
 
 	holder.ConstAlgorithmTest();
+
+	holder.InsertTest();
+
+	holder.AttachTest();
 }

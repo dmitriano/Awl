@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iterator>
-
 #include "Awl/SingleList.h"
 
 namespace awl
@@ -47,8 +45,8 @@ namespace awl
 
 		void exclude()
 		{
-			T * prev = this->BackwardLink::next;
-			T * next = this->ForwardLink::next;
+			T * prev = this->BackwardLink::next();
+			T * next = this->ForwardLink::next();
 			TForwardList::remove_after(prev);
 			TBackwardList::remove_after(next);
 		}
@@ -110,25 +108,25 @@ namespace awl
 
 		//Add... includes specified element to the list
 
-		static void insert(iterator i, T * a) { insert_before(*i, a); }
-		static void insert(reverse_iterator i, T * a) { insert_after(*i, a); }
+		static void insert(iterator i, T * a) { insert_after(*i, a); }
+		static void insert(reverse_iterator i, T * a) { insert_before(*i, a); }
 
-		static void remove(iterator i) { remove(*i); }
-		static void remove(reverse_iterator i) { remove(*i); }
+		static void erase(iterator i) { remove(*i); }
+		static void erase(reverse_iterator i) { remove(*i); }
 
 		//static void erase(iterator i) { erase(*i);}
 		//static void erase(reverse_iterator i) { erase(*i);}
 
 		static void insert_after(T * p, T * a)
 		{
-			T * next = p->ForwardLink::next;
+			T * next = p->ForwardLink::next();
 			TForwardList::insert_after(p, a);
 			TBackwardList::insert_after(next, a);
 		}
 
 		static void insert_before(T * p, T * a)
 		{
-			T * prev = p->BackwardLink::next;
+			T * prev = p->BackwardLink::next();
 			TForwardList::insert_after(prev, a);
 			TBackwardList::insert_after(p, a);
 		}
@@ -136,21 +134,8 @@ namespace awl
 		void push_front(T * a) { insert_after(Forward.null(), a); }
 		void push_back(T * a) { insert_before(Forward.null(), a); }
 
-		//! Excludes specified element from the list.
-		static T * remove(T * a)
-		{
-			a->exclude();
-			return a;
-		}
-
 		T * pop_front() { return remove(Forward.front()); }
 		T * pop_back() { return remove(Backward.front()); }
-
-		void attach(T * first, T * last)
-		{
-			Forward.attach(first, last);
-			Backward.attach(last, first);
-		}
 
 		void attach(quick_list & src)
 		{
@@ -220,6 +205,19 @@ namespace awl
 		}
 
 	private:
+
+		//! Excludes specified element from the list.
+		static T * remove(T * a)
+		{
+			a->exclude();
+			return a;
+		}
+
+		void attach(T * first, T * last)
+		{
+			Forward.attach(first, last);
+			Backward.attach(last, first);
+		}
 
 		//forward and backward lists
 		TForwardList Forward;
