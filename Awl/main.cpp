@@ -13,11 +13,11 @@ void main()
 {
 	try
 	{
+		TestList();
+
 		TestUpdateQueue();
 
 		TestObservable();
-
-		TestList();
 
 		std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
 	}

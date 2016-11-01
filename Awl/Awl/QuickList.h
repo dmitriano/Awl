@@ -114,9 +114,6 @@ namespace awl
 		static void erase(iterator i) { remove(*i); }
 		static void erase(reverse_iterator i) { remove(*i); }
 
-		//static void erase(iterator i) { erase(*i);}
-		//static void erase(reverse_iterator i) { erase(*i);}
-
 		static void insert_after(T * p, T * a)
 		{
 			T * next = p->ForwardLink::next();

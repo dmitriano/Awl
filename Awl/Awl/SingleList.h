@@ -55,9 +55,6 @@ namespace awl
 		T * pCur;
 	};
 
-	//! A singly linked list containing elements derived from single_link<T>.
-	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
-		Null element takes only sizeof(T*) bytes, but not sizeof(T). */
 	template <class T, class Link>
 	class single_iterator : public base_single_iterator<T, Link>
 	{
@@ -133,6 +130,9 @@ namespace awl
 		}
 	};
 
+	//! A singly linked list containing elements derived from single_link<T>.
+	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
+	Null element takes only sizeof(T*) bytes, but not sizeof(T). */
 	template < class T, class Link = single_link<T> >
 	class single_list
 	{
@@ -143,14 +143,11 @@ namespace awl
 		typedef single_iterator<T, Link> iterator;
 		typedef const_single_iterator<T, Link> const_iterator;
 
-		single_list() : m_null(null()) {}
+		single_list() : Null(null()) {}
 		~single_list() {}
 
-		T * null() { return (T *)&m_null; }
-		const T * null() const { return (T *)&m_null; }
-
-		T * front() { return m_null.next(); }
-		const T * front() const { return m_null.next(); }
+		T * front() { return Null.next(); }
+		const T * front() const { return Null.next(); }
 
 		iterator begin() { return front(); }
 		const_iterator begin() const { return front(); }
@@ -193,11 +190,13 @@ namespace awl
 
 		//void erase_all() { erase_range(null(), null());}
 
-		void clear() { m_null.pNext = null(); }
+		void clear() { Null.pNext = null(); }
+
+	private:
 
 		void attach(T * first, T * last)
 		{
-			m_null.pNext = first;
+			Null.pNext = first;
 
 			last->Link::pNext = null();
 		}
@@ -208,7 +207,7 @@ namespace awl
 		{
 			T * old_first = front();
 
-			m_null.pNext = first;
+			Null.pNext = first;
 
 			last->Link::pNext = old_first;
 		}
@@ -220,8 +219,12 @@ namespace awl
 			last->Link::pNext = null();
 		}
 
-	protected:
+		T * null() { return (T *)&Null; }
+		const T * null() const { return (T *)&Null; }
 
-		Link  m_null;
+		Link Null;
+
+		//! quick_list accesses null() function.
+		template <class T1, class DLink> friend class quick_list;
 	};
 };

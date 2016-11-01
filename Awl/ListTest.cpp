@@ -252,6 +252,8 @@ public:
 	{
 		list.push_back(new Element(4));
 
+		Assert::AreEqual((size_t)(4), list.size());
+
 		auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 2; });
 
 		if (i == list.end())
@@ -274,6 +276,8 @@ public:
 		Assert::IsFalse(p_element_to_be_deleted->included());
 		
 		delete p_element_to_be_deleted;
+
+		Assert::AreEqual((size_t)(4), list.size());
 
 		delete *(i++); //The element is excluded from the list automatically.
 
