@@ -5,6 +5,10 @@
 
 #include "Awl/UpdateQueue.h"
 
+#include "UnitTesting.h"
+
+using namespace UnitTesting;
+
 class GameScene
 {
 public:
@@ -50,6 +54,8 @@ void SceneRenderingFunc()
 {
 	GameScene scene;
 
+	Assert::IsTrue(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
+
 	scene.Draw();
 
 	//This sleep simulates the delay between flips that can be 1000/60 = 16.66ms, for example.
@@ -57,6 +63,8 @@ void SceneRenderingFunc()
 	
 	updateQueue.ApplyUpdates(scene);
 
+	Assert::IsTrue(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
+	
 	scene.Draw();
 }
 
