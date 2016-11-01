@@ -7,7 +7,7 @@
 #include <sstream>
 
 #if !defined(_T)	
-	#define _T(quoted_string) quoted_string
+#define _T(quoted_string) quoted_string
 #endif
 
 namespace UnitTesting
@@ -15,7 +15,7 @@ namespace UnitTesting
 	typedef char TCHAR;
 
 	typedef std::basic_string<TCHAR> TString;
-	
+
 	//! The basic exception class for Lines Game engine.
 	class TestException : public std::exception
 	{

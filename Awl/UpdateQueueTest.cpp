@@ -27,7 +27,7 @@ void GameScene::Draw()
 	std::ostringstream out;
 
 	out << "Drawing the scene with the following settings: Rotation=" << (int)Rotation << " PerspectiveMode=" << (PerspectiveMode ? "true" : "false") << std::endl;
-	
+
 	std::cout << out.str();
 }
 
@@ -60,18 +60,18 @@ void SceneRenderingFunc()
 
 	//This sleep simulates the delay between flips that can be 1000/60 = 16.66ms, for example.
 	std::this_thread::sleep_for(std::chrono::milliseconds(17));
-	
+
 	updateQueue.ApplyUpdates(scene);
 
 	Assert::IsTrue(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
-	
+
 	scene.Draw();
 }
 
 void TestUpdateQueue()
 {
 	std::thread main_thread(UserActionsFunc);
-	
+
 	std::thread render_thread(SceneRenderingFunc);
 
 	render_thread.join();

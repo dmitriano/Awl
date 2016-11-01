@@ -4,49 +4,49 @@
 
 namespace awl
 {
-    template <class IObserver>
-    class Observer : public IObserver, public quick_link< Observer<IObserver> >
-    {
-    public:
+	template <class IObserver>
+	class Observer : public IObserver, public quick_link< Observer<IObserver> >
+	{
+	public:
 
-        bool IsSubscribed() const
-        {
-            return included();
-        }
-        
-        void UnsubscribeSelf()
-        {
-            exclude();
-        }
+		bool IsSubscribed() const
+		{
+			return included();
+		}
 
-        ~Observer()
-        {
-            if (IsSubscribed())
-            {
-                UnsubscribeSelf();
-            }
-        }
-    };
+		void UnsubscribeSelf()
+		{
+			exclude();
+		}
 
-    template <class IObserver>
-    class Observable
-    {
-    public:
+		~Observer()
+		{
+			if (IsSubscribed())
+			{
+				UnsubscribeSelf();
+			}
+		}
+	};
 
-        typedef Observer<IObserver> OBSERVER;
+	template <class IObserver>
+	class Observable
+	{
+	public:
 
-        void Subscribe(OBSERVER * p_observer)
-	    {
-		    Observers.push_back(p_observer);
-	    }
+		typedef Observer<IObserver> OBSERVER;
 
-        void Unsubscribe(OBSERVER * p_observer)
-        {
-            p_observer->UnsubscribeSelf();
-        }
+		void Subscribe(OBSERVER * p_observer)
+		{
+			Observers.push_back(p_observer);
+		}
 
-    protected:
-        
+		void Unsubscribe(OBSERVER * p_observer)
+		{
+			p_observer->UnsubscribeSelf();
+		}
+
+	protected:
+
 		template<typename ... Args>
 		void Notify(void (IObserver::*func)(Args ...), Args ... args)
 		{
@@ -61,8 +61,8 @@ namespace awl
 
 	private:
 
-        typedef quick_list<OBSERVER> OBSERVER_LIST;
+		typedef quick_list<OBSERVER> OBSERVER_LIST;
 
-        OBSERVER_LIST Observers;
-    };
+		OBSERVER_LIST Observers;
+	};
 }

@@ -13,6 +13,7 @@ public:
 
 	Element(int val) : Value(val)
 	{
+		++elementCount;
 	}
 
 	~Element()
@@ -21,10 +22,16 @@ public:
 		{
 			exclude();
 		}
+
+		--elementCount;
 	}
 
 	int Value = 0;
+
+	static int elementCount;
 };
+
+int Element::elementCount = 0;
 
 typedef awl::quick_list<Element> ELEMENT_LIST;
 
@@ -260,9 +267,15 @@ public:
 
 		++i;
 		
-		list.erase(i++);
+		Element * p_element_to_be_deleted = *i;
+		
+		list.erase(i++); //This only excludes the element from the list but not deletes it.
 
-		list.erase(i++);
+		Assert::IsFalse(p_element_to_be_deleted->included());
+		
+		delete p_element_to_be_deleted;
+
+		delete *(i++); //The element is excluded from the list automatically.
 
 		Assert::AreEqual((size_t)(3), list.size());
 
@@ -301,29 +314,33 @@ public:
 
 void TestList()
 {
-	ListHolder holder;
+	{
+		ListHolder holder;
 
-	holder.AddRemoveTest();
+		holder.AddRemoveTest();
 
-	holder.AutoRemoveTest();
+		holder.AutoRemoveTest();
 
-	holder.PrintList();
+		holder.PrintList();
 
-	holder.PrintListAuto();
+		holder.PrintListAuto();
 
-	holder.PrintListConst();
+		holder.PrintListConst();
 
-	holder.PrintListIter();
+		holder.PrintListIter();
 
-	holder.PrintListIterConst();
+		holder.PrintListIterConst();
 
-	holder.PrintListReverseIterConst();
+		holder.PrintListReverseIterConst();
 
-	holder.PrintListReverseIter();
+		holder.PrintListReverseIter();
 
-	holder.ConstAlgorithmTest();
+		holder.ConstAlgorithmTest();
 
-	holder.InsertTest();
+		holder.InsertTest();
 
-	holder.AttachTest();
+		holder.AttachTest();
+	}
+
+	Assert::AreEqual(0, Element::elementCount);
 }

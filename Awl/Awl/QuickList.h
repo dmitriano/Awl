@@ -28,19 +28,9 @@ namespace awl
 	{
 	public:
 
-		typedef TForwardLink<T> ForwardLink;
-		typedef TBackwardLink<T> BackwardLink;
-
-	protected:
-
-		typedef single_list<T, ForwardLink> TForwardList;
-		typedef single_list<T, BackwardLink> TBackwardList;
-
-		quick_link() {}
-
 		bool included() const
 		{
-			return ForwardLink::included() && BackwardLink::included();
+			return ForwardLink::included();// && BackwardLink::included();
 		}
 
 		void exclude()
@@ -50,6 +40,16 @@ namespace awl
 			TForwardList::remove_after(prev);
 			TBackwardList::remove_after(next);
 		}
+
+	protected:
+
+		typedef TForwardLink<T> ForwardLink;
+		typedef TBackwardLink<T> BackwardLink;
+
+		typedef single_list<T, ForwardLink> TForwardList;
+		typedef single_list<T, BackwardLink> TBackwardList;
+
+		quick_link() {}
 
 		//! There should not be template parameter defaults in forward declaration.
 		template <class T1, class DLink> friend class quick_list;
@@ -90,7 +90,7 @@ namespace awl
 		const T * back() const { return Backward.front(); }
 
 		iterator begin() { return Forward.begin(); }
-		const_iterator begin() const { return Forward.begin();}
+		const_iterator begin() const { return Forward.begin(); }
 
 		iterator end() { return Forward.end(); }
 		const_iterator end() const { return Forward.end(); }

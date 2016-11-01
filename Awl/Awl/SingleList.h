@@ -56,7 +56,7 @@ namespace awl
 	};
 
 	//! A singly linked list containing elements derived from single_link<T>.
-	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last. 
+	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
 		Null element takes only sizeof(T*) bytes, but not sizeof(T). */
 	template <class T, class Link>
 	class single_iterator : public base_single_iterator<T, Link>
@@ -155,8 +155,8 @@ namespace awl
 		iterator begin() { return front(); }
 		const_iterator begin() const { return front(); }
 
-		iterator end() { return null();}
-		const_iterator end() const { return null();}
+		iterator end() { return null(); }
+		const_iterator end() const { return null(); }
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 

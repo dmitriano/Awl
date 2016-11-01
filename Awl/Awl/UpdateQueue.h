@@ -14,7 +14,7 @@ namespace awl
 			Message(const std::function<void(Args ...)> & func) : Func(func)
 			{
 			}
-			
+
 			std::function<void(Args ...)> Func;
 		};
 
@@ -46,7 +46,7 @@ namespace awl
 			//note that using PendingMessages.clear() here will result in memory leak
 			FreeBlocks.push_back(PendingMessages);
 		}
-		
+
 		//called by UI thread to propagate changes to render thread
 		void Push(const std::function<void(Args ...)> & func)
 		{
@@ -134,7 +134,7 @@ namespace awl
 
 		//messages (changes) queued by UI thread while rendering operation is in progress
 		MessageQueue PendingMessages;
-		
+
 		//we recycle freed queue elements to avoid superfluous dynamic memory allocation
 		MessageQueue FreeBlocks;
 
