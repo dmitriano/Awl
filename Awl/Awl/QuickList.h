@@ -191,14 +191,7 @@ namespace awl
 
 		size_t size() const
 		{
-			size_t count = 0;
-
-			for (const_iterator i = begin(); i != end(); ++i)
-			{
-				++count;
-			}
-
-			return count;
+			return Forward.size();
 		}
 
 	private:

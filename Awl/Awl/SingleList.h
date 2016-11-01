@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iterator>
+#include <algorithm>
 
 namespace awl
 {
@@ -191,6 +192,22 @@ namespace awl
 		//void erase_all() { erase_range(null(), null());}
 
 		void clear() { Null.pNext = null(); }
+
+		//! Returns the count of elements in the list.
+		size_t size() const
+		{
+			size_t count = 0;
+
+			//We do not need to do dereferencing here, so we do not use std::for_each
+			//std::for_each(begin(), end(), [&count](const T *) { ++count; });
+			
+			for (const_iterator i = begin(); i != end(); ++i)
+			{
+				++count;
+			}
+
+			return count;
+		}
 
 	private:
 
