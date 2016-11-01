@@ -30,6 +30,9 @@
     <ClInclude Include="Awl\Observable.h">
       <Filter>Awl</Filter>
     </ClInclude>
+    <ClInclude Include="UnitTesting.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,6 +42,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ObservableTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ListTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTesting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

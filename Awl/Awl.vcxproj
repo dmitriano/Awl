@@ -150,10 +150,13 @@
     <ClInclude Include="Awl\QuickList.h" />
     <ClInclude Include="Awl\SingleList.h" />
     <ClInclude Include="Awl\UpdateQueue.h" />
+    <ClInclude Include="UnitTesting.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ListTest.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObservableTest.cpp" />
+    <ClCompile Include="UnitTesting.cpp" />
     <ClCompile Include="UpdateQueueTest.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -270,7 +270,7 @@ public:
 		Backward.clear();
 	}
 
-	size_t count() const
+	size_t size() const
 	{
 		size_t count = 0;
 		
