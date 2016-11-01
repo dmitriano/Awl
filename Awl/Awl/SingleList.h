@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iterator>
-#include <algorithm>
 
 namespace awl
 {
@@ -12,22 +11,25 @@ namespace awl
 
 		single_link(T * n) : pNext(n) {}
 
+		bool included() const
+		{
+			return next() != nullptr;
+		}
+
+	protected:
+
 		T * next() { return pNext; }
 
 		const T * next() const { return pNext; }
 
-	protected:
+		single_link() : pNext(nullptr) {}
+
+	private:
 
 		T * pNext;
 
-		single_link() : pNext(nullptr) {}
-
-		bool included() const
-		{
-			return pNext != nullptr;
-		}
-
 		//! There should not be template parameter defaults in forward declaration.
+		template <class T1, class DLink> friend class base_single_iterator;
 		template <class T1, class DLink> friend class single_list;
 	};
 
