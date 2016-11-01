@@ -1,11 +1,16 @@
 #pragma once
 
+#include <iterator>
+
 #include "Awl/SingleList.h"
 
 namespace awl
 {
+	//! The base class for quick_list iterators.
+	/*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization 
+		of std::iterator.*/
 	template <class T, class Link>
-	class base_quick_iterator
+	class base_quick_iterator : public std::iterator<std::forward_iterator_tag, T *>
 	{
 	public:
 
