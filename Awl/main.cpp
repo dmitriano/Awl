@@ -9,9 +9,11 @@ void TestObservable();
 
 void TestList();
 
-void main()
+int main()
 {
-	try
+    int error = 1;
+
+    try
 	{
 		TestList();
 
@@ -20,9 +22,13 @@ void main()
 		TestObservable();
 
 		std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
+
+        error = 0;
 	}
 	catch (const std::exception & e)
 	{
 		std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
 	}
+
+    return error;
 }

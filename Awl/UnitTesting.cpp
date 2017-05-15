@@ -1,5 +1,3 @@
-#pragma once
-
 #include "UnitTesting.h"
 
 namespace UnitTesting
