@@ -3,6 +3,7 @@ project (AwlTest)
 include_directories("Awl")
 
 #Enable multithreading to use std::thread: Operation not permitted
+#http://stackoverflow.com/questions/30734136/cmake-linking-error-pthread-enable-multithreading-to-use-stdthread-operation
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
 
 #http://stackoverflow.com/questions/37621342/cmake-will-not-compile-to-c-11-standard

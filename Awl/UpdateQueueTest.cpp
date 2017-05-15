@@ -52,7 +52,8 @@ void UserActionsFunc()
 
 void SceneRenderingFunc()
 {
-/*
+//GCC 4.7.3 does not have std::this_thread::sleep.
+#if !(__GNUC__ == 4 && __GNUC_MINOR__ == 7)
     GameScene scene;
 
 	Assert::IsTrue(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
@@ -60,14 +61,14 @@ void SceneRenderingFunc()
 	scene.Draw();
 
     //This sleep simulates the delay between flips that can be 1000/60 = 16.66ms, for example. (is not compiled by GCC 4.7.3)
-    std::this_thread::sleep_for(std::chrono::milliseconds(17));4.7.3
+    std::this_thread::sleep_for(std::chrono::milliseconds(17));
 
 	updateQueue.ApplyUpdates(scene);
 
 	Assert::IsTrue(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 
 	scene.Draw();
-*/
+#endif
 }
 
 void TestUpdateQueue()
