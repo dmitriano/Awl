@@ -147,9 +147,18 @@ namespace awl
 		typedef const_single_iterator<T, Link> const_iterator;
 
 		single_list() : Null(null()) {}
-		~single_list() {}
 
-		T * front() { return Null.next(); }
+                single_list(const single_list& other) = delete;
+
+                single_list(single_list&& other) = delete;
+
+                ~single_list() {}
+
+                single_list& operator = (const single_list& other) = delete;
+
+                single_list& operator = (single_list&& other) = delete;
+
+                T * front() { return Null.next(); }
 		const T * front() const { return Null.next(); }
 
 		iterator begin() { return front(); }

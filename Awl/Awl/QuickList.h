@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+
 #include "Awl/SingleList.h"
 
 namespace awl
@@ -83,7 +85,30 @@ namespace awl
 		typedef typename TBackwardList::iterator reverse_iterator;
 		typedef typename TBackwardList::const_iterator const_reverse_iterator;
 
-		T * front() { return Forward.front(); }
+                quick_list()
+                {
+                }
+
+                quick_list(const quick_list& other) = delete;
+
+                quick_list(quick_list&& other)
+                {
+                    attach(other);
+                }
+
+                quick_list& operator = (const quick_list& other) = delete;
+
+                quick_list& operator = (quick_list&& other)
+                {
+                    if (this != &other)
+                    {
+                        //quick_list cannot free it resources, so it is supposed to be empty
+                        assert(empty());
+                        attach(other);
+                    }
+                }
+
+                T * front() { return Forward.front(); }
 		const T * front() const { return Forward.front(); }
 
 		T * back() { return Backward.front(); }
@@ -134,23 +159,6 @@ namespace awl
 		T * pop_front() { return remove(Forward.front()); }
 		T * pop_back() { return remove(Backward.front()); }
 
-		void attach(quick_list & src)
-		{
-			if (src.empty())
-			{
-				clear();
-			}
-			else
-			{
-				T * first = src.front();
-				T * last = src.back();
-
-				attach(first, last);
-
-				src.clear();
-			}
-		}
-
 		void push_front(quick_list & src)
 		{
 			if (!src.empty())
@@ -196,17 +204,34 @@ namespace awl
 
 	private:
 
-		//! Excludes specified element from the list.
+                void attach(quick_list & src)
+                {
+                        if (src.empty())
+                        {
+                                clear();
+                        }
+                        else
+                        {
+                            T * first = src.front();
+                            T * last = src.back();
+
+                            attach(first, last);
+
+                            src.clear();
+                        }
+                }
+
+                void attach(T * first, T * last)
+                {
+                        Forward.attach(first, last);
+                        Backward.attach(last, first);
+                }
+
+                //! Excludes specified element from the list.
 		static T * remove(T * a)
 		{
 			a->exclude();
 			return a;
-		}
-
-		void attach(T * first, T * last)
-		{
-			Forward.attach(first, last);
-			Backward.attach(last, first);
 		}
 
 		//forward and backward lists

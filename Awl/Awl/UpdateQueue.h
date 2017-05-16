@@ -25,7 +25,13 @@ namespace awl
 			//it is a dependent name, so we need a typename here to specify that it refers to a type
 			//typedef typename awl::quick_list<Message>::iterator iterator;
 
-			~MessageQueue()
+                        MessageQueue& operator=(MessageQueue&& other)
+                        {
+                            awl::quick_list<Message>::operator=(std::move(other));
+                            return *this;
+                        }
+
+                        ~MessageQueue()
 			{
 				typename MessageQueue::iterator i = awl::quick_list<Message>::begin();
 
@@ -113,7 +119,7 @@ namespace awl
 
 			//moove all the messages from PendingMessages to RenderingMessages
 			//very short operation that actually performs a few assignments
-			RenderingMessages.attach(PendingMessages);
+                        RenderingMessages = std::move(PendingMessages);
 		}
 
 		void FreeData()

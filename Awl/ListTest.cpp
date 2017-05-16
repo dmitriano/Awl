@@ -286,19 +286,19 @@ public:
 		PrintList();
 	}
 
-	void AttachTest()
+    void MoveTest()
 	{
 		ELEMENT_LIST other_list;
 
 		Assert::AreEqual((size_t)(3), list.size());
 
-		other_list.attach(list);
+        other_list = std::move(list);
 
 		Assert::AreEqual((size_t)(0), list.size());
 
 		Assert::AreEqual((size_t)(3), other_list.size());
 
-		list.attach(other_list);
+        list = std::move(other_list);
 
 		Assert::AreEqual((size_t)(0), other_list.size());
 
@@ -343,7 +343,7 @@ void TestList()
 
 		holder.InsertTest();
 
-		holder.AttachTest();
+        holder.MoveTest();
 	}
 
 	Assert::AreEqual(0, Element::elementCount);

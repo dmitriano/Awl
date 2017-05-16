@@ -39,7 +39,25 @@ namespace awl
 
 		typedef Observer<IObserver> OBSERVER;
 
-		void Subscribe(OBSERVER * p_observer)
+                Observable()
+                {
+                }
+
+                Observable(const Observable& other) = delete;
+
+                Observable(Observable&& other) : Observers(std::move(other.Observers))
+                {
+                }
+
+                Observable& operator = (const Observable& other) = delete;
+
+                Observable& operator = (Observable&& other)
+                {
+                    Observers = std::move(other.Observers);
+                    return *this;
+                }
+
+                void Subscribe(OBSERVER * p_observer)
 		{
 			Observers.push_back(p_observer);
 		}
