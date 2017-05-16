@@ -120,10 +120,10 @@ namespace awl
 		{
 			std::lock_guard<std::mutex> lock(queueMutex);
 
-			for (typename MessageQueue::iterator i = RenderingMessages.begin(); i != RenderingMessages.end(); ++i)
+			for (Message * p_message : RenderingMessages)
 			{
 				//release lambda expression
-				i->Func = std::function<void(Args ...)>();
+				p_message->Func = std::function<void(Args ...)>();
 			}
 
 			//recycle RenderingMessages (also very short operation)
