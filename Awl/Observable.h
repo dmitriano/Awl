@@ -39,25 +39,36 @@ namespace awl
 
 		typedef Observer<IObserver> OBSERVER;
 
-                Observable()
-                {
-                }
+		Observable()
+		{
+		}
 
-                Observable(const Observable& other) = delete;
+		~Observable()
+		{
+			//If the observable is deleted before its observers,
+			//we remove them from the list, otherwise they will think that they are included and
+			//their destructors will delete them from already destroyed list.
+			while (!Observers.empty())
+			{
+				Observers.pop_front();
+			}
+		}
 
-                Observable(Observable&& other) : Observers(std::move(other.Observers))
-                {
-                }
+		Observable(const Observable& other) = delete;
 
-                Observable& operator = (const Observable& other) = delete;
+		Observable(Observable&& other) : Observers(std::move(other.Observers))
+		{
+		}
 
-                Observable& operator = (Observable&& other)
-                {
-                    Observers = std::move(other.Observers);
-                    return *this;
-                }
+		Observable& operator = (const Observable& other) = delete;
 
-                void Subscribe(OBSERVER * p_observer)
+		Observable& operator = (Observable&& other)
+		{
+			Observers = std::move(other.Observers);
+			return *this;
+		}
+
+		void Subscribe(OBSERVER * p_observer)
 		{
 			Observers.push_back(p_observer);
 		}
