@@ -255,4 +255,4 @@ namespace awl
 		//! quick_list accesses null() function.
 		template <class T1, class DLink> friend class quick_list;
 	};
-};
+}

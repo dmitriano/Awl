@@ -213,14 +213,6 @@ public:
 		std::cout << std::endl;
 	}
 
-	//! Conversion from non-const inerator to const interator.
-	ELEMENT_LIST::const_iterator IterConstCastTest()
-	{
-		ELEMENT_LIST::const_iterator i = list.begin();
-
-		ELEMENT_LIST::const_reverse_iterator r_i = list.rbegin();
-	}
-
 	void ConstAlgorithmTest() const
 	{
 		//This code does not complile with MSVC in Debug configuration.

@@ -1,20 +1,27 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.9.1)
 project (AwlTest)
-include_directories("Awl")
 
-#Enable multithreading to use std::thread: Operation not permitted
-#http://stackoverflow.com/questions/30734136/cmake-linking-error-pthread-enable-multithreading-to-use-stdthread-operation
-SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#http://stackoverflow.com/questions/37621342/cmake-will-not-compile-to-c-11-standard
-#add_compile_options(-std=c++11) # CMake 2.8.12 or newer
-#In CMake version 3.1 and newer, if you want to force C++11, you need the following lines:
-#set(CMAKE_CXX_STANDARD 11) # C++11...
-#set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
-#set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # using Clang
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  # using GCC
+  add_definitions("-std=c++11 -Wall -Wextra -pedantic -pthread")
+  #Enable multithreading to use std::thread: Operation not permitted
+  #http://stackoverflow.com/questions/30734136/cmake-linking-error-pthread-enable-multithreading-to-use-stdthread-operation
+  SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  # using Intel C++
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  # using Visual Studio C++
+  add_definitions(-D_UNICODE)
+endif()
 
 find_package (Threads)
 
-add_executable(AwlTest Awl/ListTest.cpp  Awl/ObservableTest.cpp  Awl/UnitTesting.cpp  Awl/UpdateQueueTest.cpp  Awl/main.cpp)
+file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/*.h ${CMAKE_SOURCE_DIR}/*.cpp)
 
-target_link_libraries (AwlTest ${CMAKE_THREAD_LIBS_INIT})
+add_executable(${PROJECT_NAME} ${CPP_FILES})
+
+target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})

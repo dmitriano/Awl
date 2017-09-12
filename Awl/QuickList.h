@@ -106,9 +106,10 @@ namespace awl
                         assert(empty());
                         attach(other);
                     }
+                    return *this;
                 }
 
-                T * front() { return Forward.front(); }
+        T * front() { return Forward.front(); }
 		const T * front() const { return Forward.front(); }
 
 		T * back() { return Backward.front(); }
@@ -238,4 +239,4 @@ namespace awl
 		TForwardList Forward;
 		TBackwardList Backward;
 	};
-};
+}

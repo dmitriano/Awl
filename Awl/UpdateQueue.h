@@ -3,6 +3,7 @@
 #include "Awl/QuickList.h"
 
 #include <mutex>
+#include <functional>
 
 namespace awl
 {
