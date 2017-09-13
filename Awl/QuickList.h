@@ -6,27 +6,24 @@
 
 namespace awl
 {
-	template <class T>
-	class TForwardLink : public single_link<T>
+	class TForwardLink : public single_link
 	{
 	protected:
 		TForwardLink() {}
 	public:
-		TForwardLink(T * n) : single_link<T>(n) {}
+		TForwardLink(TForwardLink * n) : single_link(n) {}
 	};
 
-	template <class T>
-	class TBackwardLink : public single_link<T>
+	class TBackwardLink : public single_link
 	{
 	protected:
 		TBackwardLink() {}
 	public:
-		TBackwardLink(T * n) : single_link<T>(n) {}
+		TBackwardLink(TBackwardLink * n) : single_link(n) {}
 	};
 
 	//! Double link consisting of two single links.
-	template <class T>
-	class quick_link : public TForwardLink<T>, public TBackwardLink<T>
+	class quick_link : public TForwardLink, public TBackwardLink
 	{
 	public:
 
@@ -37,19 +34,19 @@ namespace awl
 
 		void exclude()
 		{
-			T * prev = this->BackwardLink::next();
-			T * next = this->ForwardLink::next();
+			quick_link * prev = static_cast<quick_link *>(static_cast<BackwardLink *>(this->BackwardLink::next()));
+			quick_link * next = static_cast<quick_link *>(static_cast<ForwardLink *>(this->ForwardLink::next()));
 			TForwardList::remove_after(prev);
 			TBackwardList::remove_after(next);
 		}
 
 	protected:
 
-		typedef TForwardLink<T> ForwardLink;
-		typedef TBackwardLink<T> BackwardLink;
+		typedef TForwardLink ForwardLink;
+		typedef TBackwardLink BackwardLink;
 
-		typedef single_list<T, ForwardLink> TForwardList;
-		typedef single_list<T, BackwardLink> TBackwardList;
+		typedef single_list<ForwardLink, ForwardLink> TForwardList;
+		typedef single_list<BackwardLink, BackwardLink> TBackwardList;
 
 		quick_link() {}
 
@@ -58,13 +55,13 @@ namespace awl
 
 	public:
 
-		quick_link(T * next, T * prev) : TForwardLink<T>(next), TBackwardLink<T>(prev)
+		quick_link(TForwardLink * next, TBackwardLink * prev) : TForwardLink(next), TBackwardLink(prev)
 		{
 		}
 	};
 
 	//! Doubly linked list consisting of two singly linked lists.
-	template < class T, class DLink = quick_link<T>>
+	template < class T, class DLink = quick_link>
 	class quick_list
 	{
 	private:
@@ -85,31 +82,31 @@ namespace awl
 		typedef typename TBackwardList::iterator reverse_iterator;
 		typedef typename TBackwardList::const_iterator const_reverse_iterator;
 
-                quick_list()
-                {
-                }
+		quick_list()
+		{
+		}
 
-                quick_list(const quick_list& other) = delete;
+		quick_list(const quick_list& other) = delete;
 
-                quick_list(quick_list&& other)
-                {
-                    attach(other);
-                }
+		quick_list(quick_list&& other)
+		{
+			attach(other);
+		}
 
-                quick_list& operator = (const quick_list& other) = delete;
+		quick_list& operator = (const quick_list& other) = delete;
 
-                quick_list& operator = (quick_list&& other)
-                {
-                    if (this != &other)
-                    {
-                        //quick_list cannot free it resources, so it is supposed to be empty
-                        assert(empty());
-                        attach(other);
-                    }
-                    return *this;
-                }
+		quick_list& operator = (quick_list&& other)
+		{
+			if (this != &other)
+			{
+				//quick_list cannot free it resources, so it is supposed to be empty
+				assert(empty());
+				attach(other);
+			}
+			return *this;
+		}
 
-        T * front() { return Forward.front(); }
+		T * front() { return Forward.front(); }
 		const T * front() const { return Forward.front(); }
 
 		T * back() { return Backward.front(); }
@@ -140,22 +137,22 @@ namespace awl
 		static void erase(iterator i) { remove(*i); }
 		static void erase(reverse_iterator i) { remove(*i); }
 
-		static void insert_after(T * p, T * a)
+		static void insert_after(quick_link * p, quick_link * a)
 		{
-			T * next = p->ForwardLink::next();
+			quick_link * next = static_cast<quick_link *>(static_cast<ForwardLink *>(p->ForwardLink::next()));
 			TForwardList::insert_after(p, a);
 			TBackwardList::insert_after(next, a);
 		}
 
-		static void insert_before(T * p, T * a)
+		static void insert_before(quick_link * p, quick_link * a)
 		{
-			T * prev = p->BackwardLink::next();
+			quick_link * prev = static_cast<quick_link *>(static_cast<BackwardLink *>(p->BackwardLink::next()));
 			TForwardList::insert_after(prev, a);
 			TBackwardList::insert_after(p, a);
 		}
 
-		void push_front(T * a) { insert_after(Forward.null(), a); }
-		void push_back(T * a) { insert_before(Forward.null(), a); }
+		void push_front(T * a) { insert_after(static_cast<quick_link *>(Forward.null()), a); }
+		void push_back(T * a) { insert_before(static_cast<quick_link *>(Forward.null()), a); }
 
 		T * pop_front() { return remove(Forward.front()); }
 		T * pop_back() { return remove(Backward.front()); }
@@ -205,30 +202,30 @@ namespace awl
 
 	private:
 
-                void attach(quick_list & src)
-                {
-                        if (src.empty())
-                        {
-                                clear();
-                        }
-                        else
-                        {
-                            T * first = src.front();
-                            T * last = src.back();
+		void attach(quick_list & src)
+		{
+			if (src.empty())
+			{
+				clear();
+			}
+			else
+			{
+				T * first = src.front();
+				T * last = src.back();
 
-                            attach(first, last);
+				attach(first, last);
 
-                            src.clear();
-                        }
-                }
+				src.clear();
+			}
+		}
 
-                void attach(T * first, T * last)
-                {
-                        Forward.attach(first, last);
-                        Backward.attach(last, first);
-                }
+		void attach(T * first, T * last)
+		{
+			Forward.attach(first, last);
+			Backward.attach(last, first);
+		}
 
-                //! Excludes specified element from the list.
+		//! Excludes specified element from the list.
 		static T * remove(T * a)
 		{
 			a->exclude();

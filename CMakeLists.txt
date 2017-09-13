@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.9.1)
+cmake_minimum_required (VERSION 3.6.2)
 project (AwlTest)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

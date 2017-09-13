@@ -5,22 +5,22 @@
 namespace awl
 {
 	template <class IObserver>
-        class Observer : public IObserver, public quick_link<Observer<IObserver>>
+	class Observer : public IObserver, public quick_link
 	{
-        private:
+	private:
 
-            typedef quick_link<Observer<IObserver>> Base;
+		typedef quick_link Base;
 
-        public:
+	public:
 
 		bool IsSubscribed() const
 		{
-                        return Base::included();
+			return Base::included();
 		}
 
 		void UnsubscribeSelf()
 		{
-                        Base::exclude();
+			Base::exclude();
 		}
 
 		~Observer()

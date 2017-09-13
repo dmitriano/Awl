@@ -10,7 +10,7 @@ namespace awl
 	template<typename ... Args>
 	class UpdateQueue
 	{
-		struct Message : public awl::quick_link<Message>
+		struct Message : public awl::quick_link
 		{
 			Message(const std::function<void(Args ...)> & func) : Func(func)
 			{

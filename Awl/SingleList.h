@@ -4,31 +4,30 @@
 
 namespace awl
 {
-	template <class T>
+	//It does not make a sense to cast pNext to T, so single_link is not a template class.
 	class single_link
 	{
 	public:
 
-		single_link(T * n) : pNext(n) {}
+		single_link(single_link * n) : pNext(n) {}
 
 		bool included() const
 		{
-			return next() != nullptr;
+			return pNext != nullptr;
 		}
-
-	protected:
-
-		T * next() { return pNext; }
-
-		const T * next() const { return pNext; }
 
 		single_link() : pNext(nullptr) {}
 
+	protected:
+
+		single_link * next() { return pNext; }
+
+		const single_link * next() const { return pNext; }
+
 	private:
 
-		T * pNext;
+		single_link * pNext;
 
-		//! There should not be template parameter defaults in forward declaration.
 		template <class T1, class DLink> friend class base_single_iterator;
 		template <class T1, class DLink> friend class single_list;
 	};
@@ -41,7 +40,7 @@ namespace awl
 	{
 	public:
 
-		base_single_iterator(T *p) : pCur(p) {}
+		base_single_iterator(Link *p) : pCur(p) {}
 
 		T * operator-> () const { return cur(); }
 
@@ -49,13 +48,13 @@ namespace awl
 
 	protected:
 
-		T * cur() const { return pCur; }
+		T * cur() const { return static_cast<T *>(pCur); }
 
-		void MoveNext() { pCur = pCur->Link::next(); }
+		void MoveNext() { pCur = static_cast<Link *>(pCur->Link::next()); }
 
 	private:
 
-		T * pCur;
+		Link * pCur;
 	};
 
 	template <class T, class Link>
@@ -63,7 +62,7 @@ namespace awl
 	{
 	public:
 
-		single_iterator(T *p) : base_single_iterator<T, Link>(p) {}
+		single_iterator(Link *p) : base_single_iterator<T, Link>(p) {}
 
 		single_iterator(const single_iterator & other) : single_iterator(*other) {}
 
@@ -95,11 +94,11 @@ namespace awl
 	};
 
 	template <class T, class Link>
-	class const_single_iterator : public base_single_iterator<const T, Link>
+	class const_single_iterator : public base_single_iterator<const T, const Link>
 	{
 	public:
 
-		const_single_iterator(const T *p) : base_single_iterator<const T, Link>(p) {}
+		const_single_iterator(const Link *p) : base_single_iterator<const T, const Link>(p) {}
 
 		const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
 
@@ -136,7 +135,7 @@ namespace awl
 	//! A singly linked list containing elements derived from single_link<T>.
 	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
 	Null element takes only sizeof(T*) bytes, but not sizeof(T). */
-	template < class T, class Link = single_link<T> >
+	template <class T, class Link = single_link>
 	class single_list
 	{
 	public:
@@ -148,18 +147,18 @@ namespace awl
 
 		single_list() : Null(null()) {}
 
-                single_list(const single_list& other) = delete;
+		single_list(const single_list& other) = delete;
 
-                single_list(single_list&& other) = delete;
+		single_list(single_list&& other) = delete;
 
-                ~single_list() {}
+		~single_list() {}
 
-                single_list& operator = (const single_list& other) = delete;
+		single_list& operator = (const single_list& other) = delete;
 
-                single_list& operator = (single_list&& other) = delete;
+		single_list& operator = (single_list&& other) = delete;
 
-                T * front() { return Null.next(); }
-		const T * front() const { return Null.next(); }
+		T * front() { return static_cast<T *>(static_cast<Link *>(Null.next())); }
+		const T * front() const { return static_cast<const T *>(static_cast<const Link *>(Null.next())); }
 
 		iterator begin() { return front(); }
 		const_iterator begin() const { return front(); }
@@ -169,15 +168,15 @@ namespace awl
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
-		static void insert_after(T * p, T * a)
+		static void insert_after(Link * p, Link * a)
 		{
 			a->Link::pNext = p->Link::pNext;
 			p->Link::pNext = a;
 		}
 
-		static T * remove_after(T * p)
+		static Link * remove_after(Link * p)
 		{
-			T * r = p->Link::pNext;
+			Link * r = static_cast<Link *>(p->Link::pNext);
 			p->Link::pNext = r->Link::pNext;
 			r->Link::pNext = nullptr;
 			return r;
@@ -211,7 +210,7 @@ namespace awl
 
 			//We do not need to do dereferencing here, so we do not use std::for_each
 			//std::for_each(begin(), end(), [&count](const T *) { ++count; });
-			
+
 			for (const_iterator i = begin(); i != end(); ++i)
 			{
 				++count;
@@ -222,7 +221,7 @@ namespace awl
 
 	private:
 
-		void attach(T * first, T * last)
+		void attach(Link * first, Link * last)
 		{
 			Null.pNext = first;
 
@@ -231,24 +230,24 @@ namespace awl
 
 		//SingList does not know its last element so it should be provided by QuickList
 
-		void push_front(T * first, T * last)
+		void push_front(Link * first, Link * last)
 		{
-			T * old_first = front();
+			Link * old_first = front();
 
 			Null.pNext = first;
 
 			last->Link::pNext = old_first;
 		}
 
-		void push_back(T * first, T * last, T * old_last)
+		void push_back(Link * first, Link * last, Link * old_last)
 		{
 			old_last->Link::pNext = first;
 
 			last->Link::pNext = null();
 		}
 
-		T * null() { return (T *)&Null; }
-		const T * null() const { return (T *)&Null; }
+		Link * null() { return &Null; }
+		const Link * null() const { return &Null; }
 
 		Link Null;
 

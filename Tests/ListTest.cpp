@@ -7,7 +7,7 @@
 
 using namespace UnitTesting;
 
-class Element : public awl::quick_link<Element>
+class Element : public awl::quick_link
 {
 public:
 
