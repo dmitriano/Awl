@@ -173,20 +173,6 @@ namespace awl
 		static void erase(iterator i) { remove(*i); }
 		static void erase(reverse_iterator i) { remove(*i); }
 
-		static void insert_after(quick_link * p, quick_link * a)
-		{
-			quick_link * next = static_cast<quick_link *>(p->ForwardLink::next());
-			TForwardList::insert_after(p, a);
-			TBackwardList::insert_after(next, a);
-		}
-
-		static void insert_before(quick_link * p, quick_link * a)
-		{
-			quick_link * prev = static_cast<quick_link *>(p->BackwardLink::next());
-			TForwardList::insert_after(prev, a);
-			TBackwardList::insert_after(p, a);
-		}
-
 		void push_front(T * a) { insert_after(static_cast<DLink *>(Forward.null()), a); }
 		void push_back(T * a) { insert_before(static_cast<DLink *>(Forward.null()), a); }
 
@@ -237,6 +223,20 @@ namespace awl
 		}
 
 	private:
+
+		static void insert_after(DLink * p, DLink * a)
+		{
+			DLink * next = static_cast<DLink *>(p->ForwardLink::next());
+			TForwardList::insert_after(p, a);
+			TBackwardList::insert_after(next, a);
+		}
+
+		static void insert_before(DLink * p, DLink * a)
+		{
+			DLink * prev = static_cast<DLink *>(p->BackwardLink::next());
+			TForwardList::insert_after(prev, a);
+			TBackwardList::insert_after(p, a);
+		}
 
 		void attach(quick_list & src)
 		{

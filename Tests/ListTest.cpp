@@ -7,7 +7,25 @@
 
 using namespace UnitTesting;
 
-class Element : public awl::quick_link
+class LinkA : public awl::quick_link
+{
+	typedef awl::quick_link Base;
+
+public:
+
+	using Base::Base;
+};
+
+class LinkB : public awl::quick_link
+{
+	typedef awl::quick_link Base;
+
+public:
+
+	using Base::Base;
+};
+
+class Element : public LinkA
 {
 public:
 
@@ -33,7 +51,7 @@ public:
 
 int Element::elementCount = 0;
 
-typedef awl::quick_list<Element> ELEMENT_LIST;
+typedef awl::quick_list<Element, LinkA> ELEMENT_LIST;
 
 class ListHolder
 {
