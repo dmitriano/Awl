@@ -267,6 +267,7 @@ namespace awl
 
 		//! quick_list accesses null() function.
 		template <class T1, class DLink> friend class quick_list;
+		template <class Dlink> friend class basic_quick_link;
 		friend class quick_link;
 	};
 }

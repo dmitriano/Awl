@@ -28,8 +28,9 @@ namespace awl
 	/*! There is no Null of type quick_link, but there are two separate singly-lined lists, that can have different offset in their enclosing class,
 		so we cannot make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
 		so we should derive quick_link from two single links.
-		There is not need to have basic_quick_link, because quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
-	class quick_link : public TForwardLink, public TBackwardLink
+		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
+	template <class Dlink>
+	class basic_quick_link : public TForwardLink, public TBackwardLink
 	{
 	public:
 
@@ -41,8 +42,8 @@ namespace awl
 
 		void exclude()
 		{
-			quick_link * prev = static_cast<quick_link *>(this->BackwardLink::next());
-			quick_link * next = static_cast<quick_link *>(this->ForwardLink::next());
+			Dlink * prev = static_cast<Dlink *>(this->BackwardLink::next());
+			Dlink * next = static_cast<Dlink *>(this->ForwardLink::next());
 			ForwardList::remove_after(prev);
 			BackwardList::remove_after(next);
 		}
@@ -55,7 +56,7 @@ namespace awl
 			}
 		}
 
-		~quick_link()
+		~basic_quick_link()
 		{
 			safe_exclude();
 		}
@@ -65,20 +66,34 @@ namespace awl
 		typedef TForwardLink ForwardLink;
 		typedef TBackwardLink BackwardLink;
 
-		//! The elements that are not Nulls are of type quick_link, but Nulls are ForwardLink and BackwardLink.
-		typedef single_list<quick_link, ForwardLink> ForwardList;
-		typedef single_list<quick_link, BackwardLink> BackwardList;
+		//! The elements that are not Nulls are of type Dlink, but Nulls are ForwardLink and BackwardLink.
+		typedef single_list<Dlink, ForwardLink> ForwardList;
+		typedef single_list<Dlink, BackwardLink> BackwardList;
 
-		quick_link() {}
+		basic_quick_link() {}
 
 		//! There should not be template parameter defaults in forward declaration.
 		template <class T1, class DLink> friend class quick_list;
 
 	public:
 
-		quick_link(quick_link * next, quick_link * prev) : ForwardLink(next), BackwardLink(prev)
+		basic_quick_link(basic_quick_link * next, basic_quick_link * prev) : ForwardLink(next), BackwardLink(prev)
 		{
 		}
+	};
+
+	//! If objects of a class included to only one list, single_link can be used by default.
+	class quick_link : public basic_quick_link<quick_link>
+	{
+	private:
+
+		typedef basic_quick_link<quick_link> Base;
+
+	public:
+
+		using Base::Base;
+
+		template <class T1, class DLink1> friend class quick_list;
 	};
 
 	//! Doubly linked list consisting of two singly linked lists.
