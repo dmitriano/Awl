@@ -214,7 +214,7 @@ namespace awl
 		}
 
 		bool empty() const { return null()->next() == null(); }
-		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }
+		bool empty_or_contains_one() const { return null()->next()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
 		void clear() { null()->pNext = null(); }

@@ -30,7 +30,9 @@ namespace awl
 	/*! There the Null of type quick_link, and there are two separate singly-lined lists, that can have different offset in their enclosing class,
 		but we can make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
 		so we should derive quick_link from two single links.
-		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
+		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.
+		IMPORTANT: The link sould not call safe_exclude() in its destructor, because when quick_list::clear() is called, pNull of the elements are not set to nullptr,
+		so the link can be in some kind of a detached state in which pNext is not valid at all.*/
 	template <class Dlink>
 	class basic_quick_link : public TForwardLink<Dlink>, public TBackwardLink<Dlink>
 	{
@@ -56,11 +58,6 @@ namespace awl
 			{
 				exclude();
 			}
-		}
-
-		~basic_quick_link()
-		{
-			safe_exclude();
 		}
 
 		typedef TForwardLink<Dlink> ForwardLink;
