@@ -7,7 +7,8 @@ namespace awl
 	//! Base class for all the single links. Objects of a class can be included into multiple lists by deriving from multiple base_single_link classes.
 	/*! Link template parameter is the class pNext points to, but not this points to, but static_cast<Link *>(this) is always correct.
 		Casting pNext to T * is allowed by C++ standad only if pNext points to a subobject of type T, if pNext points to Link that actually is not a subobject of T,
-		the behavior of static_cast<T *>(pNext) is undefined. But casting this to T * makes sense and can be done by an iterator to access the objects it designates. */
+		the behavior of static_cast<T *>(pNext) is undefined. But casting this to T * makes sense and can be done by an iterator to access the objects it designates.
+		With this type of the link we can have a list of objects of different types derived from the same type of the link, but of cause typical lists do not allow this.*/
 	template <class Link>
 	class base_single_link
 	{
@@ -51,7 +52,7 @@ namespace awl
 		template <class T1, class Link1> friend class single_list;
 	};
 
-	//! The base class for list iterators.
+	//! The base class for list iterators. All the object in the should be of the same type T derived from Link.
 	/*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
 		of std::iterator.*/
 	template <class T, class Link>
@@ -190,22 +191,6 @@ namespace awl
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
-		//! One or both the parameters can be end(), so they are not T*.
-		static void insert_after(Link * p, Link * a)
-		{
-			a->Link::pNext = p->Link::pNext;
-			p->Link::pNext = a;
-		}
-
-		//! The parameter can be end(), so it is not T*.
-		static Link * remove_after(Link * p)
-		{
-			Link * r = p->Link::pNext;
-			p->Link::pNext = r->Link::pNext;
-			r->Link::pNext = nullptr;
-			return r;
-		}
-
 		void push_front(T * a) { insert_after(null(), a); }
 
 		T * pop_front() { return remove_after(null()); }
@@ -213,17 +198,6 @@ namespace awl
 		bool empty() const { return front() == null(); }
 		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
-
-		//void erase_after(T * p) { GC::destroy(remove_after(p));}
-
-		//void erase_range(T * pre_first, T * post_last)
-		//{
-		//    iterator it = pre_first;
-		//    while (it++ != post_last)
-		//      erase_after(*it);
-		//}
-
-		//void erase_all() { erase_range(null(), null());}
 
 		void clear() { Null.pNext = null(); }
 
@@ -244,6 +218,22 @@ namespace awl
 		}
 
 	private:
+
+		//! One or both the parameters can be end(), so they are not T*.
+		static void insert_after(Link * p, Link * a)
+		{
+			a->Link::pNext = p->Link::pNext;
+			p->Link::pNext = a;
+		}
+
+		//! The parameter can be end(), so it is not T*.
+		static Link * remove_after(Link * p)
+		{
+			Link * r = p->Link::pNext;
+			p->Link::pNext = r->Link::pNext;
+			r->Link::pNext = nullptr;
+			return r;
+		}
 
 		void attach(Link * first, Link * last)
 		{
@@ -277,5 +267,6 @@ namespace awl
 
 		//! quick_list accesses null() function.
 		template <class T1, class DLink> friend class quick_list;
+		friend class quick_link;
 	};
 }

@@ -25,13 +25,18 @@ namespace awl
 	};
 
 	//! Double link consisting of two single links.
+	/*! There is no Null of type quick_link, but there are two separate singly-lined lists, that can have different offset in their enclosing class,
+		so we cannot make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
+		so we should derive quick_link from two single links.
+		There is not need to have basic_quick_link, because quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
 	class quick_link : public TForwardLink, public TBackwardLink
 	{
 	public:
 
 		bool included() const
 		{
-			return ForwardLink::included();// && BackwardLink::included();
+			assert(ForwardLink::included() == BackwardLink::included());
+			return ForwardLink::included();
 		}
 
 		void exclude()
@@ -42,11 +47,25 @@ namespace awl
 			BackwardList::remove_after(next);
 		}
 
+		void safe_exclude()
+		{
+			if (included())
+			{
+				exclude();
+			}
+		}
+
+		~quick_link()
+		{
+			safe_exclude();
+		}
+
 	protected:
 
 		typedef TForwardLink ForwardLink;
 		typedef TBackwardLink BackwardLink;
 
+		//! The elements that are not Nulls are of type quick_link, but Nulls are ForwardLink and BackwardLink.
 		typedef single_list<quick_link, ForwardLink> ForwardList;
 		typedef single_list<quick_link, BackwardLink> BackwardList;
 
@@ -153,8 +172,8 @@ namespace awl
 			TBackwardList::insert_after(p, a);
 		}
 
-		void push_front(T * a) { insert_after(static_cast<quick_link *>(Forward.null()), a); }
-		void push_back(T * a) { insert_before(static_cast<quick_link *>(Forward.null()), a); }
+		void push_front(T * a) { insert_after(static_cast<DLink *>(Forward.null()), a); }
+		void push_back(T * a) { insert_before(static_cast<DLink *>(Forward.null()), a); }
 
 		T * pop_front() { return remove(Forward.front()); }
 		T * pop_back() { return remove(Backward.front()); }
@@ -234,7 +253,7 @@ namespace awl
 			return a;
 		}
 
-		//forward and backward lists
+		//! Forward and backward lists storing ForwardLink* and BackwardLink*, but not a quick_link*.
 		TForwardList Forward;
 		TBackwardList Backward;
 	};
