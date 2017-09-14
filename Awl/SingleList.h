@@ -34,7 +34,7 @@ namespace awl
 	private:
 
 		template <class T1, class Link1> friend class base_single_iterator;
-		template <class T1, class Link1> friend class single_list;
+		template <class T1, class Link1, class Derived1> friend class basic_single_list;
 	};
 
 	//! If objects of a class included to only one list, single_link can be used by default.
@@ -49,7 +49,7 @@ namespace awl
 		using Base::Base;
 
 		template <class T1, class Link1> friend class base_single_iterator;
-		template <class T1, class Link1> friend class single_list;
+		template <class T1, class Link1, class Derived1> friend class basic_single_list;
 	};
 
 	//! The base class for list iterators. All the object in the should be of the same type T derived from Link.
@@ -156,8 +156,8 @@ namespace awl
 	//! A singly linked list containing elements derived from single_link<T>.
 	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
 		Null element takes only sizeof(T*) bytes, but not sizeof(T). */
-	template <class T, class Link = single_link>
-	class single_list
+	template <class T, class Link, class Derived>
+	class basic_single_list
 	{
 	public:
 
@@ -166,25 +166,25 @@ namespace awl
 		typedef single_iterator<T, Link> iterator;
 		typedef const_single_iterator<T, Link> const_iterator;
 
-		single_list() : Null(null()) {}
+		basic_single_list() {}
 
-		single_list(const single_list& other) = delete;
+		basic_single_list(const basic_single_list& other) = delete;
 
-		single_list(single_list&& other) = delete;
+		basic_single_list(basic_single_list&& other) = delete;
 
-		~single_list() {}
+		~basic_single_list() {}
 
-		single_list& operator = (const single_list& other) = delete;
+		basic_single_list& operator = (const basic_single_list& other) = delete;
 
-		single_list& operator = (single_list&& other) = delete;
+		basic_single_list& operator = (basic_single_list&& other) = delete;
 
 		//! Results in undfined behavior if the list is empty.
-		T * front() { return static_cast<T *>(Null.next()); }
-		const T * front() const { return static_cast<const T *>(Null.next()); }
+		T * front() { return static_cast<T *>(null()->next()); }
+		const T * front() const { return static_cast<const T *>(null()->next()); }
 
 		//! begin() does not cast Null.next() to T *, so it can return a valid end().
-		iterator begin() { return Null.next(); }
-		const_iterator begin() const { return Null.next(); }
+		iterator begin() { return null()->next(); }
+		const_iterator begin() const { return null()->next(); }
 
 		iterator end() { return null(); }
 		const_iterator end() const { return null(); }
@@ -199,7 +199,7 @@ namespace awl
 		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
-		void clear() { Null.pNext = null(); }
+		void clear() { null()->pNext = null(); }
 
 		//! Returns the count of elements in the list.
 		size_t size() const
@@ -237,7 +237,7 @@ namespace awl
 
 		void attach(Link * first, Link * last)
 		{
-			Null.pNext = first;
+			null()->pNext = first;
 
 			last->Link::pNext = null();
 		}
@@ -248,7 +248,7 @@ namespace awl
 		{
 			Link * old_first = front();
 
-			Null.pNext = first;
+			null()->pNext = first;
 
 			last->Link::pNext = old_first;
 		}
@@ -260,14 +260,28 @@ namespace awl
 			last->Link::pNext = null();
 		}
 
-		Link * null() { return &Null; }
-		const Link * null() const { return &Null; }
-
-		Link Null;
+		Link * null() { return static_cast<Link *>(&(static_cast<Derived *>(this)->Null)); }
+		const Link * null() const { return static_cast<const Link *>(&(static_cast<const Derived *>(this)->Null)); }
 
 		//! quick_list accesses null() function.
 		template <class T1, class DLink> friend class quick_list;
 		template <class Dlink> friend class basic_quick_link;
 		friend class quick_link;
+	};
+
+	template <class T, class Link = single_link>
+	class single_list : public basic_single_list<T, Link, single_list<T, Link>>
+	{
+	public:
+
+		single_list() : Null(&Null)
+		{
+		}
+
+	private:
+
+		Link Null;
+
+		template <class T1, class Link1, class Derived1> friend class basic_single_list;
 	};
 }
