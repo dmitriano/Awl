@@ -10,7 +10,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   add_definitions("-std=c++11 -Wall -Wextra -pedantic -pthread")
   #Enable multithreading to use std::thread: Operation not permitted
   #http://stackoverflow.com/questions/30734136/cmake-linking-error-pthread-enable-multithreading-to-use-stdthread-operation
-  SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
+  #SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
+
+  #add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
+  #link_libraries("-fsanitize=thread")
+  add_definitions("-fsanitize=undefined -fno-omit-frame-pointer")
+  link_libraries("-fsanitize=undefined")
+  #add_definitions("-fsanitize=address -fno-omit-frame-pointer")
+  #link_libraries("-fsanitize=address")
+  set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=gold")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
