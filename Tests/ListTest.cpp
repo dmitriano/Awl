@@ -7,25 +7,25 @@
 
 using namespace UnitTesting;
 
-class LinkA : public awl::quick_link
+class LinkA : public awl::basic_quick_link<LinkA>
 {
-	typedef awl::quick_link Base;
+	typedef awl::basic_quick_link<LinkA> Base;
 
 public:
 
 	using Base::Base;
 };
 
-class LinkB : public awl::quick_link
+class LinkB : public awl::basic_quick_link<LinkB>
 {
-	typedef awl::quick_link Base;
+	typedef awl::basic_quick_link<LinkB> Base;
 
 public:
 
 	using Base::Base;
 };
 
-class Element : public LinkA
+class Element : public LinkA, public LinkB, public awl::quick_link
 {
 public:
 
@@ -36,11 +36,6 @@ public:
 
 	~Element()
 	{
-		if (included())
-		{
-			exclude();
-		}
-
 		--elementCount;
 	}
 
@@ -51,10 +46,11 @@ public:
 
 int Element::elementCount = 0;
 
-typedef awl::quick_list<Element, LinkA> ELEMENT_LIST;
-
+template <class DLink>
 class ListHolder
 {
+	typedef awl::quick_list<Element, DLink> ELEMENT_LIST;
+
 	ELEMENT_LIST list;
 
 public:
@@ -165,7 +161,7 @@ public:
 
 		int val = 0;
 
-		for (ELEMENT_LIST::iterator i = list.begin(); i != list.end(); ++i)
+		for (typename ELEMENT_LIST::iterator i = list.begin(); i != list.end(); ++i)
 		{
 			Element * e = *i;
 			
@@ -183,7 +179,7 @@ public:
 
 		int val = 0;
 
-		for (ELEMENT_LIST::const_iterator i = list.begin(); i != list.end(); ++i)
+		for (typename ELEMENT_LIST::const_iterator i = list.begin(); i != list.end(); ++i)
 		{
 			const Element * e = *i;
 
@@ -201,7 +197,7 @@ public:
 
 		int val = 2;
 
-		for (ELEMENT_LIST::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+		for (typename ELEMENT_LIST::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
 		{
 			Element * e = *i;
 
@@ -219,7 +215,7 @@ public:
 
 		int val = 2;
 
-		for (ELEMENT_LIST::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+		for (typename ELEMENT_LIST::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
 		{
 			const Element * e = *i;
 
@@ -283,7 +279,7 @@ public:
 		
 		list.erase(i++); //This only excludes the element from the list but not deletes it.
 
-		Assert::IsFalse(p_element_to_be_deleted->included());
+		Assert::IsFalse(p_element_to_be_deleted->DLink::included());
 		
 		delete p_element_to_be_deleted;
 
@@ -326,10 +322,11 @@ public:
 	}
 };
 
-void TestList()
+template <class DLink>
+void TestLink()
 {
 	{
-		ListHolder holder;
+		ListHolder<DLink> holder;
 
 		holder.AddRemoveTest();
 
@@ -357,4 +354,11 @@ void TestList()
 	}
 
 	Assert::AreEqual(0, Element::elementCount);
+}
+
+void TestList()
+{
+	TestLink<LinkA>();
+	TestLink<LinkB>();
+	TestLink<awl::quick_link>();
 }

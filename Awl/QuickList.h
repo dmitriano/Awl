@@ -6,22 +6,24 @@
 
 namespace awl
 {
-	//template <class Link>
-	class TForwardLink : public base_single_link<TForwardLink>
+	//! Forward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
+	template <class DLink>
+	class TForwardLink : public base_single_link<TForwardLink<DLink>>
 	{
 	protected:
 		TForwardLink() {}
 	public:
-		TForwardLink(TForwardLink * n) : base_single_link<TForwardLink>(n) {}
+		TForwardLink(TForwardLink * n) : base_single_link<TForwardLink<DLink>>(n) {}
 	};
 
-	//template <class Link>
-	class TBackwardLink : public base_single_link<TBackwardLink>
+	//! Backward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
+	template <class DLink>
+	class TBackwardLink : public base_single_link<TBackwardLink<DLink>>
 	{
 	protected:
 		TBackwardLink() {}
 	public:
-		TBackwardLink(TBackwardLink * n) : base_single_link<TBackwardLink>(n) {}
+		TBackwardLink(TBackwardLink * n) : base_single_link<TBackwardLink<DLink>>(n) {}
 	};
 
 	//! Double link consisting of two single links.
@@ -30,7 +32,7 @@ namespace awl
 		so we should derive quick_link from two single links.
 		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
 	template <class Dlink>
-	class basic_quick_link : public TForwardLink, public TBackwardLink
+	class basic_quick_link : public TForwardLink<Dlink>, public TBackwardLink<Dlink>
 	{
 	public:
 
@@ -63,8 +65,8 @@ namespace awl
 
 	protected:
 
-		typedef TForwardLink ForwardLink;
-		typedef TBackwardLink BackwardLink;
+		typedef TForwardLink<Dlink> ForwardLink;
+		typedef TBackwardLink<Dlink> BackwardLink;
 
 		//! The elements that are not Nulls are of type Dlink, but Nulls are ForwardLink and BackwardLink.
 		typedef single_list<Dlink, ForwardLink> ForwardList;
@@ -264,7 +266,7 @@ namespace awl
 		//! Excludes specified element from the list.
 		static T * remove(T * a)
 		{
-			a->exclude();
+			a->DLink::exclude();
 			return a;
 		}
 
