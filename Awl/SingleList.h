@@ -4,15 +4,15 @@
 
 namespace awl
 {
-	//! The link for singly linked list of elements of type T.
+	//! Base class for all the single links. Objects of a class can be included into multiple lists by deriving from multiple base_single_link classes.
 	/*! Casting pNext to T * is allowed by C++ standad only if pNext points to a subobject of type T, if pNext points to Link that actually is not a subobject of T,
 		the behavior of static_cast<T *>(pNext) is undefined. But casting this to T * makes sense and can be done by an iterator to access the objects it designates. */
 	template <class Link>
-	class extended_single_link
+	class base_single_link
 	{
 	public:
 
-		extended_single_link(Link * n) : pNext(n) {}
+		base_single_link(Link * n) : pNext(n) {}
 
 		bool included() const
 		{
@@ -21,7 +21,7 @@ namespace awl
 
 	protected:
 
-		extended_single_link() : pNext(nullptr) {}
+		base_single_link() : pNext(nullptr) {}
 
 		Link * next() { return pNext; }
 
@@ -35,11 +35,12 @@ namespace awl
 		template <class T1, class Link1> friend class single_list;
 	};
 
-	class single_link : public extended_single_link<single_link>
+	//! If objects of a class included to only one list, single_link can be used by default.
+	class single_link : public base_single_link<single_link>
 	{
 	private:
 
-		typedef extended_single_link<single_link> Base;
+		typedef base_single_link<single_link> Base;
 
 	public:
 
@@ -51,7 +52,7 @@ namespace awl
 
 	//! The base class for list iterators.
 	/*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
-	of std::iterator.*/
+		of std::iterator.*/
 	template <class T, class Link>
 	class base_single_iterator : public std::iterator<std::forward_iterator_tag, T *>
 	{
@@ -67,7 +68,7 @@ namespace awl
 
 		T * cur() const { return static_cast<T *>(pCur); }
 
-		void MoveNext() { pCur = static_cast<Link *>(pCur->Link::next()); }
+		void MoveNext() { pCur = pCur->Link::next(); }
 
 	private:
 
@@ -174,8 +175,8 @@ namespace awl
 
 		single_list& operator = (single_list&& other) = delete;
 
-		T * front() { return static_cast<T *>(static_cast<Link *>(Null.next())); }
-		const T * front() const { return static_cast<const T *>(static_cast<const Link *>(Null.next())); }
+		T * front() { return static_cast<T *>(Null.next()); }
+		const T * front() const { return static_cast<const T *>(Null.next()); }
 
 		iterator begin() { return front(); }
 		const_iterator begin() const { return front(); }
@@ -193,7 +194,7 @@ namespace awl
 
 		static Link * remove_after(Link * p)
 		{
-			Link * r = static_cast<Link *>(p->Link::pNext);
+			Link * r = p->Link::pNext;
 			p->Link::pNext = r->Link::pNext;
 			r->Link::pNext = nullptr;
 			return r;

@@ -6,20 +6,20 @@
 
 namespace awl
 {
-	class TForwardLink : public single_link
+	class TForwardLink : public base_single_link<TForwardLink>
 	{
 	protected:
 		TForwardLink() {}
 	public:
-		TForwardLink(TForwardLink * n) : single_link(n) {}
+		TForwardLink(TForwardLink * n) : base_single_link<TForwardLink>(n) {}
 	};
 
-	class TBackwardLink : public single_link
+	class TBackwardLink : public base_single_link<TBackwardLink>
 	{
 	protected:
 		TBackwardLink() {}
 	public:
-		TBackwardLink(TBackwardLink * n) : single_link(n) {}
+		TBackwardLink(TBackwardLink * n) : base_single_link<TBackwardLink>(n) {}
 	};
 
 	//! Double link consisting of two single links.
