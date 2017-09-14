@@ -73,6 +73,8 @@ namespace awl
 
 		void MoveNext() { pCur = pCur->Link::next(); }
 
+		Link * link() const { return pCur; }
+
 	private:
 
 		Link * pCur;
@@ -105,7 +107,7 @@ namespace awl
 
 		bool operator == (const single_iterator & r) const
 		{
-			return this->cur() == r.cur();
+			return this->link() == r.link();
 		}
 
 		bool operator != (const single_iterator & r)  const
@@ -144,7 +146,7 @@ namespace awl
 
 		bool operator == (const const_single_iterator & r) const
 		{
-			return this->cur() == r.cur();
+			return this->link() == r.link();
 		}
 
 		bool operator != (const const_single_iterator & r)  const
@@ -179,8 +181,17 @@ namespace awl
 		basic_single_list& operator = (basic_single_list&& other) = delete;
 
 		//! Results in undfined behavior if the list is empty.
-		T * front() { return static_cast<T *>(null()->next()); }
-		const T * front() const { return static_cast<const T *>(null()->next()); }
+		T * front()
+		{
+			assert(!empty());
+			return static_cast<T *>(null()->next());
+		}
+
+		const T * front() const
+		{
+			assert(!empty());
+			return static_cast<const T *>(null()->next());
+		}
 
 		//! begin() does not cast Null.next() to T *, so it can return a valid end().
 		iterator begin() { return null()->next(); }
@@ -191,11 +202,18 @@ namespace awl
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
-		void push_front(T * a) { insert_after(null(), a); }
+		void push_front(T * a)
+		{
+			insert_after(null(), a);
+		}
 
-		T * pop_front() { return static_cast<T *>(remove_after(null())); }
+		T * pop_front()
+		{
+			assert(!empty());
+			return static_cast<T *>(remove_after(null()));
+		}
 
-		bool empty() const { return front() == null(); }
+		bool empty() const { return null()->next() == null(); }
 		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
