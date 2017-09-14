@@ -6,6 +6,7 @@
 
 namespace awl
 {
+	//template <class Link>
 	class TForwardLink : public base_single_link<TForwardLink>
 	{
 	protected:
@@ -14,6 +15,7 @@ namespace awl
 		TForwardLink(TForwardLink * n) : base_single_link<TForwardLink>(n) {}
 	};
 
+	//template <class Link>
 	class TBackwardLink : public base_single_link<TBackwardLink>
 	{
 	protected:
@@ -34,10 +36,10 @@ namespace awl
 
 		void exclude()
 		{
-			quick_link * prev = static_cast<quick_link *>(static_cast<BackwardLink *>(this->BackwardLink::next()));
-			quick_link * next = static_cast<quick_link *>(static_cast<ForwardLink *>(this->ForwardLink::next()));
-			TForwardList::remove_after(prev);
-			TBackwardList::remove_after(next);
+			quick_link * prev = static_cast<quick_link *>(this->BackwardLink::next());
+			quick_link * next = static_cast<quick_link *>(this->ForwardLink::next());
+			ForwardList::remove_after(prev);
+			BackwardList::remove_after(next);
 		}
 
 	protected:
@@ -45,8 +47,8 @@ namespace awl
 		typedef TForwardLink ForwardLink;
 		typedef TBackwardLink BackwardLink;
 
-		typedef single_list<ForwardLink, ForwardLink> TForwardList;
-		typedef single_list<BackwardLink, BackwardLink> TBackwardList;
+		typedef single_list<quick_link, ForwardLink> ForwardList;
+		typedef single_list<quick_link, BackwardLink> BackwardList;
 
 		quick_link() {}
 
@@ -55,7 +57,7 @@ namespace awl
 
 	public:
 
-		quick_link(TForwardLink * next, TBackwardLink * prev) : TForwardLink(next), TBackwardLink(prev)
+		quick_link(quick_link * next, quick_link * prev) : ForwardLink(next), BackwardLink(prev)
 		{
 		}
 	};
@@ -139,14 +141,14 @@ namespace awl
 
 		static void insert_after(quick_link * p, quick_link * a)
 		{
-			quick_link * next = static_cast<quick_link *>(static_cast<ForwardLink *>(p->ForwardLink::next()));
+			quick_link * next = static_cast<quick_link *>(p->ForwardLink::next());
 			TForwardList::insert_after(p, a);
 			TBackwardList::insert_after(next, a);
 		}
 
 		static void insert_before(quick_link * p, quick_link * a)
 		{
-			quick_link * prev = static_cast<quick_link *>(static_cast<BackwardLink *>(p->BackwardLink::next()));
+			quick_link * prev = static_cast<quick_link *>(p->BackwardLink::next());
 			TForwardList::insert_after(prev, a);
 			TBackwardList::insert_after(p, a);
 		}

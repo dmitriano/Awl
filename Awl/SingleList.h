@@ -5,7 +5,8 @@
 namespace awl
 {
 	//! Base class for all the single links. Objects of a class can be included into multiple lists by deriving from multiple base_single_link classes.
-	/*! Casting pNext to T * is allowed by C++ standad only if pNext points to a subobject of type T, if pNext points to Link that actually is not a subobject of T,
+	/*! Link template parameter is the class pNext points to, but not this points to, but static_cast<Link *>(this) is always correct.
+		Casting pNext to T * is allowed by C++ standad only if pNext points to a subobject of type T, if pNext points to Link that actually is not a subobject of T,
 		the behavior of static_cast<T *>(pNext) is undefined. But casting this to T * makes sense and can be done by an iterator to access the objects it designates. */
 	template <class Link>
 	class base_single_link
