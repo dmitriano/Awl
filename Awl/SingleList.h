@@ -67,6 +67,7 @@ namespace awl
 
 	protected:
 
+		//! Results in undefined behavior if the iterator is end().
 		T * cur() const { return static_cast<T *>(pCur); }
 
 		void MoveNext() { pCur = pCur->Link::next(); }
@@ -176,23 +177,27 @@ namespace awl
 
 		single_list& operator = (single_list&& other) = delete;
 
+		//! Results in undfined behavior if the list is empty.
 		T * front() { return static_cast<T *>(Null.next()); }
 		const T * front() const { return static_cast<const T *>(Null.next()); }
 
-		iterator begin() { return front(); }
-		const_iterator begin() const { return front(); }
+		//! begin() does not cast Null.next() to T *, so it can return a valid end().
+		iterator begin() { return Null.next(); }
+		const_iterator begin() const { return Null.next(); }
 
 		iterator end() { return null(); }
 		const_iterator end() const { return null(); }
 
 		static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
+		//! One or both the parameters can be end(), so they are not T*.
 		static void insert_after(Link * p, Link * a)
 		{
 			a->Link::pNext = p->Link::pNext;
 			p->Link::pNext = a;
 		}
 
+		//! The parameter can be end(), so it is not T*.
 		static Link * remove_after(Link * p)
 		{
 			Link * r = p->Link::pNext;
