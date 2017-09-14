@@ -4,32 +4,49 @@
 
 namespace awl
 {
-	//It does not make a sense to cast pNext to T, so single_link is not a template class.
-	class single_link
+	//! The link for singly linked list of elements of type T.
+	/*! Casting pNext to T * is allowed by C++ standad only if pNext points to a subobject of type T, if pNext points to Link that actually is not a subobject of T,
+		the behavior of static_cast<T *>(pNext) is undefined. But casting this to T * makes sense and can be done by an iterator to access the objects it designates. */
+	template <class Link>
+	class extended_single_link
 	{
 	public:
 
-		single_link(single_link * n) : pNext(n) {}
+		extended_single_link(Link * n) : pNext(n) {}
 
 		bool included() const
 		{
 			return pNext != nullptr;
 		}
 
-		single_link() : pNext(nullptr) {}
-
 	protected:
 
-		single_link * next() { return pNext; }
+		extended_single_link() : pNext(nullptr) {}
 
-		const single_link * next() const { return pNext; }
+		Link * next() { return pNext; }
+
+		const Link * next() const { return pNext; }
+
+		Link * pNext;
 
 	private:
 
-		single_link * pNext;
+		template <class T1, class Link1> friend class base_single_iterator;
+		template <class T1, class Link1> friend class single_list;
+	};
 
-		template <class T1, class DLink> friend class base_single_iterator;
-		template <class T1, class DLink> friend class single_list;
+	class single_link : public extended_single_link<single_link>
+	{
+	private:
+
+		typedef extended_single_link<single_link> Base;
+
+	public:
+
+		using Base::Base;
+
+		template <class T1, class Link1> friend class base_single_iterator;
+		template <class T1, class Link1> friend class single_list;
 	};
 
 	//! The base class for list iterators.
@@ -134,7 +151,7 @@ namespace awl
 
 	//! A singly linked list containing elements derived from single_link<T>.
 	/*! Implementation of the list is based on the idea of holding some fake "null" element of type single_link<T> that goes before the first and after the last.
-	Null element takes only sizeof(T*) bytes, but not sizeof(T). */
+		Null element takes only sizeof(T*) bytes, but not sizeof(T). */
 	template <class T, class Link = single_link>
 	class single_list
 	{
