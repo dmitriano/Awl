@@ -397,6 +397,8 @@ void TestSingleList()
 
 	Assert::AreEqual(list.size(), --count);
 
+	list.push_front(new EleMent);
+
 	Assert::AreEqual(list.size(), ++count);
 
 	list.clear();

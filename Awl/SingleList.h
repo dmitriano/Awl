@@ -184,18 +184,18 @@ namespace awl
 		T * front()
 		{
 			assert(!empty());
-			return static_cast<T *>(null()->next());
+			return static_cast<T *>(first());
 		}
 
 		const T * front() const
 		{
 			assert(!empty());
-			return static_cast<const T *>(null()->next());
+			return static_cast<const T *>(first());
 		}
 
 		//! begin() does not cast Null.next() to T *, so it can return a valid end().
-		iterator begin() { return null()->next(); }
-		const_iterator begin() const { return null()->next(); }
+		iterator begin() { return first(); }
+		const_iterator begin() const { return first(); }
 
 		iterator end() { return null(); }
 		const_iterator end() const { return null(); }
@@ -213,8 +213,8 @@ namespace awl
 			return static_cast<T *>(remove_after(null()));
 		}
 
-		bool empty() const { return null()->next() == null(); }
-		bool empty_or_contains_one() const { return null()->next()->Link::pNext == null(); }
+		bool empty() const { return first() == null(); }
+		bool empty_or_contains_one() const { return first()->Link::pNext == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
 		void clear() { null()->pNext = null(); }
@@ -236,6 +236,10 @@ namespace awl
 		}
 
 	private:
+
+		//! The same as front but can be Null.
+		Link * first() { return null()->next(); }
+		const Link * first() const { return null()->next(); }
 
 		//! One or both the parameters can be end(), so they are not T*.
 		static void insert_after(Link * p, Link * a)
@@ -264,7 +268,7 @@ namespace awl
 
 		void push_front(Link * first, Link * last)
 		{
-			Link * old_first = front();
+			Link * old_first = this->first();
 
 			null()->pNext = first;
 
