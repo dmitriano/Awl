@@ -193,7 +193,7 @@ namespace awl
 
 		void push_front(T * a) { insert_after(null(), a); }
 
-		T * pop_front() { return remove_after(null()); }
+		T * pop_front() { return static_cast<T *>(remove_after(null())); }
 
 		bool empty() const { return front() == null(); }
 		bool empty_or_contains_one() const { return front()->Link::pNext == null(); }

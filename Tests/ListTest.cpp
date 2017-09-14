@@ -356,9 +356,54 @@ void TestLink()
 	Assert::AreEqual(0, Element::elementCount);
 }
 
+struct EleMent : awl::single_link
+{
+	int a = 25;
+};
+
+void TestSingleList()
+{
+	awl::single_list<EleMent> list;
+
+	size_t count = 0;
+
+	Assert::AreEqual(list.size(), count);
+
+	list.push_front(new EleMent);
+
+	Assert::AreEqual(list.size(), ++count);
+
+	list.push_front(new EleMent);
+
+	Assert::AreEqual(list.size(), ++count);
+
+	list.push_front(new EleMent);
+
+	Assert::AreEqual(list.size(), ++count);
+
+	delete list.pop_front();
+
+	Assert::AreEqual(list.size(), --count);
+
+	delete list.pop_front();
+
+	Assert::AreEqual(list.size(), --count);
+
+	delete list.pop_front();
+
+	Assert::AreEqual(list.size(), --count);
+
+	Assert::AreEqual(list.size(), ++count);
+
+	list.clear();
+
+	Assert::AreEqual(list.size(), (size_t)0);
+}
+
 void TestList()
 {
 	TestLink<LinkA>();
 	TestLink<LinkB>();
 	TestLink<awl::quick_link>();
+	TestSingleList();
 }

@@ -27,8 +27,8 @@ namespace awl
 	};
 
 	//! Double link consisting of two single links.
-	/*! There is no Null of type quick_link, but there are two separate singly-lined lists, that can have different offset in their enclosing class,
-		so we cannot make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
+	/*! There the Null of type quick_link, and there are two separate singly-lined lists, that can have different offset in their enclosing class,
+		but we can make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
 		so we should derive quick_link from two single links.
 		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.*/
 	template <class Dlink>
@@ -63,10 +63,10 @@ namespace awl
 			safe_exclude();
 		}
 
-	protected:
-
 		typedef TForwardLink<Dlink> ForwardLink;
 		typedef TBackwardLink<Dlink> BackwardLink;
+
+	protected:
 
 		//! The elements that are not Nulls are of type Dlink, but Nulls are ForwardLink and BackwardLink.
 		typedef single_list<Dlink, ForwardLink> ForwardList;
@@ -98,17 +98,34 @@ namespace awl
 		template <class T1, class DLink1> friend class quick_list;
 	};
 
+
+	template <class T, class Link, class Derived>
+	class forward_list : public basic_single_list<T, Link, Derived>
+	{
+	};
+
+	template <class T, class Link, class Derived>
+	class backward_list : public basic_single_list<T, Link, Derived>
+	{
+	};
+
 	//! Doubly linked list consisting of two singly linked lists.
 	template < class T, class DLink = quick_link>
-	class quick_list
+	class quick_list : private forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>>, private backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>>
 	{
 	private:
 
 		typedef typename DLink::ForwardLink ForwardLink;
 		typedef typename DLink::BackwardLink BackwardLink;
 
-		typedef single_list<T, ForwardLink> TForwardList;
-		typedef single_list<T, BackwardLink> TBackwardList;
+		typedef forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>> TForwardList;
+		typedef backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>> TBackwardList;
+
+		TForwardList & forward() { return *this; }
+		const TForwardList & forward() const { return *this; }
+
+		TBackwardList & backward() { return *this; }
+		const TBackwardList & backward() const { return *this; }
 
 	public:
 
@@ -120,7 +137,8 @@ namespace awl
 		typedef typename TBackwardList::iterator reverse_iterator;
 		typedef typename TBackwardList::const_iterator const_reverse_iterator;
 
-		quick_list()
+		//This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
+		quick_list() : Null(&Null, &Null)
 		{
 		}
 
@@ -144,28 +162,28 @@ namespace awl
 			return *this;
 		}
 
-		T * front() { return Forward.front(); }
-		const T * front() const { return Forward.front(); }
+		T * front() { return forward().front(); }
+		const T * front() const { return forward().front(); }
 
-		T * back() { return Backward.front(); }
-		const T * back() const { return Backward.front(); }
+		T * back() { return backward().front(); }
+		const T * back() const { return backward().front(); }
 
-		iterator begin() { return Forward.begin(); }
-		const_iterator begin() const { return Forward.begin(); }
+		iterator begin() { return forward().begin(); }
+		const_iterator begin() const { return forward().begin(); }
 
-		iterator end() { return Forward.end(); }
-		const_iterator end() const { return Forward.end(); }
+		iterator end() { return forward().end(); }
+		const_iterator end() const { return forward().end(); }
 
-		reverse_iterator rbegin() { return Backward.begin(); }
-		const_reverse_iterator rbegin() const { return Backward.begin(); }
+		reverse_iterator rbegin() { return backward().begin(); }
+		const_reverse_iterator rbegin() const { return backward().begin(); }
 
-		reverse_iterator rend() { return Backward.end(); }
-		const_reverse_iterator rend() const { return Backward.end(); }
+		reverse_iterator rend() { return backward().end(); }
+		const_reverse_iterator rend() const { return backward().end(); }
 
 		//returns true if the list is empty
-		bool empty() const { return Forward.empty(); }
-		bool empty_or_contains_one() const { return Forward.empty_or_contains_one(); }
-		bool contains_one() const { return Forward.contains_one(); }
+		bool empty() const { return forward().empty(); }
+		bool empty_or_contains_one() const { return forward().empty_or_contains_one(); }
+		bool contains_one() const { return forward().contains_one(); }
 
 		//Add... includes specified element to the list
 
@@ -175,11 +193,11 @@ namespace awl
 		static void erase(iterator i) { remove(*i); }
 		static void erase(reverse_iterator i) { remove(*i); }
 
-		void push_front(T * a) { insert_after(static_cast<DLink *>(Forward.null()), a); }
-		void push_back(T * a) { insert_before(static_cast<DLink *>(Forward.null()), a); }
+		void push_front(T * a) { insert_after(static_cast<DLink *>(forward().null()), a); }
+		void push_back(T * a) { insert_before(static_cast<DLink *>(forward().null()), a); }
 
-		T * pop_front() { return remove(Forward.front()); }
-		T * pop_back() { return remove(Backward.front()); }
+		T * pop_front() { return remove(forward().front()); }
+		T * pop_back() { return remove(backward().front()); }
 
 		void push_front(quick_list & src)
 		{
@@ -190,8 +208,8 @@ namespace awl
 
 				T * old_last = front(); //the last element in the backward list
 
-				Forward.push_front(first, last);
-				Backward.push_back(last, first, old_last);
+				forward().push_front(first, last);
+				backward().push_back(last, first, old_last);
 
 				src.clear();
 			}
@@ -206,8 +224,8 @@ namespace awl
 
 				T * old_last = back(); //the last element in the forward list
 
-				Forward.push_back(first, last, old_last);
-				Backward.push_front(last, first);
+				forward().push_back(first, last, old_last);
+				backward().push_front(last, first);
 
 				src.clear();
 			}
@@ -215,13 +233,13 @@ namespace awl
 
 		void clear()
 		{
-			Forward.clear();
-			Backward.clear();
+			forward().clear();
+			backward().clear();
 		}
 
 		size_t size() const
 		{
-			return Forward.size();
+			return forward().size();
 		}
 
 	private:
@@ -259,8 +277,8 @@ namespace awl
 
 		void attach(T * first, T * last)
 		{
-			Forward.attach(first, last);
-			Backward.attach(last, first);
+			forward().attach(first, last);
+			backward().attach(last, first);
 		}
 
 		//! Excludes specified element from the list.
@@ -270,8 +288,8 @@ namespace awl
 			return a;
 		}
 
-		//! Forward and backward lists storing ForwardLink* and BackwardLink*, but not a quick_link*.
-		TForwardList Forward;
-		TBackwardList Backward;
+		DLink Null;
+
+		template <class T1, class Link1, class Derived1> friend class basic_single_list;
 	};
 }
