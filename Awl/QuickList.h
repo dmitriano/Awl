@@ -8,33 +8,33 @@ namespace awl
 {
 	//! Forward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
 	template <class DLink>
-	class TForwardLink : public base_single_link<TForwardLink<DLink>>
+	class forward_link : public base_single_link<forward_link<DLink>>
 	{
 	protected:
-		TForwardLink() {}
+		forward_link() {}
 	public:
-		TForwardLink(TForwardLink * n) : base_single_link<TForwardLink<DLink>>(n) {}
+		forward_link(forward_link * n) : base_single_link<forward_link<DLink>>(n) {}
 	};
 
 	//! Backward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
 	template <class DLink>
-	class TBackwardLink : public base_single_link<TBackwardLink<DLink>>
+	class backward_link : public base_single_link<backward_link<DLink>>
 	{
 	protected:
-		TBackwardLink() {}
+		backward_link() {}
 	public:
-		TBackwardLink(TBackwardLink * n) : base_single_link<TBackwardLink<DLink>>(n) {}
+		backward_link(backward_link * n) : base_single_link<backward_link<DLink>>(n) {}
 	};
 
 	//! Double link consisting of two single links.
 	/*! There the Null of type quick_link, and there are two separate singly-lined lists, that can have different offset in their enclosing class,
-		but we can make TForwardLink::pNext and TBackwardLink::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
+		but we can make forward_link::pNext and backward_link::pNext point to quick_link. Getting the address of the object by its member is illegal in C++ 17,
 		so we should derive quick_link from two single links.
 		basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.
 		IMPORTANT: The link sould not call safe_exclude() in its destructor, because when quick_list::clear() is called, pNull of the elements are not set to nullptr,
 		so the link can be in some kind of a detached state in which pNext is not valid at all.*/
 	template <class Dlink>
-	class basic_quick_link : public TForwardLink<Dlink>, public TBackwardLink<Dlink>
+	class basic_quick_link : public forward_link<Dlink>, public backward_link<Dlink>
 	{
 	public:
 
@@ -60,8 +60,8 @@ namespace awl
 			}
 		}
 
-		typedef TForwardLink<Dlink> ForwardLink;
-		typedef TBackwardLink<Dlink> BackwardLink;
+		typedef forward_link<Dlink> ForwardLink;
+		typedef backward_link<Dlink> BackwardLink;
 
 	protected:
 
@@ -115,24 +115,24 @@ namespace awl
 		typedef typename DLink::ForwardLink ForwardLink;
 		typedef typename DLink::BackwardLink BackwardLink;
 
-		typedef forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>> TForwardList;
-		typedef backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>> TBackwardList;
+		typedef forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>> ForwardList;
+		typedef backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>> BackwardList;
 
-		TForwardList & forward() { return *this; }
-		const TForwardList & forward() const { return *this; }
+		ForwardList & forward() { return *this; }
+		const ForwardList & forward() const { return *this; }
 
-		TBackwardList & backward() { return *this; }
-		const TBackwardList & backward() const { return *this; }
+		BackwardList & backward() { return *this; }
+		const BackwardList & backward() const { return *this; }
 
 	public:
 
 		typedef T * value_type;
 
-		typedef typename TForwardList::iterator iterator;
-		typedef typename TForwardList::const_iterator const_iterator;
+		typedef typename ForwardList::iterator iterator;
+		typedef typename ForwardList::const_iterator const_iterator;
 
-		typedef typename TBackwardList::iterator reverse_iterator;
-		typedef typename TBackwardList::const_iterator const_reverse_iterator;
+		typedef typename BackwardList::iterator reverse_iterator;
+		typedef typename BackwardList::const_iterator const_reverse_iterator;
 
 		//This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
 		quick_list() : Null(&Null, &Null)
@@ -159,7 +159,7 @@ namespace awl
 			return *this;
 		}
 
-		//There can be using TForwardList::front, but not TBackwardList::front.
+		//There can be using ForwardList::front, but not BackwardList::front.
 		T * front() { return forward().front(); }
 		const T * front() const { return forward().front(); }
 
@@ -256,15 +256,15 @@ namespace awl
 		static void insert_after(DLink * p, DLink * a)
 		{
 			DLink * next = static_cast<DLink *>(p->ForwardLink::next());
-			TForwardList::insert_after(p, a);
-			TBackwardList::insert_after(next, a);
+			ForwardList::insert_after(p, a);
+			BackwardList::insert_after(next, a);
 		}
 
 		static void insert_before(DLink * p, DLink * a)
 		{
 			DLink * prev = static_cast<DLink *>(p->BackwardLink::next());
-			TForwardList::insert_after(prev, a);
-			TBackwardList::insert_after(p, a);
+			ForwardList::insert_after(prev, a);
+			BackwardList::insert_after(p, a);
 		}
 
 		void attach(quick_list & src)

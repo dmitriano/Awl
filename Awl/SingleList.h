@@ -18,7 +18,7 @@ namespace awl
 
 		bool included() const
 		{
-			return pNext != nullptr;
+			return next() != nullptr;
 		}
 
 	protected:
@@ -29,9 +29,14 @@ namespace awl
 
 		const Link * next() const { return pNext; }
 
-		Link * pNext;
+		void set_next(Link * n)
+		{
+			pNext = n;
+		}
 
 	private:
+
+		Link * pNext;
 
 		template <class T1, class Link1> friend class base_single_iterator;
 		template <class T1, class Link1, class Derived1> friend class basic_single_list;
@@ -71,7 +76,7 @@ namespace awl
 		//! Results in undefined behavior if the iterator is end().
 		T * cur() const { return static_cast<T *>(pCur); }
 
-		void MoveNext() { pCur = pCur->Link::next(); }
+		void MoveNext() { pCur = pCur->next(); }
 
 		Link * link() const { return pCur; }
 
@@ -214,10 +219,10 @@ namespace awl
 		}
 
 		bool empty() const { return first() == null(); }
-		bool empty_or_contains_one() const { return first()->Link::pNext == null(); }
+		bool empty_or_contains_one() const { return first()->next() == null(); }
 		bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
-		void clear() { null()->pNext = null(); }
+		void clear() { null()->set_next(null()); }
 
 		//! Returns the count of elements in the list.
 		size_t size() const
@@ -244,24 +249,24 @@ namespace awl
 		//! One or both the parameters can be end(), so they are not T*.
 		static void insert_after(Link * p, Link * a)
 		{
-			a->Link::pNext = p->Link::pNext;
-			p->Link::pNext = a;
+			a->set_next(p->next());
+			p->set_next(a);
 		}
 
 		//! The parameter can be end(), so it is not T*.
 		static Link * remove_after(Link * p)
 		{
-			Link * r = p->Link::pNext;
-			p->Link::pNext = r->Link::pNext;
-			r->Link::pNext = nullptr;
+			Link * r = p->next();
+			p->set_next(r->next());
+			r->set_next(nullptr);
 			return r;
 		}
 
 		void attach(Link * first, Link * last)
 		{
-			null()->pNext = first;
+			null()->set_next(first);
 
-			last->Link::pNext = null();
+			last->set_next(null());
 		}
 
 		//SingList does not know its last element so it should be provided by QuickList
@@ -270,16 +275,16 @@ namespace awl
 		{
 			Link * old_first = this->first();
 
-			null()->pNext = first;
+			null()->set_next(first);
 
-			last->Link::pNext = old_first;
+			last->set_next(old_first);
 		}
 
 		void push_back(Link * first, Link * last, Link * old_last)
 		{
-			old_last->Link::pNext = first;
+			old_last->set_next(first);
 
-			last->Link::pNext = null();
+			last->set_next(null());
 		}
 
 		Link * null() { return static_cast<Link *>(&(static_cast<Derived *>(this)->Null)); }
