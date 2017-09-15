@@ -17,6 +17,7 @@ namespace awl
 	};
 
 	//! Backward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
+	/*! We can completely redefine this class and replace pNext with pPrev. */
 	template <class DLink>
 	class backward_link : public base_single_link<backward_link<DLink>>
 	{
