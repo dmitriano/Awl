@@ -17,14 +17,41 @@ namespace awl
 	};
 
 	//! Backward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
-	/*! We can completely redefine this class and replace pNext with pPrev. */
+	/*! We can define backward_link in the same way as forward_link by inheriting from base_single_link, but in this can we will not be able to rename pNext with pPrev,
+		and in the debugger we will see two pNext members of a quick_list element. */
 	template <class DLink>
-	class backward_link : public base_single_link<backward_link<DLink>>
+	class backward_link
 	{
-	protected:
-		backward_link() {}
+		typedef backward_link Link;
+
 	public:
-		backward_link(backward_link * n) : base_single_link<backward_link<DLink>>(n) {}
+
+		bool included() const
+		{
+			return next() != nullptr;
+		}
+
+	protected:
+
+		backward_link(Link * n) : pPrev(n) {}
+
+		backward_link() : pPrev(nullptr) {}
+
+		Link * next() { return pPrev; }
+
+		const Link * next() const { return pPrev; }
+
+		void set_next(Link * n)
+		{
+			pPrev = n;
+		}
+
+	private:
+
+		Link * pPrev;
+
+		template <class T1, class Link1> friend class base_single_iterator;
+		template <class T1, class Link1, class Derived1> friend class basic_single_list;
 	};
 
 	//! Double link consisting of two single links.
