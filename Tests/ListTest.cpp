@@ -314,6 +314,31 @@ public:
 
 		Assert::AreEqual((size_t)(3), list.size());
 
+		std::cout << "MoveTest passed. ";
+
+		PrintList();
+	}
+
+	void PushBackTest()
+	{
+		Assert::AreEqual((size_t)(3), list.size());
+
+		ELEMENT_LIST other_list;
+
+		other_list.push_back(list);
+
+		Assert::AreEqual((size_t)(0), list.size());
+
+		Assert::AreEqual((size_t)(3), other_list.size());
+
+		list.push_back(other_list);
+
+		Assert::AreEqual((size_t)(0), other_list.size());
+
+		Assert::AreEqual((size_t)(3), list.size());
+
+		std::cout << "PushBackTest passed. ";
+
 		PrintList();
 	}
 
@@ -355,6 +380,8 @@ void TestLink()
 		holder.InsertTest();
 
         holder.MoveTest();
+
+		holder.PushBackTest();
 	}
 
 	Assert::AreEqual(0, Element::elementCount);
@@ -401,9 +428,13 @@ void TestSingleList()
 
 	Assert::AreEqual(list.size(), ++count);
 
+	auto first = list.front();
+
 	list.clear();
 
 	Assert::AreEqual(list.size(), (size_t)0);
+
+	delete first;
 }
 
 void TestList()
