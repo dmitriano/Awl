@@ -9,6 +9,8 @@ void TestObservable();
 
 void TestList();
 
+void ScopeGuardTest();
+
 int main()
 {
     int error = 1;
@@ -20,6 +22,8 @@ int main()
 		TestUpdateQueue();
 
 		TestObservable();
+
+		ScopeGuardTest();
 
 		std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
 

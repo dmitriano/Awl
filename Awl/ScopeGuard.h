@@ -3,40 +3,52 @@
 namespace awl
 {
 	template<typename Lambda>
-	class ScopeGuard
+	class scope_guard
 	{
 	public:
 
-		ScopeGuard(Lambda & l) : lambda(l)
+		scope_guard(const Lambda & l) : lambda(l)
 		{
 		}
 
-		ScopeGuard(const ScopeGuard &) = delete;
+		scope_guard(const scope_guard &) = delete;
 
-		ScopeGuard & operator = (ScopeGuard &) = delete;
+		scope_guard & operator = (const scope_guard &) = delete;
 
-		ScopeGuard(const ScopeGuard && other)
+		scope_guard(scope_guard && other) : lambda(std::move(other.lambda))
 		{
+			other.engaged = false;
 		}
 
-		ScopeGuard & operator = (ScopeGuard && other)
+		scope_guard & operator = (scope_guard && other)
 		{
 			lambda = std::move(other.lambda);
+			other.engaged = false;
 		}
 
-		~ScopeGuard()
+		~scope_guard()
 		{
-			lambda();
+			if (engaged)
+			{
+				lambda();
+			}
+		}
+
+		void release()
+		{
+			engaged = false;
 		}
 
 	private:
 
-		Lambda & lambda;
+		Lambda lambda;
+
+		bool engaged = true;
 	};
 
 	template <class Lambda>
-	inline ScopeGuard<Lambda> make_scoped_guard(Lambda & l)
+	inline scope_guard<Lambda> make_scope_guard(const Lambda & l)
 	{
-		return ScopeGuard<Lambda>(l);
+		return scope_guard<Lambda>(l);
 	}
 }
