@@ -80,15 +80,17 @@ namespace awl
 
 	protected:
 
-		template<typename ... Args>
-		void Notify(void (IObserver::*func)(Args ...), Args ... args)
+		//Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
+        //compiler errors if Args does not match Params.
+        template<typename ...Params, typename ... Args>
+		void Notify(void (IObserver::*func)(Params ...), Args&& ... args)
 		{
 			for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
 			{
 				//p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
 				IObserver * p_observer = *(i++);
 
-				(p_observer->*func)(args ...);
+				(p_observer->*func)(std::forward<Args>(args) ...);
 			}
 		}
 
