@@ -16,23 +16,23 @@ int main()
     int error = 1;
 
     try
-	{
-		TestList();
+    {
+        TestList();
 
-		TestUpdateQueue();
+        TestUpdateQueue();
 
-		TestObservable();
+        TestObservable();
 
-		ScopeGuardTest();
+        ScopeGuardTest();
 
-		std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
+        std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
 
         error = 0;
-	}
-	catch (const std::exception & e)
-	{
-		std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
-	}
+    }
+    catch (const std::exception & e)
+    {
+        std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
+    }
 
     return error;
 }

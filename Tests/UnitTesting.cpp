@@ -2,8 +2,8 @@
 
 namespace UnitTesting
 {
-	const char * TestException::what() const throw()
-	{
-		return theMessage.c_str();
-	}
+    const char * TestException::what() const throw()
+    {
+        return theMessage.c_str();
+    }
 }
