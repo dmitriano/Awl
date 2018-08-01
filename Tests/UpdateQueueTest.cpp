@@ -71,13 +71,17 @@ void SceneRenderingFunc()
     scene.Draw();
 }
 
-void TestUpdateQueue()
+void UpdateQueue_Test()
 {
+    //this does not test async. version yet.
+    
     std::thread main_thread(UserActionsFunc);
+
+    main_thread.join();
 
     std::thread render_thread(SceneRenderingFunc);
 
     render_thread.join();
-
-    main_thread.join();
 }
+
+AWL_TEST_FUNC(UpdateQueue_Test)

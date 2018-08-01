@@ -1,20 +1,17 @@
 #pragma once
 
+#include "Awl/Testing/LambdaTest.h"
+#include "Awl/Testing/TestMap.h"
+
 #include <exception>
 #include <functional>
 #include <list>
 #include <string>
 #include <sstream>
 
-#if !defined(_T)	
-#define _T(quoted_string) quoted_string
-#endif
-
 namespace UnitTesting
 {
-    typedef char TCHAR;
-
-    typedef std::basic_string<TCHAR> TString;
+    typedef awl::String TString;
 
     //! The basic exception class for Lines Game engine.
     class TestException : public std::exception
@@ -72,7 +69,7 @@ namespace UnitTesting
             {
                 std::ostringstream out;
 
-                out << _T("Actual ") << left << _T(" provided ") << right;
+                out << _T("Actual ") << left << _T(" expected ") << right;
 
                 if (message != nullptr)
                 {

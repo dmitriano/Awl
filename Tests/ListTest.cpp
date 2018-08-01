@@ -392,7 +392,7 @@ struct EleMent : awl::single_link
     int a = 25;
 };
 
-void TestSingleList()
+void List_SingleListTest()
 {
     awl::single_list<EleMent> list;
 
@@ -437,10 +437,7 @@ void TestSingleList()
     delete first;
 }
 
-void TestList()
-{
-    TestLink<LinkA>();
-    TestLink<LinkB>();
-    TestLink<awl::quick_link>();
-    TestSingleList();
-}
+AWL_TEST(List_LinkA, TestLink<LinkA>();)
+AWL_TEST(List_LinkB, TestLink<LinkB>();)
+AWL_TEST(List_QuickLink, TestLink<awl::quick_link>();)
+AWL_TEST_FUNC(List_SingleListTest)

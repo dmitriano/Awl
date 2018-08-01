@@ -1,29 +1,18 @@
-#include <exception>
 #include <iostream>
 
 #include "UnitTesting.h"
 
-void TestUpdateQueue();
-
-void TestObservable();
-
-void TestList();
-
-void ScopeGuardTest();
-
 int main()
 {
     int error = 1;
-
+    
     try
     {
-        TestList();
+        std::cout << std::endl << "***************** Running all tests *****************" << std::endl;
 
-        TestUpdateQueue();
+        auto test_map = awl::testing::CreateTestMap();
 
-        TestObservable();
-
-        ScopeGuardTest();
+        test_map->RunAll();
 
         std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
 
@@ -33,6 +22,8 @@ int main()
     {
         std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
     }
+
+    awl::testing::Shutdown();
 
     return error;
 }

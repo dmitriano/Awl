@@ -41,7 +41,7 @@ public:
     }
 };
 
-static void TestEvents()
+static void Observable_EventsTest()
 {
     Something something;
 
@@ -56,7 +56,7 @@ static void TestEvents()
     handler.UnsubscribeSelf();
 }
 
-static void TestMove()
+static void Observable_MoveTest()
 {
     Something something1;
 
@@ -88,9 +88,6 @@ static void TestMove()
     Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
 }
 
-void TestObservable()
-{
-    TestEvents();
+AWL_TEST_FUNC(Observable_EventsTest)
 
-    TestMove();
-}
+AWL_TEST_FUNC(Observable_MoveTest)
