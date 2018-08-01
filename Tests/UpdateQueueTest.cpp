@@ -71,7 +71,7 @@ void SceneRenderingFunc()
     scene.Draw();
 }
 
-void UpdateQueue_Test()
+AWL_TEST(UpdateQueue, Main)
 {
     //this does not test async. version yet.
     
@@ -84,4 +84,3 @@ void UpdateQueue_Test()
     render_thread.join();
 }
 
-AWL_TEST_FUNC(UpdateQueue_Test)

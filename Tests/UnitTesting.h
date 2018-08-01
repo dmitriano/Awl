@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Awl/Testing/LambdaTest.h"
 #include "Awl/Testing/TestMap.h"
 
 #include <exception>

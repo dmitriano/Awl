@@ -15,7 +15,7 @@ namespace awl
         {
         public:
 
-            TestMap()
+            TestMap(const TestContext & context) : testContext(context)
             {
                 for (TestLink * p_link : GetTestChain())
                 {
@@ -46,19 +46,21 @@ namespace awl
             {
                 std::cout << p_test_link->GetName() << "...";
 
-                p_test_link->Run();
+                p_test_link->Run(testContext);
 
                 std::cout << "OK" << std::endl;
             }
+
+            const TestContext & testContext;
 
             typedef std::map<String, TestLink *> Map;
 
             Map testMap;
         };
 
-        inline std::shared_ptr<TestMap> CreateTestMap()
+        inline std::shared_ptr<TestMap> CreateTestMap(const TestContext & context)
         {
-            return std::make_shared<TestMap>();
+            return std::make_shared<TestMap>(context);
         }
     }
 }

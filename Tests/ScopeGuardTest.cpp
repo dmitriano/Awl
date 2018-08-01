@@ -7,7 +7,7 @@
 
 using namespace UnitTesting;
 
-void ScopeGuard_Test()
+AWL_TEST(ScopeGuard, Main)
 {
     int usage = 1;
 
@@ -74,5 +74,3 @@ void ScopeGuard_Test()
 
     Assert::AreEqual(usage, 0);
 }
-
-AWL_TEST_FUNC(ScopeGuard_Test)

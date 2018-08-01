@@ -10,7 +10,7 @@ int main()
     {
         std::cout << std::endl << "***************** Running all tests *****************" << std::endl;
 
-        auto test_map = awl::testing::CreateTestMap();
+        auto test_map = awl::testing::CreateTestMap({});
 
         test_map->RunAll();
 
