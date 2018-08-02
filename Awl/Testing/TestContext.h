@@ -17,6 +17,10 @@ namespace awl
         {
         public:
 
+            CancellationFlag() : isCancelled(false)
+            {
+            }
+
             bool IsCancelled() override
             {
                 return isCancelled;
@@ -31,7 +35,7 @@ namespace awl
 
         private:
 
-            std::atomic<bool> isCancelled = false;
+            std::atomic<bool> isCancelled;
         };
 
         struct TestContext

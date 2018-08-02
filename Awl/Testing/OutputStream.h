@@ -24,7 +24,7 @@ namespace awl
         {
         public:
 
-            void Write(const String & s) override
+            void Write(const String &) override
             {
             }
         };
