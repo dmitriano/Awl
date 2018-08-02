@@ -16,7 +16,7 @@ namespace awl
 
             void EndLine()
             {
-                Write("\n");
+                Write(_T("\n"));
             }
         };
         

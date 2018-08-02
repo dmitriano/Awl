@@ -38,6 +38,7 @@ namespace awl
         
         typedef single_list<TestLink> TestChain;
 
+        //No additional data structures are created when the program starts except the linked list of the static TestLink objects.
         inline TestChain & GetTestChain()
         {
             static TestChain testChain;

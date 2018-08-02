@@ -51,8 +51,8 @@ namespace awl
             {
                 std::cout << p_test_link->GetName() << "...";
 
-                const TestContext test_context{ lastOutput };
-                
+                const TestContext test_context{ lastOutput, cancellationFlag };
+
                 p_test_link->Run(test_context);
 
                 std::cout << "OK" << std::endl;
@@ -62,6 +62,8 @@ namespace awl
 
             StringOutputStream lastOutput;
             
+            CancellationFlag cancellationFlag;
+                
             typedef std::map<String, TestLink *> Map;
 
             Map testMap;
