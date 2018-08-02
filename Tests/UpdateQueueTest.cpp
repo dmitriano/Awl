@@ -1,5 +1,3 @@
-#include <iostream>
-#include <sstream>
 #include <thread>
 #include <chrono>
 
@@ -19,30 +17,26 @@ public:
     //! Indicates if 3D mode is enabled.
     bool PerspectiveMode = false;
 
-    void Draw();
+    void Draw(const awl::testing::TestContext & context);
 };
 
-void GameScene::Draw()
+void GameScene::Draw(const awl::testing::TestContext & context)
 {
-    std::ostringstream out;
-
-    out << "Drawing the scene with the following settings: Rotation=" << (int)Rotation << " PerspectiveMode=" << (PerspectiveMode ? "true" : "false") << std::endl;
-
-    std::cout << out.str();
+    context.out.Write(awl::String(_T("Drawing the scene with the following settings: Rotation=")) + std::to_string((int)Rotation) + _T(" PerspectiveMode=") + (PerspectiveMode ? "true" : "false") + _T("\n"));
 }
 
 awl::UpdateQueue<GameScene &> updateQueue;
 
-void UserActionsFunc()
+void UserActionsFunc(const awl::testing::TestContext & context)
 {
-    std::cout << "The user has changed Rotation\n";
+    context.out.Write("The user has changed Rotation\n");
 
     updateQueue.Push([](GameScene & scene)
     {
         scene.Rotation = 2;
     });
 
-    std::cout << "The user has changed PerspectiveMode\n";
+    context.out.Write("The user has changed PerspectiveMode\n");
 
     updateQueue.Push([](GameScene & scene)
     {
@@ -50,13 +44,13 @@ void UserActionsFunc()
     });
 }
 
-void SceneRenderingFunc()
+void SceneRenderingFunc(const awl::testing::TestContext & context)
 {
     GameScene scene;
 
     Assert::IsTrue(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
 
-    scene.Draw();
+    scene.Draw(context);
 
     //GCC 4.7.3 does not have std::this_thread::sleep.
 #if !(__GNUC__ == 4 && __GNUC_MINOR__ == 7)
@@ -68,18 +62,18 @@ void SceneRenderingFunc()
 
     Assert::IsTrue(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 
-    scene.Draw();
+    scene.Draw(context);
 }
 
 AWL_TEST(UpdateQueue, Main)
 {
     //this does not test async. version yet.
     
-    std::thread main_thread(UserActionsFunc);
+    std::thread main_thread(UserActionsFunc, context);
 
     main_thread.join();
 
-    std::thread render_thread(SceneRenderingFunc);
+    std::thread render_thread(SceneRenderingFunc, context);
 
     render_thread.join();
 }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 
 #include "Awl/QuickList.h"
@@ -57,9 +56,46 @@ class ListHolder
 
     ELEMENT_LIST list;
 
+    const awl::testing::TestContext & context;
+
+    void Write(const awl::String & s) const
+    {
+        context.out.Write(s);
+    }
+
+    void EndLine() const
+    {
+        context.out.EndLine();
+    }
+
+    class Printer
+    {
+    public:
+
+        Printer(const awl::testing::TestContext & test_context) : context(test_context)
+        {
+            context.out.Write(_T("The list content is:"));
+        }
+
+        ~Printer()
+        {
+            context.out.EndLine();
+        }
+
+        void PrintElement(const Element * e) const
+        {
+            context.out.Write(" ");
+            context.out.Write(std::to_string(e->Value));
+        }
+
+    private:
+
+        const awl::testing::TestContext & context;
+    };
+
 public:
 
-    ListHolder()
+    ListHolder(const awl::testing::TestContext & test_context) : context(test_context)
     {
         Assert::IsTrue(list.empty());
         Assert::AreEqual(size_t(0), list.size());
@@ -115,53 +151,49 @@ public:
     {
         int val = 0;
 
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         for (Element * e : list)
         {
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val++, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void PrintListAuto()
     {
         int val = 0;
 
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         for (auto e : list)
         {
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val++, e->Value);
         }
 
-        std::cout << std::endl;
+        EndLine();
     }
 
     void PrintListConst() const
     {
         int val = 0;
 
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         for (const Element * e : list)
         {
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val++, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void PrintListIter()
     {
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         int val = 0;
 
@@ -169,17 +201,15 @@ public:
         {
             Element * e = *i;
 
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val++, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void PrintListIterConst()
     {
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         int val = 0;
 
@@ -187,17 +217,15 @@ public:
         {
             const Element * e = *i;
 
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val++, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void PrintListReverseIter()
     {
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         int val = 2;
 
@@ -205,17 +233,15 @@ public:
         {
             Element * e = *i;
 
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val--, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void PrintListReverseIterConst()
     {
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
         int val = 2;
 
@@ -223,12 +249,10 @@ public:
         {
             const Element * e = *i;
 
-            std::cout << " " << e->Value;
+            printer.PrintElement(e);
 
             Assert::AreEqual(val--, e->Value);
         }
-
-        std::cout << std::endl;
     }
 
     void ConstAlgorithmTest() const
@@ -242,7 +266,9 @@ public:
             throw TestException("Element 1 not found.");
         }
 
-        std::cout << _T("The found element is: ") << i->Value << std::endl;
+        Write(_T("The found element is:"));
+        Write(std::to_string(i->Value));
+        EndLine();
 
         i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 25; });
 
@@ -251,11 +277,9 @@ public:
             throw TestException("Non-existing element 25 found.");
         }
 
-        std::cout << _T("The list content is:");
+        Printer printer(context);
 
-        std::for_each(list.begin(), list.end(), [](const Element * e) { std::cout << " " << e->Value; });
-
-        std::cout << std::endl;
+        std::for_each(list.begin(), list.end(), [&printer](const Element * e) { printer.PrintElement(e); });
     }
 
     void InsertTest()
@@ -314,8 +338,6 @@ public:
 
         Assert::AreEqual((size_t)(3), list.size());
 
-        std::cout << "MoveTest passed. ";
-
         PrintList();
     }
 
@@ -337,8 +359,6 @@ public:
 
         Assert::AreEqual((size_t)(3), list.size());
 
-        std::cout << "PushBackTest passed. ";
-
         PrintList();
     }
 
@@ -352,10 +372,10 @@ public:
 };
 
 template <class DLink>
-void TestLink()
+void TestLink(const awl::testing::TestContext & context)
 {
     {
-        ListHolder<DLink> holder;
+        ListHolder<DLink> holder(context);
 
         holder.AddRemoveTest();
 
@@ -394,9 +414,9 @@ struct EleMent : awl::single_link
 
 AWL_TEST(List, Main)
 {
-    TestLink<LinkA>();
-    TestLink<LinkB>();
-    TestLink<awl::quick_link>();
+    TestLink<LinkA>(context);
+    TestLink<LinkB>(context);
+    TestLink<awl::quick_link>(context);
 }
 
 AWL_TEST(List, SingleList)

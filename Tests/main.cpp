@@ -6,11 +6,11 @@ int main()
 {
     int error = 1;
     
+    auto test_map = awl::testing::CreateTestMap();
+
     try
     {
         std::cout << std::endl << "***************** Running all tests *****************" << std::endl;
-
-        auto test_map = awl::testing::CreateTestMap({});
 
         test_map->RunAll();
 
@@ -21,6 +21,8 @@ int main()
     catch (const std::exception & e)
     {
         std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
+
+        std::cout << test_map->GetLastOutput();
     }
 
     awl::testing::Shutdown();

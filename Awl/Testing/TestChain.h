@@ -2,15 +2,12 @@
 
 #include "Awl/QuickList.h"
 #include "Awl/String.h"
+#include "Awl/Testing/TestContext.h"
 
 namespace awl 
 {
     namespace testing 
     {
-        class TestContext
-        {
-        };
-        
         typedef void (*TestFunc)(const TestContext & context);
         
         //The objects of this class are static, they are not supposed to be created on the heap or on the stack.
@@ -69,11 +66,11 @@ namespace awl
     }
 }
 
-#define AWL_TEST_FUNC_NAME(section_name, test_name) section_name##_##test_name##TestFunc
+#define AWL_TEST_FUNC_NAME(section_name, test_name) section_name##_##test_name##_TestFunc
 #define AWL_TEST_FUNC_SIGNATURE(section_name, test_name) static void AWL_TEST_FUNC_NAME(section_name, test_name)(const awl::testing::TestContext & context)
 
 //A test is simply a static function.
 #define AWL_TEST(section_name, test_name) \
     AWL_TEST_FUNC_SIGNATURE(section_name, test_name); \
-    static awl::testing::TestLink section_name##_##test_name##TestLink(_T(#section_name), _T(#test_name), &AWL_TEST_FUNC_NAME(section_name, test_name)); \
+    static awl::testing::TestLink section_name##_##test_name##_TestLink(_T(#section_name), _T(#test_name), &AWL_TEST_FUNC_NAME(section_name, test_name)); \
     AWL_TEST_FUNC_SIGNATURE(section_name, test_name)

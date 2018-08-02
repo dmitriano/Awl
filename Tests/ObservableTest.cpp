@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Awl/Observable.h"
 
 #include "UnitTesting.h"
@@ -22,7 +20,7 @@ public:
 
 void ChangeHandler::ItChanged(int param)
 {
-    std::cout << _T("It has changed ") << param << std::endl;
+    //std::cout << _T("It has changed ") << param << std::endl;
 
     changeHandled = true;
 }
