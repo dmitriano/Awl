@@ -412,14 +412,14 @@ struct EleMent : awl::single_link
     int a = 25;
 };
 
-AWL_TEST(List, Main)
+AWL_TEST(List)
 {
     TestLink<LinkA>(context);
     TestLink<LinkB>(context);
     TestLink<awl::quick_link>(context);
 }
 
-AWL_TEST(List, SingleList)
+AWL_TEST(List_SingleList)
 {
     awl::single_list<EleMent> list;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Awl/QuickList.h"
+#include "Awl/SingleList.h"
 #include "Awl/String.h"
 #include "Awl/Testing/TestContext.h"
 
@@ -13,15 +13,15 @@ namespace awl
         //The objects of this class are static, they are not supposed to be created on the heap or on the stack.
         //There is no safe_exclude() in the destructor, because the order of static objects destruction in undefined,
         //so the object is not excluded from the list automatically before destruction.
-        class TestLink : public quick_link
+        class TestLink : public single_link
         {
         public:
 
-            TestLink(const Char * p_section_name, const Char * p_test_name, TestFunc p_test_func);
+            TestLink(const Char * p_test_name, TestFunc p_test_func);
 
             String GetName()
             {
-                return String(pSectionName) + _T(".") + String(pTestName);
+                return pTestName;
             }
 
             void Run(const TestContext & context)
@@ -31,14 +31,12 @@ namespace awl
 
         private:
 
-            const Char * pSectionName;
-            
             const Char * pTestName;
 
             TestFunc pTestFunc;
         };
         
-        typedef quick_list<TestLink> TestChain;
+        typedef single_list<TestLink> TestChain;
 
         inline TestChain & GetTestChain()
         {
@@ -47,10 +45,10 @@ namespace awl
             return testChain;
         }
 
-        inline TestLink::TestLink(const Char * p_section_name, const Char * p_test_name, TestFunc p_test_func) :
-            pSectionName(p_section_name), pTestName(p_test_name), pTestFunc(p_test_func)
+        inline TestLink::TestLink(const Char * p_test_name, TestFunc p_test_func) :
+            pTestName(p_test_name), pTestFunc(p_test_func)
         {
-            GetTestChain().push_back(this);
+            GetTestChain().push_front(this);
         }
 
         //Guarantees the clean process exit without dangling pointers. Call it at the end of main() function, for example.
@@ -66,11 +64,11 @@ namespace awl
     }
 }
 
-#define AWL_TEST_FUNC_NAME(section_name, test_name) section_name##_##test_name##_TestFunc
-#define AWL_TEST_FUNC_SIGNATURE(section_name, test_name) static void AWL_TEST_FUNC_NAME(section_name, test_name)(const awl::testing::TestContext & context)
+#define AWL_TEST_FUNC_NAME(test_name) test_name##_TestFunc
+#define AWL_TEST_FUNC_SIGNATURE(test_name) static void AWL_TEST_FUNC_NAME(test_name)(const awl::testing::TestContext & context)
 
 //A test is simply a static function.
-#define AWL_TEST(section_name, test_name) \
-    AWL_TEST_FUNC_SIGNATURE(section_name, test_name); \
-    static awl::testing::TestLink section_name##_##test_name##_TestLink(_T(#section_name), _T(#test_name), &AWL_TEST_FUNC_NAME(section_name, test_name)); \
-    AWL_TEST_FUNC_SIGNATURE(section_name, test_name)
+#define AWL_TEST(test_name) \
+    AWL_TEST_FUNC_SIGNATURE(test_name); \
+    static awl::testing::TestLink test_name##_TestLink(_T(#test_name), &AWL_TEST_FUNC_NAME(test_name)); \
+    AWL_TEST_FUNC_SIGNATURE(test_name)

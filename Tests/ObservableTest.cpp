@@ -39,7 +39,7 @@ public:
     }
 };
 
-AWL_TEST(Observable, Events)
+AWL_TEST(Observable_Events)
 {
     Something something;
 
@@ -54,7 +54,7 @@ AWL_TEST(Observable, Events)
     handler.UnsubscribeSelf();
 }
 
-AWL_TEST(Observable, Move)
+AWL_TEST(Observable_Move)
 {
     Something something1;
 

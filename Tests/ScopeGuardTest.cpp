@@ -7,7 +7,7 @@
 
 using namespace UnitTesting;
 
-AWL_TEST(ScopeGuard, Main)
+AWL_TEST(ScopeGuard)
 {
     int usage = 1;
 

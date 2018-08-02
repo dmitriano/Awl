@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iterator>
+#include <assert.h>
 
 namespace awl
 {
