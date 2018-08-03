@@ -1,10 +1,9 @@
 #include <algorithm>
 
 #include "Awl/QuickList.h"
+#include "Awl/Testing/UnitTest.h"
 
-#include "UnitTesting.h"
-
-using namespace UnitTesting;
+using namespace awl::testing;
 
 class LinkA : public awl::basic_quick_link<LinkA>
 {
@@ -357,7 +356,7 @@ public:
 };
 
 template <class DLink>
-void TestLink(const awl::testing::TestContext & context)
+static void TestLink(const awl::testing::TestContext & context)
 {
     {
         ListHolder<DLink> holder(context);
@@ -399,9 +398,9 @@ struct EleMent : awl::single_link
 
 AWL_TEST(List)
 {
-    TestLink<LinkA>(context);
-    TestLink<LinkB>(context);
-    TestLink<awl::quick_link>(context);
+    ::TestLink<LinkA>(context);
+    ::TestLink<LinkB>(context);
+    ::TestLink<awl::quick_link>(context);
 }
 
 AWL_TEST(List_SingleList)

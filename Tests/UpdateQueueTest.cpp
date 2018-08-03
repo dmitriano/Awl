@@ -2,10 +2,9 @@
 #include <chrono>
 
 #include "Awl/UpdateQueue.h"
+#include "Awl/Testing/UnitTest.h"
 
-#include "UnitTesting.h"
-
-using namespace UnitTesting;
+using namespace awl::testing;
 
 class GameScene
 {

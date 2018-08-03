@@ -1,8 +1,7 @@
 #include "Awl/Observable.h"
+#include "Awl/Testing/UnitTest.h"
 
-#include "UnitTesting.h"
-
-using namespace UnitTesting;
+using namespace awl::testing;
 
 struct INotifySomethingChanged
 {

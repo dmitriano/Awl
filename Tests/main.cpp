@@ -1,5 +1,5 @@
-#include "UnitTesting.h"
-#include "Awl\StdConsole.h"
+#include "Awl/StdConsole.h"
+#include "Awl/Testing/TestMap.h"
 
 int main()
 {
