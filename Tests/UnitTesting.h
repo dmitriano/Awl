@@ -6,14 +6,12 @@
 #include <functional>
 #include <list>
 #include <string>
-#include <sstream>
 
 namespace UnitTesting
 {
     typedef awl::String TString;
 
-    //! The basic exception class for Lines Game engine.
-    class TestException : public std::exception
+    class TestException
     {
     private:
 
@@ -33,47 +31,43 @@ namespace UnitTesting
         {
             return theMessage;
         }
-
-        virtual const char * what() const throw() override;
     };
 
     class Assert
     {
     public:
 
-        static void IsTrue(bool val, const TCHAR * message = nullptr)
+        static void Fail(const TCHAR * message = _T("Assertion failed."))
+        {
+            throw TestException(message);
+        }
+        
+        static void IsTrue(bool val, const TCHAR * message = _T("The value is not true."))
         {
             if (!val)
             {
-                if (message != nullptr)
-                {
-                    throw TestException(message);
-                }
-                else
-                {
-                    throw TestException(_T("The value is not true."));
-                }
+                Fail(message);
             }
         }
 
-        static void IsFalse(bool val, const TCHAR * message = nullptr)
+        static void IsFalse(bool val, const TCHAR * message = _T("The value is not false."))
         {
-            IsTrue(!val, message);
+            if (val)
+            {
+                Fail(message);
+            }
         }
 
-        template <typename T>
-        static void AreEqual(T left, T right, const TCHAR * message = nullptr)
+        template <typename E, typename A>
+        static void AreEqual(E expected, A actual, const TCHAR * message = _T("The values are not equal."))
         {
-            if (left != right)
+            if (expected != actual)
             {
-                std::ostringstream out;
+                awl::ostringstream out;
 
-                out << _T("Actual ") << left << _T(" expected ") << right;
-
-                if (message != nullptr)
-                {
-                    out << message;
-                }
+                out << message << _T(" ");
+                
+                out << _T(" expected ") << expected << _T("actual ") << actual << _T(".");
 
                 throw TestException(out.str());
             }

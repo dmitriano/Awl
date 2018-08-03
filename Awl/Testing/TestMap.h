@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/Testing/TestChain.h"
+#include "Awl/StdConsole.h"
 
 #include <map>
 #include <memory>
@@ -42,25 +43,25 @@ namespace awl
 
             String GetLastOutput() const
             {
-                return lastOutput.GetString();
+                return lastOutput.str();
             }
 
         private:
 
             void InternalRun(TestLink * p_test_link)
             {
-                std::cout << p_test_link->GetName() << "...";
+                cout() << p_test_link->GetName() << _T("...");
 
                 const TestContext test_context{ lastOutput, cancellationFlag };
 
                 p_test_link->Run(test_context);
 
-                std::cout << "OK" << std::endl;
+                cout() << _T("OK") << std::endl;
 
-                lastOutput.Clear();
+                lastOutput.clear();
             }
 
-            StringOutputStream lastOutput;
+            ostringstream lastOutput;
             
             CancellationFlag cancellationFlag;
                 

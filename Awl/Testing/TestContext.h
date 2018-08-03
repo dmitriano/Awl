@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Awl/Testing/OutputStream.h"
+#include "Awl/String.h"
 
 #include <atomic>
+#include <mutex>
 
 namespace awl 
 {
@@ -40,7 +41,9 @@ namespace awl
 
         struct TestContext
         {
-            OutputStream & out;
+            //std::recursive_mutex & mutex;
+            
+            std::basic_ostream<Char> & out;
 
             TestCancellation & cancellation;
         };

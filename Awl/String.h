@@ -1,8 +1,13 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+
+#include <tchar.h>
+
+#else
 
 #ifndef TCHAR
 #define TCHAR char
@@ -12,10 +17,6 @@
 #define _T(quoted_string) quoted_string
 #endif
 
-#else
-
-#include <tchar.h>
-
 #endif
 
 namespace awl
@@ -23,4 +24,6 @@ namespace awl
     typedef TCHAR Char;
 
     typedef std::basic_string<Char> String;
+
+    typedef std::basic_ostringstream<Char> ostringstream;
 }

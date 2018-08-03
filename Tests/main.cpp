@@ -1,6 +1,5 @@
-#include <iostream>
-
 #include "UnitTesting.h"
+#include "Awl\StdConsole.h"
 
 int main()
 {
@@ -10,19 +9,19 @@ int main()
 
     try
     {
-        std::cout << std::endl << "***************** Running all tests *****************" << std::endl;
+        awl::cout() << std::endl << _T("***************** Running all tests *****************") << std::endl;
 
         test_map->RunAll();
 
-        std::cout << std::endl << "***************** Tests passed *****************" << std::endl;
+        awl::cout() << std::endl << _T("***************** Tests passed *****************") << std::endl;
 
         error = 0;
     }
     catch (const std::exception & e)
     {
-        std::cout << std::endl << "***************** Tests failed: " << e.what() << std::endl;
+        awl::cout() << std::endl << _T("***************** Tests failed: ") << e.what() << std::endl;
 
-        std::cout << test_map->GetLastOutput();
+        awl::cout() << test_map->GetLastOutput();
     }
 
     awl::testing::Shutdown();

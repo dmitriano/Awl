@@ -22,21 +22,25 @@ public:
 
 void GameScene::Draw(const awl::testing::TestContext & context)
 {
-    context.out.Write(awl::String(_T("Drawing the scene with the following settings: Rotation=")) + std::to_string((int)Rotation) + _T(" PerspectiveMode=") + (PerspectiveMode ? "true" : "false") + _T("\n"));
+    awl::ostringstream out;
+    
+    out << _T("Drawing the scene with the following settings: Rotation=") << (int)Rotation << _T(" PerspectiveMode=") << (PerspectiveMode ? "true" : "false") << std::endl;
+    
+    context.out << out.str();
 }
 
 awl::UpdateQueue<GameScene &> updateQueue;
 
 void UserActionsFunc(const awl::testing::TestContext & context)
 {
-    context.out.Write("The user has changed Rotation\n");
+    context.out << _T("The user has changed Rotation\n");
 
     updateQueue.Push([](GameScene & scene)
     {
         scene.Rotation = 2;
     });
 
-    context.out.Write("The user has changed PerspectiveMode\n");
+    context.out << _T("The user has changed PerspectiveMode\n");
 
     updateQueue.Push([](GameScene & scene)
     {

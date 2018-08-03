@@ -58,34 +58,23 @@ class ListHolder
 
     const awl::testing::TestContext & context;
 
-    void Write(const awl::String & s) const
-    {
-        context.out.Write(s);
-    }
-
-    void EndLine() const
-    {
-        context.out.EndLine();
-    }
-
     class Printer
     {
     public:
 
         Printer(const awl::testing::TestContext & test_context) : context(test_context)
         {
-            context.out.Write(_T("The list content is:"));
+            context.out << _T("The list content is:");
         }
 
         ~Printer()
         {
-            context.out.EndLine();
+            context.out << std::endl;
         }
 
         void PrintElement(const Element * e) const
         {
-            context.out.Write(" ");
-            context.out.Write(std::to_string(e->Value));
+            context.out << _T(" ") << e->Value;
         }
 
     private:
@@ -173,8 +162,6 @@ public:
 
             Assert::AreEqual(val++, e->Value);
         }
-
-        EndLine();
     }
 
     void PrintListConst() const
@@ -263,18 +250,16 @@ public:
 
         if (i == list.end())
         {
-            throw TestException("Element 1 not found.");
+            Assert::Fail(_T("Element 1 not found."));
         }
 
-        Write(_T("The found element is:"));
-        Write(std::to_string(i->Value));
-        EndLine();
+        context.out << _T("The found element is: ") << i->Value << std::endl;
 
         i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 25; });
 
         if (i != list.end())
         {
-            throw TestException("Non-existing element 25 found.");
+            Assert::Fail(_T("Non-existing element 25 found."));
         }
 
         Printer printer(context);
@@ -292,7 +277,7 @@ public:
 
         if (i == list.end())
         {
-            throw TestException("Element 2 not found.");
+            Assert::Fail(_T("Element 2 not found."));
         }
 
         list.insert(i, new Element(3));
