@@ -27,6 +27,11 @@ namespace awl
             cv.notify_all();
         }
 
+        void Reset()
+        {
+            isCancelled = false;
+        }
+
         template< class Rep, class Period >
         void Sleep(const std::chrono::duration<Rep, Period>& time) const
         {

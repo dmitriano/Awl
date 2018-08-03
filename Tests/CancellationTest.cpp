@@ -47,11 +47,11 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 
             auto now = std::chrono::steady_clock::now();
 
-            auto ellapsed = std::chrono::duration_cast<Duration>(now - start);
+            auto elapsed = std::chrono::duration_cast<Duration>(now - start);
 
-            Assert::IsTrue(ellapsed.count() >= client_sleep_time);
+            Assert::IsTrue(elapsed.count() >= client_sleep_time);
 
-            Assert::IsTrue(ellapsed.count() < worker_sleep_time);
+            Assert::IsTrue(elapsed.count() < worker_sleep_time);
         }));
     }
 

@@ -16,7 +16,7 @@ namespace awl
             //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
             std::basic_ostream<Char> & out;
 
-            Cancellation & cancellation;
+            const Cancellation & cancellation;
         };
     }
 }
