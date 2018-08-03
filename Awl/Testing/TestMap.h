@@ -63,7 +63,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            CancellationFlag cancellationFlag;
+            Cancellation cancellationFlag;
                 
             typedef std::map<String, TestLink *> Map;
 

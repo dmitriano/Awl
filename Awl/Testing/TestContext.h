@@ -1,51 +1,22 @@
 #pragma once
 
 #include "Awl/String.h"
+#include "Awl/Cancellation.h"
 
 #include <atomic>
-#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 namespace awl 
 {
     namespace testing 
     {
-        struct TestCancellation
-        {
-            virtual bool IsCancelled() = 0;
-        };
-        
-        class CancellationFlag : public TestCancellation
-        {
-        public:
-
-            CancellationFlag() : isCancelled(false)
-            {
-            }
-
-            bool IsCancelled() override
-            {
-                return isCancelled;
-            }
-
-            CancellationFlag & operator = (bool val)
-            {
-                isCancelled = val;
-
-                return *this;
-            }
-
-        private:
-
-            std::atomic<bool> isCancelled;
-        };
-
         struct TestContext
         {
-            //std::recursive_mutex & mutex;
-            
+            //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
             std::basic_ostream<Char> & out;
 
-            TestCancellation & cancellation;
+            Cancellation & cancellation;
         };
     }
 }

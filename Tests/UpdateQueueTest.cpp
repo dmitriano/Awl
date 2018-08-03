@@ -6,6 +6,11 @@
 
 using namespace awl::testing;
 
+typedef std::recursive_mutex TestMutex;
+typedef std::unique_lock<TestMutex> TestLock;
+
+static TestMutex testMutex;
+
 class GameScene
 {
 public:
@@ -21,33 +26,39 @@ public:
 
 void GameScene::Draw(const awl::testing::TestContext & context)
 {
-    awl::ostringstream out;
+    TestLock lock(testMutex);
     
-    out << _T("Drawing the scene with the following settings: Rotation=") << (int)Rotation << _T(" PerspectiveMode=") << (PerspectiveMode ? "true" : "false") << std::endl;
-    
-    context.out << out.str();
+    context.out << _T("Drawing the scene with the following settings: Rotation=") << (int)Rotation << _T(" PerspectiveMode=") << (PerspectiveMode ? "true" : "false") << std::endl;
 }
 
 awl::UpdateQueue<GameScene &> updateQueue;
 
-void UserActionsFunc(const awl::testing::TestContext & context)
+static void UserActionsFunc(const awl::testing::TestContext & context)
 {
-    context.out << _T("The user has changed Rotation\n");
+    {
+        TestLock lock(testMutex);
+
+        context.out << _T("The user has changed Rotation\n");
+    }
 
     updateQueue.Push([](GameScene & scene)
     {
         scene.Rotation = 2;
     });
 
-    context.out << _T("The user has changed PerspectiveMode\n");
+    {
+        TestLock lock(testMutex);
 
+        context.out << _T("The user has changed PerspectiveMode\n");
+    }
+    
     updateQueue.Push([](GameScene & scene)
     {
         scene.PerspectiveMode = true;
     });
 }
 
-void SceneRenderingFunc(const awl::testing::TestContext & context)
+static void SceneRenderingFunc(const awl::testing::TestContext & context)
 {
     GameScene scene;
 
