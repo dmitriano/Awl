@@ -2,6 +2,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Cancellation.h"
+#include "Awl/Testing/AttributeProvider.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -17,6 +18,8 @@ namespace awl
             std::basic_ostream<Char> & out;
 
             const Cancellation & cancellation;
+
+            const AttributeProvider & ap;
         };
     }
 }

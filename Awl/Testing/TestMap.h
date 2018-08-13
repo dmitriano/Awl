@@ -23,20 +23,20 @@ namespace awl
                 }
             }
 
-            void Run(const String & name, ostream & out)
+            void Run(const String & name, const TestContext & context)
             {
                 auto i = testMap.find(name);
 
                 assert(i != testMap.end());
 
-                InternalRun(i->second, out);
+                InternalRun(i->second, context);
             }
             
-            void RunAll(ostream & out)
+            void RunAll(const TestContext & context)
             {
                 for (auto & p : testMap)
                 {
-                    InternalRun(p.second, out);
+                    InternalRun(p.second, context);
                 }
             }
 
@@ -47,23 +47,21 @@ namespace awl
 
         private:
 
-            void InternalRun(TestLink * p_test_link, ostream & out)
+            void InternalRun(TestLink * p_test_link, const TestContext & context)
             {
-                out << p_test_link->GetName() << _T("...");
+                context.out << p_test_link->GetName() << _T("...");
 
-                const TestContext test_context{ lastOutput, cancellationFlag };
+                const TestContext temp_context{ lastOutput, context.cancellation, context.ap };
 
-                p_test_link->Run(test_context);
+                p_test_link->Run(temp_context);
 
-                out << _T("OK") << std::endl;
+                context.out << _T("OK") << std::endl;
 
                 lastOutput.clear();
             }
 
             ostringstream lastOutput;
             
-            Cancellation cancellationFlag;
-                
             typedef std::map<String, TestLink *> Map;
 
             Map testMap;
@@ -74,6 +72,8 @@ namespace awl
             return std::make_shared<TestMap>();
         }
 
-        int RunAllTests(ostream & out);
+        int RunAllTests();
+        
+        int RunAllTests(const TestContext & context);
     }
 }

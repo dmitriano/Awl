@@ -32,8 +32,8 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 {
     awl::Cancellation cancellation;
 
-    constexpr size_t thread_count = 10;
-
+    AWL_ATTRIBUTE(size_t, thread_count, 10);
+    
     std::vector<std::thread> v;
     v.reserve(thread_count);
 
