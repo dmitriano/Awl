@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Awl/Testing/TestChain.h"
-#include "Awl/StdConsole.h"
 
 #include <map>
 #include <memory>
@@ -24,20 +23,20 @@ namespace awl
                 }
             }
 
-            void Run(const String & name)
+            void Run(const String & name, ostream & out)
             {
                 auto i = testMap.find(name);
 
                 assert(i != testMap.end());
 
-                InternalRun(i->second);
+                InternalRun(i->second, out);
             }
             
-            void RunAll()
+            void RunAll(ostream & out)
             {
                 for (auto & p : testMap)
                 {
-                    InternalRun(p.second);
+                    InternalRun(p.second, out);
                 }
             }
 
@@ -48,15 +47,15 @@ namespace awl
 
         private:
 
-            void InternalRun(TestLink * p_test_link)
+            void InternalRun(TestLink * p_test_link, ostream & out)
             {
-                cout() << p_test_link->GetName() << _T("...");
+                out << p_test_link->GetName() << _T("...");
 
                 const TestContext test_context{ lastOutput, cancellationFlag };
 
                 p_test_link->Run(test_context);
 
-                cout() << _T("OK") << std::endl;
+                out << _T("OK") << std::endl;
 
                 lastOutput.clear();
             }
@@ -74,5 +73,7 @@ namespace awl
         {
             return std::make_shared<TestMap>();
         }
+
+        int RunAllTests(ostream & out);
     }
 }

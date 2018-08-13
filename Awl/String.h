@@ -25,5 +25,8 @@ namespace awl
 
     typedef std::basic_string<Char> String;
 
+    typedef std::basic_istream<Char> istream;
+    typedef std::basic_ostream<Char> ostream;
+    
     typedef std::basic_ostringstream<Char> ostringstream;
 }

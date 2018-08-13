@@ -21,6 +21,6 @@ namespace awl
         static std::wostream &cout() { return std::wcout; }
     };
 
-    inline std::basic_istream<Char> &cin() { return select_console<Char>::cin(); }
-    inline std::basic_ostream<Char> &cout() { return select_console<Char>::cout(); }
+    inline istream &cin() { return select_console<Char>::cin(); }
+    inline ostream &cout() { return select_console<Char>::cout(); }
 }
