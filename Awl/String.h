@@ -30,6 +30,30 @@ namespace awl
     
     typedef std::basic_ostringstream<Char> ostringstream;
 
+    // used when C is specified as char
+    template<typename C, typename T>
+    inline typename std::enable_if<std::is_same<C, char>::value, std::string>::type ToBasicString(T val)
+    {
+        return std::to_string(val);
+    }
+
+    // used when C is specified as wchar_t
+    template<typename C, typename T>
+    inline typename std::enable_if<std::is_same<C, wchar_t>::value, std::wstring>::type ToBasicString(T val)
+    {
+        return std::to_wstring(val);
+    }
+
+    // used when C is specified as other types
+    template<typename C, typename T>
+    typename std::enable_if<!std::is_same<C, char>::value && !std::is_same<C, wchar_t>::value, std::basic_string<C>>::type ToBasicString(T val);
+
+    template<typename T>
+    inline String ToString(T val)
+    {
+        return ToBasicString<Char, T>(val);
+    }
+
     inline void FromString(const String & s, int & val)
     {
         val = std::stoi(s);

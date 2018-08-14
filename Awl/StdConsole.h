@@ -9,13 +9,15 @@ namespace awl
     //We use std::cout/std::cin or std::wcout/std::wcin depending on Char typedef.
     template<typename T> struct select_console;
 
-    template<> struct select_console<char>
+    template<>
+    struct select_console<char>
     {
         static std::istream &cin() { return std::cin; }
         static std::ostream &cout() { return std::cout; }
     };
 
-    template<> struct select_console<wchar_t>
+    template<>
+    struct select_console<wchar_t>
     {
         static std::wistream &cin() { return std::wcin; }
         static std::wostream &cout() { return std::wcout; }

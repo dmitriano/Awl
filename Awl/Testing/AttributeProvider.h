@@ -6,11 +6,11 @@ namespace awl
 {
     namespace testing
     {
-        class NamedParser
+        class AttributeParser
         {
         public:
 
-            NamedParser(const Char * name) : myName(name)
+            AttributeParser(const Char * name) : myName(name)
             {
             }
 
@@ -19,24 +19,24 @@ namespace awl
                 return myName;
             }
 
-            virtual ~NamedParser() = default;
+            virtual ~AttributeParser() = default;
 
-        protected:
+            virtual bool Parse(const String & s) = 0;
 
-             virtual bool Parse(const String & s) = 0;
+            virtual String GetDefaultValue() const = 0;
+
+            virtual String GetTypeName() const = 0;
 
         private:
 
             const Char * myName;
-
-            friend class AttributeProvider;
         };
 
         class AttributeProvider
         {
         public:
 
-            bool TryGet(NamedParser & parser) const
+            bool TryGet(AttributeParser & parser) const
             {
                 String s;
                 
