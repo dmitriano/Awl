@@ -41,7 +41,7 @@ namespace awl
 
                     out << message << _T(" ");
 
-                    out << _T(" expected ") << expected << _T("actual ") << actual << _T(".");
+                    out << _T(" expected ") << expected << _T(", actual ") << actual << _T(".");
 
                     throw TestException(out.str());
                 }

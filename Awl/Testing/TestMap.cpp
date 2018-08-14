@@ -54,7 +54,9 @@ namespace awl
 
             try
             {
-                context.out << std::endl << _T("***************** Running all tests *****************") << std::endl;
+                const size_t test_count = p_tests != nullptr ? p_tests->size() : test_map->GetTestCount();
+                
+                context.out << std::endl << _T("***************** Running ") << test_count << _T(" tests *****************") << std::endl;
 
                 if (p_tests == nullptr)
                 {
@@ -70,17 +72,13 @@ namespace awl
                     }
                 }
 
-                context.out << std::endl << _T("***************** Tests passed *****************") << std::endl;
+                context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
 
                 error = 0;
             }
-            catch (const std::exception & e)
-            {
-                context.out << std::endl << _T("***************** Tests failed: ") << e.what() << std::endl;
-            }
             catch (const awl::testing::TestException & e)
             {
-                context.out << std::endl << _T("***************** Tests failed: ") << e.GetMessage() << std::endl;
+                context.out << std::endl << _T("***************** The tests failed: ") << e.GetMessage() << std::endl;
             }
 
             if (error != 0)
@@ -125,16 +123,14 @@ namespace awl
                 {
                     istringstream in(test_names_val);
 
-                    std::set<String> tests;
+                    std::set<String> tests { std::istream_iterator<String, Char>(in), std::istream_iterator<String, Char>() };
 
-                    std::copy(std::istream_iterator<String, Char>(in), std::istream_iterator<String, Char>(), std::inserter(tests, tests.begin()));
-
-                    return awl::testing::RunTests(context, &tests);
+                    return RunTests(context, &tests);
                 }
 
-                return awl::testing::RunTests(context, nullptr);
+                return RunTests(context, nullptr);
             }
-            catch (const awl::testing::TestException & e)
+            catch (const TestException & e)
             {
                 cout() << _T("The following error has occurred: ") << e.GetMessage() << std::endl;
             }

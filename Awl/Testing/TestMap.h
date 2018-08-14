@@ -32,6 +32,11 @@ namespace awl
                 return lastOutput.str();
             }
 
+            size_t GetTestCount() const
+            {
+                return testMap.size();
+            }
+
         private:
 
             void InternalRun(TestLink * p_test_link, const TestContext & context);
