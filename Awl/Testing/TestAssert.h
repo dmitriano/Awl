@@ -1,33 +1,11 @@
 #pragma once
 
-#include "Awl/Testing/TestMap.h"
+#include "Awl/Testing/TestException.h"
 
 namespace awl
 {
     namespace testing
     {
-        class TestException
-        {
-        private:
-
-            const String theMessage;
-
-        public:
-
-            explicit TestException() : theMessage(_T("No messsage provided."))
-            {
-            }
-
-            explicit TestException(const String & message) : theMessage(message)
-            {
-            }
-
-            const String & GetMessage() const
-            {
-                return theMessage;
-            }
-        };
-
         class Assert
         {
         public:

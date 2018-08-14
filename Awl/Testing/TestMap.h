@@ -23,7 +23,7 @@ namespace awl
                 }
             }
 
-            void Run(const String & name, const TestContext & context)
+            void Run(const TestContext & context, const String & name)
             {
                 auto i = testMap.find(name);
 
@@ -75,5 +75,7 @@ namespace awl
         int RunAllTests();
         
         int RunAllTests(const TestContext & context);
+
+        int Run(int argc, Char * argv[]);
     }
 }

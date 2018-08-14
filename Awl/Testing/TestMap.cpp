@@ -1,6 +1,7 @@
+#include "Awl/StdConsole.h"
 #include "Awl/Testing/TestMap.h"
 #include "Awl/Testing/TestAssert.h"
-#include "Awl/StdConsole.h"
+#include "Awl/Testing/CommandLineProvider.h"
 
 namespace awl
 {
@@ -50,6 +51,26 @@ namespace awl
             const TestContext context{ awl::cout(), cancellation, ap };
 
             return RunAllTests(context);
+        }
+
+        int Run(int argc, Char * argv[])
+        {
+            try
+            {
+                CommandLineProvider cl(argc, argv);
+
+                Cancellation cancellation;
+
+                const TestContext context{ awl::cout(), cancellation, cl };
+
+                return awl::testing::RunAllTests(context);
+            }
+            catch (const awl::testing::TestException & e)
+            {
+                cout() << _T("The following error has occurred while parsing the command line arguments: ") << e.GetMessage() << std::endl;
+            }
+
+            return 2;
         }
     }
 }

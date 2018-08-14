@@ -40,7 +40,7 @@ namespace awl
             {
                 String s;
                 
-                if (TryFind(s))
+                if (TryFind(parser.GetName(), s))
                 {
                     return parser.Parse(s);
                 }
@@ -50,7 +50,7 @@ namespace awl
 
         protected:
 
-            virtual const bool TryFind(String & val) const
+            virtual bool TryFind(const String & name, String & val) const
             {
                 return false;
             }
