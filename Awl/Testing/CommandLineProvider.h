@@ -17,8 +17,6 @@ namespace awl
 
             ~CommandLineProvider();
 
-        protected:
-
             bool TryFind(const String & name, String & val) const override;
 
         private:

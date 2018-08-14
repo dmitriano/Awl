@@ -23,22 +23,9 @@ namespace awl
                 }
             }
 
-            void Run(const TestContext & context, const String & name)
-            {
-                auto i = testMap.find(name);
-
-                assert(i != testMap.end());
-
-                InternalRun(i->second, context);
-            }
+            void Run(const TestContext & context, const String & name);
             
-            void RunAll(const TestContext & context)
-            {
-                for (auto & p : testMap)
-                {
-                    InternalRun(p.second, context);
-                }
-            }
+            void RunAll(const TestContext & context);
 
             String GetLastOutput() const
             {
@@ -47,18 +34,7 @@ namespace awl
 
         private:
 
-            void InternalRun(TestLink * p_test_link, const TestContext & context)
-            {
-                context.out << p_test_link->GetName() << _T("...");
-
-                const TestContext temp_context{ lastOutput, context.cancellation, context.ap };
-
-                p_test_link->Run(temp_context);
-
-                context.out << _T("OK") << std::endl;
-
-                lastOutput.clear();
-            }
+            void InternalRun(TestLink * p_test_link, const TestContext & context);
 
             ostringstream lastOutput;
             

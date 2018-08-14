@@ -48,8 +48,6 @@ namespace awl
                 return false;
             }
 
-        protected:
-
             virtual bool TryFind(const String & name, String & val) const
             {
                 return false;

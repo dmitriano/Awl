@@ -23,8 +23,8 @@ AWL_TEST(Cancellation_NegativeTimeDiff)
     Assert::IsTrue(diff.count() < 0);
 }
 
-constexpr int client_sleep_time = 100;
-constexpr int worker_sleep_time = 1000;
+constexpr int default_client_sleep_time = 100;
+constexpr int default_worker_sleep_time = 1000;
 
 typedef std::chrono::milliseconds Duration;
 
@@ -32,6 +32,8 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 {
     awl::Cancellation cancellation;
 
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWL_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
     AWL_ATTRIBUTE(size_t, thread_count, 10);
     
     std::vector<std::thread> v;
@@ -39,7 +41,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 
     for (size_t i = 0; i < thread_count; ++i)
     {
-        v.push_back(std::thread([&cancellation]()
+        v.push_back(std::thread([&cancellation, client_sleep_time, worker_sleep_time]()
         {
             auto start = std::chrono::steady_clock::now();
 
@@ -55,7 +57,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
         }));
     }
 
-    std::thread client([&cancellation]()
+    std::thread client([&cancellation, client_sleep_time]()
     {
         std::this_thread::sleep_for(Duration(client_sleep_time));
 
@@ -74,6 +76,8 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 
 AWL_TEST(Cancellation_SimpleSleep)
 {
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+
     awl::Cancellation cancellation;
 
     auto start = std::chrono::steady_clock::now();

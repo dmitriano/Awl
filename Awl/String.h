@@ -29,6 +29,7 @@ namespace awl
     typedef std::basic_ostream<Char> ostream;
     
     typedef std::basic_ostringstream<Char> ostringstream;
+    typedef std::basic_istringstream<Char> istringstream;
 
     // used when C is specified as char
     template<typename C, typename T>
