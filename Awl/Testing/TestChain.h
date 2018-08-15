@@ -73,3 +73,6 @@ namespace awl
     AWL_TEST_FUNC_SIGNATURE(test_name); \
     static awl::testing::TestLink test_name##_TestLink(_T(#test_name), &AWL_TEST_FUNC_NAME(test_name)); \
     AWL_TEST_FUNC_SIGNATURE(test_name)
+
+#define AWL_DISABLED_TEST(test_name) \
+    AWL_TEST_FUNC_SIGNATURE(test_name)

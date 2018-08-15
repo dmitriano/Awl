@@ -34,7 +34,14 @@ namespace awl
                         {
                             String val = argv[i];
                             
-                            allOptions.emplace(name, val);
+                            if (!allOptions.emplace(name, val).second)
+                            {
+                                ostringstream out;
+
+                                out << _T("Duplicated option '" << name << _T("'."));
+
+                                throw TestException(out.str());
+                            }
 
                             ++i;
                         }

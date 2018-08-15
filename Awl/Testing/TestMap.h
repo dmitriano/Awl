@@ -15,13 +15,7 @@ namespace awl
         {
         public:
 
-            TestMap()
-            {
-                for (TestLink * p_link : GetTestChain())
-                {
-                    testMap.emplace(p_link->GetName(), p_link);
-                }
-            }
+            TestMap();
 
             void Run(const TestContext & context, const String & name);
             

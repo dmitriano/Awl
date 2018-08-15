@@ -32,7 +32,7 @@ namespace awl
             isCancelled = false;
         }
 
-        template< class Rep, class Period >
+        template <class Rep, class Period>
         void Sleep(const std::chrono::duration<Rep, Period>& time) const
         {
             cv.wait_for(std::unique_lock<std::mutex>(mutex), time, [this]() -> bool

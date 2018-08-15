@@ -10,6 +10,21 @@ namespace awl
 {
     namespace testing
     {
+        TestMap::TestMap()
+        {
+            for (TestLink * p_link : GetTestChain())
+            {
+                if (!testMap.emplace(p_link->GetName(), p_link).second)
+                {
+                    ostringstream out;
+
+                    out << _T("The test '" << p_link->GetName() << _T(" already exists."));
+
+                    throw TestException(out.str());
+                }
+            }
+        }
+
         void TestMap::Run(const TestContext & context, const String & name)
         {
             auto i = testMap.find(name);

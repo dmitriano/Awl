@@ -78,3 +78,15 @@ AWL_TEST(Formatter_String)
 
     Assert::IsTrue(to_result == sample);
 }
+
+AWL_TEST(Formatter_Arithmetic)
+{
+    Formatter<int>();
+    Formatter<long>();
+    Formatter<long long>();
+    Formatter<unsigned long>();
+    Formatter<unsigned long long>();
+    Formatter<float>();
+    Formatter<double>();
+    Formatter<long double>();
+}
