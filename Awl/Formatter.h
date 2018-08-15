@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/ScalarFormatter.h"
+#include "Awl/TypeTraits.h"
 
 namespace awl
 {
@@ -29,23 +30,9 @@ namespace awl
         }
     };
 
-    template <typename C>
-    const C * GetSeparator();
-
-    template <>
-    inline const char * GetSeparator()
-    {
-        return " ";
-    }
-
-    template <>
-    inline const wchar_t * GetSeparator()
-    {
-        return L" ";
-    }
-
     template <typename C, typename T>
-    class BasicFormatter<C, T, typename std::enable_if<std::is_class<T>::value>::type>
+    class BasicFormatter<C, T, typename std::enable_if<is_collection<T>::value && 
+        (std::is_arithmetic<typename T::value_type>::value || is_string<typename T::value_type>::value)>::type>
     {
     public:
 
@@ -53,6 +40,8 @@ namespace awl
 
         static String ToString(T val)
         {
+            constexpr C separator = '\x20';
+            
             std::basic_ostringstream<C> out;
 
             //This adds an extra separator at the end of the stream.
@@ -68,7 +57,7 @@ namespace awl
                 }
                 else
                 {
-                    out << GetSeparator<C>();
+                    out << separator;
                 }
 
                 out << e;
