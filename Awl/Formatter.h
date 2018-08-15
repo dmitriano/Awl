@@ -31,14 +31,32 @@ namespace awl
     };
 
     template <typename C, typename T>
-    class BasicFormatter<C, T, typename std::enable_if<is_collection<T>::value && 
-        (std::is_arithmetic<typename T::value_type>::value || is_string<typename T::value_type>::value)>::type>
+    class BasicFormatter<C, T, typename std::enable_if<is_string<C, T>::value>::type>
     {
     public:
 
         typedef std::basic_string<C> String;
 
         static String ToString(T val)
+        {
+            return val;
+        }
+
+        static T FromString(String s)
+        {
+            return s;
+        }
+    };
+
+    template <typename C, typename T>
+    class BasicFormatter<C, T, typename std::enable_if<is_collection<T>::value && 
+        (std::is_arithmetic<typename T::value_type>::value || is_string<C, typename T::value_type>::value)>::type>
+    {
+    public:
+
+        typedef std::basic_string<C> String;
+
+        static String ToString(const T & val)
         {
             constexpr C separator = '\x20';
             

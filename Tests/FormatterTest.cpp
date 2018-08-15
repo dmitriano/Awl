@@ -11,10 +11,6 @@ using namespace awl::testing;
 template <class C>
 void TestIntContainer(const C * sample)
 {
-    static_assert(is_collection<std::vector<int>>::value, "std::vector<int> is not a container.");
-    static_assert(std::is_arithmetic<std::vector<int>::value_type>::value, "std::vector<int> element is not arithmetic.");
-    static_assert(is_collection<std::vector<int>>::value && std::is_arithmetic<std::vector<int>::value_type>::value, "std::vector<int> is not an arithmetic container.");
-
     typedef std::vector<int> V;
     typedef BasicFormatter<C, V> F;
     typedef std::basic_string<C> String;
@@ -66,4 +62,19 @@ AWL_TEST(Formatter_BoolContainer)
     String s_result = F::ToString(v);
 
     Assert::IsTrue(s_sample == s_result);
+}
+
+AWL_TEST(Formatter_String)
+{
+    typedef Formatter<String> F;
+
+    String sample = _T("abc");
+
+    auto from_result = F::FromString(sample);
+
+    Assert::IsTrue(from_result == sample);
+
+    String to_result = F::ToString(sample);
+
+    Assert::IsTrue(to_result == sample);
 }
