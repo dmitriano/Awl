@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/Testing/AttributeProvider.h"
+#include "Awl/Formatter.h"
 
 namespace awl
 {
@@ -19,7 +20,7 @@ namespace awl
                 }
             }
 
-            T GetValue() const
+            T & GetValue()
             {
                 return myVal;
             }
@@ -28,7 +29,7 @@ namespace awl
             {
                 try
                 {
-                    awl::FromString(s, myVal);
+                    myVal = Formatter<T>::FromString(s);
                 }
                 catch (const std::exception &)
                 {
@@ -40,7 +41,7 @@ namespace awl
 
             String GetDefaultValue() const override
             {
-                return ToString(myVal);
+                return Formatter<T>::ToString(myVal);
             }
 
             String GetTypeName() const override
@@ -59,4 +60,4 @@ namespace awl
     }
 }
 
-#define AWL_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name = LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue()
+#define AWL_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name = std::move(LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue())

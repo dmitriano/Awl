@@ -2,6 +2,7 @@
 #include "Awl/Testing/TestMap.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
+#include "Awl/Testing/LocalAttribute.h"
 
 #include <set>
 
@@ -46,7 +47,7 @@ namespace awl
             lastOutput.clear();
         }
 
-        static int RunTests(const TestContext & context, const std::set<String> * p_tests)
+        static int RunTests(const TestContext & context, const std::set<String> & tests)
         {
             int error = 1;
 
@@ -54,18 +55,16 @@ namespace awl
 
             try
             {
-                const size_t test_count = p_tests != nullptr ? p_tests->size() : test_map->GetTestCount();
+                const size_t test_count = tests.empty() ? test_map->GetTestCount() : tests.size();
                 
                 context.out << std::endl << _T("***************** Running ") << test_count << _T(" tests *****************") << std::endl;
 
-                if (p_tests == nullptr)
+                if (tests.empty())
                 {
                     test_map->RunAll(context);
                 }
                 else
                 {
-                    auto & tests = *p_tests;
-
                     for (auto & test : tests)
                     {
                         test_map->Run(context, test);
@@ -93,7 +92,7 @@ namespace awl
 
         int RunAllTests(const TestContext & context)
         {
-            return RunTests(context, nullptr);
+            return RunTests(context, {});
         }
 
         int RunAllTests()
@@ -117,18 +116,9 @@ namespace awl
 
                 const TestContext context{ awl::cout(), cancellation, cl };
 
-                String test_names_val;
+                AWL_ATTRIBUTE(std::set<String>, run, {});
                 
-                if (cl.TryFind(_T("run"), test_names_val))
-                {
-                    istringstream in(test_names_val);
-
-                    std::set<String> tests { std::istream_iterator<String, Char>(in), std::istream_iterator<String, Char>() };
-
-                    return RunTests(context, &tests);
-                }
-
-                return RunTests(context, nullptr);
+                return RunTests(context, run);
             }
             catch (const TestException & e)
             {
