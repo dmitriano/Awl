@@ -11,13 +11,38 @@ namespace awl
     {
     public:
 
-        Cancellation() : isCancelled(false)
+        virtual bool IsCancelled() const = 0;
+
+        virtual void InterruptibleSleep(std::chrono::nanoseconds time) const = 0;
+
+        template <class Rep, class Period>
+        void Sleep(const std::chrono::duration<Rep, Period>& time) const
+        {
+            InterruptibleSleep(std::chrono::duration_cast<std::chrono::nanoseconds>(time));
+        }
+    };
+
+    class CancellationFlag : public Cancellation
+    {
+    public:
+
+        CancellationFlag() : isCancelled(false)
         {
         }
 
-        bool IsCancelled() const
+        bool IsCancelled() const override
         {
             return isCancelled;
+        }
+
+        void InterruptibleSleep(std::chrono::nanoseconds time) const override
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+
+            cv.wait_for(lock, time, [this]() -> bool
+            {
+                return isCancelled;
+            });
         }
 
         void Cancel()
@@ -30,15 +55,6 @@ namespace awl
         void Reset()
         {
             isCancelled = false;
-        }
-
-        template <class Rep, class Period>
-        void Sleep(const std::chrono::duration<Rep, Period>& time) const
-        {
-            cv.wait_for(std::unique_lock<std::mutex>(mutex), time, [this]() -> bool
-            {
-                return isCancelled;
-            });
         }
 
     private:

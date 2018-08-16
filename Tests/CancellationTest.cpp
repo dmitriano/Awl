@@ -30,7 +30,7 @@ typedef std::chrono::milliseconds Duration;
 
 AWL_TEST(Cancellation_InterruptibleSleep)
 {
-    awl::Cancellation cancellation;
+    awl::CancellationFlag cancellation;
 
     AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWL_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
@@ -78,7 +78,7 @@ AWL_TEST(Cancellation_SimpleSleep)
 {
     AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
-    awl::Cancellation cancellation;
+    awl::CancellationFlag cancellation;
 
     auto start = std::chrono::steady_clock::now();
 

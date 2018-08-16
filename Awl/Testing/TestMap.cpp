@@ -112,7 +112,7 @@ namespace awl
 
         int RunAllTests()
         {
-            Cancellation cancellation;
+            CancellationFlag cancellation;
 
             AttributeProvider ap;
 
@@ -127,7 +127,7 @@ namespace awl
             {
                 CommandLineProvider cl(argc, argv);
 
-                Cancellation cancellation;
+                CancellationFlag cancellation;
 
                 const TestContext context{ awl::cout(), cancellation, cl };
 
