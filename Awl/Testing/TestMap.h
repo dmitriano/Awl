@@ -33,11 +33,6 @@ namespace awl
 
         private:
 
-            std::basic_ostream<Char> & GetOutputStream(const TestContext & context, bool verbose)
-            {
-                return verbose ? context.out : lastOutput;
-            }
-
             void InternalRun(TestLink * p_test_link, const TestContext & context);
 
             ostringstream lastOutput;

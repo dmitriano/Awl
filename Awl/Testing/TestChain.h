@@ -76,3 +76,5 @@ namespace awl
 
 #define AWL_DISABLED_TEST(test_name) \
     AWL_TEST_FUNC_SIGNATURE(test_name)
+
+#define AWL_BENCHMARK(test_name) AWL_TEST(test_name)
