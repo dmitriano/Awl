@@ -16,52 +16,47 @@ namespace awl
 
             std::match_results<String::const_iterator> match;
 
+            OptionsMap::iterator current_option = allOptions.end();
+
             int i = 1;
 
             while (i < argc)
             {
-                String option = argv[i];
-                
-                if (std::regex_match(option, match, option_regex))
+                String val = argv[i++];
+
+                if (std::regex_match(val, match, option_regex) && match.size() == 2)
                 {
-                    if (match.size() == 2)
+                    String name = match[1].str();
+
+                    auto result = allOptions.emplace(name, Option{});
+
+                    if (!result.second)
                     {
-                        String name = match[1].str();
+                        ostringstream out;
 
-                        ++i;
+                        out << _T("Duplicated option '" << name << _T("'."));
 
-                        if (i < argc)
-                        {
-                            String val = argv[i];
-                            
-                            if (!allOptions.emplace(name, val).second)
-                            {
-                                ostringstream out;
-
-                                out << _T("Duplicated option '" << name << _T("'."));
-
-                                throw TestException(out.str());
-                            }
-
-                            ++i;
-                        }
-                        else
-                        {
-                            ostringstream out;
-
-                            out << _T("The value of '") << name << _T("' expected.");
-
-                            throw TestException(out.str());
-                        }
+                        throw TestException(out.str());
                     }
+
+                    current_option = result.first;
                 }
                 else
                 {
-                    ostringstream out;
+                    if (current_option != allOptions.end())
+                    {
+                        current_option->second = val;
 
-                    out << _T("An option name starting with '--' expected near ") << option;
+                        current_option = allOptions.end();
+                    }
+                    else
+                    {
+                        ostringstream out;
 
-                    throw TestException(out.str());
+                        out << _T("An option name starting with '--' expected near ") << val;
+
+                        throw TestException(out.str());
+                    }
                 }
             }
         }

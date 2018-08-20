@@ -51,11 +51,11 @@ namespace awl
 
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
-            AWL_ATTRIBUTE(int, verbose, 0);
+            AWL_FLAG(bool, verbose);
 
             context.out << p_test_link->GetName() << _T("...");
 
-            if (verbose != 0)
+            if (verbose)
             {
                 context.out << std::endl;
             }

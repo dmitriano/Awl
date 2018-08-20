@@ -37,6 +37,17 @@ namespace awl
             return ToBasicString<C, T>(val);
         }
 
+        template<>
+        static String ToString(bool val)
+        {
+            return String {};
+        }
+
+        static void FromString(const String & s, bool & val)
+        {
+            val = true;
+        }
+
         static void FromString(const String & s, int & val)
         {
             val = std::stoi(s);
