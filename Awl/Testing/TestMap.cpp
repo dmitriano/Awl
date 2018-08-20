@@ -51,15 +51,17 @@ namespace awl
 
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
-            context.out << p_test_link->GetName() << _T("...");
+            context.out << p_test_link->GetName() << _T("...") << std::endl;
 
-            const TestContext temp_context{ lastOutput, context.cancellation, context.ap };
+            AWL_ATTRIBUTE(int, verbose, 0);
+
+            const TestContext temp_context{ GetOutputStream(context, verbose != 0), context.cancellation, context.ap };
 
             p_test_link->Run(temp_context);
 
-            context.out << _T("OK") << std::endl;
-
             lastOutput.clear();
+
+            context.out << _T("OK") << std::endl;
         }
 
         static int RunTests(const TestContext & context, const std::set<String> & tests)
