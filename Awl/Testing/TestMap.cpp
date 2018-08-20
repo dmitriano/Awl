@@ -55,11 +55,16 @@ namespace awl
             }
         }
 
-        void TestMap::PrintTestNames(awl::ostream & out) const
+        void TestMap::PrintNames(awl::ostream & out, const std::function<bool(const String&)> & filter) const
         {
             for (auto & p : testMap)
             {
-                out << p.first << std::endl;
+                const auto & test_name = p.first;
+
+                if (filter(test_name))
+                {
+                    out << test_name << std::endl;
+                }
             }
         }
 
@@ -83,6 +88,34 @@ namespace awl
             context.out << _T("OK") << std::endl;
         }
 
+        std::function<bool(const String &s)> CreateFilter(const String filter)
+        {
+            if (filter.empty())
+            {
+                return [](const String & test_name) { return true; };
+            }
+            
+            return [filter](const String & test_name)
+            {
+                try
+                {
+                    std::basic_regex<Char> test_name_regex(filter);
+
+                    std::match_results<String::const_iterator> match;
+
+                    return std::regex_match(test_name, match, test_name_regex);
+                }
+                catch (const std::regex_error&)
+                {
+                    ostringstream out;
+
+                    out << _T("Not a valid regular expression '") << filter << _T("'.") << std::endl;
+
+                    throw TestException(out.str());
+                }
+            };
+        }
+        
         static int RunTests(const TestContext & context)
         {
             int error = 1;
@@ -93,43 +126,20 @@ namespace awl
 
             try
             {
-                const size_t test_count = run.empty() ? test_map->GetTestCount() : run.size();
-                
-                context.out << std::endl << _T("***************** Running ") << test_count << _T(" tests *****************") << std::endl;
-
                 if (run.empty())
                 {
                     AWL_ATTRIBUTE(String, filter, _T(".*_Test"));
 
-                    if (filter.empty())
-                    {
-                        test_map->RunAll(context, [](const String & test_name) { return true; });
-                    }
-                    else
-                    {
-                        test_map->RunAll(context, [&filter](const String & test_name)
-                        {
-                            try
-                            {
-                                std::basic_regex<Char> test_name_regex(filter);
+                    auto f = CreateFilter(filter);
+                    
+                    context.out << std::endl << _T("***************** Running ") << test_map->GetCount(f) << _T(" tests *****************") << std::endl;
 
-                                std::match_results<String::const_iterator> match;
-
-                                return std::regex_match(test_name, match, test_name_regex);
-                            }
-                            catch (const std::regex_error&)
-                            {
-                                ostringstream out;
-
-                                out << _T("Not a valid regular expression '") << filter << _T("'.") << std::endl;
-
-                                throw TestException(out.str());
-                            }
-                        });
-                    }
+                    test_map->RunAll(context, f);
                 }
                 else
                 {
+                    context.out << std::endl << _T("***************** Running ") << run.size() << _T(" tests *****************") << std::endl;
+
                     for (auto & test : run)
                     {
                         test_map->Run(context, test);
@@ -187,7 +197,13 @@ namespace awl
                 {
                     auto test_map = awl::testing::CreateTestMap();
 
-                    test_map->PrintTestNames(awl::cout());
+                    AWL_ATTRIBUTE(String, filter, {});
+
+                    auto f = CreateFilter(filter);
+
+                    test_map->PrintNames(awl::cout(), f);
+
+                    awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
                     
                     return 0;
                 }

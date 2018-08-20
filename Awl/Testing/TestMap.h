@@ -6,6 +6,7 @@
 #include <memory>
 #include <iostream>
 #include <functional>
+#include <algorithm>
 #include <assert.h>
 
 namespace awl 
@@ -22,7 +23,7 @@ namespace awl
             
             void RunAll(const TestContext & context, const std::function<bool (const String&)> & filter);
 
-            void PrintTestNames(awl::ostream & out) const;
+            void PrintNames(awl::ostream & out, const std::function<bool(const String&)> & filter) const;
 
             String GetLastOutput() const
             {
@@ -32,6 +33,11 @@ namespace awl
             size_t GetTestCount() const
             {
                 return testMap.size();
+            }
+
+            size_t GetCount(const std::function<bool(const String&)> & filter) const
+            {
+                return std::count_if(testMap.begin(), testMap.end(), [&filter](const std::pair<String, TestLink *> & p) { return filter(p.first); });
             }
 
         private:
