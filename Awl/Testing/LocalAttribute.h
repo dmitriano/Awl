@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/Testing/AttributeProvider.h"
-#include "Awl/Formatter.h"
+#include "Awl/Testing/Formatter.h"
 
 namespace awl
 {

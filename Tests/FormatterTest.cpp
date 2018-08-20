@@ -2,7 +2,7 @@
 #include <set>
 
 #include "Awl/Cancellation.h"
-#include "Awl/Formatter.h"
+#include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/UnitTest.h"
 
 using namespace awl;
