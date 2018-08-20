@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <iostream>
+#include <functional>
 #include <assert.h>
 
 namespace awl 
@@ -19,7 +20,7 @@ namespace awl
 
             void Run(const TestContext & context, const String & name);
             
-            void RunAll(const TestContext & context);
+            void RunAll(const TestContext & context, const std::function<bool (const String&)> & filter);
 
             void PrintTestNames(awl::ostream & out) const;
 

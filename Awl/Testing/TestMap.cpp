@@ -5,6 +5,7 @@
 #include "Awl/Testing/LocalAttribute.h"
 
 #include <set>
+#include <regex>
 
 namespace awl
 {
@@ -41,11 +42,16 @@ namespace awl
             InternalRun(i->second, context);
         }
             
-        void TestMap::RunAll(const TestContext & context)
+        void TestMap::RunAll(const TestContext & context, const std::function<bool(const String&)> & filter)
         {
             for (auto & p : testMap)
             {
-                InternalRun(p.second, context);
+                const auto & test_name = p.first;
+                
+                if (filter(test_name))
+                {
+                    InternalRun(p.second, context);
+                }
             }
         }
 
@@ -77,25 +83,54 @@ namespace awl
             context.out << _T("OK") << std::endl;
         }
 
-        static int RunTests(const TestContext & context, const std::set<String> & tests)
+        static int RunTests(const TestContext & context)
         {
             int error = 1;
 
             auto test_map = awl::testing::CreateTestMap();
 
+            AWL_ATTRIBUTE(std::set<String>, run, {});
+
             try
             {
-                const size_t test_count = tests.empty() ? test_map->GetTestCount() : tests.size();
+                const size_t test_count = run.empty() ? test_map->GetTestCount() : run.size();
                 
                 context.out << std::endl << _T("***************** Running ") << test_count << _T(" tests *****************") << std::endl;
 
-                if (tests.empty())
+                if (run.empty())
                 {
-                    test_map->RunAll(context);
+                    AWL_ATTRIBUTE(String, filter, _T(".*_Test"));
+
+                    if (filter.empty())
+                    {
+                        test_map->RunAll(context, [](const String & test_name) { return true; });
+                    }
+                    else
+                    {
+                        test_map->RunAll(context, [&filter](const String & test_name)
+                        {
+                            try
+                            {
+                                std::basic_regex<Char> test_name_regex(filter);
+
+                                std::match_results<String::const_iterator> match;
+
+                                return std::regex_match(test_name, match, test_name_regex);
+                            }
+                            catch (const std::regex_error&)
+                            {
+                                ostringstream out;
+
+                                out << _T("Not a valid regular expression '") << filter << _T("'.") << std::endl;
+
+                                throw TestException(out.str());
+                            }
+                        });
+                    }
                 }
                 else
                 {
-                    for (auto & test : tests)
+                    for (auto & test : run)
                     {
                         test_map->Run(context, test);
                     }
@@ -122,7 +157,7 @@ namespace awl
 
         int RunAllTests(const TestContext & context)
         {
-            return RunTests(context, {});
+            return RunTests(context);
         }
 
         int RunAllTests()
@@ -157,9 +192,7 @@ namespace awl
                     return 0;
                 }
 
-                AWL_ATTRIBUTE(std::set<String>, run, {});
-
-                return RunTests(context, run);
+                return RunTests(context);
             }
             catch (const TestException & e)
             {

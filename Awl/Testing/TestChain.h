@@ -65,16 +65,17 @@ namespace awl
     }
 }
 
-#define AWL_TEST_FUNC_NAME(test_name) test_name##_TestFunc
-#define AWL_TEST_FUNC_SIGNATURE(test_name) static void AWL_TEST_FUNC_NAME(test_name)(const awl::testing::TestContext & context)
+#define AWL_LINK_FUNC_NAME(test_name) test_name##_TestFunc
+#define AWL_LINK_FUNC_SIGNATURE(test_name) static void AWL_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext & context)
 
 //A test is simply a static function.
-#define AWL_TEST(test_name) \
-    AWL_TEST_FUNC_SIGNATURE(test_name); \
-    static awl::testing::TestLink test_name##_TestLink(_T(#test_name), &AWL_TEST_FUNC_NAME(test_name)); \
-    AWL_TEST_FUNC_SIGNATURE(test_name)
+#define AWL_LINK(test_name, suffix) \
+    AWL_LINK_FUNC_SIGNATURE(test_name); \
+    static awl::testing::TestLink test_name##_##suffix_TestLink(_T(#test_name) _T("_") _T(#suffix), &AWL_LINK_FUNC_NAME(test_name)); \
+    AWL_LINK_FUNC_SIGNATURE(test_name)
 
 #define AWL_DISABLED_TEST(test_name) \
-    AWL_TEST_FUNC_SIGNATURE(test_name)
+    AWL_LINK_FUNC_SIGNATURE(test_name)
 
-#define AWL_BENCHMARK(test_name) AWL_TEST(test_name)
+#define AWL_TEST(test_name) AWL_LINK(test_name, Test)
+#define AWL_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark)
