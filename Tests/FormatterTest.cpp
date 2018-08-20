@@ -81,6 +81,7 @@ AWL_TEST(Formatter_String)
 
 AWL_TEST(Formatter_Arithmetic)
 {
+    Formatter<bool>();
     Formatter<int>();
     Formatter<long>();
     Formatter<long long>();

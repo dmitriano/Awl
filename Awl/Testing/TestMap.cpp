@@ -49,9 +49,17 @@ namespace awl
             }
         }
 
+        void TestMap::PrintTestNames(awl::ostream & out) const
+        {
+            for (auto & p : testMap)
+            {
+                out << p.first << std::endl;
+            }
+        }
+
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
-            AWL_FLAG(bool, verbose);
+            AWL_FLAG(verbose);
 
             context.out << p_test_link->GetName() << _T("...");
 
@@ -138,8 +146,19 @@ namespace awl
 
                 const TestContext context{ awl::cout(), cancellation, cl };
 
+                AWL_FLAG(list);
+
+                if (list)
+                {
+                    auto test_map = awl::testing::CreateTestMap();
+
+                    test_map->PrintTestNames(awl::cout());
+                    
+                    return 0;
+                }
+
                 AWL_ATTRIBUTE(std::set<String>, run, {});
-                
+
                 return RunTests(context, run);
             }
             catch (const TestException & e)

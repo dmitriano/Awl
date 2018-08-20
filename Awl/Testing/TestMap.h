@@ -21,6 +21,8 @@ namespace awl
             
             void RunAll(const TestContext & context);
 
+            void PrintTestNames(awl::ostream & out) const;
+
             String GetLastOutput() const
             {
                 return lastOutput.str();

@@ -62,4 +62,4 @@ namespace awl
 
 #define AWL_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name = std::move(LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue())
 
-#define AWL_FLAG(attribute_type, attribute_name) AWL_ATTRIBUTE(attribute_type, attribute_name, false)
+#define AWL_FLAG(attribute_name) AWL_ATTRIBUTE(bool, attribute_name, false)
