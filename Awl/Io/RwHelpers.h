@@ -31,7 +31,7 @@ namespace awl
 
             val.resize(len);
 
-            Read(s, reinterpret_cast<uint8_t *>(const_cast<Char *>(val.data())), len * sizeof(Char));
+            s.Read(reinterpret_cast<uint8_t *>(const_cast<Char *>(val.data())), len * sizeof(Char));
 
             *(const_cast<Char *>(val.data() + len)) = 0;
         }
@@ -43,7 +43,7 @@ namespace awl
 
             WriteScalar(s, len);
 
-            Write(s, reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
+            s.Write(reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
         }
     }
 }
