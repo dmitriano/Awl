@@ -10,7 +10,7 @@ using namespace awl::testing;
 using namespace awl::io;
 
 template <class T>
-static void TestObject(const TestContext & context, T sample)
+static void Test(const TestContext & context, T sample)
 {
     AWL_ATTRIBUTE(size_t, iteration_count, 10);
     
@@ -45,34 +45,46 @@ AWL_TEST(IoObjectReadWrite)
 
     size_t sample = hasher(0);
 
-    TestObject(context, sample);
+    Test(context, sample);
 
     uint32_t uint_sample = static_cast<uint32_t>(sample);
     
-    TestObject(context, uint_sample);
+    Test(context, uint_sample);
 
     uint8_t byte_sample = static_cast<uint8_t>(sample);
 
-    TestObject(context, byte_sample);
+    Test(context, byte_sample);
 
-    TestObject(context, std::chrono::system_clock::now());
+    Test(context, std::chrono::system_clock::now());
 
-    TestObject(context, std::string("some sample string"));
-    TestObject(context, std::wstring(L"some sample string"));
+    Test(context, std::string("some sample string"));
+    Test(context, std::wstring(L"some sample string"));
 
-    TestObject(context, std::string("a"));
-    TestObject(context, std::wstring(L"a"));
+    Test(context, std::string("a"));
+    Test(context, std::wstring(L"a"));
 
-    TestObject(context, std::string(""));
-    TestObject(context, std::wstring(L""));
+    Test(context, std::string(""));
+    Test(context, std::wstring(L""));
 
-    TestObject(context, std::vector<int>{0, 1, 2, 3, 4, 5});
-    TestObject(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});
-    TestObject(context, std::vector<bool>{true, false, true, false, true, false});
+    Test(context, std::vector<int>{0, 1, 2, 3, 4, 5});
+    Test(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});
+    Test(context, std::vector<bool>{true, false, true, false, true, false});
 
-    TestObject(context, std::vector<int>{});
-    TestObject(context, std::vector<double>{});
-    TestObject(context, std::vector<bool>{});
+    Test(context, std::vector<int>{});
+    Test(context, std::vector<double>{});
+    Test(context, std::vector<bool>{});
+
+    std::vector<std::string> sv{"a1", "b123", "c12345"};
+    Test(context, sv);
+
+    std::vector<std::wstring> wsv{ L"a1", L"b123", L"c12345" };
+    Test(context, wsv);
+
+    std::vector<std::vector<std::string>> svv{ sv, sv, sv };
+    Test(context, svv);
+
+    std::vector<std::vector<std::wstring>> wsvv{ wsv, wsv, wsv };
+    Test(context, wsvv);
 }
 
 template <class T>

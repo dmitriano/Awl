@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <type_traits>
 
 namespace awl 
 {
@@ -76,15 +77,33 @@ namespace awl
         }
 
         template <class Stream, typename T>
-        inline void ReadVector(Stream & s, std::vector<T> & items)
+        typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type ReadVector(Stream & s, std::vector<T> & v)
         {
-            s.Read(reinterpret_cast<uint8_t *>(items.data()), items.size() * sizeof(T));
+            s.Read(reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
         }
 
         template <class Stream, typename T>
-        inline void WriteVector(Stream & s, const std::vector<T> & items)
+        typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type WriteVector(Stream & s, const std::vector<T> & v)
         {
-            s.Write(reinterpret_cast<const uint8_t *>(items.data()), items.size() * sizeof(T));
+            s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(T));
+        }
+
+        template <class Stream, typename T>
+        typename std::enable_if<std::is_class<T>::value, void>::type ReadVector(Stream & s, std::vector<T> & v)
+        {
+            for (auto & elem : v)
+            {
+                Read(s, elem);
+            }
+        }
+
+        template <class Stream, typename T>
+        typename std::enable_if<std::is_class<T>::value, void>::type WriteVector(Stream & s, const std::vector<T> & v)
+        {
+            for (auto & elem : v)
+            {
+                Write(s, elem);
+            }
         }
 
         template <class Stream>
