@@ -31,7 +31,7 @@ static void TestScalar(const TestContext & context, T sample)
 
         ReadScalar(in, result);
 
-        Assert::AreEqual(sample, result);
+        Assert::IsTrue(sample == result);
     }
 
     Assert::IsTrue(in.End());
@@ -52,6 +52,8 @@ AWL_TEST(IoScalarReadWrite)
     uint8_t byte_sample = static_cast<uint8_t>(sample);
 
     TestScalar(context, byte_sample);
+
+    TestScalar(context, std::chrono::system_clock::now());
 }
 
 template <class Char>
@@ -129,4 +131,8 @@ AWL_TEST(IoVectorReadWrite)
     TestVector(context, std::vector<int>{0, 1, 2, 3, 4, 5});
     TestVector(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});
     TestVector(context, std::vector<bool>{true, false, true, false, true, false});
+
+    TestVector(context, std::vector<int>{});
+    TestVector(context, std::vector<double>{});
+    TestVector(context, std::vector<bool>{});
 }
