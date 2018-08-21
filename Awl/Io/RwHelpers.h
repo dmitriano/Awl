@@ -9,7 +9,7 @@ namespace awl
     namespace io
     {
         template <class Stream, typename T>
-        inline void ReadScalar(Stream & s, T & val)
+        inline void Read(Stream & s, T & val)
         {
             const size_t size = sizeof(T);
 
@@ -17,7 +17,7 @@ namespace awl
         }
 
         template <class Stream, typename T>
-        inline void WriteScalar(Stream & s, const T & val)
+        inline void Write(Stream & s, const T & val)
         {
             const size_t size = sizeof(T);
 
@@ -28,19 +28,19 @@ namespace awl
         static_assert(std::is_same <std::chrono::nanoseconds::rep, int64_t>::value, "nanoseconds::rep is not int64_t");
 
         template <class Stream, class Clock, class Duration>
-        inline void ReadScalar(Stream & s, std::chrono::time_point<Clock, Duration> & val)
+        inline void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val)
         {
             using namespace std::chrono;
 
             int64_t ns_count;
 
-            ReadScalar(s, ns_count);
+            Read(s, ns_count);
 
             val = std::chrono::time_point<Clock, Duration>(duration_cast<Duration>(nanoseconds(ns_count)));
         }
 
         template <class Stream, class Clock, class Duration>
-        inline void WriteScalar(Stream & s, const std::chrono::time_point<Clock, Duration> & val)
+        inline void Write(Stream & s, const std::chrono::time_point<Clock, Duration> & val)
         {
             using namespace std::chrono;
 
@@ -48,15 +48,15 @@ namespace awl
 
             int64_t ns_count = ns.count();
 
-            WriteScalar(s, ns_count);
+            Write(s, ns_count);
         }
 
         template <class Stream, typename Char>
-        void ReadString(Stream & s, std::basic_string<Char> & val)
+        void Read(Stream & s, std::basic_string<Char> & val)
         {
             std::basic_string<Char>::size_type len;
 
-            ReadScalar(s, len);
+            Read(s, len);
 
             val.resize(len);
 
@@ -66,11 +66,11 @@ namespace awl
         }
 
         template <class Stream, typename Char>
-        void WriteString(Stream & s, const std::basic_string<Char> & val)
+        void Write(Stream & s, const std::basic_string<Char> & val)
         {
             std::basic_string<Char>::size_type len = val.length();
 
-            WriteScalar(s, len);
+            Write(s, len);
 
             s.Write(reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
         }
@@ -78,17 +78,13 @@ namespace awl
         template <class Stream, typename T>
         inline void ReadVector(Stream & s, std::vector<T> & items)
         {
-            std::vector<T>::size_type size = sizeof(T);
-
-            s.Read(reinterpret_cast<uint8_t *>(items.data()), size * items.size());
+            s.Read(reinterpret_cast<uint8_t *>(items.data()), items.size() * sizeof(T));
         }
 
         template <class Stream, typename T>
         inline void WriteVector(Stream & s, const std::vector<T> & items)
         {
-            std::vector<T>::size_type size = sizeof(T);
-
-            s.Write(reinterpret_cast<const uint8_t *>(items.data()), size * items.size());
+            s.Write(reinterpret_cast<const uint8_t *>(items.data()), items.size() * sizeof(T));
         }
 
         template <class Stream>
@@ -100,9 +96,9 @@ namespace awl
             {
                 uint8_t aggr;
 
-                ReadScalar(s, aggr);
+                Read(s, aggr);
 
-                for (unsigned char mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
+                for (uint8_t mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
                 {
                     x.at(i) = (aggr & mask) != 0;
                 }
@@ -126,8 +122,45 @@ namespace awl
                     }
                 }
 
-                WriteScalar(s, aggr);
+                Write(s, aggr);
             }
         }
+
+        template <class Stream, typename T>
+        inline void Read(Stream & s, std::vector<T> & v)
+        {
+            std::vector<T>::size_type size;
+
+            Read(s, size);
+
+            v.resize(size);
+
+            ReadVector(s, v);
+        }
+
+        template <class Stream, typename T>
+        inline void Write(Stream & s, const std::vector<T> & v)
+        {
+            std::vector<T>::size_type size = v.size();
+
+            Write(s, size);
+
+            WriteVector(s, v);
+        }
+
+        /*
+        template <class Stream, typename T>
+        void Serialize(Stream & s, T & val, bool is_storing)
+        {
+            if (is_storing)
+            {
+                Write(s, val);
+            }
+            else
+            {
+                Read(s, val);
+            }
+        }
+        */
     }
 }

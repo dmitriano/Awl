@@ -37,5 +37,11 @@ namespace awl
 
             virtual ~SequentialOutputStream() = default;
         };
+
+        /*
+        class SequentialIoStream : public SequentialInputStream, public SequentialOutputStream
+        {
+        };
+        */
     }
 }

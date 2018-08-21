@@ -10,7 +10,7 @@ using namespace awl::testing;
 using namespace awl::io;
 
 template <class T>
-static void TestScalar(const TestContext & context, T sample)
+static void TestObject(const TestContext & context, T sample)
 {
     AWL_ATTRIBUTE(size_t, iteration_count, 10);
     
@@ -20,7 +20,8 @@ static void TestScalar(const TestContext & context, T sample)
 
     for (int i = 0; i < iteration_count; ++i)
     {
-        WriteScalar(out, sample);
+        Write(out, sample);
+        //Serialize(out, sample, true);
     }
 
     VectorInputStream in(v);
@@ -29,7 +30,8 @@ static void TestScalar(const TestContext & context, T sample)
     {
         T result;
 
-        ReadScalar(in, result);
+        Read(in, result);
+        //Serialize(in, result, false);
 
         Assert::IsTrue(sample == result);
     }
@@ -37,63 +39,40 @@ static void TestScalar(const TestContext & context, T sample)
     Assert::IsTrue(in.End());
 }
 
-AWL_TEST(IoScalarReadWrite)
+AWL_TEST(IoObjectReadWrite)
 {
     std::hash<int> hasher;
 
     size_t sample = hasher(0);
 
-    TestScalar(context, sample);
+    TestObject(context, sample);
 
     uint32_t uint_sample = static_cast<uint32_t>(sample);
     
-    TestScalar(context, uint_sample);
+    TestObject(context, uint_sample);
 
     uint8_t byte_sample = static_cast<uint8_t>(sample);
 
-    TestScalar(context, byte_sample);
+    TestObject(context, byte_sample);
 
-    TestScalar(context, std::chrono::system_clock::now());
-}
+    TestObject(context, std::chrono::system_clock::now());
 
-template <class Char>
-static void TestString(const TestContext & context, std::basic_string<Char> sample)
-{
-    AWL_ATTRIBUTE(size_t, iteration_count, 10);
+    TestObject(context, std::string("some sample string"));
+    TestObject(context, std::wstring(L"some sample string"));
 
-    std::vector<uint8_t> v;
+    TestObject(context, std::string("a"));
+    TestObject(context, std::wstring(L"a"));
 
-    VectorOutputStream out(v);
+    TestObject(context, std::string(""));
+    TestObject(context, std::wstring(L""));
 
-    for (int i = 0; i < iteration_count; ++i)
-    {
-        WriteString(out, sample);
-    }
+    TestObject(context, std::vector<int>{0, 1, 2, 3, 4, 5});
+    TestObject(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});
+    TestObject(context, std::vector<bool>{true, false, true, false, true, false});
 
-    VectorInputStream in(v);
-
-    for (int i = 0; i < iteration_count; ++i)
-    {
-        std::basic_string<Char> result;
-
-        ReadString(in, result);
-
-        Assert::IsTrue(sample == result);
-    }
-
-    Assert::IsTrue(in.End());
-}
-
-AWL_TEST(IoStringReadWrite)
-{
-    TestString(context, std::string("some sample string"));
-    TestString(context, std::wstring(L"some sample string"));
-
-    TestString(context, std::string("a"));
-    TestString(context, std::wstring(L"a"));
-
-    TestString(context, std::string(""));
-    TestString(context, std::wstring(L""));
+    TestObject(context, std::vector<int>{});
+    TestObject(context, std::vector<double>{});
+    TestObject(context, std::vector<bool>{});
 }
 
 template <class T>
