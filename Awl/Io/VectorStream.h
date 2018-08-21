@@ -18,26 +18,27 @@ namespace awl
             {
             }
 
-            bool End() const
+            bool End() const override
             {
                 return m_i == m_v.end();
             }
 
-            size_t Read(uint8_t * buffer, size_t count) override
+            void Read(uint8_t * buffer, size_t count) override
             {
                 auto diff = m_v.end() - m_i;
 
                 assert(diff >= 0);
 
-                auto actual_count = std::min(count, static_cast<size_t>(diff));
+                if (static_cast<size_t>(diff) < count)
+                {
+                    throw EndOfFileException();
+                }
 
-                auto end = m_i + actual_count;
+                auto end = m_i + count;
 
                 std::copy(m_i, end, buffer);
                 
                 m_i = end;
-
-                return actual_count;
             }
 
         private:
@@ -55,11 +56,9 @@ namespace awl
             {
             }
 
-            size_t Write(const uint8_t * buffer, size_t count) override
+            void Write(const uint8_t * buffer, size_t count) override
             {
                 m_v.insert(m_v.end(), buffer, buffer + count);
-
-                return count;
             }
 
         private:

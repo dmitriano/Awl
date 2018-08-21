@@ -6,41 +6,20 @@ namespace awl
 {
     namespace io
     {
-        /*
-        class IoException
-        {
-        };
-
-        class ReadException : public IoException
-        {
-        };
-        
-        class WriteException : public IoException
-        {
-        };
-        */
-
         template <class Stream, typename T>
-        auto ReadScalar(Stream & s, T & val)
+        void ReadScalar(Stream & s, T & val)
         {
             const size_t size = sizeof(T);
 
-            return s.Read(reinterpret_cast<uint8_t *>(&val), size);
-
-            /*
-            if (actually_read != size)
-            {
-
-            }
-            */
+            s.Read(reinterpret_cast<uint8_t *>(&val), size);
         }
 
         template <class Stream, typename T>
-        auto WriteScalar(Stream & s, const T & val)
+        void WriteScalar(Stream & s, const T & val)
         {
             const size_t size = sizeof(T);
 
-            return s.Write(reinterpret_cast<const uint8_t *>(&val), size);
+            s.Write(reinterpret_cast<const uint8_t *>(&val), size);
         }
 
         template <class Stream, typename Char>
@@ -58,7 +37,7 @@ namespace awl
         }
 
         template <class Stream, typename Char>
-        auto WriteString(Stream & s, const std::basic_string<Char> & val)
+        void WriteString(Stream & s, const std::basic_string<Char> & val)
         {
             const size_t len = val.length();
 

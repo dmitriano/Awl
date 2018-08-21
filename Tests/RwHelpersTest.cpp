@@ -19,15 +19,15 @@ AWL_TEST(IoScalarReadWrite)
 
     VectorOutputStream out(v);
 
-    Assert::AreEqual(sizeof(sample), WriteScalar(out, sample));
+    WriteScalar(out, sample);
 
     VectorInputStream in(v);
 
     size_t result;
 
-    Assert::AreEqual(sizeof(sample), ReadScalar(in, result));
+    ReadScalar(in, result);
 
     Assert::AreEqual(sample, result);
 
-    Assert::AreEqual(0, in.Read(nullptr, 10));
+    Assert::IsTrue(in.End());
 }
