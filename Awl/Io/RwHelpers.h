@@ -61,7 +61,7 @@ namespace awl
         template <class Stream, typename Char>
         void Read(Stream & s, std::basic_string<Char> & val)
         {
-            std::basic_string<Char>::size_type len;
+            typename std::basic_string<Char>::size_type len;
 
             Read(s, len);
 
@@ -75,7 +75,7 @@ namespace awl
         template <class Stream, typename Char>
         void Write(Stream & s, const std::basic_string<Char> & val)
         {
-            std::basic_string<Char>::size_type len = val.length();
+            typename std::basic_string<Char>::size_type len = val.length();
 
             Write(s, len);
 
@@ -115,7 +115,7 @@ namespace awl
         template <class Stream>
         void ReadVector(Stream & s, std::vector<bool> & x)
         {
-            std::vector<bool>::size_type n = x.size();
+            typename std::vector<bool>::size_type n = x.size();
 
             for (std::vector<bool>::size_type i = 0; i < n;)
             {
@@ -133,7 +133,7 @@ namespace awl
         template <class Stream>
         void WriteVector(Stream & s, const std::vector<bool> & x)
         {
-            std::vector<bool>::size_type n = x.size();
+            typename std::vector<bool>::size_type n = x.size();
 
             for (std::vector<bool>::size_type i = 0; i < n;)
             {
@@ -154,7 +154,7 @@ namespace awl
         template <class Stream, typename T>
         inline void Read(Stream & s, std::vector<T> & v)
         {
-            std::vector<T>::size_type size;
+            typename std::vector<T>::size_type size;
 
             Read(s, size);
 
@@ -166,7 +166,7 @@ namespace awl
         template <class Stream, typename T>
         inline void Write(Stream & s, const std::vector<T> & v)
         {
-            std::vector<T>::size_type size = v.size();
+            typename std::vector<T>::size_type size = v.size();
 
             Write(s, size);
 
@@ -208,7 +208,7 @@ namespace awl
 
             for (size_t i = 0; i < count; ++i)
             {
-                Coll::value_type elem;
+                typename Coll::value_type elem;
 
                 Read(s, elem);
 
