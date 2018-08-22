@@ -37,6 +37,27 @@ static void Test(const TestContext & context, T sample)
     Assert::IsTrue(in.End());
 }
 
+struct A
+{
+    int x;
+    double y;
+};
+
+inline bool operator == (const A & left, const A & right)
+{
+    return std::tie(left.x, left.y) == std::tie(right.x, right.y);
+}
+
+inline bool operator < (const A & left, const A & right)
+{
+    return std::tie(left.x, left.y) < std::tie(right.x, right.y);
+}
+
+inline auto class_as_tuple(A & val)
+{
+    return std::forward_as_tuple(val.x, val.y);
+}
+
 AWL_TEST(IoObjectReadWrite)
 {
     std::hash<int> hasher;
@@ -93,6 +114,23 @@ AWL_TEST(IoObjectReadWrite)
     Test(context, std::unordered_map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
 
     Test(context, std::map<std::string, std::set<int>>{ {"a", is}, { "b12345", is }, { "c12345", is }, { "", is } });
+
+    Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
+
+    A a{ 5, 7.0 };
+
+    {
+        A a_saved = a;
+        
+        auto a_ref = class_as_tuple(a);
+
+        ++std::get<0>(a_ref);
+
+        Assert::IsTrue(a.x == a_saved.x + 1);
+    }
+    
+    Test(context, a);
+    Test(context, std::vector<A>{a, a, a});
 }
 
 template <class T>

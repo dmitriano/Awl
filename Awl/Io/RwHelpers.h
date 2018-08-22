@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <chrono>
 #include <type_traits>
+#include <tuple>
+#include <utility> 
 
 namespace awl 
 {
@@ -275,19 +277,55 @@ namespace awl
             WriteCollection(s, coll);
         }
 
-        /*
-        template <class Stream, typename T>
-        void Serialize(Stream & s, T & val, bool is_storing)
+        template<class Stream, std::size_t I = 0, typename... Tp>
+        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type ReadEach(Stream &, std::tuple<Tp...> &) // Unused arguments are given no names.
         {
-            if (is_storing)
-            {
-                Write(s, val);
-            }
-            else
-            {
-                Read(s, val);
-            }
         }
-        */
+
+        template<class Stream, std::size_t I = 0, typename... Tp>
+        inline typename std::enable_if<(I < sizeof...(Tp)), void>::type ReadEach(Stream & s, std::tuple<Tp...>& t)
+        {
+            Read(s, std::get<I>(t));
+            ReadEach<Stream, I + 1, Tp...>(s, t);
+        }
+
+        template<class Stream, typename ... Fields>
+        void Read(Stream & s, std::tuple<Fields...> & val)
+        {
+            ReadEach(s, val);
+        }
+
+        template<class Stream, std::size_t I = 0, typename... Tp>
+        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type WriteEach(Stream &, const std::tuple<Tp...> &) // Unused arguments are given no names.
+        {
+        }
+
+        template<class Stream, std::size_t I = 0, typename... Tp>
+        inline typename std::enable_if<(I < sizeof...(Tp)), void>::type WriteEach(Stream & s, const std::tuple<Tp...>& t)
+        {
+            Write(s, std::get<I>(t));
+            WriteEach<Stream, I + 1, Tp...>(s, t);
+        }
+
+        template<class Stream, typename ... Fields>
+        void Write(Stream & s, const std::tuple<Fields...> & val)
+        {
+            WriteEach(s, val);
+        }
+
+        template <class Stream, typename T>
+        typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
+        {
+            Read(s, class_as_tuple(val));
+        }
+
+        template <class Stream, typename T>
+        typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
+        {
+            //Remove const and then make it const again.
+            const auto & tuple_val = class_as_tuple(const_cast<T &>(val));
+            
+            Write(s, tuple_val);
+        }
     }
 }
