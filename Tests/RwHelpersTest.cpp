@@ -21,7 +21,6 @@ static void Test(const TestContext & context, T sample)
     for (int i = 0; i < iteration_count; ++i)
     {
         Write(out, sample);
-        //Serialize(out, sample, true);
     }
 
     VectorInputStream in(v);
@@ -31,7 +30,6 @@ static void Test(const TestContext & context, T sample)
         T result;
 
         Read(in, result);
-        //Serialize(in, result, false);
 
         Assert::IsTrue(sample == result);
     }
@@ -43,15 +41,15 @@ AWL_TEST(IoObjectReadWrite)
 {
     std::hash<int> hasher;
 
-    size_t sample = hasher(0);
+    const size_t sample = hasher(0);
 
     Test(context, sample);
 
-    uint32_t uint_sample = static_cast<uint32_t>(sample);
+    const uint32_t uint_sample = static_cast<uint32_t>(sample);
     
     Test(context, uint_sample);
 
-    uint8_t byte_sample = static_cast<uint8_t>(sample);
+    const uint8_t byte_sample = static_cast<uint8_t>(sample);
 
     Test(context, byte_sample);
 
@@ -74,10 +72,10 @@ AWL_TEST(IoObjectReadWrite)
     Test(context, std::vector<double>{});
     Test(context, std::vector<bool>{});
 
-    std::vector<std::string> sv{"a1", "b123", "c12345"};
+    const std::vector<std::string> sv{"a1", "b123", "c12345"};
     Test(context, sv);
 
-    std::vector<std::wstring> wsv{ L"a1", L"b123", L"c12345" };
+    const std::vector<std::wstring> wsv{ L"a1", L"b123", L"c12345" };
     Test(context, wsv);
 
     std::vector<std::vector<std::string>> svv{ sv, sv, sv };
@@ -86,7 +84,7 @@ AWL_TEST(IoObjectReadWrite)
     std::vector<std::vector<std::wstring>> wsvv{ wsv, wsv, wsv };
     Test(context, wsvv);
 
-    std::set<int> is{ 0, 1, 2, 3, 4, 5 };
+    const std::set<int> is{ 0, 1, 2, 3, 4, 5 };
     
     Test(context, is);
     Test(context, std::unordered_set<int>{0, 1, 2, 3, 4, 5});

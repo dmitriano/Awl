@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iterator>
 #include <assert.h>
 
 namespace awl 
@@ -36,8 +37,15 @@ namespace awl
 
                 auto end = m_i + count;
 
-                std::copy(m_i, end, buffer);
+#if defined(_MSC_VER)
+                auto dest_iter = stdext::make_checked_array_iterator(buffer, count);
                 
+#else
+                auto dest_iter = buffer;
+#endif
+
+                std::copy(m_i, end, dest_iter);
+
                 m_i = end;
             }
 
