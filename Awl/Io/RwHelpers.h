@@ -11,7 +11,7 @@
 #include <tuple>
 #include <utility> 
 
-namespace awl 
+namespace awl
 {
     namespace io
     {
@@ -313,6 +313,12 @@ namespace awl
             WriteEach(s, val);
         }
 
+        template <class T>
+        auto class_as_tuple(T & val)
+        {
+            return val.as_tuple();
+        }
+        
         template <class Stream, typename T>
         typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
         {

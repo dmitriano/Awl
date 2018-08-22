@@ -53,27 +53,60 @@ inline bool operator < (const A & left, const A & right)
     return std::tie(left.x, left.y) < std::tie(right.x, right.y);
 }
 
-inline auto class_as_tuple(A & val)
+namespace awl
 {
-    return std::forward_as_tuple(val.x, val.y);
+    namespace io
+    {
+        template <>
+        inline auto class_as_tuple(A & val)
+        {
+            return std::forward_as_tuple(val.x, val.y);
+        }
+    }
 }
+
+class B
+{
+public:
+
+    B() : m_set{ 0, 1, 2 }, m_v{3, 4}
+    {
+    }
+
+    auto as_tuple()
+    {
+        return std::forward_as_tuple(m_set, m_v);
+    }
+
+    bool operator == (const B & right) const
+    {
+        return std::tie(m_set, m_v) == std::tie(right.m_set, right.m_v);
+    }
+
+private:
+
+    std::set<int> m_set;
+    std::vector<int> m_v;
+};
 
 AWL_TEST(IoObjectReadWrite)
 {
-    std::hash<int> hasher;
+    {
+        std::hash<int> hasher;
 
-    const size_t sample = hasher(0);
+        const size_t sample = hasher(0);
 
-    Test(context, sample);
+        Test(context, sample);
 
-    const uint32_t uint_sample = static_cast<uint32_t>(sample);
+        const uint32_t uint_sample = static_cast<uint32_t>(sample);
+
+        Test(context, uint_sample);
+
+        const uint8_t byte_sample = static_cast<uint8_t>(sample);
+
+        Test(context, byte_sample);
+    }
     
-    Test(context, uint_sample);
-
-    const uint8_t byte_sample = static_cast<uint8_t>(sample);
-
-    Test(context, byte_sample);
-
     Test(context, std::chrono::system_clock::now());
 
     Test(context, std::string("some sample string"));
@@ -93,44 +126,55 @@ AWL_TEST(IoObjectReadWrite)
     Test(context, std::vector<double>{});
     Test(context, std::vector<bool>{});
 
-    const std::vector<std::string> sv{"a1", "b123", "c12345"};
-    Test(context, sv);
+    {
+        const std::vector<std::string> sv{ "a1", "b123", "c12345" };
+        Test(context, sv);
 
-    const std::vector<std::wstring> wsv{ L"a1", L"b123", L"c12345" };
-    Test(context, wsv);
+        const std::vector<std::wstring> wsv{ L"a1", L"b123", L"c12345" };
+        Test(context, wsv);
 
-    std::vector<std::vector<std::string>> svv{ sv, sv, sv };
-    Test(context, svv);
+        std::vector<std::vector<std::string>> svv{ sv, sv, sv };
+        Test(context, svv);
 
-    std::vector<std::vector<std::wstring>> wsvv{ wsv, wsv, wsv };
-    Test(context, wsvv);
+        std::vector<std::vector<std::wstring>> wsvv{ wsv, wsv, wsv };
+        Test(context, wsvv);
+    }
 
-    const std::set<int> is{ 0, 1, 2, 3, 4, 5 };
-    
-    Test(context, is);
-    Test(context, std::unordered_set<int>{0, 1, 2, 3, 4, 5});
+    {
+        const std::set<int> is{ 0, 1, 2, 3, 4, 5 };
 
-    Test(context, std::map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
-    Test(context, std::unordered_map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
+        Test(context, is);
+        Test(context, std::unordered_set<int>{0, 1, 2, 3, 4, 5});
 
-    Test(context, std::map<std::string, std::set<int>>{ {"a", is}, { "b12345", is }, { "c12345", is }, { "", is } });
+        Test(context, std::map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
+        Test(context, std::unordered_map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
+
+        Test(context, std::map<std::string, std::set<int>>{ {"a", is}, { "b12345", is }, { "c12345", is }, { "", is } });
+    }
 
     Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
 
-    A a{ 5, 7.0 };
-
     {
+        A a{ 5, 7.0 };
+
         A a_saved = a;
-        
+
         auto a_ref = class_as_tuple(a);
 
         ++std::get<0>(a_ref);
 
         Assert::IsTrue(a.x == a_saved.x + 1);
+
+        Test(context, a);
+        Test(context, std::vector<A>{a, a, a});
+        Test(context, std::set<A>{a, a_saved});
     }
-    
-    Test(context, a);
-    Test(context, std::vector<A>{a, a, a});
+
+    {
+        const B b;
+
+        Test(context, b);
+    }
 }
 
 template <class T>
