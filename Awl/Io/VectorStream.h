@@ -35,16 +35,19 @@ namespace awl
                     throw EndOfFileException();
                 }
 
+                //Can be slow with uint8_t.
+                //std::copy(m_i, end, stdext::make_checked_array_iterator(buffer, count));
+
+                //This results in an assert if diff == 0
+                //const uint8_t * src = &(*m_i);
+
+                auto pos = m_i - m_v.begin();
+
+                const uint8_t * src = m_v.data() + pos;
+
+                std::memcpy(buffer, src, count * sizeof(uint8_t));
+
                 auto end = m_i + count;
-
-#if defined(_MSC_VER)
-                auto dest_iter = stdext::make_checked_array_iterator(buffer, count);
-                
-#else
-                auto dest_iter = buffer;
-#endif
-
-                std::copy(m_i, end, dest_iter);
 
                 m_i = end;
             }
