@@ -23,12 +23,33 @@ namespace awl
             s.Read(reinterpret_cast<uint8_t *>(&val), size);
         }
 
+        //Scalar types are passed by value but not by const reference.
         template <class Stream, typename T>
-        inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Write(Stream & s, const T & val)
+        inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Write(Stream & s, T val)
         {
             const size_t size = sizeof(T);
 
             s.Write(reinterpret_cast<const uint8_t *>(&val), size);
+        }
+
+        //sizeof(bool) is implementation-defined and it is not required to be 1.
+
+        template <class Stream>
+        inline void Read(Stream & s, bool & b)
+        {
+            uint8_t val;
+
+            Read(s, val);
+
+            b = val != 0;
+        }
+
+        template <class Stream>
+        inline void Write(Stream & s, bool b)
+        {
+            uint8_t val = b ? 1 : 0;
+
+            Write(s, val);
         }
 
         //Initially on Windows the type was long long, but Android build fails with it, so I changed it to int64_t, what is the difference between them?
@@ -47,7 +68,7 @@ namespace awl
         }
 
         template <class Stream, class Clock, class Duration>
-        inline void Write(Stream & s, const std::chrono::time_point<Clock, Duration> & val)
+        inline void Write(Stream & s, std::chrono::time_point<Clock, Duration> val)
         {
             using namespace std::chrono;
 
@@ -338,6 +359,18 @@ namespace awl
         typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
         {
             Write(s, class_as_const_tuple(val));
+        }
+
+        template <class T>
+        bool objects_equal(const T & left, const T & right)
+        {
+            return class_as_const_tuple(left) == class_as_const_tuple(right);
+        }
+
+        template <class T>
+        bool objects_less(const T & left, const T & right)
+        {
+            return class_as_const_tuple(left) < class_as_const_tuple(right);
         }
     }
 }

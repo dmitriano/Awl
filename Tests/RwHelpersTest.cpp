@@ -59,12 +59,12 @@ namespace awl
 
 inline bool operator == (const A & left, const A & right)
 {
-    return class_as_const_tuple(left) == class_as_const_tuple(right);
+    return objects_equal(left, right);
 }
 
 inline bool operator < (const A & left, const A & right)
 {
-    return class_as_const_tuple(left) <= class_as_const_tuple(right);
+    return objects_less(left, right);
 }
 
 class B
@@ -77,18 +77,22 @@ public:
 
     auto as_tuple()
     {
-        return std::tie(m_set, m_v);
+        return std::tie(m_set, m_v, m_u8, m_b);
     }
 
     bool operator == (const B & right) const
     {
-        return class_as_const_tuple(*this) == class_as_const_tuple(right);
+        return objects_equal(*this, right);
     }
 
 private:
 
     std::set<int> m_set;
     std::vector<int> m_v;
+
+    uint8_t m_u8 = 25;
+
+    bool m_b = true;
 };
 
 AWL_TEST(IoObjectReadWrite)
@@ -108,7 +112,10 @@ AWL_TEST(IoObjectReadWrite)
 
         Test(context, byte_sample);
     }
-    
+
+    Test(context, bool(true));
+    Test(context, bool(false));
+
     Test(context, std::chrono::system_clock::now());
 
     Test(context, std::string("some sample string"));
