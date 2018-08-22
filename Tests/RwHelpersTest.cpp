@@ -9,21 +9,23 @@
 using namespace awl::testing;
 using namespace awl::io;
 
+static std::vector<uint8_t> reusable_v;
+
 template <class T>
 static void Test(const TestContext & context, T sample)
 {
     AWL_ATTRIBUTE(size_t, iteration_count, 10);
-    
-    std::vector<uint8_t> v;
 
-    VectorOutputStream out(v);
+    reusable_v.resize(0);
+
+    VectorOutputStream out(reusable_v);
 
     for (int i = 0; i < iteration_count; ++i)
     {
         Write(out, sample);
     }
 
-    VectorInputStream in(v);
+    VectorInputStream in(reusable_v);
 
     for (int i = 0; i < iteration_count; ++i)
     {
@@ -174,6 +176,7 @@ AWL_TEST(IoObjectReadWrite)
         const B b;
 
         Test(context, b);
+        Test(context, std::vector<B>{b, b, b});
     }
 }
 
