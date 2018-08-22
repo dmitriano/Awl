@@ -85,6 +85,16 @@ AWL_TEST(IoObjectReadWrite)
 
     std::vector<std::vector<std::wstring>> wsvv{ wsv, wsv, wsv };
     Test(context, wsvv);
+
+    std::set<int> is{ 0, 1, 2, 3, 4, 5 };
+    
+    Test(context, is);
+    Test(context, std::unordered_set<int>{0, 1, 2, 3, 4, 5});
+
+    Test(context, std::map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
+    Test(context, std::unordered_map<std::string, int>{ {"a", 0}, { "b12345", 1 }, { "c12345", 2 }, { "", 3 } });
+
+    Test(context, std::map<std::string, std::set<int>>{ {"a", is}, { "b12345", is }, { "c12345", is }, { "", is } });
 }
 
 template <class T>

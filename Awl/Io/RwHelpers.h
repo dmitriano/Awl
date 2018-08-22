@@ -2,6 +2,10 @@
 
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
 #include <chrono>
 #include <type_traits>
 
@@ -10,7 +14,7 @@ namespace awl
     namespace io
     {
         template <class Stream, typename T>
-        inline void Read(Stream & s, T & val)
+        inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Read(Stream & s, T & val)
         {
             const size_t size = sizeof(T);
 
@@ -18,7 +22,7 @@ namespace awl
         }
 
         template <class Stream, typename T>
-        inline void Write(Stream & s, const T & val)
+        inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Write(Stream & s, const T & val)
         {
             const size_t size = sizeof(T);
 
@@ -165,6 +169,110 @@ namespace awl
             Write(s, size);
 
             WriteVector(s, v);
+        }
+
+        template <class T>
+        struct remove_const
+        {
+            typedef T type;
+        };
+
+        template <class T>
+        struct remove_const<const T>
+        {
+            typedef T type;
+        };
+
+        template <class Stream, class First, class Second>
+        inline void Read(Stream & s, std::pair<First, Second> & val)
+        {
+            Read(s, const_cast<typename remove_const<First>::type &>(val.first));
+            Read(s, val.second);
+        }
+
+        template <class Stream, class First, class Second>
+        inline void Write(Stream & s, const std::pair<First, Second> & val)
+        {
+            Write(s, val.first);
+            Write(s, val.second);
+        }
+
+        template <class Stream, typename Coll>
+        void ReadCollection(Stream & s, Coll & coll)
+        {
+            size_t count;
+
+            Read(s, count);
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                Coll::value_type elem;
+
+                Read(s, elem);
+
+                coll.insert(elem);
+            }
+        }
+
+        template <class Stream, typename Coll>
+        void WriteCollection(Stream & s, const Coll & coll)
+        {
+            size_t count = coll.size();
+
+            Write(s, count);
+
+            for (auto & elem : coll)
+            {
+                Write(s, elem);
+            }
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Read(Stream & s, std::set<T, Compare, Alloc> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Write(Stream & s, const std::set<T, Compare, Alloc> &coll)
+        {
+            WriteCollection(s, coll);
+        }
+
+        template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
+        void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
+        void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll)
+        {
+            WriteCollection(s, coll);
+        }
+
+        template <class Stream, class Key, class T, class Compare, class Alloc>
+        void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template <class Stream, class Key, class T, class Compare, class Alloc>
+        void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll)
+        {
+            WriteCollection(s, coll);
+        }
+
+        template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator>
+        void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator>
+        void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll)
+        {
+            WriteCollection(s, coll);
         }
 
         /*
