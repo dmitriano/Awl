@@ -45,16 +45,6 @@ struct A
     double y;
 };
 
-inline bool operator == (const A & left, const A & right)
-{
-    return std::tie(left.x, left.y) == std::tie(right.x, right.y);
-}
-
-inline bool operator < (const A & left, const A & right)
-{
-    return std::tie(left.x, left.y) < std::tie(right.x, right.y);
-}
-
 namespace awl
 {
     namespace io
@@ -62,9 +52,19 @@ namespace awl
         template <>
         inline auto class_as_tuple(A & val)
         {
-            return std::forward_as_tuple(val.x, val.y);
+            return std::tie(val.x, val.y);
         }
     }
+}
+
+inline bool operator == (const A & left, const A & right)
+{
+    return class_as_const_tuple(left) == class_as_const_tuple(right);
+}
+
+inline bool operator < (const A & left, const A & right)
+{
+    return class_as_const_tuple(left) <= class_as_const_tuple(right);
 }
 
 class B
@@ -77,12 +77,12 @@ public:
 
     auto as_tuple()
     {
-        return std::forward_as_tuple(m_set, m_v);
+        return std::tie(m_set, m_v);
     }
 
     bool operator == (const B & right) const
     {
-        return std::tie(m_set, m_v) == std::tie(right.m_set, right.m_v);
+        return class_as_const_tuple(*this) == class_as_const_tuple(right);
     }
 
 private:
@@ -156,6 +156,13 @@ AWL_TEST(IoObjectReadWrite)
 
     Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
 
+    {
+        A a1{ 5, 7.0 };
+        A a2{ 5, 8.0 };
+
+        Assert::IsTrue(a1 < a2);
+    }
+    
     {
         A a{ 5, 7.0 };
 

@@ -319,6 +319,15 @@ namespace awl
             return val.as_tuple();
         }
         
+        template <class T>
+        auto class_as_const_tuple(const T & val)
+        {
+            //Remove const and then make it const again.
+            const auto & tuple_val = class_as_tuple(const_cast<T &>(val));
+
+            return tuple_val;
+        }
+
         template <class Stream, typename T>
         typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
         {
@@ -328,10 +337,7 @@ namespace awl
         template <class Stream, typename T>
         typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
         {
-            //Remove const and then make it const again.
-            const auto & tuple_val = class_as_tuple(const_cast<T &>(val));
-            
-            Write(s, tuple_val);
+            Write(s, class_as_const_tuple(val));
         }
     }
 }
