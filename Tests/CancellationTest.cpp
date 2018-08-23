@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Awl/Cancellation.h"
+#include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
 using namespace awl::testing;
@@ -43,13 +44,11 @@ AWL_TEST(Cancellation_InterruptibleSleep)
     {
         v.push_back(std::thread([&cancellation, client_sleep_time, worker_sleep_time]()
         {
-            auto start = std::chrono::steady_clock::now();
+            awl::StopWatch w;
 
             cancellation.Sleep(Duration(worker_sleep_time));
 
-            auto now = std::chrono::steady_clock::now();
-
-            auto elapsed = std::chrono::duration_cast<Duration>(now - start);
+            const auto elapsed = w.GetElapsedCast<Duration>();
 
             Assert::IsTrue(elapsed.count() >= client_sleep_time);
 
@@ -80,13 +79,11 @@ AWL_TEST(Cancellation_SimpleSleep)
 
     awl::CancellationFlag cancellation;
 
-    auto start = std::chrono::steady_clock::now();
+    awl::StopWatch w;
 
     cancellation.Sleep(Duration(client_sleep_time));
 
-    auto now = std::chrono::steady_clock::now();
+    const auto elapsed = w.GetElapsedCast<Duration>();
 
-    auto ellapsed = std::chrono::duration_cast<Duration>(now - start);
-
-    Assert::IsTrue(ellapsed.count() >= client_sleep_time);
+    Assert::IsTrue(elapsed.count() >= client_sleep_time);
 }

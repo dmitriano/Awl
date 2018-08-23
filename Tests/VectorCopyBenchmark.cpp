@@ -52,9 +52,9 @@ static void FromInt(ElementStruct & val, int i)
 
 static double ReportSpeed(const TestContext & context, const awl::StopWatch & w, size_t size)
 {
-    auto time = w.GetElapsedSeconds<double>();
+    const auto time = w.GetElapsedSeconds<double>();
 
-    double speed = size / time / (1024 * 1024);
+    const double speed = size / time / (1024 * 1024);
     
     context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
 
@@ -78,7 +78,7 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
     v.reserve(vector_size);
     Assert::AreEqual(vector_size, v.capacity());
 
-    context.out << _T("std::vector<" << type_name << _T(">\t"));
+    context.out << _T("std::vector<") << type_name << _T(">\t");
 
     double ratio;
     
@@ -118,15 +118,22 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
         ratio = ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
     }
 
-    context.out << _T("\t (") << ratio << _T(")") << std::endl;
+    context.out << _T("\t (") << ratio << _T(")");
+
+    context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
 }
 
 AWL_BENCHMARK(VectorCopyPerformance)
 {
-    CopyVector<uint8_t>(context, _T("uint8_t"));
+    CopyVector<uint8_t>(context, _T("byte"));
+    CopyVector<short>(context, _T("short"));
     CopyVector<int>(context, _T("int"));
+    CopyVector<long>(context, _T("long"));
     CopyVector<long long>(context, _T("long long"));
+    CopyVector<float>(context, _T("float"));
+    CopyVector<double>(context, _T("double"));
     CopyVector<long double>(context, _T("long double"));
+    CopyVector<long long>(context, _T("long double"));
     CopyVector<ElementStruct>(context, _T("struct"));
     CopyVector<ElementClass>(context, _T("class"));
 }
