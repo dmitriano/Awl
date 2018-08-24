@@ -47,25 +47,21 @@ struct A
 
 namespace awl
 {
-    namespace io
+    template <>
+    inline auto class_as_const_tuple(const A & val)
     {
-        template <>
-        inline auto class_as_tuple(A & val)
-        {
-            return std::tie(val.x, val.y);
-        }
+        return std::tie(val.x, val.y);
+    }
+
+    template <>
+    inline auto class_as_tuple(A & val)
+    {
+        return std::tie(val.x, val.y);
     }
 }
 
-inline bool operator == (const A & left, const A & right)
-{
-    return objects_equal(left, right);
-}
-
-inline bool operator < (const A & left, const A & right)
-{
-    return objects_less(left, right);
-}
+AWL_EQUATABLE(A)
+AWL_COMPARABLE(A)
 
 class B
 {
@@ -75,15 +71,7 @@ public:
     {
     }
 
-    auto as_tuple()
-    {
-        return std::tie(m_set, m_v, m_u8, m_b);
-    }
-
-    bool operator == (const B & right) const
-    {
-        return objects_equal(*this, right);
-    }
+    AWL_SERIALIZABLE(m_set, m_v, m_u8, m_b)
 
 private:
 
@@ -94,6 +82,8 @@ private:
 
     bool m_b = true;
 };
+
+AWL_EQUATABLE(B)
 
 AWL_TEST(IoObjectReadWrite)
 {
@@ -177,7 +167,7 @@ AWL_TEST(IoObjectReadWrite)
 
         A a_saved = a;
 
-        auto a_ref = class_as_tuple(a);
+        auto a_ref = awl::class_as_tuple(a);
 
         ++std::get<0>(a_ref);
 

@@ -11,7 +11,7 @@
 #include <tuple>
 #include <utility> 
 
-#include "Awl/TupleHelpers.h"
+#include "Awl/Serializable.h"
 
 namespace awl
 {
@@ -301,7 +301,7 @@ namespace awl
         }
 
         template<class Stream, std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type ReadEach(Stream &, std::tuple<Tp...> &) // Unused arguments are given no names.
+        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type ReadEach(Stream &, std::tuple<Tp...> &)
         {
         }
 
@@ -312,15 +312,22 @@ namespace awl
             ReadEach<Stream, I + 1, Tp...>(s, t);
         }
 
-        //Here the tuple of references is passed by value.
+        //A tuple of references is passed by value.
         template<class Stream, typename ... Fields>
         void Read(Stream & s, std::tuple<Fields& ...> val)
         {
             ReadEach(s, val);
         }
 
+        //A tuple of values is passed by reference. Cannot figure out why this does not compile with VC2017.
+        //template<class Stream, typename ... Fields>
+        //void Read(Stream & s, std::tuple<Fields ...> & val)
+        //{
+        //    ReadEach(s, val);
+        //}
+
         template<class Stream, std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type WriteEach(Stream &, const std::tuple<Tp...> &) // Unused arguments are given no names.
+        inline typename std::enable_if<(I == sizeof...(Tp)), void>::type WriteEach(Stream &, const std::tuple<Tp...> &)
         {
         }
 
@@ -337,21 +344,6 @@ namespace awl
             WriteEach(s, val);
         }
 
-        template <class T>
-        auto class_as_tuple(T & val)
-        {
-            return val.as_tuple();
-        }
-        
-        template <class T>
-        auto class_as_const_tuple(const T & val)
-        {
-            //Remove const and then make it const again.
-            const auto & tuple_val = class_as_tuple(const_cast<T &>(val));
-
-            return tuple_val;
-        }
-
         template <class Stream, typename T>
         typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
         {
@@ -362,18 +354,6 @@ namespace awl
         typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
         {
             Write(s, class_as_const_tuple(val));
-        }
-
-        template <class T>
-        bool objects_equal(const T & left, const T & right)
-        {
-            return class_as_const_tuple(left) == class_as_const_tuple(right);
-        }
-
-        template <class T>
-        bool objects_less(const T & left, const T & right)
-        {
-            return class_as_const_tuple(left) < class_as_const_tuple(right);
         }
     }
 }
