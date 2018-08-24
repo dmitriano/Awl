@@ -6,18 +6,6 @@ namespace awl
 {
     namespace io
     {
-        class IoException
-        {
-        };
-
-        class EndOfFileException : public IoException
-        {
-        };
-
-        class WriteException : public IoException
-        {
-        };
-
         class SequentialInputStream
         {
         public:
@@ -37,11 +25,5 @@ namespace awl
 
             virtual ~SequentialOutputStream() = default;
         };
-
-        /*
-        class SequentialIoStream : public SequentialInputStream, public SequentialOutputStream
-        {
-        };
-        */
     }
 }

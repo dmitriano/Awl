@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/TestException.h"
 
 namespace awl
@@ -37,13 +38,7 @@ namespace awl
             {
                 if (expected != actual)
                 {
-                    ostringstream out;
-
-                    out << message << _T(" ");
-
-                    out << _T(" expected ") << expected << _T(", actual ") << actual << _T(".");
-
-                    throw TestException(out.str());
+                    throw TestException(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
                 }
             }
         };

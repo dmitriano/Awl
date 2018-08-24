@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/Io/IoException.h"
 #include "Awl/Io/SequentialStream.h"
 
 #include <vector>
@@ -30,9 +31,11 @@ namespace awl
 
                 assert(diff >= 0);
 
-                if (static_cast<size_t>(diff) < count)
+                auto available = static_cast<size_t>(diff);
+                
+                if (available < count)
                 {
-                    throw EndOfFileException();
+                    throw EndOfFileException(count, available);
                 }
 
                 //Can be slow with uint8_t.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/StdConsole.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/TestException.h"
 
@@ -32,11 +33,7 @@ namespace awl
 
                     if (!result.second)
                     {
-                        ostringstream out;
-
-                        out << _T("Duplicated option '" << name << _T("'."));
-
-                        throw TestException(out.str());
+                        throw TestException(format() << _T("Duplicated option '" << name << _T("'.")));
                     }
 
                     current_option = result.first;
@@ -51,11 +48,7 @@ namespace awl
                     }
                     else
                     {
-                        ostringstream out;
-
-                        out << _T("An option name starting with '--' expected near ") << val;
-
-                        throw TestException(out.str());
+                        throw TestException(format() << _T("An option name starting with '--' expected near ") << val);
                     }
                 }
             }

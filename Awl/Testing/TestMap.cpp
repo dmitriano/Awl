@@ -17,11 +17,7 @@ namespace awl
             {
                 if (!testMap.emplace(p_link->GetName(), p_link).second)
                 {
-                    ostringstream out;
-
-                    out << _T("The test '" << p_link->GetName() << _T(" already exists."));
-
-                    throw TestException(out.str());
+                    throw TestException(format() << _T("The test '" << p_link->GetName() << _T(" already exists.")));
                 }
             }
         }
@@ -32,11 +28,7 @@ namespace awl
 
             if (i == testMap.end())
             {
-                ostringstream out;
-
-                out << _T("The test '" << name << _T(" does not exist."));
-
-                throw TestException(out.str());
+                throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
             }
 
             InternalRun(i->second, context);
@@ -107,11 +99,7 @@ namespace awl
                 }
                 catch (const std::regex_error&)
                 {
-                    ostringstream out;
-
-                    out << _T("Not a valid regular expression '") << filter << _T("'.") << std::endl;
-
-                    throw TestException(out.str());
+                    throw TestException(format() << _T("Not a valid regular expression '") << filter << _T("'."));
                 }
             };
         }

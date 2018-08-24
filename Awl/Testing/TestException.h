@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Awl/String.h"
+#include "Awl/Exception.h"
 
 namespace awl
 {
     namespace testing
     {
-        class TestException
+        class TestException : public Exception
         {
         private:
 
@@ -22,7 +22,7 @@ namespace awl
             {
             }
 
-            const String & GetMessage() const
+            String GetMessage() const override
             {
                 return theMessage;
             }
