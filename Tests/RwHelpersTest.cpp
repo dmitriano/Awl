@@ -45,25 +45,9 @@ struct A
     double y;
 };
 
-namespace awl
-{
-    template <>
-    inline auto object_as_tuple(const A & val)
-    {
-        return std::tie(val.x, val.y);
-    }
+AWL_SERIALIZABLE_CLASS_2(A, x, y)
 
-    template <>
-    inline auto object_as_tuple(A & val)
-    {
-        return std::tie(val.x, val.y);
-    }
-}
-
-//static_assert(awl::sizeof_serializable<A>() == sizeof(A::x) + sizeof(A::y), "!=");
-
-AWL_EQUATABLE(A)
-AWL_COMPARABLE(A)
+AWL_EQUATABLE_AND_COMPARABLE(A)
 
 class B
 {

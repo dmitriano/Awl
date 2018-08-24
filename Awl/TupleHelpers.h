@@ -4,17 +4,18 @@
 
 namespace awl
 {
+#if AWL_CPPSTD >= 17
+
     //In C++17 (but not in VC2017) template folding can be used:
-    /*
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
         return (sizeof(Ts) + ...);
     }
-    */
 
-    //C++14 version:
-    /*
+#elif AWL_CPPSTD >= 14
+
+    //C++14 version (does not compile with GCC 4.9):
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
@@ -30,7 +31,8 @@ namespace awl
 
         return sum;
     }
-    */
+
+#else
 
     //C++11 version (compiles with GCC 4.9):
     template <typename = void>
@@ -50,6 +52,8 @@ namespace awl
     {
         return sizeof_tuple_helper<sizeof(Ts)...>();
     }
+
+#endif
     
     static_assert(sizeof_tuple(std::tuple<int, bool>{}) == sizeof(int) + sizeof(bool), "it is not 5!");
 }
