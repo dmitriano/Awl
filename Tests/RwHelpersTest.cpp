@@ -161,7 +161,9 @@ AWL_TEST(IoObjectReadWrite)
         Test(context, std::map<std::string, std::set<int>>{ {"a", is}, { "b12345", is }, { "c12345", is }, { "", is } });
     }
 
-    Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
+    //This test is not correct, because it passes a tuple of values by value, 
+    //but if std::tuple is a member of a class the tuple of references is passed by value.
+    //Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
 
     {
         A a1{ 5, 7.0 };

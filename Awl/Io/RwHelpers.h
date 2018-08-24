@@ -312,9 +312,9 @@ namespace awl
             ReadEach<Stream, I + 1, Tp...>(s, t);
         }
 
-        //Here the tuple of references is passed by value. This will not compile with GCC if the tuple is passed by reference.
+        //Here the tuple of references is passed by value.
         template<class Stream, typename ... Fields>
-        void Read(Stream & s, std::tuple<Fields...> val)
+        void Read(Stream & s, std::tuple<Fields& ...> val)
         {
             ReadEach(s, val);
         }
@@ -332,7 +332,7 @@ namespace awl
         }
 
         template<class Stream, typename ... Fields>
-        void Write(Stream & s, const std::tuple<Fields...> & val)
+        void Write(Stream & s, const std::tuple<Fields& ...> & val)
         {
             WriteEach(s, val);
         }
