@@ -48,17 +48,19 @@ struct A
 namespace awl
 {
     template <>
-    inline auto class_as_const_tuple(const A & val)
+    inline auto object_as_tuple(const A & val)
     {
         return std::tie(val.x, val.y);
     }
 
     template <>
-    inline auto class_as_tuple(A & val)
+    inline auto object_as_tuple(A & val)
     {
         return std::tie(val.x, val.y);
     }
 }
+
+//static_assert(awl::sizeof_serializable<A>() == sizeof(A::x) + sizeof(A::y), "!=");
 
 AWL_EQUATABLE(A)
 AWL_COMPARABLE(A)
@@ -167,7 +169,7 @@ AWL_TEST(IoObjectReadWrite)
 
         A a_saved = a;
 
-        auto a_ref = awl::class_as_tuple(a);
+        auto a_ref = awl::object_as_tuple(a);
 
         ++std::get<0>(a_ref);
 
