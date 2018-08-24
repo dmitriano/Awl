@@ -1,25 +1,40 @@
 #include "Awl/Observable.h"
+#include "Awl/String.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/Formatter.h"
 
 using namespace awl::testing;
 
 struct INotifySomethingChanged
 {
-    virtual void ItChanged(int param) = 0;
+    virtual void ItChanged(int param, awl::String val) = 0;
 };
 
 class ChangeHandler : public awl::Observer<INotifySomethingChanged>
 {
 public:
 
-    virtual void ItChanged(int param) override;
+    ChangeHandler(const TestContext & c) : context(c)
+    {
+    }
+
+    void ItChanged(int param, awl::String val) override;
 
     bool changeHandled = false;
+
+private:
+
+    const TestContext & context;
 };
 
-void ChangeHandler::ItChanged(int param)
+void ChangeHandler::ItChanged(int param, awl::String val)
 {
-    //std::cout << _T("It has changed ") << param << std::endl;
+    context.out << _T("It has changed ") << param << _T(" ") << val << std::endl;
+
+    if (param == 2)
+    {
+        Assert::IsTrue(val == _T("temporary"));
+    }
 
     changeHandled = true;
 }
@@ -34,7 +49,22 @@ public:
     {
         It = it;
 
-        Notify(&INotifySomethingChanged::ItChanged, it);
+        awl::String val = Formatter<int>::ToString(It);
+
+        awl::String val_copy = val;
+
+        //Here val_copy is not temporary.
+        Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
+
+        Assert::IsTrue(val_copy == val);
+    }
+
+    void SetIt2(int it)
+    {
+        It = it;
+
+        //This test demonstrates why Notify should not use std::forward<Args>.
+        Notify(&INotifySomethingChanged::ItChanged, it, awl::String(_T("temporary")));
     }
 };
 
@@ -42,24 +72,47 @@ AWL_TEST(Observable_Events)
 {
     Something something;
 
-    ChangeHandler handler;
+    Assert::AreEqual(0, something.size());
+    Assert::IsTrue(something.empty());
 
-    something.Subscribe(&handler);
+    {
+        ChangeHandler handler1(context);
+        ChangeHandler handler2(context);
+        ChangeHandler handler3(context);
 
-    something.SetIt(3);
+        something.Subscribe(&handler1);
+        something.Subscribe(&handler2);
+        something.Subscribe(&handler3);
 
-    Assert::IsTrue(handler.changeHandled, _T("The observer has not been notified"));
+        Assert::AreEqual(3u, something.size());
 
-    handler.UnsubscribeSelf();
+        something.SetIt(1);
+        something.SetIt2(2);
+
+        Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
+        Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
+        Assert::IsTrue(handler3.changeHandled, _T("The observer has not been notified"));
+
+        handler1.UnsubscribeSelf();
+        Assert::AreEqual(2u, something.size());
+
+        something.Unsubscribe(&handler2);
+        Assert::AreEqual(1u, something.size());
+
+        Assert::IsTrue(!something.empty());
+    }
+
+    Assert::AreEqual(0, something.size());
+    Assert::IsTrue(something.empty());
 }
 
 AWL_TEST(Observable_Move)
 {
     Something something1;
 
-    ChangeHandler handler1;
+    ChangeHandler handler1(context);
 
-    ChangeHandler handler2;
+    ChangeHandler handler2(context);
 
     something1.Subscribe(&handler1);
 
