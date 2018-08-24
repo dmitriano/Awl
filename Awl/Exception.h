@@ -25,4 +25,34 @@ namespace awl
 
         AWL_IMPLEMENT_EXCEPTION
     };
+
+    class GeneralException : public Exception
+    {
+    private:
+
+        const String theMessage;
+
+    public:
+
+        explicit GeneralException(String message) : theMessage(message)
+        {
+        }
+
+        String GetMessage() const override
+        {
+            return theMessage;
+        }
+
+        AWL_IMPLEMENT_EXCEPTION
+    };
 }
+
+#define AWL_DEFINE_DERIVED_EXCEPTION(DerivedClass, BaseClass) \
+    class DerivedClass : public BaseClass \
+    { \
+        public: \
+        DerivedClass(awl::String message) : BaseClass(message) {} \
+        AWL_IMPLEMENT_EXCEPTION \
+    };
+
+#define AWL_DEFINE_EXCEPTION(ExceptionClass) AWL_DEFINE_DERIVED_EXCEPTION(ExceptionClass, awl::GeneralException)

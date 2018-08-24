@@ -4,21 +4,24 @@
 
 namespace awl
 {
-    class format
+    template <class C>
+    class basic_format
     {
     public:
         
         template <typename T>
-        format & operator << (const T & val)
+        basic_format & operator << (const T & val)
         {
             out << val;
             return *this;
         }
 
-        operator String() const { return out.str(); }
+        operator std::basic_string<C>() const { return out.str(); }
 
     private:
         
-        ostringstream out;
+        std::basic_ostringstream<C> out;
     };
+
+    typedef basic_format<Char> format;
 }
