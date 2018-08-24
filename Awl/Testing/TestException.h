@@ -14,10 +14,6 @@ namespace awl
 
         public:
 
-            explicit TestException() : theMessage(_T("No messsage provided."))
-            {
-            }
-
             explicit TestException(const String & message) : theMessage(message)
             {
             }
@@ -26,6 +22,8 @@ namespace awl
             {
                 return theMessage;
             }
+
+            AWL_IMPLEMENT_EXCEPTION
         };
     }
 }

@@ -9,6 +9,7 @@ namespace awl
     {
         class IoException : public Exception
         {
+            AWL_IMPLEMENT_EXCEPTION
         };
 
         class EndOfFileException : public IoException
@@ -24,6 +25,8 @@ namespace awl
             {
                 return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(".");
             }
+
+            AWL_IMPLEMENT_EXCEPTION
 
         private:
 
