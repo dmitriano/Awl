@@ -19,7 +19,7 @@ namespace awl
             {
             }
 
-            bool End() const override
+            bool End() override
             {
                 return m_i == m_v.end();
             }

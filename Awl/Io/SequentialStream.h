@@ -22,7 +22,7 @@ namespace awl
         {
         public:
 
-            virtual bool End() const = 0;
+            virtual bool End() = 0;
                 
             virtual void Read(uint8_t * buffer, size_t count) = 0;
 
