@@ -39,16 +39,40 @@ static void Test(const TestContext & context, T sample)
     Assert::IsTrue(in.End());
 }
 
+//An example of a third-party structure that we cannot change, but need to serialize.
 struct A
 {
     int x;
     double y;
 };
 
-AWL_SERIALIZABLE_CLASS_2(A, x, y)
+namespace awl
+{
+    template <>
+    inline auto object_as_tuple(const A & val)
+    {
+        return std::tie(val.x, val.y);
+    }
 
+    template <>
+    inline auto object_as_tuple(A & val)
+    {
+        return std::tie(val.x, val.y);
+    }
+}
+
+//At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
 AWL_EQUATABLE_AND_COMPARABLE(A)
 
+//Another option is to derive our class from A and make the derived class serializable.
+struct AWrapper : A
+{
+    AWL_SERIALIZABLE(x, y)
+};
+
+AWL_EQUATABLE(AWrapper)
+
+//Our class that we can make serializable with the single line of code.
 class B
 {
 public:
@@ -162,6 +186,12 @@ AWL_TEST(IoObjectReadWrite)
         Test(context, a);
         Test(context, std::vector<A>{a, a, a});
         Test(context, std::set<A>{a, a_saved});
+
+        AWrapper w;
+        w.x = 6;
+        w.y = 8.0;
+        
+        Test(context, w);
     }
 
     {
