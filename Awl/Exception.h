@@ -5,10 +5,10 @@
 #include <exception>
 
 #define AWL_IMPLEMENT_EXCEPTION \
-const char * what() const throw() override \
-{ \
-    return typeid(*this).name(); \
-}
+    const char * what() const throw() override \
+    { \
+        return typeid(*this).name(); \
+    }
 
 namespace awl
 {
@@ -16,6 +16,11 @@ namespace awl
     {
     public:
 
+        String GetClassName() const
+        {
+            return FromACString<Char>(what());
+        }
+        
         virtual String GetMessage() const = 0;
 
         AWL_IMPLEMENT_EXCEPTION
