@@ -48,7 +48,7 @@ namespace awl
                 return false;
             }
 
-            virtual bool TryFind(const String & name, String & val) const
+            virtual bool TryFind(const String &, String &) const
             {
                 return false;
             }
