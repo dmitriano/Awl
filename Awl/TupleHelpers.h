@@ -6,7 +6,7 @@ namespace awl
 {
 #if AWL_CPPSTD >= 17
 
-    //In C++17 (but not in VC2017) template folding can be used:
+    //In C++17 template folding can be used:
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {

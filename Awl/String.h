@@ -37,7 +37,6 @@ namespace awl
     typedef std::basic_ostringstream<Char> ostringstream;
     typedef std::basic_istringstream<Char> istringstream;
 
-    
     template <typename C>
     typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
     {
@@ -64,6 +63,20 @@ namespace awl
         return FromACStringHelper<Char>(p_src);
     }
 
+#if AWL_CPPSTD >= 17
+
+    inline String FromAString(std::string src)
+    {
+        if constexpr (std::is_same_v<Char, char>)
+        {
+            return std::forward<std::string>(src);
+        }
+
+        return FromACString(src.c_str());
+    }
+
+#else
+
     template <typename C>
     inline typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromAStringHelper(std::string src)
     {
@@ -80,4 +93,6 @@ namespace awl
     {
         return FromAStringHelper<Char>(src);
     }
+
+#endif
 }
