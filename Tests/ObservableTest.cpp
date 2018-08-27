@@ -137,3 +137,46 @@ AWL_TEST(Observable_Move)
     Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
     Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
 }
+
+class ChangeHandler2
+{
+public:
+
+    ChangeHandler2(const TestContext & c) : context(c)
+    {
+    }
+
+    void SomeHanderFunc(const awl::String & val)
+    {
+        context.out << _T("The value is: ") << val << std::endl;
+    }
+
+private:
+
+    const TestContext & context;
+};
+
+template<typename ...Params, typename ... Args>
+void WrongNotify(ChangeHandler2 & h, void (ChangeHandler2::*func)(Params ...), Args&&... args)
+{
+    (h.*func)(std::forward<Args>(args) ...);
+}
+
+template<typename ...Params>
+static void WrongNotify2(ChangeHandler2 & h, void (ChangeHandler2::*func)(Params ...), awl::String && val)
+{
+    func(std::forward<const awl::String &&>(val));
+}
+
+AWL_TEST(Observable_ForwardArgs)
+{
+    awl::String val = _T("String Value 1");
+
+    ChangeHandler2 h(context);
+
+    WrongNotify(h, &ChangeHandler2::SomeHanderFunc, val);
+    WrongNotify(h, &ChangeHandler2::SomeHanderFunc, val);
+    WrongNotify(h, &ChangeHandler2::SomeHanderFunc, val);
+
+    WrongNotify(h, &ChangeHandler2::SomeHanderFunc, awl::String(_T("String Value 2")));
+}
