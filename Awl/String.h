@@ -64,7 +64,7 @@ namespace awl
         std::mbstate_t state = std::mbstate_t();
         
         size_t len;
-        size_t success = mbsrtowcs_s(&len, NULL, 0, &mbstr, 0, &state);
+        size_t success = mbsrtowcs_s(&len, nullptr, 0, &mbstr, 0, &state);
         
         if (success != 0)
         {
@@ -88,13 +88,14 @@ namespace awl
     inline std::wstring DecodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
-        std::size_t len = 1 + std::mbsrtowcs(NULL, &mbstr, 0, &state);
+        std::size_t len = 1 + std::mbsrtowcs(nullptr, &mbstr, 0, &state);
         std::wstring wstr(len, ' ');
         std::mbsrtowcs(&wstr[0], &mbstr, wstr.size(), &state);
         return wstr;
     }
 
 #endif
+    
     template <typename C>
     inline typename std::enable_if<std::is_same<C, wchar_t>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
     {
