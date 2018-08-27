@@ -4,6 +4,8 @@
 #include <sstream>
 #include <type_traits>
 #include <algorithm>
+#include <wchar.h>
+#include <assert.h>
 
 #ifdef _MSC_VER
 
@@ -37,19 +39,66 @@ namespace awl
     typedef std::basic_ostringstream<Char> ostringstream;
     typedef std::basic_istringstream<Char> istringstream;
 
-    template <typename C>
-    typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
-    {
-        std::basic_string<C> dest(strlen(p_src), ' ');
+#ifdef _MSC_VER
 
-        auto p_cur = p_src;
-        
-        for (auto & ch : dest)
+    class decode_error : std::exception
+    {
+    public:
+
+        decode_error(std::string s) : src(s)
         {
-            ch = *p_cur++;
         }
 
-        return dest;
+        const char * what() const throw() override
+        {
+            return src.c_str();
+        }
+
+    private:
+
+        std::string src;
+    };
+    
+    inline std::wstring DecodeString(const char* mbstr)
+    {
+        std::mbstate_t state = std::mbstate_t();
+        
+        size_t len;
+        size_t success = mbsrtowcs_s(&len, NULL, 0, &mbstr, 0, &state);
+        
+        if (success != 0)
+        {
+            throw decode_error(mbstr);
+        }
+
+        std::wstring wstr(len, ' ');
+        size_t ret_val;
+        success = mbsrtowcs_s(&ret_val, &wstr[0], len,  &mbstr, wstr.size(), &state);
+        
+        if (success != 0 || ret_val != len)
+        {
+            throw decode_error(mbstr);
+        }
+
+        return wstr;
+    }
+
+#else
+
+    inline std::wstring DecodeString(const char* mbstr)
+    {
+        std::mbstate_t state = std::mbstate_t();
+        std::size_t len = 1 + std::mbsrtowcs(NULL, &mbstr, 0, &state);
+        std::wstring wstr(len, ' ');
+        std::mbsrtowcs(&wstr[0], &mbstr, wstr.size(), &state);
+        return wstr;
+    }
+
+#endif
+    template <typename C>
+    inline typename std::enable_if<std::is_same<C, wchar_t>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
+    {
+        return DecodeString(p_src);
     }
 
     template <typename C>
