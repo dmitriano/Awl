@@ -23,7 +23,7 @@ AWL_TEST(ExceptionTryCatch)
     }
     catch (const std::exception & e)
     {
-        context.out << awl::FromACString<awl::Char>(e.what()) << std::endl;
+        context.out << awl::FromACString(e.what()) << std::endl;
 
         auto * p_awl_e = dynamic_cast<const awl::Exception *>(&e);
         

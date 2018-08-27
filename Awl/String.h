@@ -39,23 +39,7 @@ namespace awl
 
     
     template <typename C>
-    typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromAString(std::string src)
-    {
-        std::basic_string<C> dest(src.length(), ' ');
-
-        std::copy(src.begin(), src.end(), dest.begin());
-
-        return dest;
-    }
-
-    template <typename C>
-    typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromAString(std::string src)
-    {
-        return src;
-    }
-    
-    template <typename C>
-    typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromACString(const char * p_src)
+    typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
     {
         std::basic_string<C> dest(strlen(p_src), ' ');
 
@@ -70,8 +54,30 @@ namespace awl
     }
 
     template <typename C>
-    typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromACString(const char * p_src)
+    inline typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
     {
         return p_src;
+    }
+
+    inline String FromACString(const char * p_src)
+    {
+        return FromACStringHelper<Char>(p_src);
+    }
+
+    template <typename C>
+    inline typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromAStringHelper(std::string src)
+    {
+        return FromACString(src.c_str());
+    }
+
+    template <typename C>
+    inline typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromAStringHelper(std::string src)
+    {
+        return std::forward<std::string>(src);
+    }
+
+    inline String FromAString(std::string src)
+    {
+        return FromAStringHelper<Char>(src);
     }
 }
