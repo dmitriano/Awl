@@ -19,7 +19,7 @@ namespace awl
 
             TestLink(const Char * p_test_name, TestFunc p_test_func);
 
-            String GetName()
+            const Char * GetName()
             {
                 return pTestName;
             }

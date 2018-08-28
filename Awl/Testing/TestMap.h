@@ -19,7 +19,7 @@ namespace awl
 
             TestMap();
 
-            void Run(const TestContext & context, const String & name);
+            void Run(const TestContext & context, const Char * name);
             
             void RunAll(const TestContext & context, const std::function<bool (const String&)> & filter);
 
@@ -46,7 +46,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            typedef std::map<String, TestLink *> Map;
+            typedef std::map<const Char *, TestLink *, CStringComparator<Char>> Map;
 
             Map testMap;
         };

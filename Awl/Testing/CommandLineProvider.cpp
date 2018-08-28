@@ -15,7 +15,7 @@ namespace awl
         {
             std::basic_regex<Char> option_regex(_T("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
 
-            std::match_results<String::const_iterator> match;
+            std::match_results<const Char *> match;
 
             OptionsMap::iterator current_option = allOptions.end();
 
@@ -23,7 +23,7 @@ namespace awl
 
             while (i < argc)
             {
-                String val = argv[i++];
+                const Char * val = argv[i++];
 
                 if (std::regex_match(val, match, option_regex) && match.size() == 2)
                 {

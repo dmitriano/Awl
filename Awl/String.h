@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <sstream>
 #include <type_traits>
@@ -38,6 +39,26 @@ namespace awl
     
     typedef std::basic_ostringstream<Char> ostringstream;
     typedef std::basic_istringstream<Char> istringstream;
+
+    inline auto StrCmp(const char * left, const char * right)
+    {
+        return std::strcmp(left, right);
+    }
+
+    inline auto StrCmp(const wchar_t * left, const wchar_t * right)
+    {
+        return std::wcscmp(left, right);
+    }
+
+    //C-string comparator.
+    template <typename Ch>
+    struct CStringComparator
+    {
+        bool operator()(const Ch * left, const Ch * right) const
+        {
+            return StrCmp(left, right) < 0;
+        }
+    };
 
 #ifdef _MSC_VER
 

@@ -180,3 +180,22 @@ AWL_TEST(Observable_ForwardArgs)
 
     WrongNotify(h, &ChangeHandler2::SomeHanderFunc, awl::String(_T("String Value 2")));
 }
+
+class X
+{
+public:
+    X() {};
+    X(const X&) { called = "copy"; };
+    X(X&&) { called = "move"; };
+
+    std::string called;
+};
+
+AWL_TEST(Observable_ConstMove)
+{
+    const X x1;
+    X x2 = std::move(x1);
+
+    Assert::IsTrue(x1.called == "");
+    Assert::IsTrue(x2.called == "copy");
+}

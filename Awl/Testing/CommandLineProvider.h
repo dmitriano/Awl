@@ -27,7 +27,7 @@ namespace awl
                 {
                 }
                 
-                Option(const String & v) : Option()
+                Option(const Char * v) : Option()
                 {
                     val = v;
                 }

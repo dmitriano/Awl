@@ -22,7 +22,7 @@ namespace awl
             }
         }
 
-        void TestMap::Run(const TestContext & context, const String & name)
+        void TestMap::Run(const TestContext & context, const Char * name)
         {
             auto i = testMap.find(name);
 
@@ -130,7 +130,7 @@ namespace awl
 
                     for (auto & test : run)
                     {
-                        test_map->Run(context, test);
+                        test_map->Run(context, test.c_str());
                     }
                 }
 
