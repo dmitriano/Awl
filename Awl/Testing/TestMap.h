@@ -46,7 +46,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            typedef std::map<const Char *, TestLink *, CStringComparator<Char>> Map;
+            typedef std::map<const Char *, TestLink *, CStringLess<Char>> Map;
 
             Map testMap;
         };

@@ -23,7 +23,7 @@ namespace awl
 
             struct Option
             {
-                Option() : usage(0)
+                Option() : usage(0), val(nullptr)
                 {
                 }
                 
@@ -35,10 +35,10 @@ namespace awl
                 //A flag is an option that does not have a value.
                 bool IsFlag() const
                 {
-                    return val.empty();
+                    return val != nullptr;
                 }
 
-                String val;
+                const Char * val;
 
                 mutable size_t usage;
             };

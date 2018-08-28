@@ -52,7 +52,7 @@ namespace awl
 
     //C-string comparator.
     template <typename Ch>
-    struct CStringComparator
+    struct CStringLess
     {
         bool operator()(const Ch * left, const Ch * right) const
         {
