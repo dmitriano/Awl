@@ -40,6 +40,16 @@ namespace awl
     typedef std::basic_ostringstream<Char> ostringstream;
     typedef std::basic_istringstream<Char> istringstream;
 
+    inline auto StrLen(const char * s)
+    {
+        return std::strlen(s);
+    }
+
+    inline auto StrLen(const wchar_t * s)
+    {
+        return std::wcslen(s);
+    }
+
     inline auto StrCmp(const char * left, const char * right)
     {
         return std::strcmp(left, right);
