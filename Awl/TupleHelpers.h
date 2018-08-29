@@ -4,6 +4,8 @@
 
 namespace awl
 {
+//In VS2017 the value of __cplusplus is still 199711L even with enabled /std:c++17 option,
+//but with C++ 17 it should be 201402L, so we cannot use it.
 #if AWL_CPPSTD >= 17
 
     //In C++17 template folding can be used:

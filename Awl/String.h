@@ -62,43 +62,74 @@ namespace awl
 
 #ifdef _MSC_VER
 
-    class decode_error : std::exception
+    class string_encoding_error : public std::exception
     {
     public:
 
-        decode_error(std::string s) : src(s)
+        string_encoding_error(size_t e) : error(e)
         {
         }
 
         const char * what() const throw() override
         {
-            return src.c_str();
+            return typeid(*this).name();
+        }
+
+        size_t error_number() const
+        {
+            return error;
         }
 
     private:
 
-        std::string src;
+        const size_t error;
     };
     
+    inline std::string EncodeString(const wchar_t* wstr)
+    {
+        std::mbstate_t state = std::mbstate_t();
+
+        //The length includes the teminating zero.
+        size_t len;
+        size_t error = wcsrtombs_s(&len, nullptr, 0, &wstr, 0, &state);
+
+        if (error != 0)
+        {
+            throw string_encoding_error(error);
+        }
+
+        std::string mbstr(len - 1, ' ');
+        size_t ret_val;
+        error = wcsrtombs_s(&ret_val, &mbstr[0], mbstr.size() + 1, &wstr, len, &state);
+
+        if (error != 0 || ret_val != len)
+        {
+            throw string_encoding_error(error);
+        }
+
+        return mbstr;
+    }
+
     inline std::wstring DecodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
         
+        //The length includes the teminating zero.
         size_t len;
-        size_t success = mbsrtowcs_s(&len, nullptr, 0, &mbstr, 0, &state);
+        size_t error = mbsrtowcs_s(&len, nullptr, 0, &mbstr, 0, &state);
         
-        if (success != 0)
+        if (error != 0)
         {
-            throw decode_error(mbstr);
+            throw string_encoding_error(error);
         }
 
-        std::wstring wstr(len, ' ');
+        std::wstring wstr(len - 1, ' ');
         size_t ret_val;
-        success = mbsrtowcs_s(&ret_val, &wstr[0], len,  &mbstr, wstr.size(), &state);
+        error = mbsrtowcs_s(&ret_val, &wstr[0], wstr.size() + 1,  &mbstr, len, &state);
         
-        if (success != 0 || ret_val != len)
+        if (error != 0 || ret_val != len)
         {
-            throw decode_error(mbstr);
+            throw string_encoding_error(error);
         }
 
         return wstr;
@@ -106,12 +137,23 @@ namespace awl
 
 #else
 
+    inline std::string EncodeString(const wchar_t* wstr)
+    {
+        std::mbstate_t state = std::mbstate_t();
+        //This length does not include the terminating zero.
+        std::size_t len = std::wcsrtombs(nullptr, &wstr, 0, &state);
+        std::string mbstr(len, ' ');
+        std::wcsrtombs(&mbstr[0], &wstr, len + 1, &state);
+        return mbstr;
+    }
+
     inline std::wstring DecodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
-        std::size_t len = 1 + std::mbsrtowcs(nullptr, &mbstr, 0, &state);
+        //This length does not include the terminating zero.
+        std::size_t len = std::mbsrtowcs(nullptr, &mbstr, 0, &state);
         std::wstring wstr(len, ' ');
-        std::mbsrtowcs(&wstr[0], &mbstr, wstr.size(), &state);
+        std::mbsrtowcs(&wstr[0], &mbstr, len + 1, &state);
         return wstr;
     }
 
