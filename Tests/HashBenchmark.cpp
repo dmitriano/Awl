@@ -47,14 +47,21 @@ static void CalcHash(const TestContext & context)
         {
             Hash::value_type new_val = hash(p_buffer.get(), vector_size);
 
-            Assert::IsTrue(val == 0 || new_val == val);
+            if (val == 0)
+            {
+                val = new_val;
+            }
+            else
+            {
+                Assert::IsTrue(new_val == val);
+            }
         }
 
         context.out << awl::FromACString(typeid(hash).name()) << _T(": ");
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << std::endl;
+        context.out << _T(" Hash : ") << val << _T(" ") << std::endl;
     }
 }
 

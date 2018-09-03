@@ -177,11 +177,14 @@ namespace awl
 
         static inline uint64_t crc64(uint64_t crc, const uint8_t *s, size_t l)
         {
-            for (size_t j = 0; j < l; j++)
+            const uint8_t * end = s + l;
+            
+            for (const uint8_t * p = s; p != end; ++p)
             {
-                uint8_t byte = s[j];
+                const uint8_t byte = *p;
                 crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
             }
+            
             return crc;
         }
 
