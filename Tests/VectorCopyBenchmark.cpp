@@ -5,7 +5,6 @@
 
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/StdConsole.h"
 
 using namespace awl::testing;
 

@@ -73,7 +73,16 @@ namespace awl
             {
                 ++(i->second.usage);
 
-                val = i->second.val;
+                const Char * raw_val = i->second.val;
+
+                if (raw_val == nullptr)
+                {
+                    val.clear();
+                }
+                else
+                {
+                    val = i->second.val;
+                }
 
                 return true;
             }
