@@ -65,6 +65,19 @@ static void CalcHash(const TestContext & context)
     }
 }
 
+AWL_TEST(Hash)
+{
+    using namespace awl::crypto;
+
+    {
+        Crc64 hash;
+
+        const char * sample = "123456789";
+
+        Assert::IsTrue(hash(reinterpret_cast<const uint8_t *>(sample), std::strlen(sample)) == 0xe9c6d914c4b8d9caULL);
+    }
+}
+
 AWL_BENCHMARK(HashPerformance)
 {
     using namespace awl::crypto;
