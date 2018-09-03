@@ -5,7 +5,7 @@
 #include <set>
 #include <memory>
 
-#include "Awl/Hash.h"
+#include "Awl/Crypto/Crc64.h"
 #include "Awl/String.h"
 
 #include "Awl/StopWatch.h"
