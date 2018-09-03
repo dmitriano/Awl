@@ -89,11 +89,15 @@ AWL_TEST(Hash)
         Assert::IsTrue(val == sample_val);
     }
 
+#if AWL_CPPSTD >= 17
+
     {
         std::set<int> set{ 1, 2, 3 };
 
         hash(set.begin(), set.end());
     }
+
+#endif
 }
 
 AWL_BENCHMARK(HashPerformance)

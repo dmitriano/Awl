@@ -34,6 +34,8 @@ namespace awl
         {
         public:
 
+#if AWL_CPPSTD >= 17
+            
             template <class InputIt>
             typename std::enable_if<std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type operator()(InputIt begin, InputIt end) const
             {
@@ -60,6 +62,25 @@ namespace awl
 
                 return to_array(crc);
             }
+#else
+
+            //Works a bit faster than C++ 17 version.
+            template <class InputIt>
+            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1, value_type>::type operator()(InputIt begin, InputIt end) const
+            {
+                typedef typename std::iterator_traits<InputIt>::value_type T;
+
+                uint64_t crc = 0;
+
+                for (InputIt i = begin; i != end; ++i)
+                {
+                    Calc(crc, static_cast<uint8_t>(*i));
+                }
+
+                return to_array(crc);
+            }
+
+#endif
 
         private:
 
