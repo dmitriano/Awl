@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Awl/Crypto/BasicHash.h"
+
 #include <stdint.h>
 #include <array>
 #include <type_traits>
-
-#include "Awl/Crypto/BasicHash.h"
 
 namespace awl
 {
@@ -48,8 +48,6 @@ namespace awl
             template <class InputIt>
             typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1, value_type>::type operator()(InputIt begin, InputIt end) const
             {
-                typedef typename std::iterator_traits<InputIt>::value_type T;
-
                 uint64_t crc = 0;
 
                 for (InputIt i = begin; i != end; ++i)

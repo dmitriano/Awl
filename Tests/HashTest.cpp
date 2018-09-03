@@ -6,6 +6,11 @@
 #include <memory>
 
 #include "Awl/Crypto/Crc64.h"
+
+#ifdef AWL_OPENSSL
+#include "Awl/Crypto/OpenSslHash.h"
+#endif
+
 #include "Awl/String.h"
 
 #include "Awl/StopWatch.h"
@@ -25,7 +30,7 @@ static double ReportSpeed(const TestContext & context, const awl::StopWatch & w,
 }
 
 template <class Hash>
-static void CalcHash(const TestContext & context)
+static void CalcHash(const TestContext & context, const awl::Char * type_name = nullptr)
 {
     AWL_ATTRIBUTE(size_t, vector_size, 1000000);
     AWL_ATTRIBUTE(size_t, iteration_count, 1);
@@ -58,7 +63,16 @@ static void CalcHash(const TestContext & context)
             }
         }
 
-        context.out << awl::FromACString(typeid(hash).name()) << _T(": ");
+        if (type_name == nullptr)
+        {
+            context.out << awl::FromACString(typeid(hash).name());
+        }
+        else
+        {
+            context.out << type_name;
+        }
+        
+        context.out << _T(": ");
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
@@ -104,5 +118,14 @@ AWL_BENCHMARK(HashPerformance)
 {
     using namespace awl::crypto;
     
-    CalcHash<Crc64>(context);
+    CalcHash<Crc64>(context, _T("Crc64"));
+
+#ifdef AWL_OPENSSL
+
+    CalcHash<Md5>(context, _T("Md5"));
+    CalcHash<Sha1>(context, _T("Sha1"));
+    CalcHash<Sha256>(context, _T("Sha256"));
+    CalcHash<Sha512>(context, _T("Sha512"));
+
+#endif
 }
