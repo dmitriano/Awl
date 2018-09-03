@@ -38,16 +38,16 @@ static void CalcHash(const TestContext & context)
 
     Hash hash;
 
-    Hash::value_type val = 0;
+    Hash::value_type val = {};
 
     {
         awl::StopWatch w;
 
         for (int i = 0; i < iteration_count; ++i)
         {
-            Hash::value_type new_val = hash(p_buffer.get(), vector_size);
+            Hash::value_type new_val = hash(p_buffer.get(), p_buffer.get() + vector_size);
 
-            if (val == 0)
+            if (val == Hash::value_type{})
             {
                 val = new_val;
             }
@@ -61,7 +61,14 @@ static void CalcHash(const TestContext & context)
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : ") << val << _T(" ") << std::endl;
+        context.out << _T(" Hash : 0x") << std::hex;
+        
+        for (size_t i = 0; i < val.size(); ++i)
+        {
+            context.out << val[i];
+        }
+        
+        context.out << std::endl;
     }
 }
 
@@ -72,9 +79,13 @@ AWL_TEST(Hash)
     {
         Crc64 hash;
 
-        const char * sample = "123456789";
+        std::string sample("123456789");
 
-        Assert::IsTrue(hash(reinterpret_cast<const uint8_t *>(sample), std::strlen(sample)) == 0xe9c6d914c4b8d9caULL);
+        const Crc64::value_type sample_val = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+
+        const Crc64::value_type val = hash(sample.begin(), sample.end());
+        
+        Assert::IsTrue(val == sample_val);
     }
 }
 

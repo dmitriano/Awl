@@ -43,7 +43,7 @@ namespace awl
 {
     namespace crypto
     {
-        static const uint64_t crc64_tab[256] = 
+        const uint64_t Crc64::crc64_tab[256] =
         {
             UINT64_C(0x0000000000000000), UINT64_C(0x7ad870c830358979),
             UINT64_C(0xf5b0e190606b12f2), UINT64_C(0x8f689158505e9b8b),
@@ -174,23 +174,5 @@ namespace awl
             UINT64_C(0xa6df411fbfb21ca3), UINT64_C(0xdc0731d78f8795da),
             UINT64_C(0x536fa08fdfd90e51), UINT64_C(0x29b7d047efec8728),
         };
-
-        static inline uint64_t crc64(uint64_t crc, const uint8_t *s, size_t l)
-        {
-            const uint8_t * end = s + l;
-            
-            for (const uint8_t * p = s; p != end; ++p)
-            {
-                const uint8_t byte = *p;
-                crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
-            }
-            
-            return crc;
-        }
-
-        uint64_t CalcCrc64(const uint8_t * data, size_t len)
-        {
-            return crc64(0, data, len);
-        }
     }
 }
