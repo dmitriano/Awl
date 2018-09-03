@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <array>
+#include <type_traits>
 
 namespace awl
 {
@@ -34,15 +35,27 @@ namespace awl
         public:
 
             template <class InputIt>
-            value_type operator()(InputIt begin, InputIt end) const
+            typename std::enable_if<std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type operator()(InputIt begin, InputIt end) const
             {
-                uint64_t crc = 0;
+                typedef typename std::iterator_traits<InputIt>::value_type T;
                 
+                uint64_t crc = 0;
+
                 for (InputIt i = begin; i != end; ++i)
                 {
-                    const uint8_t byte = *i;
+                    if constexpr (sizeof(T) == 1)
+                    {
+                        Calc(crc, static_cast<uint8_t>(*i));
+                    }
+                    else
+                    {
+                        auto bytes = to_array(*i);
 
-                    crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
+                        for (size_t j = 0; j < bytes.size(); ++j)
+                        {
+                            Calc(crc, static_cast<uint8_t>(bytes[j]));
+                        }
+                    }
                 }
 
                 return to_array(crc);
@@ -51,6 +64,11 @@ namespace awl
         private:
 
             static const uint64_t crc64_tab[256];
+
+            static void Calc(uint64_t & crc, uint8_t byte)
+            {
+                crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
+            };
 
             template <typename T>
             static std::array<std::uint8_t, sizeof(T)> to_array(T value)

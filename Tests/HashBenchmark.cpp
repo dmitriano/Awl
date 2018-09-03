@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <set>
 #include <memory>
 
 #include "Awl/Hash.h"
@@ -76,9 +77,9 @@ AWL_TEST(Hash)
 {
     using namespace awl::crypto;
 
-    {
-        Crc64 hash;
+    Crc64 hash;
 
+    {
         std::string sample("123456789");
 
         const Crc64::value_type sample_val = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
@@ -86,6 +87,12 @@ AWL_TEST(Hash)
         const Crc64::value_type val = hash(sample.begin(), sample.end());
         
         Assert::IsTrue(val == sample_val);
+    }
+
+    {
+        std::set<int> set{ 1, 2, 3 };
+
+        hash(set.begin(), set.end());
     }
 }
 
