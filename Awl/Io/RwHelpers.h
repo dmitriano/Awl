@@ -196,22 +196,10 @@ namespace awl
             WriteVector(s, v);
         }
 
-        template <class T>
-        struct remove_const
-        {
-            typedef T type;
-        };
-
-        template <class T>
-        struct remove_const<const T>
-        {
-            typedef T type;
-        };
-
         template <class Stream, class First, class Second>
         inline void Read(Stream & s, std::pair<First, Second> & val)
         {
-            Read(s, const_cast<typename remove_const<First>::type &>(val.first));
+            Read(s, const_cast<typename std::remove_const<First>::type &>(val.first));
             Read(s, val.second);
         }
 
