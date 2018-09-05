@@ -3,6 +3,8 @@
 #include "Awl/Testing/ScalarFormatter.h"
 #include "Awl/Testing/TypeTraits.h"
 
+#include <iterator>
+
 namespace awl
 {
     namespace testing

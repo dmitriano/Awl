@@ -64,9 +64,20 @@ namespace awl
     /*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
         of std::iterator.*/
     template <class T, class Link>
-    class base_single_iterator : public std::iterator<std::forward_iterator_tag, T *>
+    class base_single_iterator
     {
     public:
+
+        typedef std::forward_iterator_tag iterator_category;
+
+        //A value is not T but T*, because the list is a contaner of elements of type T *.
+        typedef T * value_type;
+
+        //typedef std::ptrdiff_t difference_type;
+
+        typedef value_type * pointer;
+
+        typedef value_type & reference;
 
         base_single_iterator(Link *p) : pCur(p) {}
 
