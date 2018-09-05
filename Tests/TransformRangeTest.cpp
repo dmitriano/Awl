@@ -93,6 +93,11 @@ AWL_TEST(TransformIterator)
 
         auto end = awl::make_transform_iterator(m.end(), yfunc);
 
+        static_assert(std::is_same_v<decltype(begin)::value_type, int>, "wrong value_type");
+        static_assert(std::is_same_v<decltype(begin)::reference, int &>, "wrong value_type");
+        //static_assert(std::is_same_v<decltype(&decltype(begin)::operator*()), int &>, "wrong value_type");
+        static_assert(std::is_same_v<decltype(*begin), int &>, "wrong value_type");
+
         {
             auto i = begin;
 
@@ -103,11 +108,26 @@ AWL_TEST(TransformIterator)
         
             Assert::AreEqual(2, *i);
 
-            //*i = 5;
+            *i = 5;
             
-            //Assert::AreEqual(3, *i++);
+            Assert::AreEqual(5, *i++);
 
-            //Assert::IsTrue(i == end);
+            Assert::AreEqual(3, *i++);
+
+            Assert::IsTrue(i == end);
+        }
+
+        {
+            auto i = begin;
+
+            Assert::IsTrue(i == begin);
+            Assert::IsTrue(i != end);
+
+            Assert::AreEqual(1, *i++);
+            Assert::AreEqual(5, *i++);
+            Assert::AreEqual(3, *i++);
+
+            Assert::IsTrue(i == end);
         }
     }
 }
