@@ -83,6 +83,6 @@ namespace awl
     template <class T>
     inline auto make_count(T end)
     {
-        return make_range(int_iterator<T>(0), int_iterator<T>(end));
+        return make_int_range(static_cast<T>(0), end);
     }
 }

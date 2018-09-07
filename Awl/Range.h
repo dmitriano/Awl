@@ -21,6 +21,11 @@ namespace awl
             return m_end;
         }
 
+        bool empty() const
+        {
+            return begin() == end();
+        }
+
     private:
         
         Iterator m_begin;
