@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "Awl/StopWatch.h"
+#include "Awl/IntRange.h"
 #include "Awl/Testing/UnitTest.h"
 
 using namespace awl::testing;
@@ -68,7 +69,7 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
 
     std::unique_ptr<T[]> p_buffer(new T[vector_size]);
     
-    for (int i = 0; i < vector_size; ++i)
+    for (auto i : awl::make_count(static_cast<int>(vector_size)))
     {
         FromInt(p_buffer[i], i);
     }
@@ -84,7 +85,7 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
     {
         awl::StopWatch w;
 
-        for (int i = 0; i < iteration_count; ++i)
+        for (auto i : awl::make_count(iteration_count))
         {
             std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
 
@@ -102,7 +103,7 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
     {
         awl::StopWatch w;
 
-        for (int i = 0; i < iteration_count; ++i)
+        for (auto i : awl::make_count(iteration_count))
         {
             v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
 

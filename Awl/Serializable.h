@@ -38,6 +38,7 @@ namespace awl
 }
 
 //Used inside of a class definition for defining as_tuple() member functions.
+//Theoretically all the as_tuple() overloads can be constexpr, but GCC 4.9 does not compile it.
 #define AWL_SERIALIZABLE(...) \
     auto as_const_tuple() const \
     { \
@@ -51,6 +52,10 @@ namespace awl
     { \
         return std::tie(__VA_ARGS__); \
     }
+
+//There also can be 
+//  friend auto awl::object_as_tuple<ClassName>(ClassName &);
+//but this also does not compile with GCC 4.9, but compiles with VS2017.
 
 //Used outside of a class definition for defining object_as_tuple functions.
 //It will become easy to do with __VA_OPT__ in C++20 but I don't see how to do this currently.
