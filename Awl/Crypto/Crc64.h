@@ -31,28 +31,49 @@ namespace awl
                     }
                     else
                     {
-                        auto bytes = to_array(*i);
+                        const auto bytes = to_array(*i);
 
                         for (size_t j = 0; j < bytes.size(); ++j)
                         {
-                            Calc(crc, static_cast<uint8_t>(bytes[j]));
+                            Calc(crc, bytes[j]);
                         }
                     }
                 }
 
                 return to_array(crc);
             }
+
 #else
 
             //Works a bit faster than C++ 17 version.
             template <class InputIt>
-            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1, value_type>::type operator()(InputIt begin, InputIt end) const
+            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type 
+                operator()(InputIt begin, InputIt end) const
             {
                 uint64_t crc = 0;
 
                 for (InputIt i = begin; i != end; ++i)
                 {
                     Calc(crc, static_cast<uint8_t>(*i));
+                }
+
+                return to_array(crc);
+            }
+
+            template <class InputIt>
+            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) >= 2 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type 
+                operator()(InputIt begin, InputIt end) const
+            {
+                uint64_t crc = 0;
+
+                for (InputIt i = begin; i != end; ++i)
+                {
+                    const auto bytes = to_array(*i);
+
+                    for (size_t j = 0; j < bytes.size(); ++j)
+                    {
+                        Calc(crc, bytes[j]);
+                    }
                 }
 
                 return to_array(crc);
@@ -68,19 +89,6 @@ namespace awl
             {
                 crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
             };
-
-            template <typename T>
-            static std::array<std::uint8_t, sizeof(T)> to_array(T value)
-            {
-                std::array<std::uint8_t, sizeof(T)> result;
-
-                for (std::size_t i{ sizeof(T) }; i; --i)
-                {
-                    result[i - 1] = static_cast<uint8_t>(value >> ((sizeof(T) - i) * 8));
-                }
-
-                return result;
-            }
         };
     }
 }

@@ -103,15 +103,11 @@ AWL_TEST(Hash)
         Assert::IsTrue(val == sample_val);
     }
 
-#if AWL_CPPSTD >= 17
-
     {
         std::set<int> set{ 1, 2, 3 };
 
         hash(set.begin(), set.end());
     }
-
-#endif
 }
 
 AWL_BENCHMARK(HashPerformance)
@@ -128,4 +124,87 @@ AWL_BENCHMARK(HashPerformance)
     CalcHash<Sha512>(context, _T("Sha512"));
 
 #endif
+}
+
+AWL_TEST(Hash_ToFromArray)
+{
+    using namespace awl::crypto;
+
+    constexpr uint64_t sample = UINT64_C(0xab28ecb46814fe75);
+
+    const auto a = to_array(sample);
+
+    const auto val = from_array<uint64_t>(a);
+
+    Assert::AreEqual(sample, val);
+}
+
+namespace examples
+{
+    //Theoretically as an example, StringHash can be used with switch operator, but is a bit strange usage.
+    template <class Hash>
+    class StringHash
+    {
+    public:
+
+        static constexpr size_t size()
+        {
+            return Hash::size();
+        }
+
+        typedef typename Hash::value_type value_type;
+
+        explicit StringHash(Hash h = {}) : m_hash(h)
+        {
+        }
+
+        template <typename C>
+        value_type operator()(const std::basic_string<C> & str) const
+        {
+            return m_hash(str.begin(), str.end());
+        }
+
+        template <typename C, size_t N>
+        constexpr value_type operator()(const C(&s)[N]) const
+        {
+            static_assert(N >= 1, "The parameter is not a string literal.");
+
+            constexpr size_t length = N - 1;
+
+            return m_hash(s, s + length);
+        }
+
+    private:
+
+        Hash m_hash;
+    };
+}
+
+AWL_TEST(Hash_String)
+{
+    using namespace awl::crypto;
+
+    typedef examples::StringHash<Crc64> Hash;
+
+    Hash hash;
+
+    {
+        std::string sample("123456789");
+
+        const Hash::value_type sample_val = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+
+        const Hash::value_type val = hash(sample);
+
+        Assert::IsTrue(sample_val == val);
+    }
+
+    {
+        std::wstring sample(L"123456789");
+
+        auto str_hash = hash(sample);
+
+        auto literal_hash = hash(L"123456789");
+
+        Assert::IsTrue(str_hash == literal_hash);
+    }
 }
