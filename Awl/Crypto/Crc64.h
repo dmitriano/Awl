@@ -14,6 +14,10 @@ namespace awl
         {
         public:
 
+            Crc64(uint64_t seed = 127) : m_seed(seed)
+            {
+            }
+
 #if AWL_CPPSTD >= 17
             
             template <class InputIt>
@@ -47,10 +51,10 @@ namespace awl
 
             //Works a bit faster than C++ 17 version.
             template <class InputIt>
-            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type 
+            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type
                 operator()(InputIt begin, InputIt end) const
             {
-                uint64_t crc = 0;
+                uint64_t crc = m_seed;
 
                 for (InputIt i = begin; i != end; ++i)
                 {
@@ -61,10 +65,10 @@ namespace awl
             }
 
             template <class InputIt>
-            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) >= 2 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type 
+            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) >= 2 && std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type
                 operator()(InputIt begin, InputIt end) const
             {
-                uint64_t crc = 0;
+                uint64_t crc = m_seed;
 
                 for (InputIt i = begin; i != end; ++i)
                 {
@@ -85,9 +89,11 @@ namespace awl
 
             static const uint64_t crc64_tab[256];
 
+            uint64_t m_seed;
+
             static void Calc(uint64_t & crc, uint8_t byte)
             {
-                crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
+                crc = crc64_tab[static_cast<uint8_t>(crc) ^ byte] ^ (crc >> 8);
             };
         };
     }

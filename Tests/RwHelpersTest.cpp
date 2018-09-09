@@ -9,14 +9,12 @@
 using namespace awl::testing;
 using namespace awl::io;
 
-static std::vector<uint8_t> reusable_v;
-
 template <class T>
 static void Test(const TestContext & context, T sample)
 {
     AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
-    reusable_v.resize(0);
+    std::vector<uint8_t> reusable_v;
 
     VectorOutputStream out(reusable_v);
 

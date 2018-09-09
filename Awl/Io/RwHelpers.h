@@ -12,6 +12,7 @@
 #include <utility> 
 
 #include "Awl/Serializable.h"
+#include "Awl/Io/IoException.h"
 
 namespace awl
 {
@@ -22,7 +23,14 @@ namespace awl
         {
             const size_t size = sizeof(T);
 
-            s.Read(reinterpret_cast<uint8_t *>(&val), size);
+            const size_t actually_read = s.Read(reinterpret_cast<uint8_t *>(&val), size);
+
+            assert(actually_read <= size);
+
+            if (actually_read < size)
+            {
+                throw EndOfFileException(size, actually_read);
+            }
         }
 
         //Scalar types are passed by value but not by const reference.

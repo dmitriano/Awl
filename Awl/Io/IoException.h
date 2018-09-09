@@ -23,7 +23,7 @@ namespace awl
 
             String GetMessage() const override
             {
-                return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(".");
+                return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(" .");
             }
 
             AWL_IMPLEMENT_EXCEPTION
@@ -32,6 +32,33 @@ namespace awl
 
             const size_t requestedCount;
             const size_t actuallyReadCount;
+        };
+
+        class CurruptionException : public IoException
+        {
+        public:
+
+            CurruptionException(size_t pos = -1) : m_pos(pos)
+            {
+            }
+
+            String GetMessage() const override
+            {
+                return format() << _T("The stream is corrupted");
+
+                if (m_pos != -1)
+                {
+                    format() << _T(" at ") << m_pos;
+                }
+
+                format() << _T(" .");
+            }
+
+            AWL_IMPLEMENT_EXCEPTION
+
+        private:
+
+            const size_t m_pos;
         };
     }
 }

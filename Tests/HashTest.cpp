@@ -12,6 +12,7 @@
 #endif
 
 #include "Awl/String.h"
+#include "Awl/IntRange.h"
 
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
@@ -32,6 +33,16 @@ static double ReportSpeed(const TestContext & context, const awl::StopWatch & w,
 template <class Hash>
 static void CalcHash(const TestContext & context, const awl::Char * type_name = nullptr)
 {
+    const Hash hash;
+
+    {
+        auto r = awl::make_int_range<uint8_t>(0, 1);
+        
+        auto zero_val = hash(r.begin(), r.end());
+
+        Assert::IsFalse(zero_val == Hash::value_type{});
+    }
+    
     AWL_ATTRIBUTE(size_t, vector_size, 1000000);
     AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
@@ -41,8 +52,6 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     {
         p_buffer[i] = static_cast<uint8_t>(i);
     }
-
-    const Hash hash;
 
     Hash::value_type val = {};
 
@@ -91,7 +100,7 @@ AWL_TEST(Hash)
 {
     using namespace awl::crypto;
 
-    const Crc64 hash;
+    const Crc64 hash(0);
 
     {
         std::string sample("123456789");
@@ -210,7 +219,7 @@ AWL_TEST(Hash_String)
 
     typedef examples::StringHash<Crc64> Hash;
 
-    const Hash hash;
+    const Hash hash(0);
 
     {
         std::string sample("123456789");

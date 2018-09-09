@@ -25,7 +25,7 @@ namespace awl
                 return m_i == m_v.end();
             }
 
-            void Read(uint8_t * buffer, size_t count) override
+            size_t Read(uint8_t * buffer, size_t count) override
             {
                 auto diff = m_v.end() - m_i;
 
@@ -33,11 +33,8 @@ namespace awl
 
                 auto available = static_cast<size_t>(diff);
                 
-                if (available < count)
-                {
-                    throw EndOfFileException(count, available);
-                }
-
+                const size_t read_count = std::min(available, count);
+                
                 //Can be slow with uint8_t.
                 //std::copy(m_i, end, stdext::make_checked_array_iterator(buffer, count));
 
@@ -48,11 +45,13 @@ namespace awl
 
                 const uint8_t * src = m_v.data() + pos;
 
-                std::memcpy(buffer, src, count * sizeof(uint8_t));
+                std::memcpy(buffer, src, read_count * sizeof(uint8_t));
 
-                auto end = m_i + count;
+                auto end = m_i + read_count;
 
                 m_i = end;
+
+                return read_count;
             }
 
         private:
