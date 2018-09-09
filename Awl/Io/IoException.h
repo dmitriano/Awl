@@ -34,11 +34,11 @@ namespace awl
             const size_t actuallyReadCount;
         };
 
-        class CurruptionException : public IoException
+        class CorruptionException : public IoException
         {
         public:
 
-            CurruptionException(size_t pos = -1) : m_pos(pos)
+            CorruptionException(size_t pos = -1) : m_pos(pos)
             {
             }
 

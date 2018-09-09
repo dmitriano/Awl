@@ -63,7 +63,7 @@ namespace awl
 
                         if (actually_read < Hash::size())
                         {
-                            throw CurruptionException();
+                            throw CorruptionException();
                         }
 
                         m_block.resize(actually_read);
@@ -81,7 +81,7 @@ namespace awl
 
                         if (calculated_val != read_val)
                         {
-                            throw CurruptionException();
+                            throw CorruptionException();
                         }
 
                         m_block.resize(actually_read - Hash::size());
