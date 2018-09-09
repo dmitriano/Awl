@@ -42,7 +42,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
         p_buffer[i] = static_cast<uint8_t>(i);
     }
 
-    Hash hash;
+    const Hash hash;
 
     Hash::value_type val = {};
 
@@ -91,7 +91,7 @@ AWL_TEST(Hash)
 {
     using namespace awl::crypto;
 
-    Crc64 hash;
+    const Crc64 hash;
 
     {
         std::string sample("123456789");
@@ -178,6 +178,30 @@ namespace examples
 
         Hash m_hash;
     };
+
+    class EasyHash
+    {
+    public:
+
+        typedef uint32_t value_type;
+
+        uint32_t operator()(std::string::const_iterator begin, std::string::const_iterator end) const
+        {
+            return (*this)(&(*begin), &(*begin) + (end - begin));
+        }
+
+        constexpr uint32_t operator()(const char * begin, const char * end) const
+        {
+            uint32_t seed = std::numeric_limits<uint32_t>::max() / 2;
+
+            for (const char * p = begin; p != end; ++p)
+            {
+                seed = static_cast<uint32_t>(*p * 33ULL) ^ seed;
+            }
+
+            return seed;
+        }
+    };
 }
 
 AWL_TEST(Hash_String)
@@ -186,7 +210,7 @@ AWL_TEST(Hash_String)
 
     typedef examples::StringHash<Crc64> Hash;
 
-    Hash hash;
+    const Hash hash;
 
     {
         std::string sample("123456789");
@@ -208,3 +232,28 @@ AWL_TEST(Hash_String)
         Assert::IsTrue(str_hash == literal_hash);
     }
 }
+
+AWL_TEST(Hash_Switch)
+{
+    using namespace awl::crypto;
+
+    using namespace examples;
+
+    typedef StringHash<EasyHash> Hash;
+
+    const Hash hash;
+
+    const std::string sample = "communism";
+
+    switch (hash(sample))
+    {
+    case hash("never comes"):
+        Assert::Fail();
+
+    case hash("communism"):
+        break;
+    
+    default:
+        Assert::Fail();
+    }
+};
