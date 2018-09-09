@@ -19,7 +19,7 @@ namespace awl
     namespace io
     {
         template <class Stream>
-        inline void RawRead(Stream & s, uint8_t * buffer, size_t count)
+        inline void ReadRaw(Stream & s, uint8_t * buffer, size_t count)
         {
             const size_t actually_read = s.Read(buffer, count);
 
@@ -36,7 +36,7 @@ namespace awl
         {
             const size_t size = sizeof(T);
 
-            RawRead(s, reinterpret_cast<uint8_t *>(&val), size);
+            ReadRaw(s, reinterpret_cast<uint8_t *>(&val), size);
         }
 
         //Scalar types are passed by value but not by const reference.
@@ -104,7 +104,7 @@ namespace awl
 
             val.resize(len);
 
-            RawRead(s, reinterpret_cast<uint8_t *>(const_cast<Char *>(val.data())), len * sizeof(Char));
+            ReadRaw(s, reinterpret_cast<uint8_t *>(const_cast<Char *>(val.data())), len * sizeof(Char));
 
             *(const_cast<Char *>(val.data() + len)) = 0;
         }
@@ -122,7 +122,7 @@ namespace awl
         template <class Stream, typename T>
         typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type ReadVector(Stream & s, std::vector<T> & v)
         {
-            RawRead(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
+            ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
         }
 
         template <class Stream, typename T>

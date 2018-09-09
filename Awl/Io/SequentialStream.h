@@ -51,7 +51,7 @@ namespace awl
                 return m_in.eof();
             }
 
-        private:
+        protected:
 
             std::istream & m_in;
         };

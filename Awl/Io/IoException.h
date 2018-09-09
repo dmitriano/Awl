@@ -46,7 +46,7 @@ namespace awl
             {
                 return format() << _T("The stream is corrupted");
 
-                if (m_pos != -1)
+                if (m_pos != static_cast<size_t>(-1))
                 {
                     format() << _T(" at ") << m_pos;
                 }
