@@ -10,5 +10,13 @@ Compiling on Windows with CMake and MSVC2017:
 
 Compiling on Linux with CMake and GCC 7.3:
 
-    cmake ../../Awl/
+    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     make -j2
+
+Running the tests:
+
+    AwlTest --filter .*Test
+
+Running the benchmarks:
+
+    AwlTest --filter .*Benchmark --verbose
