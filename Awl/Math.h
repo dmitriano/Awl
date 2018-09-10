@@ -36,7 +36,7 @@ namespace awl
         template <class I, class F>
         inline typename std::enable_if<std::is_integral<I>::value && std::is_floating_point<F>::value, I>::type round(F f)
         {
-#if (__GNUC__ == 4 && __GNUC_MINOR__ <= 9)
+#ifdef __GNUC__
             return static_cast<I>(f + 0.5f);
 #else
             return static_cast<I>(std::lruond(f));
