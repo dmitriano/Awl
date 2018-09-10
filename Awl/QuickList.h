@@ -206,7 +206,6 @@ namespace awl
         reverse_iterator rend() { return backward().end(); }
         const_reverse_iterator rend() const { return backward().end(); }
 
-        //returns true if the list is empty
         bool empty() const { return forward().empty(); }
         bool empty_or_contains_one() const { return forward().empty_or_contains_one(); }
         bool contains_one() const { return forward().contains_one(); }
@@ -214,15 +213,10 @@ namespace awl
         static void insert(iterator i, T * a) { insert_after(*i, a); }
         static void erase(iterator i) { remove(*i); }
 
-        //MSVC 2015
         static_assert(!std::is_same<iterator, reverse_iterator>::value, "iterator and reverse_iterator are the same types.");
 
-#if !defined(_MSC_VER)
-        // MSVC 2015 error C2535: 'void awl::quick_list<T,DLink>::insert(awl::single_iterator<T,Link>,T *)': member function already defined or declared
         static void insert(reverse_iterator i, T * a) { insert_before(*i, a); }
-        //MSVC 2015 error C2535: 'void awl::quick_list<T,DLink>::erase(awl::single_iterator<T,Link>)': member function already defined or declared
         static void erase(reverse_iterator i) { remove(*i); }
-#endif
 
         void push_front(T * a) { insert_after(static_cast<DLink *>(forward().null()), a); }
         void push_back(T * a) { insert_before(static_cast<DLink *>(forward().null()), a); }

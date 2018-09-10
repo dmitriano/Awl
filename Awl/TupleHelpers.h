@@ -29,7 +29,7 @@ namespace awl
         //so it's initialized an used array and, inside the initialization list,
         //it's placed ret += sizeof(Ts) that is expanded for every type of the tuple. 
         //So ret accumulate the sum of the types.
-        (void)unused {0u, sum += sizeof(Ts)...};
+        static_cast<void>(unused {0u, sum += sizeof(Ts)...});
 
         return sum;
     }
