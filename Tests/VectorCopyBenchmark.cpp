@@ -87,6 +87,8 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
 
         for (auto i : awl::make_count(iteration_count))
         {
+            static_cast<void>(i);
+
             std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
 
             //Ensure the vector was not resized.
@@ -105,6 +107,8 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
 
         for (auto i : awl::make_count(iteration_count))
         {
+            static_cast<void>(i);
+
             v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
 
             //Ensure the vector was not resized.

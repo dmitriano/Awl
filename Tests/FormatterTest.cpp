@@ -13,15 +13,15 @@ void TestIntContainer(const C * sample)
 {
     typedef std::vector<int> V;
     typedef BasicFormatter<C, V> F;
-    typedef std::basic_string<C> String;
+    typedef std::basic_string<C> TString;
 
-    String s_sample = sample;
+    TString s_sample = sample;
 
     V v = F::FromString(s_sample);
 
     Assert::IsTrue(v == V { 10, -3, 50 });
 
-    String s_result = F::ToString(v);
+    TString s_result = F::ToString(v);
 
     Assert::IsTrue(s_sample == s_result);
 }

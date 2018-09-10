@@ -76,6 +76,8 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
     
     for (auto i : awl::make_count(corruption_count))
     {
+        static_cast<void>(i);
+        
         try
         {
             Test(context, hash, sample, corrupt);

@@ -273,4 +273,4 @@ AWL_TEST(Hash_Switch)
     default:
         Assert::Fail();
     }
-};
+}
