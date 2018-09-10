@@ -48,7 +48,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
     std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[vector_size]);
 
-    for (int i = 0; i < vector_size; ++i)
+    for (size_t i = 0; i < vector_size; ++i)
     {
         p_buffer[i] = static_cast<uint8_t>(i);
     }
@@ -58,7 +58,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     {
         awl::StopWatch w;
 
-        for (int i = 0; i < iteration_count; ++i)
+        for (size_t i = 0; i < iteration_count; ++i)
         {
             typename Hash::value_type new_val = hash(p_buffer.get(), p_buffer.get() + vector_size);
 

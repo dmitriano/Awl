@@ -42,7 +42,7 @@ static void Test(const TestContext & context, Hash hash, const T & sample, const
 
         HashOutputStream<Hash> hout(out, block_size, hash);
 
-        for (int i = 0; i < iteration_count; ++i)
+        for (size_t i = 0; i < iteration_count; ++i)
         {
             Write(hout, sample);
         }
@@ -55,7 +55,7 @@ static void Test(const TestContext & context, Hash hash, const T & sample, const
 
         HashInputStream<Hash> hin(in, block_size, hash);
 
-        for (int i = 0; i < iteration_count; ++i)
+        for (size_t i = 0; i < iteration_count; ++i)
         {
             T result;
 

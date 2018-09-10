@@ -18,14 +18,14 @@ static void Test(const TestContext & context, T sample)
 
     VectorOutputStream out(reusable_v);
 
-    for (int i = 0; i < iteration_count; ++i)
+    for (size_t i = 0; i < iteration_count; ++i)
     {
         Write(out, sample);
     }
 
     VectorInputStream in(reusable_v);
 
-    for (int i = 0; i < iteration_count; ++i)
+    for (size_t i = 0; i < iteration_count; ++i)
     {
         T result;
 
@@ -209,14 +209,14 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 
     VectorOutputStream out(v);
 
-    for (int i = 0; i < iteration_count; ++i)
+    for (size_t i = 0; i < iteration_count; ++i)
     {
         WriteVector(out, sample);
     }
 
     VectorInputStream in(v);
 
-    for (int i = 0; i < iteration_count; ++i)
+    for (size_t i = 0; i < iteration_count; ++i)
     {
         std::vector<T> result;
 

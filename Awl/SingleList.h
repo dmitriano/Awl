@@ -73,7 +73,8 @@ namespace awl
         //A value is not T but T*, because the list is a contaner of elements of type T *.
         typedef T * value_type;
 
-        //typedef std::ptrdiff_t difference_type;
+        //Required by std::iterator_traits in GCC.
+        typedef std::ptrdiff_t difference_type;
 
         typedef value_type * pointer;
 

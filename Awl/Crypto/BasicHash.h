@@ -33,7 +33,8 @@ namespace awl
         template <typename T>
         constexpr std::array<std::uint8_t, sizeof(T)> to_array(T value)
         {
-            std::array<std::uint8_t, sizeof(T)> result;
+            //'= {}' is for preventing GCC warning "there is no default constructor..."
+            std::array<std::uint8_t, sizeof(T)> result = {};
 
             for (std::size_t i{ sizeof(T) }; i != 0; --i)
             {

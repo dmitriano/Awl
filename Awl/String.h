@@ -190,7 +190,7 @@ namespace awl
 
     inline String FromAString(std::string src)
     {
-        if constexpr (std::is_same_v<Char, char>)
+        if constexpr (std::is_same<Char, char>::value)
         {
             return std::forward<std::string>(src);
         }
