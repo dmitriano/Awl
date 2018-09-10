@@ -10,6 +10,8 @@ using namespace awl::testing;
 
 AWL_TEST(Cancellation_NegativeTimeDiff)
 {
+    AWL_UNUSED_CONTEXT;
+
     auto start = std::chrono::steady_clock::now();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

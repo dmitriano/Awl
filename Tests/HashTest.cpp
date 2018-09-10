@@ -98,6 +98,8 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
 AWL_TEST(Hash)
 {
+    AWL_UNUSED_CONTEXT;
+
     using namespace awl::crypto;
 
     const Crc64 hash(0);
@@ -137,6 +139,8 @@ AWL_BENCHMARK(HashPerformance)
 
 AWL_TEST(Hash_ToFromArray)
 {
+    AWL_UNUSED_CONTEXT;
+
     using namespace awl::crypto;
 
     constexpr uint64_t sample = UINT64_C(0xab28ecb46814fe75);
@@ -215,6 +219,8 @@ namespace examples
 
 AWL_TEST(Hash_String)
 {
+    AWL_UNUSED_CONTEXT;
+
     using namespace awl::crypto;
 
     typedef examples::StringHash<Crc64> Hash;
@@ -244,6 +250,8 @@ AWL_TEST(Hash_String)
 
 AWL_TEST(Hash_Switch)
 {
+    AWL_UNUSED_CONTEXT;
+
     using namespace awl::crypto;
 
     using namespace examples;

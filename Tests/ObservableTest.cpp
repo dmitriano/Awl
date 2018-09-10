@@ -193,6 +193,8 @@ public:
 
 AWL_TEST(Observable_ConstMove)
 {
+    AWL_UNUSED_CONTEXT;
+
     const X x1;
     X x2 = std::move(x1);
 

@@ -13,6 +13,8 @@ using namespace awl::testing;
 
 AWL_TEST(IntRangeInt)
 {
+    AWL_UNUSED_CONTEXT;
+
     int n = 0;
     
     for (auto i : awl::make_count(10))
@@ -25,6 +27,8 @@ AWL_TEST(IntRangeInt)
 
 AWL_TEST(IntRangeSizeT)
 {
+    AWL_UNUSED_CONTEXT;
+
     size_t n = 0;
 
     const size_t N = 10;

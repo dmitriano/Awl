@@ -43,7 +43,7 @@ static void FromInt(T & val, int i)
 }
 
 template <>
-static void FromInt(ElementStruct & val, int i)
+void FromInt(ElementStruct & val, int i)
 {
     val.i = i;
     val.x = i * 10.0;

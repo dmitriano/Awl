@@ -405,6 +405,8 @@ AWL_TEST(List)
 
 AWL_TEST(List_SingleList)
 {
+    AWL_UNUSED_CONTEXT;
+
     awl::single_list<EleMent> list;
 
     size_t count = 0;

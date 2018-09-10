@@ -44,14 +44,18 @@ namespace awl
 
             String GetMessage() const override
             {
-                return format() << _T("The stream is corrupted");
+                format out;
+                
+                out << _T("The stream is corrupted");
 
                 if (m_pos != static_cast<size_t>(-1))
                 {
-                    format() << _T(" at ") << m_pos;
+                    out << _T(" at ") << m_pos;
                 }
 
-                format() << _T(" .");
+                out << _T(" .");
+
+                return out;
             }
 
             AWL_IMPLEMENT_EXCEPTION

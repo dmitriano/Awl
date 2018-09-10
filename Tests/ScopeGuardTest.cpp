@@ -8,6 +8,8 @@ using namespace awl::testing;
 
 AWL_TEST(ScopeGuard)
 {
+    AWL_UNUSED_CONTEXT;
+
     int usage = 1;
 
     {

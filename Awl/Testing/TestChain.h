@@ -79,3 +79,5 @@ namespace awl
 
 #define AWL_TEST(test_name) AWL_LINK(test_name, Test)
 #define AWL_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark)
+
+#define AWL_UNUSED_CONTEXT (void)context
