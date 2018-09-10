@@ -4,12 +4,12 @@
 #include "Awl/String.h"
 #include "Awl/Testing/TestContext.h"
 
-namespace awl 
+namespace awl
 {
-    namespace testing 
+    namespace testing
     {
         typedef void (*TestFunc)(const TestContext & context);
-        
+
         //The objects of this class are static, they are not supposed to be created on the heap or on the stack.
         //There is no safe_exclude() in the destructor, because the order of static objects destruction in undefined,
         //so the object is not excluded from the list automatically before destruction.
@@ -35,14 +35,14 @@ namespace awl
 
             TestFunc pTestFunc;
         };
-        
+
         typedef single_list<TestLink> TestChain;
 
         //No additional data structures are created when the program starts except the linked list of the static TestLink objects.
         inline TestChain & GetTestChain()
         {
             static TestChain testChain;
-            
+
             return testChain;
         }
 

@@ -33,13 +33,13 @@ namespace awl
 
             InternalRun(i->second, context);
         }
-            
+
         void TestMap::RunAll(const TestContext & context, const std::function<bool(const String&)> & filter)
         {
             for (auto & p : testMap)
             {
                 const auto & test_name = p.first;
-                
+
                 if (filter(test_name))
                 {
                     InternalRun(p.second, context);
@@ -84,9 +84,9 @@ namespace awl
         {
             if (filter.empty())
             {
-                return [](const String & test_name) { return true; };
+                return [](const String &) { return true; };
             }
-            
+
             return [filter](const String & test_name)
             {
                 try
@@ -103,7 +103,7 @@ namespace awl
                 }
             };
         }
-        
+
         static int RunTests(const TestContext & context)
         {
             int error = 1;
@@ -119,7 +119,7 @@ namespace awl
                     AWL_ATTRIBUTE(String, filter, _T(".*_Test"));
 
                     auto f = CreateFilter(filter);
-                    
+
                     context.out << std::endl << _T("***************** Running ") << test_map->GetCount(f) << _T(" tests *****************") << std::endl;
 
                     test_map->RunAll(context, f);
@@ -192,7 +192,7 @@ namespace awl
                     test_map->PrintNames(awl::cout(), f);
 
                     awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
-                    
+
                     return 0;
                 }
 

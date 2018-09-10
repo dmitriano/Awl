@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Awl/StdConsole.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"

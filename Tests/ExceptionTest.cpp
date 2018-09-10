@@ -11,7 +11,7 @@ static void Print(const TestContext & context, const awl::Exception & e)
     context.out << e.GetClassName() << _T(" ") << e.GetMessage() << std::endl;
 }
 
-static void EncodeDecode(const TestContext & context, const std::wstring sample)
+static void EncodeDecode(const TestContext &, const std::wstring sample)
 {
     const std::string encoded = awl::EncodeString(sample.c_str());
 
@@ -31,7 +31,6 @@ AWL_TEST(DecodeString)
     }
 
     EncodeDecode(context, L"");
-    EncodeDecode(context, L"коммунизм");
 }
 
 AWL_TEST(ExceptionMessage)

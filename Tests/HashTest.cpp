@@ -24,7 +24,7 @@ static double ReportSpeed(const TestContext & context, const awl::StopWatch & w,
     const auto time = w.GetElapsedSeconds<double>();
 
     const double speed = size / time / (1024 * 1024);
-    
+
     context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
 
     return speed;
@@ -37,32 +37,32 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
     {
         auto r = awl::make_int_range<uint8_t>(0, 1);
-        
+
         auto zero_val = hash(r.begin(), r.end());
 
-        Assert::IsFalse(zero_val == Hash::value_type{});
+        Assert::IsFalse(zero_val == typename Hash::value_type{});
     }
-    
+
     AWL_ATTRIBUTE(size_t, vector_size, 1000000);
     AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
     std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[vector_size]);
-    
+
     for (int i = 0; i < vector_size; ++i)
     {
         p_buffer[i] = static_cast<uint8_t>(i);
     }
 
-    Hash::value_type val = {};
+    typename Hash::value_type val = {};
 
     {
         awl::StopWatch w;
 
         for (int i = 0; i < iteration_count; ++i)
         {
-            Hash::value_type new_val = hash(p_buffer.get(), p_buffer.get() + vector_size);
+            typename Hash::value_type new_val = hash(p_buffer.get(), p_buffer.get() + vector_size);
 
-            if (val == Hash::value_type{})
+            if (val == typename Hash::value_type{})
             {
                 val = new_val;
             }
@@ -80,18 +80,18 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
         {
             context.out << type_name;
         }
-        
+
         context.out << _T(": ");
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
         context.out << _T(" Hash : 0x") << std::hex;
-        
+
         for (size_t i = 0; i < val.size(); ++i)
         {
             context.out << val[i];
         }
-        
+
         context.out << std::endl;
     }
 }
@@ -108,7 +108,7 @@ AWL_TEST(Hash)
         const Crc64::value_type sample_val = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
 
         const Crc64::value_type val = hash(sample.begin(), sample.end());
-        
+
         Assert::IsTrue(val == sample_val);
     }
 
@@ -122,7 +122,7 @@ AWL_TEST(Hash)
 AWL_BENCHMARK(HashPerformance)
 {
     using namespace awl::crypto;
-    
+
     CalcHash<Crc64>(context, _T("Crc64"));
 
 #ifdef AWL_OPENSSL

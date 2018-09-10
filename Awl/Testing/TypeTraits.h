@@ -30,4 +30,4 @@ namespace awl
         static_assert(!is_string<wchar_t, std::string>::value, "is_string<wchar_t, std::string>::value is true.");
         static_assert(is_string<wchar_t, std::wstring>::value, "is_string<wchar_t, std::wstring>::value is false.");
     }
-};
+}

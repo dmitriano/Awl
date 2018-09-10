@@ -22,6 +22,12 @@ namespace awl
             return std::to_wstring(val);
         }
 
+        template<typename C>
+        inline typename std::enable_if<std::is_same<C, char>::value || std::is_same<C, wchar_t>::value, std::basic_string<C>>::type ToBasicString(bool)
+        {
+            return std::basic_string<C>{};
+        }
+
         // used when C is specified as other types
         template<typename C, typename T>
         typename std::enable_if<!std::is_same<C, char>::value && !std::is_same<C, wchar_t>::value, std::basic_string<C>>::type ToBasicString(T val);
@@ -39,13 +45,7 @@ namespace awl
                 return ToBasicString<C, T>(val);
             }
 
-            template<>
-            static String ToString(bool val)
-            {
-                return String{};
-            }
-
-            static void FromString(const String & s, bool & val)
+            static void FromString(const String &, bool & val)
             {
                 val = true;
             }

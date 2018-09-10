@@ -23,10 +23,10 @@ namespace awl
 
             struct Option
             {
-                Option() : usage(0), val(nullptr)
+                Option() : val(nullptr), usage(0)
                 {
                 }
-                
+
                 Option(const Char * v) : Option()
                 {
                     val = v;
@@ -42,7 +42,7 @@ namespace awl
 
                 mutable size_t usage;
             };
-            
+
             typedef std::unordered_map<String, Option> OptionsMap;
 
             OptionsMap allOptions;
