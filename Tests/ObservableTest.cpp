@@ -72,7 +72,7 @@ AWL_TEST(Observable_Events)
 {
     Something something;
 
-    Assert::AreEqual(0, something.size());
+    Assert::AreEqual(0U, something.size());
     Assert::IsTrue(something.empty());
 
     {
@@ -102,7 +102,7 @@ AWL_TEST(Observable_Events)
         Assert::IsTrue(!something.empty());
     }
 
-    Assert::AreEqual(0, something.size());
+    Assert::AreEqual(0U, something.size());
     Assert::IsTrue(something.empty());
 }
 
