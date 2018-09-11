@@ -8,7 +8,7 @@ Compiling on Windows with CMake and MSVC2017:
     cmake.exe ..\..\examples\lib\Awl -DCMAKE_GENERATOR_PLATFORM=x64
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 
-Compiling on Linux with CMake and GCC 7.3:
+Compiling on Linux with CMake and GCC 8:
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     make -j2
