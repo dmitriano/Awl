@@ -46,9 +46,9 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
     static std::vector<uint8_t> v;
 
-    v.resize(0);
-
     const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
+
+    v.reserve(total_size * 2);
 
     {
         VectorOutputStream out(v);

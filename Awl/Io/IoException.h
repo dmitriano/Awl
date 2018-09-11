@@ -74,5 +74,28 @@ namespace awl
         {
             AWL_IMPLEMENT_EXCEPTION
         };
+
+        //The exception indicating a general IO error in the user code.
+        //When the user does an IO operation he throws IoError (or an exception of another type derived from IoException)
+        //but catches IoException.
+        class IoError : public IoException
+        {
+        private:
+
+            const String theMessage;
+
+        public:
+
+            explicit IoError(String message) : theMessage(message)
+            {
+            }
+
+            String GetMessage() const override
+            {
+                return theMessage;
+            }
+
+            AWL_IMPLEMENT_EXCEPTION
+        };
     }
 }
