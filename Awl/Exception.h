@@ -21,7 +21,10 @@ namespace awl
             return FromACString(what());
         }
         
-        virtual String GetMessage() const = 0;
+        virtual String GetMessage() const
+        {
+            return GetClassName();
+        }
 
         AWL_IMPLEMENT_EXCEPTION
     };

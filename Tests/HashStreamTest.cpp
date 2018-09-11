@@ -5,9 +5,11 @@
 #include <set>
 #include <memory>
 #include <functional>
+#include <fstream>
 
 #include "Awl/Io/HashStream.h"
 #include "Awl/Io/VectorStream.h"
+#include "Awl/Io/StdStream.h"
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/IoException.h"
 
@@ -23,39 +25,64 @@
 using namespace awl::testing;
 using namespace awl::io;
 
+static double ReportSpeed(const TestContext & context, const awl::StopWatch & w, size_t size)
+{
+    const auto time = w.GetElapsedSeconds<double>();
+
+    const double speed = size / time / (1024 * 1024);
+
+    context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
+
+    return speed;
+}
+
 typedef std::function<void(std::vector<uint8_t> &)> CorruptFunc;
 
-static CorruptFunc no_corrupt = [](std::vector<uint8_t> &) {};
-
 template <class Hash, class T>
-static void Test(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = no_corrupt)
+static void TestOnVector(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = {})
 {
     AWL_ATTRIBUTE(size_t, block_size, 64);
-    AWL_ATTRIBUTE(size_t, iteration_count, 100);
+    AWL_ATTRIBUTE(size_t, sample_count, 100);
 
     static std::vector<uint8_t> v;
 
     v.resize(0);
+
+    const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
 
     {
         VectorOutputStream out(v);
 
         HashOutputStream<Hash> hout(out, block_size, hash);
 
-        for (size_t i = 0; i < iteration_count; ++i)
+        awl::StopWatch w;
+
+        for (size_t i = 0; i < sample_count; ++i)
         {
             Write(hout, sample);
         }
+
+        if (!corrupt)
+        {
+            context.out << _T("Write speed: ");
+
+            ReportSpeed(context, w, total_size);
+        }
     }
 
-    corrupt(v);
+    if (corrupt)
+    {
+        corrupt(v);
+    }
 
     {
         VectorInputStream in(v);
 
         HashInputStream<Hash> hin(in, block_size, hash);
 
-        for (size_t i = 0; i < iteration_count; ++i)
+        awl::StopWatch w;
+
+        for (size_t i = 0; i < sample_count; ++i)
         {
             T result;
 
@@ -64,9 +91,112 @@ static void Test(const TestContext & context, Hash hash, const T & sample, const
             Assert::IsTrue(sample == result, _T("read/write mismatch."));
         }
 
+        if (!corrupt)
+        {
+            context.out << _T(" Read speed: ");
+
+            ReportSpeed(context, w, total_size);
+
+            context.out << std::endl;
+        }
+
         Assert::IsTrue(in.End());
         Assert::IsTrue(hin.End());
     }
+}
+
+typedef std::function<void(const awl::Char *)> CorruptFileFunc;
+
+template <class Hash, class T>
+static void TestOnFile(const TestContext & context, Hash hash, const T & sample, const CorruptFileFunc & corrupt = {})
+{
+    AWL_ATTRIBUTE(size_t, block_size, 64);
+    AWL_ATTRIBUTE(size_t, sample_count, 100);
+    AWL_FLAG(buffered);
+    AWL_FLAG(no_hash);
+
+    const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
+
+    static const awl::Char file_name[] = _T("hash-test.dat");
+
+    {
+        std::ofstream fout;
+        
+        if (!buffered)
+        {
+            fout.rdbuf()->pubsetbuf(0, 0);
+        }
+        
+        fout.open(file_name, std::ios::out | std::ifstream::binary);
+        
+        StdOutputStream out(fout);
+
+        HashOutputStream<Hash> hout(out, block_size, hash);
+
+        SequentialOutputStream & redirected_out = no_hash ? static_cast<SequentialOutputStream &>(out) : static_cast<SequentialOutputStream &>(hout);
+        
+        awl::StopWatch w;
+
+        for (size_t i = 0; i < sample_count; ++i)
+        {
+            Write(redirected_out, sample);
+        }
+
+        if (!corrupt)
+        {
+            context.out << _T("Write speed: ");
+
+            ReportSpeed(context, w, total_size);
+        }
+    }
+
+    if (corrupt)
+    {
+        corrupt(file_name);
+    }
+
+    {
+        std::ifstream fin;
+
+        if (!buffered)
+        {
+            fin.rdbuf()->pubsetbuf(0, 0);
+        }
+
+        fin.open(file_name, std::ios::in | std::ifstream::binary);
+
+        StdInputStream in(fin);
+
+        HashInputStream<Hash> hin(in, block_size, hash);
+
+        SequentialInputStream & redirected_in = no_hash ? static_cast<SequentialInputStream &>(in) : static_cast<SequentialInputStream&>(hin);
+
+        awl::StopWatch w;
+
+        for (size_t i = 0; i < sample_count; ++i)
+        {
+            T result;
+
+            Read(redirected_in, result);
+
+            Assert::IsTrue(sample == result, _T("read/write mismatch."));
+        }
+
+        if (!corrupt)
+        {
+            context.out << _T(" Read speed: ");
+
+            ReportSpeed(context, w, total_size);
+
+            context.out << std::endl;
+        }
+
+        Assert::IsTrue(in.End());
+        Assert::IsTrue(hin.End());
+    }
+
+    //There is no wchar_t version in C++.
+    //std::remove(file_name);
 }
 
 template <class Hash, class T>
@@ -80,7 +210,7 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         
         try
         {
-            Test(context, hash, sample, corrupt);
+            TestOnVector(context, hash, sample, corrupt);
 
             Assert::Fail(_T("Corrupted stream."));
         }
@@ -94,13 +224,31 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
     }
 }
 
-AWL_TEST(IoHashStream)
+static auto MakeVector(const TestContext & context)
 {
-    awl::crypto::Crc64 hash;
-    
-    std::vector<int> sample{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    AWL_ATTRIBUTE(int, sample_size, 10);
 
-    Test(context, hash, sample);
+    const auto sample_range = awl::make_count(sample_size);
+
+    const std::vector<int> sample(sample_range.begin(), sample_range.end());
+
+    return sample;
+}
+
+AWL_TEST(IoHashStreamOnVector)
+{
+    const std::vector<int> sample = MakeVector(context);
+
+    awl::crypto::Crc64 hash;
+
+    TestOnVector(context, hash, sample);
+}
+
+AWL_TEST(IoHashStreamCorruption)
+{
+    const std::vector<int> sample = MakeVector(context);
+
+    awl::crypto::Crc64 hash;
 
     TestCorruption(context, hash, sample, [&context](std::vector<uint8_t> & v)
     {
@@ -123,4 +271,13 @@ AWL_TEST(IoHashStream)
         ++v[i];
     },
     false);
+}
+
+AWL_TEST(IoHashStreamOnFile)
+{
+    const std::vector<int> sample = MakeVector(context);
+
+    awl::crypto::Crc64 hash;
+
+    TestOnFile(context, hash, sample);
 }

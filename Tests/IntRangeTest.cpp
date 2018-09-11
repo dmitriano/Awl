@@ -23,6 +23,14 @@ AWL_TEST(IntRangeInt)
     }
 
     Assert::AreEqual(n, 10);
+
+    const std::vector<int> sample{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    const auto range = awl::make_count(10);
+    
+    const std::vector<int> v(range.begin(), range.end());
+
+    Assert::IsTrue(v == sample);
 }
 
 AWL_TEST(IntRangeSizeT)

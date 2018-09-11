@@ -64,5 +64,15 @@ namespace awl
 
             const size_t m_pos;
         };
+
+        class ReadFailException : public IoException
+        {
+            AWL_IMPLEMENT_EXCEPTION
+        };
+
+        class WriteFailException : public IoException
+        {
+            AWL_IMPLEMENT_EXCEPTION
+        };
     }
 }
