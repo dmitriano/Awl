@@ -57,7 +57,7 @@ namespace awl
             for (const auto & p : allOptions)
             {
                 if (p.second.usage == 0)
-                { 
+                {
                     cout() << _T("Unused option '" << p.first << _T("'")) << std::endl;
                 }
             }
