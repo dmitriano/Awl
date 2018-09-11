@@ -49,6 +49,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
     const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
 
     v.reserve(total_size * 2);
+    v.resize(0);
 
     {
         VectorOutputStream out(v);
