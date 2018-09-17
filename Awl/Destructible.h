@@ -41,6 +41,10 @@ namespace awl
         {
             return get();
         }
+
+        ~Destructible()
+        {
+        }
     
     private:
         
