@@ -3,6 +3,7 @@
 #include "Awl/String.h"
 
 #include <exception>
+#include <typeinfo>
 
 #define AWL_IMPLEMENT_EXCEPTION \
     const char * what() const throw() override \
