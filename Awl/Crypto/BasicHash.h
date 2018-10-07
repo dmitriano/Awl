@@ -30,8 +30,15 @@ namespace awl
             typedef HashValue<value_size> value_type;
         };
 
+//body of constexpr function not a return-statement
+#if AWL_CPPSTD >= 14
+    #define AWL_CONSTEXPR_14 constexpr
+#else
+    #define AWL_CONSTEXPR_14
+#endif
+
         template <typename T>
-        constexpr std::array<std::uint8_t, sizeof(T)> to_array(T value)
+        AWL_CONSTEXPR_14 std::array<std::uint8_t, sizeof(T)> to_array(T value)
         {
             //'= {}' is for preventing GCC warning "there is no default constructor..."
             std::array<std::uint8_t, sizeof(T)> result = {};
@@ -45,7 +52,7 @@ namespace awl
         }
 
         template <typename T>
-        constexpr T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
+        AWL_CONSTEXPR_14 T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
         {
             T val = 0;
 
