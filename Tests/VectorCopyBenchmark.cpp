@@ -7,6 +7,8 @@
 #include "Awl/IntRange.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include "BenchmarkHelpers.h"
+
 using namespace awl::testing;
 
 struct ElementStruct
@@ -48,17 +50,6 @@ void FromInt(ElementStruct & val, int i)
     val.i = i;
     val.x = i * 10.0;
     val.y = i * 10.0;
-}
-
-static double ReportSpeed(const TestContext & context, const awl::StopWatch & w, size_t size)
-{
-    const auto time = w.GetElapsedSeconds<double>();
-
-    const double speed = size / time / (1024 * 1024);
-    
-    context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
-
-    return speed;
 }
 
 template <class T>

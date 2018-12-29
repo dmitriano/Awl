@@ -22,19 +22,10 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include "BenchmarkHelpers.h"
+
 using namespace awl::testing;
 using namespace awl::io;
-
-static double ReportSpeed(const TestContext & context, const awl::StopWatch & w, size_t size)
-{
-    const auto time = w.GetElapsedSeconds<double>();
-
-    const double speed = size / time / (1024 * 1024);
-
-    context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
-
-    return speed;
-}
 
 typedef std::function<void(std::vector<uint8_t> &)> CorruptFunc;
 
