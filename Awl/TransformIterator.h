@@ -18,7 +18,7 @@ namespace awl
 
 #if AWL_CPPSTD >= 17
 
-        typedef awl::function_traits<UnaryFunction>::result_type Value;
+        typedef typename awl::function_traits<UnaryFunction>::result_type Value;
         
 #else
 

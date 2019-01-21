@@ -302,6 +302,25 @@ namespace awl
             WriteCollection(s, coll);
         }
 
+#if AWL_CPPSTD >= 17
+
+        //Implementing Read/WriteEach with fold expressions.
+
+        template<class Stream, typename ... Fields>
+        inline void ReadEach(Stream & s, std::tuple<Fields& ...> val)
+        {
+            for_each(val, [&s](auto& field) { Read(s, field); });
+        }
+
+        template<class Stream, typename ... Fields>
+        inline void WriteEach(Stream & s, const std::tuple<Fields& ...> & val)
+        {
+            for_each(val, [&s](auto& field) { Write(s, field); });
+        }
+
+#else
+        //Implementing Read/WriteEach with recursive templates.
+
         template<class Stream, std::size_t I = 0, typename... Tp>
         inline typename std::enable_if<(I == sizeof...(Tp)), void>::type ReadEach(Stream &, std::tuple<Tp...> &)
         {
@@ -313,20 +332,6 @@ namespace awl
             Read(s, std::get<I>(t));
             ReadEach<Stream, I + 1, Tp...>(s, t);
         }
-
-        //A tuple of references is passed by value.
-        template<class Stream, typename ... Fields>
-        void Read(Stream & s, std::tuple<Fields& ...> val)
-        {
-            ReadEach(s, val);
-        }
-
-        //A tuple of values is passed by reference. Cannot figure out why this does not compile with VC2017.
-        //template<class Stream, typename ... Fields>
-        //void Read(Stream & s, std::tuple<Fields ...> & val)
-        //{
-        //    ReadEach(s, val);
-        //}
 
         template<class Stream, std::size_t I = 0, typename... Tp>
         inline typename std::enable_if<(I == sizeof...(Tp)), void>::type WriteEach(Stream &, const std::tuple<Tp...> &)
@@ -340,20 +345,35 @@ namespace awl
             WriteEach<Stream, I + 1, Tp...>(s, t);
         }
 
+#endif
+        //A tuple of references is passed by value.
         template<class Stream, typename ... Fields>
-        void Write(Stream & s, const std::tuple<Fields& ...> & val)
+        inline void Read(Stream & s, std::tuple<Fields& ...> val)
+        {
+            ReadEach(s, val);
+        }
+
+        //A tuple of values is passed by reference. Cannot figure out why this does not compile with VC2017.
+        //template<class Stream, typename ... Fields>
+        //void Read(Stream & s, std::tuple<Fields ...> & val)
+        //{
+        //    ReadEach(s, val);
+        //}
+
+        template<class Stream, typename ... Fields>
+        inline void Write(Stream & s, const std::tuple<Fields& ...> & val)
         {
             WriteEach(s, val);
         }
 
         template <class Stream, typename T>
-        typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
+        inline typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
         {
             Read(s, object_as_tuple(val));
         }
 
         template <class Stream, typename T>
-        typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
+        inline typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
         {
             Write(s, object_as_tuple(val));
         }

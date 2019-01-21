@@ -2,6 +2,10 @@
 
 #include <tuple>
 
+#if AWL_CPPSTD >= 17
+#include <utility>
+#endif
+
 namespace awl
 {
 //In VS2017 the value of __cplusplus is still 199711L even with enabled /std:c++17 option,
@@ -13,6 +17,16 @@ namespace awl
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
         return (sizeof(Ts) + ...);
+    }
+
+    template <typename... Args, typename Func, std::size_t... Idx>
+    void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>) {
+        (f(std::get<Idx>(t)), ...);
+    }
+
+    template <typename... Args, typename Func>
+    void for_each(const std::tuple<Args...>& t, Func&& f) {
+        for_each(t, f, std::index_sequence_for<Args...>{});
     }
 
 #elif AWL_CPPSTD >= 14
