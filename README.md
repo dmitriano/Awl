@@ -3,10 +3,6 @@ AWL - A Working Library
 
 AWL is a small but constantly growing cross-platform C++ library.
 
-LICENSE
-
-AWL is placed in the public domain. Anyone is free to copy, modify, publish, use, compile, sell, or distribute the original AWL code, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
-
 BUILDING
 
 Compiling on Windows with CMake and MSVC2017:
