@@ -3,8 +3,6 @@ AWL - A Working Library
 
 AWL is a small but constantly growing cross-platform C++ library.
 
-BUILDING
-
 Compiling on Windows with CMake and MSVC2017:
 
     cmake.exe ..\..\examples\lib\Awl -DCMAKE_GENERATOR_PLATFORM=x64
