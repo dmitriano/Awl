@@ -95,7 +95,7 @@ AWL_TEST(FlatMapOrder)
     m.insert(std::make_pair(5, 3));
     m.insert(std::make_pair(2, 4));
 
-    Assert::AreEqual(m.m_v.size(), 5);
+    Assert::AreEqual(m.m_v.size(), static_cast<size_t>(5));
     
     for (size_t i = 0; i < m.m_v.size(); ++i)
     {
