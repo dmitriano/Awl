@@ -267,9 +267,9 @@ AWL_TEST(IoHashStreamCorruption)
 
 //This test can be used to measure the disk speed
 //Without hash:
-//./AwlTest --filter IoHashStreamOnFile.* --verbose --sample_count 1000000 --block_size 128000 --no_hash --buffered
+//./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000 --no_hash --buffered
 //With hash:
-//./AwlTest --filter IoHashStreamOnFile.* --verbose --sample_count 1000000 --block_size 128000
+//./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000
 AWL_TEST(IoHashStreamOnFile)
 {
     const std::vector<int> sample = MakeVector(context);
