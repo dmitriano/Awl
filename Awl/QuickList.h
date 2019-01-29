@@ -109,7 +109,7 @@ namespace awl
         }
     };
 
-    //! If objects of a class included to only one list, single_link can be used by default.
+    //! If objects of a class included to only one list, quick_link can be used by default.
     class quick_link : public basic_quick_link<quick_link>
     {
     private:
