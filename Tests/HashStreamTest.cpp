@@ -119,7 +119,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             fout.rdbuf()->pubsetbuf(0, 0);
         }
         
-        fout.open(file_name, std::ios::out | std::ifstream::binary);
+        fout.open(file_name, std::ios::out | std::ostream::binary);
         
         StdOutputStream out(fout);
 
@@ -155,7 +155,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             fin.rdbuf()->pubsetbuf(0, 0);
         }
 
-        fin.open(file_name, std::ios::in | std::ifstream::binary);
+        fin.open(file_name, std::ios::in | std::istream::binary);
 
         StdInputStream in(fin);
 
