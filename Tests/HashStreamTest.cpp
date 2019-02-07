@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "Awl/Io/HashStream.h"
+#include "Awl/Io/BufferedStream.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/StdStream.h"
 #include "Awl/Io/RwHelpers.h"
@@ -227,13 +228,20 @@ static auto MakeVector(const TestContext & context)
     return sample;
 }
 
-AWL_TEST(IoHashStreamOnVector)
+AWL_TEST(IoHashStreamOnVectorCrc64)
+{
+    awl::crypto::Crc64 hash;
+
+    TestOnVector(context, hash, MakeVector(context));
+}
+
+AWL_TEST(IoHashStreamOnVectorFake)
 {
     const std::vector<int> sample = MakeVector(context);
 
-    awl::crypto::Crc64 hash;
+    awl::crypto::FakeHash hash;
 
-    TestOnVector(context, hash, sample);
+    TestOnVector(context, hash, MakeVector(context));
 }
 
 AWL_TEST(IoHashStreamCorruption)

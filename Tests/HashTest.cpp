@@ -274,3 +274,17 @@ AWL_TEST(Hash_Switch)
         Assert::Fail();
     }
 }
+
+AWL_TEST(Hash_Fake)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using namespace awl::crypto;
+
+    const std::string sample1 = "communism";
+    const std::string sample2 = "never comes";
+
+    FakeHash hash;
+
+    Assert::IsTrue(hash(sample1.begin(), sample1.end()) == hash(sample2.begin(), sample2.end()));
+}

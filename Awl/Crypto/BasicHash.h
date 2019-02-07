@@ -30,6 +30,19 @@ namespace awl
             typedef HashValue<value_size> value_type;
         };
 
+        class FakeHash : public BasicHash<0u>
+        {
+        public:
+
+            template <class InputIt>
+            constexpr value_type operator()(InputIt begin, InputIt end) const
+            {
+                static_cast<void>(begin);
+                static_cast<void>(end);
+                return {};
+            }
+        };
+
 //body of constexpr function not a return-statement
 #if AWL_CPPSTD >= 14
     #define AWL_CONSTEXPR_14 constexpr
