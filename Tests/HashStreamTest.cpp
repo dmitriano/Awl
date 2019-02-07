@@ -221,11 +221,9 @@ static auto MakeVector(const TestContext & context)
 {
     AWL_ATTRIBUTE(int, sample_size, 10);
 
-    const auto sample_range = awl::make_count(sample_size);
+    const auto range = awl::make_count(sample_size);
 
-    const std::vector<int> sample(sample_range.begin(), sample_range.end());
-
-    return sample;
+    return std::vector<int>(range.begin(), range.end());
 }
 
 AWL_TEST(IoHashStreamCorruption)

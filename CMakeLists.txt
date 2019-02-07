@@ -4,6 +4,7 @@ project (AwlTest)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_CXX_STANDARD 17)
+add_definitions(-DAWL_CPPSTD=17)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # using Clang
