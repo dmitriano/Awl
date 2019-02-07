@@ -277,7 +277,11 @@ AWL_TEST(IoHashStreamOnFileCrc64)
     TestOnFile(context, awl::crypto::Crc64(), MakeVector(context));
 }
 
-//./AwlTest --filter IoHash.*FileFake.* --verbose --block_size 100000 --sample_count 10000000
+//on SSD:
+//./AwlTest --filter IoHash.*FileCrc.* --verbose --block_size 100000 --sample_count 1000 --sample_size 100000
+// Write speed: 327.32 MB/sec Read speed: 347.95 MB/sec
+//./AwlTest --filter IoHash.*FileFake.* --verbose --block_size 100000 --sample_count 1000 --sample_size 100000
+// Write speed: 1041.22 MB/sec Read speed: 1878.19 MB/sec
 AWL_TEST(IoHashStreamOnFileFake)
 {
     TestOnFile(context, awl::crypto::FakeHash(), MakeVector(context));
