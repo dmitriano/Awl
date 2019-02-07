@@ -228,22 +228,6 @@ static auto MakeVector(const TestContext & context)
     return sample;
 }
 
-AWL_TEST(IoHashStreamOnVectorCrc64)
-{
-    awl::crypto::Crc64 hash;
-
-    TestOnVector(context, hash, MakeVector(context));
-}
-
-AWL_TEST(IoHashStreamOnVectorFake)
-{
-    const std::vector<int> sample = MakeVector(context);
-
-    awl::crypto::FakeHash hash;
-
-    TestOnVector(context, hash, MakeVector(context));
-}
-
 AWL_TEST(IoHashStreamCorruption)
 {
     const std::vector<int> sample = MakeVector(context);
@@ -273,16 +257,28 @@ AWL_TEST(IoHashStreamCorruption)
     false);
 }
 
+AWL_TEST(IoHashStreamOnVectorCrc64)
+{
+    TestOnVector(context, awl::crypto::Crc64(), MakeVector(context));
+}
+
+AWL_TEST(IoHashStreamOnVectorFake)
+{
+    TestOnVector(context, awl::crypto::FakeHash(), MakeVector(context));
+}
+
 //This test can be used to measure the disk speed
 //Without hash:
 //./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000 --no_hash --buffered
 //With hash:
 //./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000
-AWL_TEST(IoHashStreamOnFile)
+AWL_TEST(IoHashStreamOnFileCrc64)
 {
-    const std::vector<int> sample = MakeVector(context);
+    TestOnFile(context, awl::crypto::Crc64(), MakeVector(context));
+}
 
-    awl::crypto::Crc64 hash;
-
-    TestOnFile(context, hash, sample);
+//./AwlTest --filter IoHash.*FileFake.* --verbose --block_size 100000 --sample_count 10000000
+AWL_TEST(IoHashStreamOnFileFake)
+{
+    TestOnFile(context, awl::crypto::FakeHash(), MakeVector(context));
 }
