@@ -145,6 +145,28 @@ namespace awl
             return m_bits[Enum2Index(value)];
         }
 
+        std::size_t count() const
+        {
+            return m_bits.count();
+        }
+        
+        constexpr std::size_t size() const noexcept
+        {
+            return m_bits.size();
+        }
+
+        bool operator==(const bitmap& other) const
+        {
+            return m_bits == other.m_bits;
+        }
+        
+        bool operator!=(const bitmap& other) const
+        {
+            return !operator == (other);
+        }
+
+        //It is not clear enough is it a good idea to have operator bool(), because, for example,
+        //'bm1 == bm2' or 'bm1 == true' compiles even if operator == (…) is not defined.
         constexpr operator bool() const { return any(); }
 
     private:

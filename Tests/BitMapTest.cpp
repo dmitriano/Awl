@@ -1,19 +1,22 @@
 #include "Awl/BitMap.h"
 
-AWL_BITMAP(Vehicle, Car, Train, AirPlain)
-
-static_assert(awl::EnumTraits<Vehicle>::count() == 3);
-
 #include "Awl/Testing/UnitTest.h"
 
 using namespace awl::testing;
+
+AWL_BITMAP(Vehicle, Car, Train, AirPlain)
+
+static_assert(awl::EnumTraits<Vehicle>::count() == 3);
 
 AWL_TEST(BitMap)
 {
     AWL_UNUSED_CONTEXT;
 
     const awl::bitmap<Vehicle> car{ Vehicle::Car };
-    
+
+    Assert::IsTrue(car.count() == 1);
+    Assert::IsTrue(car.size() == 3);
+
     Assert::IsTrue(car);
     
     Assert::IsTrue(car[Vehicle::Car]);
@@ -58,4 +61,9 @@ AWL_TEST(BitMap)
     Assert::IsFalse(var[Vehicle::Train]);
     Assert::IsFalse(var[Vehicle::AirPlain]);
     Assert::IsTrue(var == car);
+    Assert::IsTrue(var != other);
+
+    //There is no operator == (bool), but this compiles.
+    Assert::IsTrue(var == true);
+    Assert::IsTrue(none == false);
 }
