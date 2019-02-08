@@ -1,14 +1,13 @@
 #pragma once
 
+#include "EnumTraits.h"
+
 #include <type_traits>
-#include <limits>
 #include <bitset>
 #include <initializer_list>
 
 namespace awl
 {
-    template <class T> struct EnumTraits;
-
     template<typename Enum, bool IsEnum = std::is_enum<Enum>::value>
     class bitmap;
 
@@ -186,18 +185,3 @@ namespace awl
         BitSet m_bits;
     };
 }
-
-#define AWL_BITMAP(EnumName, ...) \
-    enum class EnumName { __VA_ARGS__ }; \
-    template<> \
-    struct awl::EnumTraits<EnumName> \
-    { \
-    private: \
-        enum { __VA_ARGS__ }; \
-    public: \
-        static constexpr std::size_t count() \
-        { \
-            auto values = { __VA_ARGS__ }; \
-            return static_cast<std::size_t>(values.end() - values.begin()); \
-        } \
-    };

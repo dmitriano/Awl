@@ -4,7 +4,7 @@
 
 using namespace awl::testing;
 
-AWL_BITMAP(Vehicle, Car, Train, AirPlain)
+AWL_SEQUENTIAL_ENUM(Vehicle, Car, Train, AirPlain)
 
 static_assert(awl::EnumTraits<Vehicle>::count() == 3);
 
