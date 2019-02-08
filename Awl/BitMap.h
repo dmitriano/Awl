@@ -23,12 +23,12 @@ namespace awl
 
         constexpr bitmap() = default;
 
-        constexpr bitmap(std::initializer_list<Enum> values)
+        constexpr bitmap(std::initializer_list<Enum> values) : m_bits(MakeLong(values))
         {
-            for (Enum v : values)
-            {
-                m_bits.set(Enum2Index(v), true);
-            }
+            //for (Enum v : values)
+            //{
+            //    m_bits |= Enum2Bits(v);
+            //}
         }
 
         constexpr bitmap operator|(Enum value) const
@@ -180,6 +180,18 @@ namespace awl
             BitSet bits;
             bits.set(Enum2Index(value));
             return bits;
+        }
+
+        static constexpr unsigned long long MakeLong(std::initializer_list<Enum> values)
+        {
+            unsigned long long val = 0ull;
+
+            for (Enum v : values)
+            {
+                val |= (1ull << Enum2Index(v));
+            }
+
+            return val;
         }
 
         BitSet m_bits;

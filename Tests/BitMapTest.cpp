@@ -7,24 +7,25 @@ using namespace awl::testing;
 AWL_SEQUENTIAL_ENUM(Vehicle, Car, Train, AirPlain)
 
 static_assert(awl::EnumTraits<Vehicle>::count() == 3);
+//static_assert(awl::bitmap<Vehicle>{ Vehicle::Car }[Vehicle::Car]);
 
 AWL_TEST(BitMap)
 {
     AWL_UNUSED_CONTEXT;
 
-    const awl::bitmap<Vehicle> car{ Vehicle::Car };
+    constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 
     Assert::IsTrue(car.count() == 1);
-    Assert::IsTrue(car.size() == 3);
+    static_assert(car.size() == 3);
 
     Assert::IsTrue(car);
     
-    Assert::IsTrue(car[Vehicle::Car]);
+    static_assert(car[Vehicle::Car]);
     Assert::IsTrue(car & Vehicle::Car);
     Assert::IsTrue(car | Vehicle::Car);
     Assert::IsFalse(car ^ Vehicle::Car);
 
-    Assert::IsFalse(car[Vehicle::Train]);
+    static_assert(!car[Vehicle::Train]);
     Assert::IsFalse(car & Vehicle::Train);
     Assert::IsFalse(car & Vehicle::Train);
     Assert::IsTrue(car | Vehicle::Train);
