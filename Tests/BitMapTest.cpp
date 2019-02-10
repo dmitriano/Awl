@@ -4,16 +4,25 @@
 
 using namespace awl::testing;
 
-AWL_SEQUENTIAL_ENUM(Vehicle, Car, Train, AirPlain)
-using ConstBitMap = const awl::bitmap<Vehicle>;
+namespace BitMapTest
+{
+    AWL_SEQUENTIAL_ENUM(Vehicle, Car, Train, AirPlain)
+    using ConstBitMap = const awl::bitmap<Vehicle>;
+}
 
-static_assert(awl::EnumTraits<Vehicle>::count() == 3);
-static_assert(ConstBitMap{ Vehicle::Car }[Vehicle::Car]);
-static_assert(!ConstBitMap{ Vehicle::Car }[Vehicle::Train]);
-static_assert(ConstBitMap{ Vehicle::Car, Vehicle::Train}[Vehicle::Train]);
+AWL_ENUM_TRAITS(BitMapTest, Vehicle)
+
+namespace BitMapTest
+{
+    static_assert(awl::EnumTraits<Vehicle>::count() == 3);
+    static_assert(ConstBitMap{ Vehicle::Car }[Vehicle::Car]);
+    static_assert(!ConstBitMap{ Vehicle::Car }[Vehicle::Train]);
+    static_assert(ConstBitMap{ Vehicle::Car, Vehicle::Train }[Vehicle::Train]);
+}
 
 AWL_TEST(BitMap)
 {
+    using namespace BitMapTest;
     AWL_UNUSED_CONTEXT;
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
