@@ -8,15 +8,14 @@
 
 namespace awl
 {
-    template<typename Enum, bool IsEnum = std::is_enum<Enum>::value>
+    template<typename Enum, std::size_t N = EnumTraits<Enum>::count(), bool IsEnum = std::is_enum<Enum>::value>
     class bitmap;
 
-    template<typename Enum>
-    class bitmap<Enum, true>
+    template<typename Enum, std::size_t N>
+    class bitmap<Enum, N, true>
     {
     private:
 
-        constexpr const static std::size_t N = EnumTraits<Enum>::count();
         typedef std::bitset<N> BitSet;
 
     public:
@@ -197,3 +196,13 @@ namespace awl
         BitSet m_bits;
     };
 }
+
+#define AWL_BITMAP_IMPL(EnumName, access, ...) \
+    AWL_SEQUENTIAL_ENUM_IMPL(EnumName, access, __VA_ARGS__) \
+    typedef awl::bitmap<EnumName, EnumName##Traits::Count> EnumName##BitMap;
+
+#define AWL_PUBLIC_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, public:, __VA_ARGS__)
+#define AWL_PRIVATE_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, private:, __VA_ARGS__)
+#define AWL_PROTECTED_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, protected:, __VA_ARGS__)
+
+#define AWL_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, , __VA_ARGS__)

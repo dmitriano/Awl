@@ -7,22 +7,23 @@ using namespace awl::testing;
 namespace BitMapTest
 {
     AWL_SEQUENTIAL_ENUM(Vehicle, Car, Train, AirPlain)
-    using ConstBitMap = const awl::bitmap<Vehicle>;
 }
 
 AWL_ENUM_TRAITS(BitMapTest, Vehicle)
 
 namespace BitMapTest
 {
+    using ConstBitMap = const awl::bitmap<Vehicle>;
     static_assert(awl::EnumTraits<Vehicle>::count() == 3);
     static_assert(ConstBitMap{ Vehicle::Car }[Vehicle::Car]);
     static_assert(!ConstBitMap{ Vehicle::Car }[Vehicle::Train]);
     static_assert(ConstBitMap{ Vehicle::Car, Vehicle::Train }[Vehicle::Train]);
 }
 
-AWL_TEST(BitMap)
+AWL_TEST(BitMapWithEnumTraits)
 {
     using namespace BitMapTest;
+
     AWL_UNUSED_CONTEXT;
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
@@ -79,4 +80,42 @@ AWL_TEST(BitMap)
     //There is no operator == (bool), but this compiles.
     Assert::IsTrue(var == true);
     Assert::IsTrue(none == false);
+}
+
+namespace BitMapTest1
+{
+    class A
+    {
+    private:
+
+        AWL_PRIVATE_BITMAP(GameLevel1, Baby, Starter, Professional, Expert)
+
+    public:
+
+        AWL_PUBLIC_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
+
+        A(GameLevelBitMap bm) : m_bm(bm)
+        {
+        }
+
+        GameLevelBitMap m_bm;
+
+        static void Test()
+        {
+            Assert::IsTrue(GameLevel1BitMap{}.none());
+            Assert::IsTrue(GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all());
+        }
+    };
+}
+
+AWL_TEST(BitMapEnclosed)
+{
+    using namespace BitMapTest1;
+
+    AWL_UNUSED_CONTEXT;
+
+    A::Test();
+
+    Assert::IsTrue(A({ }).m_bm.none());
+    Assert::IsTrue(A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all());
 }
