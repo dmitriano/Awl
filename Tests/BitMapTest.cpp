@@ -105,6 +105,9 @@ namespace BitMapTest1
             Assert::IsTrue(GameLevel1BitMap{}.none());
             Assert::IsTrue(GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all());
         }
+
+        //error: Cannot specialize template in current scope.
+        //AWL_ENUM_TRAITS(A, GameLevel)
     };
 }
 
