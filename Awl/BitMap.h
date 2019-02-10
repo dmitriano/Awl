@@ -197,12 +197,6 @@ namespace awl
     };
 }
 
-#define AWL_BITMAP_IMPL(EnumName, access, ...) \
-    AWL_SEQUENTIAL_ENUM_IMPL(EnumName, access, __VA_ARGS__) \
+#define AWL_BITMAP(EnumName, ...) \
+    AWL_SEQUENTIAL_ENUM(EnumName, __VA_ARGS__) \
     typedef awl::bitmap<EnumName, EnumName##Traits::Count> EnumName##BitMap;
-
-#define AWL_PUBLIC_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, public:, __VA_ARGS__)
-#define AWL_PRIVATE_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, private:, __VA_ARGS__)
-#define AWL_PROTECTED_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, protected:, __VA_ARGS__)
-
-#define AWL_BITMAP(EnumName, ...) AWL_BITMAP_IMPL(EnumName, , __VA_ARGS__)

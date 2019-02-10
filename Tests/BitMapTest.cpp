@@ -88,11 +88,11 @@ namespace BitMapTest1
     {
     private:
 
-        AWL_PRIVATE_BITMAP(GameLevel1, Baby, Starter, Professional, Expert)
+        AWL_BITMAP(GameLevel1, Baby, Starter, Professional, Expert)
 
     public:
 
-        AWL_PUBLIC_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
+        AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
 
         A(GameLevelBitMap bm) : m_bm(bm)
         {
@@ -108,6 +108,8 @@ namespace BitMapTest1
     };
 }
 
+AWL_ENUM_TRAITS(BitMapTest1::A, GameLevel)
+
 AWL_TEST(BitMapEnclosed)
 {
     using namespace BitMapTest1;
@@ -118,4 +120,12 @@ AWL_TEST(BitMapEnclosed)
 
     Assert::IsTrue(A({ }).m_bm.none());
     Assert::IsTrue(A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all());
+
+    typedef awl::bitmap<A::GameLevel, A::GameLevelTraits::Count> GameLevelBitMap2;
+    Assert::IsTrue(GameLevelBitMap2{ }.none());
+    Assert::IsTrue(GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all());
+
+    typedef awl::bitmap<A::GameLevel> GameLevelBitMap3;
+    Assert::IsTrue(GameLevelBitMap3{ }.none());
+    Assert::IsTrue(GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all());
 }
