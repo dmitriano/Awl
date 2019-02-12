@@ -396,16 +396,16 @@ struct EleMent : awl::single_link
     int a = 25;
 };
 
-AWL_TEST(List)
+AWT_TEST(List)
 {
     ::TestLink<LinkA>(context);
     ::TestLink<LinkB>(context);
     ::TestLink<awl::quick_link>(context);
 }
 
-AWL_TEST(List_SingleList)
+AWT_TEST(List_SingleList)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     awl::single_list<EleMent> list;
 

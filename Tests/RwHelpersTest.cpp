@@ -93,7 +93,7 @@ private:
 
 AWL_EQUATABLE(B)
 
-AWL_TEST(IoObjectReadWrite)
+AWT_TEST(IoObjectReadWrite)
 {
     {
         std::hash<int> hasher;
@@ -230,7 +230,7 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
     Assert::IsTrue(in.End());
 }
 
-AWL_TEST(IoVectorReadWrite)
+AWT_TEST(IoVectorReadWrite)
 {
     TestVector(context, std::vector<int>{0, 1, 2, 3, 4, 5});
     TestVector(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});

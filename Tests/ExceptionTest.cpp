@@ -20,7 +20,7 @@ static void EncodeDecode(const TestContext &, const std::wstring sample)
     Assert::IsTrue(decoded == sample);
 }
 
-AWL_TEST(DecodeString)
+AWT_TEST(DecodeString)
 {
     setlocale(LC_ALL, "ru_RU.utf8");
 
@@ -33,7 +33,7 @@ AWL_TEST(DecodeString)
     EncodeDecode(context, L"");
 }
 
-AWL_TEST(ExceptionMessage)
+AWT_TEST(ExceptionMessage)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
@@ -41,7 +41,7 @@ AWL_TEST(ExceptionMessage)
     Print(context, TestException(_T("Test message.")));
 }
 
-AWL_TEST(ExceptionTryCatch)
+AWT_TEST(ExceptionTryCatch)
 {
     setlocale(LC_ALL, "en_US.utf8");
 

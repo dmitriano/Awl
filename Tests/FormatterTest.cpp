@@ -26,17 +26,17 @@ void TestIntContainer(const C * sample)
     Assert::IsTrue(s_sample == s_result);
 }
 
-AWL_TEST(Formatter_IntContainer)
+AWT_TEST(Formatter_IntContainer)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     TestIntContainer("10 -3 50");
     TestIntContainer(_T("10 -3 50"));
 }
 
-AWL_TEST(Formatter_StringContainer)
+AWT_TEST(Formatter_StringContainer)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     typedef std::set<awl::String> V;
     typedef Formatter<V> F;
@@ -52,9 +52,9 @@ AWL_TEST(Formatter_StringContainer)
     Assert::IsTrue(s_sample == s_result);
 }
 
-AWL_TEST(Formatter_BoolContainer)
+AWT_TEST(Formatter_BoolContainer)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     typedef std::vector<bool> V;
     typedef Formatter<V> F;
@@ -70,9 +70,9 @@ AWL_TEST(Formatter_BoolContainer)
     Assert::IsTrue(s_sample == s_result);
 }
 
-AWL_TEST(Formatter_String)
+AWT_TEST(Formatter_String)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     typedef Formatter<String> F;
 
@@ -87,9 +87,9 @@ AWL_TEST(Formatter_String)
     Assert::IsTrue(to_result == sample);
 }
 
-AWL_TEST(Formatter_Arithmetic)
+AWT_TEST(Formatter_Arithmetic)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     Formatter<bool>();
     Formatter<int>();

@@ -79,7 +79,7 @@ static void SceneRenderingFunc(const awl::testing::TestContext & context)
     scene.Draw(context);
 }
 
-AWL_TEST(UpdateQueue)
+AWT_TEST(UpdateQueue)
 {
     //this does not test async. version yet.
     

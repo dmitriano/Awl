@@ -83,7 +83,7 @@ private:
     }
 };
 
-AWL_TEST(FlatMapOrder)
+AWT_TEST(FlatMapOrder)
 {
     static_cast<void>(context);
     
@@ -103,7 +103,7 @@ AWL_TEST(FlatMapOrder)
     }
 }
 
-AWL_BENCHMARK(FlatMap)
+AWT_BENCHMARK(FlatMap)
 {
     Insert<std::map<size_t, size_t>>(context, _T("map"));
     Insert<std::unordered_map<size_t, size_t>>(context, _T("unordered_map"));

@@ -20,11 +20,11 @@ namespace BitMapTest
     static_assert(ConstBitMap{ Vehicle::Car, Vehicle::Train }[Vehicle::Train]);
 }
 
-AWL_TEST(BitMapWithEnumTraits)
+AWT_TEST(BitMapWithEnumTraits)
 {
     using namespace BitMapTest;
 
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 
@@ -113,11 +113,11 @@ namespace BitMapTest1
 
 AWL_ENUM_TRAITS(BitMapTest1::A, GameLevel)
 
-AWL_TEST(BitMapEnclosed)
+AWT_TEST(BitMapEnclosed)
 {
     using namespace BitMapTest1;
 
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     A::Test();
 

@@ -11,7 +11,7 @@
 
 using namespace awl::testing;
 
-AWL_TEST(TransformIterator)
+AWT_TEST(TransformIterator)
 {
     typedef std::map<awl::String, int> TestMap;
     

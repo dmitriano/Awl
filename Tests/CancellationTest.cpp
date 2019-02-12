@@ -8,9 +8,9 @@
 
 using namespace awl::testing;
 
-AWL_TEST(Cancellation_NegativeTimeDiff)
+AWT_TEST(Cancellation_NegativeTimeDiff)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     auto start = std::chrono::steady_clock::now();
 
@@ -31,7 +31,7 @@ constexpr int default_worker_sleep_time = 1000;
 
 typedef std::chrono::milliseconds Duration;
 
-AWL_TEST(Cancellation_InterruptibleSleep)
+AWT_TEST(Cancellation_InterruptibleSleep)
 {
     awl::CancellationFlag cancellation;
 
@@ -75,7 +75,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
     client.join();
 }
 
-AWL_TEST(Cancellation_SimpleSleep)
+AWT_TEST(Cancellation_SimpleSleep)
 {
     AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 

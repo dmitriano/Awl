@@ -118,7 +118,7 @@ static void CopyVector(const TestContext & context, const awl::Char * type_name)
     context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
 }
 
-AWL_BENCHMARK(VectorCopyPerformance)
+AWT_BENCHMARK(VectorCopyPerformance)
 {
     CopyVector<uint8_t>(context, _T("byte"));
     CopyVector<short>(context, _T("short"));

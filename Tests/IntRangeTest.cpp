@@ -11,9 +11,9 @@
 
 using namespace awl::testing;
 
-AWL_TEST(IntRangeInt)
+AWT_TEST(IntRangeInt)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     int n = 0;
     
@@ -33,9 +33,9 @@ AWL_TEST(IntRangeInt)
     Assert::IsTrue(v == sample);
 }
 
-AWL_TEST(IntRangeSizeT)
+AWT_TEST(IntRangeSizeT)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     size_t n = 0;
 

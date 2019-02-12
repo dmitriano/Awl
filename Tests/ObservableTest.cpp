@@ -68,7 +68,7 @@ public:
     }
 };
 
-AWL_TEST(Observable_Events)
+AWT_TEST(Observable_Events)
 {
     Something something;
 
@@ -106,7 +106,7 @@ AWL_TEST(Observable_Events)
     Assert::IsTrue(something.empty());
 }
 
-AWL_TEST(Observable_Move)
+AWT_TEST(Observable_Move)
 {
     Something something1;
 
@@ -168,7 +168,7 @@ static void WrongNotify2(ChangeHandler2 & h, void (ChangeHandler2::*func)(Params
     func(std::forward<const awl::String &&>(val));
 }
 
-AWL_TEST(Observable_ForwardArgs)
+AWT_TEST(Observable_ForwardArgs)
 {
     awl::String val = _T("String Value 1");
 
@@ -191,9 +191,9 @@ public:
     std::string called;
 };
 
-AWL_TEST(Observable_ConstMove)
+AWT_TEST(Observable_ConstMove)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     const X x1;
     X x2 = std::move(x1);

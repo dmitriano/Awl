@@ -96,9 +96,9 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     }
 }
 
-AWL_TEST(Hash)
+AWT_TEST(Hash)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -121,7 +121,7 @@ AWL_TEST(Hash)
     }
 }
 
-AWL_BENCHMARK(HashPerformance)
+AWT_BENCHMARK(HashPerformance)
 {
     using namespace awl::crypto;
 
@@ -137,9 +137,9 @@ AWL_BENCHMARK(HashPerformance)
 #endif
 }
 
-AWL_TEST(Hash_ToFromArray)
+AWT_TEST(Hash_ToFromArray)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -217,9 +217,9 @@ namespace examples
     };
 }
 
-AWL_TEST(Hash_String)
+AWT_TEST(Hash_String)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -248,9 +248,9 @@ AWL_TEST(Hash_String)
     }
 }
 
-AWL_TEST(Hash_Switch)
+AWT_TEST(Hash_Switch)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -275,9 +275,9 @@ AWL_TEST(Hash_Switch)
     }
 }
 
-AWL_TEST(Hash_Fake)
+AWT_TEST(Hash_Fake)
 {
-    AWL_UNUSED_CONTEXT;
+    AWT_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
