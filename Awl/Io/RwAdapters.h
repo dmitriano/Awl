@@ -9,7 +9,10 @@ namespace awl
     {
         namespace adapters
         {
-            template <std::size_t N>
+            //For the compatibility with std::vector<bool> there should be value_type, size_type, size(), at().
+            //Adapters template arguments can be both const and non-const types.
+
+            template <class BitSet>
             class BitSetAdapter
             {
             public:
@@ -17,7 +20,7 @@ namespace awl
                 typedef bool value_type;
                 typedef std::size_t size_type;
 
-                explicit BitSetAdapter(const std::bitset<N> & v) : m_bits(v)
+                explicit BitSetAdapter(BitSet & v) : m_bits(v)
                 {
                 }
 
@@ -25,8 +28,6 @@ namespace awl
                 {
                     return m_bits.size();
                 }
-
-                //For the compatibility with std::vector<bool>.
 
                 auto at(std::size_t i) const
                 {
@@ -40,10 +41,10 @@ namespace awl
 
             private:
 
-                std::bitset<N> m_bits;
+                BitSet & m_bits;
             };
 
-            template<typename Enum, std::size_t N>
+            template<class BitMap>
             class BitMapAdapter
             {
             public:
@@ -51,7 +52,7 @@ namespace awl
                 typedef bool value_type;
                 typedef std::size_t size_type;
 
-                explicit BitMapAdapter(const bitmap<Enum, N> & v) : m_bm(v)
+                explicit BitMapAdapter(BitMap & v) : m_bm(v)
                 {
                 }
 
@@ -62,17 +63,17 @@ namespace awl
 
                 auto at(std::size_t i) const
                 {
-                    return m_bm[static_cast<Enum>(i)];
+                    return m_bm[static_cast<typename BitMap::enum_type>(i)];
                 }
 
                 auto at(std::size_t i)
                 {
-                    return m_bm[static_cast<Enum>(i)];
+                    return m_bm[static_cast<typename BitMap::enum_type>(i)];
                 }
 
             private:
 
-                bitmap<Enum, N> m_bm;
+                BitMap & m_bm;
             };
         }
     }

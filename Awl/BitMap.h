@@ -20,6 +20,8 @@ namespace awl
 
     public:
 
+        typedef Enum enum_type;
+
         constexpr bitmap() = default;
 
         constexpr bitmap(std::initializer_list<Enum> values) : m_bits(MakeLong(values))
