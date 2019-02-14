@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <bitset>
 #include <set>
 #include <map>
 #include <unordered_set>
@@ -123,20 +124,23 @@ namespace awl
             s.Write(reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
         }
 
-        template <class Stream, typename T>
-        typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type ReadVector(Stream & s, std::vector<T> & v)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type 
+            ReadVector(Stream & s, Container & v)
         {
-            ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
+            ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
         }
 
-        template <class Stream, typename T>
-        typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type WriteVector(Stream & s, const std::vector<T> & v)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type 
+            WriteVector(Stream & s, const Container & v)
         {
-            s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(T));
+            s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
         }
 
-        template <class Stream, typename T>
-        typename std::enable_if<std::is_class<T>::value, void>::type ReadVector(Stream & s, std::vector<T> & v)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_class<typename Container::value_type>::value, void>::type 
+            ReadVector(Stream & s, Container & v)
         {
             for (auto & elem : v)
             {
@@ -144,8 +148,9 @@ namespace awl
             }
         }
 
-        template <class Stream, typename T>
-        typename std::enable_if<std::is_class<T>::value, void>::type WriteVector(Stream & s, const std::vector<T> & v)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_class<typename Container::value_type>::value, void>::type 
+            WriteVector(Stream & s, const Container & v)
         {
             for (const auto & elem : v)
             {
@@ -153,12 +158,13 @@ namespace awl
             }
         }
 
-        template <class Stream>
-        void ReadVector(Stream & s, std::vector<bool> & x)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_same<typename Container::value_type, bool>::value, void>::type
+            ReadVector(Stream & s, Container & x)
         {
-            typename std::vector<bool>::size_type n = x.size();
+            typename Container::size_type n = x.size();
 
-            for (std::vector<bool>::size_type i = 0; i < n;)
+            for (Container::size_type i = 0; i < n;)
             {
                 uint8_t aggr;
 
@@ -171,12 +177,13 @@ namespace awl
             }
         }
 
-        template <class Stream>
-        void WriteVector(Stream & s, const std::vector<bool> & x)
+        template <class Stream, class Container>
+        typename std::enable_if<std::is_same<typename Container::value_type, bool>::value, void>::type
+            WriteVector(Stream & s, const Container & x)
         {
-            typename std::vector<bool>::size_type n = x.size();
+            typename Container::size_type n = x.size();
 
-            for (std::vector<bool>::size_type i = 0; i < n;)
+            for (Container::size_type i = 0; i < n;)
             {
                 uint8_t aggr = 0;
 
@@ -214,36 +221,32 @@ namespace awl
             WriteVector(s, v);
         }
 
-        //std::array has no specialization for bool type.
+        //std::array has no specialization for bool type, but we save std::array<bool, N> in the same format as std::vector<bool>.
         template <class Stream, typename T, std::size_t N>
-        typename std::enable_if<std::is_arithmetic<T>::value, void>::type Read(Stream & s, std::array<T, N> & v)
+        inline void Read(Stream & s, std::array<T, N> & v)
         {
-            ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
+            ReadVector(s, v);
         }
 
         template <class Stream, typename T, std::size_t N>
-        typename std::enable_if<std::is_arithmetic<T>::value, void>::type Write(Stream & s, const std::array<T, N> & v)
+        inline void Write(Stream & s, const std::array<T, N> & v)
         {
-            s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(T));
+            WriteVector(s, v);
         }
 
-        template <class Stream, typename T, std::size_t N>
-        typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, std::array<T, N> & v)
-        {
-            for (auto & elem : v)
-            {
-                Read(s, elem);
-            }
-        }
+        //looks like std::bitset<N> does not have value_type
+        //we save std::bitset<N> in the same format as std::vector<bool>.
+        //template <class Stream, std::size_t N>
+        //inline void Read(Stream & s, std::bitset<N> & v)
+        //{
+        //    ReadVector(s, v);
+        //}
 
-        template <class Stream, typename T, std::size_t N>
-        typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const std::array<T, N> & v)
-        {
-            for (const auto & elem : v)
-            {
-                Write(s, elem);
-            }
-        }
+        //template <class Stream, std::size_t N>
+        //inline void Write(Stream & s, const std::bitset<N> & v)
+        //{
+        //    WriteVector(s, v);
+        //}
 
         template <class Stream, class First, class Second>
         inline void Read(Stream & s, std::pair<First, Second> & val)

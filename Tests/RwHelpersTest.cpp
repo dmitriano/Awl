@@ -75,17 +75,18 @@ class B
 {
 public:
 
-    B() : m_set{ 0, 1, 2 }, m_v{3, 4}, m_a{'a', 'b', 'c'}
+    B() : m_set{ 0, 1, 2 }, m_v{3, 4}, m_a{'a', 'b', 'c'}//, m_bs(0x3ul)
     {
     }
 
-    AWL_SERIALIZABLE(m_set, m_v, m_a, m_u8, m_b)
+    AWL_SERIALIZABLE(m_set, m_v, m_a, /*m_bs,*/ m_u8, m_b)
 
 private:
 
     std::set<int> m_set;
     std::vector<int> m_v;
     std::array<char, 3> m_a;
+    //std::bitset<3> m_bs;
 
     uint8_t m_u8 = 25;
 
