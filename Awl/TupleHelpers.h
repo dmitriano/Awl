@@ -20,13 +20,13 @@ namespace awl
     }
 
     template <typename... Args, typename Func, std::size_t... Idx>
-    inline void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>)
+    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>)
     {
         (f(std::get<Idx>(t)), ...);
     }
 
     template <typename... Args, typename Func>
-    inline void for_each(const std::tuple<Args...>& t, Func&& f)
+    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
     {
         for_each(t, f, std::index_sequence_for<Args...>{});
     }

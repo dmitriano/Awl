@@ -7,31 +7,31 @@
 namespace awl
 {
     template <class T>
-    inline auto object_as_tuple(T & val)
+    inline constexpr auto object_as_tuple(T & val)
     {
         return val.as_tuple();
     }
 
     template <class T>
-    inline auto object_as_tuple(const T & val)
+    inline constexpr auto object_as_tuple(const T & val)
     {
         return val.as_tuple();
     }
 
     template <class T>
-    inline bool objects_equal(const T & left, const T & right)
+    inline constexpr bool objects_equal(const T & left, const T & right)
     {
         return object_as_tuple(left) == object_as_tuple(right);
     }
 
     template <class T>
-    inline bool objects_less(const T & left, const T & right)
+    inline constexpr bool objects_less(const T & left, const T & right)
     {
         return object_as_tuple(left) < object_as_tuple(right);
     }
 
     template <class T>
-    inline bool objects_greater(const T & left, const T & right)
+    inline constexpr bool objects_greater(const T & left, const T & right)
     {
         return object_as_tuple(left) > object_as_tuple(right);
     }
@@ -40,15 +40,15 @@ namespace awl
 //Used inside of a class definition for defining as_tuple() member functions.
 //Theoretically all the as_tuple() overloads can be constexpr, but GCC 4.9 does not compile it.
 #define AWL_SERIALIZABLE(...) \
-    auto as_const_tuple() const \
+    constexpr auto as_const_tuple() const \
     { \
         return std::tie(__VA_ARGS__); \
     } \
-    auto as_tuple() const \
+    constexpr auto as_tuple() const \
     { \
         return as_const_tuple(); \
     } \
-    auto as_tuple() \
+    constexpr auto as_tuple() \
     { \
         return std::tie(__VA_ARGS__); \
     }
@@ -78,7 +78,7 @@ namespace awl
 */
 
 #define AWL_BINARY_OPERATOR(ClassName, OP) \
-    inline bool operator OP (const ClassName & left, const ClassName & right) \
+    inline constexpr bool operator OP (const ClassName & left, const ClassName & right) \
     { \
         return awl::object_as_tuple(left) OP awl::object_as_tuple(right); \
     }
