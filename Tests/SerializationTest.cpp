@@ -22,7 +22,7 @@ namespace awl
             return size;
         }
 
-        throw 1;
+        return 0;
     }
 
     namespace static_test

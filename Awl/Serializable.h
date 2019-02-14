@@ -78,7 +78,7 @@ namespace awl
 */
 
 #define AWL_BINARY_OPERATOR(ClassName, OP) \
-    inline constexpr bool operator OP (const ClassName & left, const ClassName & right) \
+    inline bool operator OP (const ClassName & left, const ClassName & right) \
     { \
         return awl::object_as_tuple(left) OP awl::object_as_tuple(right); \
     }
