@@ -17,6 +17,7 @@
 
 #include "Awl/Serializable.h"
 #include "Awl/Io/IoException.h"
+#include "Awl/Io/RwAdapters.h"
 
 namespace awl
 {
@@ -236,29 +237,37 @@ namespace awl
             WriteVector(s, v);
         }
 
-        //Looks like std::bitset<N> does not have value_type, so we use awl::bitmap instead.
-        //template <class Stream, std::size_t N>
-        //inline void Read(Stream & s, std::bitset<N> & v)
-        //{
-        //    ReadVector(s, v);
-        //}
+        //Looks like std::bitset<N> does not have value_type, so we use BitSetAdapter
+        template <class Stream, std::size_t N>
+        inline void Read(Stream & s, std::bitset<N> & v)
+        {
+            adapters::BitSetAdapter a(v);
+            
+            ReadVector(s, a);
+        }
 
-        //template <class Stream, std::size_t N>
-        //inline void Write(Stream & s, const std::bitset<N> & v)
-        //{
-        //    WriteVector(s, v);
-        //}
+        template <class Stream, std::size_t N>
+        inline void Write(Stream & s, const std::bitset<N> & v)
+        {
+            const adapters::BitSetAdapter a(v);
+
+            WriteVector(s, a);
+        }
 
         template <class Stream, typename Enum, std::size_t N>
         inline void Read(Stream & s, bitmap<Enum, N> & v)
         {
-            ReadVector(s, v);
+            adapters::BitMapAdapter a(v);
+
+            ReadVector(s, a);
         }
 
         template <class Stream, typename Enum, std::size_t N>
         inline void Write(Stream & s, const bitmap<Enum, N> & v)
         {
-            WriteVector(s, v);
+            const adapters::BitMapAdapter a(v);
+
+            WriteVector(s, a);
         }
 
         template <class Stream, class First, class Second>

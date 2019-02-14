@@ -75,11 +75,11 @@ class B
 {
 public:
 
-    B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, m_bm{ GameLevel::Professional }
+    B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, m_bm{ GameLevel::Professional }, m_bs(3ul)
     {
     }
 
-    AWL_SERIALIZABLE(m_set, m_v, m_a, m_bm, m_u8, m_b)
+    AWL_SERIALIZABLE(m_set, m_v, m_a, m_bm, m_bs, m_u8, m_b)
 
 private:
 
@@ -89,6 +89,8 @@ private:
 
     AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert);
     GameLevelBitMap m_bm;
+
+    std::bitset<3> m_bs;
 
     uint8_t m_u8 = 25;
 
