@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 #include <set>
 #include <map>
 #include <unordered_set>
@@ -18,6 +19,9 @@ namespace awl
 {
     namespace io
     {
+        //The benefit of having Stream template parameter in all Read/Write methods is that Stream::Read and Stream::Write functions
+        //can be called as non-virtual and even as constexpr if the final Stream type is known at compile time.
+
         template <class Stream>
         inline void ReadRaw(Stream & s, uint8_t * buffer, size_t count)
         {
@@ -143,7 +147,7 @@ namespace awl
         template <class Stream, typename T>
         typename std::enable_if<std::is_class<T>::value, void>::type WriteVector(Stream & s, const std::vector<T> & v)
         {
-            for (auto & elem : v)
+            for (const auto & elem : v)
             {
                 Write(s, elem);
             }
@@ -208,6 +212,37 @@ namespace awl
             Write(s, size);
 
             WriteVector(s, v);
+        }
+
+        //std::array has no specialization for bool type.
+        template <class Stream, typename T, std::size_t N>
+        typename std::enable_if<std::is_arithmetic<T>::value, void>::type Read(Stream & s, std::array<T, N> & v)
+        {
+            ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(T));
+        }
+
+        template <class Stream, typename T, std::size_t N>
+        typename std::enable_if<std::is_arithmetic<T>::value, void>::type Write(Stream & s, const std::array<T, N> & v)
+        {
+            s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(T));
+        }
+
+        template <class Stream, typename T, std::size_t N>
+        typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, std::array<T, N> & v)
+        {
+            for (auto & elem : v)
+            {
+                Read(s, elem);
+            }
+        }
+
+        template <class Stream, typename T, std::size_t N>
+        typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const std::array<T, N> & v)
+        {
+            for (const auto & elem : v)
+            {
+                Write(s, elem);
+            }
         }
 
         template <class Stream, class First, class Second>
