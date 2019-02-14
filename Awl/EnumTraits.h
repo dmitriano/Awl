@@ -28,10 +28,12 @@ namespace awl
     enum class EnumName : uint8_t { __VA_ARGS__ }; \
     class EnumName##Traits \
     { \
-    private: \
-        enum : std::underlying_type<EnumName>::type { __VA_ARGS__, Last }; \
     public: \
-        static constexpr std::underlying_type<EnumName>::type Count = Last; \
+        typedef std::underlying_type<EnumName>::type size_type; \
+    private: \
+        enum : size_type { __VA_ARGS__, Last }; \
+    public: \
+        static constexpr size_type Count = Last; \
     };
 
 //This awl::EnumTraits should be specialized at the global namespace level.
@@ -40,7 +42,7 @@ namespace awl
     class awl::EnumTraits<ns::EnumName> \
     { \
     public: \
-        static constexpr std::size_t count() \
+        static constexpr ns::EnumName##Traits::size_type count() \
         { \
             return ns::EnumName##Traits::Count; \
         } \
