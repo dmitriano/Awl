@@ -20,6 +20,9 @@ namespace awl
 
     public:
 
+        typedef bool value_type;
+        typedef std::size_t size_type;
+
         constexpr bitmap() = default;
 
         constexpr bitmap(std::initializer_list<Enum> values) : m_bits(MakeLong(values))
@@ -166,6 +169,18 @@ namespace awl
         //It is not clear enough is it a good idea to have operator bool(), because, for example,
         //'bm1 == bm2' or 'bm1 == true' compiles even if operator == (…) is not defined.
         constexpr operator bool() const { return any(); }
+
+        //For the compatibility with std::vector<bool> (they should be removed in future).
+        
+        auto at(std::size_t i) const
+        {
+            return m_bits[i];
+        }
+
+        auto at(std::size_t i)
+        {
+            return m_bits[i];
+        }
 
     private:
 

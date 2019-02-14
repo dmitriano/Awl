@@ -13,6 +13,8 @@
 #include <tuple>
 #include <utility> 
 
+#include "Awl/BitMap.h"
+
 #include "Awl/Serializable.h"
 #include "Awl/Io/IoException.h"
 
@@ -234,8 +236,7 @@ namespace awl
             WriteVector(s, v);
         }
 
-        //looks like std::bitset<N> does not have value_type
-        //we save std::bitset<N> in the same format as std::vector<bool>.
+        //Looks like std::bitset<N> does not have value_type, so we use awl::bitmap instead.
         //template <class Stream, std::size_t N>
         //inline void Read(Stream & s, std::bitset<N> & v)
         //{
@@ -247,6 +248,18 @@ namespace awl
         //{
         //    WriteVector(s, v);
         //}
+
+        template <class Stream, typename Enum, std::size_t N>
+        inline void Read(Stream & s, bitmap<Enum, N> & v)
+        {
+            ReadVector(s, v);
+        }
+
+        template <class Stream, typename Enum, std::size_t N>
+        inline void Write(Stream & s, const bitmap<Enum, N> & v)
+        {
+            WriteVector(s, v);
+        }
 
         template <class Stream, class First, class Second>
         inline void Read(Stream & s, std::pair<First, Second> & val)
