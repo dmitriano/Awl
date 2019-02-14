@@ -254,7 +254,7 @@ namespace awl
             WriteVector(s, a);
         }
 
-        template <class Stream, typename Enum, std::size_t N>
+        template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
         inline void Read(Stream & s, bitmap<Enum, N> & v)
         {
             adapters::BitMapAdapter a(v);
@@ -262,7 +262,7 @@ namespace awl
             ReadVector(s, a);
         }
 
-        template <class Stream, typename Enum, std::size_t N>
+        template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
         inline void Write(Stream & s, const bitmap<Enum, N> & v)
         {
             const adapters::BitMapAdapter a(v);

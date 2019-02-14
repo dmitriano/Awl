@@ -87,7 +87,7 @@ private:
     std::vector<int> m_v;
     std::array<char, 3> m_a;
 
-    AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert);
+    AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
     GameLevelBitMap m_bm;
 
     std::bitset<3> m_bs;
