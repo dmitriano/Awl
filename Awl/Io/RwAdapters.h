@@ -50,7 +50,7 @@ namespace awl
             public:
 
                 typedef bool value_type;
-                typedef std::size_t size_type;
+                typedef typename BitMap::size_type size_type;
 
                 explicit BitMapAdapter(BitMap & v) : m_bm(v)
                 {
@@ -61,12 +61,12 @@ namespace awl
                     return m_bm.size();
                 }
 
-                auto at(std::size_t i) const
+                auto at(size_type i) const
                 {
                     return m_bm[static_cast<typename BitMap::enum_type>(i)];
                 }
 
-                auto at(std::size_t i)
+                auto at(size_type i)
                 {
                     return m_bm[static_cast<typename BitMap::enum_type>(i)];
                 }

@@ -25,13 +25,13 @@ namespace awl
 //We cannot specialize awl::EnumTraits<EnumName> inside a class or a namespace, so we define EnumName##Traits,
 //also EnumName##Traits cannot be private, because if it is a template parameter of a public member.
 #define AWL_SEQUENTIAL_ENUM(EnumName, ...) \
-    enum class EnumName { __VA_ARGS__ }; \
+    enum class EnumName : uint8_t { __VA_ARGS__ }; \
     class EnumName##Traits \
     { \
     private: \
-        enum { __VA_ARGS__, Last }; \
+        enum : std::underlying_type<EnumName>::type { __VA_ARGS__, Last }; \
     public: \
-        static constexpr size_t Count = Last; \
+        static constexpr std::underlying_type<EnumName>::type Count = Last; \
     };
 
 //This awl::EnumTraits should be specialized at the global namespace level.

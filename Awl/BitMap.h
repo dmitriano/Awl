@@ -8,10 +8,10 @@
 
 namespace awl
 {
-    template<typename Enum, std::size_t N = EnumTraits<Enum>::count(), bool IsEnum = std::is_enum<Enum>::value>
+    template<typename Enum, typename std::underlying_type<Enum>::type N = EnumTraits<Enum>::count(), bool IsEnum = std::is_enum<Enum>::value>
     class bitmap;
 
-    template<typename Enum, std::size_t N>
+    template<typename Enum, typename std::underlying_type<Enum>::type N>
     class bitmap<Enum, N, true>
     {
     private:
@@ -21,6 +21,7 @@ namespace awl
     public:
 
         typedef Enum enum_type;
+        typedef typename std::underlying_type<enum_type>::type size_type;
 
         constexpr bitmap() = default;
 
@@ -145,14 +146,14 @@ namespace awl
             return m_bits[Enum2Index(value)];
         }
 
-        std::size_t count() const
+        size_type count() const
         {
-            return m_bits.count();
+            return static_cast<size_type>(m_bits.count());
         }
         
-        constexpr std::size_t size() const noexcept
+        constexpr size_type size() const noexcept
         {
-            return m_bits.size();
+            return static_cast<size_type>(m_bits.size());
         }
 
         bool operator==(const bitmap& other) const
@@ -169,9 +170,9 @@ namespace awl
 
     private:
 
-        static constexpr std::size_t Enum2Index(Enum value)
+        static constexpr size_type Enum2Index(Enum value)
         {
-            return static_cast<std::size_t>(value);
+            return static_cast<size_type>(value);
         }
 
         static constexpr BitSet Enum2Bits(Enum value)
