@@ -241,7 +241,7 @@ namespace awl
         template <class Stream, std::size_t N>
         inline void Read(Stream & s, std::bitset<N> & v)
         {
-            adapters::BitSetAdapter a(v);
+            adapters::BitSetAdapter<std::bitset<N>> a(v);
             
             ReadVector(s, a);
         }
@@ -249,7 +249,7 @@ namespace awl
         template <class Stream, std::size_t N>
         inline void Write(Stream & s, const std::bitset<N> & v)
         {
-            const adapters::BitSetAdapter a(v);
+            const adapters::BitSetAdapter<const std::bitset<N>> a(v);
 
             WriteVector(s, a);
         }
@@ -257,7 +257,7 @@ namespace awl
         template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
         inline void Read(Stream & s, bitmap<Enum, N> & v)
         {
-            adapters::BitMapAdapter a(v);
+            adapters::BitMapAdapter<bitmap<Enum, N>> a(v);
 
             ReadVector(s, a);
         }
@@ -265,7 +265,7 @@ namespace awl
         template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
         inline void Write(Stream & s, const bitmap<Enum, N> & v)
         {
-            const adapters::BitMapAdapter a(v);
+            const adapters::BitMapAdapter<const bitmap<Enum, N>> a(v);
 
             WriteVector(s, a);
         }

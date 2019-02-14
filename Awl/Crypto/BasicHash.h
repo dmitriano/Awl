@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Awl/Lang.h"
+
 #include <stdint.h>
 #include <array>
 #include <type_traits>
@@ -43,15 +45,8 @@ namespace awl
             }
         };
 
-//body of constexpr function not a return-statement
-#if AWL_CPPSTD >= 14
-    #define AWL_CONSTEXPR_14 constexpr
-#else
-    #define AWL_CONSTEXPR_14
-#endif
-
         template <typename T>
-        AWL_CONSTEXPR_14 std::array<std::uint8_t, sizeof(T)> to_array(T value)
+        AWL_CONSTEXPR std::array<std::uint8_t, sizeof(T)> to_array(T value)
         {
             //'= {}' is for preventing GCC warning "there is no default constructor..."
             std::array<std::uint8_t, sizeof(T)> result = {};
@@ -65,7 +60,7 @@ namespace awl
         }
 
         template <typename T>
-        AWL_CONSTEXPR_14 T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
+        AWL_CONSTEXPR T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
         {
             T val = 0;
 
