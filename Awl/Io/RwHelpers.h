@@ -167,7 +167,7 @@ namespace awl
         {
             typename Container::size_type n = x.size();
 
-            for (Container::size_type i = 0; i < n;)
+            for (typename Container::size_type i = 0; i < n;)
             {
                 uint8_t aggr;
 
@@ -186,7 +186,7 @@ namespace awl
         {
             typename Container::size_type n = x.size();
 
-            for (Container::size_type i = 0; i < n;)
+            for (typename Container::size_type i = 0; i < n;)
             {
                 uint8_t aggr = 0;
 
