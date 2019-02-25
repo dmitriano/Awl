@@ -20,6 +20,8 @@ namespace awl
     template <class T>
     constexpr std::size_t sizeof_object(const T & val)
     {
+        static_assert(std::is_arithmetic<T>::value || is_tuplizable<T>);
+
         if constexpr (std::is_arithmetic<T>::value)
         {
             return sizeof(val);
@@ -31,10 +33,6 @@ namespace awl
             for_each(object_as_tuple(val), [&size](auto& field) { size += sizeof_object(field); });
 
             return size;
-        }
-        else
-        {
-            static_assert(false);
         }
     }
 
