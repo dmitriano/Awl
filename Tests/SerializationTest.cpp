@@ -5,6 +5,18 @@ using namespace awl::testing;
 
 namespace awl
 {
+    template <typename T, typename = void>
+    struct is_tuplizable_t : std::false_type {};
+
+    template <typename T>
+    struct is_tuplizable_t <T, std::void_t<decltype(T{}.as_const_tuple()) >> : std::true_type {};
+    //There can be 
+    //static inline constexpr bool isTuplizable = true;
+    //in AWL_SERIALIZABLE macro.
+
+    template <typename T>
+    inline constexpr bool is_tuplizable = std::is_class<T>::value && is_tuplizable_t<T>::value;
+
     template <class T>
     constexpr std::size_t sizeof_object(const T & val)
     {
@@ -12,8 +24,7 @@ namespace awl
         {
             return sizeof(val);
         }
-
-        if constexpr (std::is_class<T>::value)
+        else if constexpr (is_tuplizable<T>)
         {
             std::size_t size = 0;
 
@@ -21,8 +32,18 @@ namespace awl
 
             return size;
         }
+        else
+        {
+            static_assert(false);
+        }
+    }
 
-        return 0;
+    template <class T>
+    constexpr std::size_t sizeof_class()
+    {
+        using ConstT = const T;
+        
+        return sizeof_object(ConstT{});
     }
 
     namespace static_test
@@ -43,8 +64,9 @@ namespace awl
             AWL_SERIALIZABLE(a, z)
         };
 
-        using ConstB = const B;
-        
-        static_assert(sizeof_object(ConstB{}) == sizeof(bool) + sizeof(int) + sizeof(double));
+        static_assert(is_tuplizable<A>);
+
+        static_assert(sizeof_class<A>() == sizeof(bool) + sizeof(int));
+        static_assert(sizeof_class<B>() == sizeof_class<A>() + sizeof(double));
     }
 }
