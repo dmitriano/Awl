@@ -24,7 +24,7 @@ void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
 
     for (size_t i = 0; i != v.size(); ++i)
     {
-        Assert::IsTrue(strcmp(v[i], ml[i]) == 0);
+        Assert::IsTrue(v[i] == ml[i]);
     }
 }
 
