@@ -6,135 +6,144 @@
 #include <algorithm>
 #include <assert.h>
 
-namespace awl::helpers
+namespace awl
 {
-    class MemberList
+    namespace helpers
     {
-    private:
-
-        typedef std::vector<std::string> Vector;
-
-    public:
-
-        MemberList(const char * s) : m_v(getArgNames(s))
+        class MemberList
         {
-        }
+        private:
 
-        typedef Vector::const_reference const_reference;
-        typedef Vector::const_pointer const_pointer;
-        typedef Vector::const_iterator const_iterator;
-        typedef Vector::const_reverse_iterator const_reverse_iterator;
+            typedef std::vector<std::string> Vector;
 
-        const_iterator begin() const { return m_v.begin();}
-        const_iterator cbegin() const noexcept { return m_v.cbegin();}
+        public:
 
-        const_iterator end() const { return m_v.end();}
-        const_iterator cend() const noexcept { return m_v.cend();}
-
-        const_iterator find(const std::string & name) const
-        {
-            return std::find(m_v.begin(), m_v.end(), name);
-        }
-
-        const_iterator find_cstr(const char * name) const
-        {
-            return std::find_if(m_v.begin(), m_v.end(), [name](const std::string & val)
+            MemberList(const char * s) : m_v(getArgNames(s))
             {
-                return strcmp(val.c_str(), name) == 0;
-            });
-        }
-
-        static inline const size_t NotAnIndex = static_cast<size_t>(-1);
-
-        size_t find_index(const std::string & name)
-        {
-            const_iterator i = find(name);
-
-            if (i != m_v.end())
-            {
-                return i - m_v.begin();
             }
 
-            return NotAnIndex;
-        }
+            typedef Vector::const_reference const_reference;
+            typedef Vector::const_pointer const_pointer;
+            typedef Vector::const_iterator const_iterator;
+            typedef Vector::const_reverse_iterator const_reverse_iterator;
 
-        const_reference operator[](size_t pos) const
-        {
-            return m_v[pos];
-        }
+            const_iterator begin() const { return m_v.begin();}
+            const_iterator cbegin() const noexcept { return m_v.cbegin();}
 
-        size_t size() const
-        {
-            return m_v.size();
-        }
+            const_iterator end() const { return m_v.end();}
+            const_iterator cend() const noexcept { return m_v.cend();}
 
-    private:
-
-        template <class Accept>
-        static void traverse(const char * va, Accept accept)
-        {
-            const char * p_start = va;
-            bool eaten_separator = false;
-
-            const char * p = va;
-            while (*p != 0)
+            const_iterator find(const std::string & name) const
             {
-                if (*p == ',' && *(p + 1) == ' ')
+                return std::find(m_v.begin(), m_v.end(), name);
+            }
+
+            const_iterator find_cstr(const char * name) const
+            {
+                return std::find_if(m_v.begin(), m_v.end(), [name](const std::string & val)
                 {
-                    assert(p_start != nullptr);
-                    assert(p > p_start);
-                    accept(p_start, p - p_start);
-                    p_start = nullptr;
-                    eaten_separator = true;
+                    return strcmp(val.c_str(), name) == 0;
+                });
+            }
+
+            static inline const size_t NotAnIndex = static_cast<size_t>(-1);
+
+            size_t find_index(const std::string & name)
+            {
+                const_iterator i = find(name);
+
+                if (i != m_v.end())
+                {
+                    return i - m_v.begin();
+                }
+
+                return NotAnIndex;
+            }
+
+            const_reference operator[](size_t pos) const
+            {
+                return m_v[pos];
+            }
+
+            size_t size() const
+            {
+                return m_v.size();
+            }
+
+        private:
+
+            template <class Accept>
+            static void traverse(const char * va, Accept accept)
+            {
+                const char * p_start = va;
+                bool eaten_separator = false;
+
+                const char * p = va;
+                while (*p != 0)
+                {
+                    if (*p == ',' && *(p + 1) == ' ')
+                    {
+                        assert(p_start != nullptr);
+                        assert(p > p_start);
+                        accept(p_start, p - p_start);
+                        p_start = nullptr;
+                        eaten_separator = true;
+                        ++p;
+                    }
+                    else if (eaten_separator)
+                    {
+                        p_start = p;
+                        eaten_separator = false;
+                    }
+
                     ++p;
                 }
-                else if (eaten_separator)
+
+                assert(p_start != nullptr);
+
+                //the list can be empty
+                if (p != p_start)
                 {
-                    p_start = p;
-                    eaten_separator = false;
+                    assert(p > p_start);
+                    accept(p_start, p - p_start);
                 }
-
-                ++p;
             }
 
-            assert(p_start != nullptr);
-            
-            //the list can be empty
-            if (p != p_start)
+            static size_t getArgCount(const char * va)
             {
-                assert(p > p_start);
-                accept(p_start, p - p_start);
+                size_t count = 0;
+
+                traverse(va, [&count](const char *, size_t) { ++count; });
+
+                return count;
             }
-        }
-        
-        static size_t getArgCount(const char * va)
-        {
-            size_t count = 0;
 
-            traverse(va, [&count](const char *, size_t) { ++count; });
-
-            return count;
-        }
-
-        static Vector getArgNames(const char * va)
-        {
-            Vector v;
-
-            const size_t count = getArgCount(va);
-            v.reserve(count);
-
-            traverse(va, [&v](const char * p, size_t len)
+            static Vector getArgNames(const char * va)
             {
-                v.push_back(std::string(p, len)); }
-            );
+                Vector v;
 
-            assert(v.size() == count);
+                const size_t count = getArgCount(va);
+                v.reserve(count);
 
-            return v;
-        }
+                traverse(va, [&v](const char * p, size_t len)
+                {
+                    v.push_back(std::string(p, len)); }
+                );
 
-        Vector m_v;
-    };
+                assert(v.size() == count);
+
+                return v;
+            }
+
+            Vector m_v;
+        };
+    }
+
+    template <typename T, typename = void>
+    struct is_stringizable : std::false_type {};
+
+    template <typename T>
+    struct is_stringizable<T, std::void_t<decltype(T{}.get_member_names())>> : std::true_type {};
 }
 
 #define AWL_STRINGIZABLE(...) \
@@ -145,3 +154,4 @@ namespace awl::helpers
         static const awl::helpers::MemberList ml(va); \
         return ml; \
     }
+
