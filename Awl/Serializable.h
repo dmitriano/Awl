@@ -84,16 +84,16 @@ namespace awl
         return awl::object_as_tuple(left) OP awl::object_as_tuple(right); \
     }
 
-#define AWL_EQUATABLE(ClassName) \
+#define AWL_MEMBERWISE_EQUATABLE(ClassName) \
     AWL_BINARY_OPERATOR(ClassName, ==) \
     AWL_BINARY_OPERATOR(ClassName, !=)
 
-#define AWL_COMPARABLE(ClassName) \
+#define AWL_MEMBERWISE_COMPARABLE(ClassName) \
     AWL_BINARY_OPERATOR(ClassName, <) \
     AWL_BINARY_OPERATOR(ClassName, >) \
     AWL_BINARY_OPERATOR(ClassName, <=) \
     AWL_BINARY_OPERATOR(ClassName, >=)
 
-#define AWL_EQUATABLE_AND_COMPARABLE(ClassName) \
-    AWL_EQUATABLE(ClassName) \
-    AWL_COMPARABLE(ClassName)
+#define AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(ClassName) \
+    AWL_MEMBERWISE_EQUATABLE(ClassName) \
+    AWL_MEMBERWISE_COMPARABLE(ClassName)

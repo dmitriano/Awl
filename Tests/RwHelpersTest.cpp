@@ -60,7 +60,7 @@ namespace awl
 }
 
 //At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
-AWL_EQUATABLE_AND_COMPARABLE(A)
+AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
 
 //Another option is to derive our class from A and make the derived class serializable.
 struct AWrapper : A
@@ -68,7 +68,7 @@ struct AWrapper : A
     AWL_SERIALIZABLE(x, y)
 };
 
-AWL_EQUATABLE(AWrapper)
+AWL_MEMBERWISE_EQUATABLE(AWrapper)
 
 //Our class that we can make serializable with the single line of code.
 class B
@@ -97,7 +97,7 @@ private:
     bool m_b = true;
 };
 
-AWL_EQUATABLE(B)
+AWL_MEMBERWISE_EQUATABLE(B)
 
 AWT_TEST(IoObjectReadWrite)
 {
