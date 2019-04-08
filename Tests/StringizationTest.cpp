@@ -4,6 +4,8 @@
 #include <string>
 #include <array>
 #include <sstream>
+#include <any>
+#include <map>
 
 using namespace awl::testing;
 
@@ -15,6 +17,8 @@ struct A
 
     AWL_STRINGIZABLE(x, y, z)
 };
+
+AWL_MEMBERWISE_EQUATABLE(A)
 
 typedef std::vector<const char *> Vector;
 
@@ -63,11 +67,30 @@ AWT_TEST(Stringizable_MemberList)
     TestMemberList({ "aaaa", "bb", "c" });
     TestMemberList({ "x", "aaaa", "bb", "c" });
 
-    AssertMemberListEqual(A::get_member_list(), Vector{ "x", "y", "z" });
+    AssertMemberListEqual(A::get_member_names(), Vector{ "x", "y", "z" });
 }
 
-//AWT_TEST(Stringizable_MemberList)
-//{
-//    static char va[] = "x, y, z";
-//    va[5] = "a";
-//}
+AWT_TEST(Stringizable_ForEach)
+{
+    AWT_UNUSED_CONTEXT;
+
+    A a1 = { 1, 5.0, "abc" };
+
+    std::map<std::string, std::any> map;
+
+    awl::for_each_index(a1.as_const_tuple(), [&a1, &map](auto & val, size_t index)
+    {
+        map.emplace(a1.get_member_names()[index], val);
+    });
+
+    Assert::IsTrue(map.size() == 3);
+
+    A a2 = {};
+
+    awl::for_each_index(a2.as_tuple(), [&a2, &map](auto & val, size_t index)
+    {
+        val = std::any_cast<decltype(val)>(map[a2.get_member_names()[index]]);
+    });
+
+    Assert::IsTrue(a1 == a2);
+}

@@ -31,6 +31,18 @@ namespace awl
         for_each(t, f, std::index_sequence_for<Args...>{});
     }
 
+    template <typename... Args, typename Func, std::size_t... Idx>
+    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>)
+    {
+        (f(std::get<Idx>(t), Idx), ...);
+    }
+
+    template <typename... Args, typename Func>
+    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
+    {
+        for_each_index(t, f, std::index_sequence_for<Args...>{});
+    }
+
 #elif AWL_CPPSTD >= 14
 
     //C++14 version (does not compile with GCC 4.9):

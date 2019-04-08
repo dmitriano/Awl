@@ -139,7 +139,7 @@ namespace awl::helpers
 
 #define AWL_STRINGIZABLE(...) \
     AWL_SERIALIZABLE(__VA_ARGS__) \
-    static const awl::helpers::MemberList & get_member_list() \
+    static const awl::helpers::MemberList & get_member_names() \
     { \
         static const char va[] = #__VA_ARGS__; \
         static const awl::helpers::MemberList ml(va); \
