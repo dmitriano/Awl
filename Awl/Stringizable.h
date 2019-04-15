@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include <string>
 #include <cstring>
 
 namespace awl
