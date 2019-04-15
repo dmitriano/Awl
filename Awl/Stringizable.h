@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include <cstring>
 
 namespace awl
 {
@@ -42,7 +43,7 @@ namespace awl
             {
                 return std::find_if(m_v.begin(), m_v.end(), [name](const std::string & val)
                 {
-                    return strcmp(val.c_str(), name) == 0;
+                    return std::strcmp(val.c_str(), name) == 0;
                 });
             }
 
