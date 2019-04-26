@@ -24,6 +24,7 @@ namespace awl
         {
             free = std::move(other.free);
             other.engaged = false;
+            return *this;
         }
 
         ~scope_guard()
