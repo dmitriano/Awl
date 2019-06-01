@@ -130,4 +130,45 @@ AWT_TEST(TransformIterator)
             Assert::IsTrue(i == end);
         }
     }
+
+    {
+        auto func = [](const TestMap::value_type & p) -> const awl::String & { return p.first; };
+
+        auto range = awl::make_transform_range(m, func);
+
+        {
+            auto i = range.begin();
+
+            Assert::IsTrue(i == range.begin());
+            Assert::IsTrue(i != range.end());
+
+            Assert::AreEqual(_T("a"), *i++);
+            Assert::AreEqual(_T("b"), *i++);
+            Assert::AreEqual(_T("c"), *i++);
+
+            Assert::IsTrue(i == range.end());
+        }
+
+        {
+            //This does not compile with CLang 7, but compiles with CLang 8.
+            auto func1 = func;
+            func = func1;
+
+            auto i1 = range.begin();
+            auto i2 = range.begin();
+
+            i1 = i2;
+
+            Assert::IsTrue(i1 == i2);
+        }
+
+        {
+            std::vector<awl::String> v;
+
+            //This requires copy assignment operator to be defined.
+            v.insert(v.begin(), range.begin(), range.end());
+
+            Assert::IsTrue(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
+        }
+    }
 }

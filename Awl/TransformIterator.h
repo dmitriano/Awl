@@ -75,7 +75,7 @@ namespace awl
 
         Iterator m_i;
 
-        const UnaryFunction & m_func;
+        UnaryFunction m_func;
     };
 
     template <class Iterator, class UnaryFunction>

@@ -2,7 +2,7 @@
 
 namespace awl
 {
-    template <class T> struct EnumTraits;
+    template <class T> class EnumTraits;
 }
 
 /*
