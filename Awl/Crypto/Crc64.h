@@ -25,7 +25,7 @@ namespace awl
             {
                 typedef typename std::iterator_traits<InputIt>::value_type T;
                 
-                uint64_t crc = 0;
+                uint64_t crc = m_seed;
 
                 for (InputIt i = begin; i != end; ++i)
                 {
@@ -94,7 +94,7 @@ namespace awl
             static void Calc(uint64_t & crc, uint8_t byte)
             {
                 crc = crc64_tab[static_cast<uint8_t>(crc) ^ byte] ^ (crc >> 8);
-            };
+            }
         };
     }
 }
