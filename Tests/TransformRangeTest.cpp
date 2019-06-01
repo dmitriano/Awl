@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <iomanip>
 #include <map>
@@ -149,10 +148,15 @@ AWT_TEST(TransformIterator)
             Assert::IsTrue(i == range.end());
         }
 
+        //(until C++20) If no captures are specified, the closure type has a defaulted copy assignment operator and a defaulted move assignment operator.
+        //Otherwise, it has a deleted copy assignment operator (this includes the case when there is a capture-default, even if it does not actually capture anything).
+#if AWL_CPPSTD >= 20
         {
             //This does not compile with CLang 7, but compiles with CLang 8.
             auto func1 = func;
             func = func1;
+            static_cast<void>(func);
+            static_cast<void>(func1);
 
             auto i1 = range.begin();
             auto i2 = range.begin();
@@ -170,5 +174,6 @@ AWT_TEST(TransformIterator)
 
             Assert::IsTrue(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
         }
+#endif
     }
 }
