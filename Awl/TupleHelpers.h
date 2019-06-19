@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include <array>
 
 #if AWL_CPPSTD >= 17
 #include <utility>
@@ -12,17 +13,16 @@ namespace awl
 //but with C++ 17 it should be 201402L, so we cannot use it.
 #if AWL_CPPSTD >= 17
 
-    //In C++17 template folding can be used:
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
         return (sizeof(Ts) + ...);
     }
 
-    template <typename... Args, typename Func, std::size_t... Idx>
-    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>)
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
-        (f(std::get<Idx>(t)), ...);
+        (f(std::get<index>(t)), ...);
     }
 
     template <typename... Args, typename Func>
@@ -31,16 +31,40 @@ namespace awl
         for_each(t, f, std::index_sequence_for<Args...>{});
     }
 
-    template <typename... Args, typename Func, std::size_t... Idx>
-    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<Idx...>)
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
-        (f(std::get<Idx>(t), Idx), ...);
+        (f(std::get<index>(t), index), ...);
     }
 
     template <typename... Args, typename Func>
     inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
     {
         for_each_index(t, f, std::index_sequence_for<Args...>{});
+    }
+
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr auto transform(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    {
+        return std::make_tuple(f(std::get<index>(t)) ...);
+    }
+
+    template <typename... Args, typename Func>
+    inline constexpr auto transform(const std::tuple<Args...>& t, Func&& f)
+    {
+        return transform(t, f, std::index_sequence_for<Args...>{});
+    }
+
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr auto to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    {
+        return std::array{f(std::get<index>(t)) ...};
+    }
+
+    template <typename... Args, typename Func>
+    inline constexpr auto to_array(const std::tuple<Args...>& t, Func&& f)
+    {
+        return to_array(t, f, std::index_sequence_for<Args...>{});
     }
 
 #elif AWL_CPPSTD >= 14
