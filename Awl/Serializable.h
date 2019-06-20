@@ -36,6 +36,18 @@ namespace awl
     {
         return object_as_tuple(left) > object_as_tuple(right);
     }
+
+    template <typename T, typename = void>
+    struct is_tuplizable : std::false_type {};
+
+    template <typename T>
+    struct is_tuplizable<T, std::void_t<decltype(T{}.as_const_tuple())>> : std::true_type {};
+    //There can be 
+    //static inline constexpr bool isTuplizable = true;
+    //in AWL_SERIALIZABLE macro.
+
+    template <typename T>
+    inline constexpr bool is_tuplizable_v = is_tuplizable<T>::value;
 }
 
 //Used inside of a class definition for defining as_tuple() member functions.

@@ -146,6 +146,9 @@ namespace awl
 
     template <typename T>
     struct is_stringizable<T, std::void_t<decltype(T{}.get_member_names())>> : std::true_type {};
+
+    template <typename T>
+    inline constexpr bool is_stringizable_v = is_stringizable<T>::value;
 }
 
 #define AWL_STRINGIZABLE(...) \

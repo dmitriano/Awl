@@ -7,30 +7,18 @@ using namespace awl::testing;
 
 namespace awl
 {
-    template <typename T, typename = void>
-    struct is_tuplizable_t : std::false_type {};
-
-    template <typename T>
-    struct is_tuplizable_t <T, std::void_t<decltype(T{}.as_const_tuple()) >> : std::true_type {};
-    //There can be 
-    //static inline constexpr bool isTuplizable = true;
-    //in AWL_SERIALIZABLE macro.
-
-    template <typename T>
-    inline constexpr bool is_tuplizable = std::is_class<T>::value && is_tuplizable_t<T>::value;
-
     //MSVC 2017: error C2131: expression did not evaluate to a constant.
     /*
     template <class T, typename Func>
     inline constexpr void for_each_member(const T & val, const Func & f)
     {
-        static_assert(std::is_arithmetic<T>::value || is_tuplizable<T>);
+        static_assert(std::is_arithmetic<T>::value || is_tuplizable_v<T>);
 
         if constexpr (std::is_arithmetic<T>::value)
         {
             f(val);
         }
-        else if constexpr (is_tuplizable<T>)
+        else if constexpr (is_tuplizable_v<T>)
         {
             for_each(object_as_tuple(val), f);
         }
@@ -50,13 +38,13 @@ namespace awl
     template <class T>
     constexpr std::size_t sizeof_object(const T & val)
     {
-        static_assert(std::is_arithmetic<T>::value || is_tuplizable<T>);
+        static_assert(std::is_arithmetic<T>::value || is_tuplizable_v<T>);
 
         if constexpr (std::is_arithmetic<T>::value)
         {
             return sizeof(val);
         }
-        else if constexpr (is_tuplizable<T>)
+        else if constexpr (is_tuplizable_v<T>)
         {
             std::size_t size = 0;
 
@@ -82,7 +70,7 @@ namespace awl
             static_cast<void>(val);
             return true;
         }
-        else if constexpr (is_tuplizable<T>)
+        else if constexpr (is_tuplizable_v<T>)
         {
             bool all = true;
 
@@ -136,7 +124,7 @@ namespace awl
             AWL_SERIALIZABLE(b, p)
         };
 
-        static_assert(is_tuplizable<A>);
+        static_assert(is_tuplizable_v<A>);
 
         static_assert(sizeof_class<A>() == sizeof(bool) + sizeof(int));
         static_assert(sizeof_class<B>() == sizeof_class<A>() + sizeof(double));
