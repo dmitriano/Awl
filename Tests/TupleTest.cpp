@@ -91,3 +91,15 @@ AWT_TEST(TransformTuple)
 
     Assert::IsTrue(t1 == t);
 }
+
+AWT_TEST(MapTuple)
+{
+    AWT_UNUSED_CONTEXT;
+
+    typedef std::tuple<bool, char, int, float, double, std::string> T1;
+    typedef std::tuple<char, int, int, double, std::string, int, double> T2;
+
+    auto a = awl::map_types<T1, T2>();
+
+    Assert::IsTrue(a == std::array<size_t, std::tuple_size<T2>::value>{1, 2, 2, 4, 5, 2, 4});
+}

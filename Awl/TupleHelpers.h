@@ -91,6 +91,44 @@ namespace awl
         return to_array(t, f, std::index_sequence_for<Args...>{});
     }
 
+    template<class T> struct dependent_false : std::false_type {};
+
+    template <typename T>
+    inline constexpr bool dependent_false_v = dependent_false<T>::value;
+
+    template <class T1, class T2>
+    inline constexpr auto map_types(const T1 & t1, T2 & t2)
+    {
+        std::array<size_t, std::tuple_size<T2>::value> a;
+        a.fill(static_cast<size_t>(-1));
+
+        for_each_index(t2, [&a, &t1](const auto & field2, size_t index2)
+        {
+            for_each_index(t1, [&a, &field2, &index2](const auto & field1, size_t index1)
+            {
+                if constexpr (std::is_same_v<decltype(field1), decltype(field2)>)
+                {
+                    a[index2] = index1;
+                }
+                else
+                {
+                    static_cast<void>(index1);
+                }
+            });
+        });
+        
+        return a;
+    }
+
+    template <class T1, class T2>
+    inline constexpr auto map_types()
+    {
+        const T1 t1{};
+        const T2 t2{};
+
+        return map_types(t1, t2);
+    }
+
 #elif AWL_CPPSTD >= 14
 
     //C++14 version (does not compile with GCC 4.9):
