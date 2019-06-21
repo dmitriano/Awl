@@ -96,37 +96,28 @@ namespace awl
     template <typename T>
     inline constexpr bool dependent_false_v = dependent_false<T>::value;
 
-    template <class T1, class T2>
-    inline constexpr auto map_types(const T1 & t1, T2 & t2)
+    //Get the index of the single unique match for an arbitrary type in something tuple-like:
+    template <class T, class U, std::size_t... N>
+    static constexpr auto find_type_impl(std::index_sequence<N...>) noexcept
     {
-        std::array<size_t, std::tuple_size<T2>::value> a;
-        a.fill(static_cast<size_t>(-1));
-
-        for_each_index(t2, [&a, &t1](const auto & field2, size_t index2)
-        {
-            for_each_index(t1, [&a, &field2, &index2](const auto & field1, size_t index1)
-            {
-                if constexpr (std::is_same_v<decltype(field1), decltype(field2)>)
-                {
-                    a[index2] = index1;
-                }
-                else
-                {
-                    static_cast<void>(index1);
-                }
-            });
-        });
-        
-        return a;
+        static_assert((std::size_t() + ... + std::is_same_v<T, std::tuple_element_t<N, U>>) == 1, "There is no single exact match");
+        return std::max({ (std::is_same_v<T, std::tuple_element_t<N, U>> ? N : 0)... });
     }
+    
+    template <class T, class U>
+    static constexpr std::size_t find_type_v = find_type_impl<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
 
-    template <class T1, class T2>
-    inline constexpr auto map_types()
+    //Use that to get all the indices and put them into a std::array:
+    template <class T, class U, std::size_t... N>
+    constexpr auto map_types_impl(std::index_sequence<N...>) noexcept
     {
-        const T1 t1{};
-        const T2 t2{};
-
-        return map_types(t1, t2);
+        return std::array<std::size_t, sizeof...(N)>{find_type_v<std::tuple_element_t<N, U>, T>...};
+    }
+    
+    template <class T, class U>
+    constexpr auto map_types() noexcept
+    {
+        return map_types_impl<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
     }
 
 #elif AWL_CPPSTD >= 14
