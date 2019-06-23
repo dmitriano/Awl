@@ -21,11 +21,7 @@ namespace awl
     {
         const std::string & name;
         size_t type;
-
-        AWL_SERIALIZABLE(name, type)
     };
-
-    AWL_MEMBERWISE_EQUATABLE(FieldRef)
         
     class Prototype
     {
@@ -46,7 +42,7 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_a(map_types_t2v<Tie, V >())
+        AttachedPrototype() : m_a(map_types_t2v<Tie, V>())
         {
             assert(m_a.size() == S::get_member_names().size());
         }
@@ -71,6 +67,8 @@ namespace awl
     {
     public:
 
+        DetachedPrototype() = default;
+        
         explicit DetachedPrototype(std::vector<Field> fields) : m_fields(std::move(fields))
         {
         }
