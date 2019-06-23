@@ -42,8 +42,8 @@ namespace awl
     {
     private:
 
-        typedef typename decltype(S{}.as_tuple()) Tie;
-
+        typedef typename tuplizable_traits<S>::Tie Tie;
+    
     public:
 
         AttachedPrototype() : m_a(map_types_t2v<Tie, V >())
