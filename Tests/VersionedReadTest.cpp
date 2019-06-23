@@ -109,8 +109,7 @@ namespace awl::io
         auto new_proto = ctx.MakeNewPrototype<Struct>();
         auto & old_proto = ctx.FindOldPrototype<Struct>();
         auto readers = ctx.MakeFieldReaders<Stream>();
-
-        auto name_map = old_proto.MapNames(new_proto);
+        auto name_map = ctx.FindProtoMap<Struct>();
 
         assert(name_map.size() == old_proto.GetCount());
 

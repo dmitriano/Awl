@@ -29,12 +29,21 @@ namespace awl::io
             return oldPrototypes[index];
         }
 
+        template <class S>
+        const std::vector<size_t> & FindProtoMap() const
+        {
+            constexpr size_t index = find_variant_type_v<S, StructV>;
+            assert(index < oldPrototypes.size());
+            return protoMaps[index];
+        }
+
         //Makes the new and old prototypes identical.
         void Initialize()
         {
             assert(oldPrototypes.empty());
             auto a = MakeNewPrototypes();
             std::copy(a.begin(), a.end(), std::back_inserter(oldPrototypes));
+            MakeProtoMaps();
         }
         
         template <class Stream>
@@ -43,6 +52,7 @@ namespace awl::io
             assert(oldPrototypes.empty());
             //Read as std::vector.
             Read(s, oldPrototypes);
+            MakeProtoMaps();
         }
 
         template <class Stream>
@@ -64,8 +74,6 @@ namespace awl::io
         const bool allowDelete = true;
 
     private:
-
-        std::vector<DetachedPrototype> oldPrototypes;
 
         typedef std::array<DetachedPrototype, std::variant_size_v<StructV>> NewArray;
 
@@ -97,6 +105,35 @@ namespace awl::io
             typedef std::array<std::function<FieldV(Stream & s)>, std::variant_size_v<FieldV>> ReaderArray;
             return ReaderArray{ MakeFieldReader<Stream, index>() ... };
         }
+
+        template <size_t index>
+        void MakeProtoMap()
+        {
+            //can there be a better implementation?
+            if (index < oldPrototypes.size())
+            {
+                auto new_proto = MakeNewPrototype<std::variant_alternative_t<index, StructV>>();
+                auto & old_proto = oldPrototypes[index];
+                protoMaps[index] = old_proto.MapNames(new_proto);
+            }
+        }
+        
+        void MakeProtoMaps()
+        {
+            assert(protoMaps.empty());
+            constexpr size_t size = std::variant_size_v<StructV>;
+            protoMaps.resize(size);
+            return MakeProtoMaps(std::make_index_sequence<size>());
+        }
+
+        template <std::size_t... index>
+        void MakeProtoMaps(std::index_sequence<index...>)
+        {
+            (MakeProtoMap<index>(), ...);
+        }
+
+        std::vector<DetachedPrototype> oldPrototypes;
+        std::vector<std::vector<size_t>> protoMaps;
     };
 
     typedef Context<std::variant<>, std::variant<>> FakeContext;
