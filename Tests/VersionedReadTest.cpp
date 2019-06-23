@@ -31,12 +31,12 @@ AWL_MEMBERWISE_EQUATABLE(B1)
 
 struct A2
 {
-    int a;
     double b;
-    std::string c;
     int d = 5;
+    std::string e = "xyz";
+    std::string c;
 
-    AWL_STRINGIZABLE(a, b, c, d)
+    AWL_STRINGIZABLE(b, d, e, c)
 };
 
 AWL_MEMBERWISE_EQUATABLE(A2)
@@ -44,10 +44,10 @@ AWL_MEMBERWISE_EQUATABLE(A2)
 struct B2
 {
     int x;
-    double y;
-    std::vector<int> z;
+    std::vector<int> z{ 1, 2, 3 };
+    std::string w = "xyz";
 
-    AWL_STRINGIZABLE(x, y, z)
+    AWL_STRINGIZABLE(x, z, w)
 };
 
 AWL_MEMBERWISE_EQUATABLE(B2)
@@ -143,12 +143,12 @@ AWT_TEST(VersionedRead)
         ReadV(in, a2, ctx);
         ReadV(in, b2, ctx);
 
-        Assert::IsTrue(a2.a == a1.a);
+        //Assert::IsTrue(a2.a == a1.a);
         Assert::IsTrue(a2.b == a1.b);
         Assert::IsTrue(a2.c == a1.c);
         Assert::IsTrue(a2.d == 5);
 
         Assert::IsTrue(b2.x == b1.x);
-        Assert::IsTrue(b2.y == b1.y);
+        //Assert::IsTrue(b2.y == b1.y);
     }
 }
