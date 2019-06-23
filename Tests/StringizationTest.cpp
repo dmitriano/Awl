@@ -104,5 +104,9 @@ AWT_TEST(Stringizable_Prototype)
 
     awl::AttachedPrototype<V, A> ap;
 
-    Assert::IsTrue(ap.GetMemberTypes() == std::vector<size_t>{2, 4, 5});
+    awl::DetachedPrototype dp(ap);
+
+    awl::DetachedPrototype result(std::vector<awl::Field>{ {"x", 2u}, {"y", 4u}, {"z", 5u} });
+
+    Assert::IsTrue(dp == result);
 }
