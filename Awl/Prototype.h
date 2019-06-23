@@ -58,7 +58,25 @@ namespace awl
             return m_a.size();
         }
 
+        auto MakeSetters() const
+        {
+            return MakeSetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
+        }
+
     private:
+
+        template <std::size_t... index>
+        auto MakeSetters(std::index_sequence<index...>) const
+        {
+            typedef std::array<std::function<void(S & val, V v_field)>, sizeof...(index)> SetterArray;
+            return SetterArray{ 
+                [](S & val, V v_field)
+                {
+                    std::get<index>(val.as_tuple()) = std::get<std::remove_reference_t<std::tuple_element_t<index, Tie>>>(v_field);
+                }
+                ...
+            };
+        }
 
         std::array<size_t, std::tuple_size_v<Tie>> m_a;
     };

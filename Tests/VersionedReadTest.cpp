@@ -64,17 +64,31 @@ inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     auto new_proto = ctx.MakeNewPrototype<Struct>();
     auto & old_proto = ctx.FindOldPrototype<Struct>();
     auto readers = ctx.MakeFieldReaders<Stream>();
+    auto setters = new_proto.MakeSetters();
 
     for (int old_index = 0; old_index < old_proto.GetCount(); ++old_index)
     {
-        const auto field = old_proto.GetField(old_index);
-        auto reader = readers[field.type];
+        const auto old_field = old_proto.GetField(old_index);
+        auto reader = readers[old_field.type];
         auto v = reader(s);
 
+        for (int new_index = 0; new_index < new_proto.GetCount(); ++new_index)
+        {
+            const auto new_field = new_proto.GetField(new_index);
+            
+            if (new_field.name == old_field.name)
+            {
+                if (new_field.type == old_field.type)
+                {
+                    setters[new_index](val, v);
+                }
+                break;
+            }
+        }
     }
 }
 
-AWT_TEST(Context)
+AWT_TEST(VersionedRead)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -128,10 +142,13 @@ AWT_TEST(Context)
         
         ReadV(in, a2, ctx);
         ReadV(in, b2, ctx);
-    }
-}
 
-AWT_TEST(VersionedRead)
-{
-    AWT_UNUSED_CONTEXT;
+        Assert::IsTrue(a2.a == a1.a);
+        Assert::IsTrue(a2.b == a1.b);
+        Assert::IsTrue(a2.c == a1.c);
+        Assert::IsTrue(a2.d == 5);
+
+        Assert::IsTrue(b2.x == b1.x);
+        Assert::IsTrue(b2.y == b1.y);
+    }
 }
