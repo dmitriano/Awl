@@ -100,9 +100,9 @@ AWT_TEST(Stringizable_Prototype)
 {
     AWT_UNUSED_CONTEXT;
 
-    //typedef std::variant<bool, char, int, float, double, std::string> V;
+    typedef std::variant<bool, char, int, float, double, std::string> V;
 
-    //awl::AttachedPrototype<V, A> ap;
+    awl::AttachedPrototype<V, A> ap;
 
-    //Assert::IsTrue(ap.GetMemberTypes() == std::vector<size_t>{2, 4, 5});
+    Assert::IsTrue(ap.GetMemberTypes() == std::vector<size_t>{2, 4, 5});
 }

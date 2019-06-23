@@ -29,7 +29,7 @@ namespace awl
 
         std::vector<size_t> GetMemberTypes() const override
         {
-            auto a = map_types_t2v<decltype(S{}.as_const_tuple()), V>();
+            auto a = map_types_t2v<decltype(S{}.as_tuple()), V>();
             return std::vector<size_t>(a.begin(), a.end());
         }
     };
