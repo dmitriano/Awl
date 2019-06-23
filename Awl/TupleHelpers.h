@@ -98,31 +98,31 @@ namespace awl
     inline constexpr bool dependent_false_v = dependent_false<T>::value;
 
     //Get the index of the single unique match for an arbitrary type in something tuple-like:
-    template <class T, class U, std::size_t... N>
-    static constexpr auto find_tuple_type_impl(std::index_sequence<N...>) noexcept
+    template <class T, class U, std::size_t... index>
+    static constexpr auto find_tuple_type_impl(std::index_sequence<index...>) noexcept
     {
-        static_assert((std::size_t() + ... + std::is_same_v<T, std::tuple_element_t<N, U>>) == 1, "There is no single exact match");
-        return std::max({ (std::is_same_v<T, std::tuple_element_t<N, U>> ? N : 0)... });
+        static_assert((std::size_t() + ... + std::is_same_v<T, std::tuple_element_t<index, U>>) == 1, "There is no single exact match");
+        return std::max({ (std::is_same_v<T, std::tuple_element_t<index, U>> ? index : 0)... });
     }
     
     template <class T, class U>
     static constexpr std::size_t find_tuple_type_v = find_tuple_type_impl<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
 
-    template <class T, class U, std::size_t... N>
-    static constexpr auto find_variant_type_impl(std::index_sequence<N...>) noexcept
+    template <class T, class U, std::size_t... index>
+    static constexpr auto find_variant_type_impl(std::index_sequence<index...>) noexcept
     {
-        static_assert((std::size_t() + ... + std::is_same_v<T, std::variant_alternative_t<N, U>>) == 1, "There is no single exact match");
-        return std::max({ (std::is_same_v<T, std::variant_alternative_t<N, U>> ? N : 0)... });
+        static_assert((std::size_t() + ... + std::is_same_v<T, std::variant_alternative_t<index, U>>) == 1, "There is no single exact match");
+        return std::max({ (std::is_same_v<T, std::variant_alternative_t<index, U>> ? index : 0)... });
     }
 
     template <class T, class U>
     static constexpr std::size_t find_variant_type_v = find_variant_type_impl<T, U>(std::make_index_sequence<std::variant_size_v<U>>());
 
     //Use that to get all the indices and put them into a std::array:
-    template <class T, class U, std::size_t... N>
-    constexpr auto map_types_impl_t2t(std::index_sequence<N...>) noexcept
+    template <class T, class U, std::size_t... index>
+    constexpr auto map_types_impl_t2t(std::index_sequence<index...>) noexcept
     {
-        return std::array<std::size_t, sizeof...(N)>{find_tuple_type_v<std::tuple_element_t<N, U>, T>...};
+        return std::array<std::size_t, sizeof...(index)>{find_tuple_type_v<std::tuple_element_t<index, U>, T>...};
     }
     
     template <class T, class U>
@@ -131,10 +131,10 @@ namespace awl
         return map_types_impl_t2t<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
     }
 
-    template <class T, class U, std::size_t... N>
-    constexpr auto map_types_impl_t2v(std::index_sequence<N...>) noexcept
+    template <class T, class U, std::size_t... index>
+    constexpr auto map_types_impl_t2v(std::index_sequence<index...>) noexcept
     {
-        return std::array<std::size_t, sizeof...(N)>{find_variant_type_v<std::tuple_element_t<N, U>, T>...};
+        return std::array<std::size_t, sizeof...(index)>{find_variant_type_v<std::tuple_element_t<index, U>, T>...};
     }
 
     template <class T, class U>
