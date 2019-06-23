@@ -64,7 +64,6 @@ inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     auto new_proto = ctx.MakeNewPrototype<Struct>();
     auto & old_proto = ctx.FindOldPrototype<Struct>();
     auto readers = ctx.MakeFieldReaders<Stream>();
-    auto setters = new_proto.MakeSetters();
 
     for (int old_index = 0; old_index < old_proto.GetCount(); ++old_index)
     {
@@ -80,7 +79,7 @@ inline void ReadV(Stream & s, Struct & val, const Context & ctx)
             {
                 if (new_field.type == old_field.type)
                 {
-                    setters[new_index](val, v);
+                    new_proto.Set(val, new_index, std::move(v));
                 }
                 break;
             }

@@ -3,6 +3,7 @@
 #include "Awl/Stringizable.h"
 
 #include <vector>
+#include <functional>
 #include <assert.h>
 
 namespace awl
@@ -42,7 +43,7 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_a(map_types_t2v<Tie, V>())
+        AttachedPrototype() : m_a(map_types_t2v<Tie, V>()), m_setters(MakeSetters())
         {
             assert(m_a.size() == S::get_member_names().size());
         }
@@ -58,19 +59,25 @@ namespace awl
             return m_a.size();
         }
 
+        void Set(S & val, size_t index, V v_field)
+        {
+            m_setters[index](val, std::move(v_field));
+        }
+
+    private:
+
+        typedef std::array<std::function<void(S & val, V v_field)>, std::tuple_size_v<Tie>> SetterArray;
+        
         auto MakeSetters() const
         {
             return MakeSetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
         }
 
-    private:
-
         template <std::size_t... index>
         auto MakeSetters(std::index_sequence<index...>) const
         {
-            typedef std::array<std::function<void(S & val, V v_field)>, sizeof...(index)> SetterArray;
             return SetterArray{ 
-                [](S & val, V v_field)
+                [](S & val, V && v_field)
                 {
                     std::get<index>(val.as_tuple()) = std::get<std::remove_reference_t<std::tuple_element_t<index, Tie>>>(v_field);
                 }
@@ -79,6 +86,8 @@ namespace awl
         }
 
         std::array<size_t, std::tuple_size_v<Tie>> m_a;
+
+        SetterArray m_setters;
     };
 
     class DetachedPrototype : public Prototype
