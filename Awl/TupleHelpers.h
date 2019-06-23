@@ -119,28 +119,30 @@ namespace awl
     static constexpr std::size_t find_variant_type_v = find_variant_type_impl<T, U>(std::make_index_sequence<std::variant_size_v<U>>());
 
     //Use that to get all the indices and put them into a std::array:
-    template <class T, class U, std::size_t... index>
+    template <class U, class T, std::size_t... index>
     constexpr auto map_types_impl_t2t(std::index_sequence<index...>) noexcept
     {
         return std::array<std::size_t, sizeof...(index)>{find_tuple_type_v<std::tuple_element_t<index, U>, T>...};
     }
     
-    template <class T, class U>
+    //U is a tuple, T is a tuple
+    template <class U, class T>
     constexpr auto map_types_t2t() noexcept
     {
-        return map_types_impl_t2t<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
+        return map_types_impl_t2t<U, T>(std::make_index_sequence<std::tuple_size_v<U>>());
     }
 
-    template <class T, class U, std::size_t... index>
+    template <class U, class T, std::size_t... index>
     constexpr auto map_types_impl_t2v(std::index_sequence<index...>) noexcept
     {
         return std::array<std::size_t, sizeof...(index)>{find_variant_type_v<std::tuple_element_t<index, U>, T>...};
     }
 
-    template <class T, class U>
+    //U is a tuple, T is a variant
+    template <class U, class T>
     constexpr auto map_types_t2v() noexcept
     {
-        return map_types_impl_t2v<T, U>(std::make_index_sequence<std::tuple_size_v<U>>());
+        return map_types_impl_t2v<U, T>(std::make_index_sequence<std::tuple_size_v<U>>());
     }
 
 #elif AWL_CPPSTD >= 14
