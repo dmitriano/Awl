@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <functional>
+#include <limits>
 #include <assert.h>
 
 namespace awl
@@ -31,6 +32,34 @@ namespace awl
         virtual FieldRef GetField(size_t index) const = 0;
 
         virtual size_t GetCount() const = 0;
+
+        static constexpr size_t NoIndex = std::numeric_limits<size_t>::max();
+        
+        std::vector<size_t> MapNames(const Prototype & other) const
+        {
+            std::vector<size_t> v;
+            v.resize(GetCount());
+
+            for (int old_index = 0; old_index < GetCount(); ++old_index)
+            {
+                v[old_index] = NoIndex;
+                
+                const auto old_field = GetField(old_index);
+
+                for (int new_index = 0; new_index < other.GetCount(); ++new_index)
+                {
+                    const auto new_field = other.GetField(new_index);
+
+                    if (new_field.name == old_field.name)
+                    {
+                        v[old_index] = new_index;
+                        break;
+                    }
+                }
+            }
+
+            return v;
+        }
     };
 
     //V is std::variant, S is a Stringizable

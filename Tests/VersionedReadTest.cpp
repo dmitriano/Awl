@@ -58,30 +58,88 @@ typedef std::variant<bool, char, int, float, double, std::string, std::vector<in
 typedef awl::io::Context<std::variant<A1, B1>, FieldV1> OldContext;
 typedef awl::io::Context<std::variant<A2, B2>, FieldV2> NewContext;
 
-template<class Stream, class Struct, class Context>
-inline void ReadV(Stream & s, Struct & val, const Context & ctx)
+namespace awl::io
 {
-    auto new_proto = ctx.MakeNewPrototype<Struct>();
-    auto & old_proto = ctx.FindOldPrototype<Struct>();
-    auto readers = ctx.MakeFieldReaders<Stream>();
-
-    for (int old_index = 0; old_index < old_proto.GetCount(); ++old_index)
+    class FieldNotFoundException : public IoException
     {
-        const auto old_field = old_proto.GetField(old_index);
-        auto reader = readers[old_field.type];
-        auto v = reader(s);
+    public:
 
-        for (int new_index = 0; new_index < new_proto.GetCount(); ++new_index)
+        FieldNotFoundException(const std::string & name) : fieldName(name)
         {
-            const auto new_field = new_proto.GetField(new_index);
-            
-            if (new_field.name == old_field.name)
+        }
+
+        String GetMessage() const override
+        {
+            return format() << _T("Field '") << FromAString(fieldName) << _T("' not found.") << _T(" .");
+        }
+
+        AWL_IMPLEMENT_EXCEPTION
+
+    private:
+
+        const std::string fieldName;
+    };
+
+    class TypeMismatchException : public IoException
+    {
+    public:
+
+        TypeMismatchException(const std::string & name, size_t actual, size_t expected) :
+            fieldName(name), actualType(actual), expectedType(expected)
+        {
+        }
+
+        String GetMessage() const override
+        {
+            return format() << _T("Expected '") << FromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
+        }
+
+        AWL_IMPLEMENT_EXCEPTION
+
+    private:
+
+        const std::string fieldName;
+        const size_t actualType;
+        const size_t expectedType;
+    };
+
+    template<class Stream, class Struct, class Context>
+    inline void ReadV(Stream & s, Struct & val, const Context & ctx)
+    {
+        auto new_proto = ctx.MakeNewPrototype<Struct>();
+        auto & old_proto = ctx.FindOldPrototype<Struct>();
+        auto readers = ctx.MakeFieldReaders<Stream>();
+
+        auto name_map = old_proto.MapNames(new_proto);
+
+        assert(name_map.size() == old_proto.GetCount());
+
+        for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
+        {
+            const auto old_field = old_proto.GetField(old_index);
+            auto reader = readers[old_field.type];
+            //We read it even if it does not longer exist in the new struct.
+            auto v = reader(s);
+
+            const size_t new_index = name_map[old_index];
+
+            if (new_index == Prototype::NoIndex)
             {
-                if (new_field.type == old_field.type)
+                if (!ctx.allowDelete)
                 {
-                    new_proto.Set(val, new_index, std::move(v));
+                    throw FieldNotFoundException(old_field.name);
                 }
-                break;
+            }
+            else
+            {
+                const auto new_field = new_proto.GetField(new_index);
+
+                if (new_field.type != old_field.type)
+                {
+                    throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
+                }
+
+                new_proto.Set(val, new_index, std::move(v));
             }
         }
     }

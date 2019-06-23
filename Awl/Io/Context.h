@@ -60,6 +60,9 @@ namespace awl::io
             return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<FieldV>>());
         }
 
+        const bool allowTypeMismatch = false;
+        const bool allowDelete = true;
+
     private:
 
         std::vector<DetachedPrototype> oldPrototypes;
