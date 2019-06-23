@@ -1,4 +1,5 @@
 #include "Awl/Stringizable.h"
+#include "Awl/Prototype.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <string>
@@ -93,4 +94,15 @@ AWT_TEST(Stringizable_ForEach)
     });
 
     Assert::IsTrue(a1 == a2);
+}
+
+AWT_TEST(Stringizable_Prototype)
+{
+    AWT_UNUSED_CONTEXT;
+
+    //typedef std::variant<bool, char, int, float, double, std::string> V;
+
+    //awl::AttachedPrototype<V, A> ap;
+
+    //Assert::IsTrue(ap.GetMemberTypes() == std::vector<size_t>{2, 4, 5});
 }
