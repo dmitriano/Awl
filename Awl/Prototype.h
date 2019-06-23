@@ -43,20 +43,25 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_a(map_types_t2v<Tie, V>()), m_setters(MakeSetters())
+        AttachedPrototype() : m_types(map_types_t2v<Tie, V>()), m_getters(MakeGetters()), m_setters(MakeSetters())
         {
-            assert(m_a.size() == S::get_member_names().size());
+            assert(m_types.size() == S::get_member_names().size());
         }
 
         FieldRef GetField(size_t index) const override
         {
             assert(index < GetCount());
-            return { S::get_member_names()[index], m_a[index] };
+            return { S::get_member_names()[index], m_types[index] };
         }
 
         size_t GetCount() const override
         {
-            return m_a.size();
+            return m_types.size();
+        }
+
+        V Get(const S & val, size_t index)
+        {
+            return m_getters[index](val);
         }
 
         void Set(S & val, size_t index, V v_field)
@@ -66,8 +71,27 @@ namespace awl
 
     private:
 
+        typedef std::array<size_t, std::tuple_size_v<Tie>> TypesArray;
+        typedef std::array<std::function<V(const S & val)>, std::tuple_size_v<Tie>> GetterArray;
         typedef std::array<std::function<void(S & val, V v_field)>, std::tuple_size_v<Tie>> SetterArray;
-        
+
+        auto MakeGetters() const
+        {
+            return MakeGetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
+        }
+
+        template <std::size_t... index>
+        auto MakeGetters(std::index_sequence<index...>) const
+        {
+            return GetterArray{
+                [](const S & val) -> V
+                {
+                    return std::get<index>(val.as_tuple());
+                }
+                ...
+            };
+        }
+
         auto MakeSetters() const
         {
             return MakeSetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
@@ -85,8 +109,9 @@ namespace awl
             };
         }
 
-        std::array<size_t, std::tuple_size_v<Tie>> m_a;
-
+        TypesArray m_types;
+        
+        GetterArray m_getters;
         SetterArray m_setters;
     };
 

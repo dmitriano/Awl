@@ -96,17 +96,38 @@ AWT_TEST(Stringizable_ForEach)
     Assert::IsTrue(a1 == a2);
 }
 
-AWT_TEST(Stringizable_Prototype)
+typedef std::variant<bool, char, int, float, double, std::string> V;
+
+AWT_TEST(Prototype_TypeMap)
 {
     AWT_UNUSED_CONTEXT;
-
-    typedef std::variant<bool, char, int, float, double, std::string> V;
 
     awl::AttachedPrototype<V, A> ap;
 
     awl::DetachedPrototype dp(ap);
 
-    awl::DetachedPrototype result(std::vector<awl::Field>{ {"x", 2u}, {"y", 4u}, {"z", 5u} });
+    awl::DetachedPrototype result(std::vector<awl::Field>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
 
     Assert::IsTrue(dp == result);
+}
+
+AWT_TEST(Prototype_GetSet)
+{
+    AWT_UNUSED_CONTEXT;
+
+    awl::AttachedPrototype<V, A> ap;
+
+    A a = { 1, 5.0, "abc" };
+
+    Assert::IsTrue(ap.Get(a, 0) == V(a.x));
+    Assert::IsTrue(ap.Get(a, 1) == V(a.y));
+    Assert::IsTrue(ap.Get(a, 2) == V(a.z));
+
+    ap.Set(a, 0, 3);
+    ap.Set(a, 1, 7.0);
+    ap.Set(a, 2, std::string("xyz"));
+
+    Assert::IsTrue(ap.Get(a, 0) == V(3));
+    Assert::IsTrue(ap.Get(a, 1) == V(7.0));
+    Assert::IsTrue(ap.Get(a, 2) == V(std::string("xyz")));
 }
