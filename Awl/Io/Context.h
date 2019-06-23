@@ -57,7 +57,7 @@ namespace awl::io
         template <class Stream>
         auto MakeFieldReaders() const
         {
-            return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<StructV>>());
+            return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<FieldV>>());
         }
 
     private:
