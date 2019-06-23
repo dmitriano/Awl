@@ -3,6 +3,7 @@
 #include "Awl/Prototype.h"
 #include "Awl/Io/RwHelpers.h"
 
+#include <functional>
 #include <assert.h>
 
 namespace awl::io
@@ -21,7 +22,7 @@ namespace awl::io
         }
 
         template <class S>
-        Prototype & FindOldPrototype()
+        const Prototype & FindOldPrototype() const
         {
             constexpr size_t index = find_variant_type_v<S, StructV>;
             assert(index < oldPrototypes.size());
@@ -45,12 +46,18 @@ namespace awl::io
         }
 
         template <class Stream>
-        inline void WriteNew(Stream & s)
+        void WriteNew(Stream & s) const
         {
             //Write as std::array.
             auto a = MakeNewPrototypes();
             Write(s, a.size());
             Write(s, a);
+        }
+
+        template <class Stream>
+        auto MakeFieldReaders() const
+        {
+            return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<StructV>>());
         }
 
     private:
@@ -60,14 +67,29 @@ namespace awl::io
         typedef std::array<DetachedPrototype, std::variant_size_v<StructV>> NewArray;
 
         template <std::size_t... index>
-        NewArray MakeNewPrototypes(std::index_sequence<index...>)
+        NewArray MakeNewPrototypes(std::index_sequence<index...>) const
         {
             return NewArray{ DetachedPrototype(MakeNewPrototype<std::variant_alternative_t<index, StructV>>())... };
         }
 
-        NewArray MakeNewPrototypes()
+        NewArray MakeNewPrototypes() const
         {
             return MakeNewPrototypes(std::make_index_sequence<std::variant_size_v<StructV>>());
+        }
+
+        template <class Stream, std::size_t... index>
+        auto MakeFieldReaders(std::index_sequence<index...>) const
+        {
+            typedef std::array<std::function<FieldV(Stream & s)>, std::variant_size_v<FieldV>> ReaderArray;
+            return ReaderArray{
+                [](Stream & s)
+                {
+                    std::variant_alternative_t<index, FieldV> val;
+                    Read(s, val);
+                    return FieldV(val);
+                }
+                ...
+            };
         }
     };
 
