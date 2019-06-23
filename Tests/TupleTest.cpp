@@ -92,14 +92,34 @@ AWT_TEST(TupleTransform)
     Assert::IsTrue(t1 == t);
 }
 
-AWT_TEST(TupleMap)
+AWT_TEST(TupleT2TMap)
 {
     AWT_UNUSED_CONTEXT;
 
     typedef std::tuple<bool, char, int, float, double, std::string> T1;
     typedef std::tuple<char, int, int, double, std::string, int, double> T2;
 
+    static_assert(awl::find_tuple_type_v<bool, T1> == 0);
+    static_assert(awl::find_tuple_type_v<char, T1> == 1);
+    static_assert(awl::find_tuple_type_v<std::string, T1> == 5);
+
     auto a = awl::map_types_t2t<T1, T2>();
 
-    Assert::IsTrue(a == std::array<size_t, std::tuple_size<T2>::value>{1, 2, 2, 4, 5, 2, 4});
+    Assert::IsTrue(a == std::array<size_t, std::tuple_size_v<T2>>{1, 2, 2, 4, 5, 2, 4});
+}
+
+AWT_TEST(TupleT2VMap)
+{
+    AWT_UNUSED_CONTEXT;
+
+    typedef std::variant<bool, char, int, float, double, std::string> T1;
+    typedef std::tuple<char, int, int, double, std::string, int, double> T2;
+
+    static_assert(awl::find_variant_type_v<bool, T1> == 0);
+    static_assert(awl::find_variant_type_v<char, T1> == 1);
+    static_assert(awl::find_variant_type_v<std::string, T1> == 5);
+
+    auto a = awl::map_types_t2v<T1, T2>();
+
+    Assert::IsTrue(a == std::array<size_t, std::tuple_size_v<T2>>{1, 2, 2, 4, 5, 2, 4});
 }
