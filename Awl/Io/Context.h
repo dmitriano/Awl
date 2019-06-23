@@ -77,19 +77,22 @@ namespace awl::io
             return MakeNewPrototypes(std::make_index_sequence<std::variant_size_v<StructV>>());
         }
 
+        template <class Stream, size_t index>
+        static constexpr auto MakeFieldReader()
+        {
+            return [](Stream & s)
+            {
+                std::variant_alternative_t<index, FieldV> val;
+                Read(s, val);
+                return FieldV(val);
+            };
+        }
+        
         template <class Stream, std::size_t... index>
         auto MakeFieldReaders(std::index_sequence<index...>) const
         {
             typedef std::array<std::function<FieldV(Stream & s)>, std::variant_size_v<FieldV>> ReaderArray;
-            return ReaderArray{
-                [](Stream & s)
-                {
-                    std::variant_alternative_t<index, FieldV> val;
-                    Read(s, val);
-                    return FieldV(val);
-                }
-                ...
-            };
+            return ReaderArray{ MakeFieldReader<Stream, index>() ... };
         }
     };
 
