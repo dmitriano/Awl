@@ -109,6 +109,8 @@ namespace awl
 
         single_iterator(const single_iterator & other) : single_iterator(*other) {}
 
+        single_iterator & operator = (const single_iterator &) = default;
+
         single_iterator & operator++ ()
         {
             this->MoveNext();
@@ -144,6 +146,8 @@ namespace awl
         const_single_iterator(const Link *p) : base_single_iterator<const T, const Link>(p) {}
 
         const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
+
+        const_single_iterator & operator = (const const_single_iterator &) = default;
 
         //! The only differece between single_iterator and const_single_iterator is that single_iterator can be converted to const_single_iterator but not vice versa.
         const_single_iterator(const single_iterator<T, Link> & other) : const_single_iterator(*other) {}
