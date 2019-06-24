@@ -41,8 +41,14 @@ namespace awl::io
         void Initialize()
         {
             assert(oldPrototypes.empty());
-            auto a = MakeNewPrototypes();
-            std::copy(a.begin(), a.end(), std::back_inserter(oldPrototypes));
+            
+            auto new_protos = MakeNewPrototypes();
+
+            for (Prototype * p : new_protos.a)
+            {
+                oldPrototypes.push_back(DetachedPrototype(*p));
+            }
+            
             MakeProtoMaps();
         }
         
@@ -50,7 +56,7 @@ namespace awl::io
         void ReadOld(Stream & s)
         {
             assert(oldPrototypes.empty());
-            //Read as std::vector.
+            //Read std::vector.
             Read(s, oldPrototypes);
             MakeProtoMaps();
         }
@@ -58,10 +64,19 @@ namespace awl::io
         template <class Stream>
         void WriteNew(Stream & s) const
         {
-            //Write as std::array.
-            auto a = MakeNewPrototypes();
-            Write(s, a.size());
-            Write(s, a);
+            //Write std::array.
+            auto new_protos = MakeNewPrototypes();
+            Write(s, new_protos.a.size());
+            
+            for (Prototype * p : new_protos.a)
+            {
+                for (size_t i = 0; i < p->GetCount(); ++i)
+                {
+                    FieldRef fr = p->GetField(i);
+                    Write(s, fr.name);
+                    Write(s, fr.type);
+                }
+            }
         }
 
         template <class Stream>
@@ -75,15 +90,29 @@ namespace awl::io
 
     private:
 
-        typedef std::array<DetachedPrototype, std::variant_size_v<StructV>> NewArray;
+        typedef std::array<Prototype *, std::variant_size_v<StructV>> NewArray;
+
+        template <class Tuple, class Array>
+        struct InterfaceArray
+        {
+            InterfaceArray(Tuple && tt, Array && aa) : t(std::move(tt)), a(std::move(aa))
+            {
+            }
+
+            Tuple t;
+            Array a;
+        };
 
         template <std::size_t... index>
-        NewArray MakeNewPrototypes(std::index_sequence<index...>) const
+        auto MakeNewPrototypes(std::index_sequence<index...>) const
         {
-            return NewArray{ DetachedPrototype(MakeNewPrototype<std::variant_alternative_t<index, StructV>>())... };
+            auto t = std::make_tuple(MakeNewPrototype<std::variant_alternative_t<index, StructV>>()... );
+            auto a = to_array(t, [](auto & field) { return static_cast<Prototype *>(&field); });
+
+            return InterfaceArray(std::move(t), std::move(a));
         }
 
-        NewArray MakeNewPrototypes() const
+        auto MakeNewPrototypes() const
         {
             return MakeNewPrototypes(std::make_index_sequence<std::variant_size_v<StructV>>());
         }
@@ -106,30 +135,20 @@ namespace awl::io
             return ReaderArray{ MakeFieldReader<Stream, index>() ... };
         }
 
-        template <size_t index>
-        void MakeProtoMap()
-        {
-            //can there be a better implementation?
-            if (index < oldPrototypes.size())
-            {
-                auto new_proto = MakeNewPrototype<std::variant_alternative_t<index, StructV>>();
-                auto & old_proto = oldPrototypes[index];
-                protoMaps[index] = old_proto.MapNames(new_proto);
-            }
-        }
-        
         void MakeProtoMaps()
         {
             assert(protoMaps.empty());
             constexpr size_t size = std::variant_size_v<StructV>;
             protoMaps.resize(size);
-            return MakeProtoMaps(std::make_index_sequence<size>());
-        }
 
-        template <std::size_t... index>
-        void MakeProtoMaps(std::index_sequence<index...>)
-        {
-            (MakeProtoMap<index>(), ...);
+            auto new_protos = MakeNewPrototypes();
+
+            assert(new_protos.a.size() < oldPrototypes.size());
+
+            for (size_t i = 0; i < oldPrototypes.size(); ++i)
+            {
+                protoMaps[i] = oldPrototypes[i].MapNames(*(new_protos.a[i]));
+            }
         }
 
         std::vector<DetachedPrototype> oldPrototypes;
