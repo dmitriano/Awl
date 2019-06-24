@@ -60,49 +60,6 @@ typedef awl::io::Context<std::variant<A2, B2>, FieldV2> NewContext;
 
 namespace awl::io
 {
-    class FieldNotFoundException : public IoException
-    {
-    public:
-
-        FieldNotFoundException(const std::string & name) : fieldName(name)
-        {
-        }
-
-        String GetMessage() const override
-        {
-            return format() << _T("Field '") << FromAString(fieldName) << _T("' not found.") << _T(" .");
-        }
-
-        AWL_IMPLEMENT_EXCEPTION
-
-    private:
-
-        const std::string fieldName;
-    };
-
-    class TypeMismatchException : public IoException
-    {
-    public:
-
-        TypeMismatchException(const std::string & name, size_t actual, size_t expected) :
-            fieldName(name), actualType(actual), expectedType(expected)
-        {
-        }
-
-        String GetMessage() const override
-        {
-            return format() << _T("Expected '") << FromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
-        }
-
-        AWL_IMPLEMENT_EXCEPTION
-
-    private:
-
-        const std::string fieldName;
-        const size_t actualType;
-        const size_t expectedType;
-    };
-
     template<class Stream, class Struct, class Context>
     inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     {
