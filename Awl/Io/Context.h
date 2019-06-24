@@ -8,17 +8,47 @@
 
 namespace awl::io
 {
+    namespace helpers
+    {
+        template <class StructV, class FieldV>
+        struct PrototypeTupleCreator
+        {
+            template <class S>
+            static auto MakePrototype()
+            {
+                //This will trigger the static_assert if S is not in StructV.
+                find_variant_type_v<S, StructV>;
+                return AttachedPrototype<FieldV, S>();
+            }
+
+            template <std::size_t... index>
+            static auto MakePrototypeTuple(std::index_sequence<index...>)
+            {
+                return std::make_tuple(MakePrototype<std::variant_alternative_t<index, StructV>>()...);
+            }
+
+            static auto MakePrototypeTuple()
+            {
+                return MakePrototypeTuple(std::make_index_sequence<std::variant_size_v<StructV>>());
+            }
+        };
+    }
+
     template <class StructV, class FieldV>
     class Context
     {
     public:
 
+        Context() :
+            newPrototypesTuple(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()),
+            newPrototypes(to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); }))
+        {
+        }
+
         template <class S>
         static auto MakeNewPrototype()
         {
-            //This will trigger the static_assert if S is not in StructV.
-            find_variant_type_v<S, StructV>;
-            return AttachedPrototype<FieldV, S>();
+            return helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototype<S>();
         }
 
         template <class S>
@@ -42,9 +72,7 @@ namespace awl::io
         {
             assert(oldPrototypes.empty());
             
-            auto new_protos = MakeNewPrototypes();
-
-            for (Prototype * p : new_protos.a)
+            for (Prototype * p : newPrototypes)
             {
                 oldPrototypes.push_back(DetachedPrototype(*p));
             }
@@ -65,12 +93,14 @@ namespace awl::io
         void WriteNew(Stream & s) const
         {
             //Write std::array.
-            auto new_protos = MakeNewPrototypes();
-            Write(s, new_protos.a.size());
+            Write(s, newPrototypes.size());
             
-            for (Prototype * p : new_protos.a)
+            for (Prototype * p : newPrototypes)
             {
-                for (size_t i = 0; i < p->GetCount(); ++i)
+                const size_t count = p->GetCount();
+                Write(s, count);
+                
+                for (size_t i = 0; i < count; ++i)
                 {
                     FieldRef fr = p->GetField(i);
                     Write(s, fr.name);
@@ -90,32 +120,8 @@ namespace awl::io
 
     private:
 
+        typedef decltype(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()) NewTuple;
         typedef std::array<Prototype *, std::variant_size_v<StructV>> NewArray;
-
-        template <class Tuple, class Array>
-        struct InterfaceArray
-        {
-            InterfaceArray(Tuple && tt, Array && aa) : t(std::move(tt)), a(std::move(aa))
-            {
-            }
-
-            Tuple t;
-            Array a;
-        };
-
-        template <std::size_t... index>
-        auto MakeNewPrototypes(std::index_sequence<index...>) const
-        {
-            auto t = std::make_tuple(MakeNewPrototype<std::variant_alternative_t<index, StructV>>()... );
-            auto a = to_array(t, [](auto & field) { return static_cast<Prototype *>(&field); });
-
-            return InterfaceArray(std::move(t), std::move(a));
-        }
-
-        auto MakeNewPrototypes() const
-        {
-            return MakeNewPrototypes(std::make_index_sequence<std::variant_size_v<StructV>>());
-        }
 
         template <class Stream, size_t index>
         static constexpr auto MakeFieldReader()
@@ -141,16 +147,16 @@ namespace awl::io
             constexpr size_t size = std::variant_size_v<StructV>;
             protoMaps.resize(size);
 
-            auto new_protos = MakeNewPrototypes();
-
-            assert(new_protos.a.size() < oldPrototypes.size());
+            assert(oldPrototypes.size() <= newPrototypes.size());
 
             for (size_t i = 0; i < oldPrototypes.size(); ++i)
             {
-                protoMaps[i] = oldPrototypes[i].MapNames(*(new_protos.a[i]));
+                protoMaps[i] = oldPrototypes[i].MapNames(*(newPrototypes[i]));
             }
         }
 
+        NewTuple newPrototypesTuple;
+        NewArray newPrototypes;
         std::vector<DetachedPrototype> oldPrototypes;
         std::vector<std::vector<size_t>> protoMaps;
     };
