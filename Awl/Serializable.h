@@ -52,8 +52,8 @@ namespace awl
     template <class T>
     struct tuplizable_traits
     {
-        typedef typename decltype(T{}.as_const_tuple()) ConstTie;
-        typedef typename decltype(T{}.as_tuple()) Tie;
+        typedef decltype(T{}.as_const_tuple()) ConstTie;
+        typedef decltype(T{}.as_tuple()) Tie;
     };
 }
 

@@ -40,13 +40,13 @@ namespace awl
             std::vector<size_t> v;
             v.resize(GetCount());
 
-            for (int old_index = 0; old_index < GetCount(); ++old_index)
+            for (size_t old_index = 0; old_index < GetCount(); ++old_index)
             {
                 v[old_index] = NoIndex;
                 
                 const auto old_field = GetField(old_index);
 
-                for (int new_index = 0; new_index < other.GetCount(); ++new_index)
+                for (size_t new_index = 0; new_index < other.GetCount(); ++new_index)
                 {
                     const auto new_field = other.GetField(new_index);
 
@@ -157,7 +157,7 @@ namespace awl
         explicit DetachedPrototype(const Prototype & ap)
         {
             m_fields.resize(ap.GetCount());
-            for (int i = 0; i < ap.GetCount(); ++i)
+            for (size_t i = 0; i < ap.GetCount(); ++i)
             {
                 const FieldRef field = ap.GetField(i);
                 m_fields[i] = {field.name, field.type};

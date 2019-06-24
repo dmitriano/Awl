@@ -3,6 +3,7 @@
 #include <tuple>
 #include <variant>
 #include <array>
+#include <algorithm>
 
 #if AWL_CPPSTD >= 17
 #include <utility>
