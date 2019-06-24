@@ -16,8 +16,8 @@ namespace awl::io
             template <class S>
             static auto MakePrototype()
             {
-                //This will trigger the static_assert if S is not in StructV.
-                find_variant_type_v<S, StructV>;
+                //This will probably trigger the static_assert if S is not in StructV.
+                //find_variant_type_v<S, StructV>;
                 return AttachedPrototype<FieldV, S>();
             }
 

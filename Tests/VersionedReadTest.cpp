@@ -63,10 +63,10 @@ namespace awl::io
     template<class Stream, class Struct, class Context>
     inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     {
-        auto & new_proto = ctx.FindNewPrototype<Struct>();
-        auto & old_proto = ctx.FindOldPrototype<Struct>();
-        auto readers = ctx.MakeFieldReaders<Stream>();
-        auto name_map = ctx.FindProtoMap<Struct>();
+        auto & new_proto = ctx.template FindNewPrototype<Struct>();
+        auto & old_proto = ctx.template FindOldPrototype<Struct>();
+        auto readers = ctx.template MakeFieldReaders<Stream>();
+        auto name_map = ctx.template FindProtoMap<Struct>();
 
         assert(name_map.size() == old_proto.GetCount());
 
