@@ -46,9 +46,10 @@ namespace awl::io
         }
 
         template <class S>
-        static auto MakeNewPrototype()
+        const AttachedPrototype<FieldV, S> & FindNewPrototype() const
         {
-            return helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototype<S>();
+            constexpr size_t index = find_variant_type_v<S, StructV>;
+            return std::get<index>(newPrototypesTuple);
         }
 
         template <class S>
@@ -81,7 +82,7 @@ namespace awl::io
         }
         
         template <class Stream>
-        void ReadOld(Stream & s)
+        void ReadOldPrototypes(Stream & s)
         {
             assert(oldPrototypes.empty());
             //Read std::vector.
@@ -90,7 +91,7 @@ namespace awl::io
         }
 
         template <class Stream>
-        void WriteNew(Stream & s) const
+        void WriteNewPrototypes(Stream & s) const
         {
             //Write std::array.
             Write(s, newPrototypes.size());

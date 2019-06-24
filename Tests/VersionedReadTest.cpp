@@ -106,7 +106,7 @@ namespace awl::io
     template<class Stream, class Struct, class Context>
     inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     {
-        auto new_proto = ctx.MakeNewPrototype<Struct>();
+        auto & new_proto = ctx.FindNewPrototype<Struct>();
         auto & old_proto = ctx.FindOldPrototype<Struct>();
         auto readers = ctx.MakeFieldReaders<Stream>();
         auto name_map = ctx.FindProtoMap<Struct>();
@@ -160,14 +160,14 @@ AWT_TEST(VersionedRead)
         ctx.Initialize();
         
         {
-            auto a1_proto = ctx.MakeNewPrototype<A1>();
+            auto & a1_proto = ctx.FindNewPrototype<A1>();
             Assert::IsTrue(a1_proto.GetCount() == 3);
 
-            auto b1_proto = ctx.MakeNewPrototype<B1>();
+            auto & b1_proto = ctx.FindNewPrototype<B1>();
             Assert::IsTrue(b1_proto.GetCount() == 2);
         }
 
-        ctx.WriteNew(out);
+        ctx.WriteNewPrototypes(out);
 
         Write(out, a1);
         Write(out, b1);
@@ -177,13 +177,13 @@ AWT_TEST(VersionedRead)
         awl::io::VectorInputStream in(v);
 
         NewContext ctx;
-        ctx.ReadOld(in);
+        ctx.ReadOldPrototypes(in);
 
         {
-            auto a2_proto = ctx.MakeNewPrototype<A2>();
+            auto & a2_proto = ctx.FindNewPrototype<A2>();
             Assert::IsTrue(a2_proto.GetCount() == 4);
 
-            auto b2_proto = ctx.MakeNewPrototype<B2>();
+            auto & b2_proto = ctx.FindNewPrototype<B2>();
             Assert::IsTrue(b2_proto.GetCount() == 3);
 
             auto & a1_proto = ctx.FindOldPrototype<A2>();
