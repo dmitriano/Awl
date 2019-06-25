@@ -4,11 +4,44 @@
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/SequentialStream.h"
 
-#include <functional>
 #include <assert.h>
 
 namespace awl::io
 {
+    template <class Struct>
+    struct FieldReader
+    {
+        virtual void ReadField(SequentialInputStream & in, Struct & val) const = 0;
+    };
+
+    template <class Struct, size_t index>
+    class FieldReaderImpl : public FieldReader<Struct>
+    {
+    public:
+
+        void ReadField(SequentialInputStream & in, Struct & val) const override
+        {
+            Read(in, std::get<index>(val.as_tuple()));
+        }
+    };
+
+    struct FieldSkipper
+    {
+        virtual void SkipField(SequentialInputStream & in) const = 0;
+    };
+
+    template <class Field>
+    class FieldSkipperImpl : public FieldSkipper
+    {
+    public:
+
+        void SkipField(SequentialInputStream & in) const override
+        {
+            Field val;
+            Read(in, val);
+        }
+    };
+
     namespace helpers
     {
         template <class StructV, class FieldV>
@@ -31,17 +64,74 @@ namespace awl::io
                 return MakePrototypeTuple(std::make_index_sequence<std::variant_size_v<StructV>>());
             }
         };
+
+        template <class StructV>
+        struct FieldReaderTupleCreator
+        {
+            template <class Struct, std::size_t... index>
+            static auto MakeFieldReaderTuple(std::index_sequence<index...>)
+            {
+                return std::make_tuple(FieldReaderImpl<Struct, index>()...);
+            }
+
+            template <class Struct>
+            static auto MakeFieldReaderTuple()
+            {
+                return MakeFieldReaderTuple<Struct>(std::make_index_sequence<std::tuple_size_v<tuplizable_traits<Struct>::Tie>>());
+            }
+
+            template <std::size_t... index>
+            static auto MakeReaderTuple(std::index_sequence<index...>)
+            {
+                return std::make_tuple(MakeFieldReaderTuple<std::variant_alternative_t<index, StructV>>()...);
+            }
+
+            //Creates a tuple of tuples of FieldReader-s.
+            static auto MakeReaderTuple()
+            {
+                return MakeReaderTuple(std::make_index_sequence<std::variant_size_v<StructV>>());
+            }
+        };
+
+        template <class FieldV>
+        struct FieldSkipperTupleCreator
+        {
+            template <std::size_t... index>
+            static auto MakeTuple(std::index_sequence<index...>)
+            {
+                return std::make_tuple(FieldSkipperImpl<std::variant_alternative_t<index, FieldV>>()...);
+            }
+
+            static auto MakeTuple()
+            {
+                return MakeTuple(std::make_index_sequence<std::variant_size_v<FieldV>>());
+            }
+        };
     }
 
     template <class StructV, class FieldV>
     class Context
     {
+    private:
+
+        typedef decltype(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()) NewPrototypeTuple;
+        typedef std::array<Prototype *, std::variant_size_v<StructV>> NewPrototypeArray;
+
+        typedef decltype(helpers::FieldReaderTupleCreator<StructV>::MakeReaderTuple()) ReaderTuple;
+
+        typedef decltype(helpers::FieldSkipperTupleCreator<FieldV>::MakeTuple()) SkipperTuple;
+        typedef std::array<FieldSkipper *, std::variant_size_v<FieldV>> SkipperArray;
+
+        typedef std::array<std::function<FieldV(SequentialInputStream & s)>, std::variant_size_v<FieldV>> ReaderArray;
+    
     public:
 
         Context() :
             newPrototypesTuple(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()),
             newPrototypes(to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
-            fieldReaders(MakeFieldReaders())
+            readerTuple(helpers::FieldReaderTupleCreator<StructV>::MakeReaderTuple()),
+            skipperTuple(helpers::FieldSkipperTupleCreator<FieldV>::MakeTuple()),
+            skipperArray(to_array(skipperTuple, [](auto & field) { return static_cast<FieldSkipper *>(&field); }))
         {
         }
 
@@ -53,6 +143,19 @@ namespace awl::io
         {
             constexpr size_t index = StructIndex<S>;
             return std::get<index>(newPrototypesTuple);
+        }
+
+        template <class S>
+        auto MakeFieldReaders() const
+        {
+            constexpr size_t index = StructIndex<S>;
+            auto & reader_tuple = std::get<index>(readerTuple);
+            return to_array(reader_tuple, [](auto & reader) { return static_cast<const FieldReader<S> *>(&reader); });
+        }
+
+        const SkipperArray & GetFieldSkippers() const
+        {
+            return skipperArray;
         }
 
         template <class S>
@@ -118,12 +221,6 @@ namespace awl::io
             }
         }
 
-        auto & GetFieldReader(size_t old_index) const
-        {
-            assert(old_index < fieldReaders.size());
-            return fieldReaders[old_index];
-        }
-
         typedef uint16_t StructIndexType;
         
         bool serializeStructIndex = true;
@@ -131,10 +228,6 @@ namespace awl::io
         bool allowDelete = true;
 
     private:
-
-        typedef decltype(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()) NewTuple;
-        typedef std::array<Prototype *, std::variant_size_v<StructV>> NewArray;
-        typedef std::array<std::function<FieldV(SequentialInputStream & s)>, std::variant_size_v<FieldV>> ReaderArray;
 
         auto MakeFieldReaders() const
         {
@@ -169,11 +262,13 @@ namespace awl::io
             }
         }
 
-        NewTuple newPrototypesTuple;
-        NewArray newPrototypes;
+        NewPrototypeTuple newPrototypesTuple;
+        NewPrototypeArray newPrototypes;
         std::vector<DetachedPrototype> oldPrototypes;
         std::vector<std::vector<size_t>> protoMaps;
-        ReaderArray fieldReaders;
+        ReaderTuple readerTuple;
+        SkipperTuple skipperTuple;
+        SkipperArray skipperArray;
     };
 
     typedef Context<std::variant<>, std::variant<>> FakeContext;

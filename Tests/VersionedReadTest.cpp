@@ -92,6 +92,10 @@ namespace awl::io
 
         auto & new_proto = ctx.template FindNewPrototype<Struct>();
         auto & old_proto = ctx.template FindOldPrototype<Struct>();
+        
+        auto readers = ctx.template MakeFieldReaders<Struct>();
+        auto & skippers = ctx.GetFieldSkippers();
+
         auto name_map = ctx.template FindProtoMap<Struct>();
 
         assert(name_map.size() == old_proto.GetCount());
@@ -99,9 +103,6 @@ namespace awl::io
         for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
         {
             const auto old_field = old_proto.GetField(old_index);
-            auto & reader = ctx.GetFieldReader(old_field.type);
-            //We read it even if it does not longer exist in the new struct.
-            auto v = reader(s);
 
             const size_t new_index = name_map[old_index];
 
@@ -111,6 +112,9 @@ namespace awl::io
                 {
                     throw FieldNotFoundException(old_field.name);
                 }
+
+                //Skip by type.
+                skippers[old_field.type]->SkipField(s);
             }
             else
             {
@@ -121,7 +125,8 @@ namespace awl::io
                     throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
                 }
 
-                new_proto.Set(val, new_index, std::move(v));
+                //But read by index.
+                readers[new_index]->ReadField(s, val);
             }
         }
     }
