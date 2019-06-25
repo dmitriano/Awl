@@ -44,27 +44,6 @@ namespace awl::io
 
     namespace helpers
     {
-        template <class StructV, class FieldV>
-        struct PrototypeTupleCreator
-        {
-            template <class S>
-            static auto MakePrototype()
-            {
-                return AttachedPrototype<FieldV, S>();
-            }
-
-            template <std::size_t... index>
-            static auto MakePrototypeTuple(std::index_sequence<index...>)
-            {
-                return std::make_tuple(MakePrototype<std::variant_alternative_t<index, StructV>>()...);
-            }
-
-            static auto MakePrototypeTuple()
-            {
-                return MakePrototypeTuple(std::make_index_sequence<std::variant_size_v<StructV>>());
-            }
-        };
-
         template <class StructV>
         struct FieldReaderTupleCreator
         {
@@ -99,7 +78,10 @@ namespace awl::io
     {
     private:
 
-        typedef decltype(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()) NewPrototypeTuple;
+        template <class S>
+        using MyAttachedPrototype = AttachedPrototype<FieldV, S>;
+
+        typedef decltype(transform_v2t<StructV, MyAttachedPrototype>()) NewPrototypeTuple;
         typedef std::array<Prototype *, std::variant_size_v<StructV>> NewPrototypeArray;
 
         typedef decltype(helpers::FieldReaderTupleCreator<StructV>::MakeReaderTuple()) ReaderTuple;
@@ -112,7 +94,7 @@ namespace awl::io
     public:
 
         Context() :
-            newPrototypesTuple(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()),
+            newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
             readerTuple(helpers::FieldReaderTupleCreator<StructV>::MakeReaderTuple()),
             skipperTuple(transform_v2t<FieldV, FieldSkipperImpl>()),
