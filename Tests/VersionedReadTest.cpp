@@ -93,7 +93,7 @@ namespace awl::io
         auto & new_proto = ctx.template FindNewPrototype<Struct>();
         auto & old_proto = ctx.template FindOldPrototype<Struct>();
         
-        auto readers = ctx.template MakeFieldReaders<Struct>();
+        auto & readers = ctx.template FindFieldReaders<Struct>();
         auto & skippers = ctx.GetFieldSkippers();
 
         auto name_map = ctx.template FindProtoMap<Struct>();
