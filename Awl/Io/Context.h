@@ -54,6 +54,13 @@ namespace awl::io
         }
 
         template <class S>
+        const bool HasOldPrototype() const
+        {
+            constexpr size_t index = StructIndex<S>;
+            return index < oldPrototypes.size();
+        }
+
+        template <class S>
         const Prototype & FindOldPrototype() const
         {
             constexpr size_t index = StructIndex<S>;

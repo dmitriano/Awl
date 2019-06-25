@@ -22,7 +22,7 @@ AWL_MEMBERWISE_EQUATABLE(A1)
 struct B1
 {
     int x;
-    double y;
+    bool y;
 
     AWL_STRINGIZABLE(x, y)
 };
@@ -43,8 +43,8 @@ AWL_MEMBERWISE_EQUATABLE(A2)
 
 struct B2
 {
-    int x;
     std::vector<int> z{ 1, 2, 3 };
+    int x;
     std::string w = "xyz";
 
     AWL_STRINGIZABLE(x, z, w)
@@ -52,11 +52,27 @@ struct B2
 
 AWL_MEMBERWISE_EQUATABLE(B2)
 
+struct C2
+{
+    int x = 7;
+
+    AWL_STRINGIZABLE(x)
+};
+
+AWL_MEMBERWISE_EQUATABLE(C2)
+
+static const A1 a1 = { 1, 2.0, "abc" };
+static const B1 b1 = { 1, true };
+
+static const A2 a2_expected = { a1.b, 5, "xyz", a1.c };
+static const B2 b2_expected = { std::vector<int>{ 1, 2, 3 },  b1.x, "xyz"};
+static const C2 c2_expected = { 7 };
+
 typedef std::variant<bool, char, int, float, double, std::string> FieldV1;
 typedef std::variant<bool, char, int, float, double, std::string, std::vector<int>> FieldV2;
 
 typedef awl::io::Context<std::variant<A1, B1>, FieldV1> OldContext;
-typedef awl::io::Context<std::variant<A2, B2>, FieldV2> NewContext;
+typedef awl::io::Context<std::variant<A2, B2, C2>, FieldV2> NewContext;
 
 namespace awl::io
 {
@@ -124,67 +140,76 @@ namespace awl::io
     }
 }
 
+void WriteDataV1(awl::io::SequentialOutputStream & out)
+{
+    OldContext ctx;
+    ctx.Initialize();
+
+    {
+        auto & a1_proto = ctx.FindNewPrototype<A1>();
+        Assert::IsTrue(a1_proto.GetCount() == 3);
+
+        auto & b1_proto = ctx.FindNewPrototype<B1>();
+        Assert::IsTrue(b1_proto.GetCount() == 2);
+    }
+
+    ctx.WriteNewPrototypes(out);
+
+    awl::io::WriteV(out, a1, ctx);
+    awl::io::WriteV(out, b1, ctx);
+}
+
+auto ReadDataV2(awl::io::SequentialInputStream & in)
+{
+    NewContext ctx;
+    ctx.ReadOldPrototypes(in);
+
+    {
+        auto & a2_proto = ctx.FindNewPrototype<A2>();
+        Assert::IsTrue(a2_proto.GetCount() == 4);
+
+        auto & b2_proto = ctx.FindNewPrototype<B2>();
+        Assert::IsTrue(b2_proto.GetCount() == 3);
+
+        auto & a1_proto = ctx.FindOldPrototype<A2>();
+        Assert::IsTrue(a1_proto.GetCount() == 3);
+
+        auto & b1_proto = ctx.FindOldPrototype<B2>();
+        Assert::IsTrue(b1_proto.GetCount() == 2);
+    }
+
+    A2 a2;
+    B2 b2;
+    C2 c2;
+
+    awl::io::ReadV(in, a2, ctx);
+    awl::io::ReadV(in, b2, ctx);
+
+    if (ctx.HasOldPrototype<C2>())
+    {
+        awl::io::ReadV(in, c2, ctx);
+    }
+
+    return std::make_tuple(a2, b2, c2);
+}
+
 AWT_TEST(VersionedRead)
 {
     AWT_UNUSED_CONTEXT;
-
-    A1 a1 = { 1, 2.0, "abc" };
-    B1 b1 = { 1, 2.0 };
 
     std::vector<uint8_t> v;
 
     {
         awl::io::VectorOutputStream out(v);
 
-        OldContext ctx;
-        ctx.Initialize();
-        
-        {
-            auto & a1_proto = ctx.FindNewPrototype<A1>();
-            Assert::IsTrue(a1_proto.GetCount() == 3);
-
-            auto & b1_proto = ctx.FindNewPrototype<B1>();
-            Assert::IsTrue(b1_proto.GetCount() == 2);
-        }
-
-        ctx.WriteNewPrototypes(out);
-
-        awl::io::WriteV(out, a1, ctx);
-        awl::io::WriteV(out, b1, ctx);
+        WriteDataV1(out);
     }
 
     {
         awl::io::VectorInputStream in(v);
 
-        NewContext ctx;
-        ctx.ReadOldPrototypes(in);
+        auto t = ReadDataV2(in);
 
-        {
-            auto & a2_proto = ctx.FindNewPrototype<A2>();
-            Assert::IsTrue(a2_proto.GetCount() == 4);
-
-            auto & b2_proto = ctx.FindNewPrototype<B2>();
-            Assert::IsTrue(b2_proto.GetCount() == 3);
-
-            auto & a1_proto = ctx.FindOldPrototype<A2>();
-            Assert::IsTrue(a1_proto.GetCount() == 3);
-
-            auto & b1_proto = ctx.FindOldPrototype<B2>();
-            Assert::IsTrue(b1_proto.GetCount() == 2);
-        }
-
-        A2 a2;
-        B2 b2;
-        
-        awl::io::ReadV(in, a2, ctx);
-        awl::io::ReadV(in, b2, ctx);
-
-        //Assert::IsTrue(a2.a == a1.a);
-        Assert::IsTrue(a2.b == a1.b);
-        Assert::IsTrue(a2.c == a1.c);
-        Assert::IsTrue(a2.d == 5);
-
-        Assert::IsTrue(b2.x == b1.x);
-        //Assert::IsTrue(b2.y == b1.y);
+        Assert::IsTrue(t == std::make_tuple(a2_expected, b2_expected, c2_expected));
     }
 }
