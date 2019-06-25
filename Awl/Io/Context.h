@@ -71,43 +71,41 @@ namespace awl::io
         };
 
         template <class Struct>
-        struct FieldReadersHolder
+        using FieldReaderTuple = decltype(FieldReaderTupleCreator<Struct>::MakeTuple());
+        
+        template <class Struct>
+        using FieldReaderArray = std::array<const FieldReader<Struct> *, FieldReaderTupleCreator<Struct>::fieldCount>;
+
+        template <size_t index>
+        struct FieldReaderArrayHolder
         {
-            typedef decltype(FieldReaderTupleCreator<Struct>::MakeTuple()) Tuple;
-            typedef std::array<const FieldReader<Struct> *, FieldReaderTupleCreator<Struct>::fieldCount> Array;
-
-            FieldReadersHolder() :
-                t(FieldReaderTupleCreator<Struct>::MakeTuple())
+            using Struct = std::variant_alternative_t<index, StructV>;
+            
+            FieldReaderArrayHolder(const FieldReaderTuple<Struct> & t) :
+                a(tuple_to_array(t, [](auto & reader) { return static_cast<const FieldReader<Struct> *>(&reader); }))
             {
-                //The object will be copied or moved after construction, it does not make a sense to initialize the array in the constructor.
-                std::fill(a.begin(), a.end(), nullptr);
             }
-
-            void InitializeArray() const
-            {
-                a = tuple_to_array(t, [](auto & reader) { return dynamic_cast<const FieldReader<Struct> *>(&reader); });
-            }
-
-            Tuple t;
-            mutable Array a;
+            
+            FieldReaderArray<Struct> a;
         };
+        
+        using TupleOfFieldReaderTuple = decltype(transform_v2t<StructV, FieldReaderTuple>());
 
-        typedef decltype(transform_v2t<StructV, FieldReadersHolder>()) ReaderTuple;
+        using TupleOfFieldReaderArray = decltype(transform_t2ti<FieldReaderArrayHolder>(TupleOfFieldReaderTuple{}));
 
-        typedef decltype(transform_v2t<FieldV, FieldSkipperImpl>()) SkipperTuple;
-        typedef std::array<FieldSkipper *, std::variant_size_v<FieldV>> SkipperArray;
-
+        using SkipperTuple = decltype(transform_v2t<FieldV, FieldSkipperImpl>());
+        using SkipperArray = std::array<FieldSkipper *, std::variant_size_v<FieldV>>;
     
     public:
 
         Context() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
-            readerTuple(transform_v2t<StructV, FieldReadersHolder>()),
+            readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
+            readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
             skipperTuple(transform_v2t<FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_to_array(skipperTuple, [](auto & field) { return static_cast<FieldSkipper *>(&field); }))
         {
-            for_each(readerTuple, [](auto & holder) { holder.InitializeArray(); });
         }
 
         template <class S>
@@ -124,7 +122,7 @@ namespace awl::io
         auto & FindFieldReaders() const
         {
             constexpr size_t index = StructIndex<S>;
-            auto & holder = std::get<index>(readerTuple);
+            auto & holder = std::get<index>(readerArrays);
             return holder.a;
         }
 
@@ -222,7 +220,8 @@ namespace awl::io
         NewPrototypeArray newPrototypes;
         std::vector<DetachedPrototype> oldPrototypes;
         std::vector<std::vector<size_t>> protoMaps;
-        ReaderTuple readerTuple;
+        TupleOfFieldReaderTuple readerTuples;
+        TupleOfFieldReaderArray readerArrays;
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
     };

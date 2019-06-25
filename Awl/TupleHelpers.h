@@ -69,6 +69,30 @@ namespace awl
         return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
+    template <template <class> class T, class Tuple, std::size_t... index>
+    inline constexpr auto transform_t2t(const Tuple & t, std::index_sequence<index...>)
+    {
+        return std::make_tuple(T<std::tuple_element_t<index, Tuple>>(std::get<index>(t)) ...);
+    }
+
+    template <template <class> class T, class Tuple>
+    inline constexpr auto transform_t2t(const Tuple & t)
+    {
+        return transform_t2t<T>(t, std::make_index_sequence<std::tuple_size_v<Tuple>>());
+    }
+
+    template <template <size_t index> class T, class Tuple, std::size_t... index>
+    inline constexpr auto transform_t2ti(const Tuple & t, std::index_sequence<index...>)
+    {
+        return std::make_tuple(T<index>(std::get<index>(t)) ...);
+    }
+
+    template <template <size_t index> class T, class Tuple>
+    inline constexpr auto transform_t2ti(const Tuple & t)
+    {
+        return transform_t2ti<T>(t, std::make_index_sequence<std::tuple_size_v<Tuple>>());
+    }
+
     template <class V, template <class> class T, std::size_t... index>
     inline constexpr auto transform_v2t(std::index_sequence<index...>)
     {
