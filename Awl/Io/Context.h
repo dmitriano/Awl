@@ -117,6 +117,8 @@ namespace awl::io
             return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<FieldV>>());
         }
 
+        typedef uint16_t StructIndexType;
+        
         bool serializeStructIndex = true;
         bool allowTypeMismatch = false;
         bool allowDelete = true;
