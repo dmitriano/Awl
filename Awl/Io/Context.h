@@ -2,6 +2,7 @@
 
 #include "Awl/Prototype.h"
 #include "Awl/Io/RwHelpers.h"
+#include "Awl/Io/SequentialStream.h"
 
 #include <functional>
 #include <assert.h>
@@ -39,7 +40,8 @@ namespace awl::io
 
         Context() :
             newPrototypesTuple(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()),
-            newPrototypes(to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); }))
+            newPrototypes(to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
+            fieldReaders(MakeFieldReaders())
         {
         }
 
@@ -89,8 +91,7 @@ namespace awl::io
             MakeProtoMaps();
         }
         
-        template <class Stream>
-        void ReadOldPrototypes(Stream & s)
+        void ReadOldPrototypes(SequentialInputStream & s)
         {
             assert(oldPrototypes.empty());
             //Read std::vector.
@@ -98,8 +99,7 @@ namespace awl::io
             MakeProtoMaps();
         }
 
-        template <class Stream>
-        void WriteNewPrototypes(Stream & s) const
+        void WriteNewPrototypes(SequentialOutputStream & s) const
         {
             //Write std::array.
             Write(s, newPrototypes.size());
@@ -118,10 +118,10 @@ namespace awl::io
             }
         }
 
-        template <class Stream>
-        auto MakeFieldReaders() const
+        auto & GetFieldReader(size_t old_index) const
         {
-            return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<FieldV>>());
+            assert(old_index < fieldReaders.size());
+            return fieldReaders[old_index];
         }
 
         typedef uint16_t StructIndexType;
@@ -134,23 +134,25 @@ namespace awl::io
 
         typedef decltype(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()) NewTuple;
         typedef std::array<Prototype *, std::variant_size_v<StructV>> NewArray;
+        typedef std::array<std::function<FieldV(SequentialInputStream & s)>, std::variant_size_v<FieldV>> ReaderArray;
 
-        template <class Stream, size_t index>
-        static constexpr auto MakeFieldReader()
+        auto MakeFieldReaders() const
         {
-            return [](Stream & s)
-            {
-                std::variant_alternative_t<index, FieldV> val;
-                Read(s, val);
-                return FieldV(val);
-            };
+            return MakeFieldReaders(std::make_index_sequence<std::variant_size_v<FieldV>>());
         }
-        
-        template <class Stream, std::size_t... index>
+
+        template <std::size_t... index>
         auto MakeFieldReaders(std::index_sequence<index...>) const
         {
-            typedef std::array<std::function<FieldV(Stream & s)>, std::variant_size_v<FieldV>> ReaderArray;
-            return ReaderArray{ MakeFieldReader<Stream, index>() ... };
+            return ReaderArray{
+                [](SequentialInputStream & s)
+                {
+                    std::variant_alternative_t<index, FieldV> val;
+                    Read(s, val);
+                    return FieldV(val);
+                }
+                ...
+            };
         }
 
         void MakeProtoMaps()
@@ -171,6 +173,7 @@ namespace awl::io
         NewArray newPrototypes;
         std::vector<DetachedPrototype> oldPrototypes;
         std::vector<std::vector<size_t>> protoMaps;
+        ReaderArray fieldReaders;
     };
 
     typedef Context<std::variant<>, std::variant<>> FakeContext;

@@ -92,7 +92,6 @@ namespace awl::io
 
         auto & new_proto = ctx.template FindNewPrototype<Struct>();
         auto & old_proto = ctx.template FindOldPrototype<Struct>();
-        auto readers = ctx.template MakeFieldReaders<Stream>();
         auto name_map = ctx.template FindProtoMap<Struct>();
 
         assert(name_map.size() == old_proto.GetCount());
@@ -100,7 +99,7 @@ namespace awl::io
         for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
         {
             const auto old_field = old_proto.GetField(old_index);
-            auto reader = readers[old_field.type];
+            auto & reader = ctx.GetFieldReader(old_field.type);
             //We read it even if it does not longer exist in the new struct.
             auto v = reader(s);
 
