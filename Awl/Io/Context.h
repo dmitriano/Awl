@@ -82,7 +82,7 @@ namespace awl::io
             using Struct = std::variant_alternative_t<index, StructV>;
             
             FieldReaderArrayHolder(const FieldReaderTuple<Struct> & t) :
-                a(tuple_to_array(t, [](auto & reader) { return static_cast<const FieldReader<Struct> *>(&reader); }))
+                a(tuple_cast<const FieldReader<Struct>>(t))
             {
             }
             
@@ -90,7 +90,6 @@ namespace awl::io
         };
         
         using TupleOfFieldReaderTuple = decltype(transform_v2t<StructV, FieldReaderTuple>());
-
         using TupleOfFieldReaderArray = decltype(transform_t2ti<FieldReaderArrayHolder>(TupleOfFieldReaderTuple{}));
 
         using SkipperTuple = decltype(transform_v2t<FieldV, FieldSkipperImpl>());
