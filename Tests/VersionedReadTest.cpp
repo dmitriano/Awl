@@ -63,6 +63,17 @@ namespace awl::io
     template<class Stream, class Struct, class Context>
     inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     {
+        if (ctx.serializeStructIndex)
+        {
+            size_t index;
+            Read(s, index);
+            constexpr size_t expected_index = Context::template StructIndex<Struct>;
+            if (index != expected_index)
+            {
+                throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
+            }
+        }
+
         auto & new_proto = ctx.template FindNewPrototype<Struct>();
         auto & old_proto = ctx.template FindOldPrototype<Struct>();
         auto readers = ctx.template MakeFieldReaders<Stream>();
@@ -99,6 +110,18 @@ namespace awl::io
             }
         }
     }
+
+    template<class Stream, class Struct, class Context>
+    inline void WriteV(Stream & s, const Struct & val, const Context & ctx)
+    {
+        if (ctx.serializeStructIndex)
+        {
+            const size_t index = Context::StructIndex<Struct>;
+            Write(s, index);
+        }
+
+        Write(s, val);
+    }
 }
 
 AWT_TEST(VersionedRead)
@@ -126,8 +149,8 @@ AWT_TEST(VersionedRead)
 
         ctx.WriteNewPrototypes(out);
 
-        Write(out, a1);
-        Write(out, b1);
+        awl::io::WriteV(out, a1, ctx);
+        awl::io::WriteV(out, b1, ctx);
     }
 
     {
@@ -153,8 +176,8 @@ AWT_TEST(VersionedRead)
         A2 a2;
         B2 b2;
         
-        ReadV(in, a2, ctx);
-        ReadV(in, b2, ctx);
+        awl::io::ReadV(in, a2, ctx);
+        awl::io::ReadV(in, b2, ctx);
 
         //Assert::IsTrue(a2.a == a1.a);
         Assert::IsTrue(a2.b == a1.b);

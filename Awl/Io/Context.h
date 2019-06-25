@@ -16,8 +16,6 @@ namespace awl::io
             template <class S>
             static auto MakePrototype()
             {
-                //This will probably trigger the static_assert if S is not in StructV.
-                //find_variant_type_v<S, StructV>;
                 return AttachedPrototype<FieldV, S>();
             }
 
@@ -46,16 +44,19 @@ namespace awl::io
         }
 
         template <class S>
+        inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
+
+        template <class S>
         const AttachedPrototype<FieldV, S> & FindNewPrototype() const
         {
-            constexpr size_t index = find_variant_type_v<S, StructV>;
+            constexpr size_t index = StructIndex<S>;
             return std::get<index>(newPrototypesTuple);
         }
 
         template <class S>
         const Prototype & FindOldPrototype() const
         {
-            constexpr size_t index = find_variant_type_v<S, StructV>;
+            constexpr size_t index = StructIndex<S>;
             assert(index < oldPrototypes.size());
             return oldPrototypes[index];
         }
@@ -63,7 +64,7 @@ namespace awl::io
         template <class S>
         const std::vector<size_t> & FindProtoMap() const
         {
-            constexpr size_t index = find_variant_type_v<S, StructV>;
+            constexpr size_t index = StructIndex<S>;
             assert(index < oldPrototypes.size());
             return protoMaps[index];
         }
@@ -116,8 +117,9 @@ namespace awl::io
             return MakeFieldReaders<Stream>(std::make_index_sequence<std::variant_size_v<FieldV>>());
         }
 
-        const bool allowTypeMismatch = false;
-        const bool allowDelete = true;
+        bool serializeStructIndex = true;
+        bool allowTypeMismatch = false;
+        bool allowDelete = true;
 
     private:
 
