@@ -69,6 +69,18 @@ namespace awl
         return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
+    template <class V, template <class> class T, std::size_t... index>
+    inline constexpr auto transform_v2t(std::index_sequence<index...>)
+    {
+        return std::make_tuple(T<std::variant_alternative_t<index, V>>() ...);
+    }
+
+    template <class V, template <class> class T>
+    inline constexpr auto transform_v2t()
+    {
+        return transform_v2t<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
+    }
+
     template <typename... Args, typename Func, std::size_t... index>
     inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
