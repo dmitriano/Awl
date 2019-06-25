@@ -99,11 +99,11 @@ namespace awl::io
 
         Context() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
-            newPrototypes(tuple_to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
+            newPrototypes(tuple_cast<Prototype>(newPrototypesTuple)),
             readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
             readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
             skipperTuple(transform_v2t<FieldV, FieldSkipperImpl>()),
-            skipperArray(tuple_to_array(skipperTuple, [](auto & field) { return static_cast<FieldSkipper *>(&field); }))
+            skipperArray(tuple_cast<FieldSkipper>(skipperTuple))
         {
         }
 

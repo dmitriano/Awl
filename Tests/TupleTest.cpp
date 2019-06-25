@@ -63,7 +63,7 @@ AWT_TEST(TupleTransform)
 
     const auto wt = awl::transform_tuple(t, [](const auto & field) { return FieldWriter(field); });
 
-    const auto writers = awl::tuple_to_array(wt, [](const auto & field_writer) { return static_cast<const Writer *>(&field_writer); });
+    const auto writers = awl::tuple_cast<const Writer>(wt);
 
     std::ostringstream out;
 
@@ -80,7 +80,7 @@ AWT_TEST(TupleTransform)
 
     const auto rt = awl::transform_tuple(t1, [](auto & field) { return FieldReader(field); });
 
-    const auto readers = awl::tuple_to_array(rt, [](auto & field_reader) { return static_cast<const Reader *>(&field_reader); });
+    const auto readers = awl::tuple_cast<const Reader>(rt);
 
     std::istringstream in(result);
     

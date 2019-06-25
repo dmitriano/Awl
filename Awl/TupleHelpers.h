@@ -129,6 +129,18 @@ namespace awl
         return tuple_cast<I>(t, std::index_sequence_for<Args...>{});
     }
 
+    template <class I, typename... Args, std::size_t... index>
+    inline constexpr auto tuple_cast(std::tuple<Args...>& t, std::index_sequence<index...>)
+    {
+        return std::array{ static_cast<I *>(&std::get<index>(t)) ... };
+    }
+
+    template <class I, typename... Args>
+    inline constexpr auto tuple_cast(std::tuple<Args...>& t)
+    {
+        return tuple_cast<I>(t, std::index_sequence_for<Args...>{});
+    }
+
     template <typename... Args, typename Func, std::size_t... index>
     inline constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
