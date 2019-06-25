@@ -61,11 +61,11 @@ struct C2
 
 AWL_MEMBERWISE_EQUATABLE(C2)
 
-static const A1 a1 = { 1, 2.0, "abc" };
-static const B1 b1 = { 1, true };
+static const A1 a1_expected = { 1, 2.0, "abc" };
+static const B1 b1_expected = { 1, true };
 
-static const A2 a2_expected = { a1.b, 5, "xyz", a1.c };
-static const B2 b2_expected = { std::vector<int>{ 1, 2, 3 },  b1.x, "xyz"};
+static const A2 a2_expected = { a1_expected.b, 5, "xyz", a1_expected.c };
+static const B2 b2_expected = { std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz"};
 static const C2 c2_expected = { 7 };
 
 typedef std::variant<bool, char, int, float, double, std::string> FieldV1;
@@ -155,8 +155,22 @@ void WriteDataV1(awl::io::SequentialOutputStream & out)
 
     ctx.WriteNewPrototypes(out);
 
-    awl::io::WriteV(out, a1, ctx);
-    awl::io::WriteV(out, b1, ctx);
+    awl::io::WriteV(out, a1_expected, ctx);
+    awl::io::WriteV(out, b1_expected, ctx);
+}
+
+auto ReadDataV1(awl::io::SequentialInputStream & in)
+{
+    OldContext ctx;
+    ctx.ReadOldPrototypes(in);
+
+    A1 a1;
+    B1 b1;
+
+    awl::io::ReadV(in, a1, ctx);
+    awl::io::ReadV(in, b1, ctx);
+
+    return std::make_tuple(a1, b1);
 }
 
 auto ReadDataV2(awl::io::SequentialInputStream & in)
@@ -183,8 +197,15 @@ auto ReadDataV2(awl::io::SequentialInputStream & in)
     C2 c2;
 
     awl::io::ReadV(in, a2, ctx);
+
+    //Version 1 data has B2 so the condition is true.
+    Assert::IsTrue(ctx.HasOldPrototype<B2>());
     awl::io::ReadV(in, b2, ctx);
 
+    //There is no C2 in version 1 so the condition is false.
+    Assert::IsFalse(ctx.HasOldPrototype<C2>());
+    
+    //An example of how to read data that may not exist in a previous version.
     if (ctx.HasOldPrototype<C2>())
     {
         awl::io::ReadV(in, c2, ctx);
@@ -203,6 +224,14 @@ AWT_TEST(VersionedRead)
         awl::io::VectorOutputStream out(v);
 
         WriteDataV1(out);
+    }
+
+    {
+        awl::io::VectorInputStream in(v);
+
+        auto t = ReadDataV1(in);
+
+        Assert::IsTrue(t == std::make_tuple(a1_expected, b1_expected));
     }
 
     {
