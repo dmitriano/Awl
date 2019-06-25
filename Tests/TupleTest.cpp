@@ -61,9 +61,9 @@ AWT_TEST(TupleTransform)
 
     const auto t = std::make_tuple(1, 2.0, std::string("abc"));
 
-    const auto wt = awl::transform(t, [](const auto & field) { return FieldWriter(field); });
+    const auto wt = awl::transform_tuple(t, [](const auto & field) { return FieldWriter(field); });
 
-    const auto writers = awl::to_array(wt, [](const auto & field_writer) { return static_cast<const Writer *>(&field_writer); });
+    const auto writers = awl::tuple_to_array(wt, [](const auto & field_writer) { return static_cast<const Writer *>(&field_writer); });
 
     std::ostringstream out;
 
@@ -78,9 +78,9 @@ AWT_TEST(TupleTransform)
 
     std::remove_const_t<decltype(t)> t1{};
 
-    const auto rt = awl::transform(t1, [](auto & field) { return FieldReader(field); });
+    const auto rt = awl::transform_tuple(t1, [](auto & field) { return FieldReader(field); });
 
-    const auto readers = awl::to_array(rt, [](auto & field_reader) { return static_cast<const Reader *>(&field_reader); });
+    const auto readers = awl::tuple_to_array(rt, [](auto & field_reader) { return static_cast<const Reader *>(&field_reader); });
 
     std::istringstream in(result);
     

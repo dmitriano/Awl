@@ -145,7 +145,7 @@ AWT_TEST(Hash_ToFromArray)
 
     constexpr uint64_t sample = UINT64_C(0xab28ecb46814fe75);
 
-    const auto a = to_array(sample);
+    const auto a = tuple_to_array(sample);
 
     const auto val = from_array<uint64_t>(a);
 

@@ -35,7 +35,7 @@ namespace awl
                     }
                     else
                     {
-                        const auto bytes = to_array(*i);
+                        const auto bytes = tuple_to_array(*i);
 
                         for (size_t j = 0; j < bytes.size(); ++j)
                         {
@@ -44,7 +44,7 @@ namespace awl
                     }
                 }
 
-                return to_array(crc);
+                return tuple_to_array(crc);
             }
 
 #else
@@ -61,7 +61,7 @@ namespace awl
                     Calc(crc, static_cast<uint8_t>(*i));
                 }
 
-                return to_array(crc);
+                return tuple_to_array(crc);
             }
 
             template <class InputIt>
@@ -72,7 +72,7 @@ namespace awl
 
                 for (InputIt i = begin; i != end; ++i)
                 {
-                    const auto bytes = to_array(*i);
+                    const auto bytes = tuple_to_array(*i);
 
                     for (size_t j = 0; j < bytes.size(); ++j)
                     {
@@ -80,7 +80,7 @@ namespace awl
                     }
                 }
 
-                return to_array(crc);
+                return tuple_to_array(crc);
             }
 
 #endif

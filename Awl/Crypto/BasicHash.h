@@ -46,7 +46,7 @@ namespace awl
         };
 
         template <typename T>
-        AWL_CONSTEXPR std::array<std::uint8_t, sizeof(T)> to_array(T value)
+        AWL_CONSTEXPR std::array<std::uint8_t, sizeof(T)> tuple_to_array(T value)
         {
             //'= {}' is for preventing GCC warning "there is no default constructor..."
             std::array<std::uint8_t, sizeof(T)> result = {};

@@ -128,10 +128,10 @@ namespace awl::io
 
         Context() :
             newPrototypesTuple(helpers::PrototypeTupleCreator<StructV, FieldV>::MakePrototypeTuple()),
-            newPrototypes(to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
+            newPrototypes(tuple_to_array(newPrototypesTuple, [](auto & field) { return static_cast<Prototype *>(&field); })),
             readerTuple(helpers::FieldReaderTupleCreator<StructV>::MakeReaderTuple()),
             skipperTuple(helpers::FieldSkipperTupleCreator<FieldV>::MakeTuple()),
-            skipperArray(to_array(skipperTuple, [](auto & field) { return static_cast<FieldSkipper *>(&field); }))
+            skipperArray(tuple_to_array(skipperTuple, [](auto & field) { return static_cast<FieldSkipper *>(&field); }))
         {
         }
 
@@ -150,7 +150,7 @@ namespace awl::io
         {
             constexpr size_t index = StructIndex<S>;
             auto & reader_tuple = std::get<index>(readerTuple);
-            return to_array(reader_tuple, [](auto & reader) { return static_cast<const FieldReader<S> *>(&reader); });
+            return tuple_to_array(reader_tuple, [](auto & reader) { return static_cast<const FieldReader<S> *>(&reader); });
         }
 
         const SkipperArray & GetFieldSkippers() const

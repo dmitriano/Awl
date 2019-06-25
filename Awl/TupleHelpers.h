@@ -46,51 +46,51 @@ namespace awl
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto transform(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    inline constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::make_tuple(f(std::get<index>(t)) ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto transform(const std::tuple<Args...>& t, Func&& f)
+    inline constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f)
     {
-        return transform(t, f, std::index_sequence_for<Args...>{});
+        return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto transform(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    inline constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::make_tuple(f(std::get<index>(t)) ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto transform(std::tuple<Args...>& t, Func&& f)
+    inline constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f)
     {
-        return transform(t, f, std::index_sequence_for<Args...>{});
+        return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::array{f(std::get<index>(t)) ...};
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto to_array(const std::tuple<Args...>& t, Func&& f)
+    inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f)
     {
-        return to_array(t, f, std::index_sequence_for<Args...>{});
+        return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto to_array(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    inline constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::array{ f(std::get<index>(t)) ... };
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto to_array(std::tuple<Args...>& t, Func&& f)
+    inline constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f)
     {
-        return to_array(t, f, std::index_sequence_for<Args...>{});
+        return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
     }
 
     template<class T> struct dependent_false : std::false_type {};
