@@ -50,13 +50,13 @@ namespace awl::io
         template <class Struct>
         using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
 
-        typedef decltype(transform_v2t<StructV, MyAttachedPrototype>()) NewPrototypeTuple;
-        typedef std::array<Prototype *, std::variant_size_v<StructV>> NewPrototypeArray;
+        using NewPrototypeTuple = decltype(transform_v2t<StructV, MyAttachedPrototype>());
+        using NewPrototypeArray = std::array<Prototype *, std::variant_size_v<StructV>>;
 
         template <class Struct>
         struct FieldReaderTupleCreator
         {
-            static constexpr size_t fieldCount = std::tuple_size_v<tuplizable_traits<Struct>::Tie>;
+            static constexpr size_t fieldCount = std::tuple_size_v<typename tuplizable_traits<Struct>::Tie>;
             
             template <std::size_t... index>
             static auto MakeTuple(std::index_sequence<index...>)
@@ -131,7 +131,7 @@ namespace awl::io
         }
 
         template <class S>
-        const bool HasOldPrototype() const
+        bool HasOldPrototype() const
         {
             constexpr size_t index = StructIndex<S>;
             return index < oldPrototypes.size();
@@ -193,7 +193,7 @@ namespace awl::io
             }
         }
 
-        typedef uint16_t StructIndexType;
+        using StructIndexType = uint16_t;
         
         bool serializeStructIndex = true;
         bool allowTypeMismatch = false;
@@ -225,5 +225,5 @@ namespace awl::io
         SkipperArray skipperArray;
     };
 
-    typedef Context<std::variant<>, std::variant<>> FakeContext;
+    using FakeContext = Context<std::variant<>, std::variant<>>;
 }

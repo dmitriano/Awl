@@ -81,7 +81,7 @@ namespace awl::io
     {
         if (ctx.serializeStructIndex)
         {
-            Context::StructIndexType index;
+            typename Context::StructIndexType index;
             Read(s, index);
             constexpr size_t expected_index = Context::template StructIndex<Struct>;
             if (index != expected_index)
@@ -136,7 +136,7 @@ namespace awl::io
     {
         if (ctx.serializeStructIndex)
         {
-            const Context::StructIndexType index = static_cast<Context::StructIndexType>(Context::StructIndex<Struct>);
+            const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
             Write(s, index);
         }
 
