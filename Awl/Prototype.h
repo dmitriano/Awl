@@ -95,7 +95,8 @@ namespace awl
 
         void Set(S & val, size_t index, V v_field) const
         {
-            runtime_set(val.as_tuple(), index, v_field);
+            auto temp = val.as_tuple();
+            runtime_set(temp, index, v_field);
         }
 
     private:
