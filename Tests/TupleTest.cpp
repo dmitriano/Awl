@@ -155,3 +155,18 @@ AWT_TEST(TupleMapT2V)
         Assert::IsTrue(a == result);
     }
 }
+
+AWT_TEST(TupleRuntimeIndex)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Variant = std::variant<bool, char, int, float, double, std::string>;
+    using Tuple = std::tuple<char, int, int, double, std::string>;
+
+    using namespace std::string_literals;
+    Tuple t = std::make_tuple('a', 2, 3, 5.0, "abc");
+    Variant v = awl::runtime_get<Variant>(t, 1);
+    assert(std::get<int>(v) == 2);
+    awl::runtime_set(t, 4, Variant("xyz"s));
+    assert(std::get<4>(t) == std::string("xyz"));
+}

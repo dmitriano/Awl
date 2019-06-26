@@ -72,7 +72,7 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_types(map_types_t2v<Tie, V>()), m_getters(MakeGetters()), m_setters(MakeSetters())
+        AttachedPrototype() : m_types(map_types_t2v<Tie, V>())
         {
             assert(m_types.size() == S::get_member_names().size());
         }
@@ -90,58 +90,19 @@ namespace awl
 
         V Get(const S & val, size_t index) const
         {
-            return m_getters[index](val);
+            return V{};
+            //return runtime_get<V>(val.as_tuple(), index);
         }
 
         void Set(S & val, size_t index, V v_field) const
         {
-            m_setters[index](val, std::move(v_field));
+            //runtime_set(val.as_tuple(), index, v_field);
         }
 
     private:
 
-        typedef std::array<size_t, std::tuple_size_v<Tie>> TypesArray;
-        typedef std::array<std::function<V(const S & val)>, std::tuple_size_v<Tie>> GetterArray;
-        typedef std::array<std::function<void(S & val, V v_field)>, std::tuple_size_v<Tie>> SetterArray;
-
-        auto MakeGetters() const
-        {
-            return MakeGetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
-        }
-
-        template <std::size_t... index>
-        auto MakeGetters(std::index_sequence<index...>) const
-        {
-            return GetterArray{
-                [](const S & val) -> V
-                {
-                    return std::get<index>(val.as_tuple());
-                }
-                ...
-            };
-        }
-
-        auto MakeSetters() const
-        {
-            return MakeSetters(std::make_index_sequence<std::tuple_size_v<Tie>>());
-        }
-
-        template <std::size_t... index>
-        auto MakeSetters(std::index_sequence<index...>) const
-        {
-            return SetterArray{
-                [](S & val, V && v_field)
-                {
-                    std::get<index>(val.as_tuple()) = std::get<std::remove_reference_t<std::tuple_element_t<index, Tie>>>(v_field);
-                }
-                ...
-            };
-        }
-
+        using TypesArray = std::array<size_t, std::tuple_size_v<Tie>>;
         TypesArray m_types;
-        
-        GetterArray m_getters;
-        SetterArray m_setters;
     };
 
     class DetachedPrototype : public Prototype

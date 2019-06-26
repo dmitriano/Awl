@@ -111,7 +111,7 @@ AWT_TEST(Prototype_TypeMap)
     Assert::IsTrue(dp == result);
 }
 
-AWT_TEST(Prototype_GetSet)
+AWT_DISABLED_TEST(Prototype_GetSet)
 {
     AWT_UNUSED_CONTEXT;
 
