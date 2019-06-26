@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Awl/Exception.h"
+
 #include <tuple>
 #include <variant>
 #include <array>
@@ -215,7 +217,7 @@ namespace awl
         {
             static_cast<void>(tuple);
             static_cast<void>(index);
-            throw "Index out of range for tuple";
+            throw GeneralException(_T("Index out of range for tuple"));
         }
         else
         {
@@ -236,7 +238,7 @@ namespace awl
             static_cast<void>(tuple);
             static_cast<void>(index);
             static_cast<void>(variant);
-            throw "Index out of range for tuple";
+            throw GeneralException(_T("Index out of range for tuple"));
         }
         else
         {
