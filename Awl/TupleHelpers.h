@@ -244,7 +244,7 @@ namespace awl
             {
                 // Note: You should check here that variant holds the correct type
                 // before assigning.
-                std::get<Index>(tuple) = std::get<std::tuple_element_t<Index, Tuple>>(variant);
+                std::get<Index>(tuple) = std::get<std::remove_reference_t<std::tuple_element_t<Index, Tuple>>>(variant);
             }
             else
             {

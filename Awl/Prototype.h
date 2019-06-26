@@ -90,13 +90,12 @@ namespace awl
 
         V Get(const S & val, size_t index) const
         {
-            return V{};
-            //return runtime_get<V>(val.as_tuple(), index);
+            return runtime_get<V>(val.as_tuple(), index);
         }
 
         void Set(S & val, size_t index, V v_field) const
         {
-            //runtime_set(val.as_tuple(), index, v_field);
+            runtime_set(val.as_tuple(), index, v_field);
         }
 
     private:

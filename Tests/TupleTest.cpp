@@ -166,7 +166,7 @@ AWT_TEST(TupleRuntimeIndex)
     using namespace std::string_literals;
     Tuple t = std::make_tuple('a', 2, 3, 5.0, "abc");
     Variant v = awl::runtime_get<Variant>(t, 1);
-    assert(std::get<int>(v) == 2);
+    Assert::IsTrue(std::get<int>(v) == 2);
     awl::runtime_set(t, 4, Variant("xyz"s));
-    assert(std::get<4>(t) == std::string("xyz"));
+    Assert::IsTrue(std::get<4>(t) == std::string("xyz"));
 }
