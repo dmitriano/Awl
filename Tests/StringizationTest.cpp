@@ -21,6 +21,20 @@ struct A
 
 AWL_MEMBERWISE_EQUATABLE(A)
 
+struct B
+{
+    int x;
+    double y;
+    std::string z;
+
+    AWL_STRINGIZABLE(
+        x,
+        y,
+        z)
+};
+
+AWL_MEMBERWISE_EQUATABLE(B)
+
 typedef std::vector<const char *> Vector;
 
 void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
@@ -74,6 +88,7 @@ AWT_TEST(Stringizable_MemberList)
     TestMemberList({ "x", "aaaa", "bb", "c" });
 
     AssertMemberListEqual(A::get_member_names(), Vector{ "x", "y", "z" });
+    AssertMemberListEqual(B::get_member_names(), Vector{ "x", "y", "z" });
 }
 
 AWT_TEST(Stringizable_ForEach)
