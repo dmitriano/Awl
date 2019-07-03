@@ -33,7 +33,7 @@ void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
     }
 }
 
-void TestMemberList(Vector v)
+void TestMemberListImpl(Vector v, const char * p_separator)
 {
     std::ostringstream out;
     bool first = true;
@@ -46,7 +46,7 @@ void TestMemberList(Vector v)
         }
         else
         {
-            out << ", ";
+            out << p_separator;
         }
 
         out << s;
@@ -57,6 +57,11 @@ void TestMemberList(Vector v)
     awl::helpers::MemberList ml(sample.data());
 
     AssertMemberListEqual(ml, v);
+}
+
+void TestMemberList(Vector v)
+{
+    TestMemberListImpl(v, ", ");
 }
 
 AWT_TEST(Stringizable_MemberList)
