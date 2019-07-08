@@ -38,7 +38,7 @@ namespace awl
     template <typename... Args, typename Func, std::size_t... index>
     inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
-        (f(std::get<index>(t), index), ...);
+        (f(std::get<index>(t), std::integral_constant<std::size_t, index>()), ...);
     }
 
     template <typename... Args, typename Func>
