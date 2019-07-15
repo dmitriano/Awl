@@ -107,6 +107,12 @@ namespace awl::io
         {
         }
 
+        //It contains the addresses of its members.
+        Context(const Context&) = delete;
+        Context(Context&&) = delete;
+        Context& operator = (const Context&) = delete;
+        Context& operator = (Context&&) = delete;
+
         template <class S>
         inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
 

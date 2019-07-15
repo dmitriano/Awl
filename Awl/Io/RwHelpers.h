@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <tuple>
 #include <utility> 
+#include <optional>
 
 #include "Awl/BitMap.h"
 
@@ -436,6 +437,36 @@ namespace awl
         inline typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
         {
             Write(s, object_as_tuple(val));
+        }
+
+        template <class Stream, typename T>
+        inline void Read(Stream & s, std::optional<T>& opt_val)
+        {
+            bool has_value;
+
+            Read(s, has_value);
+
+            if (has_value)
+            {
+                T val;
+
+                Read(s, val);
+
+                opt_val = std::move(val);
+            }
+        }
+
+        template <class Stream, typename T>
+        inline void Write(Stream & s, const std::optional<T>& opt_val)
+        {
+            const bool has_value = opt_val.has_value();
+
+            Write(s, has_value);
+
+            if (has_value)
+            {
+                Write(s, opt_val.value());
+            }
         }
     }
 }

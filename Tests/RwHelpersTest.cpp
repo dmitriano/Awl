@@ -92,7 +92,7 @@ private:
 
     std::bitset<3> m_bs;
 
-    uint8_t m_u8 = 25;
+    std::optional<uint32_t> m_u8 = 25u;
 
     bool m_b = true;
 };
