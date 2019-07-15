@@ -22,7 +22,6 @@ namespace awl
             Link * left;
             Link * right;
             Color color;
-            Link * key;
             std::size_t rank;
             std::size_t count;
 
@@ -116,6 +115,7 @@ namespace awl
 
         struct Node : public Link
         {
+            Key key;
             T value;
         };
     };
