@@ -22,7 +22,7 @@ namespace awl
         return std::chrono::time_point_cast<Duration>(Clock::from_time_t(t));
     }
 
-    template <class Clock, class Duration = typename Clock::duration>
+    template <class Clock, class Duration>
     inline std::chrono::time_point<Clock, Duration> make_time(int year, int month, int day, int hour, int min, int second, Duration fs)
     {
         const auto tp = make_time<Clock, Duration>(year, month, day, hour, min, second);
