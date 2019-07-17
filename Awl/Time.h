@@ -5,8 +5,8 @@
 
 namespace awl
 {
-    template <class Clock, class Duration = Clock::duration>
-    std::chrono::time_point<Clock> make_time(int year, int month, int day, int hour, int min, int second)
+    template <class Clock, class Duration = typename Clock::duration>
+    inline std::chrono::time_point<Clock, Duration> make_time(int year, int month, int day, int hour, int min, int second)
     {
         std::tm tm{};
         tm.tm_year = year - 1900;
@@ -19,12 +19,14 @@ namespace awl
 
         const time_t t = std::mktime(&tm);
 
-        return Clock::from_time_t(t);
+        return std::chrono::time_point_cast<Duration>(Clock::from_time_t(t));
     }
 
-    template <class Clock, class Duration>
-    std::chrono::time_point<Clock> make_time(int year, int month, int day, int hour, int min, int second, Duration fs)
+    template <class Clock, class Duration = typename Clock::duration>
+    inline std::chrono::time_point<Clock, Duration> make_time(int year, int month, int day, int hour, int min, int second, Duration fs)
     {
-        return make_time<Clock>(year, month, day, hour, min, second) + duration_cast<Clock::duration>(fs);
+        const auto tp = make_time<Clock, Duration>(year, month, day, hour, min, second);
+
+        return tp + fs;
     }
 }
