@@ -199,6 +199,60 @@ namespace awl
             return true;
         }
 
+        //Returns the pointer to the smallest node greater than x.
+        Node * GetSuccessor(Node * x)
+        {
+            Node * y;
+
+            if (x->right != nullptr)
+            {
+                // If right is not NULL then go right one and
+                // then keep going left until we find a node with
+                // no left pointer.
+                for (y = x->right; y->left != nullptr; y = y->left);
+            }
+            else
+            {
+                // Go up the tree until we get to a node that is on the
+                // left of its parent (or the root) and then return the
+                // parent.
+                y = x->parent;
+                while (y != nullptr && x == y->right)
+                {
+                    x = y;
+                    y = y->parent;
+                }
+            }
+            return y;
+        }
+
+        //Returns the pointer to the largest node smaller than x.
+        Node * GetPredecessor(Node * x)
+        {
+            Node * y;
+
+            if (x->left != nullptr)
+            {
+                // If left is not NULL then go left one and
+                // then keep going right until we find a node with
+                // no right pointer.
+                for (y = x->left; y->right != nullptr; y = y->right);
+            }
+            else
+            {
+                // Go up the tree until we get to a node that is on the
+                // right of its parent (or the root) and then return the
+                // parent.
+                y = x->parent;
+                while (y != nullptr && x == y->left)
+                {
+                    x = y;
+                    y = y->parent;
+                }
+            }
+            return y;
+        }
+
         void Balance(Node * node)
         {
             static_cast<void>(node);

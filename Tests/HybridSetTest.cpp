@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 
 #include "Awl/HybridSet.h"
 #include "Awl/Testing/UnitTest.h"
@@ -43,6 +44,20 @@ namespace awl
 
             Set::Node * pn7 = set.FindNodeByKey(7);
             Assert::IsTrue(pn7 == nullptr);
+
+            constexpr std::size_t count = 5;
+            std::array<Set::Node *, count> nodes = { &n1, &n2, &n3, &n4, &n5 };
+
+            for (std::size_t i = 0; i < count; ++i)
+            {
+                Set::Node * x = nodes[i];
+
+                Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
+                Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
+
+                Assert::IsTrue(set.GetPredecessor(x) == predecessor);
+                Assert::IsTrue(set.GetSuccessor(x) == successor);
+            }
         }
 
         Set set;
