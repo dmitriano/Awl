@@ -86,6 +86,10 @@ namespace awl
 
         struct Node : public Link, public quick_link
         {
+            Node(const T & v) : Link{}, value(v)
+            {
+            }
+            
             //The only function that requires this to be Node *.
             void CopyFrom(Node * other)
             {
@@ -205,17 +209,18 @@ namespace awl
             return nullptr;
         }
 
-        bool InsertNode(Node * node)
+        Node * InsertNode(const T & val)
         {
             Node * parent;
-            Node * x = FindNodeByKey(node->value, &parent);
+            Node * x = FindNodeByKey(val, &parent);
 
             if (x != nullptr)
             {
                 //A node with the same key already exists.
-                return false;
+                return nullptr;
             }
 
+            Node * node = new Node(val);
             node->parent = parent;
             if (parent == nullptr)
             {
@@ -249,7 +254,7 @@ namespace awl
                 m_list.insert(m_list.begin(), node);
             }
 
-            return true;
+            return node;
         }
 
         //Returns the pointer to the smallest node greater than x.
@@ -522,7 +527,8 @@ namespace awl
                 FixAfterDelete(x);
 
             //Remove the node from the list.
-            z->safe_exclude();
+            z->exclude();
+            delete z;
         }
 
         // Restores the reb-black properties after a delete.
