@@ -45,19 +45,32 @@ namespace awl
             Set::Node * pn7 = set.FindNodeByKey(7);
             Assert::IsTrue(pn7 == nullptr);
 
-            constexpr std::size_t count = 5;
-            std::array<Set::Node *, count> nodes = { &n1, &n2, &n3, &n4, &n5 };
-
-            for (std::size_t i = 0; i < count; ++i)
             {
-                Set::Node * x = nodes[i];
+                constexpr std::size_t count = 5;
+                std::array<Set::Node *, count> nodes = { &n1, &n2, &n3, &n4, &n5 };
 
-                Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
-                Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
+                for (std::size_t i = 0; i < count; ++i)
+                {
+                    Set::Node * x = nodes[i];
 
-                Assert::IsTrue(set.GetPredecessor(x) == predecessor);
-                Assert::IsTrue(set.GetSuccessor(x) == successor);
+                    Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
+                    Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
+
+                    Assert::IsTrue(set.GetPredecessor(x) == predecessor);
+                    Assert::IsTrue(set.GetSuccessor(x) == successor);
+                }
             }
+
+            set.RemoveNode(&n1);
+            Assert::IsTrue(set.m_root == &n2);
+            set.RemoveNode(&n2);
+            Assert::IsTrue(set.m_root == &n4);
+            set.RemoveNode(&n4);
+            Assert::IsTrue(set.m_root == &n5);
+            set.RemoveNode(&n3);
+            Assert::IsTrue(set.m_root == &n5);
+            set.RemoveNode(&n5);
+            Assert::IsTrue(set.m_root == nullptr);
         }
 
         Set set;

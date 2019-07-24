@@ -56,9 +56,12 @@ namespace awl
 
             void SetParent(Node * p)
             {
-                assert(p != nullptr);
                 this->parent = p;
-                this->parent->UpdateCount();
+
+                if (this->parent != nullptr)
+                {
+                    this->parent->UpdateCount();
+                }
             }
 
             void SetLeft(Node * l)
@@ -73,7 +76,16 @@ namespace awl
                 UpdateCount();
             }
 
-            void CopyFrom(Link * other)
+            void ClearRelations()
+            {
+                *this = {};
+            }
+        };
+
+        struct Node : public Link
+        {
+            //The only function that requires this to be Node *.
+            void CopyFrom(Node * other)
             {
                 if (other->left != nullptr)
                 {
@@ -108,14 +120,6 @@ namespace awl
                 this->rank = other->rank;
             }
 
-            void ClearRelations()
-            {
-                *this = {};
-            }
-        };
-
-        struct Node : public Link
-        {
             T value;
         };
 
@@ -421,6 +425,160 @@ namespace awl
                 }
             }
             m_root->color = Color::Black;
+        }
+
+        // Delete the node z, and free up the space
+        void RemoveNode(Node * z)
+        {
+            Node * x;
+            Node * y;
+
+            if (z->left == nullptr || z->right == nullptr)
+                y = z;
+            else
+                y = GetSuccessor(z);
+
+            if (y->left != nullptr)
+                x = y->left;
+            else
+                x = y->right;
+
+            if (x != nullptr)
+                x->SetParent(y->parent);
+
+            if (y->parent == nullptr)
+                m_root = x;
+            else
+            {
+                if (y == y->parent->left)
+                    y->parent->SetLeft(x);
+                else
+                    y->parent->SetRight(x);
+            }
+
+            if (y != z)
+            {
+                //we must replace 'z' with 'y' node
+                y->CopyFrom(z);
+
+                if (z == m_root)
+                    m_root = y;
+
+                //we do this all above instead of the following line in original code
+                //to provide guarantee of the persistence of the node in the tree
+                //z.mKey = y.mKey;
+            }
+
+            if (y->color == Color::Black && x != nullptr)
+                FixAfterDelete(x);
+        }
+
+        // Restores the reb-black properties after a delete.
+        void FixAfterDelete(Node * x)
+        {
+            Node * w;
+
+            while (x != m_root && x->color == Color::Black)
+            {
+                if (x == x->parent->left)
+                {
+                    w = x->parent->right;
+                    if (w == nullptr)
+                    {
+                        x = x->parent;
+                        continue;
+                    }
+
+
+                    if (w->color == Color::Red)
+                    {
+                        w->color = Color::Black;
+                        x->parent->color = Color::Red;
+                        RotateLeft(x->parent);
+                        w = x->parent->right;
+                    }
+
+                    if (w == nullptr)
+                    {
+                        x = x->parent;
+                        continue;
+                    }
+
+                    if ((w->left == nullptr || w->left->color == Color::Black) &&
+                        (w->right == nullptr || w->right->color == Color::Black))
+                    {
+                        w->color = Color::Red;
+                        x = x->parent;
+                    }
+                    else
+                    {
+                        if (w->right == nullptr || w->right->color == Color::Black)
+                        {
+                            if (w->left != nullptr)
+                                w->left->color = Color::Black;
+                            w->color = Color::Red;
+                            RotateRight(w);
+                            w = x->parent->right;
+                        }
+
+                        w->color = x->parent->color;
+                        x->parent->color = Color::Black;
+                        if (w->right != nullptr)
+                            w->right->color = Color::Black;
+                        RotateLeft(x->parent);
+                        x = m_root;
+                    }
+                }
+                else
+                {
+                    w = x->parent->left;
+                    if (w == nullptr)
+                    {
+                        x = x->parent;
+                        continue;
+                    }
+
+                    if (w->color == Color::Red)
+                    {
+                        w->color = Color::Black;
+                        x->parent->color = Color::Red;
+                        RotateRight(x->parent);
+                        w = x->parent->left;
+                    }
+
+                    if (w == nullptr)
+                    {
+                        x = x->parent;
+                        continue;
+                    }
+
+                    if ((w->right == nullptr || w->right->color == Color::Black) &&
+                        (w->left == nullptr || w->left->color == Color::Black))
+                    {
+                        w->color = Color::Red;
+                        x = x->parent;
+                    }
+                    else
+                    {
+                        if (w->left == nullptr || w->left->color == Color::Black)
+                        {
+                            if (w->right != nullptr)
+                                w->right->color = Color::Black;
+                            w->color = Color::Red;
+                            RotateLeft(w);
+                            w = x->parent->left;
+                        }
+
+                        w->color = x->parent->color;
+                        x->parent->color = Color::Black;
+                        if (w->left != nullptr)
+                            w->left->color = Color::Black;
+                        RotateRight(x->parent);
+                        x = m_root;
+                    }
+                }
+            }
+            x->color = Color::Black;
         }
 
         Node * m_root = nullptr;
