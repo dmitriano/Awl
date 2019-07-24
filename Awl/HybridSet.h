@@ -1,5 +1,7 @@
 #pragma once
 
+#include "QuickList.h"
+
 #include <iterator>
 #include <assert.h>
 
@@ -82,7 +84,7 @@ namespace awl
             }
         };
 
-        struct Node : public Link
+        struct Node : public Link, public quick_link
         {
             //The only function that requires this to be Node *.
             void CopyFrom(Node * other)
@@ -123,11 +125,47 @@ namespace awl
             T value;
         };
 
+        using List = quick_list<Node>;
+
     public:
+
+        using value_type = T;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = value_type & ;
+        using const_reference = const value_type & ;
+
+        using iterator = typename List::iterator;
+        using const_iterator = typename List::const_iterator ;
+
+        using reverse_iterator = typename List::iterator;
+        using const_reverse_iterator = typename List::const_iterator;
 
         hybrid_set(Compare comp = {}) : m_comp(comp)
         {
         }
+
+        T & front() { return *m_list.front(); }
+        const T & front() const { return *m_list.front(); }
+
+        T & back() { return *m_list.back(); }
+        const T & back() const { return *m_list.back(); }
+
+        iterator begin() { return m_list.begin(); }
+        const_iterator begin() const { return m_list.begin(); }
+
+        iterator end() { return m_list.end(); }
+        const_iterator end() const { return m_list.end(); }
+
+        reverse_iterator rbegin() { return m_list.rbegin(); }
+        const_reverse_iterator rbegin() const { return m_list.rbegin(); }
+
+        reverse_iterator rend() { return m_list.rend(); }
+        const_reverse_iterator rend() const { return m_list.rend(); }
+
+        bool empty() const { return m_list.empty(); }
+        bool empty_or_contains_one() const { return m_list.empty_or_contains_one(); }
+        bool contains_one() const { return m_list.contains_one(); }
 
     private:
 
@@ -199,6 +237,17 @@ namespace awl
             node->color = Color::Red;
             Balance(node);
             m_root->color = Color::Black;
+
+            //Insert newly added node to the list.
+            Node * pred = GetPredecessor(node);
+            if (pred != nullptr)
+            {
+                m_list.insert(iterator(pred), node);
+            }
+            else
+            {
+                m_list.insert(m_list.begin(), node);
+            }
 
             return true;
         }
@@ -471,6 +520,9 @@ namespace awl
 
             if (y->color == Color::Black && x != nullptr)
                 FixAfterDelete(x);
+
+            //Remove the node from the list.
+            z->safe_exclude();
         }
 
         // Restores the reb-black properties after a delete.
@@ -582,6 +634,7 @@ namespace awl
         }
 
         Node * m_root = nullptr;
+        List m_list;
         std::size_t m_count = 0u;
         Compare m_comp;
 
