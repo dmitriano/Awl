@@ -149,11 +149,11 @@ namespace awl
         {
         }
 
-        T & front() { return *m_list.front(); }
-        const T & front() const { return *m_list.front(); }
+        T & front() { return m_list.front()->value; }
+        const T & front() const { return m_list.front()->value; }
 
-        T & back() { return *m_list.back(); }
-        const T & back() const { return *m_list.back(); }
+        T & back() { return m_list.back()->value; }
+        const T & back() const { return m_list.back()->value; }
 
         iterator begin() { return m_list.begin(); }
         const_iterator begin() const { return m_list.begin(); }
@@ -170,6 +170,19 @@ namespace awl
         bool empty() const { return m_list.empty(); }
         bool empty_or_contains_one() const { return m_list.empty_or_contains_one(); }
         bool contains_one() const { return m_list.contains_one(); }
+
+        std::pair<iterator, bool> insert(const value_type & value)
+        {
+            std::pair<Node *, bool> p = InsertNode(value);
+            //It cannot be null after insertion.
+            assert(p.first != nullptr);
+            return std::make_pair(iterator(p.first), p.second);
+        }
+
+        size_type size() const
+        {
+            return m_root == nullptr ? 0 : m_root->count + 1;
+        }
 
     private:
 
@@ -209,7 +222,7 @@ namespace awl
             return nullptr;
         }
 
-        Node * InsertNode(const T & val)
+        std::pair<Node *, bool> InsertNode(const T & val)
         {
             Node * parent;
             Node * x = FindNodeByKey(val, &parent);
@@ -217,7 +230,7 @@ namespace awl
             if (x != nullptr)
             {
                 //A node with the same key already exists.
-                return nullptr;
+                return std::make_pair(x, false);
             }
 
             Node * node = new Node(val);
@@ -247,14 +260,16 @@ namespace awl
             Node * pred = GetPredecessor(node);
             if (pred != nullptr)
             {
+                assert(m_comp(pred->value, node->value));
                 m_list.insert(iterator(pred), node);
             }
             else
             {
-                m_list.insert(m_list.begin(), node);
+                assert(node == m_root || m_comp(node->value, front()));
+                m_list.push_front(node);
             }
 
-            return node;
+            return std::make_pair(node, true);
         }
 
         //Returns the pointer to the smallest node greater than x.
@@ -641,7 +656,6 @@ namespace awl
 
         Node * m_root = nullptr;
         List m_list;
-        std::size_t m_count = 0u;
         Compare m_comp;
 
         friend class HybridSetTest;
