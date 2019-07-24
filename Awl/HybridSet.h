@@ -253,9 +253,174 @@ namespace awl
             return y;
         }
 
-        void Balance(Node * node)
+        // Rotate our tree Left
+        //
+        //             X        rb_left_rotate(X)--->            Y
+        //           /   \                                     /   \
+        //          A     Y                                   X     C
+        //              /   \                               /   \
+        //             B     C                             A     B
+        //
+        // N.B. This does not change the ordering.
+        //
+        // We assume that neither X or Y is NULL
+        void RotateLeft(Node * x)
         {
-            static_cast<void>(node);
+            Node * y = x->right;
+
+            // Turn Y's left subtree into X's right subtree (move B)
+            x->right = y->left;
+
+            // If B is not nullptr, set it's parent to be X
+            if (y->left != nullptr)
+                y->left->parent = x;
+
+            // Set Y's parent to be what X's parent was
+            y->parent = x->parent;
+
+            // if X was the root
+            if (x->parent == nullptr)
+                m_root = y;
+            else
+            {
+                // Set X's parent's left or right pointer to be Y
+                if (x == x->parent->left)
+                    x->parent->left = y;
+                else
+                    x->parent->right = y;
+            }
+
+            // Put X on Y's left
+            y->left = x;
+
+            // Set X's parent to be Y
+            x->parent = y;
+
+            x->UpdateCount();
+
+        }
+
+        // Rotate our tree Right
+        //
+        //             X                                         Y
+        //           /   \                                     /   \
+        //          A     Y     <---rb_right_rotate(Y)        X     C
+        //              /   \                               /   \
+        //             B     C                             A     B
+        //
+        // N.B. This does not change the ordering.
+        //
+        // We assume that neither X or Y is NULL
+        void RotateRight(Node * y)
+        {
+            Node * x = y->left;
+
+            // Turn X's right subtree into Y's left subtree (move B)
+            y->left = x->right;
+
+            // If B is not nullptr, set it's parent to be Y
+            if (x->right != nullptr)
+                x->right->parent = y;
+
+            // Set X's parent to be what Y's parent was
+            x->parent = y->parent;
+
+            // if Y was the root
+            if (y->parent == nullptr)
+                m_root = x;
+            else
+            {
+                // Set Y's parent's left or right pointer to be X
+                if (y == y->parent->left)
+                    y->parent->left = x;
+                else
+                    y->parent->right = x;
+            }
+
+            // Put Y on X's right
+            x->right = y;
+
+            // Set Y's parent to be X
+            y->parent = x;
+
+            y->UpdateCount();
+        }
+
+        //Balance tree past inserting
+        void Balance(Node * z)
+        {
+            //Having added a red node, we must now walk back up the tree balancing
+            //it, by a series of rotations and changing of colours
+            Node * x = z;
+            Node * y;
+
+            //While we are not at the top and our parent node is red
+            //N.B. Since the root node is garanteed black, then we
+            //are also going to stop if we are the child of the root
+            while (x != m_root && (x->parent->color == Color::Red))
+            {
+                //if our parent is on the left side of our grandparent
+                if (x->parent == x->parent->parent->left)
+                {
+                    //get the right side of our grandparent (uncle?)
+                    y = x->parent->parent->right;
+                    if (y != nullptr && y->color == Color::Red)
+                    {
+                        //make our parent black
+                        x->parent->color = Color::Black;
+                        //make our uncle black
+                        y->color = Color::Black;
+                        //make our grandparent red
+                        x->parent->parent->color = Color::Red;
+                        //now consider our grandparent
+                        x = x->parent->parent;
+                    }
+                    else
+                    {
+                        //if we are on the right side of our parent
+                        if (x == x->parent->right)
+                        {
+                            //Move up to our parent
+                            x = x->parent;
+                            RotateLeft(x);
+                        }
+
+                        /* make our parent black */
+                        x->parent->color = Color::Black;
+                        /* make our grandparent red */
+                        x->parent->parent->color = Color::Red;
+                        /* right rotate our grandparent */
+                        RotateRight(x->parent->parent);
+                    }
+                }
+                else
+                {
+                    //everything here is the same as above, but
+                    //exchanging left for right
+                    y = x->parent->parent->left;
+                    if (y != nullptr && y->color == Color::Red)
+                    {
+                        x->parent->color = Color::Black;
+                        y->color = Color::Black;
+                        x->parent->parent->color = Color::Red;
+
+                        x = x->parent->parent;
+                    }
+                    else
+                    {
+                        if (x == x->parent->left)
+                        {
+                            x = x->parent;
+                            RotateRight(x);
+                        }
+
+                        x->parent->color = Color::Black;
+                        x->parent->parent->color = Color::Red;
+                        RotateLeft(x->parent->parent);
+                    }
+                }
+            }
+            m_root->color = Color::Black;
         }
 
         Node * m_root = nullptr;
