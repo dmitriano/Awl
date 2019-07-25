@@ -134,7 +134,20 @@ namespace awl
         };
 
         using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
-            
+
+        Node * CreateNode(const T & val)
+        {
+            Node * node = m_nodeAlloc.allocate(1);
+            new (node) Node(val);
+            return node;
+        }
+        
+        void DestroyNode(Node * node)
+        {
+            node->~Node();
+            m_nodeAlloc.deallocate(node, 1);
+        }
+
         using List = quick_list<Node>;
 
         struct IteratorHelper
@@ -320,8 +333,7 @@ namespace awl
                 return std::make_pair(x, false);
             }
 
-            Node * node = m_nodeAlloc.allocate(1);
-            new (node) Node(val);
+            Node * node = CreateNode(val);
 
             node->parent = parent;
             if (parent == nullptr)
