@@ -134,7 +134,7 @@ void CompareSets(const StdSet & std_set, const MySet & my_set)
         {
             size_t std_val = *i++;
             size_t my_val = *my_i;
-            Assert::AreEqual(std_val, my_val);
+            Assert::AreEqual(std_val, my_val, _T("wrong element"));
         }
 
         Assert::IsTrue(i == std_set.rend());

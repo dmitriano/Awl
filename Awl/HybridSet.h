@@ -123,8 +123,8 @@ namespace awl
 
                 this->color = other->color;
                 this->SetParent(other->parent);
-                this->count = other->count;
-                this->rank = other->rank;
+                //this->count = other->count;
+                //this->rank = other->rank;
             }
 
             T value;
@@ -448,7 +448,6 @@ namespace awl
             x->parent = y;
 
             x->UpdateCount();
-
         }
 
         // Rotate our tree Right
