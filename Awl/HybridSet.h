@@ -332,7 +332,7 @@ namespace awl
                 }
             }
             node->color = Color::Red;
-            Balance(node);
+            BalanceAfterInsert(node);
             m_root->color = Color::Black;
 
             //Insert newly added node to the list.
@@ -498,7 +498,7 @@ namespace awl
         }
 
         //Balance tree past inserting
-        void Balance(Node * z)
+        void BalanceAfterInsert(Node * z)
         {
             //Having added a red node, we must now walk back up the tree balancing
             //it, by a series of rotations and changing of colours
@@ -617,7 +617,7 @@ namespace awl
             }
 
             if (y->color == Color::Black && x != nullptr)
-                FixAfterDelete(x);
+                BalanceAfterRemove(x);
 
             //Remove the node from the list.
             z->exclude();
@@ -625,7 +625,7 @@ namespace awl
         }
 
         // Restores the reb-black properties after a delete.
-        void FixAfterDelete(Node * x)
+        void BalanceAfterRemove(Node * x)
         {
             Node * w;
 
