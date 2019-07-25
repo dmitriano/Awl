@@ -165,6 +165,9 @@ void PrintSet(const TestContext & ctx, const Set<size_t> & set)
     ctx.out << _T("]") << std::endl;
 }
 
+//Parameter examples:
+//--filter Hybrid.* --verbose --insert_count 100 --range 10 --print_set
+//--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
 AWT_TEST(HybridSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);

@@ -94,6 +94,9 @@ namespace awl
             //The only function that requires this to be Node *.
             void CopyFrom(Node * other)
             {
+                this->count = other->count;
+                this->rank = other->rank;
+
                 if (other->left != nullptr)
                 {
                     other->left->parent = this;
@@ -123,8 +126,6 @@ namespace awl
 
                 this->color = other->color;
                 this->SetParent(other->parent);
-                //this->count = other->count;
-                //this->rank = other->rank;
             }
 
             T value;
