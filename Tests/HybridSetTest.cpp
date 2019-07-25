@@ -103,6 +103,16 @@ AWT_TEST(HybridSetInternal)
 using MySet = awl::hybrid_set<size_t>;
 using StdSet = std::set<size_t>;
 
+void CompareBounds(const StdSet & std_set, const MySet & my_set)
+{
+    Assert::AreEqual(std_set.size(), my_set.size(), _T("wrong size"));
+
+    Assert::AreEqual(*std_set.begin(), my_set.front(), _T("wrong front"));
+    Assert::AreEqual(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
+    Assert::AreEqual(*std_set.rbegin(), my_set.back(), _T("wrong back"));
+    Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
+}
+
 void CompareSets(const StdSet & std_set, const MySet & my_set)
 {
     {
@@ -159,6 +169,7 @@ AWT_TEST(HybridSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
+    AWL_ATTRIBUTE(size_t, delete_step, 10);
     AWL_FLAG(print_set);
     AWL_FLAG(do_not_compare_sets);
 
@@ -183,12 +194,7 @@ AWT_TEST(HybridSetRandom)
             Assert::AreEqual(std_result.second, my_result.second);
         }
 
-        Assert::AreEqual(std_set.size(), my_set.size());
-
-        Assert::AreEqual(*std_set.begin(), my_set.front());
-        Assert::AreEqual(*std_set.begin(), *my_set.begin());
-        Assert::AreEqual(*std_set.rbegin(), my_set.back());
-        Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin());
+        CompareBounds(std_set, my_set);
 
         if (!do_not_compare_sets)
         {
@@ -210,6 +216,36 @@ AWT_TEST(HybridSetRandom)
             auto my_i = my_const_set.find(val);
             auto std_i = std_set.find(val);
             Assert::IsTrue(my_i == my_const_set.end() && std_i == std_set.end() || my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val);
+        }
+
+        //Delete random value.
+        if (i % delete_step == 0)
+        {
+            size_t val = dist(awl::random());
+            bool my_result = my_set.erase(val);
+            bool std_result = std_set.erase(val) != 0;
+
+            context.out << val;
+            
+            if (my_result)
+            {
+                context.out << _T(" has been deleted.");
+            }
+            else
+            {
+                context.out << _T(" not found.");
+            }
+
+            context.out << std::endl;
+
+            Assert::IsTrue(my_result == std_result);
+
+            CompareBounds(std_set, my_set);
+
+            if (!do_not_compare_sets)
+            {
+                CompareSets(std_set, my_set);
+            }
         }
     }
 }

@@ -7,7 +7,7 @@
 
 namespace awl
 {
-    template <class UnaryFunction, class Iterator>
+    template <class UnaryFunction, class Iterator, class Container = void>
     class transform_iterator
     {
     public:
@@ -76,11 +76,19 @@ namespace awl
         Iterator m_i;
 
         UnaryFunction m_func;
+
+        friend Container;
     };
 
     template <class Iterator, class UnaryFunction>
     inline auto make_transform_iterator(Iterator i, UnaryFunction func)
     {
         return transform_iterator<UnaryFunction, Iterator>(i, func);
+    }
+
+    template <class Container, class Iterator, class UnaryFunction>
+    inline auto make_friend_iterator(Iterator i, UnaryFunction func)
+    {
+        return transform_iterator<UnaryFunction, Iterator, Container>(i, func);
     }
 }

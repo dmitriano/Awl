@@ -148,6 +148,18 @@ namespace awl
         using XFunc = decltype(IteratorHelper::MakeXFunc());
         using ConstXFunc = decltype(IteratorHelper::MakeConstXFunc());
 
+        template <class ListIterator>
+        static transform_iterator<XFunc, ListIterator, hybrid_set> MakeIterator(ListIterator i)
+        {
+            return make_friend_iterator<hybrid_set>(i, IteratorHelper::MakeXFunc());
+        }
+
+        template <class ListIterator>
+        static transform_iterator<ConstXFunc, ListIterator, hybrid_set> MakeConstIterator(ListIterator i)
+        {
+            return make_friend_iterator<hybrid_set>(i, IteratorHelper::MakeConstXFunc());
+        }
+
     public:
 
         using value_type = T;
@@ -156,11 +168,11 @@ namespace awl
         using reference = value_type & ;
         using const_reference = const value_type & ;
 
-        using iterator = transform_iterator<XFunc, typename List::iterator>;
-        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator>;
+        using iterator = transform_iterator<XFunc, typename List::iterator, hybrid_set>;
+        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator, hybrid_set>;
 
-        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator>;
-        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator>;
+        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, hybrid_set>;
+        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, hybrid_set>;
 
         hybrid_set(Compare comp = {}) : m_comp(comp)
         {
@@ -172,17 +184,17 @@ namespace awl
         T & back() { return m_list.back()->value; }
         const T & back() const { return m_list.back()->value; }
 
-        iterator begin() { return make_transform_iterator(m_list.begin(), IteratorHelper::MakeXFunc()); }
-        const_iterator begin() const { return make_transform_iterator(m_list.begin(), IteratorHelper::MakeConstXFunc()); }
+        iterator begin() { return MakeIterator(m_list.begin()); }
+        const_iterator begin() const { return MakeConstIterator(m_list.begin()); }
 
-        iterator end() { return make_transform_iterator(m_list.end(), IteratorHelper::MakeXFunc()); }
-        const_iterator end() const { return make_transform_iterator(m_list.end(), IteratorHelper::MakeConstXFunc()); }
+        iterator end() { return MakeIterator(m_list.end()); }
+        const_iterator end() const { return MakeConstIterator(m_list.end()); }
 
-        reverse_iterator rbegin() { return make_transform_iterator(m_list.rbegin(), IteratorHelper::MakeXFunc()); }
-        const_reverse_iterator rbegin() const { return make_transform_iterator(m_list.rbegin(), IteratorHelper::MakeConstXFunc()); }
+        reverse_iterator rbegin() { return MakeIterator(m_list.rbegin()); }
+        const_reverse_iterator rbegin() const { return MakeConstIterator(m_list.rbegin()); }
 
-        reverse_iterator rend() { return make_transform_iterator(m_list.rend(), IteratorHelper::MakeXFunc()); }
-        const_reverse_iterator rend() const { return make_transform_iterator(m_list.rend(), IteratorHelper::MakeConstXFunc()); }
+        reverse_iterator rend() { return MakeIterator(m_list.rend()); }
+        const_reverse_iterator rend() const { return MakeConstIterator(m_list.rend()); }
 
         bool empty() const { return m_list.empty(); }
         bool empty_or_contains_one() const { return m_list.empty_or_contains_one(); }
@@ -193,7 +205,7 @@ namespace awl
             std::pair<Node *, bool> p = InsertNode(value);
             //It cannot be null after insertion.
             assert(p.first != nullptr);
-            return std::make_pair(make_transform_iterator(typename List::iterator(p.first), IteratorHelper::MakeXFunc()), p.second);
+            return std::make_pair(MakeIterator(typename List::iterator(p.first)), p.second);
         }
 
         size_type size() const
@@ -208,7 +220,7 @@ namespace awl
 
             if (node != nullptr)
             {
-                return make_transform_iterator(typename List::iterator(node), IteratorHelper::MakeXFunc());
+                return MakeIterator(typename List::iterator(node));
             }
 
             return end();
@@ -221,10 +233,33 @@ namespace awl
 
             if (node != nullptr)
             {
-                return make_transform_iterator(typename List::const_iterator(node), IteratorHelper::MakeConstXFunc());
+                return MakeConstIterator(typename List::const_iterator(node));
             }
 
             return end();
+        }
+
+        void erase(iterator i)
+        {
+            List::iterator li = i.m_i;
+
+            Node * node = *li;
+
+            RemoveNode(node);
+        }
+
+        template <class Key>
+        bool erase(const Key & key)
+        {
+            iterator i = find(key);
+
+            if (i != end())
+            {
+                erase(i);
+                return true;
+            }
+
+            return false;
         }
 
     private:
