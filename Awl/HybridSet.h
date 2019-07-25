@@ -201,11 +201,37 @@ namespace awl
             return m_root == nullptr ? 0 : m_root->count + 1;
         }
 
+        template <class Key>
+        iterator find(const Key & key)
+        {
+            Node * node = FindNodeByKey(key);
+
+            if (node != nullptr)
+            {
+                return make_transform_iterator(typename List::iterator(node), IteratorHelper::MakeXFunc());
+            }
+
+            return end();
+        }
+
+        template <class Key>
+        const_iterator find(const Key & key) const
+        {
+            Node * node = FindNodeByKey(key);
+
+            if (node != nullptr)
+            {
+                return make_transform_iterator(typename List::const_iterator(node), IteratorHelper::MakeConstXFunc());
+            }
+
+            return end();
+        }
+
     private:
 
         //p_parent is a node to which a new node is added.
         template <class Key>
-        Node * FindNodeByKey(const Key & key, Node ** p_parent = nullptr)
+        Node * FindNodeByKey(const Key & key, Node ** p_parent = nullptr) const
         {
             if (p_parent != nullptr)
             {

@@ -105,13 +105,6 @@ using StdSet = std::set<size_t>;
 
 void CompareSets(const StdSet & std_set, const MySet & my_set)
 {
-    Assert::AreEqual(std_set.size(), my_set.size());
-
-    Assert::AreEqual(*std_set.begin(), my_set.front());
-    Assert::AreEqual(*std_set.begin(), *my_set.begin());
-    Assert::AreEqual(*std_set.rbegin(), my_set.back());
-    Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin());
-
     {
         auto i = std_set.begin();
         
@@ -167,6 +160,7 @@ AWT_TEST(HybridSetRandom)
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
     AWL_FLAG(print_set);
+    AWL_FLAG(do_not_compare_sets);
 
     std::uniform_int_distribution<size_t> dist(1, range);
 
@@ -175,17 +169,47 @@ AWT_TEST(HybridSetRandom)
 
     for (size_t i = 0; i < insert_count; ++i)
     {
-        size_t val = dist(awl::random());
-        auto my_result = my_set.insert(val);
-        auto std_result = std_set.insert(val);
-
-        if (print_set)
+        //Insert a ramdom value.
         {
-            PrintSet<awl::hybrid_set>(context, my_set);
+            size_t val = dist(awl::random());
+            auto my_result = my_set.insert(val);
+            auto std_result = std_set.insert(val);
+
+            if (print_set)
+            {
+                PrintSet<awl::hybrid_set>(context, my_set);
+            }
+
+            Assert::AreEqual(std_result.second, my_result.second);
         }
 
-        Assert::AreEqual(std_result.second, my_result.second);
-        
-        CompareSets(std_set, my_set);
+        Assert::AreEqual(std_set.size(), my_set.size());
+
+        Assert::AreEqual(*std_set.begin(), my_set.front());
+        Assert::AreEqual(*std_set.begin(), *my_set.begin());
+        Assert::AreEqual(*std_set.rbegin(), my_set.back());
+        Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin());
+
+        if (!do_not_compare_sets)
+        {
+            CompareSets(std_set, my_set);
+        }
+
+        //Find a random value.
+        {
+            size_t val = dist(awl::random());
+            auto my_i = my_set.find(val);
+            auto std_i = std_set.find(val);
+            Assert::IsTrue(my_i == my_set.end() && std_i == std_set.end() || my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val);
+        }
+
+        {
+            const MySet & my_const_set = my_set;
+
+            size_t val = dist(awl::random());
+            auto my_i = my_const_set.find(val);
+            auto std_i = std_set.find(val);
+            Assert::IsTrue(my_i == my_const_set.end() && std_i == std_set.end() || my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val);
+        }
     }
 }
