@@ -1,6 +1,7 @@
 #pragma once
 
 #include "QuickList.h"
+#include "TransformIterator.h"
 
 #include <iterator>
 #include <assert.h>
@@ -131,6 +132,22 @@ namespace awl
 
         using List = quick_list<Node>;
 
+        struct IteratorHelper
+        {
+            static auto MakeXFunc()
+            {
+                return [](Node * node) -> T & { return node->value; };
+            }
+
+            static auto MakeConstXFunc()
+            {
+                return [](const Node * node) -> const T & { return node->value; };
+            }
+        };
+
+        using XFunc = decltype(IteratorHelper::MakeXFunc());
+        using ConstXFunc = decltype(IteratorHelper::MakeConstXFunc());
+
     public:
 
         using value_type = T;
@@ -139,11 +156,11 @@ namespace awl
         using reference = value_type & ;
         using const_reference = const value_type & ;
 
-        using iterator = typename List::iterator;
-        using const_iterator = typename List::const_iterator ;
+        using iterator = transform_iterator<XFunc, typename List::iterator>;
+        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator>;
 
-        using reverse_iterator = typename List::iterator;
-        using const_reverse_iterator = typename List::const_iterator;
+        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator>;
+        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator>;
 
         hybrid_set(Compare comp = {}) : m_comp(comp)
         {
@@ -155,17 +172,17 @@ namespace awl
         T & back() { return m_list.back()->value; }
         const T & back() const { return m_list.back()->value; }
 
-        iterator begin() { return m_list.begin(); }
-        const_iterator begin() const { return m_list.begin(); }
+        iterator begin() { return make_transform_iterator(m_list.begin(), IteratorHelper::MakeXFunc()); }
+        const_iterator begin() const { return make_transform_iterator(m_list.begin(), IteratorHelper::MakeConstXFunc()); }
 
-        iterator end() { return m_list.end(); }
-        const_iterator end() const { return m_list.end(); }
+        iterator end() { return make_transform_iterator(m_list.end(), IteratorHelper::MakeXFunc()); }
+        const_iterator end() const { return make_transform_iterator(m_list.end(), IteratorHelper::MakeConstXFunc()); }
 
-        reverse_iterator rbegin() { return m_list.rbegin(); }
-        const_reverse_iterator rbegin() const { return m_list.rbegin(); }
+        reverse_iterator rbegin() { return make_transform_iterator(m_list.rbegin(), IteratorHelper::MakeXFunc()); }
+        const_reverse_iterator rbegin() const { return make_transform_iterator(m_list.rbegin(), IteratorHelper::MakeConstXFunc()); }
 
-        reverse_iterator rend() { return m_list.rend(); }
-        const_reverse_iterator rend() const { return m_list.rend(); }
+        reverse_iterator rend() { return make_transform_iterator(m_list.rend(), IteratorHelper::MakeXFunc()); }
+        const_reverse_iterator rend() const { return make_transform_iterator(m_list.rend(), IteratorHelper::MakeConstXFunc()); }
 
         bool empty() const { return m_list.empty(); }
         bool empty_or_contains_one() const { return m_list.empty_or_contains_one(); }
@@ -176,7 +193,7 @@ namespace awl
             std::pair<Node *, bool> p = InsertNode(value);
             //It cannot be null after insertion.
             assert(p.first != nullptr);
-            return std::make_pair(iterator(p.first), p.second);
+            return std::make_pair(make_transform_iterator(typename List::iterator(p.first), IteratorHelper::MakeXFunc()), p.second);
         }
 
         size_type size() const
@@ -261,7 +278,7 @@ namespace awl
             if (pred != nullptr)
             {
                 assert(m_comp(pred->value, node->value));
-                m_list.insert(iterator(pred), node);
+                m_list.insert(typename List::iterator(pred), node);
             }
             else
             {
@@ -561,7 +578,6 @@ namespace awl
                         x = x->parent;
                         continue;
                     }
-
 
                     if (w->color == Color::Red)
                     {

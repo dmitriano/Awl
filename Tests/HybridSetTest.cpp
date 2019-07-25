@@ -105,14 +105,37 @@ using StdSet = std::set<size_t>;
 
 void CompareSets(const StdSet & std_set, const MySet & my_set)
 {
-    auto i = std_set.begin();
-    for (auto val : my_set)
-    {
-        size_t std_val = *i++;
-        Assert::AreEqual(std_val, val->value);
-    }
+    Assert::AreEqual(std_set.size(), my_set.size());
 
-    Assert::IsTrue(i == std_set.end());
+    Assert::AreEqual(*std_set.begin(), my_set.front());
+    Assert::AreEqual(*std_set.begin(), *my_set.begin());
+    Assert::AreEqual(*std_set.rbegin(), my_set.back());
+    Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin());
+
+    {
+        auto i = std_set.begin();
+        
+        for (auto val : my_set)
+        {
+            size_t std_val = *i++;
+            Assert::AreEqual(std_val, val);
+        }
+
+        Assert::IsTrue(i == std_set.end());
+    }
+    
+    {
+        auto i = std_set.rbegin();
+        
+        for (auto my_i = my_set.rbegin(); my_i != my_set.rend(); ++my_i)
+        {
+            size_t std_val = *i++;
+            size_t my_val = *my_i;
+            Assert::AreEqual(std_val, my_val);
+        }
+
+        Assert::IsTrue(i == std_set.rend());
+    }
 }
 
 template <template <class> class Set>
@@ -133,7 +156,7 @@ void PrintSet(const TestContext & ctx, const Set<size_t> & set)
             ctx.out << _T(", ");
         }
 
-        ctx.out << val->value;
+        ctx.out << val;
     }
     
     ctx.out << _T("]") << std::endl;
@@ -143,6 +166,7 @@ AWT_TEST(HybridSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
+    AWL_FLAG(print_set);
 
     std::uniform_int_distribution<size_t> dist(1, range);
 
@@ -155,15 +179,13 @@ AWT_TEST(HybridSetRandom)
         auto my_result = my_set.insert(val);
         auto std_result = std_set.insert(val);
 
-        //PrintSet<awl::hybrid_set>(context, my_set);
+        if (print_set)
+        {
+            PrintSet<awl::hybrid_set>(context, my_set);
+        }
 
         Assert::AreEqual(std_result.second, my_result.second);
-        Assert::AreEqual(std_set.size(), my_set.size());
         
-        const size_t my_front_val = my_set.front();
-        const size_t std_front_val = *std_set.begin();
-        Assert::AreEqual(std_front_val, my_front_val);
-
         CompareSets(std_set, my_set);
     }
 }
