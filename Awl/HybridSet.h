@@ -8,10 +8,7 @@
 
 namespace awl
 {
-    template<
-        class T,
-        class Compare = std::less<>
-    > 
+    template<class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
     class hybrid_set
     {
     private:
@@ -90,6 +87,11 @@ namespace awl
             Node(const T & v) : Link{}, value(v)
             {
             }
+
+            ~Node()
+            {
+                exclude();
+            }
             
             //The only function that requires this to be Node *.
             void CopyFrom(Node * other)
@@ -131,6 +133,8 @@ namespace awl
             T value;
         };
 
+        using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
+            
         using List = quick_list<Node>;
 
         struct IteratorHelper
@@ -175,7 +179,11 @@ namespace awl
         using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, hybrid_set>;
         using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, hybrid_set>;
 
-        hybrid_set(Compare comp = {}) : m_comp(comp)
+        hybrid_set() : m_nodeAlloc(m_alloc)
+        {
+        }
+        
+        hybrid_set(Compare comp, const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc), m_nodeAlloc(m_alloc)
         {
         }
 
@@ -312,7 +320,9 @@ namespace awl
                 return std::make_pair(x, false);
             }
 
-            Node * node = new Node(val);
+            Node * node = m_nodeAlloc.allocate(1);
+            new (node) Node(val);
+
             node->parent = parent;
             if (parent == nullptr)
             {
@@ -620,8 +630,8 @@ namespace awl
                 BalanceAfterRemove(x);
 
             //Remove the node from the list.
-            z->exclude();
-            delete z;
+            z->~Node();
+            m_nodeAlloc.deallocate(z, 1);
         }
 
         // Restores the reb-black properties after a delete.
@@ -734,6 +744,8 @@ namespace awl
         Node * m_root = nullptr;
         List m_list;
         Compare m_comp;
+        Allocator m_alloc;
+        NodeAllocator m_nodeAlloc;
 
         friend class HybridSetTest;
     };
