@@ -169,7 +169,6 @@ AWT_TEST(HybridSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
-    AWL_ATTRIBUTE(size_t, delete_step, 10);
     AWL_FLAG(print_set);
     AWL_FLAG(do_not_compare_sets);
 
@@ -219,7 +218,6 @@ AWT_TEST(HybridSetRandom)
         }
 
         //Delete random value.
-        if (i % delete_step == 0)
         {
             size_t val = dist(awl::random());
             bool my_result = my_set.erase(val);
@@ -240,11 +238,19 @@ AWT_TEST(HybridSetRandom)
 
             Assert::IsTrue(my_result == std_result);
 
-            CompareBounds(std_set, my_set);
-
-            if (!do_not_compare_sets)
+            if (my_result)
             {
-                CompareSets(std_set, my_set);
+                if (print_set)
+                {
+                    PrintSet<awl::hybrid_set>(context, my_set);
+                }
+
+                CompareBounds(std_set, my_set);
+
+                if (!do_not_compare_sets)
+                {
+                    CompareSets(std_set, my_set);
+                }
             }
         }
     }
