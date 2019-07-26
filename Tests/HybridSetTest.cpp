@@ -1,6 +1,7 @@
 #include "Awl/HybridSet.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
+#include "Awl/String.h"
 
 #include <algorithm>
 #include <array>
@@ -77,14 +78,14 @@ namespace awl
 
         Set::Node * InsertNew(int val)
         {
-            std::pair<Set::Node *, bool> p = set.InsertNode(val);
+            std::pair<Set::iterator, bool> p = set.insert(val);
             Assert::IsTrue(p.second);
-            return p.first;
+            return *(Set::ExtractListIterator(p.first));
         }
 
         void InsertExisting(int val)
         {
-            std::pair<Set::Node *, bool> p = set.InsertNode(val);
+            std::pair<Set::iterator, bool> p = set.insert(val);
             Assert::IsFalse(p.second);
         }
 
@@ -257,4 +258,21 @@ AWT_TEST(HybridSetRandom)
             }
         }
     }
+}
+
+AWT_TEST(HybridSetMove)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Set = awl::hybrid_set<awl::String>;
+
+    Set set;
+    awl::String lval = _T("abc");
+    set.insert(lval);
+    awl::String rval = _T("xyz");
+    set.insert(std::move(rval));
+
+    Assert::IsTrue(rval == _T(""));
+    Assert::IsTrue(set.front() == _T("abc"));
+    Assert::IsTrue(set.back() == _T("xyz"));
 }

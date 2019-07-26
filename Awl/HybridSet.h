@@ -88,6 +88,10 @@ namespace awl
             {
             }
 
+            Node(T && v) : Link{}, value(std::move(v))
+            {
+            }
+
             ~Node()
             {
                 exclude();
@@ -142,6 +146,13 @@ namespace awl
             return node;
         }
         
+        Node * CreateNode(T && val)
+        {
+            Node * node = m_nodeAlloc.allocate(1);
+            new (node) Node(std::move(val));
+            return node;
+        }
+
         void DestroyNode(Node * node)
         {
             node->~Node();
@@ -224,10 +235,12 @@ namespace awl
 
         std::pair<iterator, bool> insert(const value_type & value)
         {
-            std::pair<Node *, bool> p = InsertNode(value);
-            //It cannot be null after insertion.
-            assert(p.first != nullptr);
-            return std::make_pair(MakeIterator(typename List::iterator(p.first)), p.second);
+            return UniversalInsert(value);
+        }
+
+        std::pair<iterator, bool> insert(value_type && value)
+        {
+            return UniversalInsert(std::move(value));
         }
 
         size_type size() const
@@ -263,7 +276,7 @@ namespace awl
 
         void erase(iterator i)
         {
-            List::iterator li = i.m_i;
+            List::iterator li = ExtractListIterator(i);
 
             Node * node = *li;
 
@@ -322,20 +335,27 @@ namespace awl
             return nullptr;
         }
 
-        std::pair<Node *, bool> InsertNode(const T & val)
+        template <class V>
+        std::pair<iterator, bool> UniversalInsert(V && val)
         {
             Node * parent;
-            Node * x = FindNodeByKey(val, &parent);
+            Node * node = FindNodeByKey(val, &parent);
+            const bool exists = node != nullptr;
 
-            if (x != nullptr)
+            if (!exists)
             {
-                //A node with the same key already exists.
-                return std::make_pair(x, false);
+                node = CreateNode(std::forward<V>(val));
+                InsertNode(node, parent);
             }
 
-            Node * node = CreateNode(val);
+            return std::make_pair(MakeIterator(typename List::iterator(node)), !exists);
+        }
 
+        //Inserts a node that does not exist to the specified parent.
+        void InsertNode(Node * node, Node * parent)
+        {
             node->parent = parent;
+
             if (parent == nullptr)
             {
                 m_root = node;
@@ -369,8 +389,6 @@ namespace awl
                 assert(node == m_root || m_comp(node->value, front()));
                 m_list.push_front(node);
             }
-
-            return std::make_pair(node, true);
         }
 
         //Returns the pointer to the smallest node greater than x.
@@ -753,6 +771,11 @@ namespace awl
             x->color = Color::Black;
         }
 
+        static typename List::iterator ExtractListIterator(iterator i)
+        {
+            return i.m_i;
+        }
+        
         Node * m_root = nullptr;
         List m_list;
         Compare m_comp;
