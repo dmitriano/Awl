@@ -179,6 +179,9 @@ AWT_TEST(HybridSetRandom)
     std::uniform_int_distribution<size_t> dist(1, range);
 
     MySet my_set;
+    Assert::IsTrue(my_set.empty());
+    Assert::IsTrue(my_set.size() == 0);
+
     StdSet std_set;
 
     for (size_t i = 0; i < insert_count; ++i)
@@ -260,9 +263,11 @@ AWT_TEST(HybridSetRandom)
     }
 
     my_set.clear();
+    Assert::IsTrue(my_set.empty());
+    Assert::IsTrue(my_set.size() == 0);
 }
 
-AWT_TEST(HybridSetMoveElement)
+AWT_TEST(HybridSetRValue)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -279,4 +284,41 @@ AWT_TEST(HybridSetMoveElement)
     Assert::IsTrue(set.front() == _T("abc"));
     Assert::IsTrue(*(++set.begin()) == _T("def"));
     Assert::IsTrue(set.back() == _T("xyz"));
+}
+
+using IntSet = awl::hybrid_set<int>;
+
+static IntSet GenerateIntSet()
+{
+    IntSet sample{ -1, -2, -3, -4, -5 };
+
+    std::uniform_int_distribution<int> dist(1, 1000);
+
+    for (size_t i = 0; i < 1000; ++i)
+    {
+        int val = dist(awl::random());
+        sample.insert(val);
+    }
+
+    return std::move(sample);
+}
+
+AWT_TEST(HybridSetCopyMove)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Set = IntSet;
+    
+    const Set sample = GenerateIntSet();
+    Assert::IsTrue(sample != Set{ -1, -2, -3, -4, -5 });
+
+    const Set copy = sample;
+    Assert::IsTrue(copy == sample);
+
+    Set temp = copy;
+    Assert::IsTrue(temp == copy);
+
+    const Set moved = std::move(temp);
+    Assert::IsTrue(moved == copy);
+    Assert::IsTrue(temp.empty());
 }

@@ -5,6 +5,7 @@
 
 #include <iterator>
 #include <memory>
+#include <initializer_list>
 #include <assert.h>
 
 namespace awl
@@ -217,9 +218,86 @@ namespace awl
         {
         }
 
+        hybrid_set(const hybrid_set & other) : m_comp(other.m_comp), m_alloc(other.m_alloc), m_nodeAlloc(other.m_nodeAlloc)
+        {
+            CopyElements(other);
+        }
+
+        hybrid_set(hybrid_set && other) : m_comp(std::move(other.m_comp)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc)),
+            m_root(std::move(other.m_root)), m_list(std::move(other.m_list))
+        {
+            other.m_root = nullptr;
+        }
+
+        hybrid_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc)
+        {
+            //It is not clear how to move the elemetns from std::initializer_list,
+            //see https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
+            //and https://stackoverflow.com/questions/36377758/how-to-move-elements-of-an-initializer-list/36411040#36411040
+            for (const value_type & val : init)
+            {
+                insert(val);
+            }
+        }
+
+        hybrid_set(std::initializer_list<value_type> init, const Allocator& alloc)
+            : hybrid_set(init, Compare(), alloc)
+        {
+        }
+
         ~hybrid_set()
         {
             clear();
+        }
+
+        hybrid_set & operator = (const hybrid_set & other)
+        {
+            clear();
+            //Should we copy the allocator?
+            m_comp = other.m_comp;
+            CopyElements(other);
+        }
+
+        hybrid_set & operator = (hybrid_set && other)
+        {
+            clear();
+            m_comp = std::move(other.m_comp);
+            m_alloc = std::move(other.m_alloc);
+            m_nodeAlloc = std::move(other.m_nodeAlloc);
+            m_root = std::move(other.m_root);
+            m_list = std::move(other.m_list);
+            other.m_root = nullptr;
+        }
+
+        bool operator == (const hybrid_set & other) const
+        {
+            if (size() == other.size())
+            {
+                const_iterator i = begin();
+                for (const value_type & val : other)
+                {
+                    if (m_comp(val, *i))
+                    {
+                        return false;
+                    }
+
+                    if (m_comp(*i, val))
+                    {
+                        return false;
+                    }
+
+                    ++i;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        bool operator != (const hybrid_set & other) const
+        {
+            return !operator == (other);
         }
 
         T & front() { return m_list.front()->value; }
@@ -239,10 +317,6 @@ namespace awl
 
         reverse_iterator rend() { return MakeIterator(m_list.rend()); }
         const_reverse_iterator rend() const { return MakeConstIterator(m_list.rend()); }
-
-        bool empty() const { return m_list.empty(); }
-        bool empty_or_contains_one() const { return m_list.empty_or_contains_one(); }
-        bool contains_one() const { return m_list.contains_one(); }
 
         std::pair<iterator, bool> insert(const value_type & value)
         {
@@ -269,6 +343,11 @@ namespace awl
             }
 
             return std::make_pair(MakeIterator(typename List::iterator(node)), !exists);
+        }
+
+        bool empty() const
+        {
+            return m_root == nullptr;
         }
 
         size_type size() const
@@ -813,12 +892,20 @@ namespace awl
         {
             return i.m_i;
         }
+
+        void CopyElements(const hybrid_set & other)
+        {
+            for (const T & val : other)
+            {
+                insert(val);
+            }
+        }
         
-        Node * m_root = nullptr;
-        List m_list;
         Compare m_comp;
         Allocator m_alloc;
         NodeAllocator m_nodeAlloc;
+        Node * m_root = nullptr;
+        List m_list;
 
         friend class HybridSetTest;
     };
