@@ -210,6 +210,10 @@ namespace awl
         using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, hybrid_set>;
         using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, hybrid_set>;
 
+        using allocator_type = Allocator;
+        using key_compare = Compare;
+        using value_compare = Compare;
+
         hybrid_set() : m_nodeAlloc(m_alloc)
         {
         }

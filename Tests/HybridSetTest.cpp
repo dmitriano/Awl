@@ -101,7 +101,43 @@ AWT_TEST(HybridSetInternal)
     test.Run();
 }
 
-using MySet = awl::hybrid_set<size_t>;
+static size_t memory_size = 0;
+
+template <class T>
+class TestAllocator
+{
+public:
+    
+    using value_type = T;
+
+    TestAllocator() = default;
+
+    template <class Q>
+    TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
+    {
+    }
+    
+    T* allocate(std::size_t n)
+    {
+        memory_size += n * sizeof(T);
+        return m_alloc.allocate(n);
+    }
+
+    void deallocate(T* p, std::size_t n)
+    {
+        memory_size -= n * sizeof(T);
+        return m_alloc.deallocate(p, n);
+    }
+
+private:
+
+    std::allocator<T> m_alloc;
+
+    template <class Q>
+    friend class TestAllocator;
+};
+
+using MySet = awl::hybrid_set<size_t, std::less<>, TestAllocator<size_t>>;
 using StdSet = std::set<size_t>;
 
 void CompareBounds(const StdSet & std_set, const MySet & my_set)
@@ -142,8 +178,7 @@ void CompareSets(const StdSet & std_set, const MySet & my_set)
     }
 }
 
-template <template <class> class Set>
-void PrintSet(const TestContext & ctx, const Set<size_t> & set)
+static void PrintSet(const TestContext & ctx, const MySet & set)
 {
     ctx.out << _T("size: ") << set.size() << _T(" [");
     
@@ -194,7 +229,7 @@ AWT_TEST(HybridSetRandom)
 
             if (print_set)
             {
-                PrintSet<awl::hybrid_set>(context, my_set);
+                PrintSet(context, my_set);
             }
 
             Assert::AreEqual(std_result.second, my_result.second);
@@ -249,7 +284,7 @@ AWT_TEST(HybridSetRandom)
             {
                 if (print_set)
                 {
-                    PrintSet<awl::hybrid_set>(context, my_set);
+                    PrintSet(context, my_set);
                 }
 
                 CompareBounds(std_set, my_set);
@@ -265,6 +300,7 @@ AWT_TEST(HybridSetRandom)
     my_set.clear();
     Assert::IsTrue(my_set.empty());
     Assert::IsTrue(my_set.size() == 0);
+    Assert::AreEqual(0u, memory_size, _T("memory leaks"));
 }
 
 AWT_TEST(HybridSetRValue)
