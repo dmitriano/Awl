@@ -258,6 +258,8 @@ AWT_TEST(HybridSetRandom)
             }
         }
     }
+
+    my_set.clear();
 }
 
 AWT_TEST(HybridSetMove)

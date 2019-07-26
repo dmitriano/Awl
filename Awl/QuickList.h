@@ -74,6 +74,7 @@ namespace awl
 
         void exclude()
         {
+            assert(included());
             Dlink * prev = static_cast<Dlink *>(this->BackwardLink::next());
             Dlink * next = static_cast<Dlink *>(this->ForwardLink::next());
             ForwardList::remove_after(prev);

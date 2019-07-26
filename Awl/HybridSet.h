@@ -211,6 +211,11 @@ namespace awl
         {
         }
 
+        ~hybrid_set()
+        {
+            clear();
+        }
+
         T & front() { return m_list.front()->value; }
         const T & front() const { return m_list.front()->value; }
 
@@ -295,6 +300,17 @@ namespace awl
             }
 
             return false;
+        }
+
+        void clear()
+        {
+            while (!m_list.empty())
+            {
+                //We destroy the node that is still included to the list.
+                DestroyNode(m_list.front());
+            }
+
+            m_root = nullptr;
         }
 
     private:
