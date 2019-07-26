@@ -25,10 +25,13 @@ namespace awl
             Node * left;
             Node * right;
             Color color;
-            //The number of the elements in the left subtree that is the node zero-based index.
-            std::size_t rank;
             //The number of the children.
             std::size_t count;
+
+            size_t GetRank() const
+            {
+                return this->left != nullptr ? this->left->count + 1: 0;
+            }
 
             void UpdateCount()
             {
@@ -40,11 +43,6 @@ namespace awl
                 if (this->left != nullptr)
                 {
                     this->count = this->left->count + 1;
-                    this->rank = this->count;
-                }
-                else
-                {
-                    this->rank = 0;
                 }
 
                 if (this->right != nullptr)
@@ -110,7 +108,6 @@ namespace awl
             void CopyFrom(Node * other)
             {
                 this->count = other->count;
-                this->rank = other->rank;
 
                 if (other->left != nullptr)
                 {
@@ -479,13 +476,15 @@ namespace awl
             //walk down the tree
             while (x != nullptr)
             {
-                if (i < x->rank)
+                const size_t rank = x->GetRank();
+
+                if (i < rank)
                 {
                     x = x->left;
                 }
-                else if (i > x->rank)
+                else if (i > rank)
                 {
-                    i -= (x->rank + 1);
+                    i -= (rank + 1);
                     x = x->right;
                 }
                 else
