@@ -676,8 +676,7 @@ namespace awl
                 BalanceAfterRemove(x);
 
             //Remove the node from the list.
-            z->~Node();
-            m_nodeAlloc.deallocate(z, 1);
+            DestroyNode(z);
         }
 
         // Restores the reb-black properties after a delete.
