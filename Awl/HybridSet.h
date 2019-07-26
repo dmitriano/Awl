@@ -25,7 +25,9 @@ namespace awl
             Node * left;
             Node * right;
             Color color;
+            //The number of the elements in the left subtree that is the node zero-based index.
             std::size_t rank;
+            //The number of the children.
             std::size_t count;
 
             void UpdateCount()
@@ -38,11 +40,11 @@ namespace awl
                 if (this->left != nullptr)
                 {
                     this->count = this->left->count + 1;
-                    this->rank = this->count + 1;
+                    this->rank = this->count;
                 }
                 else
                 {
-                    this->rank = 1;
+                    this->rank = 0;
                 }
 
                 if (this->right != nullptr)
@@ -372,6 +374,18 @@ namespace awl
             return end();
         }
 
+        reference at(size_type pos)
+        {
+            Node * node = FindNodeByIndex(pos);
+            return node->value;
+        }
+
+        const_reference at(size_type pos) const
+        {
+            Node * node = FindNodeByIndex(pos);
+            return node->value;
+        }
+
         template <class Key>
         const_iterator find(const Key & key) const
         {
@@ -455,6 +469,32 @@ namespace awl
             }
 
             return nullptr;
+        }
+
+        Node * FindNodeByIndex(size_t index) const
+        {
+            Node * x = m_root;
+            size_t i = index;
+
+            //walk down the tree
+            while (x != nullptr)
+            {
+                if (i < x->rank)
+                {
+                    x = x->left;
+                }
+                else if (i > x->rank)
+                {
+                    i -= (x->rank + 1);
+                    x = x->right;
+                }
+                else
+                {
+                    return x;
+                }
+            }
+
+            throw std::out_of_range("Not a valid index.");
         }
 
         template <class V>

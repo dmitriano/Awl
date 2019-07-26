@@ -324,13 +324,13 @@ AWT_TEST(HybridSetRValue)
 
 using IntSet = awl::hybrid_set<int>;
 
-static IntSet GenerateIntSet()
+static IntSet GenerateIntSet(int size = 1000)
 {
-    IntSet sample{ -1, -2, -3, -4, -5 };
+    IntSet sample;
 
-    std::uniform_int_distribution<int> dist(1, 1000);
+    std::uniform_int_distribution<int> dist(1, size);
 
-    for (size_t i = 0; i < 1000; ++i)
+    for (size_t i = 0; i < size; ++i)
     {
         int val = dist(awl::random());
         sample.insert(val);
@@ -357,4 +357,24 @@ AWT_TEST(HybridSetCopyMove)
     const Set moved = std::move(temp);
     Assert::IsTrue(moved == copy);
     Assert::IsTrue(temp.empty());
+}
+
+AWT_TEST(HybridSetIndex)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Set = IntSet;
+
+    const Set set = GenerateIntSet();
+
+    size_t index = 0;
+
+    for (auto val : set)
+    {
+        const auto found_val = set.at(index);
+        
+        Assert::AreEqual(val, found_val);
+
+        ++index;
+    }
 }
