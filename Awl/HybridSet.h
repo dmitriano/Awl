@@ -4,6 +4,7 @@
 #include "TransformIterator.h"
 
 #include <iterator>
+#include <memory>
 #include <assert.h>
 
 namespace awl
@@ -89,6 +90,11 @@ namespace awl
             }
 
             Node(T && v) : Link{}, value(std::move(v))
+            {
+            }
+
+            template <class... Args>
+            Node(Args&&... args) : Link{}, value(std::forward<Args>(args) ...)
             {
             }
 
@@ -246,6 +252,23 @@ namespace awl
         std::pair<iterator, bool> insert(value_type && value)
         {
             return UniversalInsert(std::move(value));
+        }
+
+        template <class... Args>
+        std::pair<iterator, bool> emplace(Args&&... args)
+        {
+            Node * parent;
+            std::unique_ptr<Node> val_node(CreateNode(std::forward<Args>(args) ...));
+            Node * node = FindNodeByKey(val_node->value, &parent);
+            const bool exists = node != nullptr;
+
+            if (!exists)
+            {
+                node = val_node.release();
+                InsertNode(node, parent);
+            }
+
+            return std::make_pair(MakeIterator(typename List::iterator(node)), !exists);
         }
 
         size_type size() const

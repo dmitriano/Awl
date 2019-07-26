@@ -262,7 +262,7 @@ AWT_TEST(HybridSetRandom)
     my_set.clear();
 }
 
-AWT_TEST(HybridSetMove)
+AWT_TEST(HybridSetMoveElement)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -273,8 +273,10 @@ AWT_TEST(HybridSetMove)
     set.insert(lval);
     awl::String rval = _T("xyz");
     set.insert(std::move(rval));
+    set.emplace(_T("def"));
 
     Assert::IsTrue(rval == _T(""));
     Assert::IsTrue(set.front() == _T("abc"));
+    Assert::IsTrue(*(++set.begin()) == _T("def"));
     Assert::IsTrue(set.back() == _T("xyz"));
 }
