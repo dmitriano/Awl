@@ -381,30 +381,30 @@ namespace awl
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            size_t index;
-            const size_t size = this->size();
-
-            Node * found_node = FindNodeByKey(key, [&index, size](Node * node)
+            if (m_root != nullptr)
             {
-                if (node->parent != nullptr && node->parent->right == node)
-                {
-                    //The parent and its children are at the left side.
-                    index += node->parent->GetRank() + 1;
-                    assert(index < size);
-                }
-                else
-                {
-                    assert(node->parent == nullptr || node->parent->left == node);
-                    assert(index > 0);
-                    index -= 1u;
-                }
+                size_t index = m_root->GetRank();
+                const size_t size = this->size();
 
-                static_cast<void>(size);
-            });
+                Node * found_node = FindNodeByKey(key,
+                    [&index](Node * node)
+                    {
+                        assert(index > 0);
+                        index -= 1u;
+                    },
+                    [&index, size](Node * node)
+                    {
+                        //The parent and its children are at the left side.
+                        index += node->GetRank() + 1;
+                        assert(index < size);
+                        static_cast<void>(size);
+                    }
+                );
 
-            if (found_node != nullptr)
-            {
-                return index;
+                if (found_node != nullptr)
+                {
+                    return index;
+                }
             }
 
             throw GeneralException(_T("Key not found."));
@@ -462,7 +462,9 @@ namespace awl
         template <class Key>
         Node * FindNodeByKey(const Key & key) const
         {
-            return FindNodeByKey(key, [](Node *) {});
+            auto accum = [](Node *) {};
+            
+            return FindNodeByKey(key, accum, accum);
         }
 
         //p_parent is a node to which a new node is added.
@@ -472,33 +474,34 @@ namespace awl
             if (p_parent != nullptr)
             {
                 *p_parent = nullptr;
-            }
 
-            return FindNodeByKey(key, [&p_parent](Node * x)
-            {
-                if (p_parent != nullptr)
+                auto accum = [&p_parent](Node * x)
                 {
                     *p_parent = x;
-                }
-            });
+                };
+
+                return FindNodeByKey(key, accum, accum);
+            }
+
+            return FindNodeByKey(key);
         }
 
-        template <class Key, class Accumulate>
-        Node * FindNodeByKey(const Key & key, Accumulate && accum) const
+        template <class Key, class AccumulateLeft, class AccumulateRight>
+        Node * FindNodeByKey(const Key & key, AccumulateLeft && accum_left, AccumulateRight && accum_right) const
         {
             Node * x = m_root;
 
             //walk down the tree
             while (x != nullptr)
             {
-                accum(x);
-                
                 if (m_comp(key, x->value))
                 {
+                    accum_left(x);
                     x = x->left;
                 }
                 else if (m_comp(x->value, key))
                 {
+                    accum_right(x);
                     x = x->right;
                 }
                 else
