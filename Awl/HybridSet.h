@@ -30,9 +30,16 @@ namespace awl
             //The number of the children.
             std::size_t count;
 
-            size_t GetRank() const
+            //The number of the elements in the left subtree.
+            size_t GetLeftCount() const
             {
                 return this->left != nullptr ? this->left->count + 1: 0;
+            }
+
+            //The number of the elements in the right subtree.
+            size_t GetRightCount() const
+            {
+                return this->right != nullptr ? this->right->count + 1 : 0;
             }
 
             void UpdateCount()
@@ -381,31 +388,29 @@ namespace awl
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            if (m_root != nullptr)
-            {
-                size_t index = m_root->GetRank();
-                const size_t size = this->size();
+            size_t parent_rank = 0;
+            const size_t size = this->size();
 
-                Node * found_node = FindNodeByKey(key,
-                    [&index](Node * node)
-                    {
-                        assert(index > 0);
-                        index -= 1u;
-                    },
-                    [&index, size](Node * node)
-                    {
-                        //The parent and its children are at the left side.
-                        index += node->GetRank() + 1;
-                        assert(index < size);
-                        static_cast<void>(size);
-                    }
-                );
-
-                if (found_node != nullptr)
+            Node * found_node = FindNodeByKey(key,
+                [](Node *)
                 {
-                    return index;
+                },
+                [&parent_rank, size](Node * node)
+                {
+                    //The parent and its children are at the left side.
+                    parent_rank += node->GetLeftCount() + 1;
+                    assert(parent_rank < size);
                 }
+            );
+
+            if (found_node != nullptr)
+            {
+                const size_t index = found_node->GetLeftCount() + parent_rank;
+                assert(index < size);
+                return index;
             }
+
+            static_cast<void>(size);
 
             throw GeneralException(_T("Key not found."));
         }
@@ -521,7 +526,7 @@ namespace awl
             //walk down the tree
             while (x != nullptr)
             {
-                const size_t rank = x->GetRank();
+                const size_t rank = x->GetLeftCount();
 
                 if (i < rank)
                 {

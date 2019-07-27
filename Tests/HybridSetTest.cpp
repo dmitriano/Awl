@@ -322,17 +322,16 @@ AWT_TEST(HybridSetRValue)
     Assert::IsTrue(set.back() == _T("xyz"));
 }
 
-using IntSet = awl::hybrid_set<int>;
-
-static IntSet GenerateIntSet(int size = 1000)
+template <class T>
+static awl::hybrid_set<T> GenerateIntSet(size_t insert_count, T range)
 {
-    IntSet sample;
+    awl::hybrid_set<T> sample;
 
-    std::uniform_int_distribution<int> dist(1, size);
+    std::uniform_int_distribution<T> dist(1, range);
 
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < insert_count; ++i)
     {
-        int val = dist(awl::random());
+        T val = dist(awl::random());
         sample.insert(val);
     }
 
@@ -343,9 +342,9 @@ AWT_TEST(HybridSetCopyMove)
 {
     AWT_UNUSED_CONTEXT;
 
-    using Set = IntSet;
+    using Set = awl::hybrid_set<int>;
     
-    const Set sample = GenerateIntSet();
+    const Set sample = GenerateIntSet<int>(1000, 1000);
     Assert::IsTrue(sample != Set{ -1, -2, -3, -4, -5 });
 
     const Set copy = sample;
@@ -359,13 +358,15 @@ AWT_TEST(HybridSetCopyMove)
     Assert::IsTrue(temp.empty());
 }
 
+//--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
 AWT_TEST(HybridSetIndex)
 {
     AWT_UNUSED_CONTEXT;
 
-    using Set = IntSet;
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
 
-    const Set set = GenerateIntSet();
+    auto set = GenerateIntSet(insert_count, range);
 
     size_t index = 0;
 
@@ -374,8 +375,8 @@ AWT_TEST(HybridSetIndex)
         const auto found_val = set.at(index);
         Assert::AreEqual(val, found_val);
 
-        //const size_t found_index = set.index_of(val);
-        //Assert::AreEqual(index, found_index);
+        const size_t found_index = set.index_of(val);
+        Assert::AreEqual(index, found_index);
 
         ++index;
     }
