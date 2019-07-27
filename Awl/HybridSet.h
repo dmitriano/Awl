@@ -2,6 +2,8 @@
 
 #include "QuickList.h"
 #include "TransformIterator.h"
+#include "Exception.h"
+#include "StringFormat.h"
 
 #include <iterator>
 #include <memory>
@@ -279,12 +281,7 @@ namespace awl
                 const_iterator i = begin();
                 for (const value_type & val : other)
                 {
-                    if (m_comp(val, *i))
-                    {
-                        return false;
-                    }
-
-                    if (m_comp(*i, val))
+                    if (m_comp(val, *i) || m_comp(*i, val))
                     {
                         return false;
                     }
@@ -373,14 +370,44 @@ namespace awl
 
         reference at(size_type pos)
         {
-            Node * node = FindNodeByIndex(pos);
-            return node->value;
+            return FindNodeByIndex(pos)->value;
         }
 
         const_reference at(size_type pos) const
         {
-            Node * node = FindNodeByIndex(pos);
-            return node->value;
+            return FindNodeByIndex(pos)->value;
+        }
+
+        template <class Key>
+        size_type index_of(const Key & key) const
+        {
+            size_t index;
+            const size_t size = this->size();
+
+            Node * found_node = FindNodeByKey(key, [&index, size](Node * node)
+            {
+                if (node->parent != nullptr && node->parent->right == node)
+                {
+                    //The parent and its children are at the left side.
+                    index += node->parent->GetRank() + 1;
+                    assert(index < size);
+                }
+                else
+                {
+                    assert(node->parent == nullptr || node->parent->left == node);
+                    assert(index > 0);
+                    index -= 1u;
+                }
+
+                static_cast<void>(size);
+            });
+
+            if (found_node != nullptr)
+            {
+                return index;
+            }
+
+            throw GeneralException(_T("Key not found."));
         }
 
         template <class Key>
@@ -432,24 +459,39 @@ namespace awl
 
     private:
 
+        template <class Key>
+        Node * FindNodeByKey(const Key & key) const
+        {
+            return FindNodeByKey(key, [](Node *) {});
+        }
+
         //p_parent is a node to which a new node is added.
         template <class Key>
-        Node * FindNodeByKey(const Key & key, Node ** p_parent = nullptr) const
+        Node * FindNodeByKey(const Key & key, Node ** p_parent) const
         {
             if (p_parent != nullptr)
             {
                 *p_parent = nullptr;
             }
 
-            Node * x = m_root;
-
-            //walk down the tree
-            while (x != nullptr)
+            return FindNodeByKey(key, [&p_parent](Node * x)
             {
                 if (p_parent != nullptr)
                 {
                     *p_parent = x;
                 }
+            });
+        }
+
+        template <class Key, class Accumulate>
+        Node * FindNodeByKey(const Key & key, Accumulate && accum) const
+        {
+            Node * x = m_root;
+
+            //walk down the tree
+            while (x != nullptr)
+            {
+                accum(x);
                 
                 if (m_comp(key, x->value))
                 {
@@ -493,7 +535,7 @@ namespace awl
                 }
             }
 
-            throw std::out_of_range("Not a valid index.");
+            throw std::out_of_range(basic_format<char>() << "Index " << index << " is out of range [0, " << size() << "].");
         }
 
         template <class V>

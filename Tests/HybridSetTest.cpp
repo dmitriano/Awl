@@ -372,8 +372,10 @@ AWT_TEST(HybridSetIndex)
     for (auto val : set)
     {
         const auto found_val = set.at(index);
-        
         Assert::AreEqual(val, found_val);
+
+        //const size_t found_index = set.index_of(val);
+        //Assert::AreEqual(index, found_index);
 
         ++index;
     }
