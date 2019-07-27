@@ -2,6 +2,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 #include "Awl/String.h"
+#include "Awl/Serializable.h"
 
 #include <algorithm>
 #include <array>
@@ -322,16 +323,16 @@ AWT_TEST(HybridSetRValue)
     Assert::IsTrue(set.back() == _T("xyz"));
 }
 
-template <class T>
-static awl::hybrid_set<T> GenerateIntSet(size_t insert_count, T range)
+template <class Key, class T = Key>
+static awl::hybrid_set<T> GenerateIntSet(size_t insert_count, Key range)
 {
     awl::hybrid_set<T> sample;
 
-    std::uniform_int_distribution<T> dist(1, range);
+    std::uniform_int_distribution<Key> dist(1, range);
 
     for (size_t i = 0; i < insert_count; ++i)
     {
-        T val = dist(awl::random());
+        Key val = dist(awl::random());
         sample.emplace(val);
     }
 
@@ -374,6 +375,69 @@ AWT_TEST(HybridSetIndex)
     {
         const auto found_val = set.at(index);
         Assert::AreEqual(val, found_val);
+
+        const size_t found_index = set.index_of(val);
+        Assert::AreEqual(index, found_index);
+
+        ++index;
+    }
+
+    for (size_t i = 0; i < 5; ++i)
+    {
+        Assert::Throws<std::out_of_range>([&set, i]()
+        {
+            set.at(set.size() + i);
+        });
+
+        Assert::Throws<awl::GeneralException>([&set, range, i]()
+        {
+            set.index_of(range + 1 + i);
+        });
+    }
+}
+
+struct A
+{
+    explicit A(size_t k) : key(k), attribute(k + 1)
+    {
+    }
+
+    size_t key;
+    size_t attribute;
+
+    AWL_SERIALIZABLE(key)
+};
+
+AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
+
+inline bool operator < (const A & a, size_t key)
+{
+    return a.key < key;
+}
+
+inline bool operator < (size_t key, const A & a)
+{
+    return key < a.key;
+}
+
+AWT_TEST(HybridSetComparer)
+{
+    AWT_UNUSED_CONTEXT;
+
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
+
+    auto set = GenerateIntSet<size_t, A>(insert_count, range);
+
+    size_t index = 0;
+
+    for (auto val : set)
+    {
+        const auto found_val = set.at(index);
+        Assert::IsTrue(val == found_val);
+
+        const auto i = set.find(val.key);
+        Assert::IsTrue(i != set.end() && *i == val);
 
         const size_t found_index = set.index_of(val);
         Assert::AreEqual(index, found_index);

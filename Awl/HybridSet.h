@@ -171,6 +171,14 @@ namespace awl
             return node;
         }
 
+        template <class... Args>
+        Node * CreateNode(Args&&... args)
+        {
+            Node * node = m_nodeAlloc.allocate(1);
+            new (node) Node(std::forward<Args>(args) ...);
+            return node;
+        }
+
         void DestroyNode(Node * node)
         {
             node->~Node();
