@@ -11,7 +11,7 @@ namespace awl
 {
     namespace testing
     {
-        TestMap::TestMap()
+        TestMap::TestMap() : nullOutput(&nullBuffer)
         {
             for (TestLink * p_link : GetTestChain())
             {
@@ -62,16 +62,30 @@ namespace awl
 
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
-            AWL_FLAG(verbose);
+            AWL_ATTRIBUTE(String, output, _T("failed"));
 
             context.out << p_test_link->GetName() << _T("...");
 
-            if (verbose)
+            std::basic_ostream<Char> * p_out = nullptr;
+
+            if (output == _T("all"))
             {
-                context.out << std::endl;
+                p_out = &context.out;
+            }
+            else if (output == _T("failed"))
+            {
+                p_out = &lastOutput;
+            }
+            else if (output == _T("null"))
+            {
+                p_out = &nullOutput;
+            }
+            else
+            {
+                throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
             }
 
-            const TestContext temp_context{ verbose ? context.out : lastOutput, context.cancellation, context.ap };
+            const TestContext temp_context{ *p_out, context.cancellation, context.ap };
 
             p_test_link->Run(temp_context);
 

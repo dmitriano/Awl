@@ -44,6 +44,15 @@ namespace awl
 
             void InternalRun(TestLink * p_test_link, const TestContext & context);
 
+            class NullBuffer : public std::basic_streambuf<Char>
+            {
+            public:
+                int overflow(int c) { return c; }
+            };
+
+            NullBuffer nullBuffer;
+            std::basic_ostream<Char> nullOutput;
+
             ostringstream lastOutput;
             
             typedef std::map<const Char *, TestLink *, CStringLess<Char>> Map;

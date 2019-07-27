@@ -380,4 +380,17 @@ AWT_TEST(HybridSetIndex)
 
         ++index;
     }
+
+    for (size_t i = 0; i < 5; ++i)
+    {
+        Assert::Throws<std::out_of_range>([&set, i]()
+        {
+            set.at(set.size() + i);
+        });
+
+        Assert::Throws<awl::GeneralException>([&set, range, i]()
+        {
+            set.index_of(range + 1 + i);
+        });
+    }
 }

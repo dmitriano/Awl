@@ -2,6 +2,9 @@
 
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/TestException.h"
+#include "Awl/Exception.h"
+
+#include <typeinfo>
 
 namespace awl
 {
@@ -12,7 +15,7 @@ namespace awl
         public:
             
             [[noreturn]]
-            static void Fail(const TCHAR * message = _T("Assertion failed."))
+            static void Fail(const String message = _T("An assertion failed."))
             {
                 throw TestException(message);
             }
@@ -38,7 +41,20 @@ namespace awl
             {
                 if (expected != actual)
                 {
-                    throw TestException(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
+                    Fail(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
+                }
+            }
+
+            template <class E, class Func>
+            static void Throws(Func && func)
+            {
+                try
+                {
+                    func();
+                    Assert::Fail(format() << _T("Exception of type '" ) << FromACString(typeid(E).name()) << _T("' was not thrown."));
+                }
+                catch (const E &)
+                {
                 }
             }
         };

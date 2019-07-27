@@ -399,7 +399,7 @@ namespace awl
                 {
                     //The parent and its children are at the left side.
                     parent_rank += node->GetLeftCount() + 1;
-                    assert(parent_rank < size);
+                    assert(parent_rank <= size);
                 }
             );
 
