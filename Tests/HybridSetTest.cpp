@@ -332,7 +332,7 @@ static awl::hybrid_set<T> GenerateIntSet(size_t insert_count, T range)
     for (size_t i = 0; i < insert_count; ++i)
     {
         T val = dist(awl::random());
-        sample.insert(val);
+        sample.emplace(val);
     }
 
     return std::move(sample);

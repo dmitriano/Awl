@@ -110,7 +110,10 @@ namespace awl
 
             ~Node()
             {
-                exclude();
+                //emplace(Args...) method may construct the node even if there already is a node with the key in the container,
+                //in which case the newly constructed element will be destroyed immediately. So a node is not guaranteed
+                //to be included.
+                safe_exclude();
             }
             
             //The only function that requires this to be Node *.
