@@ -10,7 +10,7 @@ namespace awl
     {
         virtual void OnAdded(const T & val) = 0;
         virtual void OnRemoved(const T & val) = 0;
-        virtual void OnReset() = 0;
+        virtual void OnClear() = 0;
     };
     
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
@@ -168,7 +168,7 @@ namespace awl
         void clear()
         {
             m_set.clear();
-            Notify(&INotifySetChanged<T>::OnReset);
+            Notify(&INotifySetChanged<T>::OnClear);
         }
 
     private:
