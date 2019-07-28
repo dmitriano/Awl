@@ -38,82 +38,42 @@ namespace awl
     template <class T, class Key, Key T::*field_ptr>
     class FieldCompare
     {
-    private:
-
-        struct GetterCreator
-        {
-            static auto CreateGetter()
-            {
-                return [](const T & val) -> const Key { return val.*field_ptr; };
-            }
-        };
-
-        using GetId = decltype(GetterCreator::CreateGetter());
-
     public:
-
-        FieldCompare() : keyCompare(KeyCompare<T, GetId>(GetterCreator::CreateGetter()))
-        {
-        }
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return keyCompare(left, right);
+            return left.*field_ptr < right.*field_ptr;
         }
 
         constexpr bool operator()(const T& val, const Key & id) const
         {
-            return keyCompare(val, id);
+            return val.*field_ptr < id;
         }
 
         constexpr bool operator()(const Key & id, const T& val) const
         {
-            return keyCompare(id, val);
+            return id < val.*field_ptr;
         }
-
-    private:
-
-        KeyCompare<T, GetId> keyCompare;
     };
 
     template <class T, class Key, Key(T::*func_ptr)() const>
     class FuncCompare
     {
-    private:
-
-        struct GetterCreator
-        {
-            static auto CreateGetter()
-            {
-                return [](const T & val) -> Key { return (val.*func_ptr)(); };
-            }
-        };
-
-        using GetId = decltype(GetterCreator::CreateGetter());
-
     public:
-
-        FuncCompare() : keyCompare(KeyCompare<T, GetId>(GetterCreator::CreateGetter()))
-        {
-        }
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return keyCompare(left, right);
+            return (left.*func_ptr)() < (right.*func_ptr)();
         }
 
         constexpr bool operator()(const T& val, const Key & id) const
         {
-            return keyCompare(val, id);
+            return (val.*func_ptr)() < id;
         }
 
         constexpr bool operator()(const Key & id, const T& val) const
         {
-            return keyCompare(id, val);
+            return id < (val.*func_ptr)();
         }
-
-    private:
-
-        KeyCompare<T, GetId> keyCompare;
     };
 }
