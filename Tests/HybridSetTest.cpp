@@ -458,9 +458,47 @@ void TestComparer(const TestContext & context)
     }
 }
 
+template <class Compare>
+void TestPointerComparer(const TestContext & context)
+{
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
+
+    std::vector<A> v;
+
+    std::uniform_int_distribution<size_t> dist(1, 100);
+
+    for (size_t i = 0; i < insert_count; ++i)
+    {
+        A val(dist(awl::random()));
+        v.push_back(val);
+    }
+
+    std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
+    v.erase(std::unique(v.begin(), v.end()), v.end());
+
+    awl::hybrid_set<const A *, Compare> set;
+    
+    for (const A & val : v)
+    {
+        set.insert(&val);
+    }
+
+    for (size_t index = 0; index < v.size(); ++index)
+    {
+        const A & val = v[index];
+        const A * found_val = set.at(index);
+        Assert::IsTrue(val == *found_val);
+    }
+}
+
 AWT_TEST(HybridSetComparer)
 {
     TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
     TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
     TestComparer<awl::TuplizableCompare<A, 0>>(context);
+
+    TestPointerComparer<awl::FieldCompare<A *, size_t, &A::key>>(context);
+    TestPointerComparer<awl::FuncCompare<A *, size_t, &A::GetKey>>(context);
+    TestPointerComparer<awl::TuplizableCompare<A *, 0>>(context);
 }

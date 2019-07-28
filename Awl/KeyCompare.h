@@ -3,6 +3,8 @@
 #include "Awl/FunctionTraits.h"
 #include "Awl/Serializable.h"
 
+#include <type_traits>
+
 namespace awl
 {
     template <class T, class GetKey>
@@ -67,7 +69,7 @@ namespace awl
         GetKey getKey;
     };
 
-    template <class T, class Field, Field T::*field_ptr>
+    template <class T, class Field, Field std::remove_pointer_t<T>::*field_ptr>
     class FieldCompare
     {
     public:
@@ -90,7 +92,7 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field T::*field_ptr>
+    template <class T, class Field, Field std::remove_pointer_t<T>::*field_ptr>
     class FieldCompare<T *, Field, field_ptr>
     {
     public:
@@ -113,7 +115,7 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field (T::*func_ptr)() const>
+    template <class T, class Field, Field (std::remove_pointer_t<T>::*func_ptr)() const>
     class FuncCompare
     {
     public:
@@ -136,7 +138,7 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field (T::*func_ptr)() const>
+    template <class T, class Field, Field (std::remove_pointer_t<T>::*func_ptr)() const>
     class FuncCompare<T *, Field, func_ptr>
     {
     public:
