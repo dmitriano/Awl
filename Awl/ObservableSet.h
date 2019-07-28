@@ -5,8 +5,16 @@
 
 namespace awl
 {
-    template<class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class observable_set
+    template <class T>
+    struct INotifySetChanged
+    {
+        virtual void OnAdded(const T & val) = 0;
+        virtual void OnRemoved(const T & val) = 0;
+        virtual void OnReset() = 0;
+    };
+    
+    template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
+    class observable_set : public awl::Observable<INotifySetChanged<T>>
     {
     private:
 
@@ -88,12 +96,14 @@ namespace awl
         std::pair<iterator, bool> insert(const value_type & value)
         {
             std::pair<iterator, bool> result = m_set.insert(value);
+            NotifyAdded(result);
             return result;
         }
 
         std::pair<iterator, bool> insert(value_type && value)
         {
             std::pair<iterator, bool> result = m_set.insert(std::move(value));
+            NotifyAdded(result);
             return result;
         }
 
@@ -101,6 +111,7 @@ namespace awl
         std::pair<iterator, bool> emplace(Args&&... args)
         {
             std::pair<iterator, bool> result = m_set.insert(std::forward<Args>(args) ...);
+            NotifyAdded(result);
             return result;
         }
 
@@ -145,21 +156,35 @@ namespace awl
         void erase(iterator i)
         {
             m_set.erase(i);
+            NotifyRemoved(i);
         }
 
         template <class Key>
         bool erase(const Key & key)
         {
-            bool result = m_set.erase(key);
-            return result;
+            return m_set.erase(key);
         }
 
         void clear()
         {
             m_set.clear();
+            Notify(&INotifySetChanged<T>::OnReset);
         }
 
     private:
+
+        void NotifyAdded(const std::pair<iterator, bool> & result)
+        {
+            if (result.second)
+            {
+                Notify(&INotifySetChanged<T>::OnAdded, *result.first);
+            }
+        }
+
+        void NotifyRemoved(const iterator & i)
+        {
+            Notify(&INotifySetChanged<T>::OnRemoved, *i);
+        }
 
         InternalSet m_set;
     };

@@ -12,7 +12,7 @@
 
 namespace awl
 {
-    template<class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
+    template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
     class hybrid_set
     {
     private:
