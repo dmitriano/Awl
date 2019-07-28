@@ -399,6 +399,8 @@ AWT_TEST(HybridSetIndex)
 
 struct A
 {
+    A() = default;
+    
     explicit A(size_t k) : key(k), attribute(k + 1)
     {
     }
@@ -460,4 +462,5 @@ AWT_TEST(HybridSetComparer)
 {
     TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
     TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
+    TestComparer<awl::TuplizableCompare<A, 0>>(context);
 }
