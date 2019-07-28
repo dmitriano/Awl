@@ -489,6 +489,21 @@ void TestPointerComparer(const TestContext & context)
         const A & val = v[index];
         const A * found_val = set.at(index);
         Assert::IsTrue(val == *found_val);
+
+        Assert::AreEqual(index, set.index_of(&val));
+        Assert::AreEqual(index, set.index_of(val.key));
+
+        {
+            auto i = set.find(&val);
+            Assert::IsTrue(i != set.end());
+            Assert::IsTrue(*(*i) == val);
+        }
+
+        {
+            auto i = set.find(val.key);
+            Assert::IsTrue(i != set.end());
+            Assert::IsTrue(*(*i) == val);
+        }
     }
 }
 
