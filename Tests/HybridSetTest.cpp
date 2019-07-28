@@ -2,6 +2,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 #include "Awl/String.h"
+#include "Awl/KeyCompare.h"
 #include "Awl/Serializable.h"
 
 #include <algorithm>
@@ -405,41 +406,14 @@ struct A
     size_t key;
     size_t attribute;
 
+    //for testing
     AWL_SERIALIZABLE(key)
 };
 
-AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
+//for testing
+AWL_MEMBERWISE_EQUATABLE(A)
 
-template <class T>
-struct KeyCompare //: public std::less<T>
-{
-    constexpr bool operator()(const T& left, const T& right) const
-    {
-        return left < right;
-    }
-
-    constexpr bool operator()(const T& val, size_t key) const
-    {
-        return val.key < key;
-    }
-
-    constexpr bool operator()(size_t key, const T& val) const
-    {
-        return key < val.key;
-    }
-};
-
-/*
-inline bool operator < (const A & a, size_t key)
-{
-    return a.key < key;
-}
-
-inline bool operator < (size_t key, const A & a)
-{
-    return key < a.key;
-}
-*/
+using ACompare = awl::FieldCompare<A, size_t, &A::key>;
 
 AWT_TEST(HybridSetComparer)
 {
@@ -448,7 +422,7 @@ AWT_TEST(HybridSetComparer)
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
 
-    auto set = GenerateIntSet<size_t, A, KeyCompare<A>>(insert_count, range);
+    auto set = GenerateIntSet<size_t, A, ACompare>(insert_count, range);
 
     size_t index = 0;
 
