@@ -406,6 +406,11 @@ struct A
     size_t key;
     size_t attribute;
 
+    size_t GetKey() const
+    {
+        return key;
+    }
+
     //for testing
     AWL_SERIALIZABLE(key)
 };
@@ -413,16 +418,13 @@ struct A
 //for testing
 AWL_MEMBERWISE_EQUATABLE(A)
 
-using ACompare = awl::FieldCompare<A, size_t, &A::key>;
-
-AWT_TEST(HybridSetComparer)
+template <class Compare>
+void TestComparer(const TestContext & context)
 {
-    AWT_UNUSED_CONTEXT;
-
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
 
-    auto set = GenerateIntSet<size_t, A, ACompare>(insert_count, range);
+    auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
 
     size_t index = 0;
 
@@ -452,4 +454,10 @@ AWT_TEST(HybridSetComparer)
             set.index_of(range + 1 + i);
         });
     }
+}
+
+AWT_TEST(HybridSetComparer)
+{
+    TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
+    TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
 }
