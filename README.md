@@ -19,4 +19,4 @@ Running the tests:
 
 Running the benchmarks:
 
-    AwlTest --filter .*Benchmark --verbose
+    AwlTest --filter .*Benchmark --output all

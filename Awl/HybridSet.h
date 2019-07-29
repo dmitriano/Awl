@@ -668,17 +668,19 @@ namespace awl
             return y;
         }
 
-        // Rotate our tree Left
-        //
-        //             X        rb_left_rotate(X)--->            Y
-        //           /   \                                     /   \
-        //          A     Y                                   X     C
-        //              /   \                               /   \
-        //             B     C                             A     B
-        //
-        // N.B. This does not change the ordering.
-        //
-        // We assume that neither X or Y is NULL
+        /*
+        Rotate our tree Left
+        
+                    X        rb_left_rotate(X)--->            Y
+                  /   \                                     /   \
+                 A     Y                                   X     C
+                     /   \                               /   \
+                    B     C                             A     B
+        
+        N.B. This does not change the ordering.
+        
+        We assume that neither X or Y is NULL
+        */
         void RotateLeft(Node * x)
         {
             Node * y = x->right;
@@ -714,17 +716,19 @@ namespace awl
             x->UpdateCount();
         }
 
-        // Rotate our tree Right
-        //
-        //             X                                         Y
-        //           /   \                                     /   \
-        //          A     Y     <---rb_right_rotate(Y)        X     C
-        //              /   \                               /   \
-        //             B     C                             A     B
-        //
-        // N.B. This does not change the ordering.
-        //
-        // We assume that neither X or Y is NULL
+        /*
+        Rotate our tree Right
+        
+                    X                                         Y
+                  /   \                                     /   \
+                 A     Y     <---rb_right_rotate(Y)        X     C
+                     /   \                               /   \
+                    B     C                             A     B
+        
+        N.B. This does not change the ordering.
+        
+        We assume that neither X or Y is NULL
+        */
         void RotateRight(Node * y)
         {
             Node * x = y->left;

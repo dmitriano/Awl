@@ -57,7 +57,7 @@ namespace awl
             }
 
             Assert::AreEqual(1, set.front());
-            Assert::AreEqual(count, set.back());
+            Assert::AreEqual(static_cast<int>(count), set.back());
             Set::Node * nN = InsertNew(284);
             Assert::AreEqual(1, set.front());
             Assert::AreEqual(nN->value, set.back());
@@ -252,7 +252,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_set.find(val);
             auto std_i = std_set.find(val);
-            Assert::IsTrue(my_i == my_set.end() && std_i == std_set.end() || my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val);
+            Assert::IsTrue((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         {
@@ -261,7 +261,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_const_set.find(val);
             auto std_i = std_set.find(val);
-            Assert::IsTrue(my_i == my_const_set.end() && std_i == std_set.end() || my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val);
+            Assert::IsTrue((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         //Delete random value.
@@ -428,8 +428,8 @@ namespace
     template <class Compare>
     void TestComparer(const TestContext & context)
     {
-        AWL_ATTRIBUTE(size_t, insert_count, 1000);
-        AWL_ATTRIBUTE(size_t, range, 1000);
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
 
         auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
 
@@ -466,12 +466,12 @@ namespace
     template <class Compare>
     void TestPointerComparer(const TestContext & context)
     {
-        AWL_ATTRIBUTE(size_t, insert_count, 1000);
-        AWL_ATTRIBUTE(size_t, range, 1000);
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
 
         std::vector<A> v;
 
-        std::uniform_int_distribution<size_t> dist(1, 100);
+        std::uniform_int_distribution<size_t> dist(1u, range);
 
         for (size_t i = 0; i < insert_count; ++i)
         {
