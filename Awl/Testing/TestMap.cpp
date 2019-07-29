@@ -89,7 +89,7 @@ namespace awl
 
             p_test_link->Run(temp_context);
 
-            lastOutput.clear();
+            lastOutput.str(String());
 
             context.out << _T("OK") << std::endl;
         }
