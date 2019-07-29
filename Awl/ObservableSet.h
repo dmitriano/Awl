@@ -9,8 +9,8 @@ namespace awl
     struct INotifySetChanged
     {
         virtual void OnAdded(const T & val) = 0;
-        virtual void OnRemoved(const T & val) = 0;
-        virtual void OnClear() = 0;
+        virtual void OnRemoving(const T & val) = 0;
+        virtual void OnClearing() = 0;
     };
     
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
@@ -155,8 +155,8 @@ namespace awl
 
         void erase(iterator i)
         {
+            NotifyRemoving(i);
             m_set.erase(i);
-            NotifyRemoved(i);
         }
 
         template <class Key>
@@ -167,8 +167,8 @@ namespace awl
 
         void clear()
         {
+            Notify(&INotifySetChanged<T>::OnClearing);
             m_set.clear();
-            Notify(&INotifySetChanged<T>::OnClear);
         }
 
     private:
@@ -181,9 +181,9 @@ namespace awl
             }
         }
 
-        void NotifyRemoved(const iterator & i)
+        void NotifyRemoving(const iterator & i)
         {
-            Notify(&INotifySetChanged<T>::OnRemoved, *i);
+            Notify(&INotifySetChanged<T>::OnRemoving, *i);
         }
 
         InternalSet m_set;
