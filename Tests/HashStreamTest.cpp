@@ -28,7 +28,7 @@
 using namespace awl::testing;
 using namespace awl::io;
 
-typedef std::function<void(std::vector<uint8_t> &)> CorruptFunc;
+using CorruptFunc = std::function<void(std::vector<uint8_t> &)>;
 
 template <class Hash, class T>
 static void TestOnVector(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = {})
@@ -98,7 +98,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
     }
 }
 
-typedef std::function<void(const awl::Char *)> CorruptFileFunc;
+using CorruptFileFunc = std::function<void(const awl::Char *)>;
 
 template <class Hash, class T>
 static void TestOnFile(const TestContext & context, Hash hash, const T & sample, const CorruptFileFunc & corrupt = {})

@@ -45,43 +45,46 @@ static void Insert(const TestContext & context, const awl::Char * type_name)
     context.out << _T("\t") << type_name << std::endl;
 }
 
-class flat_map
+namespace
 {
-public:
-
-    typedef std::pair<size_t, size_t> value_type;
-
-    void insert(const value_type & val)
+    class flat_map
     {
-        auto i = binary_find(m_v.begin(), m_v.end(), val, 
-            [&val](const value_type & left, const value_type & right)
+    public:
+
+        typedef std::pair<size_t, size_t> value_type;
+
+        void insert(const value_type & val)
+        {
+            auto i = binary_find(m_v.begin(), m_v.end(), val,
+                [&val](const value_type & left, const value_type & right)
             {
                 return left.first < right.first;
             });
 
-        if (i != m_v.end())
-        {
-            ++i;
+            if (i != m_v.end())
+            {
+                ++i;
+            }
+
+            m_v.insert(i, val);
         }
-        
-        m_v.insert(i, val);
-    }
 
-    std::vector<value_type> m_v;
+        std::vector<value_type> m_v;
 
-private:
+    private:
 
-    template<class ForwardIt, class T, class Compare = std::less<>>
-    static ForwardIt binary_find(ForwardIt first, ForwardIt last, const T& value, Compare comp = {})
-    {
-        // Note: BOTH type T and the type after ForwardIt is dereferenced 
-        // must be implicitly convertible to BOTH Type1 and Type2, used in Compare. 
-        // This is stricter than lower_bound requirement (see above)
+        template<class ForwardIt, class T, class Compare = std::less<>>
+        static ForwardIt binary_find(ForwardIt first, ForwardIt last, const T& value, Compare comp = {})
+        {
+            // Note: BOTH type T and the type after ForwardIt is dereferenced 
+            // must be implicitly convertible to BOTH Type1 and Type2, used in Compare. 
+            // This is stricter than lower_bound requirement (see above)
 
-        first = std::lower_bound(first, last, value, comp);
-        return first != last && !comp(value, *first) ? first : last;
-    }
-};
+            first = std::lower_bound(first, last, value, comp);
+            return first != last && !comp(value, *first) ? first : last;
+        }
+    };
+}
 
 AWT_TEST(FlatMapOrder)
 {

@@ -10,72 +10,75 @@
 
 using namespace awl::testing;
 
-struct A
+namespace
 {
-    int x;
-    double y;
-    std::string z;
-
-    AWL_STRINGIZABLE(x, y, z)
-};
-
-AWL_MEMBERWISE_EQUATABLE(A)
-
-struct B
-{
-    int x;
-    double y;
-    std::string z;
-
-    AWL_STRINGIZABLE(
-        x,
-        y,
-        z)
-};
-
-AWL_MEMBERWISE_EQUATABLE(B)
-
-typedef std::vector<const char *> Vector;
-
-void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
-{
-    Assert::IsTrue(v.size() == ml.size());
-
-    for (size_t i = 0; i != v.size(); ++i)
+    struct A
     {
-        Assert::IsTrue(v[i] == ml[i]);
-    }
-}
+        int x;
+        double y;
+        std::string z;
 
-void TestMemberListImpl(Vector v, const char * p_separator)
-{
-    std::ostringstream out;
-    bool first = true;
-    
-    for (const char * s : v)
+        AWL_STRINGIZABLE(x, y, z)
+    };
+
+    AWL_MEMBERWISE_EQUATABLE(A)
+
+        struct B
     {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            out << p_separator;
-        }
+        int x;
+        double y;
+        std::string z;
 
-        out << s;
+        AWL_STRINGIZABLE(
+            x,
+            y,
+            z)
+    };
+
+    AWL_MEMBERWISE_EQUATABLE(B)
+
+    using Vector = std::vector<const char *>;
+
+    void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
+    {
+        Assert::IsTrue(v.size() == ml.size());
+
+        for (size_t i = 0; i != v.size(); ++i)
+        {
+            Assert::IsTrue(v[i] == ml[i]);
+        }
     }
 
-    std::string sample = out.str();
+    void TestMemberListImpl(Vector v, const char * p_separator)
+    {
+        std::ostringstream out;
+        bool first = true;
 
-    awl::helpers::MemberList ml(sample.data());
+        for (const char * s : v)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                out << p_separator;
+            }
 
-    AssertMemberListEqual(ml, v);
-}
+            out << s;
+        }
 
-void TestMemberList(Vector v)
-{
-    TestMemberListImpl(v, ", ");
+        std::string sample = out.str();
+
+        awl::helpers::MemberList ml(sample.data());
+
+        AssertMemberListEqual(ml, v);
+    }
+
+    void TestMemberList(Vector v)
+    {
+        TestMemberListImpl(v, ", ");
+    }
 }
 
 AWT_TEST(Stringizable_MemberList)
@@ -116,7 +119,7 @@ AWT_TEST(Stringizable_ForEach)
     Assert::IsTrue(a1 == a2);
 }
 
-typedef std::variant<bool, char, int, float, double, std::string> V;
+using V = std::variant<bool, char, int, float, double, std::string>;
 
 AWT_TEST(Prototype_TypeMap)
 {

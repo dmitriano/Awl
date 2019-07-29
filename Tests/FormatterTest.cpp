@@ -9,7 +9,7 @@ using namespace awl;
 using namespace awl::testing;
 
 template <class C>
-void TestIntContainer(const C * sample)
+static void TestIntContainer(const C * sample)
 {
     typedef std::vector<int> V;
     typedef BasicFormatter<C, V> F;

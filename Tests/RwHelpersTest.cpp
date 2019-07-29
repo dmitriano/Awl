@@ -37,12 +37,15 @@ static void Test(const TestContext & context, T sample)
     Assert::IsTrue(in.End());
 }
 
-//An example of a third-party structure that we cannot change, but need to serialize.
-struct A
+namespace
 {
-    int x;
-    double y;
-};
+    //An example of a third-party structure that we cannot change, but need to serialize.
+    struct A
+    {
+        int x;
+        double y;
+    };
+}
 
 namespace awl
 {
@@ -59,45 +62,48 @@ namespace awl
     }
 }
 
-//At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
-AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
-
-//Another option is to derive our class from A and make the derived class serializable.
-struct AWrapper : A
+namespace
 {
-    AWL_SERIALIZABLE(x, y)
-};
+    //At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
+    AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
 
-AWL_MEMBERWISE_EQUATABLE(AWrapper)
-
-//Our class that we can make serializable with the single line of code.
-class B
-{
-public:
-
-    B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, m_bm{ GameLevel::Professional }, m_bs(3ul)
+        //Another option is to derive our class from A and make the derived class serializable.
+    struct AWrapper : A
     {
-    }
+        AWL_SERIALIZABLE(x, y)
+    };
 
-    AWL_SERIALIZABLE(m_set, m_v, m_a, m_bm, m_bs, m_u8, m_b)
+    AWL_MEMBERWISE_EQUATABLE(AWrapper)
 
-private:
+        //Our class that we can make serializable with the single line of code.
+    class B
+    {
+    public:
 
-    std::set<int> m_set;
-    std::vector<int> m_v;
-    std::array<char, 3> m_a;
+        B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, m_bm{ GameLevel::Professional }, m_bs(3ul)
+        {
+        }
 
-    AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
-    GameLevelBitMap m_bm;
+        AWL_SERIALIZABLE(m_set, m_v, m_a, m_bm, m_bs, m_u8, m_b)
 
-    std::bitset<3> m_bs;
+    private:
 
-    std::optional<uint32_t> m_u8 = 25u;
+        std::set<int> m_set;
+        std::vector<int> m_v;
+        std::array<char, 3> m_a;
 
-    bool m_b = true;
-};
+        AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
+            GameLevelBitMap m_bm;
 
-AWL_MEMBERWISE_EQUATABLE(B)
+        std::bitset<3> m_bs;
+
+        std::optional<uint32_t> m_u8 = 25u;
+
+        bool m_b = true;
+    };
+
+    AWL_MEMBERWISE_EQUATABLE(B)
+}
 
 AWT_TEST(IoObjectReadWrite)
 {

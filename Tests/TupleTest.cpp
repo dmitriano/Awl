@@ -7,53 +7,56 @@
 
 using namespace awl::testing;
 
-struct Writer
+namespace
 {
-    virtual void Write(std::ostream & out) const = 0;
-};
-
-struct Reader
-{
-    virtual void Read(std::istream & in) const = 0;
-};
-
-template <class Field>
-class FieldWriter : public Writer
-{
-public:
-
-    FieldWriter(const Field & field) : m_field(field)
+    struct Writer
     {
-    }
+        virtual void Write(std::ostream & out) const = 0;
+    };
 
-    void Write(std::ostream & out) const override
+    struct Reader
     {
-        out << m_field << " ";
-    }
+        virtual void Read(std::istream & in) const = 0;
+    };
 
-private:
-    
-    const Field & m_field;
-};
-
-template <class Field>
-class FieldReader : public Reader
-{
-public:
-
-    FieldReader(Field & field) : m_field(field)
+    template <class Field>
+    class FieldWriter : public Writer
     {
-    }
+    public:
 
-    void Read(std::istream & in) const override
+        FieldWriter(const Field & field) : m_field(field)
+        {
+        }
+
+        void Write(std::ostream & out) const override
+        {
+            out << m_field << " ";
+        }
+
+    private:
+
+        const Field & m_field;
+    };
+
+    template <class Field>
+    class FieldReader : public Reader
     {
-        in >> m_field;
-    }
+    public:
 
-private:
+        FieldReader(Field & field) : m_field(field)
+        {
+        }
 
-    Field & m_field;
-};
+        void Read(std::istream & in) const override
+        {
+            in >> m_field;
+        }
+
+    private:
+
+        Field & m_field;
+    };
+}
 
 AWT_TEST(TupleTransform)
 {

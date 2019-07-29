@@ -103,104 +103,107 @@ AWT_TEST(HybridSetInternal)
     test.Run();
 }
 
-static size_t memory_size = 0;
-
-template <class T>
-class TestAllocator
+namespace
 {
-public:
-    
-    using value_type = T;
+    static size_t memory_size = 0;
 
-    TestAllocator() = default;
-
-    template <class Q>
-    TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
+    template <class T>
+    class TestAllocator
     {
-    }
-    
-    T* allocate(std::size_t n)
-    {
-        memory_size += n * sizeof(T);
-        return m_alloc.allocate(n);
-    }
+    public:
 
-    void deallocate(T* p, std::size_t n)
-    {
-        memory_size -= n * sizeof(T);
-        return m_alloc.deallocate(p, n);
-    }
+        using value_type = T;
 
-private:
+        TestAllocator() = default;
 
-    std::allocator<T> m_alloc;
-
-    template <class Q>
-    friend class TestAllocator;
-};
-
-using MySet = awl::hybrid_set<size_t, std::less<>, TestAllocator<size_t>>;
-using StdSet = std::set<size_t>;
-
-void CompareBounds(const StdSet & std_set, const MySet & my_set)
-{
-    Assert::AreEqual(std_set.size(), my_set.size(), _T("wrong size"));
-
-    Assert::AreEqual(*std_set.begin(), my_set.front(), _T("wrong front"));
-    Assert::AreEqual(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
-    Assert::AreEqual(*std_set.rbegin(), my_set.back(), _T("wrong back"));
-    Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
-}
-
-void CompareSets(const StdSet & std_set, const MySet & my_set)
-{
-    {
-        auto i = std_set.begin();
-        
-        for (auto val : my_set)
+        template <class Q>
+        TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
         {
-            size_t std_val = *i++;
-            Assert::AreEqual(std_val, val);
         }
 
-        Assert::IsTrue(i == std_set.end());
-    }
-    
+        T* allocate(std::size_t n)
+        {
+            memory_size += n * sizeof(T);
+            return m_alloc.allocate(n);
+        }
+
+        void deallocate(T* p, std::size_t n)
+        {
+            memory_size -= n * sizeof(T);
+            return m_alloc.deallocate(p, n);
+        }
+
+    private:
+
+        std::allocator<T> m_alloc;
+
+        template <class Q>
+        friend class TestAllocator;
+    };
+
+    using MySet = awl::hybrid_set<size_t, std::less<>, TestAllocator<size_t>>;
+    using StdSet = std::set<size_t>;
+
+    static void CompareBounds(const StdSet & std_set, const MySet & my_set)
     {
-        auto i = std_set.rbegin();
-        
-        for (auto my_i = my_set.rbegin(); my_i != my_set.rend(); ++my_i)
-        {
-            size_t std_val = *i++;
-            size_t my_val = *my_i;
-            Assert::AreEqual(std_val, my_val, _T("wrong element"));
-        }
+        Assert::AreEqual(std_set.size(), my_set.size(), _T("wrong size"));
 
-        Assert::IsTrue(i == std_set.rend());
+        Assert::AreEqual(*std_set.begin(), my_set.front(), _T("wrong front"));
+        Assert::AreEqual(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
+        Assert::AreEqual(*std_set.rbegin(), my_set.back(), _T("wrong back"));
+        Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
     }
-}
 
-static void PrintSet(const TestContext & ctx, const MySet & set)
-{
-    ctx.out << _T("size: ") << set.size() << _T(" [");
-    
-    bool first = true;
-    
-    for (auto val : set)
+    static void CompareSets(const StdSet & std_set, const MySet & my_set)
     {
-        if (first)
         {
-            first = false;
-        }
-        else
-        {
-            ctx.out << _T(", ");
+            auto i = std_set.begin();
+
+            for (auto val : my_set)
+            {
+                size_t std_val = *i++;
+                Assert::AreEqual(std_val, val);
+            }
+
+            Assert::IsTrue(i == std_set.end());
         }
 
-        ctx.out << val;
+        {
+            auto i = std_set.rbegin();
+
+            for (auto my_i = my_set.rbegin(); my_i != my_set.rend(); ++my_i)
+            {
+                size_t std_val = *i++;
+                size_t my_val = *my_i;
+                Assert::AreEqual(std_val, my_val, _T("wrong element"));
+            }
+
+            Assert::IsTrue(i == std_set.rend());
+        }
     }
-    
-    ctx.out << _T("]") << std::endl;
+
+    static void PrintSet(const TestContext & ctx, const MySet & set)
+    {
+        ctx.out << _T("size: ") << set.size() << _T(" [");
+
+        bool first = true;
+
+        for (auto val : set)
+        {
+            if (first)
+            {
+                first = false;
+            }
+            else
+            {
+                ctx.out << _T(", ");
+            }
+
+            ctx.out << val;
+        }
+
+        ctx.out << _T("]") << std::endl;
+    }
 }
 
 //Parameter examples:
@@ -397,112 +400,115 @@ AWT_TEST(HybridSetIndex)
     }
 }
 
-struct A
+namespace
 {
-    A() = default;
-    
-    explicit A(size_t k) : key(k), attribute(k + 1)
+    struct A
     {
-    }
+        A() = default;
 
-    size_t key;
-    size_t attribute;
-
-    size_t GetKey() const
-    {
-        return key;
-    }
-
-    //for testing
-    AWL_SERIALIZABLE(key)
-};
-
-//for testing
-AWL_MEMBERWISE_EQUATABLE(A)
-
-template <class Compare>
-void TestComparer(const TestContext & context)
-{
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(size_t, range, 1000);
-
-    auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
-
-    size_t index = 0;
-
-    for (auto val : set)
-    {
-        const auto found_val = set.at(index);
-        Assert::IsTrue(val == found_val);
-
-        const auto i = set.find(val.key);
-        Assert::IsTrue(i != set.end() && *i == val);
-
-        const size_t found_index = set.index_of(val);
-        Assert::AreEqual(index, found_index);
-
-        ++index;
-    }
-
-    for (size_t i = 0; i < 5; ++i)
-    {
-        Assert::Throws<std::out_of_range>([&set, i]()
+        explicit A(size_t k) : key(k), attribute(k + 1)
         {
-            set.at(set.size() + i);
-        });
-
-        Assert::Throws<awl::GeneralException>([&set, range, i]()
-        {
-            set.index_of(range + 1 + i);
-        });
-    }
-}
-
-template <class Compare>
-void TestPointerComparer(const TestContext & context)
-{
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(size_t, range, 1000);
-
-    std::vector<A> v;
-
-    std::uniform_int_distribution<size_t> dist(1, 100);
-
-    for (size_t i = 0; i < insert_count; ++i)
-    {
-        A val(dist(awl::random()));
-        v.push_back(val);
-    }
-
-    std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
-    v.erase(std::unique(v.begin(), v.end()), v.end());
-
-    awl::hybrid_set<const A *, Compare> set;
-    
-    for (const A & val : v)
-    {
-        set.insert(&val);
-    }
-
-    for (size_t index = 0; index < v.size(); ++index)
-    {
-        const A & val = v[index];
-        const A * found_val = set.at(index);
-        Assert::IsTrue(val == *found_val);
-
-        Assert::AreEqual(index, set.index_of(&val));
-        Assert::AreEqual(index, set.index_of(val.key));
-
-        {
-            auto i = set.find(&val);
-            Assert::IsTrue(i != set.end());
-            Assert::IsTrue(*(*i) == val);
         }
 
+        size_t key;
+        size_t attribute;
+
+        size_t GetKey() const
         {
-            auto i = set.find(val.key);
-            Assert::IsTrue(i != set.end());
-            Assert::IsTrue(*(*i) == val);
+            return key;
+        }
+
+        //for testing
+        AWL_SERIALIZABLE(key)
+    };
+
+    //for testing
+    AWL_MEMBERWISE_EQUATABLE(A)
+
+    template <class Compare>
+    void TestComparer(const TestContext & context)
+    {
+        AWL_ATTRIBUTE(size_t, insert_count, 1000);
+        AWL_ATTRIBUTE(size_t, range, 1000);
+
+        auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
+
+        size_t index = 0;
+
+        for (auto val : set)
+        {
+            const auto found_val = set.at(index);
+            Assert::IsTrue(val == found_val);
+
+            const auto i = set.find(val.key);
+            Assert::IsTrue(i != set.end() && *i == val);
+
+            const size_t found_index = set.index_of(val);
+            Assert::AreEqual(index, found_index);
+
+            ++index;
+        }
+
+        for (size_t i = 0; i < 5; ++i)
+        {
+            Assert::Throws<std::out_of_range>([&set, i]()
+            {
+                set.at(set.size() + i);
+            });
+
+            Assert::Throws<awl::GeneralException>([&set, range, i]()
+            {
+                set.index_of(range + 1 + i);
+            });
+        }
+    }
+
+    template <class Compare>
+    void TestPointerComparer(const TestContext & context)
+    {
+        AWL_ATTRIBUTE(size_t, insert_count, 1000);
+        AWL_ATTRIBUTE(size_t, range, 1000);
+
+        std::vector<A> v;
+
+        std::uniform_int_distribution<size_t> dist(1, 100);
+
+        for (size_t i = 0; i < insert_count; ++i)
+        {
+            A val(dist(awl::random()));
+            v.push_back(val);
+        }
+
+        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
+
+        awl::hybrid_set<const A *, Compare> set;
+
+        for (const A & val : v)
+        {
+            set.insert(&val);
+        }
+
+        for (size_t index = 0; index < v.size(); ++index)
+        {
+            const A & val = v[index];
+            const A * found_val = set.at(index);
+            Assert::IsTrue(val == *found_val);
+
+            Assert::AreEqual(index, set.index_of(&val));
+            Assert::AreEqual(index, set.index_of(val.key));
+
+            {
+                auto i = set.find(&val);
+                Assert::IsTrue(i != set.end());
+                Assert::IsTrue(*(*i) == val);
+            }
+
+            {
+                auto i = set.find(val.key);
+                Assert::IsTrue(i != set.end());
+                Assert::IsTrue(*(*i) == val);
+            }
         }
     }
 }

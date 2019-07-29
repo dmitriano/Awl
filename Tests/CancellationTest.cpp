@@ -26,10 +26,10 @@ AWT_TEST(Cancellation_NegativeTimeDiff)
     Assert::IsTrue(diff.count() < 0);
 }
 
-constexpr int default_client_sleep_time = 100;
-constexpr int default_worker_sleep_time = 1000;
+static constexpr int default_client_sleep_time = 100;
+static constexpr int default_worker_sleep_time = 1000;
 
-typedef std::chrono::milliseconds Duration;
+using Duration = std::chrono::milliseconds;
 
 AWT_TEST(Cancellation_InterruptibleSleep)
 {
