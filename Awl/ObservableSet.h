@@ -95,14 +95,14 @@ namespace awl
 
         std::pair<iterator, bool> insert(const value_type & value)
         {
-            std::pair<iterator, bool> result = m_set.insert(value);
+            const std::pair<iterator, bool> result = m_set.insert(value);
             NotifyAdded(result);
             return result;
         }
 
         std::pair<iterator, bool> insert(value_type && value)
         {
-            std::pair<iterator, bool> result = m_set.insert(std::move(value));
+            const std::pair<iterator, bool> result = m_set.insert(std::move(value));
             NotifyAdded(result);
             return result;
         }
@@ -110,7 +110,7 @@ namespace awl
         template <class... Args>
         std::pair<iterator, bool> emplace(Args&&... args)
         {
-            std::pair<iterator, bool> result = m_set.insert(std::forward<Args>(args) ...);
+            const std::pair<iterator, bool> result = m_set.insert(std::forward<Args>(args) ...);
             NotifyAdded(result);
             return result;
         }
