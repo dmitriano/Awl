@@ -67,7 +67,7 @@ namespace
     //At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
     AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
 
-        //Another option is to derive our class from A and make the derived class serializable.
+    //Another option is to derive our class from A and make the derived class serializable.
     struct AWrapper : A
     {
         AWL_SERIALIZABLE(x, y)
@@ -75,7 +75,7 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(AWrapper)
 
-        //Our class that we can make serializable with the single line of code.
+    //Our class that we can make serializable with the single line of code.
     class B
     {
     public:

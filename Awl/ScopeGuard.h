@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 namespace awl
 {
     template<typename Lambda>
@@ -7,7 +9,7 @@ namespace awl
     {
     public:
 
-        scope_guard(const Lambda & f, bool e = true) : free(f), engaged(e)
+        scope_guard(Lambda && f, bool e = true) : free(std::forward<Lambda>(f)), engaged(e)
         {
         }
 
@@ -48,19 +50,19 @@ namespace awl
     };
 
     template <class Lambda>
-    inline scope_guard<Lambda> make_scope_guard(const Lambda & free, bool engaged = true)
+    inline scope_guard<Lambda> make_scope_guard(Lambda && free, bool engaged = true)
     {
-        return scope_guard<Lambda>(free, engaged);
+        return scope_guard<Lambda>(std::forward<Lambda>(free), engaged);
     }
 
     template <class Init, class Free>
-    inline scope_guard<Free> make_scope_guard(const Init & init, const Free & free, bool engaged = true)
+    inline scope_guard<Free> make_scope_guard(Init && init, Free && free, bool engaged = true)
     {
         if (engaged)
         {
             init();
         }
 
-        return make_scope_guard(free, engaged);
+        return make_scope_guard(std::forward<Free>(free), engaged);
     }
 }
