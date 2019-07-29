@@ -93,18 +93,18 @@ namespace awl
             }
         };
 
-        struct Node : public Link, public quick_link
+        struct Node : public hybrid_set::Link, public quick_link
         {
-            Node(const T & v) : Link{}, value(v)
+            Node(const T & v) : hybrid_set::Link{}, value(v)
             {
             }
 
-            Node(T && v) : Link{}, value(std::move(v))
+            Node(T && v) : hybrid_set::Link{}, value(std::move(v))
             {
             }
 
             template <class... Args>
-            Node(Args&&... args) : Link{}, value(std::forward<Args>(args) ...)
+            Node(Args&&... args) : hybrid_set::Link{}, value(std::forward<Args>(args) ...)
             {
             }
 
@@ -441,7 +441,7 @@ namespace awl
 
         void erase(iterator i)
         {
-            List::iterator li = ExtractListIterator(i);
+            typename List::iterator li = ExtractListIterator(i);
 
             Node * node = *li;
 

@@ -337,7 +337,7 @@ static awl::hybrid_set<T, Compare> GenerateIntSet(size_t insert_count, Key range
         sample.emplace(val);
     }
 
-    return std::move(sample);
+    return sample;
 }
 
 AWT_TEST(HybridSetCopyMove)

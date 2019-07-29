@@ -2,6 +2,15 @@
 #include "Awl/Time.h"
 
 #include "Awl/Testing/UnitTest.h"
+
+#ifdef __STDC_LIB_EXT1__
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
+
+#include <time.h>
+
+#ifdef __STDC_LIB_EXT1__
+
 using namespace awl::testing;
 using namespace std::chrono;
 
@@ -14,7 +23,7 @@ static auto MakeTime(Args... args)
     return awl::make_time<Clock>(args ...);
 }
 
-template <class Clock, class Duration = Clock::duration>
+template <class Clock, class Duration = typename Clock::duration>
 static void CheckResult(std::chrono::time_point<Clock, Duration> tp)
 {
     const TimePoint stp = std::chrono::time_point_cast<typename Clock::duration>(tp);
@@ -48,3 +57,5 @@ AWT_TEST(MakeTime)
     auto d_ns = tp_with_ns - time_point_cast<nanoseconds>(tp);
     Assert::IsTrue(d_ns == nanoseconds(ns_count));
 }
+
+#endif

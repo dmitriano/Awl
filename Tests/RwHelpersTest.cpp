@@ -168,7 +168,10 @@ AWT_TEST(IoObjectReadWrite)
     //This test is not correct, because it passes a tuple of values by value, 
     //but if std::tuple is a member of a class the tuple of references is passed by value.
     //Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
+}
 
+AWT_TEST(IoPod)
+{
     {
         A a1{ 5, 7.0 };
         A a2{ 5, 8.0 };

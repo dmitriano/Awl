@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <tuple>
 
 namespace awl
 {
@@ -22,7 +23,7 @@ namespace awl
         template <size_t i>
         struct arg
         {
-            typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+            using type = std::tuple_element_t<i, std::tuple<Args...>>;
             // the i-th argument is equivalent to the i-th tuple element of a tuple
             // composed of those arguments.
         };
