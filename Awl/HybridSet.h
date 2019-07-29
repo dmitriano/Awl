@@ -8,6 +8,7 @@
 #include <iterator>
 #include <memory>
 #include <initializer_list>
+#include <cstdint>
 #include <assert.h>
 
 namespace awl
@@ -17,7 +18,7 @@ namespace awl
     {
     private:
 
-        enum class Color { Red, Black };
+        enum class Color : uint8_t { Red, Black };
 
         struct Node;
         

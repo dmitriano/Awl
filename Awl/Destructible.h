@@ -17,9 +17,9 @@ namespace awl
         }
 
         template <class ...Args>
-        explicit Destructible(Args... args)
+        explicit Destructible(Args&&... args)
         {
-            new(m_storage) T(std::forward<Args...>(args...));
+            new(m_storage) T(std::forward<Args...>(args) ...);
         }
         
         explicit Destructible(const T & t)
