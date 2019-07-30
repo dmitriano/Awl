@@ -413,7 +413,7 @@ namespace
         size_t key;
         size_t attribute;
 
-        size_t GetKey() const
+        const size_t & GetKey() const
         {
             return key;
         }
