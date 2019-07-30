@@ -113,9 +113,10 @@ namespace awl
 
             val.resize(len);
 
-            ReadRaw(s, reinterpret_cast<uint8_t *>(const_cast<Char *>(val.data())), len * sizeof(Char));
+            //There is non-const version of data() since C++ 17.
+            ReadRaw(s, reinterpret_cast<uint8_t *>(val.data()), len * sizeof(Char));
 
-            *(const_cast<Char *>(val.data() + len)) = 0;
+            *(val.data() + len) = 0;
         }
 
         template <class Stream, typename Char>
@@ -272,13 +273,6 @@ namespace awl
         }
 
         template <class Stream, class First, class Second>
-        inline void Read(Stream & s, std::pair<First, Second> & val)
-        {
-            Read(s, const_cast<typename std::remove_const<First>::type &>(val.first));
-            Read(s, val.second);
-        }
-
-        template <class Stream, class First, class Second>
         inline void Write(Stream & s, const std::pair<First, Second> & val)
         {
             Write(s, val.first);
@@ -299,6 +293,27 @@ namespace awl
                 Read(s, elem);
 
                 coll.insert(elem);
+            }
+        }
+
+        //There is a separate function for reading a map because the first pair type is const:
+        //std::pair<const Key, T>
+        template <class Stream, typename Coll>
+        void ReadMap(Stream & s, Coll & coll)
+        {
+            size_t count;
+
+            Read(s, count);
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                typename Coll::key_type key;
+                Read(s, key);
+
+                typename Coll::mapped_type value;
+                Read(s, value);
+
+                coll.insert(std::make_pair(key, value));
             }
         }
 
@@ -342,7 +357,7 @@ namespace awl
         template <class Stream, class Key, class T, class Compare, class Alloc>
         void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll)
         {
-            ReadCollection(s, coll);
+            ReadMap(s, coll);
         }
 
         template <class Stream, class Key, class T, class Compare, class Alloc>
@@ -354,7 +369,7 @@ namespace awl
         template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator>
         void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll)
         {
-            ReadCollection(s, coll);
+            ReadMap(s, coll);
         }
 
         template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator>

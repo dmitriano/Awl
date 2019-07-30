@@ -430,7 +430,7 @@ namespace
     //for testing
     AWL_MEMBERWISE_EQUATABLE(A)
 
-        template <class Compare>
+    template <class Compare>
     void TestComparer(const TestContext & context)
     {
         AWL_ATTRIBUTE(size_t, insert_count, 1000u);
