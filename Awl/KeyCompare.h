@@ -13,8 +13,13 @@ namespace awl
     {
     public:
 
+        //The type GetKey applied to, for example 'class A { int key; std::string other; };'.
         using element_type = T;
+
+        //The same as Container::value_type, for example std::shared_ptr<A>.
         using value_type = T;
+
+        //The type of the key for heterogeneous lookup.
         using key_type = typename awl::function_traits<GetKey>::result_type;
 
         KeyCompare() = default;
@@ -172,7 +177,7 @@ namespace awl
     using FieldCompare = KeyCompare<T, FieldGeter<remove_smart_pointer_t<T>, Field, field_ptr>>;
 
     template <class T, class Field, const Field & (T::*func_ptr)() const>
-    struct FuncGeter
+    struct LValueGeter
     {
         const Field & operator() (const T & val) const
         {
@@ -181,7 +186,20 @@ namespace awl
     };
 
     template <class T, class Field, const Field & (remove_smart_pointer_t<T>::*func_ptr)() const>
-    using FuncCompare = KeyCompare<T, FuncGeter<remove_smart_pointer_t<T>, Field, func_ptr>>;
+    using LValueCompare = KeyCompare<T, LValueGeter<remove_smart_pointer_t<T>, Field, func_ptr>>;
+
+    //A function that returns something like std::tie(x, y, z).
+    template <class T, class Field, Field (T::*func_ptr)() const>
+    struct RValueGeter
+    {
+        Field operator() (const T & val) const
+        {
+            return (val.*func_ptr)();
+        }
+    };
+
+    template <class T, class Field, Field (remove_smart_pointer_t<T>::*func_ptr)() const>
+    using RValueCompare = KeyCompare<T, RValueGeter<remove_smart_pointer_t<T>, Field, func_ptr>>;
 
     template <class T, size_t index>
     struct TuplizableGeter

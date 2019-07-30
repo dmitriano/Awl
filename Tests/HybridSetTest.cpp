@@ -413,7 +413,12 @@ namespace
         size_t key;
         size_t attribute;
 
-        const size_t & GetKey() const
+        size_t GetKey() const
+        {
+            return key;
+        }
+
+        const size_t & GetKeyRef() const
         {
             return key;
         }
@@ -563,18 +568,22 @@ namespace
 AWT_TEST(HybridSetComparer)
 {
     TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
-    TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
+    TestComparer<awl::RValueCompare<A, size_t, &A::GetKey>>(context);
+    TestComparer<awl::LValueCompare<A, size_t, &A::GetKeyRef>>(context);
     TestComparer<awl::TuplizableCompare<A, 0>>(context);
 
     TestPointerComparer<awl::FieldCompare<A *, size_t, &A::key>>(context);
-    TestPointerComparer<awl::FuncCompare<A *, size_t, &A::GetKey>>(context);
+    TestPointerComparer<awl::RValueCompare<A *, size_t, &A::GetKey>>(context);
+    TestPointerComparer<awl::LValueCompare<A *, size_t, &A::GetKeyRef>>(context);
     TestPointerComparer<awl::TuplizableCompare<A *, 0>>(context);
 
     TestSmartPointerComparer<awl::FieldCompare<std::shared_ptr<A>, size_t, &A::key>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
+    TestSmartPointerComparer<awl::RValueCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
+    TestSmartPointerComparer<awl::LValueCompare<std::shared_ptr<A>, size_t, &A::GetKeyRef>>(context);
     TestSmartPointerComparer<awl::TuplizableCompare<std::shared_ptr<A>, 0>>(context);
 
     TestSmartPointerComparer<awl::FieldCompare<std::unique_ptr<A>, size_t, &A::key>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
-    TestSmartPointerComparer<awl::TuplizableCompare<std::shared_ptr<A>, 0>>(context);
+    TestSmartPointerComparer<awl::RValueCompare<std::unique_ptr<A>, size_t, &A::GetKey>>(context);
+    TestSmartPointerComparer<awl::LValueCompare<std::unique_ptr<A>, size_t, &A::GetKeyRef>>(context);
+    TestSmartPointerComparer<awl::TuplizableCompare<std::unique_ptr<A>, 0>>(context);
 }
