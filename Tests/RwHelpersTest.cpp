@@ -80,7 +80,9 @@ namespace
     {
     public:
 
-        B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, m_bm{ GameLevel::Professional }, m_bs(3ul)
+        B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, 
+              m_hset {3, 4, 5}, m_oset{ 6, 7, 8 },
+              m_bm{ GameLevel::Professional }, m_bs(3ul)
         {
         }
 
@@ -91,6 +93,9 @@ namespace
         std::set<int> m_set;
         std::vector<int> m_v;
         std::array<char, 3> m_a;
+
+        awl::hybrid_set<int> m_hset;
+        awl::observable_set<int> m_oset;
 
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
             GameLevelBitMap m_bm;

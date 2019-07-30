@@ -15,6 +15,8 @@
 #include <optional>
 
 #include "Awl/BitMap.h"
+#include "Awl/HybridSet.h"
+#include "Awl/ObservableSet.h"
 
 #include "Awl/Serializable.h"
 #include "Awl/Io/IoException.h"
@@ -338,6 +340,30 @@ namespace awl
 
         template <class Stream, class T, class Compare, class Alloc>
         void Write(Stream & s, const std::set<T, Compare, Alloc> &coll)
+        {
+            WriteCollection(s, coll);
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll)
+        {
+            WriteCollection(s, coll);
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Read(Stream & s, observable_set<T, Compare, Alloc> & coll)
+        {
+            ReadCollection(s, coll);
+        }
+
+        template <class Stream, class T, class Compare, class Alloc>
+        void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll)
         {
             WriteCollection(s, coll);
         }
