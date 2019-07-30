@@ -4,6 +4,7 @@
 #include "Awl/Serializable.h"
 
 #include <type_traits>
+#include <memory>
 
 namespace awl
 {
@@ -12,7 +13,9 @@ namespace awl
     {
     public:
 
-        using Key = typename awl::function_traits<GetKey>::result_type;
+        using element_type = T;
+        using value_type = T;
+        using key_type = typename awl::function_traits<GetKey>::result_type;
 
         KeyCompare() = default;
         
@@ -25,12 +28,12 @@ namespace awl
             return getKey(left) < getKey(right);
         }
 
-        constexpr bool operator()(const T& val, const Key & id) const
+        constexpr bool operator()(const T& val, const key_type & id) const
         {
             return getKey(val) < id;
         }
 
-        constexpr bool operator()(const Key & id, const T& val) const
+        constexpr bool operator()(const key_type & id, const T& val) const
         {
             return id < getKey(val);
         }
@@ -45,7 +48,9 @@ namespace awl
     {
     public:
 
-        using Key = typename awl::function_traits<GetKey>::result_type;
+        using value_type = T *;
+        using element_type = T;
+        using key_type = typename awl::function_traits<GetKey>::result_type;
 
         KeyCompare() = default;
 
@@ -58,12 +63,12 @@ namespace awl
             return getKey(*left) < getKey(*right);
         }
 
-        constexpr bool operator()(const T * val, const Key & id) const
+        constexpr bool operator()(const T * val, const key_type & id) const
         {
             return getKey(*val) < id;
         }
 
-        constexpr bool operator()(const Key & id, const T * val) const
+        constexpr bool operator()(const key_type & id, const T * val) const
         {
             return id < getKey(*val);
         }
@@ -72,6 +77,87 @@ namespace awl
 
         GetKey getKey;
     };
+
+    template <class T, class GetKey>
+    class KeyCompare<std::shared_ptr<T>, GetKey>
+    {
+    public:
+
+        using value_type = std::shared_ptr<T>;
+        using element_type = T;
+        using key_type = typename awl::function_traits<GetKey>::result_type;
+
+        KeyCompare() = default;
+
+        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        {
+        }
+
+        constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
+        {
+            return getKey(*left) < getKey(*right);
+        }
+
+        constexpr bool operator()(const std::shared_ptr<T> & val, const key_type & id) const
+        {
+            return getKey(*val) < id;
+        }
+
+        constexpr bool operator()(const key_type & id, const std::shared_ptr<T> & val) const
+        {
+            return id < getKey(*val);
+        }
+
+    private:
+
+        GetKey getKey;
+    };
+
+    template <class T, class Deleter, class GetKey>
+    class KeyCompare<std::unique_ptr<T, Deleter>, GetKey>
+    {
+    public:
+
+        using value_type = std::unique_ptr<T, Deleter>;
+        using element_type = T;
+        using key_type = typename awl::function_traits<GetKey>::result_type;
+
+        KeyCompare() = default;
+
+        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        {
+        }
+
+        constexpr bool operator()(const std::unique_ptr<T, Deleter> & left, const std::unique_ptr<T, Deleter> & right) const
+        {
+            return getKey(*left) < getKey(*right);
+        }
+
+        constexpr bool operator()(const std::unique_ptr<T, Deleter> & val, const key_type & id) const
+        {
+            return getKey(*val) < id;
+        }
+
+        constexpr bool operator()(const key_type & id, const std::unique_ptr<T, Deleter> & val) const
+        {
+            return id < getKey(*val);
+        }
+
+    private:
+
+        GetKey getKey;
+    };
+
+    template <class T> struct remove_smart_pointer { typedef T type; };
+    template <class T> struct remove_smart_pointer<T*> { typedef T type; };
+    template <class T> struct remove_smart_pointer<T* const> { typedef T type; };
+    template <class T> struct remove_smart_pointer<T* volatile> { typedef T type; };
+    template <class T> struct remove_smart_pointer<T* const volatile> { typedef T type; };
+    template <class T> struct remove_smart_pointer<std::shared_ptr<T>> { typedef T type; };
+    template <class T, class Deleter> struct remove_smart_pointer<std::unique_ptr<T, Deleter>> { typedef T type; };
+
+    template <class T>
+    using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;
 
     template <class T, class Field, Field T::*field_ptr>
     struct FieldGeter
@@ -82,8 +168,8 @@ namespace awl
         }
     };
     
-    template <class T, class Field, Field std::remove_pointer_t<T>::*field_ptr>
-    using FieldCompare = KeyCompare<T, FieldGeter<std::remove_pointer_t<T>, Field, field_ptr>>;
+    template <class T, class Field, Field remove_smart_pointer_t<T>::*field_ptr>
+    using FieldCompare = KeyCompare<T, FieldGeter<remove_smart_pointer_t<T>, Field, field_ptr>>;
 
     template <class T, class Field, const Field & (T::*func_ptr)() const>
     struct FuncGeter
@@ -94,8 +180,8 @@ namespace awl
         }
     };
 
-    template <class T, class Field, const Field & (std::remove_pointer_t<T>::*func_ptr)() const>
-    using FuncCompare = KeyCompare<T, FuncGeter<std::remove_pointer_t<T>, Field, func_ptr>>;
+    template <class T, class Field, const Field & (remove_smart_pointer_t<T>::*func_ptr)() const>
+    using FuncCompare = KeyCompare<T, FuncGeter<remove_smart_pointer_t<T>, Field, func_ptr>>;
 
     template <class T, size_t index>
     struct TuplizableGeter
@@ -107,5 +193,5 @@ namespace awl
     };
 
     template <class T, size_t index>
-    using TuplizableCompare = KeyCompare<T, TuplizableGeter<std::remove_pointer_t<T>, index>>;
+    using TuplizableCompare = KeyCompare<T, TuplizableGeter<remove_smart_pointer_t<T>, index>>;
 }

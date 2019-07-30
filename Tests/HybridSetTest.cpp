@@ -425,7 +425,7 @@ namespace
     //for testing
     AWL_MEMBERWISE_EQUATABLE(A)
 
-    template <class Compare>
+        template <class Compare>
     void TestComparer(const TestContext & context)
     {
         AWL_ATTRIBUTE(size_t, insert_count, 1000u);
@@ -511,6 +511,53 @@ namespace
             }
         }
     }
+
+    template <class Compare>
+    void TestSmartPointerComparer(const TestContext & context)
+    {
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
+
+        using Pointer = typename Compare::value_type;
+        using A = typename Pointer::element_type;
+
+        std::vector<A> v;
+        awl::hybrid_set<Pointer, Compare> set;
+
+        std::uniform_int_distribution<size_t> dist(1u, range);
+
+        for (size_t i = 0; i < insert_count; ++i)
+        {
+            A val(dist(awl::random()));
+            v.push_back(val);
+            set.insert(Pointer(new A(val)));
+        }
+
+        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
+
+        for (size_t index = 0; index < v.size(); ++index)
+        {
+            const A & val = v[index];
+            const Pointer & p_found = set.at(index);
+            Assert::IsTrue(val == *p_found);
+
+            Assert::AreEqual(index, set.index_of(Pointer(new A(val))));
+            Assert::AreEqual(index, set.index_of(val.key));
+
+            {
+                auto i = set.find(Pointer(new A(val)));
+                Assert::IsTrue(i != set.end());
+                Assert::IsTrue(*(*i) == val);
+            }
+
+            {
+                auto i = set.find(val.key);
+                Assert::IsTrue(i != set.end());
+                Assert::IsTrue(*(*i) == val);
+            }
+        }
+    }
 }
 
 AWT_TEST(HybridSetComparer)
@@ -522,4 +569,12 @@ AWT_TEST(HybridSetComparer)
     TestPointerComparer<awl::FieldCompare<A *, size_t, &A::key>>(context);
     TestPointerComparer<awl::FuncCompare<A *, size_t, &A::GetKey>>(context);
     TestPointerComparer<awl::TuplizableCompare<A *, 0>>(context);
+
+    TestSmartPointerComparer<awl::FieldCompare<std::shared_ptr<A>, size_t, &A::key>>(context);
+    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
+    TestSmartPointerComparer<awl::TuplizableCompare<std::shared_ptr<A>, 0>>(context);
+
+    TestSmartPointerComparer<awl::FieldCompare<std::unique_ptr<A>, size_t, &A::key>>(context);
+    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
+    TestSmartPointerComparer<awl::TuplizableCompare<std::shared_ptr<A>, 0>>(context);
 }
