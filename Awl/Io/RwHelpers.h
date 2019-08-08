@@ -80,14 +80,14 @@ namespace awl
         }
 
         //Initially on Windows the type was long long, but Android build fails with it, so I changed it to int64_t, what is the difference between them?
-        //static_assert(std::is_same <std::chrono::nanoseconds::rep, int64_t>::value, "nanoseconds::rep is not int64_t");
+        static_assert(std::is_same_v<std::chrono::nanoseconds::rep, int64_t>, "nanoseconds::rep is not int64_t");
 
         template <class Stream, class Clock, class Duration>
         inline void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val)
         {
             using namespace std::chrono;
 
-            std::chrono::nanoseconds::rep ns_count;
+            int64_t ns_count;
 
             Read(s, ns_count);
 
@@ -101,7 +101,7 @@ namespace awl
 
             auto ns = duration_cast<nanoseconds>(val.time_since_epoch());
 
-            std::chrono::nanoseconds::rep ns_count = ns.count();
+            int64_t ns_count = ns.count();
 
             Write(s, ns_count);
         }
