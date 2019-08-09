@@ -298,8 +298,7 @@ namespace awl
             }
         }
 
-        //There is a separate function for reading a map because the first pair type is const:
-        //std::pair<const Key, T>
+        //There is a separate function for reading a map because the first pair type is const (std::pair<const Key, T>):
         template <class Stream, typename Coll>
         void ReadMap(Stream & s, Coll & coll)
         {

@@ -14,10 +14,11 @@ namespace awl
     };
     
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class observable_set : public awl::Observable<INotifySetChanged<T>>
+    class observable_set : public Observable<INotifySetChanged<T>>
     {
     private:
 
+        using BaseObservable = Observable<INotifySetChanged<T>>;
         using InternalSet = hybrid_set<T, Compare, Allocator>;
 
     public:
@@ -44,11 +45,12 @@ namespace awl
         {
         }
 
-        observable_set(const observable_set & other) : m_set(other.m_set)
+        //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
+        observable_set(const observable_set & other) : BaseObservable{}, m_set(other.m_set)
         {
         }
 
-        observable_set(observable_set && other) : m_set(std::move(other.m_set))
+        observable_set(observable_set && other) : BaseObservable(std::move(other)), m_set(std::move(other.m_set))
         {
         }
 
