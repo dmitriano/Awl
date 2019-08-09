@@ -587,3 +587,108 @@ AWT_TEST(HybridSetComparer)
     TestSmartPointerComparer<awl::FuncCompare<std::unique_ptr<A>, const size_t &, &A::GetKeyRef>>(context);
     TestSmartPointerComparer<awl::TuplizableCompare<std::unique_ptr<A>, 0>>(context);
 }
+
+namespace
+{
+    class B
+    {
+    public:
+
+        B(int k) : key(k)
+        {
+        }
+
+        B(const B &) = delete;
+        B(B &&) = default;
+
+        int GetKey() const
+        {
+            return key;
+        }
+
+        //for testing
+        AWL_SERIALIZABLE(key)
+
+    private:
+
+        int key;
+    };
+
+    //for testing
+    AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(B)
+
+    template <class Compare>
+    void TestBComparer(size_t insert_count, int range)
+    {
+        auto set = GenerateIntSet<int, B, Compare>(insert_count, range);
+
+        int index = 0;
+
+        for (auto & val : set)
+        {
+            const auto & found_val = set.at(index);
+            Assert::IsTrue(val == found_val);
+
+            const auto i = set.find(val.GetKey());
+            Assert::IsTrue(i != set.end() && *i == val);
+
+            const size_t found_index = set.index_of(val);
+            Assert::AreEqual(index, found_index);
+
+            ++index;
+        }
+
+        for (size_t i = 0; i < 5; ++i)
+        {
+            Assert::Throws<std::out_of_range>([&set, i]()
+            {
+                set.at(set.size() + i);
+            });
+
+            Assert::Throws<awl::GeneralException>([&set, range, i]()
+            {
+                set.index_of(static_cast<int>(range + 1 + i));
+            });
+        }
+    }
+};
+
+AWT_TEST(HybridSetNonCopyableElement)
+{
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 2000);
+
+    auto set = GenerateIntSet<int, B>(insert_count, range);
+
+    {
+        std::uniform_int_distribution<int> dist(1, range);
+
+        for (size_t i = 0; i < insert_count; ++i)
+        {
+            const int val = dist(awl::random());
+            set.insert(B(val));
+        }
+    }
+
+    std::vector<int> keys;
+    for (const B & b : set)
+    {
+        keys.push_back(b.GetKey());
+    }
+
+    awl::hybrid_set<B> set1 = std::move(set);
+
+    for (size_t i = 0; i < keys.size(); ++i)
+    {
+        const int found_key = set1.at(i).GetKey();
+        const int actual_key = keys[i];
+        Assert::AreEqual(found_key, actual_key);
+
+        Assert::AreEqual(set1.index_of(found_key), static_cast<int>(i));
+        Assert::AreEqual(set1.index_of(B(found_key)), static_cast<int>(i));
+        Assert::IsTrue(set1.find(B(found_key)) != set1.end());
+    }
+
+    TestBComparer<awl::FuncCompare<B, int, &B::GetKey>>(insert_count, range);
+    TestBComparer<awl::TuplizableCompare<B, 0>>(insert_count, range);
+}
