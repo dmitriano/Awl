@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/ObservableSet.h"
+#include "Awl/KeyCompare.h"
 
 #include <assert.h>
 
@@ -12,25 +13,87 @@ namespace awl
     private:
 
         using ForeignKey = typename function_traits<ForeignKeyGetter>::result_type;
+        using PrimaryCompare = KeyCompare<const T *, PrimaryKeyGetter>;
+        using ValueSet = observable_set<const T *, PrimaryCompare>;
 
-        class Multi
+        class ValueSetCompare
         {
         public:
 
-            ForeignKey GetForeignKey() const
+            bool operator()(const ValueSet & left, const ValueSet & right) const
             {
-                assert(!m_set.empty());
-                return foreignKeyGetter(*m_set.front());
+                return GetForeignKey(left) < GetForeignKey(right);
             }
 
-            observable_set<const T *, KeyCompare<const T *, PrimaryKeyGetter>> m_set;
+            constexpr bool operator()(const ValueSet& val, const ForeignKey & id) const
+            {
+                return GetForeignKey(val) < id;
+            }
+
+            constexpr bool operator()(const ForeignKey & id, const ValueSet& val) const
+            {
+                return id < GetForeignKey(val);
+            }
 
         private:
 
+            ForeignKey GetForeignKey(const ValueSet & vs) const
+            {
+                assert(!vs.empty());
+                return foreignKeyGetter(*vs.front());
+            }
+
             ForeignKeyGetter foreignKeyGetter;
         };
+        
+        using MultiSet = observable_set<ValueSet, ValueSetCompare>;
 
     public:
+
+        using value_type = const ValueSet;
+
+        using size_type = typename MultiSet::size_type;
+        using difference_type = typename MultiSet::difference_type;
+        using const_reference = typename MultiSet::const_reference;
+
+        using const_iterator = typename MultiSet::const_iterator;
+        using const_reverse_iterator = typename MultiSet::const_reverse_iterator;
+
+        using allocator_type = typename MultiSet::allocator_type;
+        using key_compare = typename MultiSet::key_compare;
+        using value_compare = typename MultiSet::value_compare;
+
+        const ValueSet & front() const { return m_set.front(); }
+        const ValueSet & back() const { return m_set.back(); }
+
+        const_iterator begin() const { return m_set.begin(); }
+        const_iterator end() const { return m_set.end(); }
+        const_reverse_iterator rbegin() const { return m_set.rbegin(); }
+        const_reverse_iterator rend() const { return m_set.rend(); }
+
+        size_type size() const
+        {
+            return m_set.size();
+        }
+
+        const_reference at(size_type pos) const
+        {
+            return m_set.at(pos);
+        }
+
+        template <class Key>
+        size_type index_of(const Key & key) const
+        {
+            return m_set.index_of(key);
+        }
+
+        template <class Key>
+        const_iterator find(const Key & key) const
+        {
+            return m_set.find(key);
+        }
+
+    private:
 
         void OnAdded(const T & val) override
         {
@@ -38,14 +101,14 @@ namespace awl
 
             if (i != m_set.end())
             {
-                Multi & m = *i;
-                m.m_set.insert(&val);
+                ValueSet & vs = *i;
+                vs.insert(&val);
             }
             else
             {
-                Multi m;
-                m.m_set.insert(&val);
-                m_set.insert(std::move(m));
+                ValueSet vs;
+                vs.insert(&val);
+                m_set.insert(std::move(vs));
             }
         }
 
@@ -55,11 +118,23 @@ namespace awl
 
             assert(i != m_set.end());
 
-            Multi & m = *i;
+            ValueSet & vs = *i;
 
-            if (m.m_set.size() == 1)
+            assert(!vs.empty());
+
+            if (vs.size() == 1)
             {
-                m_set.erase(m);
+                assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val));
+                
+                m_set.erase(vs);
+            }
+            else
+            {
+                auto j = vs.find(primaryKeyGetter(val));
+
+                assert(j != vs.end());
+                
+                vs.erase(j);
             }
         }
 
@@ -68,10 +143,9 @@ namespace awl
             m_set.clear();
         }
 
-        observable_set<Multi, FuncCompare<Multi, ForeignKey, &Multi::GetForeignKey>> m_set;
+        observable_set<ValueSet, ValueSetCompare> m_set;
 
-    private:
-
+        PrimaryKeyGetter primaryKeyGetter;
         ForeignKeyGetter foreignKeyGetter;
     };
 }
