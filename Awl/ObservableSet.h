@@ -46,13 +46,13 @@ namespace awl
         }
 
         //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
-        observable_set(const observable_set & other) : BaseObservable{}, m_set(other.m_set)
-        {
-        }
+        // observable_set(const observable_set & other) : BaseObservable{}, m_set(other.m_set)
+        // {
+        // }
 
-        observable_set(observable_set && other) : BaseObservable(std::move(other)), m_set(std::move(other.m_set))
-        {
-        }
+        observable_set(const observable_set & other) = delete;
+
+        observable_set(observable_set && other) = default;
 
         observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
         {

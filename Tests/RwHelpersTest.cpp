@@ -81,12 +81,12 @@ namespace
     public:
 
         B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, 
-              m_hset {3, 4, 5}, m_oset{ 6, 7, 8 },
+              m_hset {3, 4, 5}, //m_oset{ 6, 7, 8 },
               m_bm{ GameLevel::Professional }, m_bs(3ul)
         {
         }
 
-        AWL_SERIALIZABLE(m_set, m_v, m_a, m_bm, m_bs, m_u8, m_b)
+        AWL_SERIALIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b)
 
     private:
 
@@ -95,10 +95,13 @@ namespace
         std::array<char, 3> m_a;
 
         awl::hybrid_set<int> m_hset;
-        awl::observable_set<int> m_oset;
+        
+        //It is not copyable.
+        //awl::observable_set<int> m_oset;
 
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
-            GameLevelBitMap m_bm;
+        
+        GameLevelBitMap m_bm;
 
         std::bitset<3> m_bs;
 
