@@ -42,7 +42,7 @@ namespace
     {
         std::uniform_int_distribution<int> dist(1, range);
 
-        for (int val = 0; val <  static_cast<int>(insert_count); ++val)
+        for (int val = 0; val < static_cast<int>(insert_count); ++val)
         {
             auto i = sample.find(val);
 
@@ -54,7 +54,7 @@ namespace
     }
 }
 
-AWT_TEST(ForeignSet)
+AWT_TEST(ForeignSetAddRemoveClear)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -98,6 +98,24 @@ AWT_TEST(ForeignSet)
     ps.clear();
 
     check();
+
+    Assert::IsTrue(fs.empty());
+}
+
+AWT_TEST(ForeignSetDestructor)
+{
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
+
+    ForeignSet fs;
+    
+    {
+        PrimarySet ps;
+
+        ps.Subscribe(&fs);
+
+        GenerateSet(ps, insert_count, range);
+    }
 
     Assert::IsTrue(fs.empty());
 }

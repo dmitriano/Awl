@@ -135,6 +135,7 @@ namespace awl
             {
                 assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val));
                 
+                //vs destructor will fire 'OnClearing'.
                 m_set.erase(vs);
             }
             else

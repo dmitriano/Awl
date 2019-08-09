@@ -67,6 +67,14 @@ namespace awl
 
         observable_set & operator = (observable_set && other) = default;
 
+        ~observable_set()
+        {
+            if (!m_set.empty())
+            {
+                BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
+            }
+        }
+
         bool operator == (const observable_set & other) const
         {
             return m_set == other.m_set;
@@ -169,8 +177,11 @@ namespace awl
 
         void clear()
         {
-            BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
-            m_set.clear();
+            if (!m_set.empty())
+            {
+                BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
+                m_set.clear();
+            }
         }
 
     private:
