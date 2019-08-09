@@ -71,6 +71,11 @@ namespace awl
         const_reverse_iterator rbegin() const { return m_set.rbegin(); }
         const_reverse_iterator rend() const { return m_set.rend(); }
 
+        bool empty() const
+        {
+            return m_set.empty();
+        }
+
         size_type size() const
         {
             return m_set.size();
@@ -102,13 +107,17 @@ namespace awl
             if (i != m_set.end())
             {
                 ValueSet & vs = *i;
-                vs.insert(&val);
+                const bool is_new = vs.insert(&val).second;
+                assert(is_new);
+                static_cast<void>(is_new);
             }
             else
             {
                 ValueSet vs;
                 vs.insert(&val);
-                m_set.insert(std::move(vs));
+                const bool is_new = m_set.insert(std::move(vs)).second;
+                assert(is_new);
+                static_cast<void>(is_new);
             }
         }
 
