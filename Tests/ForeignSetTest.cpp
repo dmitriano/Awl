@@ -32,7 +32,7 @@ namespace
     {
         std::uniform_int_distribution<int> dist(1, range);
 
-        for (size_t i = 0; i < insert_count; ++i)
+        for (size_t i = 0; i <insert_count; ++i)
         {
             sample.insert(A{ dist(awl::random()) , dist(awl::random()) });
         }
@@ -42,7 +42,7 @@ namespace
     {
         std::uniform_int_distribution<int> dist(1, range);
 
-        for (int val = 0; val < insert_count; ++val)
+        for (int val = 0; val <  static_cast<int>(insert_count); ++val)
         {
             auto i = sample.find(val);
 

@@ -169,7 +169,7 @@ namespace awl
 
         void clear()
         {
-            Notify(&INotifySetChanged<T>::OnClearing);
+            BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
             m_set.clear();
         }
 
@@ -179,13 +179,13 @@ namespace awl
         {
             if (result.second)
             {
-                Notify(&INotifySetChanged<T>::OnAdded, *result.first);
+                BaseObservable::Notify(&INotifySetChanged<T>::OnAdded, *result.first);
             }
         }
 
         void NotifyRemoving(const iterator & i)
         {
-            Notify(&INotifySetChanged<T>::OnRemoving, *i);
+            BaseObservable::Notify(&INotifySetChanged<T>::OnRemoving, *i);
         }
 
         InternalSet m_set;
