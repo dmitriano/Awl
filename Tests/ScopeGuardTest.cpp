@@ -74,4 +74,13 @@ AWT_TEST(ScopeGuard)
     }
 
     Assert::AreEqual(usage, 0);
+
+    {
+        auto init = [&usage]() { ++usage; };
+        auto free = [&usage]() { --usage; };
+
+        auto guard = awl::make_scope_guard(init, free, true);
+    }
+
+    Assert::AreEqual(usage, 0);
 }

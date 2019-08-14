@@ -1,7 +1,6 @@
 #pragma once
 
 #include <utility>
-#include <type_traits>
 
 namespace awl
 {
@@ -45,7 +44,7 @@ namespace awl
 
     private:
 
-        std::decay_t<Lambda> free;
+        Lambda free;
 
         bool engaged = true;
     };
