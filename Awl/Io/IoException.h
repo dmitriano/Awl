@@ -7,7 +7,6 @@ namespace awl::io
 {
     class IoException : public Exception
     {
-        AWL_IMPLEMENT_EXCEPTION
     };
 
     class EndOfFileException : public IoException
@@ -23,8 +22,6 @@ namespace awl::io
         {
             return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(" .");
         }
-
-        AWL_IMPLEMENT_EXCEPTION
 
     private:
 
@@ -56,8 +53,6 @@ namespace awl::io
             return out;
         }
 
-        AWL_IMPLEMENT_EXCEPTION
-
     private:
 
         const size_t m_pos;
@@ -65,12 +60,10 @@ namespace awl::io
 
     class ReadFailException : public IoException
     {
-        AWL_IMPLEMENT_EXCEPTION
     };
 
     class WriteFailException : public IoException
     {
-        AWL_IMPLEMENT_EXCEPTION
     };
 
     //The exception indicating a general IO error in the user code.
@@ -92,8 +85,6 @@ namespace awl::io
         {
             return theMessage;
         }
-
-        AWL_IMPLEMENT_EXCEPTION
     };
 
     class FieldNotFoundException : public IoException
@@ -108,8 +99,6 @@ namespace awl::io
         {
             return format() << _T("Field '") << FromAString(fieldName) << _T("' not found.") << _T(" .");
         }
-
-        AWL_IMPLEMENT_EXCEPTION
 
     private:
 
@@ -129,8 +118,6 @@ namespace awl::io
         {
             return format() << _T("Expected '") << FromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
         }
-
-        AWL_IMPLEMENT_EXCEPTION
 
     private:
 
