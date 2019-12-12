@@ -710,7 +710,24 @@ static void AssertIteratorsEqual(const I1 & i1, const I1 & end1, const I2 & i2, 
     }
 }
 
-AWT_TEST(HybridSetBound)
+template <class Set1, class Set2>
+static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_count)
+{
+    std::uniform_int_distribution<size_t> dist(0, range * 2);
+
+    for (size_t i = 0; i < iter_count; ++i)
+    {
+        const size_t val = dist(awl::random());
+
+        AssertIteratorsEqual(set.lower_bound(val), set.end(), std_set.lower_bound(val), std_set.end());
+        AssertIteratorsEqual(set.upper_bound(val), set.end(), std_set.upper_bound(val), std_set.end());
+        //since C++20
+        Assert::AreEqual(set.contains(val), std_set.find(val) != std_set.end());
+    }
+}
+
+//--filter HybridSetBoundAndContains.* --insert_count 1000 --range 1200
+AWT_TEST(HybridSetBoundAndContains)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
@@ -725,13 +742,10 @@ AWT_TEST(HybridSetBound)
         std_set.insert(val);
     }
 
-    std::uniform_int_distribution<size_t> dist(1, range);
+    TestBound(set, std_set, range, iter_count);
 
-    for (size_t i = 0; i < iter_count; ++i)
-    {
-        const size_t val = dist(awl::random());
+    const auto & const_set = set;
+    const auto & const_std_set = std_set;
 
-        AssertIteratorsEqual(set.lower_bound(val), set.end(), std_set.lower_bound(val), std_set.end());
-        //Assert::AreEqual(set.upper_bound(val), std_set.upper_bound(val));
-    }
+    TestBound(const_set, const_std_set, range, iter_count);
 }

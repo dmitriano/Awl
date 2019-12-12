@@ -8,6 +8,7 @@
 #include <iterator>
 #include <memory>
 #include <initializer_list>
+#include <tuple>
 #include <cstdint>
 #include <assert.h>
 
@@ -395,25 +396,55 @@ namespace awl
         template <class Key>
         const_iterator lower_bound(const Key & key) const
         {
-            return NodeToConstIterator(FindBoundByKey(key, [](Node * node) -> Node * { return node; }));
+            return NodeToConstIterator(std::get<0>(FindBoundByKey(key)));
         }
 
         template <class Key>
         iterator lower_bound(const Key & key)
         {
-            return NodeToIterator(FindBoundByKey(key, [](Node * node) -> Node * { return node; }));
+            return NodeToIterator(std::get<0>(FindBoundByKey(key)));
         }
 
         template <class Key>
         const_iterator upper_bound(const Key & key) const
         {
-            return NodeToConstIterator(FindBoundByKey(key, false));
+            auto [node, equal] = FindBoundByKey(key);
+            
+            if (equal)
+            {
+                //return its next
+                List::const_iterator i(node);
+
+                if (++i == m_list.end())
+                {
+                    return end();
+                }
+
+                return MakeConstIterator(i);
+            }
+
+            return NodeToConstIterator(node);
         }
 
         template <class Key>
         iterator upper_bound(const Key & key)
         {
-            return NodeToIterator(FindBoundByKey(key, false));
+            auto [node, equal] = FindBoundByKey(key);
+
+            if (equal)
+            {
+                //return its next
+                List::iterator i(node);
+
+                if (++i == m_list.end())
+                {
+                    return end();
+                }
+
+                return MakeIterator(i);
+            }
+
+            return NodeToIterator(node);
         }
 
         reference at(size_type pos)
@@ -567,8 +598,8 @@ namespace awl
         }
 
         //Returns an iterator pointing to the first element that is not less than (i.e. greater or equal to) key.
-        template <class Key, class HandleEqual>
-        Node * FindBoundByKey(const Key & key, HandleEqual && handle_equal) const
+        template <class Key>
+        std::tuple<Node *, bool> FindBoundByKey(const Key & key) const
         {
             Node * x = m_root;
             //the last found element greater than x
@@ -589,11 +620,11 @@ namespace awl
                 else
                 {
                     //we found the equal element
-                    return handle_equal(x);
+                    return std::make_tuple(x, true);
                 }
             }
 
-            return greater;
+            return std::make_tuple(greater, false);
         }
 
         Node * FindNodeByIndex(size_t index) const
