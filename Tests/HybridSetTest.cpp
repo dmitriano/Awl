@@ -620,7 +620,7 @@ namespace
     {
         auto set = GenerateIntSet<int, B, Compare>(insert_count, range);
 
-        int index = 0;
+        size_t index = 0;
 
         for (auto & val : set)
         {
@@ -649,7 +649,7 @@ namespace
             });
         }
     }
-};
+}
 
 AWT_TEST(HybridSetNonCopyableElement)
 {
@@ -682,8 +682,8 @@ AWT_TEST(HybridSetNonCopyableElement)
         const int actual_key = keys[i];
         Assert::AreEqual(found_key, actual_key);
 
-        Assert::AreEqual(set1.index_of(found_key), static_cast<int>(i));
-        Assert::AreEqual(set1.index_of(B(found_key)), static_cast<int>(i));
+        Assert::AreEqual(set1.index_of(found_key), i);
+        Assert::AreEqual(set1.index_of(B(found_key)), i);
         Assert::IsTrue(set1.find(B(found_key)) != set1.end());
     }
 

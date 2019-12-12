@@ -413,7 +413,7 @@ namespace awl
             if (equal)
             {
                 //return its next
-                List::const_iterator i(node);
+                typename List::const_iterator i(node);
 
                 if (++i == m_list.end())
                 {
@@ -434,7 +434,7 @@ namespace awl
             if (equal)
             {
                 //return its next
-                List::iterator i(node);
+                typename List::iterator i(node);
 
                 if (++i == m_list.end())
                 {
