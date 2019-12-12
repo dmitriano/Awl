@@ -366,8 +366,6 @@ AWT_TEST(HybridSetCopyMove)
 //--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
 AWT_TEST(HybridSetIndex)
 {
-    AWT_UNUSED_CONTEXT;
-
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(size_t, range, 1000);
 
@@ -691,4 +689,49 @@ AWT_TEST(HybridSetNonCopyableElement)
 
     TestBComparer<awl::FuncCompare<B, int, &B::GetKey>>(insert_count, range);
     TestBComparer<awl::TuplizableCompare<B, 0>>(insert_count, range);
+}
+
+template <class I1, class I2>
+static void AssertIteratorsEqual(const I1 & i1, const I1 & end1, const I2 & i2, const I2 & end2)
+{
+    if (!(i1 == end1 && i2 == end2))
+    {
+        if (i1 != end1 && i2 != end2)
+        {
+            const size_t val1 = *i1;
+            const size_t val2 = *i2;
+
+            Assert::AreEqual(val1, val2, _T("different values"));
+        }
+        else
+        {
+            Assert::Fail(_T("end and not end"));
+        }
+    }
+}
+
+AWT_TEST(HybridSetBound)
+{
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
+    AWL_ATTRIBUTE(size_t, iter_count, 1000);
+
+    auto set = GenerateIntSet(insert_count, range);
+
+    std::set<size_t> std_set;
+
+    for (auto val : set)
+    {
+        std_set.insert(val);
+    }
+
+    std::uniform_int_distribution<size_t> dist(1, range);
+
+    for (size_t i = 0; i < iter_count; ++i)
+    {
+        const size_t val = dist(awl::random());
+
+        AssertIteratorsEqual(set.lower_bound(val), set.end(), std_set.lower_bound(val), std_set.end());
+        //Assert::AreEqual(set.upper_bound(val), std_set.upper_bound(val));
+    }
 }

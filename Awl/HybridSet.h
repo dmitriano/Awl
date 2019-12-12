@@ -375,16 +375,45 @@ namespace awl
         }
 
         template <class Key>
+        const_iterator find(const Key & key) const
+        {
+            return NodeToConstIterator(FindNodeByKey(key));
+        }
+
+        template <class Key>
         iterator find(const Key & key)
         {
-            Node * node = FindNodeByKey(key);
+            return NodeToIterator(FindNodeByKey(key));
+        }
 
-            if (node != nullptr)
-            {
-                return MakeIterator(typename List::iterator(node));
-            }
+        template <class Key>
+        bool contains(const Key & key) const
+        {
+            return FindNodeByKey(key) != nullptr;
+        }
 
-            return end();
+        template <class Key>
+        const_iterator lower_bound(const Key & key) const
+        {
+            return NodeToConstIterator(FindBoundByKey(key, [](Node * node) -> Node * { return node; }));
+        }
+
+        template <class Key>
+        iterator lower_bound(const Key & key)
+        {
+            return NodeToIterator(FindBoundByKey(key, [](Node * node) -> Node * { return node; }));
+        }
+
+        template <class Key>
+        const_iterator upper_bound(const Key & key) const
+        {
+            return NodeToConstIterator(FindBoundByKey(key, false));
+        }
+
+        template <class Key>
+        iterator upper_bound(const Key & key)
+        {
+            return NodeToIterator(FindBoundByKey(key, false));
         }
 
         reference at(size_type pos)
@@ -427,19 +456,6 @@ namespace awl
             throw GeneralException(_T("Key not found."));
         }
 
-        template <class Key>
-        const_iterator find(const Key & key) const
-        {
-            Node * node = FindNodeByKey(key);
-
-            if (node != nullptr)
-            {
-                return MakeConstIterator(typename List::const_iterator(node));
-            }
-
-            return end();
-        }
-
         void erase(iterator i)
         {
             typename List::iterator li = ExtractListIterator(i);
@@ -475,6 +491,26 @@ namespace awl
         }
 
     private:
+
+        const_iterator NodeToConstIterator(const Node * node) const
+        {
+            if (node != nullptr)
+            {
+                return MakeConstIterator(typename List::const_iterator(node));
+            }
+
+            return end();
+        }
+
+        iterator NodeToIterator(Node * node)
+        {
+            if (node != nullptr)
+            {
+                return MakeIterator(typename List::iterator(node));
+            }
+
+            return end();
+        }
 
         template <class Key>
         Node * FindNodeByKey(const Key & key) const
@@ -528,6 +564,36 @@ namespace awl
             }
 
             return nullptr;
+        }
+
+        //Returns an iterator pointing to the first element that is not less than (i.e. greater or equal to) key.
+        template <class Key, class HandleEqual>
+        Node * FindBoundByKey(const Key & key, HandleEqual && handle_equal) const
+        {
+            Node * x = m_root;
+            //the last found element greater than x
+            Node * greater = nullptr;
+
+            //walk down the tree
+            while (x != nullptr)
+            {
+                if (m_comp(key, x->value))
+                {
+                    greater = x;
+                    x = x->left;
+                }
+                else if (m_comp(x->value, key))
+                {
+                    x = x->right;
+                }
+                else
+                {
+                    //we found the equal element
+                    return handle_equal(x);
+                }
+            }
+
+            return greater;
         }
 
         Node * FindNodeByIndex(size_t index) const
