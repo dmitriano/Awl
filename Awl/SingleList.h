@@ -39,6 +39,7 @@ namespace awl
 
         Link * pNext;
 
+        //It can be template<class T> friend base_single_iterator<Link>, but C++ does not allow this.
         template <class T1, class Link1> friend class base_single_iterator;
         template <class T1, class Link1, class Derived1> friend class basic_single_list;
         template <class T1, class Link1> friend class single_list;
