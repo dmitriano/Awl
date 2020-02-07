@@ -14,9 +14,15 @@ namespace awl
     }
 
     template <class T>
+    inline AWL_CONSTEXPR auto object_as_const_tuple(const T & val)
+    {
+        return val.as_const_tuple();
+    }
+
+    template <class T>
     inline AWL_CONSTEXPR auto object_as_tuple(const T & val)
     {
-        return val.as_tuple();
+        return object_as_const_tuple(val);
     }
 
     template <class T>
@@ -50,10 +56,25 @@ namespace awl
     inline constexpr bool is_tuplizable_v = is_tuplizable<T>::value;
 
     template <class T>
-    struct tuplizable_traits
+    class tuplizable_traits
     {
-        typedef decltype(T{}.as_const_tuple()) ConstTie;
-        typedef decltype(T{}.as_tuple()) Tie;
+    private:
+
+        //decltype(object_as_tuple(T{})) produces a const Tie,
+        //so we need to declare a variable of type T.
+        struct Helper
+        {
+            static auto GetTie()
+            {
+                T val;
+                return object_as_tuple(val);
+            }
+        };
+
+    public:
+
+        using ConstTie = decltype(object_as_const_tuple(T{}));
+        using Tie = decltype(Helper::GetTie());
     };
 }
 

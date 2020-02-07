@@ -50,7 +50,7 @@ namespace
 namespace awl
 {
     template <>
-    inline auto object_as_tuple(const A & val)
+    inline auto object_as_const_tuple(const A & val)
     {
         return std::tie(val.x, val.y);
     }

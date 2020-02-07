@@ -145,6 +145,7 @@ namespace awl
             s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
         }
 
+        //vector<string>, for example.
         template <class Stream, class Container>
         typename std::enable_if<std::is_class<typename Container::value_type>::value, void>::type 
             ReadVector(Stream & s, Container & v)
