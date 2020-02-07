@@ -11,9 +11,9 @@ using namespace awl::testing;
 template <class C>
 static void TestIntContainer(const C * sample)
 {
-    typedef std::vector<int> V;
-    typedef BasicFormatter<C, V> F;
-    typedef std::basic_string<C> TString;
+    using V = std::vector<int>;
+    using F = BasicFormatter<C, V>;
+    using TString = std::basic_string<C>;
 
     TString s_sample = sample;
 
@@ -38,8 +38,8 @@ AWT_TEST(Formatter_StringContainer)
 {
     AWT_UNUSED_CONTEXT;
 
-    typedef std::set<awl::String> V;
-    typedef Formatter<V> F;
+    using V = std::set<awl::String>;
+    using F = Formatter<V>;
 
     String s_sample = _T("a b cde");
 
@@ -56,8 +56,8 @@ AWT_TEST(Formatter_BoolContainer)
 {
     AWT_UNUSED_CONTEXT;
 
-    typedef std::vector<bool> V;
-    typedef Formatter<V> F;
+    using V = std::vector<bool>;
+    using F = Formatter<V>;
 
     String s_sample = _T("1 0 0");
 
@@ -74,7 +74,7 @@ AWT_TEST(Formatter_String)
 {
     AWT_UNUSED_CONTEXT;
 
-    typedef Formatter<String> F;
+    using F = Formatter<String>;
 
     String sample = _T("abc");
 

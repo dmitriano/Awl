@@ -29,7 +29,7 @@ namespace awl
                 return value_size;
             }
 
-            typedef HashValue<value_size> value_type;
+            using value_type = HashValue<value_size>;
         };
 
         class FakeHash : public BasicHash<0u>

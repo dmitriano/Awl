@@ -9,7 +9,7 @@ namespace
 {
     class LinkA : public awl::basic_quick_link<LinkA>
     {
-        typedef awl::basic_quick_link<LinkA> Base;
+        using Base = awl::basic_quick_link<LinkA>;
 
     public:
 
@@ -18,7 +18,7 @@ namespace
 
     class LinkB : public awl::basic_quick_link<LinkB>
     {
-        typedef awl::basic_quick_link<LinkB> Base;
+        using Base = awl::basic_quick_link<LinkB>;
 
     public:
 
@@ -53,7 +53,7 @@ namespace
     template <class DLink>
     class ListHolder
     {
-        typedef awl::quick_list<Element, DLink> ELEMENT_LIST;
+        using ELEMENT_LIST = awl::quick_list<Element, DLink>;
 
         ELEMENT_LIST list;
 

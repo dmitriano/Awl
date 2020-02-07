@@ -18,23 +18,23 @@ namespace awl
 
 #if AWL_CPPSTD >= 17
 
-        typedef typename awl::function_traits<UnaryFunction>::result_type Value;
+        using Value = typename awl::function_traits<UnaryFunction>::result_type;
         
 #else
 
-        typedef awl::return_type_t<decltype(&UnaryFunction::operator())> Value;
+        using Value = awl::return_type_t<decltype(&UnaryFunction::operator())>;
 
 #endif
 
-        typedef std::forward_iterator_tag iterator_category;
+        using iterator_category = std::forward_iterator_tag;
 
-        typedef typename std::remove_reference<Value>::type value_type;
+        using value_type = typename std::remove_reference<Value>::type;
 
-        typedef std::ptrdiff_t difference_type;
+        using difference_type = std::ptrdiff_t;
 
-        typedef value_type * pointer;
+        using pointer = value_type *;
 
-        typedef value_type & reference;
+        using reference = value_type &;
 
         Value operator-> () const { return cur(); }
 

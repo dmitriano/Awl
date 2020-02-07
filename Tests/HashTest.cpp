@@ -165,7 +165,7 @@ namespace examples
             return Hash::size();
         }
 
-        typedef typename Hash::value_type value_type;
+        using value_type = typename Hash::value_type;
 
         explicit StringHash(Hash h = {}) : m_hash(h)
         {
@@ -196,7 +196,7 @@ namespace examples
     {
     public:
 
-        typedef uint32_t value_type;
+        using value_type = uint32_t;
 
         uint32_t operator()(std::string::const_iterator begin, std::string::const_iterator end) const
         {
@@ -223,7 +223,7 @@ AWT_TEST(Hash_String)
 
     using namespace awl::crypto;
 
-    typedef examples::StringHash<Crc64> Hash;
+    using Hash = examples::StringHash<Crc64>;
 
     const Hash hash(0);
 
@@ -256,7 +256,7 @@ AWT_TEST(Hash_Switch)
 
     using namespace examples;
 
-    typedef StringHash<EasyHash> Hash;
+    using Hash = StringHash<EasyHash>;
 
     const Hash hash;
 

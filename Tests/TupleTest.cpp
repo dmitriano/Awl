@@ -99,11 +99,11 @@ AWT_TEST(TupleMapT2T)
 {
     AWT_UNUSED_CONTEXT;
 
-    typedef std::tuple<bool, char, int, float, double, std::string> T1;
+    using T1 = std::tuple<bool, char, int, float, double, std::string>;
     const auto result = std::array<size_t, 7>{1, 2, 2, 4, 5, 2, 4};
 
     {
-        typedef std::tuple<char, int, int, double, std::string, int, double> T2;
+        using T2 = std::tuple<char, int, int, double, std::string, int, double>;
 
         static_assert(awl::find_tuple_type_v<bool, T1> == 0);
         static_assert(awl::find_tuple_type_v<char, T1> == 1);
@@ -115,7 +115,7 @@ AWT_TEST(TupleMapT2T)
     }
 
     {
-        typedef std::tuple<char&, int&, int, double&, std::string&, int, double&> T2;
+        using T2 = std::tuple<char&, int&, int, double&, std::string&, int, double&>;
 
         static_assert(awl::find_tuple_type_v<bool&, T1> == 0);
         static_assert(awl::find_tuple_type_v<char&, T1> == 1);
@@ -131,11 +131,11 @@ AWT_TEST(TupleMapT2V)
 {
     AWT_UNUSED_CONTEXT;
 
-    typedef std::variant<bool, char, int, float, double, std::string> T1;
+    using T1 = std::variant<bool, char, int, float, double, std::string>;
     const auto result = std::array<size_t, 7>{1, 2, 2, 4, 5, 2, 4};
 
     {
-        typedef std::tuple<char, int, int, double, std::string, int, double> T2;
+        using T2 = std::tuple<char, int, int, double, std::string, int, double>;
 
         static_assert(awl::find_variant_type_v<bool, T1> == 0);
         static_assert(awl::find_variant_type_v<char, T1> == 1);
@@ -147,7 +147,7 @@ AWT_TEST(TupleMapT2V)
     }
 
     {
-        typedef std::tuple<char&, int&, int, double&, std::string&, int, double&> T2;
+        using T2 = std::tuple<char&, int&, int, double&, std::string&, int, double&>;
 
         static_assert(awl::find_variant_type_v<bool&, T1> == 0);
         static_assert(awl::find_variant_type_v<char&, T1> == 1);

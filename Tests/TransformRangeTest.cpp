@@ -12,7 +12,7 @@ using namespace awl::testing;
 
 AWT_TEST(TransformIterator)
 {
-    typedef std::map<awl::String, int> TestMap;
+    using TestMap = std::map<awl::String, int>;
     
     TestMap m {
         {_T("a"), 1},
@@ -23,7 +23,7 @@ AWT_TEST(TransformIterator)
     auto xfunc = [](const TestMap::value_type & p) -> int { return p.second; };
 
     {
-        typedef decltype(&decltype(xfunc)::operator()) OperatorType;
+        using OperatorType = decltype(&decltype(xfunc)::operator());
 
         context.out << awl::FromACString(typeid(OperatorType).name()) << std::endl;
 
@@ -34,7 +34,7 @@ AWT_TEST(TransformIterator)
         context.out << awl::FromACString(typeid(awl::function_traits<decltype(xfunc)>::result_type).name()) << std::endl;
 
 #else
-        typedef awl::return_type_t<OperatorType> result_type;
+        using result_type = awl::return_type_t<OperatorType>;
         
         static_assert(std::is_same<result_type, int>::value, "return_type_t error");
 
@@ -84,7 +84,7 @@ AWT_TEST(TransformIterator)
     auto yfunc = [](TestMap::value_type & p) -> int & { return p.second; };
 
     {
-        typedef decltype(&decltype(yfunc)::operator()) OperatorType;
+        using OperatorType = decltype(&decltype(yfunc)::operator());
 
         context.out << awl::FromACString(typeid(OperatorType).name()) << std::endl;
 
