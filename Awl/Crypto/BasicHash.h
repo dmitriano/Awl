@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Awl/Lang.h"
-
 #include <stdint.h>
 #include <array>
 #include <type_traits>
@@ -46,7 +44,7 @@ namespace awl
         };
 
         template <typename T>
-        AWL_CONSTEXPR std::array<std::uint8_t, sizeof(T)> to_array(T value)
+        constexpr std::array<std::uint8_t, sizeof(T)> to_array(T value)
         {
             //'= {}' is for preventing GCC warning "there is no default constructor..."
             std::array<std::uint8_t, sizeof(T)> result = {};
@@ -60,7 +58,7 @@ namespace awl
         }
 
         template <typename T>
-        AWL_CONSTEXPR T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
+        constexpr T from_array(const std::array<std::uint8_t, sizeof(T)> & a)
         {
             T val = 0;
 
