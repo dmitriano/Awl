@@ -17,7 +17,7 @@ namespace awl
         {
         public:
 
-            typedef std::basic_string<C> String;
+            using String = std::basic_string<C>;
 
             static String ToString(T val)
             {
@@ -39,7 +39,7 @@ namespace awl
         {
         public:
 
-            typedef std::basic_string<C> String;
+            using String = std::basic_string<C>;
 
             static String ToString(T val)
             {
@@ -58,7 +58,7 @@ namespace awl
         {
         public:
 
-            typedef std::basic_string<C> String;
+            using String = std::basic_string<C>;
 
             static String ToString(const T & val)
             {

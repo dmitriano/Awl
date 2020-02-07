@@ -18,7 +18,7 @@ namespace awl
         enum { arity = sizeof...(Args) };
         // arity is the number of arguments.
 
-        typedef ReturnType result_type;
+        using result_type = ReturnType;
 
         template <size_t i>
         struct arg

@@ -43,7 +43,7 @@ namespace awl
                 mutable size_t usage;
             };
 
-            typedef std::unordered_map<String, Option> OptionsMap;
+            using OptionsMap = std::unordered_map<String, Option>;
 
             OptionsMap allOptions;
         };

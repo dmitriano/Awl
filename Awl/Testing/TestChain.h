@@ -36,7 +36,7 @@ namespace awl
             TestFunc pTestFunc;
         };
 
-        typedef single_list<TestLink> TestChain;
+        using TestChain = single_list<TestLink>;
 
         //No additional data structures are created when the program starts except the linked list of the static TestLink objects.
         inline TestChain & GetTestChain()

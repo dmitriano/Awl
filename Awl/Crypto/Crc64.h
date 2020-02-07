@@ -23,7 +23,7 @@ namespace awl
             template <class InputIt>
             typename std::enable_if<std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type operator()(InputIt begin, InputIt end) const
             {
-                typedef typename std::iterator_traits<InputIt>::value_type T;
+                using T = typename std::iterator_traits<InputIt>::value_type;
                 
                 uint64_t crc = m_seed;
 

@@ -51,7 +51,7 @@ namespace
     {
     public:
 
-        typedef std::pair<size_t, size_t> value_type;
+        using value_type = std::pair<size_t, size_t>;
 
         void insert(const value_type & val)
         {

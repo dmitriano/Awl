@@ -37,7 +37,7 @@ namespace awl
         {
         public:
 
-            typedef std::basic_string<C> String;
+            using String = std::basic_string<C>;
 
             template<typename T>
             static String ToString(T val)
@@ -91,6 +91,6 @@ namespace awl
             }
         };
 
-        typedef BasicScalarFormatter<Char> ScalarFormatter;
+        using ScalarFormatter = BasicScalarFormatter<Char>;
     }
 }

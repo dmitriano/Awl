@@ -124,11 +124,11 @@ AWT_TEST(BitMapEnclosed)
     Assert::IsTrue(A({ }).m_bm.none());
     Assert::IsTrue(A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all());
 
-    typedef awl::bitmap<A::GameLevel, A::GameLevelTraits::Count> GameLevelBitMap2;
+    using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
     Assert::IsTrue(GameLevelBitMap2{ }.none());
     Assert::IsTrue(GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all());
 
-    typedef awl::bitmap<A::GameLevel> GameLevelBitMap3;
+    using GameLevelBitMap3 = awl::bitmap<A::GameLevel>;
     Assert::IsTrue(GameLevelBitMap3{ }.none());
     Assert::IsTrue(GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all());
 }

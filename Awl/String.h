@@ -28,17 +28,17 @@ static_assert(sizeof(_T(" ")[0]) == sizeof(TCHAR), "Wrong _T macro definition.")
 
 namespace awl
 {
-    typedef TCHAR Char;
+    using Char = TCHAR;
 
-    typedef std::basic_string<Char> String;
+    using String = std::basic_string<Char>;
 
     static_assert(std::is_same<String::value_type, TCHAR>::value, "String::value_type is not TCHAR.");
 
-    typedef std::basic_istream<Char> istream;
-    typedef std::basic_ostream<Char> ostream;
+    using istream = std::basic_istream<Char>;
+    using ostream = std::basic_ostream<Char>;
     
-    typedef std::basic_ostringstream<Char> ostringstream;
-    typedef std::basic_istringstream<Char> istringstream;
+    using ostringstream = std::basic_ostringstream<Char>;
+    using istringstream = std::basic_istringstream<Char>;
 
     inline auto StrLen(const char * s)
     {

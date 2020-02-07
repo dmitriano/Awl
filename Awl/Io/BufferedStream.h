@@ -7,7 +7,7 @@ namespace awl
 {
     namespace io
     {
-        typedef HashInputStream<crypto::FakeHash> BufferedInputStream;
-        typedef HashOutputStream<crypto::FakeHash> BufferedOutputStream;
+        using BufferedInputStream = HashInputStream<crypto::FakeHash>;
+        using BufferedOutputStream = HashOutputStream<crypto::FakeHash>;
     }
 }

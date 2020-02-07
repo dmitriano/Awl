@@ -17,8 +17,8 @@ namespace awl
             {
             public:
 
-                typedef bool value_type;
-                typedef std::size_t size_type;
+                using value_type = bool;
+                using size_type = std::size_t;
 
                 explicit BitSetAdapter(BitSet & v) : m_bits(v)
                 {
@@ -49,8 +49,8 @@ namespace awl
             {
             public:
 
-                typedef bool value_type;
-                typedef typename BitMap::size_type size_type;
+                using value_type = bool;
+                using size_type = typename BitMap::size_type;
 
                 explicit BitMapAdapter(BitMap & v) : m_bm(v)
                 {

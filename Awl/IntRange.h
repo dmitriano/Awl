@@ -19,15 +19,15 @@ namespace awl
         {
         }
 
-        typedef std::forward_iterator_tag iterator_category;
+        using iterator_category = std::forward_iterator_tag;
 
-        typedef T value_type;
+        using value_type = T;
 
-        typedef std::ptrdiff_t difference_type;
+        using difference_type = std::ptrdiff_t;
 
-        typedef value_type * pointer;
+        using pointer = value_type *;
 
-        typedef value_type & reference;
+        using reference = value_type &;
 
         value_type operator-> () const { return cur(); }
 

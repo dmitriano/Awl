@@ -22,7 +22,7 @@ namespace awl
     template <class DLink>
     class backward_link
     {
-        typedef backward_link Link;
+        using Link = backward_link;
 
     public:
 
@@ -89,14 +89,14 @@ namespace awl
             }
         }
 
-        typedef forward_link<Dlink> ForwardLink;
-        typedef backward_link<Dlink> BackwardLink;
+        using ForwardLink = forward_link<Dlink>;
+        using BackwardLink = backward_link<Dlink>;
 
     protected:
 
         //! The elements that are not Nulls are of type Dlink, but Nulls are ForwardLink and BackwardLink.
-        typedef single_list<Dlink, ForwardLink> ForwardList;
-        typedef single_list<Dlink, BackwardLink> BackwardList;
+        using ForwardList = single_list<Dlink, ForwardLink>;
+        using BackwardList = single_list<Dlink, BackwardLink>;
 
         basic_quick_link() {}
 
@@ -115,7 +115,7 @@ namespace awl
     {
     private:
 
-        typedef basic_quick_link<quick_link> Base;
+        using Base = basic_quick_link<quick_link>;
 
     public:
 
@@ -141,11 +141,11 @@ namespace awl
     {
     private:
 
-        typedef typename DLink::ForwardLink ForwardLink;
-        typedef typename DLink::BackwardLink BackwardLink;
+        using ForwardLink = typename DLink::ForwardLink;
+        using BackwardLink = typename DLink::BackwardLink;
 
-        typedef forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>> ForwardList;
-        typedef backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>> BackwardList;
+        using ForwardList = forward_list<T, typename DLink::ForwardLink, quick_list<T, DLink>>;
+        using BackwardList =  backward_list<T, typename DLink::BackwardLink, quick_list<T, DLink>>;
 
         ForwardList & forward() { return *this; }
         const ForwardList & forward() const { return *this; }
@@ -155,13 +155,13 @@ namespace awl
 
     public:
 
-        typedef T * value_type;
+        using value_type = T *;
 
-        typedef typename ForwardList::iterator iterator;
-        typedef typename ForwardList::const_iterator const_iterator;
+        using iterator = typename ForwardList::iterator;
+        using const_iterator = typename ForwardList::const_iterator;
 
-        typedef typename BackwardList::iterator reverse_iterator;
-        typedef typename BackwardList::const_iterator const_reverse_iterator;
+        using reverse_iterator = typename BackwardList::iterator;
+        using const_reverse_iterator = typename BackwardList::const_iterator;
 
         //This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
         quick_list() : Null(&Null, &Null)

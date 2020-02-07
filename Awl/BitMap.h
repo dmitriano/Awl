@@ -16,12 +16,12 @@ namespace awl
     {
     private:
 
-        typedef std::bitset<N> BitSet;
+        using BitSet = std::bitset<N>;
 
     public:
 
-        typedef Enum enum_type;
-        typedef typename std::underlying_type<enum_type>::type size_type;
+        using enum_type = Enum;
+        using size_type = typename std::underlying_type<enum_type>::type;
 
         constexpr bitmap() = default;
 
@@ -200,4 +200,4 @@ namespace awl
 
 #define AWL_BITMAP(EnumName, ...) \
     AWL_SEQUENTIAL_ENUM(EnumName, __VA_ARGS__) \
-    typedef awl::bitmap<EnumName, EnumName##Traits::Count> EnumName##BitMap;
+    using EnumName##BitMap = awl::bitmap<EnumName, EnumName##Traits::Count>;

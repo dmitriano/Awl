@@ -28,9 +28,9 @@ namespace awl
             }
         };
 
-        typedef OpenSslHash<MD5, MD5_DIGEST_LENGTH> Md5;
-        typedef OpenSslHash<SHA1, SHA_DIGEST_LENGTH> Sha1;
-        typedef OpenSslHash<SHA256, SHA256_DIGEST_LENGTH> Sha256;
-        typedef OpenSslHash<SHA512, SHA512_DIGEST_LENGTH> Sha512;
+        using Md5 = OpenSslHash<MD5, MD5_DIGEST_LENGTH>;
+        using Sha1 = OpenSslHash<SHA1, SHA_DIGEST_LENGTH>;
+        using Sha256 = OpenSslHash<SHA256, SHA256_DIGEST_LENGTH>;
+        using Sha512 = OpenSslHash<SHA512, SHA512_DIGEST_LENGTH>;
     }
 }

@@ -23,5 +23,5 @@ namespace awl
         std::basic_ostringstream<C> out;
     };
 
-    typedef basic_format<Char> format;
+    using format = basic_format<Char>;
 }

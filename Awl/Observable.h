@@ -9,7 +9,7 @@ namespace awl
     {
     private:
 
-        typedef quick_link Base;
+        using Base = quick_link;
 
     public:
 
@@ -37,7 +37,7 @@ namespace awl
     {
     public:
 
-        typedef Observer<IObserver> OBSERVER;
+        using OBSERVER = Observer<IObserver>;
 
         Observable()
         {
@@ -106,7 +106,7 @@ namespace awl
 
     private:
 
-        typedef quick_list<OBSERVER> OBSERVER_LIST;
+        using OBSERVER_LIST = quick_list<OBSERVER>;
 
         OBSERVER_LIST Observers;
     };

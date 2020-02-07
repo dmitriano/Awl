@@ -68,7 +68,7 @@ namespace awl
     {
     private:
 
-        typedef typename tuplizable_traits<S>::Tie Tie;
+        using Tie = typename tuplizable_traits<S>::Tie;
     
     public:
 

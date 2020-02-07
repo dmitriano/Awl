@@ -55,7 +55,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            typedef std::map<const Char *, TestLink *, CStringLess<Char>> Map;
+            using Map = std::map<const Char *, TestLink *, CStringLess<Char>>;
 
             Map testMap;
         };

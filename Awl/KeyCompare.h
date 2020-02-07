@@ -153,13 +153,13 @@ namespace awl
         GetKey getKey;
     };
 
-    template <class T> struct remove_smart_pointer { typedef T type; };
-    template <class T> struct remove_smart_pointer<T*> { typedef T type; };
-    template <class T> struct remove_smart_pointer<T* const> { typedef T type; };
-    template <class T> struct remove_smart_pointer<T* volatile> { typedef T type; };
-    template <class T> struct remove_smart_pointer<T* const volatile> { typedef T type; };
-    template <class T> struct remove_smart_pointer<std::shared_ptr<T>> { typedef T type; };
-    template <class T, class Deleter> struct remove_smart_pointer<std::unique_ptr<T, Deleter>> { typedef T type; };
+    template <class T> struct remove_smart_pointer { using type = T; };
+    template <class T> struct remove_smart_pointer<T*> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* const> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* volatile> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* const volatile> { using type = T; };
+    template <class T> struct remove_smart_pointer<std::shared_ptr<T>> { using type = T; };
+    template <class T, class Deleter> struct remove_smart_pointer<std::unique_ptr<T, Deleter>> { using type = T; };
 
     template <class T>
     using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;

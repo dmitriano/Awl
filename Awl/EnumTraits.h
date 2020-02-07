@@ -29,7 +29,7 @@ namespace awl
     class EnumName##Traits \
     { \
     public: \
-        typedef std::underlying_type<EnumName>::type size_type; \
+        using size_type = std::underlying_type<EnumName>::type; \
     private: \
         enum : size_type { __VA_ARGS__, Last }; \
     public: \

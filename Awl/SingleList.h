@@ -50,7 +50,7 @@ namespace awl
     {
     private:
 
-        typedef base_single_link<single_link> Base;
+        using Base = base_single_link<single_link>;
 
     public:
 
@@ -69,17 +69,17 @@ namespace awl
     {
     public:
 
-        typedef std::forward_iterator_tag iterator_category;
+        using iterator_category = std::forward_iterator_tag;
 
         //A value is not T but T*, because the list is a contaner of elements of type T *.
-        typedef T * value_type;
+        using value_type = T *;
 
         //Required by std::iterator_traits in GCC.
-        typedef std::ptrdiff_t difference_type;
+        using difference_type = std::ptrdiff_t;
 
-        typedef value_type * pointer;
+        using pointer = value_type *;
 
-        typedef value_type & reference;
+        using reference = value_type &;
 
         base_single_iterator(Link *p) : pCur(p) {}
 
@@ -188,10 +188,10 @@ namespace awl
     {
     public:
 
-        typedef T * value_type;
+        using value_type = T *;
 
-        typedef single_iterator<T, Link> iterator;
-        typedef const_single_iterator<T, Link> const_iterator;
+        using iterator = single_iterator<T, Link>;
+        using const_iterator =  const_single_iterator<T, Link>;
 
         basic_single_list() {}
 

@@ -16,7 +16,7 @@ namespace awl
         {
         private:
 
-            typedef std::vector<std::string> Vector;
+            using Vector = std::vector<std::string>;
 
         public:
 
@@ -24,10 +24,10 @@ namespace awl
             {
             }
 
-            typedef Vector::const_reference const_reference;
-            typedef Vector::const_pointer const_pointer;
-            typedef Vector::const_iterator const_iterator;
-            typedef Vector::const_reverse_iterator const_reverse_iterator;
+            using const_reference = Vector::const_reference;
+            using const_pointer = Vector::const_pointer;
+            using const_iterator = Vector::const_iterator;
+            using const_reverse_iterator = Vector::const_reverse_iterator;
 
             const_iterator begin() const { return m_v.begin();}
             const_iterator cbegin() const noexcept { return m_v.cbegin();}

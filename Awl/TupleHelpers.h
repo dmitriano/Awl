@@ -164,7 +164,7 @@ namespace awl
     template <class T, class U, std::size_t... index>
     static constexpr auto find_tuple_type_impl(std::index_sequence<index...>) noexcept
     {
-        typedef std::remove_reference_t<T> NoRefT;
+        using NoRefT = std::remove_reference_t<T>;
         static_assert((std::size_t() + ... + std::is_same_v<NoRefT, std::tuple_element_t<index, U>>) == 1, "There is no single exact match");
         return std::max({ (std::is_same_v<NoRefT, std::tuple_element_t<index, U>> ? index : 0)... });
     }
@@ -175,7 +175,7 @@ namespace awl
     template <class T, class U, std::size_t... index>
     static constexpr auto find_variant_type_impl(std::index_sequence<index...>) noexcept
     {
-        typedef std::remove_reference_t<T> NoRefT;
+        using NoRefT = std::remove_reference_t<T>;
         static_assert((std::size_t() + ... + std::is_same_v<NoRefT, std::variant_alternative_t<index, U>>) == 1, "There is no single exact match");
         return std::max({ (std::is_same_v<NoRefT, std::variant_alternative_t<index, U>> ? index : 0)... });
     }
