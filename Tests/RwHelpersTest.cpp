@@ -60,6 +60,9 @@ namespace awl
     {
         return std::tie(val.x, val.y);
     }
+
+    template <>
+    inline constexpr bool is_tuplizable_v<A> = true;
 }
 
 namespace

@@ -468,13 +468,13 @@ namespace awl
         }
 
         template <class Stream, typename T>
-        inline typename std::enable_if<std::is_class<T>::value, void>::type Read(Stream & s, T & val)
+        inline typename std::enable_if<is_tuplizable_v<T>, void>::type Read(Stream & s, T & val)
         {
             Read(s, object_as_tuple(val));
         }
 
         template <class Stream, typename T>
-        inline typename std::enable_if<std::is_class<T>::value, void>::type Write(Stream & s, const T & val)
+        inline typename std::enable_if<is_tuplizable_v<T>, void>::type Write(Stream & s, const T & val)
         {
             Write(s, object_as_tuple(val));
         }
