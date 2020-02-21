@@ -99,7 +99,7 @@ namespace awl::io
         auto & readers = ctx.template FindFieldReaders<Struct>();
         auto & skippers = ctx.GetFieldSkippers();
 
-        auto name_map = ctx.template FindProtoMap<Struct>();
+        const std::vector<size_t> & name_map = ctx.template FindProtoMap<Struct>();
 
         assert(name_map.size() == old_proto.GetCount());
 

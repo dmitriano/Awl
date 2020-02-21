@@ -23,7 +23,7 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A)
 
-        struct B
+    struct B
     {
         int x;
         double y;
@@ -113,7 +113,7 @@ AWT_TEST(Stringizable_ForEach)
 
     awl::for_each_index(a2.as_tuple(), [&a2, &map](auto & val, size_t index)
     {
-        val = std::any_cast<typename std::remove_reference<decltype(val)>::type>(map[a2.get_member_names()[index]]);
+        val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.get_member_names()[index]]);
     });
 
     Assert::IsTrue(a1 == a2);
