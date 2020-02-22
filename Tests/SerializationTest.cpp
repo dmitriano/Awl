@@ -52,6 +52,10 @@ namespace awl
 
             return size;
         }
+        else
+        {
+            static_assert(dependent_false_v<T>);
+        }
     }
 
     template <class T>
@@ -110,6 +114,8 @@ namespace awl
         struct B
         {
             A a;
+            //prevents B from being constexpr
+            //std::string x;
             double z;
 
             AWL_SERIALIZABLE(a, z)
