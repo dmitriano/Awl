@@ -67,6 +67,21 @@ namespace awl
 
         observable_set & operator = (observable_set && other) = default;
 
+        //It does not move observers, only set elements.
+        void migrate(observable_set && other)
+        {
+            clear();
+
+            other.Notify(&INotifySetChanged<T>::OnClearing);
+            m_set = std::move(other.m_set);
+            other.m_set.clear();
+
+            for (const T & elem : *this)
+            {
+                BaseObservable::Notify(&INotifySetChanged<T>::OnAdded, elem);
+            }
+        }
+
         ~observable_set()
         {
             if (!m_set.empty())
