@@ -114,11 +114,9 @@ AWT_TEST(Observable_Move)
     Something something1;
 
     ChangeHandler handler1(context);
-
     ChangeHandler handler2(context);
 
     something1.Subscribe(&handler1);
-
     something1.Subscribe(&handler2);
 
     Something something2 = std::move(something1);
@@ -146,11 +144,9 @@ AWT_TEST(Observer_Move)
     Something something1;
 
     ChangeHandler handler1(context);
-
     ChangeHandler handler2(context);
 
     something1.Subscribe(&handler1);
-
     something1.Subscribe(&handler2);
 
     ChangeHandler handler1_copy = std::move(handler1);
@@ -160,9 +156,13 @@ AWT_TEST(Observer_Move)
     
     something1.SetIt(5);
 
+    Assert::IsFalse(handler1.included(), _T("Observer #1 is included"));
+    Assert::IsFalse(handler2.included(), _T("Observer #2 is included"));
     Assert::IsFalse(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
     Assert::IsFalse(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
+    Assert::IsTrue(handler1_copy.included(), _T("Observer #1 is not included"));
+    Assert::IsTrue(handler2_copy.included(), _T("Observer #2 is not included"));
     Assert::IsTrue(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
     Assert::IsTrue(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
 }
