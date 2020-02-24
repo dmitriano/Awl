@@ -22,6 +22,7 @@ namespace awl
 
         Observer & operator = (Observer && other)
         {
+            quick_link::safe_exclude();
             Move(std::move(other));
             return *this;
         }
@@ -51,10 +52,6 @@ namespace awl
                 auto * prev = other.quick_link::predecessor();
                 other.UnsubscribeSelf();
                 prev->quick_link::insert_after(this);
-            }
-            else
-            {
-                quick_link::safe_exclude();
             }
         }
     };
