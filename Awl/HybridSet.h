@@ -281,6 +281,7 @@ namespace awl
             //Should we copy the allocator?
             m_comp = other.m_comp;
             CopyElements(other);
+            return *this;
         }
 
         hybrid_set & operator = (hybrid_set && other)
@@ -292,6 +293,7 @@ namespace awl
             m_root = std::move(other.m_root);
             m_list = std::move(other.m_list);
             other.m_root = nullptr;
+            return *this;
         }
 
         bool operator == (const hybrid_set & other) const
