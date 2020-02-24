@@ -16,6 +16,8 @@ namespace
     {
     public:
 
+        ChangeHandler() = default;
+        
         ChangeHandler(const TestContext & c) : pContext(&c)
         {
         }
@@ -24,9 +26,7 @@ namespace
 
         bool changeHandled = false;
 
-    private:
-
-        const TestContext * pContext;
+        const TestContext * pContext = nullptr;
     };
 
     void ChangeHandler::ItChanged(int param, awl::String val)
@@ -165,6 +165,59 @@ AWT_TEST(Observer_Move)
     Assert::IsTrue(handler2_copy.included(), _T("Observer #2 is not included"));
     Assert::IsTrue(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
     Assert::IsTrue(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
+}
+
+namespace
+{
+    struct Model
+    {
+        Something something;
+
+        ChangeHandler handler1;
+        ChangeHandler handler2;
+
+        void SetContext(const TestContext & c)
+        {
+            handler1.pContext = &c;
+            handler2.pContext = &c;
+        }
+
+        Model()
+        {
+            something.Subscribe(&handler1);
+            something.Subscribe(&handler2);
+        }
+
+        Model(const Model & other) = delete;
+        Model(Model && other) = default;
+        Model& operator = (const Model& other) = delete;
+        Model& operator = (Model&& other) = default;
+    };
+}
+
+AWT_TEST(Observable_ModelMove)
+{
+    Model m;
+    m.SetContext(context);
+    m.something.SetIt(5);
+
+    Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
+    Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    Assert::IsTrue(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    Assert::IsTrue(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
+
+    m = {};
+    m.SetContext(context);
+
+    Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
+    Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    Assert::IsFalse(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    Assert::IsFalse(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+
+    m.something.SetIt(7);
+
+    Assert::IsTrue(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    Assert::IsTrue(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace

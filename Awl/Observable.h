@@ -91,6 +91,7 @@ namespace awl
 
         Observable& operator = (Observable&& other)
         {
+            Observers.clear();
             Observers = std::move(other.Observers);
             return *this;
         }
