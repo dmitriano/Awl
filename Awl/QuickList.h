@@ -302,15 +302,10 @@ namespace awl
         DLink * last() { return static_cast<DLink *>(backward().first()); }
         const DLink * last() const { return static_cast<const DLink *>(backward().first()); }
 
-        static void insert_after(DLink * p, DLink * a)
-        {
-            p->insert_after(a);
-        }
-
-        static void insert_before(DLink * p, DLink * a)
-        {
-            p->insert_before(a);
-        }
+        //If T is included into multiple lists there can be multiple insert_after in T,
+        //so we cast T to DLink first.
+        static void insert_after(DLink * p, DLink * a) { p->insert_after(a); }
+        static void insert_before(DLink * p, DLink * a) { p->insert_before(a); }
 
         void attach(quick_list & src)
         {
