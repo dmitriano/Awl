@@ -7,27 +7,54 @@ namespace awl
     template <class IObserver>
     class Observer : public IObserver, public quick_link
     {
-    private:
-
-        using Base = quick_link;
-
     public:
+
+        Observer() = default;
+
+        Observer(const Observer & other) = delete;
+
+        Observer(Observer && other)
+        {
+            Move(std::move(other));
+        }
+
+        Observer & operator = (const Observer & other) = delete;
+
+        Observer & operator = (Observer && other)
+        {
+            Move(std::move(other));
+            return *this;
+        }
 
         bool IsSubscribed() const
         {
-            return Base::included();
+            return quick_link::included();
         }
 
         void UnsubscribeSelf()
         {
-            Base::exclude();
+            quick_link::exclude();
         }
 
         ~Observer()
         {
-            if (IsSubscribed())
+            quick_link::safe_exclude();
+        }
+
+    private:
+
+        //Reinserts the copy into the list :)
+        void Move(Observer && other)
+        {
+            if (other.IsSubscribed())
             {
-                UnsubscribeSelf();
+                auto * prev = other.quick_link::predecessor();
+                other.UnsubscribeSelf();
+                prev->quick_link::insert_after(this);
+            }
+            else
+            {
+                quick_link::safe_exclude();
             }
         }
     };

@@ -16,7 +16,7 @@ namespace
     {
     public:
 
-        ChangeHandler(const TestContext & c) : context(c)
+        ChangeHandler(const TestContext & c) : pContext(&c)
         {
         }
 
@@ -26,12 +26,12 @@ namespace
 
     private:
 
-        const TestContext & context;
+        const TestContext * pContext;
     };
 
     void ChangeHandler::ItChanged(int param, awl::String val)
     {
-        context.out << _T("It has changed ") << param << _T(" ") << val << std::endl;
+        pContext->out << _T("It has changed ") << param << _T(" ") << val << std::endl;
 
         if (param == 2)
         {
@@ -139,6 +139,32 @@ AWT_TEST(Observable_Move)
 
     Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
     Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
+}
+
+AWT_TEST(Observer_Move)
+{
+    Something something1;
+
+    ChangeHandler handler1(context);
+
+    ChangeHandler handler2(context);
+
+    something1.Subscribe(&handler1);
+
+    something1.Subscribe(&handler2);
+
+    ChangeHandler handler1_copy = std::move(handler1);
+
+    ChangeHandler handler2_copy(context);
+    handler2_copy = std::move(handler2);
+    
+    something1.SetIt(5);
+
+    Assert::IsFalse(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    Assert::IsFalse(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+
+    Assert::IsTrue(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
+    Assert::IsTrue(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace

@@ -61,10 +61,17 @@ namespace awl
         basic_quick_link does not declare its own members like pNext and all the linking is actually done with the single links.
         IMPORTANT: The link sould not call safe_exclude() in its destructor, because when quick_list::clear() is called, pNull of the elements are not set to nullptr,
         so the link can be in some kind of a detached state in which pNext is not valid at all.*/
-    template <class Dlink>
-    class basic_quick_link : public forward_link<Dlink>, public backward_link<Dlink>
+    template <class DLink>
+    class basic_quick_link : public forward_link<DLink>, public backward_link<DLink>
     {
     public:
+
+        using ForwardLink = forward_link<DLink>;
+        using BackwardLink = backward_link<DLink>;
+
+        //! The elements that are not Nulls are of type DLink, but Nulls are ForwardLink and BackwardLink.
+        using ForwardList = single_list<DLink, ForwardLink>;
+        using BackwardList = single_list<DLink, BackwardLink>;
 
         bool included() const
         {
@@ -75,8 +82,8 @@ namespace awl
         void exclude()
         {
             assert(included());
-            Dlink * prev = static_cast<Dlink *>(this->BackwardLink::next());
-            Dlink * next = static_cast<Dlink *>(this->ForwardLink::next());
+            DLink * prev = static_cast<DLink *>(this->BackwardLink::next());
+            DLink * next = static_cast<DLink *>(this->ForwardLink::next());
             ForwardList::remove_after(prev);
             BackwardList::remove_after(next);
         }
@@ -89,14 +96,33 @@ namespace awl
             }
         }
 
-        using ForwardLink = forward_link<Dlink>;
-        using BackwardLink = backward_link<Dlink>;
+        DLink * predecessor()
+        {
+            return static_cast<DLink *>(this->BackwardLink::next());
+        }
+
+        DLink * successor()
+        {
+            return static_cast<DLink *>(this->ForwardLink::next());
+        }
+
+        //Inserts a after this.
+        void insert_after(DLink * a)
+        {
+            DLink * next = successor();
+            ForwardList::insert_after(this, a);
+            BackwardList::insert_after(next, a);
+        }
+
+        //Inserts a before this.
+        void insert_before(DLink * a)
+        {
+            DLink * prev = predecessor();
+            ForwardList::insert_after(prev, a);
+            BackwardList::insert_after(this, a);
+        }
 
     protected:
-
-        //! The elements that are not Nulls are of type Dlink, but Nulls are ForwardLink and BackwardLink.
-        using ForwardList = single_list<Dlink, ForwardLink>;
-        using BackwardList = single_list<Dlink, BackwardLink>;
 
         basic_quick_link() {}
 
@@ -278,16 +304,12 @@ namespace awl
 
         static void insert_after(DLink * p, DLink * a)
         {
-            DLink * next = static_cast<DLink *>(p->ForwardLink::next());
-            ForwardList::insert_after(p, a);
-            BackwardList::insert_after(next, a);
+            p->insert_after(a);
         }
 
         static void insert_before(DLink * p, DLink * a)
         {
-            DLink * prev = static_cast<DLink *>(p->BackwardLink::next());
-            ForwardList::insert_after(prev, a);
-            BackwardList::insert_after(p, a);
+            p->insert_before(a);
         }
 
         void attach(quick_list & src)
