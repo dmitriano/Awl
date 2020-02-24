@@ -72,13 +72,7 @@ namespace awl
 
         ~Observable()
         {
-            //If the observable is deleted before its observers,
-            //we remove them from the list, otherwise they will think that they are included and
-            //their destructors will delete them from already destroyed list.
-            while (!Observers.empty())
-            {
-                Observers.pop_front();
-            }
+            ClearObservers();
         }
 
         Observable(const Observable& other) = delete;
@@ -91,7 +85,7 @@ namespace awl
 
         Observable& operator = (Observable&& other)
         {
-            Observers.clear();
+            ClearObservers();
             Observers = std::move(other.Observers);
             return *this;
         }
@@ -134,6 +128,18 @@ namespace awl
 
     private:
 
+        //If the observable is deleted before its observers,
+        //we remove them from the list, otherwise they will think that they are included and
+        //their destructors will delete them from already destroyed list.
+        //So we can't use Observers.clear() here because it only clears list's head.
+        void ClearObservers()
+        {
+            while (!Observers.empty())
+            {
+                Observers.pop_front();
+            }
+        }
+        
         using OBSERVER_LIST = quick_list<OBSERVER>;
 
         OBSERVER_LIST Observers;
