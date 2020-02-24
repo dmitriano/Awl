@@ -175,6 +175,7 @@ namespace
 
         ChangeHandler handler1;
         ChangeHandler handler2;
+        ChangeHandler handler3;
 
         void SetContext(const TestContext & c)
         {
@@ -203,6 +204,7 @@ AWT_TEST(Observable_ModelMove)
 
     Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
     Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
     Assert::IsTrue(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
     Assert::IsTrue(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 
@@ -211,6 +213,7 @@ AWT_TEST(Observable_ModelMove)
 
     Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
     Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
     Assert::IsFalse(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
     Assert::IsFalse(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
