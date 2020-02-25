@@ -16,10 +16,10 @@ using namespace awl::testing;
 template <class T>
 static void Insert(const TestContext & context, const awl::Char * type_name)
 {
-    AWL_ATTRIBUTE(size_t, key_range, 1000000);
-    AWL_ATTRIBUTE(size_t, value_range, 1000000);
-    AWL_ATTRIBUTE(size_t, element_count, 100);
-    AWL_ATTRIBUTE(size_t, iteration_count, 10000);
+    AWT_ATTRIBUTE(size_t, key_range, 1000000);
+    AWT_ATTRIBUTE(size_t, value_range, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, 100);
+    AWT_ATTRIBUTE(size_t, iteration_count, 10000);
 
     awl::StopWatch w;
 

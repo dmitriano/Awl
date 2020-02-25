@@ -56,8 +56,8 @@ namespace
 
 AWT_TEST(ForeignSetAddRemoveClear)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(int, range, 1000);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
 
     PrimarySet ps;
     ForeignSet fs;
@@ -104,8 +104,8 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
 AWT_TEST(ForeignSetDestructor)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(int, range, 1000);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
 
     ForeignSet fs;
     

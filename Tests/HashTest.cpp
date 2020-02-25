@@ -34,8 +34,8 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
         Assert::IsFalse(zero_val == typename Hash::value_type{});
     }
 
-    AWL_ATTRIBUTE(size_t, vector_size, 1000000);
-    AWL_ATTRIBUTE(size_t, iteration_count, 100);
+    AWT_ATTRIBUTE(size_t, vector_size, 1000000);
+    AWT_ATTRIBUTE(size_t, iteration_count, 100);
 
     std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[vector_size]);
 

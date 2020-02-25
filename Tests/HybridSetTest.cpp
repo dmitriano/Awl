@@ -211,10 +211,10 @@ namespace
 //--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
 AWT_TEST(HybridSetRandom)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(size_t, range, 1000);
-    AWL_FLAG(print_set);
-    AWL_FLAG(do_not_compare_sets);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(size_t, range, 1000);
+    AWT_FLAG(print_set);
+    AWT_FLAG(do_not_compare_sets);
 
     std::uniform_int_distribution<size_t> dist(1, range);
 
@@ -366,8 +366,8 @@ AWT_TEST(HybridSetCopyMove)
 //--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
 AWT_TEST(HybridSetIndex)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(size_t, range, 1000);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(size_t, range, 1000);
 
     auto set = GenerateIntSet(insert_count, range);
 
@@ -431,8 +431,8 @@ namespace
     template <class Compare>
     void TestComparer(const TestContext & context)
     {
-        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWL_ATTRIBUTE(size_t, range, 1000u);
+        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWT_ATTRIBUTE(size_t, range, 1000u);
 
         auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
 
@@ -469,8 +469,8 @@ namespace
     template <class Compare>
     void TestPointerComparer(const TestContext & context)
     {
-        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWL_ATTRIBUTE(size_t, range, 1000u);
+        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWT_ATTRIBUTE(size_t, range, 1000u);
 
         std::vector<A> v;
 
@@ -518,8 +518,8 @@ namespace
     template <class Compare>
     void TestSmartPointerComparer(const TestContext & context)
     {
-        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWL_ATTRIBUTE(size_t, range, 1000u);
+        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWT_ATTRIBUTE(size_t, range, 1000u);
 
         using Pointer = typename Compare::value_type;
         using A = typename Pointer::element_type;
@@ -653,8 +653,8 @@ namespace
 
 AWT_TEST(HybridSetNonCopyableElement)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(int, range, 2000);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 2000);
 
     auto set = GenerateIntSet<int, B>(insert_count, range);
 
@@ -729,9 +729,9 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
 //--filter HybridSetBoundAndContains.* --insert_count 1000 --range 1200
 AWT_TEST(HybridSetBoundAndContains)
 {
-    AWL_ATTRIBUTE(size_t, insert_count, 1000);
-    AWL_ATTRIBUTE(size_t, range, 1000);
-    AWL_ATTRIBUTE(size_t, iter_count, 1000);
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(size_t, range, 1000);
+    AWT_ATTRIBUTE(size_t, iter_count, 1000);
 
     auto set = GenerateIntSet(insert_count, range);
 

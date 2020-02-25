@@ -35,9 +35,9 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 {
     awl::CancellationFlag cancellation;
 
-    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
-    AWL_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
-    AWL_ATTRIBUTE(size_t, thread_count, 10);
+    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
+    AWT_ATTRIBUTE(size_t, thread_count, 10);
     
     std::vector<std::thread> v;
     v.reserve(thread_count);
@@ -77,7 +77,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
 AWT_TEST(Cancellation_SimpleSleep)
 {
-    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
     awl::CancellationFlag cancellation;
 

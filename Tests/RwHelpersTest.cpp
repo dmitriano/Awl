@@ -12,7 +12,7 @@ using namespace awl::io;
 template <class T>
 static void Test(const TestContext & context, T sample)
 {
-    AWL_ATTRIBUTE(size_t, iteration_count, 10);
+    AWT_ATTRIBUTE(size_t, iteration_count, 10);
 
     std::vector<uint8_t> reusable_v;
 
@@ -229,7 +229,7 @@ AWT_TEST(IoPod)
 template <class T>
 static void TestVector(const TestContext & context, std::vector<T> sample)
 {
-    AWL_ATTRIBUTE(size_t, iteration_count, 10);
+    AWT_ATTRIBUTE(size_t, iteration_count, 10);
 
     std::vector<uint8_t> v;
 

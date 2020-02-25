@@ -303,7 +303,7 @@ namespace
 
 AWT_TEST(VersionedRead)
 {
-    AWL_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, count, 1);
 
     std::vector<uint8_t> v;
 

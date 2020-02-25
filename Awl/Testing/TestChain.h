@@ -69,7 +69,7 @@ namespace awl
 #define AWT_LINK_FUNC_SIGNATURE(test_name) static void AWT_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext & context)
 
 //A test is simply a static function.
-#define AWL_LINK(test_name, suffix) \
+#define AWT_LINK(test_name, suffix) \
     AWT_LINK_FUNC_SIGNATURE(test_name); \
     static awl::testing::TestLink test_name##_##suffix_TestLink(_T(#test_name) _T("_") _T(#suffix), &AWT_LINK_FUNC_NAME(test_name)); \
     AWT_LINK_FUNC_SIGNATURE(test_name)
@@ -77,7 +77,7 @@ namespace awl
 #define AWT_DISABLED_TEST(test_name) \
     AWT_LINK_FUNC_SIGNATURE(test_name)
 
-#define AWT_TEST(test_name) AWL_LINK(test_name, Test)
-#define AWT_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark)
+#define AWT_TEST(test_name) AWT_LINK(test_name, Test)
+#define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
 
 #define AWT_UNUSED_CONTEXT static_cast<void>(context)

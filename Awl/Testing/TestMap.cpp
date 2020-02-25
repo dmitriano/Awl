@@ -62,7 +62,7 @@ namespace awl
 
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
-            AWL_ATTRIBUTE(String, output, _T("failed"));
+            AWT_ATTRIBUTE(String, output, _T("failed"));
 
             context.out << p_test_link->GetName() << _T("...");
 
@@ -124,13 +124,13 @@ namespace awl
 
             auto test_map = awl::testing::CreateTestMap();
 
-            AWL_ATTRIBUTE(std::set<String>, run, {});
+            AWT_ATTRIBUTE(std::set<String>, run, {});
 
             try
             {
                 if (run.empty())
                 {
-                    AWL_ATTRIBUTE(String, filter, _T(".*_Test"));
+                    AWT_ATTRIBUTE(String, filter, _T(".*_Test"));
 
                     auto f = CreateFilter(filter);
 
@@ -193,13 +193,13 @@ namespace awl
 
                 const TestContext context{ awl::cout(), cancellation, cl };
 
-                AWL_FLAG(list);
+                AWT_FLAG(list);
 
                 if (list)
                 {
                     auto test_map = awl::testing::CreateTestMap();
 
-                    AWL_ATTRIBUTE(String, filter, {});
+                    AWT_ATTRIBUTE(String, filter, {});
 
                     auto f = CreateFilter(filter);
 

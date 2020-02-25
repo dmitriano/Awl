@@ -33,8 +33,8 @@ using CorruptFunc = std::function<void(std::vector<uint8_t> &)>;
 template <class Hash, class T>
 static void TestOnVector(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = {})
 {
-    AWL_ATTRIBUTE(size_t, block_size, 64);
-    AWL_ATTRIBUTE(size_t, sample_count, 100);
+    AWT_ATTRIBUTE(size_t, block_size, 64);
+    AWT_ATTRIBUTE(size_t, sample_count, 100);
 
     static std::vector<uint8_t> v;
 
@@ -103,10 +103,10 @@ using CorruptFileFunc = std::function<void(const awl::Char *)>;
 template <class Hash, class T>
 static void TestOnFile(const TestContext & context, Hash hash, const T & sample, const CorruptFileFunc & corrupt = {})
 {
-    AWL_ATTRIBUTE(size_t, block_size, 64);
-    AWL_ATTRIBUTE(size_t, sample_count, 100);
-    AWL_FLAG(buffered);
-    AWL_FLAG(no_hash);
+    AWT_ATTRIBUTE(size_t, block_size, 64);
+    AWT_ATTRIBUTE(size_t, sample_count, 100);
+    AWT_FLAG(buffered);
+    AWT_FLAG(no_hash);
 
     const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
 
@@ -195,7 +195,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 template <class Hash, class T>
 static void TestCorruption(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt, bool eof_allowed)
 {
-    AWL_ATTRIBUTE(size_t, corruption_count, 100);
+    AWT_ATTRIBUTE(size_t, corruption_count, 100);
     
     for (auto i : awl::make_count(corruption_count))
     {
@@ -219,7 +219,7 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
 
 static auto MakeVector(const TestContext & context)
 {
-    AWL_ATTRIBUTE(int, sample_size, 10);
+    AWT_ATTRIBUTE(int, sample_size, 10);
 
     const auto range = awl::make_count(sample_size);
 
