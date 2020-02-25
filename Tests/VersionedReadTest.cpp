@@ -338,7 +338,7 @@ AWT_TEST(VtsReadWrite)
     std::vector<uint8_t> v;
     v.reserve(mem_size);
 
-    context.out << _T("Memory has been allocated. ") << _T(", vector capacity: ") << v.capacity() << std::endl;
+    context.out << v.capacity() << _T(" bytes of memory has been allocated. ") << std::endl;
 
     //do the test
 
@@ -355,6 +355,7 @@ AWT_TEST(VtsReadWrite)
     }
 
     AWT_ASSERT_EQUAL(mem_size, v.size());
+    AWT_ASSERT_EQUAL(mem_size, v.capacity());
 
     if (!only_write)
     {
