@@ -1,11 +1,14 @@
 #include "Awl/Io/Context.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
 
 #include <iostream>
 #include <algorithm>
 #include <functional>
+
+#include "BenchmarkHelpers.h"
 
 using namespace awl::testing;
 
@@ -251,12 +254,12 @@ AWT_TEST(VersionedRead)
 {
     AWL_ATTRIBUTE(size_t, count, 1);
 
-    size_t meta_size;
-    size_t block_size;
-    
     std::vector<uint8_t> v;
 
     //measure data size
+
+    size_t meta_size;
+
     {
         awl::io::VectorOutputStream out(v);
 
@@ -266,6 +269,8 @@ AWT_TEST(VersionedRead)
 
         v.clear();
     }
+
+    size_t block_size;
 
     {
         awl::io::VectorOutputStream out(v);
@@ -277,6 +282,8 @@ AWT_TEST(VersionedRead)
         v.clear();
     }
 
+    //allocate memory
+
     const size_t mem_size = meta_size + block_size * count;
 
     context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
@@ -285,18 +292,30 @@ AWT_TEST(VersionedRead)
 
     context.out << _T("Memory has been allocated. ") << _T(", vector capacity: ") << v.capacity() << std::endl;
 
+    //do the test
+
     {
         awl::io::VectorOutputStream out(v);
 
+        awl::StopWatch w;
+
         WriteDataV1(out, count, true);
+
+        context.out << _T("Test data has been written. ");
+        
+        ReportCount(context, w, count);
+        context.out << _T(", ");
+        ReportSpeed(context, w, v.size());
+
+        context.out << std::endl;
     }
 
     Assert::AreEqual(mem_size, v.size());
     
-    context.out << _T("Test data has been written. ") << _T("Vector size: ") << v.size() << _T(", vector capacity: ") << v.capacity() << std::endl;
-
     {
         awl::io::VectorInputStream in(v);
+
+        awl::StopWatch w;
 
         ReadDataV1(in, count);
     }
