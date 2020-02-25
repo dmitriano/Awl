@@ -127,7 +127,7 @@ namespace awl
         basic_quick_link() {}
 
         //! There should not be template parameter defaults in forward declaration.
-        template <class T1, class DLink> friend class quick_list;
+        template <class T1, class DLink1> friend class quick_list;
 
     public:
 

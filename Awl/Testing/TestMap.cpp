@@ -186,7 +186,7 @@ namespace awl
 
             AttributeProvider ap;
 
-            const TestContext context{ awl::cout(), cancellation, ap };
+            const TestContext context{ awl::cout(), cancellation, ap, false };
 
             return RunAllTests(context);
         }
@@ -199,7 +199,7 @@ namespace awl
 
                 CancellationFlag cancellation;
 
-                const TestContext context{ awl::cout(), cancellation, cl };
+                const TestContext context{ awl::cout(), cancellation, cl, false };
 
                 AWT_FLAG(list);
 
