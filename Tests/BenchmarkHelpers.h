@@ -1,8 +1,16 @@
 #pragma once
 
-#include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
-double ReportSpeed(const awl::testing::TestContext & context, const awl::StopWatch & w, size_t size);
+#include <chrono>
 
-double ReportCount(const awl::testing::TestContext & context, const awl::StopWatch & w, size_t count);
+double ReportSpeed(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t size);
+
+double ReportCount(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t count);
+
+inline void ReportCountAndSpeed(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t count, size_t size)
+{
+    ReportCount(context, d, count);
+    context.out << _T(", ");
+    ReportSpeed(context, d, size);
+}

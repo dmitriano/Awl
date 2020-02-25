@@ -43,6 +43,11 @@ namespace awl
             return std::chrono::steady_clock::now() - startTime;
         }
 
+        operator std::chrono::steady_clock::duration() const
+        {
+            return GetElapsedTime();
+        }
+
     private:
 
         std::chrono::steady_clock::time_point startTime;

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <functional>
+#include <chrono>
 
 #include "BenchmarkHelpers.h"
 
@@ -153,7 +154,7 @@ namespace awl::io
 
 namespace
 {
-    void WriteDataV1(awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
+    std::chrono::steady_clock::duration WriteDataV1(awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
@@ -171,6 +172,8 @@ namespace
             ctx.WriteNewPrototypes(out);
         }
 
+        awl::StopWatch w;
+
         for (size_t i : awl::make_count(count))
         {
             static_cast<void>(i);
@@ -178,13 +181,17 @@ namespace
             awl::io::WriteV(out, a1_expected, ctx);
             awl::io::WriteV(out, b1_expected, ctx);
         }
+
+        return w;
     }
 
-    void ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
     {
         OldContext ctx;
         ctx.ReadOldPrototypes(in);
 
+        awl::StopWatch w;
+        
         for (size_t i : awl::make_count(count))
         {
             static_cast<void>(i);
@@ -199,9 +206,11 @@ namespace
         }
 
         Assert::IsTrue(in.End());
+
+        return w;
     }
 
-    void ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
     {
         NewContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -220,6 +229,8 @@ namespace
             Assert::IsTrue(b1_proto.GetCount() == 2);
         }
 
+        awl::StopWatch w;
+        
         for (size_t i : awl::make_count(count))
         {
             static_cast<void>(i);
@@ -247,6 +258,8 @@ namespace
         }
 
         Assert::IsTrue(in.End());
+
+        return w;
     }
 }
 
@@ -297,15 +310,11 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorOutputStream out(v);
 
-        awl::StopWatch w;
-
-        WriteDataV1(out, count, true);
+        auto d = WriteDataV1(out, count, true);
 
         context.out << _T("Test data has been written. ");
         
-        ReportCount(context, w, count);
-        context.out << _T(", ");
-        ReportSpeed(context, w, v.size());
+        ReportCountAndSpeed(context, d, count, v.size());
 
         context.out << std::endl;
     }
@@ -315,18 +324,24 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorInputStream in(v);
 
-        awl::StopWatch w;
+        auto d = ReadDataV1(in, count);
 
-        ReadDataV1(in, count);
+        context.out << _T("Version 1 has been read. ");
+
+        ReportCountAndSpeed(context, d, count, v.size());
+
+        context.out << std::endl;
     }
-
-    context.out << _T("Version 1 has been read") << std::endl;
 
     {
         awl::io::VectorInputStream in(v);
 
-        ReadDataV2(in, count);
-    }
+        auto d = ReadDataV2(in, count);
 
-    context.out << _T("Version 2 has been read") << std::endl;
+        context.out << _T("Version 2 has been read. ");
+
+        ReportCountAndSpeed(context, d, count, v.size());
+
+        context.out << std::endl;
+    }
 }
