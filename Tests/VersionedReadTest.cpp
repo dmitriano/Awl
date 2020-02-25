@@ -1,6 +1,7 @@
 #include "Awl/Io/Context.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/IntRange.h"
 
 #include <iostream>
 #include <algorithm>
@@ -149,7 +150,7 @@ namespace awl::io
 
 namespace
 {
-    void WriteDataV1(awl::io::SequentialOutputStream & out)
+    void WriteDataV1(awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
@@ -162,27 +163,42 @@ namespace
             Assert::IsTrue(b1_proto.GetCount() == 2);
         }
 
-        ctx.WriteNewPrototypes(out);
+        if (with_metadata)
+        {
+            ctx.WriteNewPrototypes(out);
+        }
 
-        awl::io::WriteV(out, a1_expected, ctx);
-        awl::io::WriteV(out, b1_expected, ctx);
+        for (size_t i : awl::make_count(count))
+        {
+            static_cast<void>(i);
+            
+            awl::io::WriteV(out, a1_expected, ctx);
+            awl::io::WriteV(out, b1_expected, ctx);
+        }
     }
 
-    auto ReadDataV1(awl::io::SequentialInputStream & in)
+    void ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
     {
         OldContext ctx;
         ctx.ReadOldPrototypes(in);
 
-        A1 a1;
-        B1 b1;
+        for (size_t i : awl::make_count(count))
+        {
+            static_cast<void>(i);
 
-        awl::io::ReadV(in, a1, ctx);
-        awl::io::ReadV(in, b1, ctx);
+            A1 a1;
+            B1 b1;
 
-        return std::make_tuple(a1, b1);
+            awl::io::ReadV(in, a1, ctx);
+            awl::io::ReadV(in, b1, ctx);
+
+            Assert::IsTrue(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+        }
+
+        Assert::IsTrue(in.End());
     }
 
-    auto ReadDataV2(awl::io::SequentialInputStream & in)
+    void ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
     {
         NewContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -201,54 +217,97 @@ namespace
             Assert::IsTrue(b1_proto.GetCount() == 2);
         }
 
-        A2 a2;
-        B2 b2;
-        C2 c2;
-
-        awl::io::ReadV(in, a2, ctx);
-
-        //Version 1 data has B2 so the condition is true.
-        Assert::IsTrue(ctx.HasOldPrototype<B2>());
-        awl::io::ReadV(in, b2, ctx);
-
-        //There is no C2 in version 1 so the condition is false.
-        Assert::IsFalse(ctx.HasOldPrototype<C2>());
-
-        //An example of how to read data that may not exist in a previous version.
-        if (ctx.HasOldPrototype<C2>())
+        for (size_t i : awl::make_count(count))
         {
-            awl::io::ReadV(in, c2, ctx);
+            static_cast<void>(i);
+
+            A2 a2;
+            B2 b2;
+            C2 c2;
+
+            awl::io::ReadV(in, a2, ctx);
+
+            //Version 1 data has B2 so the condition is true.
+            Assert::IsTrue(ctx.HasOldPrototype<B2>());
+            awl::io::ReadV(in, b2, ctx);
+
+            //There is no C2 in version 1 so the condition is false.
+            Assert::IsFalse(ctx.HasOldPrototype<C2>());
+
+            //An example of how to read data that may not exist in a previous version.
+            if (ctx.HasOldPrototype<C2>())
+            {
+                awl::io::ReadV(in, c2, ctx);
+            }
+
+            Assert::IsTrue(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
         }
 
-        return std::make_tuple(a2, b2, c2);
+        Assert::IsTrue(in.End());
     }
 }
 
 AWT_TEST(VersionedRead)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_ATTRIBUTE(size_t, count, 1);
 
+    size_t meta_size;
+    size_t block_size;
+    
     std::vector<uint8_t> v;
+
+    //measure data size
+    {
+        awl::io::VectorOutputStream out(v);
+
+        WriteDataV1(out, 0, true);
+
+        meta_size = v.size();
+
+        v.clear();
+    }
 
     {
         awl::io::VectorOutputStream out(v);
 
-        WriteDataV1(out);
+        WriteDataV1(out, 1, false);
+
+        block_size = v.size();
+
+        v.clear();
     }
+
+    const size_t mem_size = meta_size + block_size * count;
+
+    context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+
+    v.reserve(mem_size);
+
+    context.out << _T("Memory has been allocated. ") << _T(", vector capacity: ") << v.capacity() << std::endl;
+
+    {
+        awl::io::VectorOutputStream out(v);
+
+        WriteDataV1(out, count, true);
+    }
+
+    Assert::AreEqual(mem_size, v.size());
+    
+    context.out << _T("Test data has been written. ") << _T("Vector size: ") << v.size() << _T(", vector capacity: ") << v.capacity() << std::endl;
 
     {
         awl::io::VectorInputStream in(v);
 
-        auto t = ReadDataV1(in);
-
-        Assert::IsTrue(t == std::make_tuple(a1_expected, b1_expected));
+        ReadDataV1(in, count);
     }
+
+    context.out << _T("Version 1 has been read") << std::endl;
 
     {
         awl::io::VectorInputStream in(v);
 
-        auto t = ReadDataV2(in);
-
-        Assert::IsTrue(t == std::make_tuple(a2_expected, b2_expected, c2_expected));
+        ReadDataV2(in, count);
     }
+
+    context.out << _T("Version 2 has been read") << std::endl;
 }
