@@ -185,6 +185,44 @@ namespace
         return w;
     }
 
+    inline void SkipStructureIndex(awl::io::SequentialInputStream & in, OldContext & ctx)
+    {
+        if (ctx.serializeStructIndex)
+        {
+            typename OldContext::StructIndexType index;
+            awl::io::Read(in, index);
+        }
+    }
+
+    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t count)
+    {
+        //Skip metadata
+        OldContext ctx;
+        ctx.ReadOldPrototypes(in);
+
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(count))
+        {
+            static_cast<void>(i);
+
+            A1 a1;
+            B1 b1;
+
+            SkipStructureIndex(in, ctx);
+            awl::io::Read(in, a1);
+
+            SkipStructureIndex(in, ctx);
+            awl::io::Read(in, b1);
+
+            Assert::IsTrue(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+        }
+
+        Assert::IsTrue(in.End());
+
+        return w;
+    }
+
     std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
     {
         OldContext ctx;
@@ -321,6 +359,18 @@ AWT_TEST(VersionedRead)
 
     Assert::AreEqual(mem_size, v.size());
     
+    {
+        awl::io::VectorInputStream in(v);
+
+        auto d = ReadDataNoV(in, count);
+
+        context.out << _T("Plain has been read. ");
+
+        ReportCountAndSpeed(context, d, count, v.size());
+
+        context.out << std::endl;
+    }
+
     {
         awl::io::VectorInputStream in(v);
 
