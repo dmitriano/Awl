@@ -12,6 +12,7 @@ namespace awl
 
             void Write(const uint8_t * buffer, size_t count) override
             {
+                static_cast<void>(buffer);
                 m_pos += count;
             }
 

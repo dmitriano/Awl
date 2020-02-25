@@ -1,5 +1,6 @@
 #include "Awl/Io/Context.h"
 #include "Awl/Io/VectorStream.h"
+#include "Awl/Io/MeasureStream.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
@@ -301,36 +302,30 @@ namespace
     }
 }
 
-AWT_TEST(VersionedRead)
+AWT_TEST(VtsRead)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
-
-    std::vector<uint8_t> v;
 
     //measure data size
 
     size_t meta_size;
 
     {
-        awl::io::VectorOutputStream out(v);
+        awl::io::MeasureStream out;
 
         WriteDataV1(context, out, 0, true);
 
-        meta_size = v.size();
-
-        v.clear();
+        meta_size = out.GetLength();
     }
 
     size_t block_size;
 
     {
-        awl::io::VectorOutputStream out(v);
+        awl::io::MeasureStream out;
 
         WriteDataV1(context, out, 1, false);
 
-        block_size = v.size();
-
-        v.clear();
+        block_size = out.GetLength();
     }
 
     //allocate memory
@@ -339,6 +334,7 @@ AWT_TEST(VersionedRead)
 
     context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
 
+    std::vector<uint8_t> v;
     v.reserve(mem_size);
 
     context.out << _T("Memory has been allocated. ") << _T(", vector capacity: ") << v.capacity() << std::endl;
@@ -394,4 +390,19 @@ AWT_TEST(VersionedRead)
 
         context.out << std::endl;
     }
+}
+
+AWT_TEST(VtsWrite)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    awl::io::MeasureStream out;
+
+    auto d = WriteDataV1(context, out, count, true);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
 }
