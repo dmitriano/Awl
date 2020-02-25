@@ -154,17 +154,17 @@ namespace awl::io
 
 namespace
 {
-    std::chrono::steady_clock::duration WriteDataV1(awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
+    std::chrono::steady_clock::duration WriteDataV1(const awl::testing::TestContext & context, awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
 
         {
             auto & a1_proto = ctx.FindNewPrototype<A1>();
-            Assert::IsTrue(a1_proto.GetCount() == 3);
+            AWT_ASSERT_TRUE(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindNewPrototype<B1>();
-            Assert::IsTrue(b1_proto.GetCount() == 2);
+            AWT_ASSERT_TRUE(b1_proto.GetCount() == 2);
         }
 
         if (with_metadata)
@@ -194,7 +194,7 @@ namespace
         }
     }
 
-    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataNoV(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
     {
         //Skip metadata
         OldContext ctx;
@@ -215,15 +215,15 @@ namespace
             SkipStructureIndex(in, ctx);
             awl::io::Read(in, b1);
 
-            Assert::IsTrue(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            AWT_ASSERT_TRUE(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
         }
 
-        Assert::IsTrue(in.End());
+        AWT_ASSERT_TRUE(in.End());
 
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV1(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
     {
         OldContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -240,31 +240,31 @@ namespace
             awl::io::ReadV(in, a1, ctx);
             awl::io::ReadV(in, b1, ctx);
 
-            Assert::IsTrue(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            AWT_ASSERT_TRUE(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
         }
 
-        Assert::IsTrue(in.End());
+        AWT_ASSERT_TRUE(in.End());
 
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV2(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
     {
         NewContext ctx;
         ctx.ReadOldPrototypes(in);
 
         {
             auto & a2_proto = ctx.FindNewPrototype<A2>();
-            Assert::IsTrue(a2_proto.GetCount() == 4);
+            AWT_ASSERT_TRUE(a2_proto.GetCount() == 4);
 
             auto & b2_proto = ctx.FindNewPrototype<B2>();
-            Assert::IsTrue(b2_proto.GetCount() == 3);
+            AWT_ASSERT_TRUE(b2_proto.GetCount() == 3);
 
             auto & a1_proto = ctx.FindOldPrototype<A2>();
-            Assert::IsTrue(a1_proto.GetCount() == 3);
+            AWT_ASSERT_TRUE(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindOldPrototype<B2>();
-            Assert::IsTrue(b1_proto.GetCount() == 2);
+            AWT_ASSERT_TRUE(b1_proto.GetCount() == 2);
         }
 
         awl::StopWatch w;
@@ -280,11 +280,11 @@ namespace
             awl::io::ReadV(in, a2, ctx);
 
             //Version 1 data has B2 so the condition is true.
-            Assert::IsTrue(ctx.HasOldPrototype<B2>());
+            AWT_ASSERT_TRUE(ctx.HasOldPrototype<B2>());
             awl::io::ReadV(in, b2, ctx);
 
             //There is no C2 in version 1 so the condition is false.
-            Assert::IsFalse(ctx.HasOldPrototype<C2>());
+            AWT_ASSERT_FALSE(ctx.HasOldPrototype<C2>());
 
             //An example of how to read data that may not exist in a previous version.
             if (ctx.HasOldPrototype<C2>())
@@ -292,10 +292,10 @@ namespace
                 awl::io::ReadV(in, c2, ctx);
             }
 
-            Assert::IsTrue(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
+            AWT_ASSERT_TRUE(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
         }
 
-        Assert::IsTrue(in.End());
+        AWT_ASSERT_TRUE(in.End());
 
         return w;
     }
@@ -314,7 +314,7 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorOutputStream out(v);
 
-        WriteDataV1(out, 0, true);
+        WriteDataV1(context, out, 0, true);
 
         meta_size = v.size();
 
@@ -326,7 +326,7 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorOutputStream out(v);
 
-        WriteDataV1(out, 1, false);
+        WriteDataV1(context, out, 1, false);
 
         block_size = v.size();
 
@@ -348,7 +348,7 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorOutputStream out(v);
 
-        auto d = WriteDataV1(out, count, true);
+        auto d = WriteDataV1(context, out, count, true);
 
         context.out << _T("Test data has been written. ");
         
@@ -357,12 +357,12 @@ AWT_TEST(VersionedRead)
         context.out << std::endl;
     }
 
-    Assert::AreEqual(mem_size, v.size());
+    AWT_ASSERT_EQUAL(mem_size, v.size());
     
     {
         awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataNoV(in, count);
+        auto d = ReadDataNoV(context, in, count);
 
         context.out << _T("Plain has been read. ");
 
@@ -374,7 +374,7 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataV1(in, count);
+        auto d = ReadDataV1(context, in, count);
 
         context.out << _T("Version 1 has been read. ");
 
@@ -386,7 +386,7 @@ AWT_TEST(VersionedRead)
     {
         awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataV2(in, count);
+        auto d = ReadDataV2(context, in, count);
 
         context.out << _T("Version 2 has been read. ");
 

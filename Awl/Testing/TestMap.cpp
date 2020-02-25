@@ -63,8 +63,16 @@ namespace awl
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
             AWT_ATTRIBUTE(String, output, _T("failed"));
+            AWT_FLAG(no_asserts);
 
-            context.out << p_test_link->GetName() << _T("...");
+            context.out << p_test_link->GetName();
+
+            if (no_asserts)
+            {
+                context.out << _T(" (Asserts are disabled!) ");
+            }
+
+            context.out << _T("...");
 
             std::basic_ostream<Char> * p_out = nullptr;
 
@@ -85,7 +93,7 @@ namespace awl
                 throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
             }
 
-            const TestContext temp_context{ *p_out, context.cancellation, context.ap };
+            const TestContext temp_context{ *p_out, context.cancellation, context.ap, !no_asserts };
 
             p_test_link->Run(temp_context);
 

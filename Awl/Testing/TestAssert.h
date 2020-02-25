@@ -6,57 +6,58 @@
 
 #include <typeinfo>
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    class Assert
     {
-        class Assert
+    public:
+
+        [[noreturn]]
+        static void Fail(const String message = _T("An assertion failed."))
         {
-        public:
-            
-            [[noreturn]]
-            static void Fail(const String message = _T("An assertion failed."))
-            {
-                throw TestException(message);
-            }
+            throw TestException(message);
+        }
 
-            static void IsTrue(bool val, const TCHAR * message = _T("The value is not true."))
+        static void IsTrue(bool val, const TCHAR * message = _T("The value is not true."))
+        {
+            if (!val)
             {
-                if (!val)
-                {
-                    Fail(message);
-                }
+                Fail(message);
             }
+        }
 
-            static void IsFalse(bool val, const TCHAR * message = _T("The value is not false."))
+        static void IsFalse(bool val, const TCHAR * message = _T("The value is not false."))
+        {
+            if (val)
             {
-                if (val)
-                {
-                    Fail(message);
-                }
+                Fail(message);
             }
+        }
 
-            template <typename E, typename A>
-            static void AreEqual(E expected, A actual, const TCHAR * message = _T("The values are not equal."))
+        template <typename E, typename A>
+        static void AreEqual(E expected, A actual, const TCHAR * message = _T("The values are not equal."))
+        {
+            if (expected != actual)
             {
-                if (expected != actual)
-                {
-                    Fail(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
-                }
+                Fail(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
             }
+        }
 
-            template <class E, class Func>
-            static void Throws(Func && func)
+        template <class E, class Func>
+        static void Throws(Func && func)
+        {
+            try
             {
-                try
-                {
-                    func();
-                    Assert::Fail(format() << _T("Exception of type '" ) << FromACString(typeid(E).name()) << _T("' was not thrown."));
-                }
-                catch (const E &)
-                {
-                }
+                func();
+                Assert::Fail(format() << _T("Exception of type '") << FromACString(typeid(E).name()) << _T("' was not thrown."));
             }
-        };
-    }
+            catch (const E &)
+            {
+            }
+        }
+    };
 }
+
+#define AWT_ASSERT_TRUE(cond) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond)
+#define AWT_ASSERT_FALSE(cond) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond)
+#define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual)

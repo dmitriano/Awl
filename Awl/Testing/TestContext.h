@@ -20,6 +20,8 @@ namespace awl
             const Cancellation & cancellation;
 
             const AttributeProvider & ap;
+
+            bool checkAsserts;
         };
     }
 }
