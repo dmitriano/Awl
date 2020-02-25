@@ -302,9 +302,10 @@ namespace
     }
 }
 
-AWT_TEST(VtsRead)
+AWT_TEST(VtsReadWrite)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_FLAG(only_write);
 
     //measure data size
 
@@ -354,45 +355,48 @@ AWT_TEST(VtsRead)
     }
 
     AWT_ASSERT_EQUAL(mem_size, v.size());
-    
+
+    if (!only_write)
     {
-        awl::io::VectorInputStream in(v);
+        {
+            awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataNoV(context, in, count);
+            auto d = ReadDataNoV(context, in, count);
 
-        context.out << _T("Plain has been read. ");
+            context.out << _T("Plain has been read. ");
 
-        ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, count, v.size());
 
-        context.out << std::endl;
-    }
+            context.out << std::endl;
+        }
 
-    {
-        awl::io::VectorInputStream in(v);
+        {
+            awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataV1(context, in, count);
+            auto d = ReadDataV1(context, in, count);
 
-        context.out << _T("Version 1 has been read. ");
+            context.out << _T("Version 1 has been read. ");
 
-        ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, count, v.size());
 
-        context.out << std::endl;
-    }
+            context.out << std::endl;
+        }
 
-    {
-        awl::io::VectorInputStream in(v);
+        {
+            awl::io::VectorInputStream in(v);
 
-        auto d = ReadDataV2(context, in, count);
+            auto d = ReadDataV2(context, in, count);
 
-        context.out << _T("Version 2 has been read. ");
+            context.out << _T("Version 2 has been read. ");
 
-        ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, count, v.size());
 
-        context.out << std::endl;
+            context.out << std::endl;
+        }
     }
 }
 
-AWT_TEST(VtsWrite)
+AWT_TEST(VtsMeasure)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 

@@ -72,7 +72,7 @@ namespace awl
                 context.out << _T(" (Asserts are disabled!) ");
             }
 
-            context.out << _T("...");
+            context.out << _T("...") << std::endl;
 
             std::basic_ostream<Char> * p_out = nullptr;
 
