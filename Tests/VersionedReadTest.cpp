@@ -323,6 +323,35 @@ namespace
 
         return w;
     }
+
+    size_t MeasureStreamSize(const awl::testing::TestContext & context, size_t count)
+    {
+        size_t meta_size;
+
+        {
+            awl::io::MeasureStream out;
+
+            WriteDataV1(context, out, 0, true);
+
+            meta_size = out.GetLength();
+        }
+
+        size_t block_size;
+
+        {
+            awl::io::MeasureStream out;
+
+            WriteDataV1(context, out, 1, false);
+
+            block_size = out.GetLength();
+        }
+
+        const size_t mem_size = meta_size + block_size * count;
+
+        context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+
+        return mem_size;
+    }
 }
 
 AWT_TEST(VtsReadWrite)
@@ -330,33 +359,7 @@ AWT_TEST(VtsReadWrite)
     AWT_ATTRIBUTE(size_t, count, 1);
     AWT_FLAG(only_write);
 
-    //measure data size
-
-    size_t meta_size;
-
-    {
-        awl::io::MeasureStream out;
-
-        WriteDataV1(context, out, 0, true);
-
-        meta_size = out.GetLength();
-    }
-
-    size_t block_size;
-
-    {
-        awl::io::MeasureStream out;
-
-        WriteDataV1(context, out, 1, false);
-
-        block_size = out.GetLength();
-    }
-
-    //allocate memory
-
-    const size_t mem_size = meta_size + block_size * count;
-
-    context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+    const size_t mem_size = MeasureStreamSize(context, count);
 
     std::vector<uint8_t> v;
     v.reserve(mem_size);
@@ -625,4 +628,104 @@ AWT_BENCHMARK(VtsMemSetMove)
 
         context.out << std::endl;
     }
+}
+
+namespace
+{
+    class TestMemoryOutputStream : public awl::io::SequentialOutputStream
+    {
+    public:
+
+        TestMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf.get())
+        {
+            std::memset(pBuf.get(), 0u, m_size);
+        }
+
+        void Write(const uint8_t * buffer, size_t count) override
+        {
+            std::memmove(m_p, buffer, count);
+            m_p += count;
+        }
+
+        size_t GetCapacity() const
+        {
+            return m_size;
+        }
+
+        size_t GetLength() const
+        {
+            return m_p - pBuf.get();
+        }
+
+        void Reset()
+        {
+            m_p = pBuf.get();
+        }
+
+    private:
+
+        const size_t m_size;
+        std::unique_ptr<uint8_t> pBuf;
+        uint8_t * m_p;
+    };
+}
+
+AWT_TEST(VtsWriteMemoryStream)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    const size_t mem_size = MeasureStreamSize(context, count);
+
+    TestMemoryOutputStream out(mem_size);
+
+    {
+        auto d = WriteDataV1(context, out, count, true);
+
+        context.out << _T("Test data has been written. ");
+
+        AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+        AWT_ASSERT_EQUAL(mem_size, out.GetLength());
+
+        ReportCountAndSpeed(context, d, count, mem_size);
+
+        context.out << std::endl;
+    }
+
+    out.Reset();
+
+    {
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(mem_size))
+        {
+            const uint8_t val = static_cast<uint8_t>(i);
+            out.Write(&val, 1);
+        }
+
+        context.out << _T("Bytes has been written. ");
+
+        ReportSpeed(context, w, mem_size);
+
+        context.out << std::endl;
+    }
+}
+
+AWT_BENCHMARK(VtsVolatileInt)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    volatile size_t val;
+
+    const size_t write_count = count * (std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
+        
+    awl::StopWatch w;
+
+    for (size_t i : awl::make_count(write_count))
+    {
+        val = i;
+    }
+
+    ReportCountAndSpeed(context, w, count, count * sizeof(val));
+
+    context.out << std::endl;
 }
