@@ -482,13 +482,28 @@ namespace
     }
 }
 
-AWT_TEST(VtsMeasurePack1)
+AWT_TEST(VtsMeasurePack1Inline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
     awl::io::MeasureStream out;
 
     auto d = WriteDataPack1(context, out, count);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
+
+AWT_TEST(VtsMeasurePack1Virtual)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    awl::io::MeasureStream out;
+
+    auto d = WriteDataPack1(context, static_cast<awl::io::SequentialOutputStream &>(out), count);
 
     context.out << _T("Test data has been written. ");
 
