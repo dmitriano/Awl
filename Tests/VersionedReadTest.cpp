@@ -427,3 +427,64 @@ AWT_TEST(VtsMeasureVirtual)
 
     context.out << std::endl;
 }
+
+namespace
+{
+#pragma pack (push)
+#pragma pack (1)
+
+    struct APack1
+    {
+        int a;
+        double b;
+        std::string c;
+    };
+
+    struct BPack1
+    {
+        int x;
+        bool y;
+    };
+
+#pragma pack (pop)
+
+    static_assert(sizeof(APack1) == sizeof(int) + sizeof(double) + sizeof(std::string));
+
+    static const A1 a_pack1_expected = { 1, 2.0, "abc" };
+    static const B1 b_pack1_expected = { 1, true };
+
+    template <class OutputStream>
+    std::chrono::steady_clock::duration WriteDataPack1(const awl::testing::TestContext & context, OutputStream & out, size_t count)
+    {
+        static_cast<void>(context);
+        
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(count))
+        {
+            static_cast<void>(i);
+
+            awl::io::Write(out, OldContext::StructIndexType{ 25 });
+            awl::io::Write(out, a1_expected);
+            awl::io::Write(out, OldContext::StructIndexType{ 27 });
+            awl::io::Write(out, b1_expected);
+        }
+
+        return w;
+    }
+}
+
+AWT_TEST(VtsMeasurePack1)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    awl::io::MeasureStream out;
+
+    auto d = WriteDataPack1(context, out, count);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
