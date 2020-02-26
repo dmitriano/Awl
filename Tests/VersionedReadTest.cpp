@@ -459,7 +459,9 @@ namespace
     {
         int a;
         double b;
-        std::string c;
+        //std::string c;
+        size_t c_len;
+        char c_data[3];
     };
 
     struct BPack1
@@ -470,10 +472,10 @@ namespace
 
 #pragma pack (pop)
 
-    static_assert(sizeof(APack1) == sizeof(int) + sizeof(double) + sizeof(std::string));
+    static_assert(sizeof(APack1) == sizeof(int) + sizeof(double) + sizeof(size_t) + 3);
 
-    static const A1 a_pack1_expected = { 1, 2.0, "abc" };
-    static const B1 b_pack1_expected = { 1, true };
+    static const APack1 a_pack1_expected = { 1, 2.0, 3u, { 'a', 'b', 'c' } };
+    static const BPack1 b_pack1_expected = { 1, true };
 
     template <class OutputStream, class T>
     void PlainWrite(OutputStream & out, const T & val)
@@ -534,17 +536,93 @@ AWT_TEST(VtsMeasurePack1Virtual)
     context.out << std::endl;
 }
 
-AWT_TEST(VtsMemset)
+namespace
+{
+    template <class OutputStream>
+    std::chrono::steady_clock::duration WriteDataPlain(const awl::testing::TestContext & context, OutputStream & out, size_t count)
+    {
+        static_cast<void>(context);
+
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(count))
+        {
+            static_cast<void>(i);
+
+            OldContext::StructIndexType fakeIndex = 25;
+            PlainWrite(out, fakeIndex);
+            PlainWrite(out, a1_expected.a);
+            PlainWrite(out, a1_expected.b);
+            PlainWrite(out, a1_expected.c.length());
+            out.Write(reinterpret_cast<const uint8_t *>(a1_expected.c.data()), a1_expected.c.length());
+            PlainWrite(out, fakeIndex);
+            PlainWrite(out, b1_expected.x);
+            PlainWrite(out, b1_expected.y);
+        }
+
+        return w;
+    }
+}
+
+AWT_TEST(VtsMeasurePlainInline)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    TestMeasureStream out;
+
+    auto d = WriteDataPlain(context, out, count);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
+
+AWT_TEST(VtsMeasurePlainVirtual)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    TestMeasureStream out;
+
+    auto d = WriteDataPlain(context, static_cast<awl::io::SequentialOutputStream &>(out), count);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
+
+AWT_TEST(VtsMemSetMove)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
     std::unique_ptr<uint8_t> p(new uint8_t[count]);
 
-    awl::StopWatch w;
+    {
+        context.out << _T("std::memset: ");
 
-    std::memset(p.get(), 25u, count);
+        awl::StopWatch w;
 
-    ReportSpeed(context, w, count);
+        std::memset(p.get(), 25u, count);
 
-    context.out << std::endl;
+        ReportSpeed(context, w, count);
+
+        context.out << std::endl;
+    }
+
+    std::unique_ptr<uint8_t> p1(new uint8_t[count]);
+
+    {
+        context.out << _T("std::memmove: ");
+
+        awl::StopWatch w;
+
+        std::memmove(p1.get(), p.get(), count);
+
+        ReportSpeed(context, w, count);
+
+        context.out << std::endl;
+    }
 }
