@@ -81,6 +81,27 @@ namespace
 
     using OldContext = awl::io::Context<std::variant<A1, B1>, FieldV1>;
     using NewContext = awl::io::Context<std::variant<A2, B2, C2>, FieldV2>;
+
+    class TestMeasureStream : public awl::io::SequentialOutputStream
+    {
+    public:
+
+        void Write(const uint8_t * buffer, size_t count) override
+        {
+            static_cast<void>(buffer);
+            m_pos += count;
+        }
+
+        size_t GetLength() const
+        {
+            return m_pos;
+        }
+
+    private:
+
+        //prevent the optimization
+        volatile size_t m_pos = 0;
+    };
 }
 
 namespace awl::io
@@ -402,7 +423,7 @@ AWT_TEST(VtsMeasureInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
-    awl::io::MeasureStream out;
+    TestMeasureStream out;
 
     auto d = WriteDataV1(context, out, count, true);
 
@@ -417,7 +438,7 @@ AWT_TEST(VtsMeasureVirtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
-    awl::io::MeasureStream out;
+    TestMeasureStream out;
 
     auto d = WriteDataV1(context, static_cast<awl::io::SequentialOutputStream &>(out), count, true);
 
@@ -486,7 +507,7 @@ AWT_TEST(VtsMeasurePack1Inline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
-    awl::io::MeasureStream out;
+    TestMeasureStream out;
 
     auto d = WriteDataPack1(context, out, count);
 
@@ -501,7 +522,7 @@ AWT_TEST(VtsMeasurePack1Virtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
-    awl::io::MeasureStream out;
+    TestMeasureStream out;
 
     auto d = WriteDataPack1(context, static_cast<awl::io::SequentialOutputStream &>(out), count);
 
