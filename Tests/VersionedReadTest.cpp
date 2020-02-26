@@ -324,10 +324,11 @@ namespace
         return w;
     }
 
-    size_t MeasureStreamSize(const awl::testing::TestContext & context, size_t count)
+    size_t MeasureStreamSize(const awl::testing::TestContext & context, size_t count, bool include_meta = true)
     {
-        size_t meta_size;
+        size_t meta_size = 0;
 
+        if (include_meta)
         {
             awl::io::MeasureStream out;
 
@@ -348,7 +349,12 @@ namespace
 
         const size_t mem_size = meta_size + block_size * count;
 
-        context.out << _T("Meta size: ") << meta_size << _T(", block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+        if (include_meta)
+        {
+            context.out << _T("Meta size: ") << meta_size << _T(", ");
+        }
+
+        context.out << _T("block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
 
         return mem_size;
     }
@@ -423,7 +429,7 @@ AWT_TEST(VtsReadWrite)
     }
 }
 
-AWT_BENCHMARK(VtsMeasureInline)
+AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -438,7 +444,7 @@ AWT_BENCHMARK(VtsMeasureInline)
     context.out << std::endl;
 }
 
-AWT_BENCHMARK(VtsMeasureVirtual)
+AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -513,9 +519,13 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
+    const size_t mem_size = MeasureStreamSize(context, count, false);
+
     TestMeasureStream out;
 
     auto d = WriteDataPack1(context, out, count);
+
+    AWT_ASSERT_TRUE(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 
@@ -571,9 +581,13 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
+    const size_t mem_size = MeasureStreamSize(context, count, false);
+    
     TestMeasureStream out;
 
     auto d = WriteDataPlain(context, out, count);
+
+    AWT_ASSERT_TRUE(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 
@@ -703,6 +717,9 @@ AWT_TEST(VtsWriteMemoryStream)
         }
 
         context.out << _T("Bytes has been written. ");
+
+        AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+        AWT_ASSERT_EQUAL(mem_size, out.GetLength());
 
         ReportSpeed(context, w, mem_size);
 
