@@ -453,6 +453,13 @@ namespace
     static const A1 a_pack1_expected = { 1, 2.0, "abc" };
     static const B1 b_pack1_expected = { 1, true };
 
+    template <class OutputStream, class T>
+    void PlainWrite(OutputStream & out, const T & val)
+    {
+        const uint8_t * bytes = reinterpret_cast<const uint8_t *>(&val);
+        out.Write(bytes, sizeof(T));
+    }
+    
     template <class OutputStream>
     std::chrono::steady_clock::duration WriteDataPack1(const awl::testing::TestContext & context, OutputStream & out, size_t count)
     {
@@ -464,10 +471,11 @@ namespace
         {
             static_cast<void>(i);
 
-            awl::io::Write(out, OldContext::StructIndexType{ 25 });
-            awl::io::Write(out, a1_expected);
-            awl::io::Write(out, OldContext::StructIndexType{ 27 });
-            awl::io::Write(out, b1_expected);
+            OldContext::StructIndexType fakeIndex = 25;
+            PlainWrite(out, fakeIndex);
+            PlainWrite(out, a_pack1_expected);
+            PlainWrite(out, fakeIndex);
+            PlainWrite(out, b_pack1_expected);
         }
 
         return w;
