@@ -420,7 +420,7 @@ AWT_TEST(VtsReadWrite)
     }
 }
 
-AWT_TEST(VtsMeasureInline)
+AWT_BENCHMARK(VtsMeasureInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -435,7 +435,7 @@ AWT_TEST(VtsMeasureInline)
     context.out << std::endl;
 }
 
-AWT_TEST(VtsMeasureVirtual)
+AWT_BENCHMARK(VtsMeasureVirtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -478,7 +478,7 @@ namespace
     static const BPack1 b_pack1_expected = { 1, true };
 
     template <class OutputStream, class T>
-    void PlainWrite(OutputStream & out, const T & val)
+    inline void PlainWrite(OutputStream & out, const T & val)
     {
         const uint8_t * bytes = reinterpret_cast<const uint8_t *>(&val);
         out.Write(bytes, sizeof(T));
@@ -506,7 +506,7 @@ namespace
     }
 }
 
-AWT_TEST(VtsMeasurePack1Inline)
+AWT_BENCHMARK(VtsMeasurePack1Inline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -521,7 +521,7 @@ AWT_TEST(VtsMeasurePack1Inline)
     context.out << std::endl;
 }
 
-AWT_TEST(VtsMeasurePack1Virtual)
+AWT_BENCHMARK(VtsMeasurePack1Virtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -564,7 +564,7 @@ namespace
     }
 }
 
-AWT_TEST(VtsMeasurePlainInline)
+AWT_BENCHMARK(VtsMeasurePlainInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -579,7 +579,7 @@ AWT_TEST(VtsMeasurePlainInline)
     context.out << std::endl;
 }
 
-AWT_TEST(VtsMeasurePlainVirtual)
+AWT_BENCHMARK(VtsMeasurePlainVirtual)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
@@ -594,7 +594,7 @@ AWT_TEST(VtsMeasurePlainVirtual)
     context.out << std::endl;
 }
 
-AWT_TEST(VtsMemSetMove)
+AWT_BENCHMARK(VtsMemSetMove)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
