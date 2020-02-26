@@ -58,6 +58,9 @@ namespace awl::testing
     };
 }
 
-#define AWT_ASSERT_TRUE(cond) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond, _T(#cond))
-#define AWT_ASSERT_FALSE(cond) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond, _T(#cond))
-#define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected))
+#define AWT_STRINGIFY(x) #x
+#define AWT_TOSTRING(x) AWT_STRINGIFY(x)
+#define AWT_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWT_TOSTRING(__LINE__))
+#define AWT_ASSERT_TRUE(cond) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond, _T(#cond) AWT_SRC_INFO)
+#define AWT_ASSERT_FALSE(cond) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond, _T(#cond) AWT_SRC_INFO)
+#define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWT_SRC_INFO)
