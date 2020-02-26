@@ -60,4 +60,4 @@ namespace awl::testing
 
 #define AWT_ASSERT_TRUE(cond) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond, _T(#cond))
 #define AWT_ASSERT_FALSE(cond) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond, _T(#cond))
-#define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual)
+#define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected))
