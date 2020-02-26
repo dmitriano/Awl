@@ -155,7 +155,8 @@ namespace awl::io
 
 namespace
 {
-    std::chrono::steady_clock::duration WriteDataV1(const awl::testing::TestContext & context, awl::io::SequentialOutputStream & out, size_t count, bool with_metadata)
+    template <class OutputStream>
+    std::chrono::steady_clock::duration WriteDataV1(const awl::testing::TestContext & context, OutputStream & out, size_t count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
@@ -397,13 +398,28 @@ AWT_TEST(VtsReadWrite)
     }
 }
 
-AWT_TEST(VtsMeasure)
+AWT_TEST(VtsMeasureInline)
 {
     AWT_ATTRIBUTE(size_t, count, 1);
 
     awl::io::MeasureStream out;
 
     auto d = WriteDataV1(context, out, count, true);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
+
+AWT_TEST(VtsMeasureVirtual)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    awl::io::MeasureStream out;
+
+    auto d = WriteDataV1(context, static_cast<awl::io::SequentialOutputStream &>(out), count, true);
 
     context.out << _T("Test data has been written. ");
 
