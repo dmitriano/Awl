@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <functional>
 #include <chrono>
+#include <memory>
 
 #include "BenchmarkHelpers.h"
 
@@ -529,6 +530,21 @@ AWT_TEST(VtsMeasurePack1Virtual)
     context.out << _T("Test data has been written. ");
 
     ReportCountAndSpeed(context, d, count, out.GetLength());
+
+    context.out << std::endl;
+}
+
+AWT_TEST(VtsMemset)
+{
+    AWT_ATTRIBUTE(size_t, count, 1);
+
+    std::unique_ptr<uint8_t> p(new uint8_t[count]);
+
+    awl::StopWatch w;
+
+    std::memset(p.get(), 25u, count);
+
+    ReportSpeed(context, w, count);
 
     context.out << std::endl;
 }
