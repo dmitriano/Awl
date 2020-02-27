@@ -88,7 +88,7 @@ namespace awl
         void InsertExisting(int val)
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
-            Assert::IsFalse(p.second);
+            AWT_ASSERT_FALSE(p.second);
         }
 
         Set set;

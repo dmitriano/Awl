@@ -31,7 +31,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         auto zero_val = hash(r.begin(), r.end());
 
-        Assert::IsFalse(zero_val == typename Hash::value_type{});
+        AWT_ASSERT_FALSE(zero_val == typename Hash::value_type{});
     }
 
     AWT_ATTRIBUTE(size_t, vector_size, 1000000);

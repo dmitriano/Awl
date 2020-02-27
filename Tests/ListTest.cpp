@@ -90,21 +90,21 @@ namespace
             AWT_ASSERT_TRUE(list.empty());
             Assert::AreEqual(size_t(0), list.size());
             AWT_ASSERT_TRUE(list.empty_or_contains_one());
-            Assert::IsFalse(list.contains_one());
+            AWT_ASSERT_FALSE(list.contains_one());
 
             list.push_back(new Element(1));
 
-            Assert::IsFalse(list.empty());
+            AWT_ASSERT_FALSE(list.empty());
             Assert::AreEqual(size_t(1), list.size());
             AWT_ASSERT_TRUE(list.empty_or_contains_one());
             AWT_ASSERT_TRUE(list.contains_one());
 
             list.push_back(new Element(2));
 
-            Assert::IsFalse(list.empty());
+            AWT_ASSERT_FALSE(list.empty());
             Assert::AreEqual(size_t(2), list.size());
-            Assert::IsFalse(list.empty_or_contains_one());
-            Assert::IsFalse(list.contains_one());
+            AWT_ASSERT_FALSE(list.empty_or_contains_one());
+            AWT_ASSERT_FALSE(list.contains_one());
 
             list.push_front(new Element(0));
 
@@ -293,7 +293,7 @@ namespace
 
             list.erase(i++); //This only excludes the element from the list but not deletes it.
 
-            Assert::IsFalse(p_element_to_be_deleted->DLink::included());
+            AWT_ASSERT_FALSE(p_element_to_be_deleted->DLink::included());
 
             delete p_element_to_be_deleted;
 

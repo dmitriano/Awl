@@ -36,44 +36,44 @@ AWT_TEST(BitMapWithEnumTraits)
     static_assert(car[Vehicle::Car]);
     AWT_ASSERT_TRUE(car & Vehicle::Car);
     AWT_ASSERT_TRUE(car | Vehicle::Car);
-    Assert::IsFalse(car ^ Vehicle::Car);
+    AWT_ASSERT_FALSE(car ^ Vehicle::Car);
 
     static_assert(!car[Vehicle::Train]);
-    Assert::IsFalse(car & Vehicle::Train);
-    Assert::IsFalse(car & Vehicle::Train);
+    AWT_ASSERT_FALSE(car & Vehicle::Train);
+    AWT_ASSERT_FALSE(car & Vehicle::Train);
     AWT_ASSERT_TRUE(car | Vehicle::Train);
     AWT_ASSERT_TRUE((car ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> other = ~car;
 
-    Assert::IsFalse(other[Vehicle::Car]);
-    Assert::IsFalse(other & Vehicle::Car);
+    AWT_ASSERT_FALSE(other[Vehicle::Car]);
+    AWT_ASSERT_FALSE(other & Vehicle::Car);
     AWT_ASSERT_TRUE(other | Vehicle::Car);
     AWT_ASSERT_TRUE(other ^ Vehicle::Car);
 
     AWT_ASSERT_TRUE(other[Vehicle::Train] && other[Vehicle::AirPlain]);
     AWT_ASSERT_TRUE((other & Vehicle::Train) && (other & Vehicle::AirPlain));
-    Assert::IsFalse(other & Vehicle::Car);
+    AWT_ASSERT_FALSE(other & Vehicle::Car);
     AWT_ASSERT_TRUE(other | Vehicle::Car);
-    Assert::IsFalse((other ^ Vehicle::Train) & Vehicle::Car);
+    AWT_ASSERT_FALSE((other ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> all = car | other;
     AWT_ASSERT_TRUE(all.all());
     AWT_ASSERT_TRUE(all == (car ^ other));
-    Assert::IsFalse(car & other);
+    AWT_ASSERT_FALSE(car & other);
 
     const awl::bitmap<Vehicle> none = ~all;
     AWT_ASSERT_TRUE(none.none());
-    Assert::IsFalse(none);
+    AWT_ASSERT_FALSE(none);
 
     AWT_ASSERT_TRUE(all == ~none);
 
     awl::bitmap<Vehicle> var;
-    Assert::IsFalse(var);
+    AWT_ASSERT_FALSE(var);
     var[Vehicle::Car] = true;
     AWT_ASSERT_TRUE(var[Vehicle::Car]);
-    Assert::IsFalse(var[Vehicle::Train]);
-    Assert::IsFalse(var[Vehicle::AirPlain]);
+    AWT_ASSERT_FALSE(var[Vehicle::Train]);
+    AWT_ASSERT_FALSE(var[Vehicle::AirPlain]);
     AWT_ASSERT_TRUE(var == car);
     AWT_ASSERT_TRUE(var != other);
 

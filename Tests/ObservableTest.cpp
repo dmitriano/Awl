@@ -156,10 +156,10 @@ AWT_TEST(Observer_Move)
     
     something1.SetIt(5);
 
-    Assert::IsFalse(handler1.included(), _T("Observer #1 is included"));
-    Assert::IsFalse(handler2.included(), _T("Observer #2 is included"));
-    Assert::IsFalse(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
-    Assert::IsFalse(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+    AWT_ASSERT_IS_FALSE(handler1.included(), _T("Observer #1 is included"));
+    AWT_ASSERT_IS_FALSE(handler2.included(), _T("Observer #2 is included"));
+    AWT_ASSERT_IS_FALSE(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    AWT_ASSERT_IS_FALSE(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
     AWT_ASSERT_IS_TRUE(handler1_copy.included(), _T("Observer #1 is not included"));
     AWT_ASSERT_IS_TRUE(handler2_copy.included(), _T("Observer #2 is not included"));
@@ -204,7 +204,7 @@ AWT_TEST(Observable_ModelMove)
 
     AWT_ASSERT_IS_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
     AWT_ASSERT_IS_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
-    Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
+    AWT_ASSERT_IS_FALSE(m.handler3.included(), _T("Observer #3 is included"));
     AWT_ASSERT_IS_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
     AWT_ASSERT_IS_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 
@@ -213,9 +213,9 @@ AWT_TEST(Observable_ModelMove)
 
     AWT_ASSERT_IS_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
     AWT_ASSERT_IS_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
-    Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
-    Assert::IsFalse(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
-    Assert::IsFalse(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+    AWT_ASSERT_IS_FALSE(m.handler3.included(), _T("Observer #3 is included"));
+    AWT_ASSERT_IS_FALSE(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    AWT_ASSERT_IS_FALSE(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
     m.something.SetIt(7);
 
