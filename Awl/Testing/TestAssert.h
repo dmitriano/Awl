@@ -58,9 +58,6 @@ namespace awl::testing
     };
 }
 
-//a possible solution for escaping the comma
-#define AWT_LIST(...) __VA_ARGS__
-
 #define AWT_STRINGIFY(x) #x
 #define AWT_TOSTRING(x) AWT_STRINGIFY(x)
 #define AWT_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWT_TOSTRING(__LINE__))

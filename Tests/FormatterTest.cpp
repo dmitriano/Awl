@@ -19,7 +19,7 @@ static void TestIntContainer(const C * sample)
 
     V v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE(v == V { AWT_LIST(10, -3, 50) });
+    AWT_ASSERT_TRUE((v == V { 10, -3, 50 }));
 
     TString s_result = F::ToString(v);
 
@@ -45,7 +45,7 @@ AWT_TEST(Formatter_StringContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE(v == V { AWT_LIST(_T("a"), _T("b"), _T("cde")) });
+    AWT_ASSERT_TRUE((v == V { _T("a"), _T("b"), _T("cde") }));
 
     String s_result = F::ToString(v);
 
@@ -63,7 +63,7 @@ AWT_TEST(Formatter_BoolContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE(v == V { AWT_LIST(true, false, false) });
+    AWT_ASSERT_TRUE((v == V { true, false, false }));
 
     String s_result = F::ToString(v);
 

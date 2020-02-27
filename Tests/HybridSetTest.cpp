@@ -350,7 +350,7 @@ AWT_TEST(HybridSetCopyMove)
     using Set = awl::hybrid_set<int>;
     
     const Set sample = GenerateIntSet<int>(1000, 1000);
-    AWT_ASSERT_TRUE(sample != Set{ AWT_LIST(-1, -2, -3, -4, -5) });
+    AWT_ASSERT_TRUE((sample != Set{ -1, -2, -3, -4, -5 }));
 
     const Set copy = sample;
     AWT_ASSERT_TRUE(copy == sample);

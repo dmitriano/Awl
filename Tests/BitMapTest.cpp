@@ -103,7 +103,7 @@ namespace BitMapTest1
         static void Test()
         {
             AWT_ASSERT_TRUE(GameLevel1BitMap{}.none());
-            AWT_ASSERT_TRUE(GameLevel1BitMap{ AWT_LIST(GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert) }.all());
+            AWT_ASSERT_TRUE((GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all()));
         }
 
         //error: Cannot specialize template in current scope.
@@ -122,13 +122,13 @@ AWT_TEST(BitMapEnclosed)
     A::Test();
 
     AWT_ASSERT_TRUE(A({ }).m_bm.none());
-    AWT_ASSERT_TRUE(A({ AWT_LIST(A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert) }).m_bm.all());
+    AWT_ASSERT_TRUE((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
 
     using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
     AWT_ASSERT_TRUE(GameLevelBitMap2{ }.none());
-    AWT_ASSERT_TRUE(GameLevelBitMap2{ AWT_LIST(A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert) }.all());
+    AWT_ASSERT_TRUE((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 
     using GameLevelBitMap3 = awl::bitmap<A::GameLevel>;
     AWT_ASSERT_TRUE(GameLevelBitMap3{ }.none());
-    AWT_ASSERT_TRUE(GameLevelBitMap3{ AWT_LIST(A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert) }.all());
+    AWT_ASSERT_TRUE((GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 }
