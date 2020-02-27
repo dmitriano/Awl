@@ -185,10 +185,10 @@ namespace
 
         {
             auto & a1_proto = ctx.FindNewPrototype<A1>();
-            AWT_ASSERT_TRUE(a1_proto.GetCount() == 3);
+            AWT_ASSERT(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindNewPrototype<B1>();
-            AWT_ASSERT_TRUE(b1_proto.GetCount() == 2);
+            AWT_ASSERT(b1_proto.GetCount() == 2);
         }
 
         if (with_metadata)
@@ -239,10 +239,10 @@ namespace
             SkipStructureIndex(in, ctx);
             awl::io::Read(in, b1);
 
-            AWT_ASSERT_TRUE(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            AWT_ASSERT(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
         }
 
-        AWT_ASSERT_TRUE(in.End());
+        AWT_ASSERT(in.End());
 
         return w;
     }
@@ -264,10 +264,10 @@ namespace
             awl::io::ReadV(in, a1, ctx);
             awl::io::ReadV(in, b1, ctx);
 
-            AWT_ASSERT_TRUE(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            AWT_ASSERT(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
         }
 
-        AWT_ASSERT_TRUE(in.End());
+        AWT_ASSERT(in.End());
 
         return w;
     }
@@ -279,16 +279,16 @@ namespace
 
         {
             auto & a2_proto = ctx.FindNewPrototype<A2>();
-            AWT_ASSERT_TRUE(a2_proto.GetCount() == 4);
+            AWT_ASSERT(a2_proto.GetCount() == 4);
 
             auto & b2_proto = ctx.FindNewPrototype<B2>();
-            AWT_ASSERT_TRUE(b2_proto.GetCount() == 3);
+            AWT_ASSERT(b2_proto.GetCount() == 3);
 
             auto & a1_proto = ctx.FindOldPrototype<A2>();
-            AWT_ASSERT_TRUE(a1_proto.GetCount() == 3);
+            AWT_ASSERT(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindOldPrototype<B2>();
-            AWT_ASSERT_TRUE(b1_proto.GetCount() == 2);
+            AWT_ASSERT(b1_proto.GetCount() == 2);
         }
 
         awl::StopWatch w;
@@ -304,7 +304,7 @@ namespace
             awl::io::ReadV(in, a2, ctx);
 
             //Version 1 data has B2 so the condition is true.
-            AWT_ASSERT_TRUE(ctx.HasOldPrototype<B2>());
+            AWT_ASSERT(ctx.HasOldPrototype<B2>());
             awl::io::ReadV(in, b2, ctx);
 
             //There is no C2 in version 1 so the condition is false.
@@ -316,10 +316,10 @@ namespace
                 awl::io::ReadV(in, c2, ctx);
             }
 
-            AWT_ASSERT_TRUE(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
+            AWT_ASSERT(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
         }
 
-        AWT_ASSERT_TRUE(in.End());
+        AWT_ASSERT(in.End());
 
         return w;
     }
@@ -523,7 +523,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
     auto d = WriteDataPack1(out, count);
 
-    AWT_ASSERT_TRUE(mem_size == out.GetLength());
+    AWT_ASSERT(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 
@@ -583,7 +583,7 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 
     auto d = WriteDataPlain(out, count);
 
-    AWT_ASSERT_TRUE(mem_size == out.GetLength());
+    AWT_ASSERT(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 

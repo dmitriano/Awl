@@ -64,6 +64,9 @@ namespace awl::testing
 
 #define AWT_FAIL(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
 
+#define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) AWT_SRC_INFO)
+#define AWT_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+
 #define AWT_ASSERT_TRUE(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) AWT_SRC_INFO)
 #define AWT_ASSERTM_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
