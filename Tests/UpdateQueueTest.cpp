@@ -64,7 +64,7 @@ namespace
     {
         GameScene scene;
 
-        AWT_ASSERT_IS_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
+        AWT_ASSERTM_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
 
         scene.Draw(context);
 
@@ -72,7 +72,7 @@ namespace
 
         updateQueue.ApplyUpdates(scene);
 
-        AWT_ASSERT_IS_TRUE(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
+        AWT_ASSERTM_TRUE(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 
         scene.Draw(context);
     }

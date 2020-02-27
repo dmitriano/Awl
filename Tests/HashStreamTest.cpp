@@ -81,7 +81,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
             Read(hin, result);
 
-            AWT_ASSERT_IS_TRUE(sample == result, _T("read/write mismatch."));
+            AWT_ASSERTM_TRUE(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -172,7 +172,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
             Read(redirected_in, result);
 
-            AWT_ASSERT_IS_TRUE(sample == result, _T("read/write mismatch."));
+            AWT_ASSERTM_TRUE(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -212,7 +212,7 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         }
         catch (const EndOfFileException &)
         {
-            AWT_ASSERT_IS_TRUE(eof_allowed, _T("End of file is not allowed."));
+            AWT_ASSERTM_TRUE(eof_allowed, _T("End of file is not allowed."));
         }
     }
 }

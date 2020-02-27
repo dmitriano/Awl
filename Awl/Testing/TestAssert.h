@@ -65,10 +65,10 @@ namespace awl::testing
 #define AWT_FAIL(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
 
 #define AWT_ASSERT_TRUE(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) AWT_SRC_INFO)
-#define AWT_ASSERT_IS_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+#define AWT_ASSERTM_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
 #define AWT_ASSERT_FALSE(cond) awl::testing::Assert::IsFalse(cond, _T(#cond) AWT_SRC_INFO)
-#define AWT_ASSERT_IS_FALSE(cond, message) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+#define AWT_ASSERTM_FALSE(cond, message) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
 #define AWT_ASSERT_EQUAL(expected, actual) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWT_SRC_INFO)
-#define AWT_ASSERT_ARE_EQUAL(expected, actual, message) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWT_SRC_INFO)
+#define AWT_ASSERTM_EQUAL(expected, actual, message) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWT_SRC_INFO)
