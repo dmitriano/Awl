@@ -81,7 +81,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
             Read(hin, result);
 
-            AWT_ASSERTM_TRUE(sample == result, _T("read/write mismatch."));
+            AWT_ASSERTM(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -93,8 +93,8 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
             context.out << std::endl;
         }
 
-        AWT_ASSERT_TRUE(in.End());
-        AWT_ASSERT_TRUE(hin.End());
+        AWT_ASSERT(in.End());
+        AWT_ASSERT(hin.End());
     }
 }
 
@@ -105,7 +105,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 {
     AWT_ATTRIBUTE(size_t, block_size, 64);
     AWT_ATTRIBUTE(size_t, sample_count, 100);
-    AWT_FLAG(buffered);
+    AWT_FLAG(not_buffered);
     AWT_FLAG(no_hash);
 
     const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
@@ -115,7 +115,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
     {
         std::ofstream fout;
         
-        if (!buffered)
+        if (not_buffered)
         {
             fout.rdbuf()->pubsetbuf(0, 0);
         }
@@ -151,7 +151,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
     {
         std::ifstream fin;
 
-        if (!buffered)
+        if (not_buffered)
         {
             fin.rdbuf()->pubsetbuf(0, 0);
         }
@@ -172,7 +172,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
             Read(redirected_in, result);
 
-            AWT_ASSERTM_TRUE(sample == result, _T("read/write mismatch."));
+            AWT_ASSERTM(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -184,8 +184,8 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             context.out << std::endl;
         }
 
-        AWT_ASSERT_TRUE(in.End());
-        AWT_ASSERT_TRUE(hin.End());
+        AWT_ASSERT(in.End());
+        AWT_ASSERT(hin.End());
     }
 
     //There is no wchar_t version in C++.
@@ -212,7 +212,7 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         }
         catch (const EndOfFileException &)
         {
-            AWT_ASSERTM_TRUE(eof_allowed, _T("End of file is not allowed."));
+            AWT_ASSERTM(eof_allowed, _T("End of file is not allowed."));
         }
     }
 }
