@@ -64,19 +64,15 @@ namespace
     {
         GameScene scene;
 
-        Assert::IsTrue(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
+        AWT_ASSERT_IS_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
 
         scene.Draw(context);
 
-        //GCC 4.7.3 does not have std::this_thread::sleep.
-#if !(__GNUC__ == 4 && __GNUC_MINOR__ == 7)
-    //This sleep simulates the delay between flips that can be 1000/60 = 16.66ms, for example. (is not compiled by GCC 4.7.3)
         std::this_thread::sleep_for(std::chrono::milliseconds(17));
-#endif
 
         updateQueue.ApplyUpdates(scene);
 
-        Assert::IsTrue(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
+        AWT_ASSERT_IS_TRUE(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 
         scene.Draw(context);
     }

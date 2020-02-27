@@ -35,11 +35,11 @@ namespace awl
             }
 
             Set::Node * pn3 = set.FindNodeByKey(3);
-            Assert::IsTrue(pn3 != nullptr);
-            Assert::IsTrue(pn3->value == 3);
+            AWT_ASSERT_TRUE(pn3 != nullptr);
+            AWT_ASSERT_TRUE(pn3->value == 3);
 
             Set::Node * pn7 = set.FindNodeByKey(7);
-            Assert::IsTrue(pn7 == nullptr);
+            AWT_ASSERT_TRUE(pn7 == nullptr);
 
             {
                 std::array<Set::Node *, count> nodes = { n1, n2, n3, n4, n5 };
@@ -51,8 +51,8 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    Assert::IsTrue(set.GetPredecessor(x) == predecessor);
-                    Assert::IsTrue(set.GetSuccessor(x) == successor);
+                    AWT_ASSERT_TRUE(set.GetPredecessor(x) == predecessor);
+                    AWT_ASSERT_TRUE(set.GetSuccessor(x) == successor);
                 }
             }
 
@@ -63,17 +63,17 @@ namespace awl
             Assert::AreEqual(nN->value, set.back());
 
             set.RemoveNode(n1);
-            Assert::IsTrue(set.m_root == n2);
+            AWT_ASSERT_TRUE(set.m_root == n2);
             set.RemoveNode(n2);
-            Assert::IsTrue(set.m_root == n4);
+            AWT_ASSERT_TRUE(set.m_root == n4);
             set.RemoveNode(n4);
-            Assert::IsTrue(set.m_root == n5);
+            AWT_ASSERT_TRUE(set.m_root == n5);
             set.RemoveNode(n3);
-            Assert::IsTrue(set.m_root == n5);
+            AWT_ASSERT_TRUE(set.m_root == n5);
             set.RemoveNode(n5);
-            Assert::IsTrue(set.m_root == nN);
+            AWT_ASSERT_TRUE(set.m_root == nN);
             set.RemoveNode(nN);
-            Assert::IsTrue(set.m_root == nullptr);
+            AWT_ASSERT_TRUE(set.m_root == nullptr);
         }
 
     private:
@@ -81,7 +81,7 @@ namespace awl
         Set::Node * InsertNew(int val)
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
-            Assert::IsTrue(p.second);
+            AWT_ASSERT_TRUE(p.second);
             return *(Set::ExtractListIterator(p.first));
         }
 
@@ -165,7 +165,7 @@ namespace
                 Assert::AreEqual(std_val, val);
             }
 
-            Assert::IsTrue(i == std_set.end());
+            AWT_ASSERT_TRUE(i == std_set.end());
         }
 
         {
@@ -178,7 +178,7 @@ namespace
                 Assert::AreEqual(std_val, my_val, _T("wrong element"));
             }
 
-            Assert::IsTrue(i == std_set.rend());
+            AWT_ASSERT_TRUE(i == std_set.rend());
         }
     }
 
@@ -219,8 +219,8 @@ AWT_TEST(HybridSetRandom)
     std::uniform_int_distribution<size_t> dist(1, range);
 
     MySet my_set;
-    Assert::IsTrue(my_set.empty());
-    Assert::IsTrue(my_set.size() == 0);
+    AWT_ASSERT_TRUE(my_set.empty());
+    AWT_ASSERT_TRUE(my_set.size() == 0);
 
     StdSet std_set;
 
@@ -252,7 +252,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_set.find(val);
             auto std_i = std_set.find(val);
-            Assert::IsTrue((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWT_ASSERT_TRUE((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         {
@@ -261,7 +261,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_const_set.find(val);
             auto std_i = std_set.find(val);
-            Assert::IsTrue((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWT_ASSERT_TRUE((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         //Delete random value.
@@ -283,7 +283,7 @@ AWT_TEST(HybridSetRandom)
 
             context.out << std::endl;
 
-            Assert::IsTrue(my_result == std_result);
+            AWT_ASSERT_TRUE(my_result == std_result);
 
             if (my_result)
             {
@@ -303,8 +303,8 @@ AWT_TEST(HybridSetRandom)
     }
 
     my_set.clear();
-    Assert::IsTrue(my_set.empty());
-    Assert::IsTrue(my_set.size() == 0);
+    AWT_ASSERT_TRUE(my_set.empty());
+    AWT_ASSERT_TRUE(my_set.size() == 0);
     Assert::AreEqual(0u, memory_size, _T("memory leaks"));
 }
 
@@ -321,10 +321,10 @@ AWT_TEST(HybridSetRValue)
     set.insert(std::move(rval));
     set.emplace(_T("def"));
 
-    Assert::IsTrue(rval == _T(""));
-    Assert::IsTrue(set.front() == _T("abc"));
-    Assert::IsTrue(*(++set.begin()) == _T("def"));
-    Assert::IsTrue(set.back() == _T("xyz"));
+    AWT_ASSERT_TRUE(rval == _T(""));
+    AWT_ASSERT_TRUE(set.front() == _T("abc"));
+    AWT_ASSERT_TRUE(*(++set.begin()) == _T("def"));
+    AWT_ASSERT_TRUE(set.back() == _T("xyz"));
 }
 
 template <class Key, class T = Key, class Compare = std::less<>>
@@ -350,17 +350,17 @@ AWT_TEST(HybridSetCopyMove)
     using Set = awl::hybrid_set<int>;
     
     const Set sample = GenerateIntSet<int>(1000, 1000);
-    Assert::IsTrue(sample != Set{ -1, -2, -3, -4, -5 });
+    AWT_ASSERT_TRUE(sample != Set{ AWT_LIST(-1, -2, -3, -4, -5) });
 
     const Set copy = sample;
-    Assert::IsTrue(copy == sample);
+    AWT_ASSERT_TRUE(copy == sample);
 
     Set temp = copy;
-    Assert::IsTrue(temp == copy);
+    AWT_ASSERT_TRUE(temp == copy);
 
     const Set moved = std::move(temp);
-    Assert::IsTrue(moved == copy);
-    Assert::IsTrue(temp.empty());
+    AWT_ASSERT_TRUE(moved == copy);
+    AWT_ASSERT_TRUE(temp.empty());
 }
 
 //--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
@@ -441,10 +441,10 @@ namespace
         for (auto val : set)
         {
             const auto found_val = set.at(index);
-            Assert::IsTrue(val == found_val);
+            AWT_ASSERT_TRUE(val == found_val);
 
             const auto i = set.find(val.key);
-            Assert::IsTrue(i != set.end() && *i == val);
+            AWT_ASSERT_TRUE(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
             Assert::AreEqual(index, found_index);
@@ -496,21 +496,21 @@ namespace
         {
             const A & val = v[index];
             const A * found_val = set.at(index);
-            Assert::IsTrue(val == *found_val);
+            AWT_ASSERT_TRUE(val == *found_val);
 
             Assert::AreEqual(index, set.index_of(&val));
             Assert::AreEqual(index, set.index_of(val.key));
 
             {
                 auto i = set.find(&val);
-                Assert::IsTrue(i != set.end());
-                Assert::IsTrue(*(*i) == val);
+                AWT_ASSERT_TRUE(i != set.end());
+                AWT_ASSERT_TRUE(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                Assert::IsTrue(i != set.end());
-                Assert::IsTrue(*(*i) == val);
+                AWT_ASSERT_TRUE(i != set.end());
+                AWT_ASSERT_TRUE(*(*i) == val);
             }
         }
     }
@@ -543,21 +543,21 @@ namespace
         {
             const A & val = v[index];
             const Pointer & p_found = set.at(index);
-            Assert::IsTrue(val == *p_found);
+            AWT_ASSERT_TRUE(val == *p_found);
 
             Assert::AreEqual(index, set.index_of(Pointer(new A(val))));
             Assert::AreEqual(index, set.index_of(val.key));
 
             {
                 auto i = set.find(Pointer(new A(val)));
-                Assert::IsTrue(i != set.end());
-                Assert::IsTrue(*(*i) == val);
+                AWT_ASSERT_TRUE(i != set.end());
+                AWT_ASSERT_TRUE(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                Assert::IsTrue(i != set.end());
-                Assert::IsTrue(*(*i) == val);
+                AWT_ASSERT_TRUE(i != set.end());
+                AWT_ASSERT_TRUE(*(*i) == val);
             }
         }
     }
@@ -625,10 +625,10 @@ namespace
         for (auto & val : set)
         {
             const auto & found_val = set.at(index);
-            Assert::IsTrue(val == found_val);
+            AWT_ASSERT_TRUE(val == found_val);
 
             const auto i = set.find(val.GetKey());
-            Assert::IsTrue(i != set.end() && *i == val);
+            AWT_ASSERT_TRUE(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
             Assert::AreEqual(index, found_index);
@@ -684,7 +684,7 @@ AWT_TEST(HybridSetNonCopyableElement)
 
         Assert::AreEqual(set1.index_of(found_key), i);
         Assert::AreEqual(set1.index_of(B(found_key)), i);
-        Assert::IsTrue(set1.find(B(found_key)) != set1.end());
+        AWT_ASSERT_TRUE(set1.find(B(found_key)) != set1.end());
     }
 
     TestBComparer<awl::FuncCompare<B, int, &B::GetKey>>(insert_count, range);

@@ -178,7 +178,7 @@ namespace awl::io
 namespace
 {
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataV1(const awl::testing::TestContext & context, OutputStream & out, size_t count, bool with_metadata)
+    std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
@@ -218,7 +218,7 @@ namespace
         }
     }
 
-    std::chrono::steady_clock::duration ReadDataNoV(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t count)
     {
         //Skip metadata
         OldContext ctx;
@@ -247,7 +247,7 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV1(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
     {
         OldContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -272,7 +272,7 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV2(const awl::testing::TestContext & context, awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
     {
         NewContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -324,7 +324,7 @@ namespace
         return w;
     }
 
-    size_t MeasureStreamSize(const awl::testing::TestContext & context, size_t count, bool include_meta = true)
+    size_t MeasureStreamSize(const TestContext & context, size_t count, bool include_meta = true)
     {
         size_t meta_size = 0;
 
@@ -332,7 +332,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1(context, out, 0, true);
+            WriteDataV1(out, 0, true);
 
             meta_size = out.GetLength();
         }
@@ -342,7 +342,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1(context, out, 1, false);
+            WriteDataV1(out, 1, false);
 
             block_size = out.GetLength();
         }
@@ -377,7 +377,7 @@ AWT_TEST(VtsReadWrite)
     {
         awl::io::VectorOutputStream out(v);
 
-        auto d = WriteDataV1(context, out, count, true);
+        auto d = WriteDataV1(out, count, true);
 
         context.out << _T("Test data has been written. ");
         
@@ -394,7 +394,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataNoV(context, in, count);
+            auto d = ReadDataNoV(in, count);
 
             context.out << _T("Plain has been read. ");
 
@@ -406,7 +406,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1(context, in, count);
+            auto d = ReadDataV1(in, count);
 
             context.out << _T("Version 1 has been read. ");
 
@@ -418,7 +418,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2(context, in, count);
+            auto d = ReadDataV2(in, count);
 
             context.out << _T("Version 2 has been read. ");
 
@@ -435,7 +435,7 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 
     TestMeasureStream out;
 
-    auto d = WriteDataV1(context, out, count, true);
+    auto d = WriteDataV1(out, count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -450,7 +450,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
     TestMeasureStream out;
 
-    auto d = WriteDataV1(context, static_cast<awl::io::SequentialOutputStream &>(out), count, true);
+    auto d = WriteDataV1(static_cast<awl::io::SequentialOutputStream &>(out), count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -494,10 +494,8 @@ namespace
     }
     
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataPack1(const awl::testing::TestContext & context, OutputStream & out, size_t count)
+    std::chrono::steady_clock::duration WriteDataPack1(OutputStream & out, size_t count)
     {
-        static_cast<void>(context);
-        
         awl::StopWatch w;
 
         for (size_t i : awl::make_count(count))
@@ -523,7 +521,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
     TestMeasureStream out;
 
-    auto d = WriteDataPack1(context, out, count);
+    auto d = WriteDataPack1(out, count);
 
     AWT_ASSERT_TRUE(mem_size == out.GetLength());
 
@@ -540,7 +538,7 @@ AWT_BENCHMARK(VtsMeasurePack1Virtual)
 
     TestMeasureStream out;
 
-    auto d = WriteDataPack1(context, static_cast<awl::io::SequentialOutputStream &>(out), count);
+    auto d = WriteDataPack1(static_cast<awl::io::SequentialOutputStream &>(out), count);
 
     context.out << _T("Test data has been written. ");
 
@@ -552,10 +550,8 @@ AWT_BENCHMARK(VtsMeasurePack1Virtual)
 namespace
 {
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataPlain(const awl::testing::TestContext & context, OutputStream & out, size_t count)
+    std::chrono::steady_clock::duration WriteDataPlain(OutputStream & out, size_t count)
     {
-        static_cast<void>(context);
-
         awl::StopWatch w;
 
         for (size_t i : awl::make_count(count))
@@ -585,7 +581,7 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
     
     TestMeasureStream out;
 
-    auto d = WriteDataPlain(context, out, count);
+    auto d = WriteDataPlain(out, count);
 
     AWT_ASSERT_TRUE(mem_size == out.GetLength());
 
@@ -602,7 +598,7 @@ AWT_BENCHMARK(VtsMeasurePlainVirtual)
 
     TestMeasureStream out;
 
-    auto d = WriteDataPlain(context, static_cast<awl::io::SequentialOutputStream &>(out), count);
+    auto d = WriteDataPlain(static_cast<awl::io::SequentialOutputStream &>(out), count);
 
     context.out << _T("Test data has been written. ");
 
@@ -693,7 +689,7 @@ AWT_TEST(VtsWriteMemoryStream)
     TestMemoryOutputStream out(mem_size);
 
     {
-        auto d = WriteDataV1(context, out, count, true);
+        auto d = WriteDataV1(out, count, true);
 
         context.out << _T("Test data has been written. ");
 

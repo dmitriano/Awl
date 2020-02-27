@@ -6,24 +6,22 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
-using namespace awl::testing;
-
 AWT_TEST(Cancellation_NegativeTimeDiff)
 {
     AWT_UNUSED_CONTEXT;
-
+    
     auto start = std::chrono::steady_clock::now();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     auto stop = std::chrono::steady_clock::now();
 
-    Assert::IsTrue(stop > start);
+    AWT_ASSERT_TRUE(stop > start);
 
     auto diff = start - stop;
 
-    Assert::IsTrue(diff < std::chrono::milliseconds(0));
-    Assert::IsTrue(diff.count() < 0);
+    AWT_ASSERT_TRUE(diff < std::chrono::milliseconds(0));
+    AWT_ASSERT_TRUE(diff.count() < 0);
 }
 
 static constexpr int default_client_sleep_time = 100;
@@ -44,7 +42,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
     for (size_t i = 0; i < thread_count; ++i)
     {
-        v.push_back(std::thread([&cancellation, client_sleep_time, worker_sleep_time]()
+        v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time]()
         {
             awl::StopWatch w;
 
@@ -52,19 +50,19 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
             const auto elapsed = w.GetElapsedCast<Duration>();
 
-            Assert::IsTrue(elapsed.count() >= client_sleep_time);
+            AWT_ASSERT_TRUE(elapsed.count() >= client_sleep_time);
 
-            Assert::IsTrue(elapsed.count() < worker_sleep_time);
+            AWT_ASSERT_TRUE(elapsed.count() < worker_sleep_time);
         }));
     }
 
-    std::thread client([&cancellation, client_sleep_time]()
+    std::thread client([&context, &cancellation, client_sleep_time]()
     {
         std::this_thread::sleep_for(Duration(client_sleep_time));
 
         cancellation.Cancel();
 
-        Assert::IsTrue(cancellation.IsCancelled());
+        AWT_ASSERT_TRUE(cancellation.IsCancelled());
     });
 
     for (auto & t : v)
@@ -87,5 +85,5 @@ AWT_TEST(Cancellation_SimpleSleep)
 
     const auto elapsed = w.GetElapsedCast<Duration>();
 
-    Assert::IsTrue(elapsed.count() >= client_sleep_time);
+    AWT_ASSERT_TRUE(elapsed.count() >= client_sleep_time);
 }

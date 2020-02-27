@@ -77,7 +77,7 @@ AWT_TEST(TupleTransform)
 
     std::string result = out.str();
     
-    Assert::IsTrue(result == "1 2 abc ");
+    AWT_ASSERT_TRUE(result == "1 2 abc ");
 
     std::remove_const_t<decltype(t)> t1{};
 
@@ -92,7 +92,7 @@ AWT_TEST(TupleTransform)
         p_reader->Read(in);
     }
 
-    Assert::IsTrue(t1 == t);
+    AWT_ASSERT_TRUE(t1 == t);
 }
 
 AWT_TEST(TupleMapT2T)
@@ -111,7 +111,7 @@ AWT_TEST(TupleMapT2T)
 
         auto a = awl::map_types_t2t<T2, T1>();
 
-        Assert::IsTrue(a == result);
+        AWT_ASSERT_TRUE(a == result);
     }
 
     {
@@ -123,7 +123,7 @@ AWT_TEST(TupleMapT2T)
 
         auto a = awl::map_types_t2t<T2, T1>();
 
-        Assert::IsTrue(a == result);
+        AWT_ASSERT_TRUE(a == result);
     }
 }
 
@@ -143,7 +143,7 @@ AWT_TEST(TupleMapT2V)
 
         auto a = awl::map_types_t2v<T2, T1>();
 
-        Assert::IsTrue(a == result);
+        AWT_ASSERT_TRUE(a == result);
     }
 
     {
@@ -155,7 +155,7 @@ AWT_TEST(TupleMapT2V)
 
         auto a = awl::map_types_t2v<T2, T1>();
 
-        Assert::IsTrue(a == result);
+        AWT_ASSERT_TRUE(a == result);
     }
 }
 
@@ -169,7 +169,7 @@ AWT_TEST(TupleRuntimeIndex)
     using namespace std::string_literals;
     Tuple t = std::make_tuple('a', 2, 3, 5.0, "abc");
     Variant v = awl::runtime_get<Variant>(t, 1);
-    Assert::IsTrue(std::get<int>(v) == 2);
+    AWT_ASSERT_TRUE(std::get<int>(v) == 2);
     awl::runtime_set(t, 4, Variant("xyz"s));
-    Assert::IsTrue(std::get<4>(t) == std::string("xyz"));
+    AWT_ASSERT_TRUE(std::get<4>(t) == std::string("xyz"));
 }

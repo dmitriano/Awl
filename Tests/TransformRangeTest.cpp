@@ -46,27 +46,27 @@ AWT_TEST(TransformIterator)
         {
             auto i = begin;
 
-            Assert::IsTrue(i == begin);
-            Assert::IsTrue(i != end);
+            AWT_ASSERT_TRUE(i == begin);
+            AWT_ASSERT_TRUE(i != end);
 
             Assert::AreEqual(1, *i++);
             Assert::AreEqual(2, *i++);
             Assert::AreEqual(3, *i++);
 
-            Assert::IsTrue(i == end);
+            AWT_ASSERT_TRUE(i == end);
         }
 
         {
             auto i = begin;
 
-            Assert::IsTrue(i == begin);
-            Assert::IsTrue(i != end);
+            AWT_ASSERT_TRUE(i == begin);
+            AWT_ASSERT_TRUE(i != end);
 
             Assert::AreEqual(1, *i);
             Assert::AreEqual(2, *(++i));
             Assert::AreEqual(3, *(++i));
 
-            Assert::IsTrue(++i == end);
+            AWT_ASSERT_TRUE(++i == end);
         }
     }
     
@@ -100,8 +100,8 @@ AWT_TEST(TransformIterator)
         {
             auto i = begin;
 
-            Assert::IsTrue(i == begin);
-            Assert::IsTrue(i != end);
+            AWT_ASSERT_TRUE(i == begin);
+            AWT_ASSERT_TRUE(i != end);
 
             Assert::AreEqual(1, *i++);
         
@@ -113,20 +113,20 @@ AWT_TEST(TransformIterator)
 
             Assert::AreEqual(3, *i++);
 
-            Assert::IsTrue(i == end);
+            AWT_ASSERT_TRUE(i == end);
         }
 
         {
             auto i = begin;
 
-            Assert::IsTrue(i == begin);
-            Assert::IsTrue(i != end);
+            AWT_ASSERT_TRUE(i == begin);
+            AWT_ASSERT_TRUE(i != end);
 
             Assert::AreEqual(1, *i++);
             Assert::AreEqual(5, *i++);
             Assert::AreEqual(3, *i++);
 
-            Assert::IsTrue(i == end);
+            AWT_ASSERT_TRUE(i == end);
         }
     }
 
@@ -138,14 +138,14 @@ AWT_TEST(TransformIterator)
         {
             auto i = range.begin();
 
-            Assert::IsTrue(i == range.begin());
-            Assert::IsTrue(i != range.end());
+            AWT_ASSERT_TRUE(i == range.begin());
+            AWT_ASSERT_TRUE(i != range.end());
 
             Assert::AreEqual(_T("a"), *i++);
             Assert::AreEqual(_T("b"), *i++);
             Assert::AreEqual(_T("c"), *i++);
 
-            Assert::IsTrue(i == range.end());
+            AWT_ASSERT_TRUE(i == range.end());
         }
 
         //(until C++20) If no captures are specified, the closure type has a defaulted copy assignment operator and a defaulted move assignment operator.
@@ -163,7 +163,7 @@ AWT_TEST(TransformIterator)
 
             i1 = i2;
 
-            Assert::IsTrue(i1 == i2);
+            AWT_ASSERT_TRUE(i1 == i2);
         }
 
         {
@@ -172,7 +172,7 @@ AWT_TEST(TransformIterator)
             //This requires copy assignment operator to be defined.
             v.insert(v.begin(), range.begin(), range.end());
 
-            Assert::IsTrue(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
+            AWT_ASSERT_TRUE(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
         }
 #endif
     }

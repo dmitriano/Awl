@@ -31,10 +31,10 @@ static void Test(const TestContext & context, T sample)
 
         Read(in, result);
 
-        Assert::IsTrue(sample == result);
+        AWT_ASSERT_TRUE(sample == result);
     }
 
-    Assert::IsTrue(in.End());
+    AWT_ASSERT_TRUE(in.End());
 }
 
 namespace
@@ -193,7 +193,7 @@ AWT_TEST(IoPod)
         A a1{ 5, 7.0 };
         A a2{ 5, 8.0 };
 
-        Assert::IsTrue(a1 < a2);
+        AWT_ASSERT_TRUE(a1 < a2);
     }
     
     {
@@ -205,7 +205,7 @@ AWT_TEST(IoPod)
 
         ++std::get<0>(a_ref);
 
-        Assert::IsTrue(a.x == a_saved.x + 1);
+        AWT_ASSERT_TRUE(a.x == a_saved.x + 1);
 
         Test(context, a);
         Test(context, std::vector<A>{a, a, a});
@@ -250,10 +250,10 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 
         ReadVector(in, result);
 
-        Assert::IsTrue(sample == result);
+        AWT_ASSERT_TRUE(sample == result);
     }
 
-    Assert::IsTrue(in.End());
+    AWT_ASSERT_TRUE(in.End());
 }
 
 AWT_TEST(IoVectorReadWrite)

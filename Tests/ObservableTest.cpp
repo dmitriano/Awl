@@ -35,7 +35,7 @@ namespace
 
         if (param == 2)
         {
-            Assert::IsTrue(val == _T("temporary"));
+            AWT_ASSERT_TRUE(val == _T("temporary"));
         }
 
         changeHandled = true;
@@ -58,7 +58,7 @@ namespace
             //Here val_copy is not temporary.
             Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
 
-            Assert::IsTrue(val_copy == val);
+            AWT_ASSERT_TRUE(val_copy == val);
         }
 
         void SetIt2(int it)
@@ -76,7 +76,7 @@ AWT_TEST(Observable_Events)
     Something something;
 
     Assert::AreEqual(0U, something.size());
-    Assert::IsTrue(something.empty());
+    AWT_ASSERT_TRUE(something.empty());
 
     {
         ChangeHandler handler1(context);
@@ -92,9 +92,9 @@ AWT_TEST(Observable_Events)
         something.SetIt(1);
         something.SetIt2(2);
 
-        Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
-        Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
-        Assert::IsTrue(handler3.changeHandled, _T("The observer has not been notified"));
+        AWT_ASSERT_IS_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+        AWT_ASSERT_IS_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
+        AWT_ASSERT_IS_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
 
         handler1.UnsubscribeSelf();
         Assert::AreEqual(2u, something.size());
@@ -102,11 +102,11 @@ AWT_TEST(Observable_Events)
         something.Unsubscribe(&handler2);
         Assert::AreEqual(1u, something.size());
 
-        Assert::IsTrue(!something.empty());
+        AWT_ASSERT_TRUE(!something.empty());
     }
 
     Assert::AreEqual(0U, something.size());
-    Assert::IsTrue(something.empty());
+    AWT_ASSERT_TRUE(something.empty());
 }
 
 AWT_TEST(Observable_Move)
@@ -123,8 +123,8 @@ AWT_TEST(Observable_Move)
 
     something2.SetIt(5);
 
-    Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
-    Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
 
     handler1.changeHandled = false;
     handler2.changeHandled = false;
@@ -135,8 +135,8 @@ AWT_TEST(Observable_Move)
 
     something3.SetIt(7);
 
-    Assert::IsTrue(handler1.changeHandled, _T("The observer has not been notified"));
-    Assert::IsTrue(handler2.changeHandled, _T("The observer has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
 }
 
 AWT_TEST(Observer_Move)
@@ -161,10 +161,10 @@ AWT_TEST(Observer_Move)
     Assert::IsFalse(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
     Assert::IsFalse(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
-    Assert::IsTrue(handler1_copy.included(), _T("Observer #1 is not included"));
-    Assert::IsTrue(handler2_copy.included(), _T("Observer #2 is not included"));
-    Assert::IsTrue(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
-    Assert::IsTrue(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler1_copy.included(), _T("Observer #1 is not included"));
+    AWT_ASSERT_IS_TRUE(handler2_copy.included(), _T("Observer #2 is not included"));
+    AWT_ASSERT_IS_TRUE(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWT_ASSERT_IS_TRUE(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace
@@ -202,25 +202,25 @@ AWT_TEST(Observable_ModelMove)
     m.SetContext(context);
     m.something.SetIt(5);
 
-    Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
-    Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    AWT_ASSERT_IS_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
+    AWT_ASSERT_IS_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
     Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
-    Assert::IsTrue(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
-    Assert::IsTrue(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWT_ASSERT_IS_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWT_ASSERT_IS_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 
     m = {};
     m.SetContext(context);
 
-    Assert::IsTrue(m.handler1.included(), _T("Observer #1 is not included"));
-    Assert::IsTrue(m.handler2.included(), _T("Observer #2 is not included"));
+    AWT_ASSERT_IS_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
+    AWT_ASSERT_IS_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
     Assert::IsFalse(m.handler3.included(), _T("Observer #3 is included"));
     Assert::IsFalse(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
     Assert::IsFalse(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
     m.something.SetIt(7);
 
-    Assert::IsTrue(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
-    Assert::IsTrue(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWT_ASSERT_IS_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWT_ASSERT_IS_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace
@@ -289,6 +289,6 @@ AWT_TEST(Observable_ConstMove)
     const X x1;
     X x2 = std::move(x1);
 
-    Assert::IsTrue(x1.called == "");
-    Assert::IsTrue(x2.called == "copy");
+    AWT_ASSERT_TRUE(x1.called == "");
+    AWT_ASSERT_TRUE(x2.called == "copy");
 }

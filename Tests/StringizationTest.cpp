@@ -41,11 +41,11 @@ namespace
 
     void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
     {
-        Assert::IsTrue(v.size() == ml.size());
+        AWT_ASSERT_TRUE(v.size() == ml.size());
 
         for (size_t i = 0; i != v.size(); ++i)
         {
-            Assert::IsTrue(v[i] == ml[i]);
+            AWT_ASSERT_TRUE(v[i] == ml[i]);
         }
     }
 
@@ -107,7 +107,7 @@ AWT_TEST(Stringizable_ForEach)
         map.emplace(a1.get_member_names()[index], val);
     });
 
-    Assert::IsTrue(map.size() == 3);
+    AWT_ASSERT_TRUE(map.size() == 3);
 
     A a2 = {};
 
@@ -116,7 +116,7 @@ AWT_TEST(Stringizable_ForEach)
         val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.get_member_names()[index]]);
     });
 
-    Assert::IsTrue(a1 == a2);
+    AWT_ASSERT_TRUE(a1 == a2);
 }
 
 using V = std::variant<bool, char, int, float, double, std::string>;
@@ -131,7 +131,7 @@ AWT_TEST(Prototype_TypeMap)
 
     awl::DetachedPrototype result(std::vector<awl::Field>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
 
-    Assert::IsTrue(dp == result);
+    AWT_ASSERT_TRUE(dp == result);
 }
 
 AWT_TEST(Prototype_GetSet)
@@ -142,15 +142,15 @@ AWT_TEST(Prototype_GetSet)
 
     A a = { 1, 5.0, "abc" };
 
-    Assert::IsTrue(ap.Get(a, 0) == V(a.x));
-    Assert::IsTrue(ap.Get(a, 1) == V(a.y));
-    Assert::IsTrue(ap.Get(a, 2) == V(a.z));
+    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(a.x));
+    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(a.y));
+    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(a.z));
 
     ap.Set(a, 0, 3);
     ap.Set(a, 1, 7.0);
     ap.Set(a, 2, std::string("xyz"));
 
-    Assert::IsTrue(ap.Get(a, 0) == V(3));
-    Assert::IsTrue(ap.Get(a, 1) == V(7.0));
-    Assert::IsTrue(ap.Get(a, 2) == V(std::string("xyz")));
+    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(3));
+    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(7.0));
+    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(std::string("xyz")));
 }

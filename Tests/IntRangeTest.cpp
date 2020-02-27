@@ -30,7 +30,7 @@ AWT_TEST(IntRangeInt)
     
     const std::vector<int> v(range.begin(), range.end());
 
-    Assert::IsTrue(v == sample);
+    AWT_ASSERT_TRUE(v == sample);
 }
 
 AWT_TEST(IntRangeSizeT)
