@@ -61,6 +61,14 @@ namespace awl::testing
 #define AWT_STRINGIFY(x) #x
 #define AWT_TOSTRING(x) AWT_STRINGIFY(x)
 #define AWT_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWT_TOSTRING(__LINE__))
+
+#define AWT_FAIL(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
+
 #define AWT_ASSERT_TRUE(cond) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond, _T(#cond) AWT_SRC_INFO)
+#define AWT_ASSERT_IS_TRUE(cond, message) if (context.checkAsserts) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+
 #define AWT_ASSERT_FALSE(cond) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond, _T(#cond) AWT_SRC_INFO)
+#define AWT_ASSERT_IS_FALSE(cond, message) if (context.checkAsserts) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+
 #define AWT_ASSERT_EQUAL(expected, actual) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWT_SRC_INFO)
+#define AWT_ASSERT_ARE_EQUAL(expected, actual, message) if (context.checkAsserts) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWT_SRC_INFO)

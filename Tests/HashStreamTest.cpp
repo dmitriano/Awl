@@ -81,7 +81,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
             Read(hin, result);
 
-            Assert::IsTrue(sample == result, _T("read/write mismatch."));
+            AWT_ASSERT_IS_TRUE(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -93,8 +93,8 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
             context.out << std::endl;
         }
 
-        Assert::IsTrue(in.End());
-        Assert::IsTrue(hin.End());
+        AWT_ASSERT_TRUE(in.End());
+        AWT_ASSERT_TRUE(hin.End());
     }
 }
 
@@ -172,7 +172,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
             Read(redirected_in, result);
 
-            Assert::IsTrue(sample == result, _T("read/write mismatch."));
+            AWT_ASSERT_IS_TRUE(sample == result, _T("read/write mismatch."));
         }
 
         if (!corrupt)
@@ -184,8 +184,8 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             context.out << std::endl;
         }
 
-        Assert::IsTrue(in.End());
-        Assert::IsTrue(hin.End());
+        AWT_ASSERT_TRUE(in.End());
+        AWT_ASSERT_TRUE(hin.End());
     }
 
     //There is no wchar_t version in C++.
@@ -205,14 +205,14 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         {
             TestOnVector(context, hash, sample, corrupt);
 
-            Assert::Fail(_T("Corrupted stream."));
+            AWT_FAIL("Corrupted stream.");
         }
         catch (const CorruptionException &)
         {
         }
         catch (const EndOfFileException &)
         {
-            Assert::IsTrue(eof_allowed, _T("End of file is not allowed."));
+            AWT_ASSERT_IS_TRUE(eof_allowed, _T("End of file is not allowed."));
         }
     }
 }
