@@ -778,10 +778,12 @@ AWT_BENCHMARK(VtsVolatileInt)
 
     volatile size_t val;
 
-    constexpr size_t element_size = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
-    
-    const size_t write_count = element_count * element_size;
-        
+    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+
+    const size_t mem_size = MeasureStreamSize(context, 1, false);
+
+    const size_t write_count = element_count * field_count;
+
     awl::StopWatch w;
 
     for (size_t i : awl::make_count(write_count))
@@ -789,7 +791,7 @@ AWT_BENCHMARK(VtsVolatileInt)
         val = i;
     }
 
-    ReportCountAndSpeed(context, w, element_count, write_count);
+    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(val));
     context.out << std::endl;
@@ -801,9 +803,11 @@ AWT_BENCHMARK(VtsVolatileStream)
 
     InlineMeasureStream out;
 
-    constexpr size_t element_size = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
 
-    const size_t write_count = element_count * element_size;
+    const size_t mem_size = MeasureStreamSize(context, 1, false);
+
+    const size_t write_count = element_count * field_count;
 
     awl::StopWatch w;
 
@@ -812,7 +816,7 @@ AWT_BENCHMARK(VtsVolatileStream)
         PlainWrite(out, i);
     }
 
-    ReportCountAndSpeed(context, w, element_count, write_count);
+    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
@@ -829,9 +833,11 @@ AWT_BENCHMARK(VtsVolatileFake)
 
     auto p_out = VtsTest::CreateFakeStream();
 
-    constexpr size_t element_size = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
 
-    const size_t write_count = element_count * element_size;
+    const size_t mem_size = MeasureStreamSize(context, 1, false);
+
+    const size_t write_count = element_count * field_count;
 
     awl::StopWatch w;
 
@@ -840,7 +846,7 @@ AWT_BENCHMARK(VtsVolatileFake)
         PlainWrite(*p_out, i);
     }
 
-    ReportCountAndSpeed(context, w, element_count, write_count);
+    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
