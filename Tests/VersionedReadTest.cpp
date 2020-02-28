@@ -83,11 +83,32 @@ namespace
     using OldContext = awl::io::Context<std::variant<A1, B1>, FieldV1>;
     using NewContext = awl::io::Context<std::variant<A2, B2, C2>, FieldV2>;
 
-    class TestMeasureStream : public awl::io::SequentialOutputStream
+    class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
     public:
 
         void Write(const uint8_t * buffer, size_t count) override
+        {
+            static_cast<void>(buffer);
+            m_pos += count;
+        }
+
+        size_t GetLength() const
+        {
+            return m_pos;
+        }
+
+    private:
+
+        //prevent the optimization
+        volatile size_t m_pos = 0;
+    };
+
+    class InlineMeasureStream
+    {
+    public:
+
+        void Write(const uint8_t * buffer, size_t count)
         {
             static_cast<void>(buffer);
             m_pos += count;
@@ -443,7 +464,7 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
     AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
-    TestMeasureStream out;
+    VirtualMeasureStream out;
 
     auto d = WriteDataV1(out, element_count, true);
 
@@ -458,7 +479,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
     AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
-    TestMeasureStream out;
+    VirtualMeasureStream out;
 
     auto d = WriteDataV1(static_cast<awl::io::SequentialOutputStream &>(out), element_count, true);
 
@@ -529,7 +550,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
-    TestMeasureStream out;
+    VirtualMeasureStream out;
 
     auto d = WriteDataPack1(out, element_count);
 
@@ -546,7 +567,7 @@ AWT_BENCHMARK(VtsMeasurePack1Virtual)
 {
     AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
-    TestMeasureStream out;
+    VirtualMeasureStream out;
 
     auto d = WriteDataPack1(static_cast<awl::io::SequentialOutputStream &>(out), element_count);
 
@@ -589,7 +610,7 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
     
-    TestMeasureStream out;
+    InlineMeasureStream out;
 
     auto d = WriteDataPlain(out, element_count);
 
@@ -606,7 +627,7 @@ AWT_BENCHMARK(VtsMeasurePlainVirtual)
 {
     AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
-    TestMeasureStream out;
+    VirtualMeasureStream out;
 
     auto d = WriteDataPlain(static_cast<awl::io::SequentialOutputStream &>(out), element_count);
 
