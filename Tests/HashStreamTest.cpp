@@ -38,7 +38,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
     static std::vector<uint8_t> v;
 
-    const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
+    const size_t total_size = sample_count * (sample.size() * sizeof(typename T::value_type) + sizeof(decltype(sample.size())));
 
     v.reserve(total_size * 2);
     v.resize(0);
@@ -75,13 +75,15 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         awl::StopWatch w;
 
+        T result;
+
         for (size_t i = 0; i < sample_count; ++i)
         {
-            T result;
-
             Read(hin, result);
 
             AWT_ASSERTM(sample == result, _T("read/write mismatch."));
+
+            result.resize(0);
         }
 
         if (!corrupt)
@@ -108,7 +110,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
     AWT_FLAG(not_buffered);
     AWT_FLAG(no_hash);
 
-    const size_t total_size = sample_count * sample.size() * sizeof(typename T::value_type);
+    const size_t total_size = sample_count * (sample.size() * sizeof(typename T::value_type) + sizeof(decltype(sample.size())));
 
     static const awl::Char file_name[] = _T("hash-test.dat");
 
@@ -166,13 +168,15 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         awl::StopWatch w;
 
+        T result;
+
         for (size_t i = 0; i < sample_count; ++i)
         {
-            T result;
-
             Read(redirected_in, result);
 
             AWT_ASSERTM(sample == result, _T("read/write mismatch."));
+
+            result.resize(0);
         }
 
         if (!corrupt)
