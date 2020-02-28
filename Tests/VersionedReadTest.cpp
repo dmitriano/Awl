@@ -787,7 +787,29 @@ AWT_BENCHMARK(VtsVolatileInt)
         val = i;
     }
 
+    ReportCountAndSpeed(context, w, element_count, element_count * sizeof(val));
+    context.out << std::endl;
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(val));
+    context.out << std::endl;
+}
 
+AWT_BENCHMARK(VtsVolatileStream)
+{
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+
+    InlineMeasureStream out;
+
+    const size_t write_count = element_count * (std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
+
+    awl::StopWatch w;
+
+    for (size_t i : awl::make_count(write_count))
+    {
+        PlainWrite(out, i);
+    }
+
+    ReportCountAndSpeed(context, w, element_count, element_count * sizeof(size_t));
+    context.out << std::endl;
+    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
 }
