@@ -76,7 +76,7 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
                 const auto & vs = *i;
                 
-                Assert::AreEqual(f_count, vs.size());
+                AWT_ASSERT_EQUAL(f_count, vs.size());
             }
             else
             {

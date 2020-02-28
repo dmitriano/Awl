@@ -205,7 +205,7 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         {
             TestOnVector(context, hash, sample, corrupt);
 
-            AWT_FAIL("Corrupted stream.");
+            AWT_FAILM("Corrupted stream.");
         }
         catch (const CorruptionException &)
         {

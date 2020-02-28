@@ -140,7 +140,7 @@ AWT_TEST(Hash_ToFromArray)
 
     const auto val = from_array<uint64_t>(a);
 
-    Assert::AreEqual(sample, val);
+    AWT_ASSERT_EQUAL(sample, val);
 }
 
 namespace examples
@@ -256,13 +256,13 @@ AWT_TEST(Hash_Switch)
     switch (hash(sample))
     {
     case hash("never comes"):
-        Assert::Fail();
+        AWT_FAIL;
 
     case hash("communism"):
         break;
     
     default:
-        Assert::Fail();
+        AWT_FAIL;
     }
 }
 

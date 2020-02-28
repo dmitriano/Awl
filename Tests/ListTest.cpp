@@ -88,27 +88,27 @@ namespace
         ListHolder(const awl::testing::TestContext & test_context) : context(test_context)
         {
             AWT_ASSERT_TRUE(list.empty());
-            Assert::AreEqual(size_t(0), list.size());
+            AWT_ASSERT_EQUAL(size_t(0), list.size());
             AWT_ASSERT_TRUE(list.empty_or_contains_one());
             AWT_ASSERT_FALSE(list.contains_one());
 
             list.push_back(new Element(1));
 
             AWT_ASSERT_FALSE(list.empty());
-            Assert::AreEqual(size_t(1), list.size());
+            AWT_ASSERT_EQUAL(size_t(1), list.size());
             AWT_ASSERT_TRUE(list.empty_or_contains_one());
             AWT_ASSERT_TRUE(list.contains_one());
 
             list.push_back(new Element(2));
 
             AWT_ASSERT_FALSE(list.empty());
-            Assert::AreEqual(size_t(2), list.size());
+            AWT_ASSERT_EQUAL(size_t(2), list.size());
             AWT_ASSERT_FALSE(list.empty_or_contains_one());
             AWT_ASSERT_FALSE(list.contains_one());
 
             list.push_front(new Element(0));
 
-            Assert::AreEqual(size_t(3), list.size());
+            AWT_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void AddRemoveTest()
@@ -116,12 +116,12 @@ namespace
             list.push_front(new Element(-1));
             list.push_back(new Element(3));
 
-            Assert::AreEqual(size_t(5), list.size());
+            AWT_ASSERT_EQUAL(size_t(5), list.size());
 
             delete list.pop_front();
             delete list.pop_back();
 
-            Assert::AreEqual(size_t(3), list.size());
+            AWT_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void AutoRemoveTest()
@@ -130,11 +130,11 @@ namespace
 
             list.push_front(p_elem);
 
-            Assert::AreEqual(size_t(4), list.size());
+            AWT_ASSERT_EQUAL(size_t(4), list.size());
 
             delete p_elem;
 
-            Assert::AreEqual(size_t(3), list.size());
+            AWT_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void PrintList()
@@ -147,7 +147,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val++, e->Value);
+                AWT_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -161,7 +161,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val++, e->Value);
+                AWT_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -175,7 +175,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val++, e->Value);
+                AWT_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -191,7 +191,7 @@ namespace
 
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val++, e->Value);
+                AWT_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -207,7 +207,7 @@ namespace
 
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val++, e->Value);
+                AWT_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -223,7 +223,7 @@ namespace
 
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val--, e->Value);
+                AWT_ASSERT_EQUAL(val--, e->Value);
             }
         }
 
@@ -239,7 +239,7 @@ namespace
 
                 printer.PrintElement(e);
 
-                Assert::AreEqual(val--, e->Value);
+                AWT_ASSERT_EQUAL(val--, e->Value);
             }
         }
 
@@ -251,7 +251,7 @@ namespace
 
             if (i == list.end())
             {
-                Assert::Fail(_T("Element 1 not found."));
+                AWT_FAILM(_T("Element 1 not found."));
             }
 
             context.out << _T("The found element is: ") << i->Value << std::endl;
@@ -260,7 +260,7 @@ namespace
 
             if (i != list.end())
             {
-                Assert::Fail(_T("Non-existing element 25 found."));
+                AWT_FAILM(_T("Non-existing element 25 found."));
             }
 
             Printer printer(context);
@@ -272,18 +272,18 @@ namespace
         {
             list.push_back(new Element(4));
 
-            Assert::AreEqual((size_t)(4), list.size());
+            AWT_ASSERT_EQUAL((size_t)(4), list.size());
 
             auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 2; });
 
             if (i == list.end())
             {
-                Assert::Fail(_T("Element 2 not found."));
+                AWT_FAILM(_T("Element 2 not found."));
             }
 
             list.insert(i, new Element(3));
 
-            Assert::AreEqual((size_t)(5), list.size());
+            AWT_ASSERT_EQUAL((size_t)(5), list.size());
 
             PrintList();
 
@@ -297,11 +297,11 @@ namespace
 
             delete p_element_to_be_deleted;
 
-            Assert::AreEqual((size_t)(4), list.size());
+            AWT_ASSERT_EQUAL((size_t)(4), list.size());
 
             delete *(i++); //The element is excluded from the list automatically.
 
-            Assert::AreEqual((size_t)(3), list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
@@ -310,40 +310,40 @@ namespace
         {
             ELEMENT_LIST other_list;
 
-            Assert::AreEqual((size_t)(3), list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), list.size());
 
             other_list = std::move(list);
 
-            Assert::AreEqual((size_t)(0), list.size());
+            AWT_ASSERT_EQUAL((size_t)(0), list.size());
 
-            Assert::AreEqual((size_t)(3), other_list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), other_list.size());
 
             list = std::move(other_list);
 
-            Assert::AreEqual((size_t)(0), other_list.size());
+            AWT_ASSERT_EQUAL((size_t)(0), other_list.size());
 
-            Assert::AreEqual((size_t)(3), list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
 
         void PushBackTest()
         {
-            Assert::AreEqual((size_t)(3), list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), list.size());
 
             ELEMENT_LIST other_list;
 
             other_list.push_back(list);
 
-            Assert::AreEqual((size_t)(0), list.size());
+            AWT_ASSERT_EQUAL((size_t)(0), list.size());
 
-            Assert::AreEqual((size_t)(3), other_list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), other_list.size());
 
             list.push_back(other_list);
 
-            Assert::AreEqual((size_t)(0), other_list.size());
+            AWT_ASSERT_EQUAL((size_t)(0), other_list.size());
 
-            Assert::AreEqual((size_t)(3), list.size());
+            AWT_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
@@ -390,7 +390,7 @@ namespace
             holder.PushBackTest();
         }
 
-        Assert::AreEqual(0, Element::elementCount);
+        AWT_ASSERT_EQUAL(0, Element::elementCount);
     }
 
     struct EleMent : awl::single_link
@@ -414,41 +414,41 @@ AWT_TEST(List_SingleList)
 
     size_t count = 0;
 
-    Assert::AreEqual(list.size(), count);
+    AWT_ASSERT_EQUAL(list.size(), count);
 
     list.push_front(new EleMent);
 
-    Assert::AreEqual(list.size(), ++count);
+    AWT_ASSERT_EQUAL(list.size(), ++count);
 
     list.push_front(new EleMent);
 
-    Assert::AreEqual(list.size(), ++count);
+    AWT_ASSERT_EQUAL(list.size(), ++count);
 
     list.push_front(new EleMent);
 
-    Assert::AreEqual(list.size(), ++count);
+    AWT_ASSERT_EQUAL(list.size(), ++count);
 
     delete list.pop_front();
 
-    Assert::AreEqual(list.size(), --count);
+    AWT_ASSERT_EQUAL(list.size(), --count);
 
     delete list.pop_front();
 
-    Assert::AreEqual(list.size(), --count);
+    AWT_ASSERT_EQUAL(list.size(), --count);
 
     delete list.pop_front();
 
-    Assert::AreEqual(list.size(), --count);
+    AWT_ASSERT_EQUAL(list.size(), --count);
 
     list.push_front(new EleMent);
 
-    Assert::AreEqual(list.size(), ++count);
+    AWT_ASSERT_EQUAL(list.size(), ++count);
 
     auto first = list.front();
 
     list.clear();
 
-    Assert::AreEqual(list.size(), (size_t)0);
+    AWT_ASSERT_EQUAL(list.size(), (size_t)0);
 
     delete first;
 }

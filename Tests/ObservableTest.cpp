@@ -75,7 +75,7 @@ AWT_TEST(Observable_Events)
 {
     Something something;
 
-    Assert::AreEqual(0U, something.size());
+    AWT_ASSERT_EQUAL(0U, something.size());
     AWT_ASSERT_TRUE(something.empty());
 
     {
@@ -87,7 +87,7 @@ AWT_TEST(Observable_Events)
         something.Subscribe(&handler2);
         something.Subscribe(&handler3);
 
-        Assert::AreEqual(3u, something.size());
+        AWT_ASSERT_EQUAL(3u, something.size());
 
         something.SetIt(1);
         something.SetIt2(2);
@@ -97,15 +97,15 @@ AWT_TEST(Observable_Events)
         AWT_ASSERTM_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
 
         handler1.UnsubscribeSelf();
-        Assert::AreEqual(2u, something.size());
+        AWT_ASSERT_EQUAL(2u, something.size());
 
         something.Unsubscribe(&handler2);
-        Assert::AreEqual(1u, something.size());
+        AWT_ASSERT_EQUAL(1u, something.size());
 
         AWT_ASSERT_TRUE(!something.empty());
     }
 
-    Assert::AreEqual(0U, something.size());
+    AWT_ASSERT_EQUAL(0U, something.size());
     AWT_ASSERT_TRUE(something.empty());
 }
 

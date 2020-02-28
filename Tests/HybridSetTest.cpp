@@ -56,11 +56,11 @@ namespace awl
                 }
             }
 
-            Assert::AreEqual(1, set.front());
-            Assert::AreEqual(static_cast<int>(count), set.back());
+            AWT_ASSERT_EQUAL(1, set.front());
+            AWT_ASSERT_EQUAL(static_cast<int>(count), set.back());
             Set::Node * nN = InsertNew(284);
-            Assert::AreEqual(1, set.front());
-            Assert::AreEqual(nN->value, set.back());
+            AWT_ASSERT_EQUAL(1, set.front());
+            AWT_ASSERT_EQUAL(nN->value, set.back());
 
             set.RemoveNode(n1);
             AWT_ASSERT_TRUE(set.m_root == n2);
@@ -146,12 +146,12 @@ namespace
 
     static void CompareBounds(const StdSet & std_set, const MySet & my_set)
     {
-        Assert::AreEqual(std_set.size(), my_set.size(), _T("wrong size"));
+        AWT_ASSERTM_EQUAL(std_set.size(), my_set.size(), _T("wrong size"));
 
-        Assert::AreEqual(*std_set.begin(), my_set.front(), _T("wrong front"));
-        Assert::AreEqual(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
-        Assert::AreEqual(*std_set.rbegin(), my_set.back(), _T("wrong back"));
-        Assert::AreEqual(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
+        AWT_ASSERTM_EQUAL(*std_set.begin(), my_set.front(), _T("wrong front"));
+        AWT_ASSERTM_EQUAL(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
+        AWT_ASSERTM_EQUAL(*std_set.rbegin(), my_set.back(), _T("wrong back"));
+        AWT_ASSERTM_EQUAL(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
     }
 
     static void CompareSets(const StdSet & std_set, const MySet & my_set)
@@ -162,7 +162,7 @@ namespace
             for (auto val : my_set)
             {
                 size_t std_val = *i++;
-                Assert::AreEqual(std_val, val);
+                AWT_ASSERT_EQUAL(std_val, val);
             }
 
             AWT_ASSERT_TRUE(i == std_set.end());
@@ -175,7 +175,7 @@ namespace
             {
                 size_t std_val = *i++;
                 size_t my_val = *my_i;
-                Assert::AreEqual(std_val, my_val, _T("wrong element"));
+                AWT_ASSERTM_EQUAL(std_val, my_val, _T("wrong element"));
             }
 
             AWT_ASSERT_TRUE(i == std_set.rend());
@@ -237,7 +237,7 @@ AWT_TEST(HybridSetRandom)
                 PrintSet(context, my_set);
             }
 
-            Assert::AreEqual(std_result.second, my_result.second);
+            AWT_ASSERT_EQUAL(std_result.second, my_result.second);
         }
 
         CompareBounds(std_set, my_set);
@@ -305,7 +305,7 @@ AWT_TEST(HybridSetRandom)
     my_set.clear();
     AWT_ASSERT_TRUE(my_set.empty());
     AWT_ASSERT_TRUE(my_set.size() == 0);
-    Assert::AreEqual(0u, memory_size, _T("memory leaks"));
+    AWT_ASSERTM_EQUAL(0u, memory_size, _T("memory leaks"));
 }
 
 AWT_TEST(HybridSetRValue)
@@ -376,10 +376,10 @@ AWT_TEST(HybridSetIndex)
     for (auto val : set)
     {
         const auto found_val = set.at(index);
-        Assert::AreEqual(val, found_val);
+        AWT_ASSERT_EQUAL(val, found_val);
 
         const size_t found_index = set.index_of(val);
-        Assert::AreEqual(index, found_index);
+        AWT_ASSERT_EQUAL(index, found_index);
 
         ++index;
     }
@@ -447,7 +447,7 @@ namespace
             AWT_ASSERT_TRUE(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
-            Assert::AreEqual(index, found_index);
+            AWT_ASSERT_EQUAL(index, found_index);
 
             ++index;
         }
@@ -498,8 +498,8 @@ namespace
             const A * found_val = set.at(index);
             AWT_ASSERT_TRUE(val == *found_val);
 
-            Assert::AreEqual(index, set.index_of(&val));
-            Assert::AreEqual(index, set.index_of(val.key));
+            AWT_ASSERT_EQUAL(index, set.index_of(&val));
+            AWT_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(&val);
@@ -545,8 +545,8 @@ namespace
             const Pointer & p_found = set.at(index);
             AWT_ASSERT_TRUE(val == *p_found);
 
-            Assert::AreEqual(index, set.index_of(Pointer(new A(val))));
-            Assert::AreEqual(index, set.index_of(val.key));
+            AWT_ASSERT_EQUAL(index, set.index_of(Pointer(new A(val))));
+            AWT_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(Pointer(new A(val)));
@@ -631,7 +631,7 @@ namespace
             AWT_ASSERT_TRUE(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
-            Assert::AreEqual(index, found_index);
+            AWT_ASSERT_EQUAL(index, found_index);
 
             ++index;
         }
@@ -680,10 +680,10 @@ AWT_TEST(HybridSetNonCopyableElement)
     {
         const int found_key = set1.at(i).GetKey();
         const int actual_key = keys[i];
-        Assert::AreEqual(found_key, actual_key);
+        AWT_ASSERT_EQUAL(found_key, actual_key);
 
-        Assert::AreEqual(set1.index_of(found_key), i);
-        Assert::AreEqual(set1.index_of(B(found_key)), i);
+        AWT_ASSERT_EQUAL(set1.index_of(found_key), i);
+        AWT_ASSERT_EQUAL(set1.index_of(B(found_key)), i);
         AWT_ASSERT_TRUE(set1.find(B(found_key)) != set1.end());
     }
 
@@ -701,11 +701,11 @@ static void AssertIteratorsEqual(const I1 & i1, const I1 & end1, const I2 & i2, 
             const size_t val1 = *i1;
             const size_t val2 = *i2;
 
-            Assert::AreEqual(val1, val2, _T("different values"));
+            AWT_ASSERTM_EQUAL(val1, val2, _T("different values"));
         }
         else
         {
-            Assert::Fail(_T("end and not end"));
+            AWT_FAILM(_T("end and not end"));
         }
     }
 }
@@ -722,7 +722,7 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
         AssertIteratorsEqual(set.lower_bound(val), set.end(), std_set.lower_bound(val), std_set.end());
         AssertIteratorsEqual(set.upper_bound(val), set.end(), std_set.upper_bound(val), std_set.end());
         //since C++20
-        Assert::AreEqual(set.contains(val), std_set.find(val) != std_set.end());
+        AWT_ASSERT_EQUAL(set.contains(val), std_set.find(val) != std_set.end());
     }
 }
 

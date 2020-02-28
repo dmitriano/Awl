@@ -17,28 +17,28 @@ AWT_TEST(ScopeGuard)
 
         guard.release();
 
-        Assert::AreEqual(usage, 1);
+        AWT_ASSERT_EQUAL(usage, 1);
     }
 
-    Assert::AreEqual(usage, 1);
+    AWT_ASSERT_EQUAL(usage, 1);
 
     {
         auto guard = awl::make_scope_guard([&usage]() { --usage; });
 
-        Assert::AreEqual(usage, 1);
+        AWT_ASSERT_EQUAL(usage, 1);
     }
 
-    Assert::AreEqual(usage, 0);
+    AWT_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
             [&usage]() { ++usage; },
             [&usage]() { --usage; });
 
-        Assert::AreEqual(usage, 1);
+        AWT_ASSERT_EQUAL(usage, 1);
     }
 
-    Assert::AreEqual(usage, 0);
+    AWT_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
@@ -47,10 +47,10 @@ AWT_TEST(ScopeGuard)
 
         guard.release();
 
-        Assert::AreEqual(usage, 1);
+        AWT_ASSERT_EQUAL(usage, 1);
     }
 
-    Assert::AreEqual(usage, 1);
+    AWT_ASSERT_EQUAL(usage, 1);
 
     usage = 0;
 
@@ -59,10 +59,10 @@ AWT_TEST(ScopeGuard)
     {
         auto guard = awl::make_scope_guard([&usage]() { --usage; }, false);
 
-        Assert::AreEqual(usage, 0);
+        AWT_ASSERT_EQUAL(usage, 0);
     }
 
-    Assert::AreEqual(usage, 0);
+    AWT_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
@@ -70,10 +70,10 @@ AWT_TEST(ScopeGuard)
             [&usage]() { --usage; },
             false);
 
-        Assert::AreEqual(usage, 0);
+        AWT_ASSERT_EQUAL(usage, 0);
     }
 
-    Assert::AreEqual(usage, 0);
+    AWT_ASSERT_EQUAL(usage, 0);
 
     {
         auto init = [&usage]() { ++usage; };
@@ -82,5 +82,5 @@ AWT_TEST(ScopeGuard)
         auto guard = awl::make_scope_guard(init, free, true);
     }
 
-    Assert::AreEqual(usage, 0);
+    AWT_ASSERT_EQUAL(usage, 0);
 }

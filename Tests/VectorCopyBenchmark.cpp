@@ -57,7 +57,7 @@ namespace
     static void CopyVector(const TestContext & context, const awl::Char * type_name)
     {
         AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-        AWT_ATTRIBUTE(size_t, iteration_count, 100);
+        AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
         std::unique_ptr<T[]> p_buffer(new T[vector_size]);
 
@@ -68,7 +68,7 @@ namespace
 
         std::vector<T> v;
         v.reserve(vector_size);
-        Assert::AreEqual(vector_size, v.capacity());
+        AWT_ASSERT_EQUAL(vector_size, v.capacity());
 
         context.out << _T("std::vector<") << type_name << _T(">\t");
 
@@ -84,8 +84,8 @@ namespace
                 std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
 
                 //Ensure the vector was not resized.
-                Assert::AreEqual(vector_size, v.capacity());
-                Assert::AreEqual(vector_size, v.size());
+                AWT_ASSERT_EQUAL(vector_size, v.capacity());
+                AWT_ASSERT_EQUAL(vector_size, v.size());
                 v.resize(0);
             }
 
@@ -104,8 +104,8 @@ namespace
                 v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
 
                 //Ensure the vector was not resized.
-                Assert::AreEqual(vector_size, v.capacity());
-                Assert::AreEqual(vector_size, v.size());
+                AWT_ASSERT_EQUAL(vector_size, v.capacity());
+                AWT_ASSERT_EQUAL(vector_size, v.size());
                 v.resize(0);
             }
 

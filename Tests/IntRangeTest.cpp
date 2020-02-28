@@ -19,10 +19,10 @@ AWT_TEST(IntRangeInt)
     
     for (auto i : awl::make_count(10))
     {
-        Assert::AreEqual(n++, i);
+        AWT_ASSERT_EQUAL(n++, i);
     }
 
-    Assert::AreEqual(n, 10);
+    AWT_ASSERT_EQUAL(n, 10);
 
     const std::vector<int> sample{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
@@ -43,8 +43,8 @@ AWT_TEST(IntRangeSizeT)
 
     for (auto i : awl::make_count(N))
     {
-        Assert::AreEqual(n++, i);
+        AWT_ASSERT_EQUAL(n++, i);
     }
 
-    Assert::AreEqual(n, N);
+    AWT_ASSERT_EQUAL(n, N);
 }

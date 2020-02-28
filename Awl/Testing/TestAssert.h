@@ -62,7 +62,8 @@ namespace awl::testing
 #define AWT_TOSTRING(x) AWT_STRINGIFY(x)
 #define AWT_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWT_TOSTRING(__LINE__))
 
-#define AWT_FAIL(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
+#define AWT_FAIL awl::testing::Assert::Fail(AWT_SRC_INFO)
+#define AWT_FAILM(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
 
 #define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
 #define AWT_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)

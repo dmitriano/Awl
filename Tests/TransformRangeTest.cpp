@@ -49,9 +49,9 @@ AWT_TEST(TransformIterator)
             AWT_ASSERT_TRUE(i == begin);
             AWT_ASSERT_TRUE(i != end);
 
-            Assert::AreEqual(1, *i++);
-            Assert::AreEqual(2, *i++);
-            Assert::AreEqual(3, *i++);
+            AWT_ASSERT_EQUAL(1, *i++);
+            AWT_ASSERT_EQUAL(2, *i++);
+            AWT_ASSERT_EQUAL(3, *i++);
 
             AWT_ASSERT_TRUE(i == end);
         }
@@ -62,9 +62,9 @@ AWT_TEST(TransformIterator)
             AWT_ASSERT_TRUE(i == begin);
             AWT_ASSERT_TRUE(i != end);
 
-            Assert::AreEqual(1, *i);
-            Assert::AreEqual(2, *(++i));
-            Assert::AreEqual(3, *(++i));
+            AWT_ASSERT_EQUAL(1, *i);
+            AWT_ASSERT_EQUAL(2, *(++i));
+            AWT_ASSERT_EQUAL(3, *(++i));
 
             AWT_ASSERT_TRUE(++i == end);
         }
@@ -77,7 +77,7 @@ AWT_TEST(TransformIterator)
         
         for (auto val : range)
         {
-            Assert::AreEqual(++i, val);
+            AWT_ASSERT_EQUAL(++i, val);
         }
     }
 
@@ -103,15 +103,15 @@ AWT_TEST(TransformIterator)
             AWT_ASSERT_TRUE(i == begin);
             AWT_ASSERT_TRUE(i != end);
 
-            Assert::AreEqual(1, *i++);
+            AWT_ASSERT_EQUAL(1, *i++);
         
-            Assert::AreEqual(2, *i);
+            AWT_ASSERT_EQUAL(2, *i);
 
             *i = 5;
             
-            Assert::AreEqual(5, *i++);
+            AWT_ASSERT_EQUAL(5, *i++);
 
-            Assert::AreEqual(3, *i++);
+            AWT_ASSERT_EQUAL(3, *i++);
 
             AWT_ASSERT_TRUE(i == end);
         }
@@ -122,9 +122,9 @@ AWT_TEST(TransformIterator)
             AWT_ASSERT_TRUE(i == begin);
             AWT_ASSERT_TRUE(i != end);
 
-            Assert::AreEqual(1, *i++);
-            Assert::AreEqual(5, *i++);
-            Assert::AreEqual(3, *i++);
+            AWT_ASSERT_EQUAL(1, *i++);
+            AWT_ASSERT_EQUAL(5, *i++);
+            AWT_ASSERT_EQUAL(3, *i++);
 
             AWT_ASSERT_TRUE(i == end);
         }
@@ -141,9 +141,9 @@ AWT_TEST(TransformIterator)
             AWT_ASSERT_TRUE(i == range.begin());
             AWT_ASSERT_TRUE(i != range.end());
 
-            Assert::AreEqual(_T("a"), *i++);
-            Assert::AreEqual(_T("b"), *i++);
-            Assert::AreEqual(_T("c"), *i++);
+            AWT_ASSERT_EQUAL(_T("a"), *i++);
+            AWT_ASSERT_EQUAL(_T("b"), *i++);
+            AWT_ASSERT_EQUAL(_T("c"), *i++);
 
             AWT_ASSERT_TRUE(i == range.end());
         }
