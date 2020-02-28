@@ -178,7 +178,7 @@ namespace awl::io
 namespace
 {
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t count, bool with_metadata)
+    std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t element_count, bool with_metadata)
     {
         OldContext ctx;
         ctx.Initialize();
@@ -198,7 +198,7 @@ namespace
 
         awl::StopWatch w;
 
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
             
@@ -218,7 +218,7 @@ namespace
         }
     }
 
-    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t element_count)
     {
         //Skip metadata
         OldContext ctx;
@@ -226,7 +226,7 @@ namespace
 
         awl::StopWatch w;
 
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
 
@@ -247,14 +247,14 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t element_count)
     {
         OldContext ctx;
         ctx.ReadOldPrototypes(in);
 
         awl::StopWatch w;
         
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
 
@@ -272,7 +272,7 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t count)
+    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t element_count)
     {
         NewContext ctx;
         ctx.ReadOldPrototypes(in);
@@ -293,7 +293,7 @@ namespace
 
         awl::StopWatch w;
         
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
 
@@ -324,7 +324,7 @@ namespace
         return w;
     }
 
-    size_t MeasureStreamSize(const TestContext & context, size_t count, bool include_meta = true)
+    size_t MeasureStreamSize(const TestContext & context, size_t element_count, bool include_meta = true)
     {
         size_t meta_size = 0;
 
@@ -347,7 +347,7 @@ namespace
             block_size = out.GetLength();
         }
 
-        const size_t mem_size = meta_size + block_size * count;
+        const size_t mem_size = meta_size + block_size * element_count;
 
         if (include_meta)
         {
@@ -362,10 +362,10 @@ namespace
 
 AWT_TEST(VtsReadWrite)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
     AWT_FLAG(only_write);
 
-    const size_t mem_size = MeasureStreamSize(context, count);
+    const size_t mem_size = MeasureStreamSize(context, element_count);
 
     std::vector<uint8_t> v;
     v.reserve(mem_size);
@@ -377,11 +377,11 @@ AWT_TEST(VtsReadWrite)
     {
         awl::io::VectorOutputStream out(v);
 
-        auto d = WriteDataV1(out, count, true);
+        auto d = WriteDataV1(out, element_count, true);
 
         context.out << _T("Test data has been written. ");
         
-        ReportCountAndSpeed(context, d, count, v.size());
+        ReportCountAndSpeed(context, d, element_count, v.size());
 
         context.out << std::endl;
     }
@@ -394,11 +394,11 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataNoV(in, count);
+            auto d = ReadDataNoV(in, element_count);
 
             context.out << _T("Plain has been read. ");
 
-            ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -406,11 +406,11 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1(in, count);
+            auto d = ReadDataV1(in, element_count);
 
             context.out << _T("Version 1 has been read. ");
 
-            ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -418,11 +418,11 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2(in, count);
+            auto d = ReadDataV2(in, element_count);
 
             context.out << _T("Version 2 has been read. ");
 
-            ReportCountAndSpeed(context, d, count, v.size());
+            ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -431,30 +431,30 @@ AWT_TEST(VtsReadWrite)
 
 AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
     TestMeasureStream out;
 
-    auto d = WriteDataV1(out, count, true);
+    auto d = WriteDataV1(out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
 
 AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
     TestMeasureStream out;
 
-    auto d = WriteDataV1(static_cast<awl::io::SequentialOutputStream &>(out), count, true);
+    auto d = WriteDataV1(static_cast<awl::io::SequentialOutputStream &>(out), element_count, true);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
@@ -494,11 +494,11 @@ namespace
     }
     
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataPack1(OutputStream & out, size_t count)
+    std::chrono::steady_clock::duration WriteDataPack1(OutputStream & out, size_t element_count)
     {
         awl::StopWatch w;
 
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
 
@@ -515,34 +515,34 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePack1Inline)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
-    const size_t mem_size = MeasureStreamSize(context, count, false);
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
     TestMeasureStream out;
 
-    auto d = WriteDataPack1(out, count);
+    auto d = WriteDataPack1(out, element_count);
 
     AWT_ASSERT(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
 
 AWT_BENCHMARK(VtsMeasurePack1Virtual)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
     TestMeasureStream out;
 
-    auto d = WriteDataPack1(static_cast<awl::io::SequentialOutputStream &>(out), count);
+    auto d = WriteDataPack1(static_cast<awl::io::SequentialOutputStream &>(out), element_count);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
@@ -550,11 +550,11 @@ AWT_BENCHMARK(VtsMeasurePack1Virtual)
 namespace
 {
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataPlain(OutputStream & out, size_t count)
+    std::chrono::steady_clock::duration WriteDataPlain(OutputStream & out, size_t element_count)
     {
         awl::StopWatch w;
 
-        for (size_t i : awl::make_count(count))
+        for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
 
@@ -575,66 +575,66 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePlainInline)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
-    const size_t mem_size = MeasureStreamSize(context, count, false);
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
     
     TestMeasureStream out;
 
-    auto d = WriteDataPlain(out, count);
+    auto d = WriteDataPlain(out, element_count);
 
     AWT_ASSERT(mem_size == out.GetLength());
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
 
 AWT_BENCHMARK(VtsMeasurePlainVirtual)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
     TestMeasureStream out;
 
-    auto d = WriteDataPlain(static_cast<awl::io::SequentialOutputStream &>(out), count);
+    auto d = WriteDataPlain(static_cast<awl::io::SequentialOutputStream &>(out), element_count);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
 
 AWT_BENCHMARK(VtsMemSetMove)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
-    std::unique_ptr<uint8_t> p(new uint8_t[count]);
+    std::unique_ptr<uint8_t> p(new uint8_t[element_count]);
 
     {
         context.out << _T("std::memset: ");
 
         awl::StopWatch w;
 
-        std::memset(p.get(), 25u, count);
+        std::memset(p.get(), 25u, element_count);
 
-        ReportSpeed(context, w, count);
+        ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
 
-    std::unique_ptr<uint8_t> p1(new uint8_t[count]);
+    std::unique_ptr<uint8_t> p1(new uint8_t[element_count]);
 
     {
         context.out << _T("std::memmove: ");
 
         awl::StopWatch w;
 
-        std::memmove(p1.get(), p.get(), count);
+        std::memmove(p1.get(), p.get(), element_count);
 
-        ReportSpeed(context, w, count);
+        ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
@@ -643,16 +643,16 @@ AWT_BENCHMARK(VtsMemSetMove)
         context.out << _T("std::vector<uint8_t>::insert: ");
 
         std::vector<uint8_t> v;
-        v.reserve(count);
-        AWT_ASSERT_EQUAL(count, v.capacity());
+        v.reserve(element_count);
+        AWT_ASSERT_EQUAL(element_count, v.capacity());
 
         awl::StopWatch w;
 
-        v.insert(v.end(), p.get(), p.get() + count);
-        AWT_ASSERT_EQUAL(count, v.capacity());
-        AWT_ASSERT_EQUAL(count, v.size());
+        v.insert(v.end(), p.get(), p.get() + element_count);
+        AWT_ASSERT_EQUAL(element_count, v.capacity());
+        AWT_ASSERT_EQUAL(element_count, v.size());
 
-        ReportSpeed(context, w, count);
+        ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
@@ -700,21 +700,21 @@ namespace
 
 AWT_TEST(VtsWriteMemoryStream)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
-    const size_t mem_size = MeasureStreamSize(context, count);
+    const size_t mem_size = MeasureStreamSize(context, element_count);
 
     TestMemoryOutputStream out(mem_size);
 
     {
-        auto d = WriteDataV1(out, count, true);
+        auto d = WriteDataV1(out, element_count, true);
 
         context.out << _T("Test data has been written. ");
 
         AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
         AWT_ASSERT_EQUAL(mem_size, out.GetLength());
 
-        ReportCountAndSpeed(context, d, count, mem_size);
+        ReportCountAndSpeed(context, d, element_count, mem_size);
 
         context.out << std::endl;
     }
@@ -743,11 +743,11 @@ AWT_TEST(VtsWriteMemoryStream)
 
 AWT_BENCHMARK(VtsVolatileInt)
 {
-    AWT_ATTRIBUTE(size_t, count, 1);
+    AWT_ATTRIBUTE(size_t, element_count, 1000);
 
     volatile size_t val;
 
-    const size_t write_count = count * (std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
+    const size_t write_count = element_count * (std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
         
     awl::StopWatch w;
 
@@ -756,7 +756,7 @@ AWT_BENCHMARK(VtsVolatileInt)
         val = i;
     }
 
-    ReportCountAndSpeed(context, w, count, count * sizeof(val));
+    ReportCountAndSpeed(context, w, element_count, element_count * sizeof(val));
 
     context.out << std::endl;
 }
