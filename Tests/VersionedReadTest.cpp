@@ -638,6 +638,24 @@ AWT_BENCHMARK(VtsMemSetMove)
 
         context.out << std::endl;
     }
+
+    {
+        context.out << _T("std::vector<uint8_t>::insert: ");
+
+        std::vector<uint8_t> v;
+        v.reserve(count);
+        AWT_ASSERT_EQUAL(count, v.capacity());
+
+        awl::StopWatch w;
+
+        v.insert(v.end(), p.get(), p.get() + count);
+        AWT_ASSERT_EQUAL(count, v.capacity());
+        AWT_ASSERT_EQUAL(count, v.size());
+
+        ReportSpeed(context, w, count);
+
+        context.out << std::endl;
+    }
 }
 
 namespace
