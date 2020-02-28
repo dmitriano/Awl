@@ -362,7 +362,7 @@ namespace
 
 AWT_TEST(VtsReadWrite)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
     AWT_FLAG(only_write);
 
@@ -441,7 +441,7 @@ AWT_TEST(VtsReadWrite)
 
 AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     TestMeasureStream out;
 
@@ -456,7 +456,7 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 
 AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     TestMeasureStream out;
 
@@ -525,7 +525,7 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePack1Inline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
@@ -544,7 +544,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
 AWT_BENCHMARK(VtsMeasurePack1Virtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     TestMeasureStream out;
 
@@ -585,7 +585,7 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePlainInline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
     
@@ -604,7 +604,7 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 
 AWT_BENCHMARK(VtsMeasurePlainVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     TestMeasureStream out;
 
@@ -619,7 +619,7 @@ AWT_BENCHMARK(VtsMeasurePlainVirtual)
 
 AWT_BENCHMARK(VtsMemSetMove)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     std::unique_ptr<uint8_t> p(new uint8_t[element_count]);
 
@@ -710,7 +710,7 @@ namespace
 
 AWT_TEST(VtsWriteMemoryStream)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -753,7 +753,7 @@ AWT_TEST(VtsWriteMemoryStream)
 
 AWT_BENCHMARK(VtsVolatileInt)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
 
     volatile size_t val;
 
