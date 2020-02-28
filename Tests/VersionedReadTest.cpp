@@ -363,6 +363,7 @@ namespace
 AWT_TEST(VtsReadWrite)
 {
     AWT_ATTRIBUTE(size_t, element_count, 1000);
+    AWT_ATTRIBUTE(size_t, iteration_count, 1);
     AWT_FLAG(only_write);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
@@ -377,11 +378,20 @@ AWT_TEST(VtsReadWrite)
     {
         awl::io::VectorOutputStream out(v);
 
-        auto d = WriteDataV1(out, element_count, true);
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+        
+        for (auto i : awl::make_count(iteration_count))
+        {
+            static_cast<void>(i);
+
+            v.resize(0);
+
+            total_d += WriteDataV1(out, element_count, true);
+        }
 
         context.out << _T("Test data has been written. ");
         
-        ReportCountAndSpeed(context, d, element_count, v.size());
+        ReportCountAndSpeed(context, total_d, element_count * iteration_count, v.size() * iteration_count);
 
         context.out << std::endl;
     }
