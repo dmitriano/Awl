@@ -766,7 +766,7 @@ AWT_BENCHMARK(VtsVolatileInt)
         val = i;
     }
 
-    ReportCountAndSpeed(context, w, element_count, element_count * sizeof(val));
+    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(val));
 
     context.out << std::endl;
 }
