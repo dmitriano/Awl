@@ -1,4 +1,5 @@
 #include "Awl/Io/SequentialStream.h"
+#include "Awl/Io/MeasureStream.h"
 #include <memory>
 
 namespace VtsTest
@@ -17,5 +18,10 @@ namespace VtsTest
     std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream()
     {
         return std::unique_ptr<awl::io::SequentialOutputStream>(new FakeStream());
+    }
+
+    std::unique_ptr<awl::io::SequentialOutputStream> CreateMeasureStream()
+    {
+        return std::unique_ptr<awl::io::SequentialOutputStream>(new awl::io::MeasureStream());
     }
 }

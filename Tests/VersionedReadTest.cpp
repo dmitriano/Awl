@@ -124,6 +124,15 @@ namespace
         //prevent the optimization
         volatile size_t m_pos = 0;
     };
+
+    constexpr size_t defaultElementCount = 1000000;
+}
+
+namespace VtsTest
+{
+    std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream();
+
+    std::unique_ptr<awl::io::SequentialOutputStream> CreateMeasureStream();
 }
 
 namespace awl::io
@@ -383,7 +392,7 @@ namespace
 
 AWT_TEST(VtsReadWrite)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
     AWT_FLAG(only_write);
 
@@ -462,7 +471,7 @@ AWT_TEST(VtsReadWrite)
 
 AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     VirtualMeasureStream out;
 
@@ -473,19 +482,42 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
     ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
+
+    AWT_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), out.GetLength());
 }
 
 AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    VirtualMeasureStream out;
+    auto p_out = VtsTest::CreateMeasureStream();
 
-    auto d = WriteDataV1(static_cast<awl::io::SequentialOutputStream &>(out), element_count, true);
+    auto d = WriteDataV1(*p_out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
+
+    ReportCountAndSpeed(context, d, element_count, len);
+
+    context.out << std::endl;
+
+    AWT_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), len);
+}
+
+AWT_BENCHMARK(VtsMeasureSerializationFake)
+{
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
+
+    auto p_out = VtsTest::CreateFakeStream();
+
+    auto d = WriteDataV1(*p_out, element_count, true);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, element_count, mem_size);
 
     context.out << std::endl;
 }
@@ -546,7 +578,7 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePack1Inline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
@@ -565,7 +597,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
 AWT_BENCHMARK(VtsMeasurePack1Virtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     VirtualMeasureStream out;
 
@@ -606,7 +638,7 @@ namespace
 
 AWT_BENCHMARK(VtsMeasurePlainInline)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
     
@@ -625,22 +657,41 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 
 AWT_BENCHMARK(VtsMeasurePlainVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    VirtualMeasureStream out;
+    auto p_out = VtsTest::CreateMeasureStream();
 
-    auto d = WriteDataPlain(static_cast<awl::io::SequentialOutputStream &>(out), element_count);
+    auto d = WriteDataPlain(*p_out, element_count);
+
+    size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
+
+    ReportCountAndSpeed(context, d, element_count, len);
+
+    context.out << std::endl;
+
+    AWT_ASSERT_EQUAL((MeasureStreamSize(context, element_count, false)), len);
+}
+
+AWT_BENCHMARK(VtsMeasurePlainFake)
+{
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
+
+    auto p_out = VtsTest::CreateFakeStream();
+
+    auto d = WriteDataPlain(*p_out, element_count);
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    ReportCountAndSpeed(context, d, element_count, mem_size);
 
     context.out << std::endl;
 }
 
 AWT_BENCHMARK(VtsMemSetMove)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     std::unique_ptr<uint8_t> p(new uint8_t[element_count]);
 
@@ -731,7 +782,7 @@ namespace
 
 AWT_TEST(VtsWriteMemoryStream)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -774,7 +825,7 @@ AWT_TEST(VtsWriteMemoryStream)
 
 AWT_BENCHMARK(VtsVolatileInt)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     volatile size_t val;
 
@@ -799,7 +850,7 @@ AWT_BENCHMARK(VtsVolatileInt)
 
 AWT_BENCHMARK(VtsVolatileStream)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     InlineMeasureStream out;
 
@@ -822,14 +873,9 @@ AWT_BENCHMARK(VtsVolatileStream)
     context.out << std::endl;
 }
 
-namespace VtsTest
-{
-    std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream();
-}
-
 AWT_BENCHMARK(VtsVolatileFake)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     auto p_out = VtsTest::CreateFakeStream();
 
@@ -849,39 +895,5 @@ AWT_BENCHMARK(VtsVolatileFake)
     ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
-    context.out << std::endl;
-}
-
-AWT_BENCHMARK(VtsMeasurePlainFake)
-{
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
-
-    const size_t mem_size = MeasureStreamSize(context, element_count, false);
-
-    auto p_out = VtsTest::CreateFakeStream();
-
-    auto d = WriteDataPlain(*p_out, element_count);
-
-    context.out << _T("Test data has been written. ");
-
-    ReportCountAndSpeed(context, d, element_count, mem_size);
-
-    context.out << std::endl;
-}
-
-AWT_BENCHMARK(VtsMeasureSerializationFake)
-{
-    AWT_ATTRIBUTE(size_t, element_count, 1000000);
-
-    const size_t mem_size = MeasureStreamSize(context, element_count, false);
-
-    auto p_out = VtsTest::CreateFakeStream();
-
-    auto d = WriteDataV1(*p_out, element_count, true);
-
-    context.out << _T("Test data has been written. ");
-
-    ReportCountAndSpeed(context, d, element_count, mem_size);
-
     context.out << std::endl;
 }
