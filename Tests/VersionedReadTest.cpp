@@ -817,3 +817,65 @@ AWT_BENCHMARK(VtsVolatileStream)
     ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
 }
+
+namespace VtsTest
+{
+    std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream();
+}
+
+AWT_BENCHMARK(VtsVolatileFake)
+{
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+
+    auto p_out = VtsTest::CreateFakeStream();
+
+    constexpr size_t element_size = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+
+    const size_t write_count = element_count * element_size;
+
+    awl::StopWatch w;
+
+    for (size_t i : awl::make_count(write_count))
+    {
+        PlainWrite(*p_out, i);
+    }
+
+    ReportCountAndSpeed(context, w, element_count, write_count);
+    context.out << std::endl;
+    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
+    context.out << std::endl;
+}
+
+AWT_BENCHMARK(VtsMeasurePlainFake)
+{
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
+
+    auto p_out = VtsTest::CreateFakeStream();
+
+    auto d = WriteDataPlain(*p_out, element_count);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, element_count, mem_size);
+
+    context.out << std::endl;
+}
+
+AWT_BENCHMARK(VtsMeasureSerializationFake)
+{
+    AWT_ATTRIBUTE(size_t, element_count, 1000000);
+
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
+
+    auto p_out = VtsTest::CreateFakeStream();
+
+    auto d = WriteDataV1(*p_out, element_count, true);
+
+    context.out << _T("Test data has been written. ");
+
+    ReportCountAndSpeed(context, d, element_count, mem_size);
+
+    context.out << std::endl;
+}
