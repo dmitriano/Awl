@@ -21,6 +21,7 @@
 #include "Helpers/FormattingHelpers.h"
 
 using namespace awl::testing;
+using namespace awl::testing::helpers;
 
 template <class Hash>
 static void CalcHash(const TestContext & context, const awl::Char * type_name = nullptr)
@@ -75,13 +76,9 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         context.out << _T(": ");
 
-        helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
+        ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : ");
-
-        helpers::PrintHash(context.out, val);
-
-        context.out << std::endl;
+        context.out << _T(" Hash : ") << val << std::endl;
     }
 }
 
