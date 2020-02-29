@@ -208,6 +208,33 @@ namespace awl::io
 namespace
 {
     template <class OutputStream>
+    std::chrono::steady_clock::duration WriteDataV1NoMeta(OutputStream & out, size_t element_count)
+    {
+        OldContext ctx;
+        ctx.Initialize();
+
+        {
+            auto & a1_proto = ctx.FindNewPrototype<A1>();
+            AWT_ASSERT(a1_proto.GetCount() == 3);
+
+            auto & b1_proto = ctx.FindNewPrototype<B1>();
+            AWT_ASSERT(b1_proto.GetCount() == 2);
+        }
+
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(element_count))
+        {
+            static_cast<void>(i);
+
+            awl::io::WriteV(out, a1_expected, ctx);
+            awl::io::WriteV(out, b1_expected, ctx);
+        }
+
+        return w;
+    }
+
+    template <class OutputStream>
     std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t element_count, bool with_metadata)
     {
         OldContext ctx;
@@ -750,6 +777,16 @@ namespace
         *dest = *src;
     }
     
+    constexpr inline void StdCopy(uint8_t * p_dest, const uint8_t * p_src, size_t count)
+    {
+        size_t i = 0;
+        while (i < count)
+        {
+            *p_dest++ = *p_src++;
+            ++i;
+        }
+    }
+
     class TestMemoryOutputStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -787,7 +824,7 @@ namespace
         uint8_t * m_p;
     };
 
-    class SwitchMemoryOutputStream : public awl::io::SequentialOutputStream
+    class SwitchMemoryOutputStream //: public awl::io::SequentialOutputStream
     {
     public:
 
@@ -796,7 +833,7 @@ namespace
             std::memset(pBuf.get(), 0u, m_size);
         }
 
-        void Write(const uint8_t * buffer, size_t count) override
+        constexpr void Write(const uint8_t * buffer, size_t count)
         {
             switch (count)
             {
@@ -813,7 +850,10 @@ namespace
                 PlainCopy<uint64_t>(m_p, buffer);
                 break;
             default:
-                std::memmove(m_p, buffer, count);
+                //memcpy, memmove, and memset are obsolete!
+                //std::copy is constexpr in C++ 20.
+                //std::memmove(m_p, buffer, count);
+                StdCopy(m_p, buffer, count);
                 break;
             }
 
@@ -849,7 +889,7 @@ void TestMemoryStream(const TestContext & context)
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-    const size_t mem_size = MeasureStreamSize(context, element_count);
+    const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
     OutputStream out(mem_size);
 
@@ -860,7 +900,7 @@ void TestMemoryStream(const TestContext & context)
         {
             static_cast<void>(i);
 
-            total_d += WriteDataV1(out, element_count, true);
+            total_d += WriteDataV1NoMeta(out, element_count);
 
             AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
             AWT_ASSERT_EQUAL(mem_size, out.GetLength());
