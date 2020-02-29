@@ -12,6 +12,7 @@
 #include <chrono>
 #include <memory>
 #include <iomanip>
+#include <type_traits>
 
 #include "BenchmarkHelpers.h"
 
@@ -210,33 +211,6 @@ namespace awl::io
 namespace
 {
     template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataV1NoMeta(OutputStream & out, size_t element_count)
-    {
-        OldContext ctx;
-        ctx.Initialize();
-
-        {
-            auto & a1_proto = ctx.FindNewPrototype<A1>();
-            AWT_ASSERT(a1_proto.GetCount() == 3);
-
-            auto & b1_proto = ctx.FindNewPrototype<B1>();
-            AWT_ASSERT(b1_proto.GetCount() == 2);
-        }
-
-        awl::StopWatch w;
-
-        for (size_t i : awl::make_count(element_count))
-        {
-            static_cast<void>(i);
-
-            awl::io::WriteV(out, a1_expected, ctx);
-            awl::io::WriteV(out, b1_expected, ctx);
-        }
-
-        return w;
-    }
-
-    template <class OutputStream>
     std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t element_count, bool with_metadata)
     {
         OldContext ctx;
@@ -250,9 +224,16 @@ namespace
             AWT_ASSERT(b1_proto.GetCount() == 2);
         }
 
-        if (with_metadata)
+        if constexpr (std::is_base_of_v<awl::io::SequentialOutputStream, OutputStream>)
         {
-            ctx.WriteNewPrototypes(out);
+            if (with_metadata)
+            {
+                ctx.WriteNewPrototypes(out);
+            }
+        }
+        else
+        {
+            static_cast<void>(with_metadata);
         }
 
         awl::StopWatch w;
@@ -1000,7 +981,7 @@ namespace
             {
                 static_cast<void>(i);
 
-                total_d += WriteDataV1NoMeta(out, element_count);
+                total_d += WriteDataV1(out, element_count, false);
 
                 AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
                 AWT_ASSERT_EQUAL(mem_size, out.GetLength());
