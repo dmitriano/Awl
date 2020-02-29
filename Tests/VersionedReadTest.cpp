@@ -945,8 +945,16 @@ namespace
 namespace awl::io
 {
     template <typename T>
-    inline typename std::enable_if_t<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void> Write(EnlightenmentMemoryOutputStream & s, T val)
+    constexpr typename std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(EnlightenmentMemoryOutputStream & s, T val)
     {
+        s.WriteArithmetic(val);
+    }
+
+    template <>
+    constexpr void Write(EnlightenmentMemoryOutputStream & s, bool b)
+    {
+        uint8_t val = b ? 1 : 0;
+
         s.WriteArithmetic(val);
     }
 }
@@ -1020,7 +1028,7 @@ AWT_TEST(VtsWriteMemoryStreamSwitch)
     TestMemoryStream<SwitchMemoryOutputStream>(context);
 }
 
-AWT_TEST(VtsWriteMemoryStreamEnlightenment)
+AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
     TestMemoryStream<EnlightenmentMemoryOutputStream>(context);
 }
