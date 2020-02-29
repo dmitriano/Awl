@@ -839,6 +839,9 @@ namespace
             delete pBuf;
         }
 
+        //To make this look better and get gid of switch operator we would probably define
+        //the specialization of Read/Write functions not only for the type
+        //but also for the stream.
         constexpr void Write(const uint8_t * buffer, size_t count)
         {
             switch (count)
