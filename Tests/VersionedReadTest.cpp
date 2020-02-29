@@ -777,13 +777,12 @@ namespace
         *dest = *src;
     }
     
-    constexpr inline void StdCopy(uint8_t * p_dest, const uint8_t * p_src, size_t count)
+    constexpr inline void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
     {
-        size_t i = 0;
-        while (i < count)
+        const uint8_t * p = begin;
+        while (p != end)
         {
-            *p_dest++ = *p_src++;
-            ++i;
+            *out++ = *p++;
         }
     }
 
@@ -799,6 +798,7 @@ namespace
         void Write(const uint8_t * buffer, size_t count) override
         {
             std::memmove(m_p, buffer, count);
+            //std::copy(buffer, buffer + count, m_p);
             m_p += count;
         }
 
@@ -852,8 +852,8 @@ namespace
             default:
                 //memcpy, memmove, and memset are obsolete!
                 //std::copy is constexpr in C++ 20.
-                //std::memmove(m_p, buffer, count);
-                StdCopy(m_p, buffer, count);
+                //std::copy(buffer, buffer + count, m_p);
+                StdCopy(buffer, buffer + count, m_p);
                 break;
             }
 
