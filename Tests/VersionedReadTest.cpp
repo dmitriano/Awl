@@ -742,6 +742,14 @@ AWT_BENCHMARK(VtsMemSetMove)
 
 namespace
 {
+    template <class T>
+    constexpr inline void PlainCopy(uint8_t * p_dest, const uint8_t * p_src)
+    {
+        T * dest = reinterpret_cast<T *>(p_dest);
+        const T * src = reinterpret_cast<const T *>(p_src);
+        *dest = *src;
+    }
+    
     class TestMemoryOutputStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -778,15 +786,71 @@ namespace
         std::unique_ptr<uint8_t> pBuf;
         uint8_t * m_p;
     };
+
+    class SwitchMemoryOutputStream : public awl::io::SequentialOutputStream
+    {
+    public:
+
+        SwitchMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf.get())
+        {
+            std::memset(pBuf.get(), 0u, m_size);
+        }
+
+        void Write(const uint8_t * buffer, size_t count) override
+        {
+            switch (count)
+            {
+            case 1:
+                PlainCopy<uint8_t>(m_p, buffer);
+                break;
+            case 2:
+                PlainCopy<uint16_t>(m_p, buffer);
+                break;
+            case 4:
+                PlainCopy<uint32_t>(m_p, buffer);
+                break;
+            case 8:
+                PlainCopy<uint64_t>(m_p, buffer);
+                break;
+            default:
+                std::memmove(m_p, buffer, count);
+                break;
+            }
+
+            m_p += count;
+        }
+
+        size_t GetCapacity() const
+        {
+            return m_size;
+        }
+
+        size_t GetLength() const
+        {
+            return m_p - pBuf.get();
+        }
+
+        void Reset()
+        {
+            m_p = pBuf.get();
+        }
+
+    private:
+
+        const size_t m_size;
+        std::unique_ptr<uint8_t> pBuf;
+        uint8_t * m_p;
+    };
 }
 
-AWT_TEST(VtsWriteMemoryStream)
+template <class OutputStream>
+void TestMemoryStream(const TestContext & context)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
-    TestMemoryOutputStream out(mem_size);
+    OutputStream out(mem_size);
 
     {
         auto d = WriteDataV1(out, element_count, true);
@@ -801,6 +865,7 @@ AWT_TEST(VtsWriteMemoryStream)
         context.out << std::endl;
     }
 
+    /*
     out.Reset();
 
     {
@@ -819,8 +884,19 @@ AWT_TEST(VtsWriteMemoryStream)
 
         ReportSpeed(context, w, mem_size);
 
-        context.out << std::endl;
+      context.out << std::endl;
     }
+    */
+}
+
+AWT_TEST(VtsWriteMemoryStreamMemmove)
+{
+    TestMemoryStream<TestMemoryOutputStream>(context);
+}
+
+AWT_TEST(VtsWriteMemoryStreamSwitch)
+{
+    TestMemoryStream<SwitchMemoryOutputStream>(context);
 }
 
 AWT_BENCHMARK(VtsVolatileInt)
