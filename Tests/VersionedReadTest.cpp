@@ -13,6 +13,7 @@
 #include <memory>
 #include <iomanip>
 #include <type_traits>
+#include <cassert>
 
 #include "BenchmarkHelpers.h"
 
@@ -233,6 +234,7 @@ namespace
         }
         else
         {
+            assert(!with_metadata);
             static_cast<void>(with_metadata);
         }
 
