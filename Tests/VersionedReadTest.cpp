@@ -847,20 +847,30 @@ template <class OutputStream>
 void TestMemoryStream(const TestContext & context)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
     OutputStream out(mem_size);
 
     {
-        auto d = WriteDataV1(out, element_count, true);
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(iteration_count))
+        {
+            static_cast<void>(i);
+
+            total_d += WriteDataV1(out, element_count, true);
+
+            AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+            AWT_ASSERT_EQUAL(mem_size, out.GetLength());
+
+            out.Reset();
+        }
 
         context.out << _T("Test data has been written. ");
 
-        AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
-        AWT_ASSERT_EQUAL(mem_size, out.GetLength());
-
-        ReportCountAndSpeed(context, d, element_count, mem_size);
+        ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
 
         context.out << std::endl;
     }
