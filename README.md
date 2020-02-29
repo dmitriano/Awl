@@ -12,7 +12,7 @@ AWL is a small cross-platform C++ library that includes:
 7. Bitset based on enum.
 8. A simple testing framework.
 
-Feel free to fork it, but keep in mind that version compatibility is not guaranteed and there is no warranty of any kind.
+Feel free to use it or fork it, but keep in mind that version compatibility is not guaranteed and there is no warranty of any kind.
 
 Compiling on Windows with CMake and MSVC2017:
 
