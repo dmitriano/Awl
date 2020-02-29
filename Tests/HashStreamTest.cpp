@@ -59,7 +59,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
         {
             context.out << _T("Write speed: ");
 
-            ReportSpeed(context, w, total_size);
+            helpers::ReportSpeed(context, w, total_size);
         }
     }
 
@@ -90,7 +90,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
         {
             context.out << _T(" Read speed: ");
 
-            ReportSpeed(context, w, total_size);
+            helpers::ReportSpeed(context, w, total_size);
 
             context.out << std::endl;
         }
@@ -141,7 +141,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
         {
             context.out << _T("Write speed: ");
 
-            ReportSpeed(context, w, total_size);
+            helpers::ReportSpeed(context, w, total_size);
         }
     }
 
@@ -183,7 +183,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
         {
             context.out << _T(" Read speed: ");
 
-            ReportSpeed(context, w, total_size);
+            helpers::ReportSpeed(context, w, total_size);
 
             context.out << std::endl;
         }

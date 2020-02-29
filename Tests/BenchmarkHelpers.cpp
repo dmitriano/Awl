@@ -5,10 +5,10 @@
 
 #include "Helpers/BenchmarkHelpers.h"
 
-using namespace awl::testing;
-
-namespace
+namespace awl::testing::helpers
 {
+    using namespace awl::testing;
+
     inline bool IsZero(std::chrono::steady_clock::duration d)
     {
         return d == std::chrono::steady_clock::duration::zero();
@@ -19,38 +19,38 @@ namespace
     {
         return std::chrono::duration_cast<std::chrono::duration<value_type>>(d).count();
     }
-}
 
-double ReportSpeed(const TestContext & context, std::chrono::steady_clock::duration d, size_t size)
-{
-    if (IsZero(d))
+    double ReportSpeed(const TestContext & context, std::chrono::steady_clock::duration d, size_t size)
     {
-        context.out << _T("ZERO TIME");
-        return std::numeric_limits<double>::infinity();
-    }
-    
-    const auto time = GetElapsedSeconds<double>(d);
+        if (IsZero(d))
+        {
+            context.out << _T("ZERO TIME");
+            return std::numeric_limits<double>::infinity();
+        }
 
-    const double speed = size / time / (1024 * 1024);
-    
-    context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
+        const auto time = GetElapsedSeconds<double>(d);
 
-    return speed;
-}
+        const double speed = size / time / (1024 * 1024);
 
-double ReportCount(const TestContext & context, std::chrono::steady_clock::duration d, size_t count)
-{
-    if (IsZero(d))
-    {
-        context.out << _T("ZERO TIME");
-        return std::numeric_limits<double>::infinity();
+        context.out << std::fixed << std::setprecision(2) << speed << _T(" MB/sec");
+
+        return speed;
     }
 
-    const auto time = GetElapsedSeconds<double>(d);
+    double ReportCount(const TestContext & context, std::chrono::steady_clock::duration d, size_t count)
+    {
+        if (IsZero(d))
+        {
+            context.out << _T("ZERO TIME");
+            return std::numeric_limits<double>::infinity();
+        }
 
-    const double speed = count / time;
+        const auto time = GetElapsedSeconds<double>(d);
 
-    context.out << std::fixed << std::setprecision(2) << speed << _T(" elements/sec");
+        const double speed = count / time;
 
-    return speed;
+        context.out << std::fixed << std::setprecision(2) << speed << _T(" elements/sec");
+
+        return speed;
+    }
 }

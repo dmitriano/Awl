@@ -40,7 +40,7 @@ static void Insert(const TestContext & context, const awl::Char * type_name)
         }
     }
 
-    ReportCount(context, w, element_count * iteration_count);
+    helpers::ReportCount(context, w, element_count * iteration_count);
 
     context.out << _T("\t") << type_name << std::endl;
 }

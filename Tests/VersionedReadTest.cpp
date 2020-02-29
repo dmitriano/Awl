@@ -434,7 +434,7 @@ AWT_TEST(VtsReadWrite)
 
         context.out << _T("Test data has been written. ");
         
-        ReportCountAndSpeed(context, total_d, element_count * iteration_count, v.size() * iteration_count);
+        helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, v.size() * iteration_count);
 
         context.out << std::endl;
     }
@@ -451,7 +451,7 @@ AWT_TEST(VtsReadWrite)
 
             context.out << _T("Plain has been read. ");
 
-            ReportCountAndSpeed(context, d, element_count, v.size());
+            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -463,7 +463,7 @@ AWT_TEST(VtsReadWrite)
 
             context.out << _T("Version 1 has been read. ");
 
-            ReportCountAndSpeed(context, d, element_count, v.size());
+            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -475,7 +475,7 @@ AWT_TEST(VtsReadWrite)
 
             context.out << _T("Version 2 has been read. ");
 
-            ReportCountAndSpeed(context, d, element_count, v.size());
+            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
@@ -492,7 +492,7 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 
@@ -511,7 +511,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
     size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
 
-    ReportCountAndSpeed(context, d, element_count, len);
+    helpers::ReportCountAndSpeed(context, d, element_count, len);
 
     context.out << std::endl;
 
@@ -530,7 +530,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, mem_size);
+    helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
     context.out << std::endl;
 }
@@ -603,7 +603,7 @@ AWT_BENCHMARK(VtsMeasurePack1Inline)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
@@ -618,7 +618,7 @@ AWT_BENCHMARK(VtsMeasurePack1Virtual)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
@@ -663,7 +663,7 @@ AWT_BENCHMARK(VtsMeasurePlainInline)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
     context.out << std::endl;
 }
@@ -678,7 +678,7 @@ AWT_BENCHMARK(VtsMeasurePlainVirtual)
 
     size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
 
-    ReportCountAndSpeed(context, d, element_count, len);
+    helpers::ReportCountAndSpeed(context, d, element_count, len);
 
     context.out << std::endl;
 
@@ -697,7 +697,7 @@ AWT_BENCHMARK(VtsMeasurePlainFake)
 
     context.out << _T("Test data has been written. ");
 
-    ReportCountAndSpeed(context, d, element_count, mem_size);
+    helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
     context.out << std::endl;
 }
@@ -715,7 +715,7 @@ AWT_BENCHMARK(VtsMemSetMove)
 
         std::memset(p.get(), 25u, element_count);
 
-        ReportSpeed(context, w, element_count);
+        helpers::ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
@@ -729,7 +729,7 @@ AWT_BENCHMARK(VtsMemSetMove)
 
         std::memmove(p1.get(), p.get(), element_count);
 
-        ReportSpeed(context, w, element_count);
+        helpers::ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
@@ -747,7 +747,7 @@ AWT_BENCHMARK(VtsMemSetMove)
         AWT_ASSERT_EQUAL(element_count, v.capacity());
         AWT_ASSERT_EQUAL(element_count, v.size());
 
-        ReportSpeed(context, w, element_count);
+        helpers::ReportSpeed(context, w, element_count);
 
         context.out << std::endl;
     }
@@ -987,7 +987,7 @@ namespace
             helpers::PrintHash(context.out, h);
             context.out << std::endl;
 
-            ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
+            helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
             context.out << std::endl;
         }
 
@@ -1008,7 +1008,7 @@ namespace
             AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
             AWT_ASSERT_EQUAL(mem_size, out.GetLength());
 
-            ReportSpeed(context, w, mem_size);
+            helpers::ReportSpeed(context, w, mem_size);
 
           context.out << std::endl;
         }
@@ -1050,9 +1050,9 @@ AWT_BENCHMARK(VtsVolatileInt)
         val = i;
     }
 
-    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
+    helpers::ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
-    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(val));
+    helpers::ReportCountAndSpeed(context, w, write_count, write_count * sizeof(val));
     context.out << std::endl;
 }
 
@@ -1075,9 +1075,9 @@ AWT_BENCHMARK(VtsVolatileStream)
         PlainWrite(out, i);
     }
 
-    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
+    helpers::ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
-    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
+    helpers::ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
 }
 
@@ -1100,8 +1100,8 @@ AWT_BENCHMARK(VtsVolatileFake)
         PlainWrite(*p_out, i);
     }
 
-    ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
+    helpers::ReportCountAndSpeed(context, w, element_count, element_count * mem_size);
     context.out << std::endl;
-    ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
+    helpers::ReportCountAndSpeed(context, w, write_count, write_count * sizeof(size_t));
     context.out << std::endl;
 }

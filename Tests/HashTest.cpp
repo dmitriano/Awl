@@ -18,6 +18,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include "Helpers/BenchmarkHelpers.h"
+#include "Helpers/FormattingHelpers.h"
 
 using namespace awl::testing;
 
@@ -74,14 +75,11 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         context.out << _T(": ");
 
-        ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
+        helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : 0x") << std::hex;
+        context.out << _T(" Hash : 0x");
 
-        for (size_t i = 0; i < val.size(); ++i)
-        {
-            context.out << val[i];
-        }
+        helpers::PrintHash(context.out, val);
 
         context.out << std::endl;
     }

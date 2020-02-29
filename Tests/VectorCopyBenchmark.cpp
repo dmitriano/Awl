@@ -91,7 +91,7 @@ namespace
 
             context.out << _T("copy: ");
 
-            ratio = ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
+            ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
         }
 
         {
@@ -111,7 +111,7 @@ namespace
 
             context.out << _T("\tinsert: ");
 
-            ratio = ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
+            ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
         }
 
         context.out << _T("\t (") << ratio << _T(")");
