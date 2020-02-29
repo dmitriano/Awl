@@ -77,7 +77,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : 0x");
+        context.out << _T(" Hash : ");
 
         helpers::PrintHash(context.out, val);
 
