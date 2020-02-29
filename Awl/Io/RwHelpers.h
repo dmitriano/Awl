@@ -107,7 +107,7 @@ namespace awl
         }
 
         template <class Stream, typename Char>
-        void Read(Stream & s, std::basic_string<Char> & val)
+        inline void Read(Stream & s, std::basic_string<Char> & val)
         {
             typename std::basic_string<Char>::size_type len;
 
@@ -122,7 +122,7 @@ namespace awl
         }
 
         template <class Stream, typename Char>
-        void Write(Stream & s, const std::basic_string<Char> & val)
+        inline void Write(Stream & s, const std::basic_string<Char> & val)
         {
             typename std::basic_string<Char>::size_type len = val.length();
 
@@ -132,14 +132,14 @@ namespace awl
         }
 
         template <class Stream, class Container>
-        typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type 
+        inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
             ReadVector(Stream & s, Container & v)
         {
             ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
         }
 
         template <class Stream, class Container>
-        typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type 
+        inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
             WriteVector(Stream & s, const Container & v)
         {
             s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
@@ -333,73 +333,73 @@ namespace awl
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Read(Stream & s, std::set<T, Compare, Alloc> & coll)
+        inline void Read(Stream & s, std::set<T, Compare, Alloc> & coll)
         {
             ReadCollection(s, coll);
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Write(Stream & s, const std::set<T, Compare, Alloc> &coll)
+        inline void Write(Stream & s, const std::set<T, Compare, Alloc> &coll)
         {
             WriteCollection(s, coll);
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll)
+        inline void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll)
         {
             ReadCollection(s, coll);
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll)
+        inline void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll)
         {
             WriteCollection(s, coll);
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Read(Stream & s, observable_set<T, Compare, Alloc> & coll)
+        inline void Read(Stream & s, observable_set<T, Compare, Alloc> & coll)
         {
             ReadCollection(s, coll);
         }
 
         template <class Stream, class T, class Compare, class Alloc>
-        void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll)
+        inline void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll)
         {
             WriteCollection(s, coll);
         }
 
         template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
-        void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll)
+        inline void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll)
         {
             ReadCollection(s, coll);
         }
 
         template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
-        void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll)
+        inline void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll)
         {
             WriteCollection(s, coll);
         }
 
         template <class Stream, class Key, class T, class Compare, class Alloc>
-        void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll)
+        inline void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll)
         {
             ReadMap(s, coll);
         }
 
         template <class Stream, class Key, class T, class Compare, class Alloc>
-        void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll)
+        inline void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll)
         {
             WriteCollection(s, coll);
         }
 
         template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator>
-        void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll)
+        inline void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll)
         {
             ReadMap(s, coll);
         }
 
         template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator>
-        void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll)
+        inline void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll)
         {
             WriteCollection(s, coll);
         }
