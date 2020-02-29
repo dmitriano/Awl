@@ -824,7 +824,7 @@ namespace
         uint8_t * m_p;
     };
 
-    class SwitchMemoryOutputStream //: public awl::io::SequentialOutputStream
+    class SwitchMemoryOutputStream
     {
     public:
 
@@ -890,62 +890,124 @@ namespace
         uint8_t * pBuf;
         uint8_t * m_p;
     };
+
+    class EnlightenmentMemoryOutputStream
+    {
+    public:
+
+        EnlightenmentMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
+        {
+            std::memset(pBuf, 0u, m_size);
+        }
+
+        ~EnlightenmentMemoryOutputStream()
+        {
+            delete pBuf;
+        }
+
+        constexpr void Write(const uint8_t * buffer, size_t count)
+        {
+            StdCopy(buffer, buffer + count, m_p);
+            m_p += count;
+        }
+
+        size_t GetCapacity() const
+        {
+            return m_size;
+        }
+
+        size_t GetLength() const
+        {
+            return m_p - pBuf;
+        }
+
+        void Reset()
+        {
+            m_p = pBuf;
+        }
+
+        template <class T>
+        constexpr void WriteArithmetic(const T val)
+        {
+            *(reinterpret_cast<T *>(pBuf)) = val;
+            m_p += sizeof(val);
+        }
+
+    private:
+
+        //how to declare Write specializaion as a friend?
+        const size_t m_size;
+        uint8_t * pBuf;
+        uint8_t * m_p;
+    };
 }
 
-template <class OutputStream>
-void TestMemoryStream(const TestContext & context)
+namespace awl::io
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWT_ATTRIBUTE(size_t, iteration_count, 1);
-
-    const size_t mem_size = MeasureStreamSize(context, element_count, false);
-
-    OutputStream out(mem_size);
-
+    template <typename T>
+    inline typename std::enable_if_t<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void> Write(EnlightenmentMemoryOutputStream & s, T val)
     {
-        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+        s.WriteArithmetic(val);
+    }
+}
 
-        for (auto i : awl::make_count(iteration_count))
+namespace
+{
+    template <class OutputStream>
+    void TestMemoryStream(const TestContext & context)
+    {
+        AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+        AWT_ATTRIBUTE(size_t, iteration_count, 1);
+
+        const size_t mem_size = MeasureStreamSize(context, element_count, false);
+
+        OutputStream out(mem_size);
+
         {
-            static_cast<void>(i);
+            std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
-            total_d += WriteDataV1NoMeta(out, element_count);
+            for (auto i : awl::make_count(iteration_count))
+            {
+                static_cast<void>(i);
+
+                total_d += WriteDataV1NoMeta(out, element_count);
+
+                AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+                AWT_ASSERT_EQUAL(mem_size, out.GetLength());
+
+                out.Reset();
+            }
+
+            context.out << _T("Test data has been written. ");
+
+            ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
+
+            context.out << std::endl;
+        }
+
+        /*
+        out.Reset();
+
+        {
+            awl::StopWatch w;
+
+            for (size_t i : awl::make_count(mem_size))
+            {
+                const uint8_t val = static_cast<uint8_t>(i);
+                out.Write(&val, 1);
+            }
+
+            context.out << _T("Bytes has been written. ");
 
             AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
             AWT_ASSERT_EQUAL(mem_size, out.GetLength());
 
-            out.Reset();
+            ReportSpeed(context, w, mem_size);
+
+          context.out << std::endl;
         }
-
-        context.out << _T("Test data has been written. ");
-
-        ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-
-        context.out << std::endl;
+        */
     }
-
-    /*
-    out.Reset();
-
-    {
-        awl::StopWatch w;
-
-        for (size_t i : awl::make_count(mem_size))
-        {
-            const uint8_t val = static_cast<uint8_t>(i);
-            out.Write(&val, 1);
-        }
-
-        context.out << _T("Bytes has been written. ");
-
-        AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
-        AWT_ASSERT_EQUAL(mem_size, out.GetLength());
-
-        ReportSpeed(context, w, mem_size);
-
-      context.out << std::endl;
-    }
-    */
 }
 
 AWT_TEST(VtsWriteMemoryStreamMemmove)
@@ -956,6 +1018,11 @@ AWT_TEST(VtsWriteMemoryStreamMemmove)
 AWT_TEST(VtsWriteMemoryStreamSwitch)
 {
     TestMemoryStream<SwitchMemoryOutputStream>(context);
+}
+
+AWT_TEST(VtsWriteMemoryStreamEnlightenment)
+{
+    TestMemoryStream<EnlightenmentMemoryOutputStream>(context);
 }
 
 AWT_BENCHMARK(VtsVolatileInt)
