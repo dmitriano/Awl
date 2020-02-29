@@ -828,9 +828,15 @@ namespace
     {
     public:
 
-        SwitchMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf.get())
+        //new uint8_t[size] is not constexpr and allocating 64K on the stack probably is not a good idea.
+        SwitchMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
         {
-            std::memset(pBuf.get(), 0u, m_size);
+            std::memset(pBuf, 0u, m_size);
+        }
+
+        ~SwitchMemoryOutputStream()
+        {
+            delete pBuf;
         }
 
         constexpr void Write(const uint8_t * buffer, size_t count)
@@ -867,18 +873,18 @@ namespace
 
         size_t GetLength() const
         {
-            return m_p - pBuf.get();
+            return m_p - pBuf;
         }
 
         void Reset()
         {
-            m_p = pBuf.get();
+            m_p = pBuf;
         }
 
     private:
 
         const size_t m_size;
-        std::unique_ptr<uint8_t> pBuf;
+        uint8_t * pBuf;
         uint8_t * m_p;
     };
 }
