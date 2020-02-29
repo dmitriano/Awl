@@ -7,7 +7,7 @@ AWL is a small cross-platform C++ library that includes:
 2. Memory stream, buffered stream, hashing stream.
 3. A set that finds an element by both key and index with O(logN) time.
 4. A doubly linked list with static insert and erase methods.
-5. An observable pattern with moveable observers.
+5. An observable pattern with movable observers.
 6. Transform iterator.
 7. Bitset based on enum.
 8. A simple testing framework.
