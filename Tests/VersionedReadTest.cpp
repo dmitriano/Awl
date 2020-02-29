@@ -918,7 +918,7 @@ namespace
         template <class T>
         constexpr void WriteArithmetic(const T val)
         {
-            *(reinterpret_cast<T *>(pBuf)) = val;
+            *(reinterpret_cast<T *>(m_p)) = val;
             m_p += sizeof(val);
         }
 
