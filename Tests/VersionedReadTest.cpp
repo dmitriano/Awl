@@ -977,9 +977,9 @@ namespace
     {
         out << _T("0x");
         
-        for (int i = 0; i < N; ++i)
+        for (size_t i = 0; i < N; ++i)
         {
-            out << std::hex << h[i] << std::dec;
+            out << std::hex << static_cast<unsigned int>(h[i]) << std::dec;
         }
     }
     
