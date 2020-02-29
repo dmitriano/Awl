@@ -23,7 +23,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
-#include "BenchmarkHelpers.h"
+#include "Helpers/BenchmarkHelpers.h"
 
 using namespace awl::testing;
 using namespace awl::io;

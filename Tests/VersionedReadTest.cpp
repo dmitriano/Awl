@@ -7,15 +7,16 @@
 #include "Awl/Crypto/Crc64.h"
 
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <functional>
 #include <chrono>
 #include <memory>
-#include <iomanip>
 #include <type_traits>
 #include <cassert>
 
-#include "BenchmarkHelpers.h"
+#include "Helpers/BenchmarkHelpers.h"
+#include "Helpers/FormattingHelpers.h"
 
 using namespace awl::testing;
 
@@ -955,17 +956,6 @@ namespace awl::io
 
 namespace
 {
-    template <size_t N>
-    void PrintHash(std::basic_ostream<awl::Char> & out, awl::crypto::HashValue<N> & h)
-    {
-        out << _T("0x");
-        
-        for (size_t i = 0; i < N; ++i)
-        {
-            out << std::hex << std::setfill(_T('0')) << std::setw(2) << static_cast<unsigned int>(h[i]) << std::dec;
-        }
-    }
-    
     template <class OutputStream>
     void TestMemoryStream(const TestContext & context)
     {
@@ -994,7 +984,7 @@ namespace
             awl::crypto::Crc64 hash;
             auto h = hash(out.begin(), out.end());
             context.out << _T("Test data has been written. Buffer hash=");
-            PrintHash(context.out, h);
+            helpers::PrintHash(context.out, h);
             context.out << std::endl;
 
             ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);

@@ -9,7 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 
-#include "BenchmarkHelpers.h"
+#include "Helpers/BenchmarkHelpers.h"
 
 using namespace awl::testing;
 
