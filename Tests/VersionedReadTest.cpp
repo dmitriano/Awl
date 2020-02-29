@@ -4,12 +4,14 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
+#include "Awl/Crypto/Crc64.h"
 
 #include <iostream>
 #include <algorithm>
 #include <functional>
 #include <chrono>
 #include <memory>
+#include <iomanip>
 
 #include "BenchmarkHelpers.h"
 
@@ -817,6 +819,9 @@ namespace
             m_p = pBuf.get();
         }
 
+        const uint8_t * begin() const { return pBuf.get(); }
+        const uint8_t * end() const { return pBuf.get() + m_size; }
+
     private:
 
         const size_t m_size;
@@ -884,6 +889,9 @@ namespace
             m_p = pBuf;
         }
 
+        const uint8_t * begin() const { return pBuf; }
+        const uint8_t * end() const { return pBuf + m_size; }
+
     private:
 
         const size_t m_size;
@@ -933,6 +941,9 @@ namespace
             m_p += sizeof(val);
         }
 
+        const uint8_t * begin() const { return pBuf; }
+        const uint8_t * end() const { return pBuf + m_size; }
+
     private:
 
         //how to declare Write specializaion as a friend?
@@ -961,6 +972,17 @@ namespace awl::io
 
 namespace
 {
+    template <size_t N>
+    void PrintHash(std::basic_ostream<awl::Char> & out, awl::crypto::HashValue<N> & h)
+    {
+        out << _T("0x");
+        
+        for (int i = 0; i < N; ++i)
+        {
+            out << std::hex << h[i] << std::dec;
+        }
+    }
+    
     template <class OutputStream>
     void TestMemoryStream(const TestContext & context)
     {
@@ -986,10 +1008,13 @@ namespace
                 out.Reset();
             }
 
-            context.out << _T("Test data has been written. ");
+            awl::crypto::Crc64 hash;
+            auto h = hash(out.begin(), out.end());
+            context.out << _T("Test data has been written. Buffer hash=");
+            PrintHash(context.out, h);
+            context.out << std::endl;
 
             ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-
             context.out << std::endl;
         }
 
