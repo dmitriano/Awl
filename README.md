@@ -1,7 +1,15 @@
 # Awl
 AWL - A Working Library
 
-AWL is a small but constantly growing cross-platform C++ library.
+AWL is a small cross-platform C++ library that includes:
+
+1. A simple binary serialization framework.
+2. A set that finds an element by both key and index with O(logN) time.
+3. A doubly linked list with static insert and erase methods.
+4. A moveable observable pattern.
+5. Transform iterator.
+6. Bitset based on enum.
+7. A simple testing framework.
 
 Compiling on Windows with CMake and MSVC2017:
 
