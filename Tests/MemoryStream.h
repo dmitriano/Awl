@@ -1,12 +1,7 @@
 #pragma once
 
 #include "Awl/Io/IoException.h"
-#include "Awl/Io/SequentialStream.h"
-
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <assert.h>
+#include "Awl/Io/RwHelpers.h"
 
 namespace awl::io
 {
@@ -25,7 +20,7 @@ namespace awl::io
 
         MemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
         {
-            std::memset(pBuf, 0u, m_size);
+            //std::memset(pBuf, 0u, m_size);
         }
 
         ~MemoryOutputStream()
@@ -37,6 +32,13 @@ namespace awl::io
         {
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
+        }
+
+        template <class T>
+        constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
+        {
+            *(reinterpret_cast<T *>(m_p)) = val;
+            m_p += sizeof(val);
         }
 
         size_t GetCapacity() const
@@ -52,13 +54,6 @@ namespace awl::io
         void Reset()
         {
             m_p = pBuf;
-        }
-
-        template <class T>
-        constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
-        {
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p += sizeof(val);
         }
 
         const uint8_t * begin() const { return pBuf; }
