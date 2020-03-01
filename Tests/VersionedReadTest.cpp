@@ -17,6 +17,7 @@
 
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"
+#include "MemoryStream.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
@@ -764,15 +765,6 @@ namespace
         *dest = *src;
     }
 
-    constexpr inline void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
-    {
-        const uint8_t * p = begin;
-        while (p != end)
-        {
-            *out++ = *p++;
-        }
-    }
-
     class TestMemoryOutputStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -852,7 +844,7 @@ namespace
                 //memcpy, memmove, and memset are obsolete!
                 //std::copy is constexpr in C++ 20.
                 //std::copy(buffer, buffer + count, m_p);
-                StdCopy(buffer, buffer + count, m_p);
+                awl::io::StdCopy(buffer, buffer + count, m_p);
                 break;
             }
 
@@ -884,78 +876,6 @@ namespace
         uint8_t * m_p;
     };
 
-}
-
-namespace awl::io
-{
-    class EnlightenmentMemoryOutputStream
-    {
-    public:
-
-        EnlightenmentMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
-        {
-            std::memset(pBuf, 0u, m_size);
-        }
-
-        ~EnlightenmentMemoryOutputStream()
-        {
-            delete pBuf;
-        }
-
-        constexpr void Write(const uint8_t * buffer, size_t count)
-        {
-            StdCopy(buffer, buffer + count, m_p);
-            m_p += count;
-        }
-
-        size_t GetCapacity() const
-        {
-            return m_size;
-        }
-
-        size_t GetLength() const
-        {
-            return m_p - pBuf;
-        }
-
-        void Reset()
-        {
-            m_p = pBuf;
-        }
-
-    template <class T>
-    constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
-    {
-        *(reinterpret_cast<T *>(m_p)) = val;
-        m_p += sizeof(val);
-    }
-
-        const uint8_t * begin() const { return pBuf; }
-        const uint8_t * end() const { return pBuf + m_size; }
-
-    private:
-
-        //how to declare Write specializaion as a friend?
-        //template <class Stream, class T> friend void Write(Stream & s, T val);
-
-        const size_t m_size;
-        uint8_t * pBuf;
-        uint8_t * m_p;
-    };
-
-    template <typename T>
-    constexpr std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(EnlightenmentMemoryOutputStream & s, T val)
-    {
-        s.WriteArithmetic(val);
-    }
-
-    template <>
-    constexpr void Write(EnlightenmentMemoryOutputStream & s, bool b)
-    {
-        uint8_t val = b ? 1 : 0;
-
-        s.WriteArithmetic(val);
-    }
 }
 
 namespace
@@ -1030,7 +950,7 @@ AWT_TEST(VtsWriteMemoryStreamSwitch)
 
 AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
-    TestMemoryStream<awl::io::EnlightenmentMemoryOutputStream>(context);
+    TestMemoryStream<awl::io::MemoryOutputStream>(context);
 }
 
 AWT_BENCHMARK(VtsVolatileInt)
