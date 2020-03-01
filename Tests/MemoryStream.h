@@ -30,11 +30,11 @@ namespace awl::io
 
         constexpr void Write(const uint8_t * buffer, size_t count)
         {
+            //std::memmove(m_p, buffer, count);
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
         }
 
-        /*
         template <class T>
         std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
         {
@@ -48,14 +48,15 @@ namespace awl::io
             *(reinterpret_cast<T *>(m_p)) = val;
             m_p = new_p;
         }
-        */
 
+        /*
         template <class T>
         constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
         {
             *(reinterpret_cast<T *>(m_p)) = val;
             m_p += sizeof(val);
         }
+        */
 
         size_t GetCapacity() const
         {
@@ -86,13 +87,13 @@ namespace awl::io
     };
 
     template <typename T>
-    constexpr std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(MemoryOutputStream & s, T val)
+    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(MemoryOutputStream & s, T val)
     {
         s.WriteArithmetic(val);
     }
 
     template <>
-    constexpr void Write(MemoryOutputStream & s, bool b)
+    inline void Write(MemoryOutputStream & s, bool b)
     {
         uint8_t val = b ? 1 : 0;
 
