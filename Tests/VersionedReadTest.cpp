@@ -987,7 +987,7 @@ namespace
 
             awl::crypto::Crc64 hash;
             auto h = hash(out.begin(), out.end());
-            context.out << _T("Test data has been written. Buffer hash=") << std::endl;
+            context.out << _T("Test data has been written. Buffer hash=") << h << std::endl;
 
             helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
             context.out << std::endl;
