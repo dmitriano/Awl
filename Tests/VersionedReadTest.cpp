@@ -763,7 +763,7 @@ namespace
         const T * src = reinterpret_cast<const T *>(p_src);
         *dest = *src;
     }
-    
+
     constexpr inline void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
     {
         const uint8_t * p = begin;
@@ -884,6 +884,10 @@ namespace
         uint8_t * m_p;
     };
 
+}
+
+namespace awl::io
+{
     class EnlightenmentMemoryOutputStream
     {
     public:
@@ -919,12 +923,12 @@ namespace
             m_p = pBuf;
         }
 
-        template <class T>
-        constexpr void WriteArithmetic(const T val)
-        {
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p += sizeof(val);
-        }
+    template <class T>
+    constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
+    {
+        *(reinterpret_cast<T *>(m_p)) = val;
+        m_p += sizeof(val);
+    }
 
         const uint8_t * begin() const { return pBuf; }
         const uint8_t * end() const { return pBuf + m_size; }
@@ -932,16 +936,15 @@ namespace
     private:
 
         //how to declare Write specializaion as a friend?
+        //template <class Stream, class T> friend void Write(Stream & s, T val);
+
         const size_t m_size;
         uint8_t * pBuf;
         uint8_t * m_p;
     };
-}
 
-namespace awl::io
-{
     template <typename T>
-    constexpr typename std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(EnlightenmentMemoryOutputStream & s, T val)
+    constexpr std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(EnlightenmentMemoryOutputStream & s, T val)
     {
         s.WriteArithmetic(val);
     }
@@ -1027,7 +1030,7 @@ AWT_TEST(VtsWriteMemoryStreamSwitch)
 
 AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
-    TestMemoryStream<EnlightenmentMemoryOutputStream>(context);
+    TestMemoryStream<awl::io::EnlightenmentMemoryOutputStream>(context);
 }
 
 AWT_BENCHMARK(VtsVolatileInt)
