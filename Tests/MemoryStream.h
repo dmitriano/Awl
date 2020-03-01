@@ -20,7 +20,7 @@ namespace awl::io
 
         MemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
         {
-            //std::memset(pBuf, 0u, m_size);
+            std::memset(pBuf, 0u, m_size);
         }
 
         ~MemoryOutputStream()
