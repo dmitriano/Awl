@@ -132,7 +132,7 @@ namespace
         volatile size_t m_pos = 0;
     };
 
-    constexpr size_t defaultElementCount = 1000000;
+    constexpr size_t defaultElementCount = 1000;
 }
 
 namespace VtsTest

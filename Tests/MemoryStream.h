@@ -5,7 +5,7 @@
 
 namespace awl::io
 {
-    constexpr inline void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
+    constexpr void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
     {
         const uint8_t * p = begin;
         while (p != end)
@@ -33,6 +33,22 @@ namespace awl::io
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
         }
+
+        /*
+        template <class T>
+        std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
+        {
+            uint8_t * const new_p = m_p + sizeof(val);
+
+            if (static_cast<size_t>(new_p - pBuf) > m_size)
+            {
+                throw GeneralException(_T("overflow"));
+            }
+
+            *(reinterpret_cast<T *>(m_p)) = val;
+            m_p = new_p;
+        }
+        */
 
         template <class T>
         constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
