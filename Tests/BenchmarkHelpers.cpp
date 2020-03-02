@@ -2,6 +2,10 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
+#include <variant>
+#include <array>
+
+#include "Awl/TupleHelpers.h"
 
 #include "Helpers/BenchmarkHelpers.h"
 
@@ -20,71 +24,63 @@ namespace awl::testing::helpers
         return std::chrono::duration_cast<std::chrono::duration<value_type>>(d).count();
     }
 
-    /*
-    template <class Duration>
-    const awl::Char * DurationUnit;
-    
-    template <class Duration>
-    void FormatDuration(Duration d)
-    {
-        using namespace std::chrono;
+    using namespace std::chrono;
 
-        if (ms.count() < 100)
+    using Durations = std::variant<hours, minutes, seconds, milliseconds, microseconds, nanoseconds>;
+    std::array<const awl::Char *, std::variant_size_v<Durations>> durationUnits = {_T("hours"), _T("minutes"), _T("sec"), _T("ms"), _T("microseconds"), _T("ns")};
+
+    template <size_t index>
+    std::enable_if_t<(index < std::variant_size_v<Durations> - 1), void> PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
+    {
+        using Duration = std::variant_alternative_t<index, Durations>;
+        
+        Duration cur = duration_cast<Duration>(d);
+
+        if (cur == Duration::zero())
         {
-            out << std::fixed << std::setprecision(2) << duration_cast<microseconds>(d).count() / 1000.0;
+            PrintDuration<index + 1>(out, d);
         }
         else
         {
-            out << ms.count();
-        }
-
-        out << DurationUnit<Duration>;
-    }
-    */
-        
-    std::basic_ostream<awl::Char> & operator << (std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
-    {
-        using namespace std::chrono;
-        
-        seconds s = duration_cast<seconds>(d);
-
-        if (s == seconds::zero())
-        {
-            milliseconds ms = duration_cast<milliseconds>(d);
-
-            if (ms == milliseconds::zero())
+            if (cur.count() < 100)
             {
-                microseconds mms = duration_cast<microseconds>(d);
+                using NextDuration = std::variant_alternative_t<index + 1, Durations>;
 
-                if (mms.count() < 100)
-                {
-                    out << std::fixed << std::setprecision(2) << duration_cast<nanoseconds>(d).count() / 1000.0;
-                }
-                else
-                {
-                    out << mms.count();
-                }
+                NextDuration next = duration_cast<NextDuration>(d);
 
-                out << _T(" microseconds");
+                out << std::fixed << std::setprecision(2) << next.count() / 1000.0;
             }
             else
             {
-                if (ms.count() < 100)
-                {
-                    out << std::fixed << std::setprecision(2) << duration_cast<microseconds>(d).count() / 1000.0;
-                }
-                else
-                {
-                    out << ms.count();
-                }
-
-                out << _T(" ms");
+                out << cur.count();
             }
+
+            out << _T(" ") << durationUnits[index];
+        }
+    }
+
+    template <size_t index>
+    std::enable_if_t<(index == std::variant_size_v<Durations> - 1), void> PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
+    {
+        if (d == std::chrono::steady_clock::duration::zero())
+        {
+            out << _T("ZERO TIME");
         }
         else
         {
-            out << std::fixed << std::setprecision(2) << GetElapsedSeconds<double>(d) << _T(" sec");
+            using Duration = std::variant_alternative_t<index, Durations>;
+
+            Duration cur = duration_cast<Duration>(d);
+
+            out << cur.count();
+
+            out << _T(" ") << durationUnits[index];
         }
+    }
+
+    std::basic_ostream<awl::Char> & operator << (std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
+    {
+        PrintDuration<0>(out, d);
 
         return out;
     }
