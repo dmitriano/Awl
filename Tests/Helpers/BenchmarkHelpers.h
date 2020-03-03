@@ -10,10 +10,5 @@ namespace awl::testing::helpers
 
     double ReportCount(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t count);
 
-    inline void ReportCountAndSpeed(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t count, size_t size)
-    {
-        ReportCount(context, d, count);
-        context.out << _T(", ");
-        ReportSpeed(context, d, size);
-    }
+    void ReportCountAndSpeed(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t count, size_t size);
 }

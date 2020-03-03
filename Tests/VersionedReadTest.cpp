@@ -959,7 +959,7 @@ AWT_BENCHMARK(VtsVolatileInt)
 
     volatile size_t val;
 
-    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
 
     const size_t mem_size = MeasureStreamSize(context, 1, false);
 
@@ -1009,7 +1009,7 @@ AWT_BENCHMARK(VtsVolatileFake)
 
     auto p_out = VtsTest::CreateFakeStream();
 
-    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> +std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
+    constexpr size_t field_count = std::tuple_size_v<awl::tuplizable_traits<A1>::Tie> + std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>;
 
     const size_t mem_size = MeasureStreamSize(context, 1, false);
 

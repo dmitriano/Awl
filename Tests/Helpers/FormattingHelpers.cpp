@@ -1,35 +1,20 @@
 #include <iostream>
 #include <iomanip>
-#include <cmath>
-#include <limits>
 #include <variant>
 #include <array>
 
 #include "Awl/TupleHelpers.h"
 
-#include "Helpers/BenchmarkHelpers.h"
+#include "FormattingHelpers.h"
 
 namespace awl::testing::helpers
 {
-    using namespace awl::testing;
-
-    inline bool IsZero(std::chrono::steady_clock::duration d)
-    {
-        return d == std::chrono::steady_clock::duration::zero();
-    }
-    
-    template <typename value_type>
-    inline value_type GetElapsedSeconds(std::chrono::steady_clock::duration d)
-    {
-        return std::chrono::duration_cast<std::chrono::duration<value_type>>(d).count();
-    }
-
     using namespace std::chrono;
 
     using Durations = std::variant<hours, minutes, seconds, milliseconds, microseconds, nanoseconds>;
 
     template <size_t index>
-    void PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
+    inline void PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
     {
         constexpr std::array<const awl::Char *, std::variant_size_v<Durations>> durationUnits = { _T("h"), _T("min"), _T("s"), _T("ms"), _T("us"), _T("ns") };
 
@@ -75,39 +60,5 @@ namespace awl::testing::helpers
         PrintDuration<0>(out, d);
 
         return out;
-    }
-
-    double ReportSpeed(const TestContext & context, std::chrono::steady_clock::duration d, size_t size)
-    {
-        if (IsZero(d))
-        {
-            context.out << _T("ZERO TIME");
-            return std::numeric_limits<double>::infinity();
-        }
-
-        const auto time = GetElapsedSeconds<double>(d);
-
-        const double speed = size / time / (1024 * 1024);
-
-        context.out << std::fixed << std::setprecision(2) << d << _T(", ") << speed << _T(" MB/sec");
-
-        return speed;
-    }
-
-    double ReportCount(const TestContext & context, std::chrono::steady_clock::duration d, size_t count)
-    {
-        if (IsZero(d))
-        {
-            context.out << _T("ZERO TIME");
-            return std::numeric_limits<double>::infinity();
-        }
-
-        const auto time = GetElapsedSeconds<double>(d);
-
-        const double speed = count / time;
-
-        context.out << std::fixed << std::setprecision(2) << d << _T(", ") << speed << _T(" elements/sec");
-
-        return speed;
     }
 }

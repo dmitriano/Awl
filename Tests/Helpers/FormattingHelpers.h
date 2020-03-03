@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <chrono>
 
 #include "Awl/Crypto/BasicHash.h"
 
@@ -19,4 +20,6 @@ namespace awl::testing::helpers
 
         return out;
     }
+
+    std::basic_ostream<awl::Char> & operator << (std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d);
 }
