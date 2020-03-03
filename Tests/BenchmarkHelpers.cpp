@@ -27,54 +27,46 @@ namespace awl::testing::helpers
     using namespace std::chrono;
 
     using Durations = std::variant<hours, minutes, seconds, milliseconds, microseconds, nanoseconds>;
-    std::array<const awl::Char *, std::variant_size_v<Durations>> durationUnits = {_T("hours"), _T("minutes"), _T("sec"), _T("ms"), _T("microseconds"), _T("ns")};
 
     template <size_t index>
-    std::enable_if_t<(index < std::variant_size_v<Durations> - 1), void> PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
+    void PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
     {
+        constexpr std::array<const awl::Char *, std::variant_size_v<Durations>> durationUnits = { _T("h"), _T("min"), _T("s"), _T("ms"), _T("us"), _T("ns") };
+
         using Duration = std::variant_alternative_t<index, Durations>;
         
         Duration cur = duration_cast<Duration>(d);
 
-        if (cur == Duration::zero())
+        if constexpr (index == std::variant_size_v<Durations> - 1)
         {
-            PrintDuration<index + 1>(out, d);
-        }
-        else
-        {
-            if (cur.count() < 100)
+            if (d == std::chrono::steady_clock::duration::zero())
             {
-                using NextDuration = std::variant_alternative_t<index + 1, Durations>;
-
-                NextDuration next = duration_cast<NextDuration>(d);
-
-                out << std::fixed << std::setprecision(2) << next.count() / 1000.0;
+                out << _T("ZERO TIME");
             }
             else
             {
-                out << cur.count();
+                out << cur.count() << durationUnits[index];
             }
-
-            out << _T(" ") << durationUnits[index];
-        }
-    }
-
-    template <size_t index>
-    std::enable_if_t<(index == std::variant_size_v<Durations> - 1), void> PrintDuration(std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d)
-    {
-        if (d == std::chrono::steady_clock::duration::zero())
-        {
-            out << _T("ZERO TIME");
         }
         else
         {
-            using Duration = std::variant_alternative_t<index, Durations>;
+            if (cur == Duration::zero())
+            {
+                PrintDuration<index + 1>(out, d);
+            }
+            else
+            {
+                out << cur.count() << durationUnits[index];
 
-            Duration cur = duration_cast<Duration>(d);
+                if (cur.count() < 10)
+                {
+                    using NextDuration = std::variant_alternative_t<index + 1, Durations>;
 
-            out << cur.count();
+                    NextDuration next = duration_cast<NextDuration>(d) - duration_cast<NextDuration>(cur);
 
-            out << _T(" ") << durationUnits[index];
+                    out << _T(":") << next.count() << durationUnits[index + 1];
+                }
+            }
         }
     }
 
