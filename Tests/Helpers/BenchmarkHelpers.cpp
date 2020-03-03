@@ -14,11 +14,6 @@ namespace awl::testing::helpers
 {
     using namespace awl::testing;
 
-    inline bool IsZero(std::chrono::steady_clock::duration d)
-    {
-        return d == std::chrono::steady_clock::duration::zero();
-    }
-    
     template <typename value_type>
     inline value_type GetElapsedSeconds(std::chrono::steady_clock::duration d)
     {
@@ -28,7 +23,7 @@ namespace awl::testing::helpers
     template <class Func>
     double ReportValue(const TestContext & context, std::chrono::steady_clock::duration d, Func && func)
     {
-        if (IsZero(d))
+        if (d == std::chrono::steady_clock::duration::zero())
         {
             context.out << _T("ZERO TIME");
             return std::numeric_limits<double>::infinity();
@@ -70,5 +65,4 @@ namespace awl::testing::helpers
         context.out << _T(", ");
         ReportSpeed(context, d, size);
     }
-
 }
