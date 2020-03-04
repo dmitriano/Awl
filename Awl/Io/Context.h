@@ -230,9 +230,9 @@ namespace awl::io
             
             if (this->serializeStructIndex)
             {
-                typename Context::StructIndexType index;
+                StructIndexType index;
                 Read(s, index);
-                constexpr size_t expected_index = Context::template StructIndex<Struct>;
+                constexpr size_t expected_index = StructIndex<Struct>;
                 if (index != expected_index)
                 {
                     throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
@@ -314,7 +314,7 @@ namespace awl::io
             {
                 if (this->serializeStructIndex)
                 {
-                    const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
+                    const StructIndexType index = static_cast<StructIndexType>(StructIndex<Struct>);
                     Write(s, index);
                 }
             }
