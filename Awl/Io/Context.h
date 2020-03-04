@@ -8,44 +8,44 @@
 
 namespace awl::io
 {
-    template <class Struct>
-    struct FieldReader
-    {
-        virtual void ReadField(SequentialInputStream & in, Struct & val) const = 0;
-    };
-
-    template <class Struct, size_t index>
-    class FieldReaderImpl : public FieldReader<Struct>
-    {
-    public:
-
-        void ReadField(SequentialInputStream & in, Struct & val) const override
-        {
-            Read(in, std::get<index>(val.as_tuple()));
-        }
-    };
-
-    struct FieldSkipper
-    {
-        virtual void SkipField(SequentialInputStream & in) const = 0;
-    };
-
-    template <class Field>
-    class FieldSkipperImpl : public FieldSkipper
-    {
-    public:
-
-        void SkipField(SequentialInputStream & in) const override
-        {
-            Field val;
-            Read(in, val);
-        }
-    };
-
     template <class StructV, class FieldV>
     class Context
     {
     private:
+
+        template <class Struct>
+        struct FieldReader
+        {
+            virtual void ReadField(SequentialInputStream & in, Struct & val) const = 0;
+        };
+
+        template <class Struct, size_t index>
+        class FieldReaderImpl : public FieldReader<Struct>
+        {
+        public:
+
+            void ReadField(SequentialInputStream & in, Struct & val) const override
+            {
+                Read(in, std::get<index>(val.as_tuple()));
+            }
+        };
+
+        struct FieldSkipper
+        {
+            virtual void SkipField(SequentialInputStream & in) const = 0;
+        };
+
+        template <class Field>
+        class FieldSkipperImpl : public FieldSkipper
+        {
+        public:
+
+            void SkipField(SequentialInputStream & in) const override
+            {
+                Field val;
+                Read(in, val);
+            }
+        };
 
         template <class Struct>
         using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
