@@ -5,11 +5,12 @@
 #include <chrono>
 
 #include "Awl/Crypto/BasicHash.h"
+#include "Awl/String.h"
 
 namespace awl::testing::helpers
 {
     template <size_t N>
-    std::basic_ostream<awl::Char> & operator << (std::basic_ostream<awl::Char> & out, awl::crypto::HashValue<N> & h)
+    awl::ostream & operator << (awl::ostream & out, awl::crypto::HashValue<N> & h)
     {
         out << _T("0x");
 
@@ -21,5 +22,5 @@ namespace awl::testing::helpers
         return out;
     }
 
-    std::basic_ostream<awl::Char> & operator << (std::basic_ostream<awl::Char> & out, std::chrono::steady_clock::duration d);
+    awl::ostream & operator << (awl::ostream & out, std::chrono::steady_clock::duration d);
 }
