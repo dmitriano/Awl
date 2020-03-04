@@ -272,10 +272,10 @@ namespace awl::io
             }
             else
             {
-                assert(name_map.size() == old_proto.GetCount());
-
                 auto & new_proto = this->template FindNewPrototype<Struct>();
                 auto & old_proto = this->template FindOldPrototype<Struct>();
+
+                assert(name_map.size() == old_proto.GetCount());
 
                 auto & readers = this->template FindFieldReaders<Struct>();
                 auto & skippers = this->GetFieldSkippers();
