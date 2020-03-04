@@ -142,21 +142,6 @@ namespace VtsTest
     std::unique_ptr<awl::io::SequentialOutputStream> CreateMeasureStream();
 }
 
-namespace awl::io
-{
-    template<class Stream, class Struct, class Context>
-    inline void ReadV(Stream & s, Struct & val, const Context & ctx)
-    {
-        ctx.ReadV(s, val);
-    }
-    
-    template<class Stream, class Struct, class Context>
-    inline void WriteV(Stream & s, const Struct & val, const Context & ctx)
-    {
-        ctx.WriteV(s, val);
-    }
-}
-
 namespace
 {
     template <class OutputStream>
@@ -192,8 +177,8 @@ namespace
         {
             static_cast<void>(i);
             
-            awl::io::WriteV(out, a1_expected, ctx);
-            awl::io::WriteV(out, b1_expected, ctx);
+            ctx.WriteV(out, a1_expected);
+            ctx.WriteV(out, b1_expected);
         }
 
         return w;
@@ -251,8 +236,8 @@ namespace
             A1 a1;
             B1 b1;
 
-            awl::io::ReadV(in, a1, ctx);
-            awl::io::ReadV(in, b1, ctx);
+            ctx.ReadV(in, a1);
+            ctx.ReadV(in, b1);
 
             AWT_ASSERT(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
         }
@@ -291,11 +276,11 @@ namespace
             B2 b2;
             C2 c2;
 
-            awl::io::ReadV(in, a2, ctx);
+            ctx.ReadV(in, a2);
 
             //Version 1 data has B2 so the condition is true.
             AWT_ASSERT(ctx.HasOldPrototype<B2>());
-            awl::io::ReadV(in, b2, ctx);
+            ctx.ReadV(in, b2);
 
             //There is no C2 in version 1 so the condition is false.
             AWT_ASSERT_FALSE(ctx.HasOldPrototype<C2>());
@@ -303,7 +288,7 @@ namespace
             //An example of how to read data that may not exist in a previous version.
             if (ctx.HasOldPrototype<C2>())
             {
-                awl::io::ReadV(in, c2, ctx);
+                ctx.ReadV(in, c2);
             }
 
             AWT_ASSERT(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
