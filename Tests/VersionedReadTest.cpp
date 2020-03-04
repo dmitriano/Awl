@@ -37,10 +37,11 @@ namespace
 
     struct B1
     {
+        A1 a;
         int x;
         bool y;
 
-        AWL_STRINGIZABLE(x, y)
+        AWL_STRINGIZABLE(a, x, y)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B1)
@@ -59,11 +60,12 @@ namespace
 
     struct B2
     {
+        A2 a;
         std::vector<int> z{ 1, 2, 3 };
         int x;
         std::string w = "xyz";
 
-        AWL_STRINGIZABLE(x, z, w)
+        AWL_STRINGIZABLE(a, x, z, w)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B2)
@@ -78,10 +80,10 @@ namespace
     AWL_MEMBERWISE_EQUATABLE(C2)
 
     static const A1 a1_expected = { 1, 2.0, "abc" };
-    static const B1 b1_expected = { 1, true };
+    static const B1 b1_expected = { a1_expected, 1, true };
 
     static const A2 a2_expected = { a1_expected.b, 5, "xyz", a1_expected.c };
-    static const B2 b2_expected = { std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
+    static const B2 b2_expected = { a2_expected, std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
     static const C2 c2_expected = { 7 };
 
     using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
@@ -155,7 +157,7 @@ namespace
             AWT_ASSERT(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindNewPrototype<B1>();
-            AWT_ASSERT(b1_proto.GetCount() == 2);
+            AWT_ASSERT(b1_proto.GetCount() == 3);
         }
 
         if constexpr (std::is_base_of_v<awl::io::SequentialOutputStream, OutputStream>)
@@ -234,12 +236,12 @@ namespace
             static_cast<void>(i);
 
             A1 a1;
-            B1 b1;
-
             ctx.ReadV(in, a1);
-            ctx.ReadV(in, b1);
+            AWT_ASSERT(a1 == a1_expected);
 
-            AWT_ASSERT(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            B1 b1;
+            ctx.ReadV(in, b1);
+            AWT_ASSERT(b1 == b1_expected);
         }
 
         AWT_ASSERT(in.End());
@@ -257,13 +259,13 @@ namespace
             AWT_ASSERT(a2_proto.GetCount() == 4);
 
             auto & b2_proto = ctx.FindNewPrototype<B2>();
-            AWT_ASSERT(b2_proto.GetCount() == 3);
+            AWT_ASSERT(b2_proto.GetCount() == 4);
 
             auto & a1_proto = ctx.FindOldPrototype<A2>();
             AWT_ASSERT(a1_proto.GetCount() == 3);
 
             auto & b1_proto = ctx.FindOldPrototype<B2>();
-            AWT_ASSERT(b1_proto.GetCount() == 2);
+            AWT_ASSERT(b1_proto.GetCount() == 3);
         }
 
         awl::StopWatch w;
@@ -273,14 +275,14 @@ namespace
             static_cast<void>(i);
 
             A2 a2;
-            B2 b2;
-            C2 c2;
-
             ctx.ReadV(in, a2);
+            AWT_ASSERT(a2 == a2_expected);
 
             //Version 1 data has B2 so the condition is true.
             AWT_ASSERT(ctx.HasOldPrototype<B2>());
+            B2 b2;
             ctx.ReadV(in, b2);
+            AWT_ASSERT(b2 == b2_expected);
 
             //There is no C2 in version 1 so the condition is false.
             AWT_ASSERT_FALSE(ctx.HasOldPrototype<C2>());
@@ -288,10 +290,10 @@ namespace
             //An example of how to read data that may not exist in a previous version.
             if (ctx.HasOldPrototype<C2>())
             {
+                C2 c2;
                 ctx.ReadV(in, c2);
+                AWT_ASSERT(c2 == c2_expected);
             }
-
-            AWT_ASSERT(std::make_tuple(a2, b2, c2) == std::make_tuple(a2_expected, b2_expected, c2_expected));
         }
 
         AWT_ASSERT(in.End());
@@ -376,6 +378,7 @@ AWT_TEST(VtsReadWrite)
 
     if (!only_write)
     {
+        /*
         {
             awl::io::VectorInputStream in(v);
 
@@ -387,6 +390,7 @@ AWT_TEST(VtsReadWrite)
 
             context.out << std::endl;
         }
+        */
 
         {
             awl::io::VectorInputStream in(v);

@@ -19,12 +19,12 @@ namespace awl::io
 
         using Split = split_variant<V, is_stringizable>;
         using StructV = typename Split::matching;
-        using FieldV = typename Split::non_matching;
+        using FieldV = V;
 
         template <class Struct>
         struct FieldReader
         {
-            virtual void ReadField(SequentialInputStream & in, Struct & val) const = 0;
+            virtual void ReadField(const Context & context, SequentialInputStream & in, Struct & val) const = 0;
         };
 
         template <class Struct, size_t index>
@@ -32,9 +32,19 @@ namespace awl::io
         {
         public:
 
-            void ReadField(SequentialInputStream & in, Struct & val) const override
+            void ReadField(const Context & context, SequentialInputStream & in, Struct & val) const override
             {
-                Read(in, std::get<index>(val.as_tuple()));
+                auto & field_val = std::get<index>(val.as_tuple());
+
+                if constexpr (is_stringizable_v<std::remove_reference_t<decltype(field_val)>>)
+                {
+                    context.ReadV(in, field_val);
+                }
+                else
+                {
+                    static_cast<void>(context);
+                    Read(in, field_val);
+                }
             }
         };
 
@@ -263,7 +273,7 @@ namespace awl::io
                     }
 
                     //But read by index.
-                    readers[new_index]->ReadField(s, val);
+                    readers[new_index]->ReadField(*this, s, val);
                 }
             }
         }
@@ -271,13 +281,26 @@ namespace awl::io
         template<class Stream, class Struct>
         void WriteV(Stream & s, const Struct & val) const
         {
-            if (this->serializeStructIndex)
+            if constexpr (is_stringizable_v<Struct>)
             {
-                const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
-                Write(s, index);
+                if (this->serializeStructIndex)
+                {
+                    const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
+                    Write(s, index);
+                }
             }
 
-            Write(s, val);
+            if constexpr (is_tuplizable_v<Struct>)
+            {
+                for_each(object_as_tuple(val), [this, &s](auto& field)
+                {
+                    WriteV(s, field);
+                });
+            }
+            else
+            {
+                Write(s, val);
+            }
         }
 
     private:
