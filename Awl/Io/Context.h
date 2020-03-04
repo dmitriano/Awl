@@ -5,8 +5,9 @@
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Stringizable.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/Io/RwHelpers.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace awl::io
 {
@@ -210,6 +211,61 @@ namespace awl::io
         bool serializeStructIndex = true;
         bool allowTypeMismatch = false;
         bool allowDelete = true;
+
+        template<class Stream, class Struct>
+        void ReadV(Stream & s, Struct & val) const
+        {
+            if (this->serializeStructIndex)
+            {
+                typename Context::StructIndexType index;
+                Read(s, index);
+                constexpr size_t expected_index = Context::template StructIndex<Struct>;
+                if (index != expected_index)
+                {
+                    throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
+                }
+            }
+
+            auto & new_proto = this->template FindNewPrototype<Struct>();
+            auto & old_proto = this->template FindOldPrototype<Struct>();
+
+            auto & readers = this->template FindFieldReaders<Struct>();
+            auto & skippers = this->GetFieldSkippers();
+
+            const std::vector<size_t> & name_map = this->template FindProtoMap<Struct>();
+
+            assert(name_map.size() == old_proto.GetCount());
+
+            for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
+            {
+                const auto old_field = old_proto.GetField(old_index);
+
+                const size_t new_index = name_map[old_index];
+
+                if (new_index == Prototype::NoIndex)
+                {
+                    if (!this->allowDelete)
+                    {
+                        throw FieldNotFoundException(old_field.name);
+                    }
+
+                    //Skip by type.
+                    skippers[old_field.type]->SkipField(s);
+                }
+                else
+                {
+                    const auto new_field = new_proto.GetField(new_index);
+
+                    if (new_field.type != old_field.type)
+                    {
+                        throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
+                    }
+
+                    //But read by index.
+                    readers[new_index]->ReadField(s, val);
+                }
+            }
+        }
 
     private:
 

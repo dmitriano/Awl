@@ -147,58 +147,9 @@ namespace awl::io
     template<class Stream, class Struct, class Context>
     inline void ReadV(Stream & s, Struct & val, const Context & ctx)
     {
-        if (ctx.serializeStructIndex)
-        {
-            typename Context::StructIndexType index;
-            Read(s, index);
-            constexpr size_t expected_index = Context::template StructIndex<Struct>;
-            if (index != expected_index)
-            {
-                throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
-            }
-        }
-
-        auto & new_proto = ctx.template FindNewPrototype<Struct>();
-        auto & old_proto = ctx.template FindOldPrototype<Struct>();
-        
-        auto & readers = ctx.template FindFieldReaders<Struct>();
-        auto & skippers = ctx.GetFieldSkippers();
-
-        const std::vector<size_t> & name_map = ctx.template FindProtoMap<Struct>();
-
-        assert(name_map.size() == old_proto.GetCount());
-
-        for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
-        {
-            const auto old_field = old_proto.GetField(old_index);
-
-            const size_t new_index = name_map[old_index];
-
-            if (new_index == Prototype::NoIndex)
-            {
-                if (!ctx.allowDelete)
-                {
-                    throw FieldNotFoundException(old_field.name);
-                }
-
-                //Skip by type.
-                skippers[old_field.type]->SkipField(s);
-            }
-            else
-            {
-                const auto new_field = new_proto.GetField(new_index);
-
-                if (new_field.type != old_field.type)
-                {
-                    throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
-                }
-
-                //But read by index.
-                readers[new_index]->ReadField(s, val);
-            }
-        }
+        ctx.ReadV(s, val);
     }
-
+    
     template<class Stream, class Struct, class Context>
     inline void WriteV(Stream & s, const Struct & val, const Context & ctx)
     {
