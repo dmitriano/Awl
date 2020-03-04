@@ -1,4 +1,4 @@
-#include "Awl/Io/Context.h"
+#include "Awl/Io/Serializer.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/MeasureStream.h"
 #include "Awl/Testing/UnitTest.h"
@@ -89,8 +89,8 @@ namespace
     using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
     using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
 
-    using OldContext = awl::io::Context<V1>;
-    using NewContext = awl::io::Context<V2>;
+    using OldSerializer = awl::io::Serializer<V1>;
+    using NewSerializer = awl::io::Serializer<V2>;
 
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
@@ -146,10 +146,12 @@ namespace VtsTest
 
 namespace
 {
-    template <class OutputStream>
-    std::chrono::steady_clock::duration WriteDataV1(OutputStream & out, size_t element_count, bool with_metadata)
+    using Duration = std::chrono::steady_clock::duration;
+    
+    template <class Serializer = OldSerializer>
+    Duration WriteDataV1(typename Serializer::OutputStream & out, size_t element_count, bool with_metadata)
     {
-        OldContext ctx;
+        Serializer ctx;
         ctx.Initialize();
 
         {
@@ -160,17 +162,9 @@ namespace
             AWT_ASSERT(b1_proto.GetCount() == 3);
         }
 
-        if constexpr (std::is_base_of_v<awl::io::SequentialOutputStream, OutputStream>)
+        if (with_metadata)
         {
-            if (with_metadata)
-            {
-                ctx.WriteNewPrototypes(out);
-            }
-        }
-        else
-        {
-            assert(!with_metadata);
-            static_cast<void>(with_metadata);
+            ctx.WriteNewPrototypes(out);
         }
 
         awl::StopWatch w;
@@ -178,7 +172,7 @@ namespace
         for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
-            
+
             ctx.WriteV(out, a1_expected);
             ctx.WriteV(out, b1_expected);
         }
@@ -186,10 +180,11 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t element_count)
+    template <class Serializer>
+    Duration ReadDataNoV(typename Serializer::InputStream & in, size_t element_count)
     {
         //Skip metadata
-        OldContext ctx;
+        Serializer ctx;
         ctx.ReadOldPrototypes(in);
 
         awl::StopWatch w;
@@ -212,9 +207,10 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV1(awl::io::SequentialInputStream & in, size_t element_count)
+    template <class Serializer>
+    Duration ReadDataV1(typename Serializer::InputStream & in, size_t element_count)
     {
-        OldContext ctx;
+        Serializer ctx;
         ctx.ReadOldPrototypes(in);
 
         awl::StopWatch w;
@@ -237,9 +233,10 @@ namespace
         return w;
     }
 
-    std::chrono::steady_clock::duration ReadDataV2(awl::io::SequentialInputStream & in, size_t element_count)
+    template <class Serializer>
+    Duration ReadDataV2(typename Serializer::InputStream & in, size_t element_count)
     {
-        NewContext ctx;
+        Serializer ctx;
         ctx.ReadOldPrototypes(in);
 
         {
@@ -289,6 +286,7 @@ namespace
         return w;
     }
 
+    template <class Serializer = OldSerializer>
     size_t MeasureStreamSize(const TestContext & context, size_t element_count, bool include_meta = true)
     {
         size_t meta_size = 0;
@@ -297,7 +295,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1(out, 0, true);
+            WriteDataV1<Serializer>(out, 0, true);
 
             meta_size = out.GetLength();
         }
@@ -307,7 +305,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1(out, 1, false);
+            WriteDataV1<Serializer>(out, 1, false);
 
             block_size = out.GetLength();
         }
@@ -351,7 +349,7 @@ AWT_TEST(VtsReadWrite)
 
             v.resize(0);
 
-            total_d += WriteDataV1(out, element_count, true);
+            total_d += WriteDataV1<OldSerializer>(out, element_count, true);
         }
 
         context.out << _T("Test data has been written. ");
@@ -369,7 +367,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataNoV(in, element_count);
+            auto d = ReadDataNoV<OldSerializer>(in, element_count);
 
             context.out << _T("Plain data has been read. ");
 
@@ -381,7 +379,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1(in, element_count);
+            auto d = ReadDataV1<OldSerializer>(in, element_count);
 
             context.out << _T("Version 1 has been read. ");
 
@@ -393,7 +391,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2(in, element_count);
+            auto d = ReadDataV2<NewSerializer>(in, element_count);
 
             context.out << _T("Version 2 has been read. ");
 
@@ -403,6 +401,7 @@ AWT_TEST(VtsReadWrite)
         }
     }
 }
+
 
 AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
@@ -635,6 +634,8 @@ namespace
         AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
         AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
+        using Serializer = awl::io::Serializer<V1, awl::io::SequentialInputStream, OutputStream>;
+
         const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
         OutputStream out(mem_size);
@@ -646,7 +647,7 @@ namespace
             {
                 static_cast<void>(i);
 
-                total_d += WriteDataV1(out, element_count, false);
+                total_d += WriteDataV1<Serializer>(out, element_count, false);
 
                 AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
                 AWT_ASSERT_EQUAL(mem_size, out.GetLength());

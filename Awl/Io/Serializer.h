@@ -13,9 +13,14 @@
 
 namespace awl::io
 {
-    template <class V>
-    class Context
+    template <class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
+    class Serializer
     {
+    public:
+
+        using InputStream = IStream;
+        using OutputStream = OStream;
+
     private:
 
         using Split = split_variant<V, is_stringizable>;
@@ -25,7 +30,7 @@ namespace awl::io
         template <class Struct>
         struct FieldReader
         {
-            virtual void ReadField(const Context & context, SequentialInputStream & in, Struct & val) const = 0;
+            virtual void ReadField(const Serializer & context, InputStream & in, Struct & val) const = 0;
         };
 
         template <class Struct, size_t index>
@@ -33,7 +38,7 @@ namespace awl::io
         {
         public:
 
-            void ReadField(const Context & context, SequentialInputStream & in, Struct & val) const override
+            void ReadField(const Serializer & context, InputStream & in, Struct & val) const override
             {
                 auto & field_val = std::get<index>(val.as_tuple());
 
@@ -51,7 +56,7 @@ namespace awl::io
 
         struct FieldSkipper
         {
-            virtual void SkipField(SequentialInputStream & in) const = 0;
+            virtual void SkipField(InputStream & in) const = 0;
         };
 
         template <class Field>
@@ -59,7 +64,7 @@ namespace awl::io
         {
         public:
 
-            void SkipField(SequentialInputStream & in) const override
+            void SkipField(InputStream & in) const override
             {
                 Field val;
                 Read(in, val);
@@ -116,7 +121,7 @@ namespace awl::io
     
     public:
 
-        Context() :
+        Serializer() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_cast<Prototype>(newPrototypesTuple)),
             readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
@@ -127,10 +132,10 @@ namespace awl::io
         }
 
         //It contains the addresses of its members.
-        Context(const Context&) = delete;
-        Context(Context&&) = delete;
-        Context& operator = (const Context&) = delete;
-        Context& operator = (Context&&) = delete;
+        Serializer(const Serializer&) = delete;
+        Serializer(Serializer&&) = delete;
+        Serializer& operator = (const Serializer&) = delete;
+        Serializer& operator = (Serializer&&) = delete;
 
         template <class S>
         inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
@@ -191,7 +196,7 @@ namespace awl::io
             MakeProtoMaps();
         }
         
-        void ReadOldPrototypes(SequentialInputStream & s)
+        void ReadOldPrototypes(InputStream & s)
         {
             assert(oldPrototypes.empty());
             //Read std::vector.
@@ -199,7 +204,7 @@ namespace awl::io
             MakeProtoMaps();
         }
 
-        void WriteNewPrototypes(SequentialOutputStream & s) const
+        void WriteNewPrototypes(OutputStream & s) const
         {
             //Write std::array.
             Write(s, newPrototypes.size());
@@ -224,8 +229,8 @@ namespace awl::io
         bool allowTypeMismatch = false;
         bool allowDelete = true;
 
-        template<class Stream, class Struct>
-        void ReadStructIndex(Stream & s, Struct & val) const
+        template<class Struct>
+        void ReadStructIndex(InputStream & s, Struct & val) const
         {
             static_cast<void>(val);
             
@@ -241,8 +246,8 @@ namespace awl::io
             }
         }
 
-        template<class Stream, class Struct>
-        void ReadV(Stream & s, Struct & val) const
+        template<class Struct>
+        void ReadV(InputStream & s, Struct & val) const
         {
             ReadStructIndex(s, val);
 
@@ -308,8 +313,8 @@ namespace awl::io
         }
 
         //Reads entire object tree assuming all the prototypes are equal.
-        template<class Stream, class Struct>
-        void ReadPlain(Stream & s, Struct & val) const
+        template<class Struct>
+        void ReadPlain(InputStream & s, Struct & val) const
         {
             if constexpr (is_stringizable_v<Struct>)
             {
@@ -330,8 +335,8 @@ namespace awl::io
         }
 
         //Writes the object tree and adds indices to the structures.
-        template<class Stream, class Struct>
-        void WriteV(Stream & s, const Struct & val) const
+        template<class Struct>
+        void WriteV(OutputStream & s, const Struct & val) const
         {
             if constexpr (is_stringizable_v<Struct>)
             {
