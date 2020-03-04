@@ -186,15 +186,6 @@ namespace
         return w;
     }
 
-    inline void SkipStructureIndex(awl::io::SequentialInputStream & in, OldContext & ctx)
-    {
-        if (ctx.serializeStructIndex)
-        {
-            typename OldContext::StructIndexType index;
-            awl::io::Read(in, index);
-        }
-    }
-
     std::chrono::steady_clock::duration ReadDataNoV(awl::io::SequentialInputStream & in, size_t element_count)
     {
         //Skip metadata
@@ -208,15 +199,12 @@ namespace
             static_cast<void>(i);
 
             A1 a1;
+            ctx.ReadNoV(in, a1);
+            AWT_ASSERT(a1 == a1_expected);
+
             B1 b1;
-
-            SkipStructureIndex(in, ctx);
-            awl::io::Read(in, a1);
-
-            SkipStructureIndex(in, ctx);
-            awl::io::Read(in, b1);
-
-            AWT_ASSERT(std::make_tuple(a1, b1) == std::make_tuple(a1_expected, b1_expected));
+            ctx.ReadNoV(in, b1);
+            AWT_ASSERT(b1 == b1_expected);
         }
 
         AWT_ASSERT(in.End());
@@ -378,19 +366,17 @@ AWT_TEST(VtsReadWrite)
 
     if (!only_write)
     {
-        /*
         {
             awl::io::VectorInputStream in(v);
 
             auto d = ReadDataNoV(in, element_count);
 
-            context.out << _T("Plain has been read. ");
+            context.out << _T("Plain data has been read. ");
 
             helpers::ReportCountAndSpeed(context, d, element_count, v.size());
 
             context.out << std::endl;
         }
-        */
 
         {
             awl::io::VectorInputStream in(v);

@@ -224,8 +224,10 @@ namespace awl::io
         bool allowDelete = true;
 
         template<class Stream, class Struct>
-        void ReadV(Stream & s, Struct & val) const
+        void ReadStructIndex(Stream & s, Struct & val) const
         {
+            static_cast<void>(val);
+            
             if (this->serializeStructIndex)
             {
                 typename Context::StructIndexType index;
@@ -236,6 +238,12 @@ namespace awl::io
                     throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
                 }
             }
+        }
+
+        template<class Stream, class Struct>
+        void ReadV(Stream & s, Struct & val) const
+        {
+            ReadStructIndex(s, val);
 
             auto & new_proto = this->template FindNewPrototype<Struct>();
             auto & old_proto = this->template FindOldPrototype<Struct>();
@@ -275,6 +283,27 @@ namespace awl::io
                     //But read by index.
                     readers[new_index]->ReadField(*this, s, val);
                 }
+            }
+        }
+
+        template<class Stream, class Struct>
+        void ReadNoV(Stream & s, Struct & val) const
+        {
+            if constexpr (is_stringizable_v<Struct>)
+            {
+                ReadStructIndex(s, val);
+            }
+
+            if constexpr (is_tuplizable_v<Struct>)
+            {
+                for_each(object_as_tuple(val), [this, &s](auto& field)
+                {
+                    ReadNoV(s, field);
+                });
+            }
+            else
+            {
+                Read(s, val);
             }
         }
 
