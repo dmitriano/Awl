@@ -3,15 +3,21 @@
 #include "Awl/Prototype.h"
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/SequentialStream.h"
+#include "Awl/Stringizable.h"
+#include "Awl/TupleHelpers.h"
 
 #include <assert.h>
 
 namespace awl::io
 {
-    template <class StructV, class FieldV>
+    template <class V>
     class Context
     {
     private:
+
+        using Split = split_variant<V, is_stringizable>;
+        using StructV = typename Split::matching;
+        using FieldV = typename Split::non_matching;
 
         template <class Struct>
         struct FieldReader
@@ -230,6 +236,4 @@ namespace awl::io
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
     };
-
-    using FakeContext = Context<std::variant<>, std::variant<>>;
 }

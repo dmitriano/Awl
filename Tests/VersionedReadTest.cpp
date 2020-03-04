@@ -84,11 +84,11 @@ namespace
     static const B2 b2_expected = { std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
     static const C2 c2_expected = { 7 };
 
-    using FieldV1 = std::variant<bool, char, int, float, double, std::string>;
-    using FieldV2 = std::variant<bool, char, int, float, double, std::string, std::vector<int>>;
+    using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
+    using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
 
-    using OldContext = awl::io::Context<std::variant<A1, B1>, FieldV1>;
-    using NewContext = awl::io::Context<std::variant<A2, B2, C2>, FieldV2>;
+    using OldContext = awl::io::Context<V1>;
+    using NewContext = awl::io::Context<V2>;
 
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {

@@ -6,6 +6,7 @@
 #include <variant>
 #include <array>
 #include <algorithm>
+#include <type_traits>
 
 #if AWL_CPPSTD >= 17
 #include <utility>
@@ -253,6 +254,45 @@ namespace awl
                 runtime_set<Tuple, Variant, Index + 1>(tuple, index, variant);
             }
         }
+    }
+
+    namespace helpers
+    {
+        template <class V1, class V2, template <class> class Predicate, class... Types>
+        struct split_variant;
+
+        template <template <class> class Predicate, class... Types>
+        struct split_variant<void, void, Predicate, std::variant<Types...>>
+            : split_variant<std::variant<>, std::variant<>, Predicate, Types...> { };
+
+        template <class... V1s, class... V2s, template <class> class Predicate, class Head, class... Tail>
+        struct split_variant<std::variant<V1s...>, std::variant<V2s...>, Predicate, Head, Tail...>
+            : std::conditional_t<
+            Predicate<Head>::value,
+            split_variant<std::variant<V1s..., Head>, std::variant<V2s...>, Predicate, Tail...>,
+            split_variant<std::variant<V1s...>, std::variant<V2s..., Head>, Predicate, Tail...>
+            > { };
+
+        template <class V1, class V2, template <class> class Predicate>
+        struct split_variant<V1, V2, Predicate> {
+            using matching = V1;
+            using non_matching = V2;
+        };
+    }
+
+    template <class V, template <class> class Predicate>
+    using split_variant = helpers::split_variant<void, void, Predicate, V>;
+
+    namespace tests
+    {
+        using V = std::variant<bool, char, float, int, double>;
+        using V1 = std::variant<bool, char, int>;
+        using V2 = std::variant<float, double>;
+
+        using result = split_variant<V, std::is_integral>;
+
+        static_assert(std::is_same_v<result::matching, V1>);
+        static_assert(std::is_same_v<result::non_matching, V2>);
     }
 
 #elif AWL_CPPSTD >= 14
