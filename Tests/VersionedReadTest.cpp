@@ -155,10 +155,10 @@ namespace
         ctx.Initialize();
 
         {
-            auto & a1_proto = ctx.FindNewPrototype<A1>();
+            auto & a1_proto = ctx.template FindNewPrototype<A1>();
             AWT_ASSERT(a1_proto.GetCount() == 3);
 
-            auto & b1_proto = ctx.FindNewPrototype<B1>();
+            auto & b1_proto = ctx.template FindNewPrototype<B1>();
             AWT_ASSERT(b1_proto.GetCount() == 3);
         }
 
@@ -240,16 +240,16 @@ namespace
         ctx.ReadOldPrototypes(in);
 
         {
-            auto & a2_proto = ctx.FindNewPrototype<A2>();
+            auto & a2_proto = ctx.template FindNewPrototype<A2>();
             AWT_ASSERT(a2_proto.GetCount() == 4);
 
-            auto & b2_proto = ctx.FindNewPrototype<B2>();
+            auto & b2_proto = ctx.template FindNewPrototype<B2>();
             AWT_ASSERT(b2_proto.GetCount() == 4);
 
-            auto & a1_proto = ctx.FindOldPrototype<A2>();
+            auto & a1_proto = ctx.template FindOldPrototype<A2>();
             AWT_ASSERT(a1_proto.GetCount() == 3);
 
-            auto & b1_proto = ctx.FindOldPrototype<B2>();
+            auto & b1_proto = ctx.template FindOldPrototype<B2>();
             AWT_ASSERT(b1_proto.GetCount() == 3);
         }
 
@@ -264,16 +264,16 @@ namespace
             AWT_ASSERT(a2 == a2_expected);
 
             //Version 1 data has B2 so the condition is true.
-            AWT_ASSERT(ctx.HasOldPrototype<B2>());
+            AWT_ASSERT(ctx.template HasOldPrototype<B2>());
             B2 b2;
             ctx.ReadV(in, b2);
             AWT_ASSERT(b2 == b2_expected);
 
             //There is no C2 in version 1 so the condition is false.
-            AWT_ASSERT_FALSE(ctx.HasOldPrototype<C2>());
+            AWT_ASSERT_FALSE(ctx.template HasOldPrototype<C2>());
 
             //An example of how to read data that may not exist in a previous version.
-            if (ctx.HasOldPrototype<C2>())
+            if (ctx.template HasOldPrototype<C2>())
             {
                 C2 c2;
                 ctx.ReadV(in, c2);
