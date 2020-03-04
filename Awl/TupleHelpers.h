@@ -291,8 +291,8 @@ namespace awl
 
         using result = split_variant<V, std::is_integral>;
 
-        static_assert(std::is_same_v<result::matching, V1>);
-        static_assert(std::is_same_v<result::non_matching, V2>);
+        static_assert(std::is_same_v<typename result::matching, V1>);
+        static_assert(std::is_same_v<typename result::non_matching, V2>);
     }
 
 #elif AWL_CPPSTD >= 14
