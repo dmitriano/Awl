@@ -7,6 +7,7 @@
 #include "Awl/TupleHelpers.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwHelpers.h"
+#include "Awl/IntRange.h"
 
 #include <cassert>
 
@@ -245,49 +246,70 @@ namespace awl::io
         {
             ReadStructIndex(s, val);
 
-            auto & new_proto = this->template FindNewPrototype<Struct>();
-            auto & old_proto = this->template FindOldPrototype<Struct>();
-
-            auto & readers = this->template FindFieldReaders<Struct>();
-            auto & skippers = this->GetFieldSkippers();
-
             const std::vector<size_t> & name_map = this->template FindProtoMap<Struct>();
 
-            assert(name_map.size() == old_proto.GetCount());
-
-            for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
+            //An empty map means either an empty structure or equal prototypes
+            //(the prototypes of empty structures are equal).
+            if (name_map.empty())
             {
-                const auto old_field = old_proto.GetField(old_index);
-
-                const size_t new_index = name_map[old_index];
-
-                if (new_index == Prototype::NoIndex)
+                //Read in the same way we write it.
+                for_each(object_as_tuple(val), [this, &s](auto& field_val)
                 {
-                    if (!this->allowDelete)
+                    if constexpr (is_stringizable_v<std::remove_reference_t<decltype(field_val)>>)
                     {
-                        throw FieldNotFoundException(old_field.name);
+                        ReadV(s, field_val);
                     }
+                    else
+                    {
+                        Read(s, field_val);
+                    }
+                });
+            }
+            else
+            {
+                assert(name_map.size() == old_proto.GetCount());
 
-                    //Skip by type.
-                    skippers[old_field.type]->SkipField(s);
-                }
-                else
+                auto & new_proto = this->template FindNewPrototype<Struct>();
+                auto & old_proto = this->template FindOldPrototype<Struct>();
+
+                auto & readers = this->template FindFieldReaders<Struct>();
+                auto & skippers = this->GetFieldSkippers();
+
+                for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
                 {
-                    const auto new_field = new_proto.GetField(new_index);
+                    const auto old_field = old_proto.GetField(old_index);
 
-                    if (new_field.type != old_field.type)
+                    const size_t new_index = name_map[old_index];
+
+                    if (new_index == Prototype::NoIndex)
                     {
-                        throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
-                    }
+                        if (!this->allowDelete)
+                        {
+                            throw FieldNotFoundException(old_field.name);
+                        }
 
-                    //But read by index.
-                    readers[new_index]->ReadField(*this, s, val);
+                        //Skip by type.
+                        skippers[old_field.type]->SkipField(s);
+                    }
+                    else
+                    {
+                        const auto new_field = new_proto.GetField(new_index);
+
+                        if (new_field.type != old_field.type)
+                        {
+                            throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
+                        }
+
+                        //But read by index.
+                        readers[new_index]->ReadField(*this, s, val);
+                    }
                 }
             }
         }
 
+        //Reads entire object tree assuming all the prototypes are equal.
         template<class Stream, class Struct>
-        void ReadNoV(Stream & s, Struct & val) const
+        void ReadPlain(Stream & s, Struct & val) const
         {
             if constexpr (is_stringizable_v<Struct>)
             {
@@ -298,7 +320,7 @@ namespace awl::io
             {
                 for_each(object_as_tuple(val), [this, &s](auto& field)
                 {
-                    ReadNoV(s, field);
+                    ReadPlain(s, field);
                 });
             }
             else
@@ -307,6 +329,7 @@ namespace awl::io
             }
         }
 
+        //Writes the object tree and adds indices to the structures.
         template<class Stream, class Struct>
         void WriteV(Stream & s, const Struct & val) const
         {
@@ -344,7 +367,16 @@ namespace awl::io
 
             for (size_t i = 0; i < oldPrototypes.size(); ++i)
             {
-                protoMaps[i] = oldPrototypes[i].MapNames(*(newPrototypes[i]));
+                std::vector<size_t> v = oldPrototypes[i].MapNames(*(newPrototypes[i]));
+
+                //Clear the vector if the map is trivial.
+                auto range = awl::make_count(v.size());
+                if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
+                {
+                    v.clear();
+                }
+
+                protoMaps[i] = v;
             }
         }
 

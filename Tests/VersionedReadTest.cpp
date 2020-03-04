@@ -199,11 +199,11 @@ namespace
             static_cast<void>(i);
 
             A1 a1;
-            ctx.ReadNoV(in, a1);
+            ctx.ReadPlain(in, a1);
             AWT_ASSERT(a1 == a1_expected);
 
             B1 b1;
-            ctx.ReadNoV(in, b1);
+            ctx.ReadPlain(in, b1);
             AWT_ASSERT(b1 == b1_expected);
         }
 
