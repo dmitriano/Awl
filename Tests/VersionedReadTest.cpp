@@ -153,13 +153,7 @@ namespace awl::io
     template<class Stream, class Struct, class Context>
     inline void WriteV(Stream & s, const Struct & val, const Context & ctx)
     {
-        if (ctx.serializeStructIndex)
-        {
-            const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
-            Write(s, index);
-        }
-
-        Write(s, val);
+        ctx.WriteV(s, val);
     }
 }
 

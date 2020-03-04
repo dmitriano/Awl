@@ -5,6 +5,7 @@
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Stringizable.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/Io/IoException.h"
 #include "Awl/Io/RwHelpers.h"
 
 #include <cassert>
@@ -265,6 +266,18 @@ namespace awl::io
                     readers[new_index]->ReadField(s, val);
                 }
             }
+        }
+
+        template<class Stream, class Struct>
+        void WriteV(Stream & s, const Struct & val) const
+        {
+            if (this->serializeStructIndex)
+            {
+                const typename Context::StructIndexType index = static_cast<typename Context::StructIndexType>(Context::template StructIndex<Struct>);
+                Write(s, index);
+            }
+
+            Write(s, val);
         }
 
     private:
