@@ -55,7 +55,7 @@ namespace awl::io
 
         struct FieldSkipper
         {
-            virtual void SkipField(InputStream & in) const = 0;
+            virtual void SkipField(const Serializer & context, InputStream & in) const = 0;
         };
 
         template <class Field>
@@ -63,10 +63,10 @@ namespace awl::io
         {
         public:
 
-            void SkipField(InputStream & in) const override
+            void SkipField(const Serializer & context, InputStream & in) const override
             {
                 Field val;
-                Read(in, val);
+                context.ReadV(in, val);
             }
         };
 
@@ -250,6 +250,7 @@ namespace awl::io
         {
             for_each(object_as_tuple(val), [this, &s](auto& field_val)
             {
+                //A tuplizable structure field can be serializable.
                 ReadV(s, field_val);
             });
         }
@@ -294,7 +295,7 @@ namespace awl::io
                             }
 
                             //Skip by type.
-                            skippers[old_field.type]->SkipField(s);
+                            skippers[old_field.type]->SkipField(*this, s);
                         }
                         else
                         {
@@ -313,7 +314,6 @@ namespace awl::io
             }
             else if constexpr (is_tuplizable_v<Struct>)
             {
-                //A tuplizable structure field can be serializable.
                 ReadTuplizable(s, val);
             }
             else
