@@ -70,6 +70,8 @@ namespace awl::io
 
     private:
 
+        using Base = Serializer<V>;
+
         template <class Struct>
         struct FieldReader
         {
@@ -140,7 +142,7 @@ namespace awl::io
         template <size_t index>
         struct FieldReaderArrayHolder
         {
-            using Struct = std::variant_alternative_t<index, StructV>;
+            using Struct = std::variant_alternative_t<index, typename Base::StructV>;
             
             FieldReaderArrayHolder(const FieldReaderTuple<Struct> & t) :
                 a(tuple_cast<const FieldReader<Struct>>(t))
@@ -150,18 +152,18 @@ namespace awl::io
             FieldReaderArray<Struct> a;
         };
         
-        using TupleOfFieldReaderTuple = decltype(transform_v2t<StructV, FieldReaderTuple>());
+        using TupleOfFieldReaderTuple = decltype(transform_v2t<typename Base::StructV, FieldReaderTuple>());
         using TupleOfFieldReaderArray = decltype(transform_t2ti<FieldReaderArrayHolder>(TupleOfFieldReaderTuple{}));
 
-        using SkipperTuple = decltype(transform_v2t<FieldV, FieldSkipperImpl>());
-        using SkipperArray = std::array<FieldSkipper *, std::variant_size_v<FieldV>>;
+        using SkipperTuple = decltype(transform_v2t<typename Base::FieldV, FieldSkipperImpl>());
+        using SkipperArray = std::array<FieldSkipper *, std::variant_size_v<typename Base::FieldV>>;
     
     public:
 
         Reader() :
-            readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
+            readerTuples(transform_v2t<typename Base::StructV, FieldReaderTuple>()),
             readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
-            skipperTuple(transform_v2t<FieldV, FieldSkipperImpl>()),
+            skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_cast<FieldSkipper>(skipperTuple))
         {
         }
@@ -169,7 +171,7 @@ namespace awl::io
         template <class S>
         auto & FindFieldReaders() const
         {
-            constexpr size_t index = StructIndex<S>;
+            constexpr size_t index = Base::template StructIndex<S>;
             auto & holder = std::get<index>(readerArrays);
             return holder.a;
         }
@@ -182,14 +184,14 @@ namespace awl::io
         template <class S>
         bool HasOldPrototype() const
         {
-            constexpr size_t index = StructIndex<S>;
+            constexpr size_t index = Base::template StructIndex<S>;
             return index < oldPrototypes.size();
         }
 
         template <class S>
         const Prototype & FindOldPrototype() const
         {
-            constexpr size_t index = StructIndex<S>;
+            constexpr size_t index = Base::template StructIndex<S>;
             assert(index < oldPrototypes.size());
             return oldPrototypes[index];
         }
@@ -197,7 +199,7 @@ namespace awl::io
         template <class S>
         const std::vector<size_t> & FindProtoMap() const
         {
-            constexpr size_t index = StructIndex<S>;
+            constexpr size_t index = Base::template StructIndex<S>;
             assert(index < oldPrototypes.size());
             return protoMaps[index];
         }
@@ -207,7 +209,7 @@ namespace awl::io
         {
             assert(oldPrototypes.empty());
             
-            for (Prototype * p : newPrototypes)
+            for (Prototype * p : this->newPrototypes)
             {
                 oldPrototypes.push_back(DetachedPrototype(*p));
             }
@@ -230,9 +232,9 @@ namespace awl::io
             
             if (this->serializeStructIndex)
             {
-                StructIndexType index;
+                typename Base::StructIndexType index;
                 Read(s, index);
-                constexpr size_t expected_index = StructIndex<Struct>;
+                constexpr size_t expected_index = Base::template StructIndex<Struct>;
                 if (index != expected_index)
                 {
                     throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
@@ -344,14 +346,14 @@ namespace awl::io
         void MakeProtoMaps()
         {
             assert(protoMaps.empty());
-            constexpr size_t size = std::variant_size_v<StructV>;
+            constexpr size_t size = std::variant_size_v<typename Base::StructV>;
             protoMaps.resize(size);
 
-            assert(oldPrototypes.size() <= newPrototypes.size());
+            assert(oldPrototypes.size() <= this->newPrototypes.size());
 
             for (size_t i = 0; i < oldPrototypes.size(); ++i)
             {
-                std::vector<size_t> v = oldPrototypes[i].MapNames(*(newPrototypes[i]));
+                std::vector<size_t> v = oldPrototypes[i].MapNames(*(this->newPrototypes[i]));
 
                 //Clear the vector if the map is trivial.
                 auto range = awl::make_count(v.size());
@@ -375,6 +377,10 @@ namespace awl::io
     template <class V, class OStream = SequentialOutputStream>
     class Writer : public Serializer<V>
     {
+    private:
+
+        using Base = Serializer<V>;
+
     public:
 
         using OutputStream = OStream;
@@ -382,9 +388,9 @@ namespace awl::io
         void WriteNewPrototypes(OutputStream & s) const
         {
             //Write std::array.
-            Write(s, newPrototypes.size());
+            Write(s, this->newPrototypes.size());
 
-            for (Prototype * p : newPrototypes)
+            for (Prototype * p : this->newPrototypes)
             {
                 const size_t count = p->GetCount();
                 Write(s, count);
@@ -406,7 +412,7 @@ namespace awl::io
             {
                 if (this->serializeStructIndex)
                 {
-                    const StructIndexType index = static_cast<StructIndexType>(StructIndex<Struct>);
+                    const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
                     Write(s, index);
                 }
             }
