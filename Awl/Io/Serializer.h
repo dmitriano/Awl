@@ -13,8 +13,28 @@
 
 namespace awl::io
 {
-    template <class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
+    template <class V>
     class Serializer
+    {
+    protected:
+
+        using StructV = filter_variant<V, is_stringizable>;
+        using FieldV = V;
+
+        using StructIndexType = uint16_t;
+
+        template <class S>
+        inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
+
+    public:
+
+        bool serializeStructIndex = true;
+        bool allowTypeMismatch = false;
+        bool allowDelete = true;
+    };
+
+    template <class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
+    class Reader : public Serializer<V>
     {
     public:
 
@@ -23,13 +43,10 @@ namespace awl::io
 
     private:
 
-        using StructV = filter_variant<V, is_stringizable>;
-        using FieldV = V;
-
         template <class Struct>
         struct FieldReader
         {
-            virtual void ReadField(const Serializer & context, InputStream & in, Struct & val) const = 0;
+            virtual void ReadField(const Reader & context, InputStream & in, Struct & val) const = 0;
         };
 
         template <class Struct, size_t index>
@@ -37,7 +54,7 @@ namespace awl::io
         {
         public:
 
-            void ReadField(const Serializer & context, InputStream & in, Struct & val) const override
+            void ReadField(const Reader & context, InputStream & in, Struct & val) const override
             {
                 auto & field_val = std::get<index>(val.as_tuple());
 
@@ -55,7 +72,7 @@ namespace awl::io
 
         struct FieldSkipper
         {
-            virtual void SkipField(const Serializer & context, InputStream & in) const = 0;
+            virtual void SkipField(const Reader & context, InputStream & in) const = 0;
         };
 
         template <class Field>
@@ -63,7 +80,7 @@ namespace awl::io
         {
         public:
 
-            void SkipField(const Serializer & context, InputStream & in) const override
+            void SkipField(const Reader & context, InputStream & in) const override
             {
                 Field val;
                 context.ReadV(in, val);
@@ -120,7 +137,7 @@ namespace awl::io
     
     public:
 
-        Serializer() :
+        Reader() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_cast<Prototype>(newPrototypesTuple)),
             readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
@@ -131,13 +148,10 @@ namespace awl::io
         }
 
         //It contains the addresses of its members.
-        Serializer(const Serializer&) = delete;
-        Serializer(Serializer&&) = delete;
-        Serializer& operator = (const Serializer&) = delete;
-        Serializer& operator = (Serializer&&) = delete;
-
-        template <class S>
-        inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
+        Reader(const Reader&) = delete;
+        Reader(Reader&&) = delete;
+        Reader& operator = (const Reader&) = delete;
+        Reader& operator = (Reader&&) = delete;
 
         template <class S>
         const AttachedPrototype<FieldV, S> & FindNewPrototype() const
@@ -221,12 +235,6 @@ namespace awl::io
                 }
             }
         }
-
-        using StructIndexType = uint16_t;
-        
-        bool serializeStructIndex = true;
-        bool allowTypeMismatch = false;
-        bool allowDelete = true;
 
         template<class Struct>
         void ReadStructIndex(InputStream & s, Struct & val) const

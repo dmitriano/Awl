@@ -91,10 +91,10 @@ namespace
     using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
 
     template <class IStream, class OStream>
-    using OldSerializer = awl::io::Serializer<V1, IStream, OStream>;
+    using OldSerializer = awl::io::Reader<V1, IStream, OStream>;
 
     template <class IStream, class OStream>
-    using NewSerializer = awl::io::Serializer<V2, IStream, OStream>;
+    using NewSerializer = awl::io::Reader<V2, IStream, OStream>;
 
     using OldVirtualSerializer = OldSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
     using NewVirtualSerializer = NewSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
@@ -155,10 +155,10 @@ namespace
 {
     using Duration = std::chrono::steady_clock::duration;
     
-    template <class Serializer>
-    Duration WriteDataV1(typename Serializer::OutputStream & out, size_t element_count, bool with_metadata)
+    template <class Reader>
+    Duration WriteDataV1(typename Reader::OutputStream & out, size_t element_count, bool with_metadata)
     {
-        Serializer ctx;
+        Reader ctx;
         ctx.Initialize();
 
         {
@@ -187,11 +187,11 @@ namespace
         return w;
     }
 
-    template <class Serializer>
-    Duration ReadDataPlain(typename Serializer::InputStream & in, size_t element_count)
+    template <class Reader>
+    Duration ReadDataPlain(typename Reader::InputStream & in, size_t element_count)
     {
         //Skip metadata
-        Serializer ctx;
+        Reader ctx;
         ctx.ReadOldPrototypes(in);
 
         awl::StopWatch w;
@@ -214,10 +214,10 @@ namespace
         return w;
     }
 
-    template <class Serializer>
-    Duration ReadDataV1(typename Serializer::InputStream & in, size_t element_count)
+    template <class Reader>
+    Duration ReadDataV1(typename Reader::InputStream & in, size_t element_count)
     {
-        Serializer ctx;
+        Reader ctx;
         ctx.ReadOldPrototypes(in);
 
         awl::StopWatch w;
@@ -240,10 +240,10 @@ namespace
         return w;
     }
 
-    template <class Serializer>
-    Duration ReadDataV2(typename Serializer::InputStream & in, size_t element_count)
+    template <class Reader>
+    Duration ReadDataV2(typename Reader::InputStream & in, size_t element_count)
     {
-        Serializer ctx;
+        Reader ctx;
         ctx.ReadOldPrototypes(in);
 
         {
@@ -330,8 +330,8 @@ namespace
         return mem_size;
     }
 
-    //template <class Serializer>
-    //inline void TestWriteDataV1(typename Serializer::OutputStream & out, size_t element_count)
+    //template <class Reader>
+    //inline void TestWriteDataV1(typename Reader::OutputStream & out, size_t element_count)
     //{
     //}
 }
@@ -532,7 +532,7 @@ namespace
         AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
         AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-        using Serializer = OldSerializer<awl::io::SequentialInputStream, OutputStream>;
+        using Reader = OldSerializer<awl::io::SequentialInputStream, OutputStream>;
 
         const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
@@ -545,7 +545,7 @@ namespace
             {
                 static_cast<void>(i);
 
-                total_d += WriteDataV1<Serializer>(out, element_count, false);
+                total_d += WriteDataV1<Reader>(out, element_count, false);
 
                 AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
                 AWT_ASSERT_EQUAL(mem_size, out.GetLength());
