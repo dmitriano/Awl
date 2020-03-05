@@ -38,10 +38,11 @@ namespace
     struct B1
     {
         A1 a;
+        A1 b;
         int x;
         bool y;
 
-        AWL_STRINGIZABLE(a, x, y)
+        AWL_STRINGIZABLE(a, b, x, y)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B1)
@@ -80,7 +81,7 @@ namespace
     AWL_MEMBERWISE_EQUATABLE(C2)
 
     static const A1 a1_expected = { 1, 2.0, "abc" };
-    static const B1 b1_expected = { a1_expected, 1, true };
+    static const B1 b1_expected = { a1_expected, a1_expected, 1, true };
 
     static const A2 a2_expected = { a1_expected.b, 5, "xyz", a1_expected.c };
     static const B2 b2_expected = { a2_expected, std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
@@ -156,10 +157,10 @@ namespace
 
         {
             auto & a1_proto = ctx.template FindNewPrototype<A1>();
-            AWT_ASSERT(a1_proto.GetCount() == 3);
+            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A1>::Tie>);
 
             auto & b1_proto = ctx.template FindNewPrototype<B1>();
-            AWT_ASSERT(b1_proto.GetCount() == 3);
+            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
         }
 
         if (with_metadata)
@@ -241,16 +242,16 @@ namespace
 
         {
             auto & a2_proto = ctx.template FindNewPrototype<A2>();
-            AWT_ASSERT(a2_proto.GetCount() == 4);
+            AWT_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A2>::Tie>);
 
             auto & b2_proto = ctx.template FindNewPrototype<B2>();
-            AWT_ASSERT(b2_proto.GetCount() == 4);
+            AWT_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B2>::Tie>);
 
             auto & a1_proto = ctx.template FindOldPrototype<A2>();
-            AWT_ASSERT(a1_proto.GetCount() == 3);
+            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A1>::Tie>);
 
             auto & b1_proto = ctx.template FindOldPrototype<B2>();
-            AWT_ASSERT(b1_proto.GetCount() == 3);
+            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
         }
 
         awl::StopWatch w;
