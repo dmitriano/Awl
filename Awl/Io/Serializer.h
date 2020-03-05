@@ -246,68 +246,79 @@ namespace awl::io
         }
 
         template<class Struct>
+        void ReadTuplizable(InputStream & s, Struct & val) const
+        {
+            for_each(object_as_tuple(val), [this, &s](auto& field_val)
+            {
+                ReadV(s, field_val);
+            });
+        }
+
+        template<class Struct>
         void ReadV(InputStream & s, Struct & val) const
         {
-            ReadStructIndex(s, val);
-
-            const std::vector<size_t> & name_map = this->template FindProtoMap<Struct>();
-
-            //An empty map means either an empty structure or equal prototypes
-            //(the prototypes of empty structures are equal).
-            if (name_map.empty())
+            if constexpr (is_stringizable_v<Struct>)
             {
-                //Read in the same way we write it.
-                for_each(object_as_tuple(val), [this, &s](auto& field_val)
+                ReadStructIndex(s, val);
+
+                const std::vector<size_t> & name_map = this->template FindProtoMap<Struct>();
+
+                //An empty map means either an empty structure or equal prototypes
+                //(the prototypes of empty structures are equal).
+                if (name_map.empty())
                 {
-                    if constexpr (is_stringizable_v<std::remove_reference_t<decltype(field_val)>>)
+                    //Read in the same way we write it.
+                    ReadTuplizable(s, val);
+                }
+                else
+                {
+                    auto & new_proto = this->template FindNewPrototype<Struct>();
+                    auto & old_proto = this->template FindOldPrototype<Struct>();
+
+                    assert(name_map.size() == old_proto.GetCount());
+
+                    auto & readers = this->template FindFieldReaders<Struct>();
+                    auto & skippers = this->GetFieldSkippers();
+
+                    for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
                     {
-                        ReadV(s, field_val);
+                        const auto old_field = old_proto.GetField(old_index);
+
+                        const size_t new_index = name_map[old_index];
+
+                        if (new_index == Prototype::NoIndex)
+                        {
+                            if (!this->allowDelete)
+                            {
+                                throw FieldNotFoundException(old_field.name);
+                            }
+
+                            //Skip by type.
+                            skippers[old_field.type]->SkipField(s);
+                        }
+                        else
+                        {
+                            const auto new_field = new_proto.GetField(new_index);
+
+                            if (new_field.type != old_field.type)
+                            {
+                                throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
+                            }
+
+                            //But read by index.
+                            readers[new_index]->ReadField(*this, s, val);
+                        }
                     }
-                    else
-                    {
-                        Read(s, field_val);
-                    }
-                });
+                }
+            }
+            else if constexpr (is_tuplizable_v<Struct>)
+            {
+                //A tuplizable structure field can be serializable.
+                ReadTuplizable(s, val);
             }
             else
             {
-                auto & new_proto = this->template FindNewPrototype<Struct>();
-                auto & old_proto = this->template FindOldPrototype<Struct>();
-
-                assert(name_map.size() == old_proto.GetCount());
-
-                auto & readers = this->template FindFieldReaders<Struct>();
-                auto & skippers = this->GetFieldSkippers();
-
-                for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
-                {
-                    const auto old_field = old_proto.GetField(old_index);
-
-                    const size_t new_index = name_map[old_index];
-
-                    if (new_index == Prototype::NoIndex)
-                    {
-                        if (!this->allowDelete)
-                        {
-                            throw FieldNotFoundException(old_field.name);
-                        }
-
-                        //Skip by type.
-                        skippers[old_field.type]->SkipField(s);
-                    }
-                    else
-                    {
-                        const auto new_field = new_proto.GetField(new_index);
-
-                        if (new_field.type != old_field.type)
-                        {
-                            throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
-                        }
-
-                        //But read by index.
-                        readers[new_index]->ReadField(*this, s, val);
-                    }
-                }
+                Read(s, val);
             }
         }
 
