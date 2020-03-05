@@ -196,7 +196,8 @@ namespace awl::io
             MakeProtoMaps();
         }
         
-        void ReadOldPrototypes(InputStream & s)
+        template <class Stream>
+        void ReadOldPrototypes(Stream & s)
         {
             assert(oldPrototypes.empty());
             //Read std::vector.
@@ -385,7 +386,8 @@ namespace awl::io
 
         using OutputStream = OStream;
 
-        void WriteNewPrototypes(OutputStream & s) const
+        template <class Stream>
+        void WriteNewPrototypes(Stream & s) const
         {
             //Write std::array.
             Write(s, this->newPrototypes.size());
