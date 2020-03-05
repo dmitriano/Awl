@@ -90,14 +90,22 @@ namespace
     using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
     using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
 
-    template <class IStream, class OStream>
-    using OldSerializer = awl::io::Reader<V1, IStream, OStream>;
+    template <class IStream>
+    using OldReader = awl::io::Reader<V1, IStream>;
 
-    template <class IStream, class OStream>
-    using NewSerializer = awl::io::Reader<V2, IStream, OStream>;
+    template <class OStream>
+    using OldWriter = awl::io::Writer<V1, OStream>;
 
-    using OldVirtualSerializer = OldSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
-    using NewVirtualSerializer = NewSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
+    template <class IStream>
+    using NewReader = awl::io::Reader<V2, IStream>;
+
+    using OldVirtualReader = OldReader<awl::io::SequentialInputStream>;
+    using OldVirtualWriter = OldWriter<awl::io::SequentialOutputStream>;
+    using NewVirtualReader = NewReader<awl::io::SequentialInputStream>;
+
+    using OldVectorReader = OldReader<awl::io::VectorInputStream>;
+    using OldVectorWriter = OldWriter<awl::io::VectorOutputStream>;
+    using NewVectorReader = NewReader<awl::io::VectorInputStream>;
 
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
@@ -155,11 +163,10 @@ namespace
 {
     using Duration = std::chrono::steady_clock::duration;
     
-    template <class Reader>
-    Duration WriteDataV1(typename Reader::OutputStream & out, size_t element_count, bool with_metadata)
+    template <class Writer>
+    Duration WriteDataV1(typename Writer::OutputStream & out, size_t element_count, bool with_metadata)
     {
-        Reader ctx;
-        ctx.Initialize();
+        Writer ctx;
 
         {
             auto & a1_proto = ctx.template FindNewPrototype<A1>();
@@ -295,7 +302,7 @@ namespace
 
     size_t MeasureStreamSize(const TestContext & context, size_t element_count, bool include_meta = true)
     {
-        using OldMeasureSerializer = OldSerializer<awl::io::SequentialInputStream, awl::io::MeasureStream>;
+        using OldMeasureWriter = OldWriter<awl::io::MeasureStream>;
 
         size_t meta_size = 0;
 
@@ -303,7 +310,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1<OldMeasureSerializer>(out, 0, true);
+            WriteDataV1<OldMeasureWriter>(out, 0, true);
 
             meta_size = out.GetLength();
         }
@@ -313,7 +320,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1<OldMeasureSerializer>(out, 1, false);
+            WriteDataV1<OldMeasureWriter>(out, 1, false);
 
             block_size = out.GetLength();
         }
@@ -342,9 +349,6 @@ AWT_TEST(VtsReadWrite)
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
     AWT_FLAG(only_write);
 
-    using OldVectorSerializer = OldSerializer<awl::io::VectorInputStream, awl::io::VectorOutputStream>;
-    using NewVectorSerializer = NewSerializer<awl::io::VectorInputStream, awl::io::VectorOutputStream>;
-
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
     std::vector<uint8_t> v;
@@ -365,7 +369,7 @@ AWT_TEST(VtsReadWrite)
 
             v.resize(0);
 
-            total_d += WriteDataV1<OldVectorSerializer>(out, element_count, true);
+            total_d += WriteDataV1<OldVectorWriter>(out, element_count, true);
         }
 
         context.out << _T("Test data has been written. ");
@@ -383,7 +387,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataPlain<OldVectorSerializer>(in, element_count);
+            auto d = ReadDataPlain<OldVectorReader>(in, element_count);
 
             context.out << _T("Plain data has been read. ");
 
@@ -395,7 +399,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1<OldVectorSerializer>(in, element_count);
+            auto d = ReadDataV1<OldVectorReader>(in, element_count);
 
             context.out << _T("Version 1 has been read. ");
 
@@ -407,7 +411,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2<NewVectorSerializer>(in, element_count);
+            auto d = ReadDataV2<NewVectorReader>(in, element_count);
 
             context.out << _T("Version 2 has been read. ");
 
@@ -422,11 +426,11 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    using OldMeasureSerializer = OldSerializer<awl::io::SequentialInputStream, VirtualMeasureStream>;
+    using OldMeasureWriter = OldWriter<VirtualMeasureStream>;
 
     VirtualMeasureStream out;
 
-    auto d = WriteDataV1<OldMeasureSerializer>(out, element_count, true);
+    auto d = WriteDataV1<OldMeasureWriter>(out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -443,7 +447,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
     auto p_out = VtsTest::CreateMeasureStream();
 
-    auto d = WriteDataV1<OldVirtualSerializer>(*p_out, element_count, true);
+    auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -464,7 +468,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
 
     auto p_out = VtsTest::CreateFakeStream();
 
-    auto d = WriteDataV1<OldVirtualSerializer>(*p_out, element_count, true);
+    auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -532,7 +536,7 @@ namespace
         AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
         AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-        using Reader = OldSerializer<awl::io::SequentialInputStream, OutputStream>;
+        using Writer = OldWriter<OutputStream>;
 
         const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
@@ -545,7 +549,7 @@ namespace
             {
                 static_cast<void>(i);
 
-                total_d += WriteDataV1<Reader>(out, element_count, false);
+                total_d += WriteDataV1<Writer>(out, element_count, false);
 
                 AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
                 AWT_ASSERT_EQUAL(mem_size, out.GetLength());

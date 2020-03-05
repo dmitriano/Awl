@@ -43,18 +43,30 @@ namespace awl::io
 
     public:
 
+        //It contains the addresses of its members.
+        Serializer(const Serializer&) = delete;
+        Serializer(Serializer&&) = delete;
+        Serializer& operator = (const Serializer&) = delete;
+        Serializer& operator = (Serializer&&) = delete;
+
+        template <class S>
+        const AttachedPrototype<FieldV, S> & FindNewPrototype() const
+        {
+            constexpr size_t index = StructIndex<S>;
+            return std::get<index>(newPrototypesTuple);
+        }
+
         bool serializeStructIndex = true;
         bool allowTypeMismatch = false;
         bool allowDelete = true;
     };
 
-    template <class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
+    template <class V, class IStream = SequentialInputStream>
     class Reader : public Serializer<V>
     {
     public:
 
         using InputStream = IStream;
-        using OutputStream = OStream;
 
     private:
 
@@ -154,19 +166,6 @@ namespace awl::io
         {
         }
 
-        //It contains the addresses of its members.
-        Reader(const Reader&) = delete;
-        Reader(Reader&&) = delete;
-        Reader& operator = (const Reader&) = delete;
-        Reader& operator = (Reader&&) = delete;
-
-        template <class S>
-        const AttachedPrototype<FieldV, S> & FindNewPrototype() const
-        {
-            constexpr size_t index = StructIndex<S>;
-            return std::get<index>(newPrototypesTuple);
-        }
-
         template <class S>
         auto & FindFieldReaders() const
         {
@@ -222,25 +221,6 @@ namespace awl::io
             //Read std::vector.
             Read(s, oldPrototypes);
             MakeProtoMaps();
-        }
-
-        void WriteNewPrototypes(OutputStream & s) const
-        {
-            //Write std::array.
-            Write(s, newPrototypes.size());
-            
-            for (Prototype * p : newPrototypes)
-            {
-                const size_t count = p->GetCount();
-                Write(s, count);
-                
-                for (size_t i = 0; i < count; ++i)
-                {
-                    FieldRef fr = p->GetField(i);
-                    Write(s, fr.name);
-                    Write(s, fr.type);
-                }
-            }
         }
 
         template<class Struct>
@@ -359,32 +339,6 @@ namespace awl::io
             }
         }
 
-        //Writes the object tree and adds indices to the structures.
-        template<class Struct>
-        void WriteV(OutputStream & s, const Struct & val) const
-        {
-            if constexpr (is_stringizable_v<Struct>)
-            {
-                if (this->serializeStructIndex)
-                {
-                    const StructIndexType index = static_cast<StructIndexType>(StructIndex<Struct>);
-                    Write(s, index);
-                }
-            }
-
-            if constexpr (is_tuplizable_v<Struct>)
-            {
-                for_each(object_as_tuple(val), [this, &s](auto& field)
-                {
-                    WriteV(s, field);
-                });
-            }
-            else
-            {
-                Write(s, val);
-            }
-        }
-
     private:
 
         void MakeProtoMaps()
@@ -416,5 +370,58 @@ namespace awl::io
         TupleOfFieldReaderArray readerArrays;
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
+    };
+
+    template <class V, class OStream = SequentialOutputStream>
+    class Writer : public Serializer<V>
+    {
+    public:
+
+        using OutputStream = OStream;
+
+        void WriteNewPrototypes(OutputStream & s) const
+        {
+            //Write std::array.
+            Write(s, newPrototypes.size());
+
+            for (Prototype * p : newPrototypes)
+            {
+                const size_t count = p->GetCount();
+                Write(s, count);
+
+                for (size_t i = 0; i < count; ++i)
+                {
+                    FieldRef fr = p->GetField(i);
+                    Write(s, fr.name);
+                    Write(s, fr.type);
+                }
+            }
+        }
+
+        //Writes the object tree and adds indices to the structures.
+        template<class Struct>
+        void WriteV(OutputStream & s, const Struct & val) const
+        {
+            if constexpr (is_stringizable_v<Struct>)
+            {
+                if (this->serializeStructIndex)
+                {
+                    const StructIndexType index = static_cast<StructIndexType>(StructIndex<Struct>);
+                    Write(s, index);
+                }
+            }
+
+            if constexpr (is_tuplizable_v<Struct>)
+            {
+                for_each(object_as_tuple(val), [this, &s](auto& field)
+                {
+                    WriteV(s, field);
+                });
+            }
+            else
+            {
+                Write(s, val);
+            }
+        }
     };
 }
