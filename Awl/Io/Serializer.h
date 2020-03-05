@@ -24,7 +24,7 @@ namespace awl::io
         using StructIndexType = uint16_t;
 
         template <class S>
-        inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
+        static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
 
         template <class Struct>
         using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
@@ -169,19 +169,6 @@ namespace awl::io
         }
 
         template <class S>
-        auto & FindFieldReaders() const
-        {
-            constexpr size_t index = Base::template StructIndex<S>;
-            auto & holder = std::get<index>(readerArrays);
-            return holder.a;
-        }
-
-        const SkipperArray & GetFieldSkippers() const
-        {
-            return skipperArray;
-        }
-
-        template <class S>
         bool HasOldPrototype() const
         {
             constexpr size_t index = Base::template StructIndex<S>;
@@ -194,14 +181,6 @@ namespace awl::io
             constexpr size_t index = Base::template StructIndex<S>;
             assert(index < oldPrototypes.size());
             return oldPrototypes[index];
-        }
-
-        template <class S>
-        const std::vector<size_t> & FindProtoMap() const
-        {
-            constexpr size_t index = Base::template StructIndex<S>;
-            assert(index < oldPrototypes.size());
-            return protoMaps[index];
         }
 
         //Makes the new and old prototypes identical.
@@ -223,33 +202,6 @@ namespace awl::io
             //Read std::vector.
             Read(s, oldPrototypes);
             MakeProtoMaps();
-        }
-
-        template<class Struct>
-        void ReadStructIndex(InputStream & s, Struct & val) const
-        {
-            static_cast<void>(val);
-            
-            if (this->serializeStructIndex)
-            {
-                typename Base::StructIndexType index;
-                Read(s, index);
-                constexpr size_t expected_index = Base::template StructIndex<Struct>;
-                if (index != expected_index)
-                {
-                    throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
-                }
-            }
-        }
-
-        template<class Struct>
-        void ReadTuplizable(InputStream & s, Struct & val) const
-        {
-            for_each(object_as_tuple(val), [this, &s](auto& field_val)
-            {
-                //A tuplizable structure field can be serializable.
-                ReadV(s, field_val);
-            });
         }
 
         template<class Struct>
@@ -342,6 +294,54 @@ namespace awl::io
         }
 
     private:
+
+        template <class S>
+        auto & FindFieldReaders() const
+        {
+            constexpr size_t index = Base::template StructIndex<S>;
+            auto & holder = std::get<index>(readerArrays);
+            return holder.a;
+        }
+
+        const SkipperArray & GetFieldSkippers() const
+        {
+            return skipperArray;
+        }
+
+        template <class S>
+        const std::vector<size_t> & FindProtoMap() const
+        {
+            constexpr size_t index = Base::template StructIndex<S>;
+            assert(index < oldPrototypes.size());
+            return protoMaps[index];
+        }
+
+        template<class Struct>
+        void ReadStructIndex(InputStream & s, Struct & val) const
+        {
+            static_cast<void>(val);
+
+            if (this->serializeStructIndex)
+            {
+                typename Base::StructIndexType index;
+                Read(s, index);
+                constexpr size_t expected_index = Base::template StructIndex<Struct>;
+                if (index != expected_index)
+                {
+                    throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
+                }
+            }
+        }
+
+        template<class Struct>
+        void ReadTuplizable(InputStream & s, Struct & val) const
+        {
+            for_each(object_as_tuple(val), [this, &s](auto& field_val)
+            {
+                //A tuplizable structure field can be serializable.
+                ReadV(s, field_val);
+            });
+        }
 
         void MakeProtoMaps()
         {
