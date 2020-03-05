@@ -23,8 +23,7 @@ namespace awl::io
 
     private:
 
-        using Split = split_variant<V, is_stringizable>;
-        using StructV = typename Split::matching;
+        using StructV = filter_variant<V, is_stringizable>;
         using FieldV = V;
 
         template <class Struct>

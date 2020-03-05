@@ -296,6 +296,9 @@ namespace awl
     template <class V, template <class> class Predicate>
     using split_variant = helpers::split_variant<std::variant<>, std::variant<>, Predicate, V>;
 
+    template <class V, template <class> class Predicate>
+    using filter_variant = typename split_variant<V, Predicate>::matching;
+
     namespace tests
     {
         using V = std::variant<bool, char, float, int, double>;
