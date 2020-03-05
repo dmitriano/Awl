@@ -90,8 +90,14 @@ namespace
     using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
     using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
 
-    using OldSerializer = awl::io::Serializer<V1>;
-    using NewSerializer = awl::io::Serializer<V2>;
+    template <class IStream, class OStream>
+    using OldSerializer = awl::io::Serializer<V1, IStream, OStream>;
+
+    template <class IStream, class OStream>
+    using NewSerializer = awl::io::Serializer<V2, IStream, OStream>;
+
+    using OldVirtualSerializer = OldSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
+    using NewVirtualSerializer = NewSerializer<awl::io::SequentialInputStream, awl::io::SequentialOutputStream>;
 
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
@@ -149,7 +155,7 @@ namespace
 {
     using Duration = std::chrono::steady_clock::duration;
     
-    template <class Serializer = OldSerializer>
+    template <class Serializer>
     Duration WriteDataV1(typename Serializer::OutputStream & out, size_t element_count, bool with_metadata)
     {
         Serializer ctx;
@@ -287,16 +293,17 @@ namespace
         return w;
     }
 
-    template <class Serializer = OldSerializer>
     size_t MeasureStreamSize(const TestContext & context, size_t element_count, bool include_meta = true)
     {
+        using OldMeasureSerializer = OldSerializer<awl::io::SequentialInputStream, awl::io::MeasureStream>;
+
         size_t meta_size = 0;
 
         if (include_meta)
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1<Serializer>(out, 0, true);
+            WriteDataV1<OldMeasureSerializer>(out, 0, true);
 
             meta_size = out.GetLength();
         }
@@ -306,7 +313,7 @@ namespace
         {
             awl::io::MeasureStream out;
 
-            WriteDataV1<Serializer>(out, 1, false);
+            WriteDataV1<OldMeasureSerializer>(out, 1, false);
 
             block_size = out.GetLength();
         }
@@ -322,6 +329,11 @@ namespace
 
         return mem_size;
     }
+
+    //template <class Serializer>
+    //inline void TestWriteDataV1(typename Serializer::OutputStream & out, size_t element_count)
+    //{
+    //}
 }
 
 AWT_TEST(VtsReadWrite)
@@ -329,6 +341,9 @@ AWT_TEST(VtsReadWrite)
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
     AWT_FLAG(only_write);
+
+    using OldVectorSerializer = OldSerializer<awl::io::VectorInputStream, awl::io::VectorOutputStream>;
+    using NewVectorSerializer = NewSerializer<awl::io::VectorInputStream, awl::io::VectorOutputStream>;
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -350,7 +365,7 @@ AWT_TEST(VtsReadWrite)
 
             v.resize(0);
 
-            total_d += WriteDataV1<OldSerializer>(out, element_count, true);
+            total_d += WriteDataV1<OldVectorSerializer>(out, element_count, true);
         }
 
         context.out << _T("Test data has been written. ");
@@ -368,7 +383,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataPlain<OldSerializer>(in, element_count);
+            auto d = ReadDataPlain<OldVectorSerializer>(in, element_count);
 
             context.out << _T("Plain data has been read. ");
 
@@ -380,7 +395,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1<OldSerializer>(in, element_count);
+            auto d = ReadDataV1<OldVectorSerializer>(in, element_count);
 
             context.out << _T("Version 1 has been read. ");
 
@@ -392,7 +407,7 @@ AWT_TEST(VtsReadWrite)
         {
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2<NewSerializer>(in, element_count);
+            auto d = ReadDataV2<NewVectorSerializer>(in, element_count);
 
             context.out << _T("Version 2 has been read. ");
 
@@ -407,9 +422,11 @@ AWT_BENCHMARK(VtsMeasureSerializationInline)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
+    using OldMeasureSerializer = OldSerializer<awl::io::SequentialInputStream, VirtualMeasureStream>;
+
     VirtualMeasureStream out;
 
-    auto d = WriteDataV1(out, element_count, true);
+    auto d = WriteDataV1<OldMeasureSerializer>(out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -426,7 +443,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
     auto p_out = VtsTest::CreateMeasureStream();
 
-    auto d = WriteDataV1(*p_out, element_count, true);
+    auto d = WriteDataV1<OldVirtualSerializer>(*p_out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -447,7 +464,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
 
     auto p_out = VtsTest::CreateFakeStream();
 
-    auto d = WriteDataV1(*p_out, element_count, true);
+    auto d = WriteDataV1<OldVirtualSerializer>(*p_out, element_count, true);
 
     context.out << _T("Test data has been written. ");
 
@@ -515,7 +532,7 @@ namespace
         AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
         AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-        using Serializer = awl::io::Serializer<V1, awl::io::SequentialInputStream, OutputStream>;
+        using Serializer = OldSerializer<awl::io::SequentialInputStream, OutputStream>;
 
         const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
