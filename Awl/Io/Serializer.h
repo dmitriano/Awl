@@ -26,6 +26,21 @@ namespace awl::io
         template <class S>
         inline static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
 
+        template <class Struct>
+        using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
+
+        using NewPrototypeTuple = decltype(transform_v2t<StructV, MyAttachedPrototype>());
+        using NewPrototypeArray = std::array<Prototype *, std::variant_size_v<StructV>>;
+
+        NewPrototypeTuple newPrototypesTuple;
+        NewPrototypeArray newPrototypes;
+
+        Serializer() :
+            newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
+            newPrototypes(tuple_cast<Prototype>(newPrototypesTuple))
+        {
+        }
+
     public:
 
         bool serializeStructIndex = true;
@@ -88,12 +103,6 @@ namespace awl::io
         };
 
         template <class Struct>
-        using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
-
-        using NewPrototypeTuple = decltype(transform_v2t<StructV, MyAttachedPrototype>());
-        using NewPrototypeArray = std::array<Prototype *, std::variant_size_v<StructV>>;
-
-        template <class Struct>
         struct FieldReaderTupleCreator
         {
             static constexpr size_t fieldCount = std::tuple_size_v<typename tuplizable_traits<Struct>::Tie>;
@@ -138,8 +147,6 @@ namespace awl::io
     public:
 
         Reader() :
-            newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
-            newPrototypes(tuple_cast<Prototype>(newPrototypesTuple)),
             readerTuples(transform_v2t<StructV, FieldReaderTuple>()),
             readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
             skipperTuple(transform_v2t<FieldV, FieldSkipperImpl>()),
@@ -403,8 +410,6 @@ namespace awl::io
             }
         }
 
-        NewPrototypeTuple newPrototypesTuple;
-        NewPrototypeArray newPrototypes;
         std::vector<DetachedPrototype> oldPrototypes;
         std::vector<std::vector<size_t>> protoMaps;
         TupleOfFieldReaderTuple readerTuples;
