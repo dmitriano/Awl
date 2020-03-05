@@ -258,30 +258,43 @@ namespace awl
 
     namespace helpers
     {
-        template <class V1, class V2, template <class> class Predicate, class... Types>
+        template <class V>
+        struct convert_empty_variant
+        {
+            using type = V;
+        };
+
+        template <>
+        struct convert_empty_variant<std::variant<>>
+        {
+            using type = std::variant<std::monostate>;
+        };
+
+        template <class V>
+        using convert_empty_variant_t = typename convert_empty_variant<V>::type;
+
+        template <class V1, class V2, template <class> class Predicate, class V>
         struct split_variant;
 
-        template <template <class> class Predicate, class... Types>
-        struct split_variant<void, void, Predicate, std::variant<Types...>>
-            : split_variant<std::variant<>, std::variant<>, Predicate, Types...> { };
+        template <class V1, class V2, template <class> class Predicate>
+        struct split_variant<V1, V2, Predicate, std::variant<>>
+        {
+            using matching = convert_empty_variant_t<V1>;
+            using non_matching = convert_empty_variant_t<V2>;
+        };
 
         template <class... V1s, class... V2s, template <class> class Predicate, class Head, class... Tail>
-        struct split_variant<std::variant<V1s...>, std::variant<V2s...>, Predicate, Head, Tail...>
-            : std::conditional_t<
+        struct split_variant<std::variant<V1s...>, std::variant<V2s...>, Predicate, std::variant<Head, Tail...>> : std::conditional_t<
             Predicate<Head>::value,
-            split_variant<std::variant<V1s..., Head>, std::variant<V2s...>, Predicate, Tail...>,
-            split_variant<std::variant<V1s...>, std::variant<V2s..., Head>, Predicate, Tail...>
-            > { };
-
-        template <class V1, class V2, template <class> class Predicate>
-        struct split_variant<V1, V2, Predicate> {
-            using matching = V1;
-            using non_matching = V2;
+            split_variant<std::variant<V1s..., Head>, std::variant<V2s...>, Predicate, std::variant<Tail...>>,
+            split_variant<std::variant<V1s...>, std::variant<V2s..., Head>, Predicate, std::variant<Tail...>>
+            >
+        {
         };
     }
 
     template <class V, template <class> class Predicate>
-    using split_variant = helpers::split_variant<void, void, Predicate, V>;
+    using split_variant = helpers::split_variant<std::variant<>, std::variant<>, Predicate, V>;
 
     namespace tests
     {
