@@ -527,7 +527,7 @@ AWT_BENCHMARK(VtsMemSetMove)
 namespace
 {
     template <class OutputStream>
-    void TestMemoryStream(const TestContext & context)
+    void TestWrite(const TestContext & context)
     {
         AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
         AWT_ATTRIBUTE(size_t, iteration_count, 1);
@@ -565,15 +565,15 @@ namespace
 
 AWT_TEST(VtsWriteMemoryStreamMemmove)
 {
-    TestMemoryStream<awl::io::VirtualMemoryOutputStream>(context);
+    TestWrite<awl::io::VirtualMemoryOutputStream>(context);
 }
 
 AWT_TEST(VtsWriteMemoryStreamSwitch)
 {
-    TestMemoryStream<awl::io::SwitchMemoryOutputStream>(context);
+    TestWrite<awl::io::SwitchMemoryOutputStream>(context);
 }
 
 AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
-    TestMemoryStream<awl::io::MemoryOutputStream>(context);
+    TestWrite<awl::io::MemoryOutputStream>(context);
 }
