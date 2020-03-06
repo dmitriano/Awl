@@ -65,6 +65,8 @@ namespace awl::testing
 #define AWT_FAIL awl::testing::Assert::Fail(AWT_SRC_INFO)
 #define AWT_FAILM(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
 
+#ifndef AWT_NO_ASSERTS
+
 #define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
 #define AWT_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
@@ -76,3 +78,21 @@ namespace awl::testing
 
 #define AWT_ASSERT_EQUAL(expected, actual) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWT_SRC_INFO)
 #define AWT_ASSERTM_EQUAL(expected, actual, message) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWT_SRC_INFO)
+
+#else
+
+#define AWT_FAKE_ASSERT ((void)0)
+
+#define AWT_ASSERT(cond) AWT_FAKE_ASSERT
+#define AWT_ASSERTM(cond, message) AWT_FAKE_ASSERT
+
+#define AWT_ASSERT_TRUE(cond) AWT_FAKE_ASSERT
+#define AWT_ASSERTM_TRUE(cond, message) AWT_FAKE_ASSERT
+
+#define AWT_ASSERT_FALSE(cond) AWT_FAKE_ASSERT
+#define AWT_ASSERTM_FALSE(cond, message) AWT_FAKE_ASSERT
+
+#define AWT_ASSERT_EQUAL(expected, actual) AWT_FAKE_ASSERT
+#define AWT_ASSERTM_EQUAL(expected, actual, message) AWT_FAKE_ASSERT
+
+#endif
