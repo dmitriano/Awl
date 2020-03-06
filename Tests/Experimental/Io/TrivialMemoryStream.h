@@ -26,6 +26,7 @@ namespace awl::io
             return GetLength() == m_size;
         }
 
+        /*
         constexpr size_t Read(uint8_t * buffer, size_t count)
         {
             const size_t available_count = m_size - GetLength();
@@ -33,6 +34,21 @@ namespace awl::io
             StdCopy(m_p, m_p + read_count, buffer);
             m_p += read_count;
             return read_count;
+        }
+        */
+
+        constexpr size_t Read(uint8_t * buffer, size_t count)
+        {
+            StdCopy(m_p, m_p + count, buffer);
+            m_p += count;
+            return count;
+        }
+
+        template <class T>
+        constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> ReadArithmetic(T & val)
+        {
+            val = *(reinterpret_cast<T *>(m_p));
+            m_p += sizeof(val);
         }
 
         constexpr void Write(const uint8_t * buffer, size_t count)
@@ -42,6 +58,7 @@ namespace awl::io
             m_p += count;
         }
 
+        /*
         template <class T>
         std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
         {
@@ -55,15 +72,14 @@ namespace awl::io
             *(reinterpret_cast<T *>(m_p)) = val;
             m_p = new_p;
         }
+        */
 
-        /*
         template <class T>
         constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
         {
             *(reinterpret_cast<T *>(m_p)) = val;
             m_p += sizeof(val);
         }
-        */
 
         constexpr size_t GetCapacity() const
         {
@@ -103,7 +119,20 @@ namespace awl::io
     inline void Write(TrivialMemoryStream & s, bool b)
     {
         uint8_t val = b ? 1 : 0;
-
         s.WriteArithmetic(val);
+    }
+
+    template <typename T>
+    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Read(TrivialMemoryStream & s, T & val)
+    {
+        s.ReadArithmetic(val);
+    }
+
+    template <>
+    inline void Read(TrivialMemoryStream & s, bool & b)
+    {
+        uint8_t val;
+        s.ReadArithmetic(val);
+        b = val != 0;
     }
 }
