@@ -26,6 +26,8 @@ namespace awl
         {
             const size_t available_size = m_size - GetLength();
             assert(available_size >= memory_size);
+            static_cast<void>(available_size);
+
             uint8_t * p = m_p;
             m_p += memory_size;
             return p;
