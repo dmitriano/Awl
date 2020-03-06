@@ -46,7 +46,7 @@ namespace awl
 
         void Reset()
         {
-            std::fill(pBuf, pBuf + m_size, 0u);
+            std::fill(pBuf, pBuf + m_size, static_cast<uint8_t>(0u));
             m_p = pBuf;
         }
 

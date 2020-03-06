@@ -18,17 +18,23 @@
 #include "Helpers/FormattingHelpers.h"
 #include "Experimental/Io/TrivialMemoryStream.h"
 #include "Experimental/Io//SampleStreams.h"
+#include "Experimental/TrivialAllocator.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
 
 namespace
 {
+    using String = std::string;
+    
+    template <class T>
+    using Vector = std::vector<T>;
+    
     struct A1
     {
         int a;
         double b;
-        std::string c;
+        String c;
 
         AWL_STRINGIZABLE(a, b, c)
     };
@@ -51,8 +57,8 @@ namespace
     {
         double b;
         int d = 5;
-        std::string e = "xyz";
-        std::string c;
+        String e = "xyz";
+        String c;
 
         AWL_STRINGIZABLE(b, d, e, c)
     };
@@ -62,9 +68,9 @@ namespace
     struct B2
     {
         A2 a;
-        std::vector<int> z{ 1, 2, 3 };
+        Vector<int> z{ 1, 2, 3 };
         int x;
-        std::string w = "xyz";
+        String w = "xyz";
 
         AWL_STRINGIZABLE(a, x, z, w)
     };
@@ -84,11 +90,11 @@ namespace
     static const B1 b1_expected = { a1_expected, a1_expected, 1, true };
 
     static const A2 a2_expected = { a1_expected.b, 5, "xyz", a1_expected.c };
-    static const B2 b2_expected = { a2_expected, std::vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
+    static const B2 b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
     static const C2 c2_expected = { 7 };
 
-    using V1 = std::variant<A1, B1, bool, char, int, float, double, std::string>;
-    using V2 = std::variant<A2, B2, bool, char, int, float, double, std::string, C2, std::vector<int>>;
+    using V1 = std::variant<A1, B1, bool, char, int, float, double, String>;
+    using V2 = std::variant<A2, B2, bool, char, int, float, double, String, C2, Vector<int>>;
 
     template <class IStream>
     using OldReader = awl::io::Reader<V1, IStream>;
@@ -306,7 +312,7 @@ AWT_TEST(VtsReadWriteVectorStream)
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
-    std::vector<uint8_t> v;
+    Vector<uint8_t> v;
     v.reserve(mem_size);
 
     context.out << v.capacity() << _T(" bytes of memory has been allocated. ") << std::endl;
@@ -544,9 +550,9 @@ AWT_BENCHMARK(VtsMemSetMove)
     }
 
     {
-        context.out << _T("std::vector<uint8_t>::insert: ");
+        context.out << _T("Vector<uint8_t>::insert: ");
 
-        std::vector<uint8_t> v;
+        Vector<uint8_t> v;
         v.reserve(element_count);
         AWT_ASSERT_EQUAL(element_count, v.capacity());
 
