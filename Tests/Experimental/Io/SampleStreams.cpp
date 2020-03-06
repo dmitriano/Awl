@@ -2,7 +2,7 @@
 #include "Awl/Io/MeasureStream.h"
 #include <memory>
 
-namespace VtsTest
+namespace awl::io
 {
     class FakeStream : public awl::io::SequentialOutputStream
     {
@@ -17,11 +17,11 @@ namespace VtsTest
 
     std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream()
     {
-        return std::unique_ptr<awl::io::SequentialOutputStream>(new FakeStream());
+        return std::unique_ptr<SequentialOutputStream>(new FakeStream());
     }
 
     std::unique_ptr<awl::io::SequentialOutputStream> CreateMeasureStream()
     {
-        return std::unique_ptr<awl::io::SequentialOutputStream>(new awl::io::MeasureStream());
+        return std::unique_ptr<SequentialOutputStream>(new awl::io::MeasureStream());
     }
 }

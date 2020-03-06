@@ -11,13 +11,13 @@
 #include <algorithm>
 #include <functional>
 #include <chrono>
-#include <memory>
 #include <type_traits>
 #include <cassert>
 
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"
-#include "MemoryStream.h"
+#include "Experimental/Io/TrivialMemoryStream.h"
+#include "Experimental/Io//SampleStreams.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
@@ -111,56 +111,7 @@ namespace
     using OldTrivialWriter = OldWriter<awl::io::TrivialMemoryStream>;
     using NewTrivialReader = NewReader<awl::io::TrivialMemoryStream>;
 
-    class VirtualMeasureStream : public awl::io::SequentialOutputStream
-    {
-    public:
-
-        void Write(const uint8_t * buffer, size_t count) override
-        {
-            static_cast<void>(buffer);
-            m_pos += count;
-        }
-
-        size_t GetLength() const
-        {
-            return m_pos;
-        }
-
-    private:
-
-        //prevent the optimization
-        volatile size_t m_pos = 0;
-    };
-
-    class InlineMeasureStream
-    {
-    public:
-
-        void Write(const uint8_t * buffer, size_t count)
-        {
-            static_cast<void>(buffer);
-            m_pos += count;
-        }
-
-        size_t GetLength() const
-        {
-            return m_pos;
-        }
-
-    private:
-
-        //prevent the optimization
-        volatile size_t m_pos = 0;
-    };
-
     constexpr size_t defaultElementCount = 1000;
-}
-
-namespace VtsTest
-{
-    std::unique_ptr<awl::io::SequentialOutputStream> CreateFakeStream();
-
-    std::unique_ptr<awl::io::SequentialOutputStream> CreateMeasureStream();
 }
 
 namespace
@@ -505,13 +456,13 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
     }
 }
 
-AWT_BENCHMARK(VtsMeasureSerializationInline)
+AWT_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    using OldMeasureWriter = OldWriter<VirtualMeasureStream>;
+    using OldMeasureWriter = OldWriter<awl::io::VirtualMeasureStream>;
 
-    VirtualMeasureStream out;
+    awl::io::VirtualMeasureStream out;
 
     auto d = WriteDataV1<OldMeasureWriter>(out, element_count, true);
 
@@ -528,7 +479,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    auto p_out = VtsTest::CreateMeasureStream();
+    auto p_out = awl::io::CreateMeasureStream();
 
     auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
@@ -549,7 +500,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
-    auto p_out = VtsTest::CreateFakeStream();
+    auto p_out = awl::io::CreateFakeStream();
 
     auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
