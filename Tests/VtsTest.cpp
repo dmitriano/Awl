@@ -332,8 +332,10 @@ namespace
 AWT_TEST(VtsReadWriteVectorStream)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWT_ATTRIBUTE(size_t, iteration_count, 1);
-    AWT_FLAG(only_write);
+    AWT_ATTRIBUTE(size_t, write_count, 1);
+    AWT_ATTRIBUTE(size_t, read_count, 1);
+
+    AWT_ASSERT(write_count >= 1);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -342,14 +344,12 @@ AWT_TEST(VtsReadWriteVectorStream)
 
     context.out << v.capacity() << _T(" bytes of memory has been allocated. ") << std::endl;
 
-    //do the test
-
     {
         awl::io::VectorOutputStream out(v);
 
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
         
-        for (auto i : awl::make_count(iteration_count))
+        for (auto i : awl::make_count(write_count))
         {
             static_cast<void>(i);
 
@@ -360,7 +360,7 @@ AWT_TEST(VtsReadWriteVectorStream)
 
         context.out << _T("Test data has been written. ");
         
-        helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, v.size() * iteration_count);
+        helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, v.size() * write_count);
 
         context.out << std::endl;
     }
@@ -368,51 +368,71 @@ AWT_TEST(VtsReadWriteVectorStream)
     AWT_ASSERT_EQUAL(mem_size, v.size());
     AWT_ASSERT_EQUAL(mem_size, v.capacity());
 
-    if (!only_write)
     {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataPlain<OldVectorReader>(in, element_count);
-
-            context.out << _T("Plain data has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
-
-            context.out << std::endl;
+            total_d += ReadDataPlain<OldVectorReader>(in, element_count);
         }
 
+        context.out << _T("Plain data has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
+
+        context.out << std::endl;
+    }
+
+    {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV1<OldVectorReader>(in, element_count);
-
-            context.out << _T("Version 1 has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
-
-            context.out << std::endl;
+            total_d += ReadDataV1<OldVectorReader>(in, element_count);
         }
 
+        context.out << _T("Version 1 has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
+
+        context.out << std::endl;
+    }
+
+    {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
             awl::io::VectorInputStream in(v);
 
-            auto d = ReadDataV2<NewVectorReader>(in, element_count);
-
-            context.out << _T("Version 2 has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, v.size());
-
-            context.out << std::endl;
+            total_d += ReadDataV2<NewVectorReader>(in, element_count);
         }
+
+        context.out << _T("Version 2 has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
+
+        context.out << std::endl;
     }
 }
 
 AWT_TEST(VtsReadWriteTrivialMemoryStream)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWT_ATTRIBUTE(size_t, iteration_count, 1);
-    AWT_FLAG(only_write);
+    AWT_ATTRIBUTE(size_t, write_count, 1);
+    AWT_ATTRIBUTE(size_t, read_count, 1);
+
+    AWT_ASSERT(write_count >= 1);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -428,7 +448,7 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
-        for (auto i : awl::make_count(iteration_count))
+        for (auto i : awl::make_count(write_count))
         {
             static_cast<void>(i);
 
@@ -442,48 +462,66 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
 
         context.out << _T("Test data has been written. ");
 
-        helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
+        helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, mem_size * write_count);
 
         context.out << std::endl;
     }
 
-    if (!only_write)
     {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
+            total_d += ReadDataPlain<OldTrivialReader>(in, element_count);
+
             in.Reset();
-
-            auto d = ReadDataPlain<OldTrivialReader>(in, element_count);
-
-            context.out << _T("Plain data has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
-
-            context.out << std::endl;
         }
 
+        context.out << _T("Plain data has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
+
+        context.out << std::endl;
+    }
+
+    {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
+            total_d += ReadDataV1<OldTrivialReader>(in, element_count);
+
             in.Reset();
-
-            auto d = ReadDataV1<OldTrivialReader>(in, element_count);
-
-            context.out << _T("Version 1 has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
-
-            context.out << std::endl;
         }
 
+        context.out << _T("Version 1 has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
+
+        context.out << std::endl;
+    }
+
+    {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(read_count))
         {
+            static_cast<void>(i);
+
+            total_d += ReadDataV2<NewTrivialReader>(in, element_count);
+
             in.Reset();
-
-            auto d = ReadDataV2<NewTrivialReader>(in, element_count);
-
-            context.out << _T("Version 2 has been read. ");
-
-            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
-
-            context.out << std::endl;
         }
+
+        context.out << _T("Version 2 has been read. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
+
+        context.out << std::endl;
     }
 }
 
