@@ -104,8 +104,13 @@ namespace awl::io
         Write(s, ns_count);
     }
 
-    template <class Stream, typename Char>
-    inline void Read(Stream & s, std::basic_string<Char> & val)
+    template<
+        class Stream,
+        class Char,
+        class Traits = std::char_traits<Char>,
+        class Allocator = std::allocator<Char>
+    >
+    inline void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val)
     {
         typename std::basic_string<Char>::size_type len;
 
@@ -119,8 +124,13 @@ namespace awl::io
         *(val.data() + len) = 0;
     }
 
-    template <class Stream, typename Char>
-    inline void Write(Stream & s, const std::basic_string<Char> & val)
+    template<
+        class Stream,
+        class Char,
+        class Traits = std::char_traits<Char>,
+        class Allocator = std::allocator<Char>
+    >
+    inline void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val)
     {
         typename std::basic_string<Char>::size_type len = val.length();
 
@@ -205,10 +215,10 @@ namespace awl::io
         }
     }
 
-    template <class Stream, typename T>
-    inline void Read(Stream & s, std::vector<T> & v)
+    template <class Stream, class T, class Allocator = std::allocator<T>>
+    inline void Read(Stream & s, std::vector<T, Allocator> & v)
     {
-        typename std::vector<T>::size_type size;
+        typename std::vector<T, Allocator>::size_type size;
 
         Read(s, size);
 
@@ -217,10 +227,10 @@ namespace awl::io
         ReadVector(s, v);
     }
 
-    template <class Stream, typename T>
-    inline void Write(Stream & s, const std::vector<T> & v)
+    template <class Stream, class T, class Allocator = std::allocator<T>>
+    inline void Write(Stream & s, const std::vector<T, Allocator> & v)
     {
-        typename std::vector<T>::size_type size = v.size();
+        typename std::vector<T, Allocator>::size_type size = v.size();
 
         Write(s, size);
 

@@ -10,14 +10,16 @@ namespace awl
     {
     public:
 
-        TrivialSpace(size_t size) : m_size(size), pBuf(new uint8_t[size])
+        //TrivialSpace() = default;
+        
+        TrivialSpace(size_t size)
         {
-            Reset();
+            Reserve(size);
         }
-
+        
         ~TrivialSpace()
         {
-            delete pBuf;
+            Clear();
         }
 
         uint8_t * Allocate(std::size_t memory_size)
@@ -29,6 +31,22 @@ namespace awl
             return p;
         }
 
+        void Reserve(size_t size)
+        {
+            Clear();
+            m_size = size;
+            pBuf = new uint8_t[size];
+            Reset();
+        }
+
+        void Clear()
+        {
+            delete pBuf;
+            m_size = 0;
+            pBuf = nullptr;
+            m_p = nullptr;
+        }
+        
         constexpr size_t GetCapacity() const
         {
             return m_size;
@@ -52,12 +70,9 @@ namespace awl
 
     private:
 
-        const size_t m_size;
-        uint8_t * pBuf;
-        uint8_t * m_p;
-
-        template <class Q>
-        friend class TestAllocator;
+        size_t m_size = 0;
+        uint8_t * pBuf = nullptr;
+        uint8_t * m_p = nullptr;
     };
     
     template <class T>
@@ -67,7 +82,7 @@ namespace awl
 
         using value_type = T;
 
-        explicit TrivialAllocator(TrivialSpace & space) : m_space(space)
+        TrivialAllocator(TrivialSpace & space) : m_space(space)
         {
         }
 

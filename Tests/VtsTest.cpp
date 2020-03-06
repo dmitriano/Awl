@@ -25,11 +25,36 @@ using namespace awl::testing::helpers;
 
 namespace
 {
-    using String = std::string;
+    template <class T>
+    using Allocator = std::allocator<T>;
+
+    /*
+    thread_local awl::TrivialSpace trivialSpace;
+    thread_local awl::TrivialAllocator<void> alloc(trivialSpace);
+    thread_local awl::TrivialAllocator<void> expectedAlloc(trivialSpace);
+    */
+
+    using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
     
     template <class T>
-    using Vector = std::vector<T>;
-    
+    using Vector = std::vector<T, Allocator<T>>;
+
+    /*
+    //It can be something like this in a future version:
+    template <template <class> class Allocator>
+    struct A1
+    {
+        A1(Allocator<void> alloc) : c(Allocator<char>(alloc)) {}
+
+        int a;
+        double b;
+        String c;
+
+        AWL_STRINGIZABLE(a, b, c)
+    };
+    */
+
+    //But currently we use default constructible allocator.
     struct A1
     {
         int a;
@@ -312,7 +337,7 @@ AWT_TEST(VtsReadWriteVectorStream)
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
-    Vector<uint8_t> v;
+    std::vector<uint8_t> v;
     v.reserve(mem_size);
 
     context.out << v.capacity() << _T(" bytes of memory has been allocated. ") << std::endl;
@@ -550,9 +575,9 @@ AWT_BENCHMARK(VtsMemSetMove)
     }
 
     {
-        context.out << _T("Vector<uint8_t>::insert: ");
+        context.out << _T("vector<uint8_t>::insert: ");
 
-        Vector<uint8_t> v;
+        std::vector<uint8_t> v;
         v.reserve(element_count);
         AWT_ASSERT_EQUAL(element_count, v.capacity());
 
