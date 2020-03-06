@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwHelpers.h"
 
@@ -14,18 +16,32 @@ namespace awl::io
         }
     }
 
-    class MemoryOutputStream
+    class TrivialMemoryStream
     {
     public:
 
-        MemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
+        TrivialMemoryStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
         {
             std::memset(pBuf, 0u, m_size);
         }
 
-        ~MemoryOutputStream()
+        ~TrivialMemoryStream()
         {
             delete pBuf;
+        }
+
+        constexpr bool End()
+        {
+            return GetLength() == m_size;
+        }
+
+        constexpr size_t Read(uint8_t * buffer, size_t count)
+        {
+            const size_t available_count = m_size - GetLength();
+            const size_t read_count = std::min(count, available_count);
+            StdCopy(m_p, m_p + read_count, buffer);
+            m_p += read_count;
+            return read_count;
         }
 
         constexpr void Write(const uint8_t * buffer, size_t count)
@@ -58,14 +74,14 @@ namespace awl::io
         }
         */
 
-        size_t GetCapacity() const
+        constexpr size_t GetCapacity() const
         {
             return m_size;
         }
 
-        size_t GetLength() const
+        constexpr size_t GetLength() const
         {
-            return m_p - pBuf;
+            return static_cast<size_t>(m_p - pBuf);
         }
 
         void Reset()
@@ -87,13 +103,13 @@ namespace awl::io
     };
 
     template <typename T>
-    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(MemoryOutputStream & s, T val)
+    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
         s.WriteArithmetic(val);
     }
 
     template <>
-    inline void Write(MemoryOutputStream & s, bool b)
+    inline void Write(TrivialMemoryStream & s, bool b)
     {
         uint8_t val = b ? 1 : 0;
 

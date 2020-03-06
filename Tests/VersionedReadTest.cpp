@@ -107,6 +107,10 @@ namespace
     using OldVectorWriter = OldWriter<awl::io::VectorOutputStream>;
     using NewVectorReader = NewReader<awl::io::VectorInputStream>;
 
+    using OldTrivialReader = OldReader<awl::io::TrivialMemoryStream>;
+    using OldTrivialWriter = OldWriter<awl::io::TrivialMemoryStream>;
+    using NewTrivialReader = NewReader<awl::io::TrivialMemoryStream>;
+
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -343,7 +347,7 @@ namespace
     //}
 }
 
-AWT_TEST(VtsReadWrite)
+AWT_TEST(VtsReadWriteVectorStream)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
@@ -416,6 +420,85 @@ AWT_TEST(VtsReadWrite)
             context.out << _T("Version 2 has been read. ");
 
             helpers::ReportCountAndSpeed(context, d, element_count, v.size());
+
+            context.out << std::endl;
+        }
+    }
+}
+
+AWT_TEST(VtsReadWriteTrivialMemoryStream)
+{
+    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWT_ATTRIBUTE(size_t, iteration_count, 1);
+    AWT_FLAG(only_write);
+
+    const size_t mem_size = MeasureStreamSize(context, element_count);
+
+    context.out << _T("Allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+
+    //do the test
+
+    awl::io::TrivialMemoryStream in(mem_size);
+    awl::io::TrivialMemoryStream & out = in;
+
+    AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+
+    {
+        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
+
+        for (auto i : awl::make_count(iteration_count))
+        {
+            static_cast<void>(i);
+
+            total_d += WriteDataV1<OldTrivialWriter>(out, element_count, true);
+
+            AWT_ASSERT_EQUAL(mem_size, out.GetLength());
+            AWT_ASSERT(in.End());
+
+            out.Reset();
+        }
+
+        context.out << _T("Test data has been written. ");
+
+        helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
+
+        context.out << std::endl;
+    }
+
+    if (!only_write)
+    {
+        {
+            in.Reset();
+
+            auto d = ReadDataPlain<OldTrivialReader>(in, element_count);
+
+            context.out << _T("Plain data has been read. ");
+
+            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
+
+            context.out << std::endl;
+        }
+
+        {
+            in.Reset();
+
+            auto d = ReadDataV1<OldTrivialReader>(in, element_count);
+
+            context.out << _T("Version 1 has been read. ");
+
+            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
+
+            context.out << std::endl;
+        }
+
+        {
+            in.Reset();
+
+            auto d = ReadDataV2<NewTrivialReader>(in, element_count);
+
+            context.out << _T("Version 2 has been read. ");
+
+            helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
             context.out << std::endl;
         }
@@ -579,5 +662,5 @@ AWT_TEST(VtsWriteMemoryStreamSwitch)
 
 AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
-    TestWrite<awl::io::MemoryOutputStream>(context);
+    TestWrite<awl::io::TrivialMemoryStream>(context);
 }
