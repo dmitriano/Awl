@@ -58,10 +58,11 @@ namespace
     struct A1
     {
         int a;
-        double b;
+        bool b;
         String c;
+        double d;
 
-        AWL_STRINGIZABLE(a, b, c)
+        AWL_STRINGIZABLE(a, b, c, d)
     };
 
     AWL_MEMBERWISE_EQUATABLE(A1)
@@ -80,12 +81,13 @@ namespace
 
     struct A2
     {
-        double b;
-        int d = 5;
-        String e = "xyz";
+        bool b;
+        double d;
+        int e = 5;
+        String f = "xyz";
         String c;
 
-        AWL_STRINGIZABLE(b, d, e, c)
+        AWL_STRINGIZABLE(b, d, e, f, c)
     };
 
     AWL_MEMBERWISE_EQUATABLE(A2)
@@ -111,10 +113,10 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(C2)
 
-    static const A1 a1_expected = { 1, 2.0, "abc" };
+    static const A1 a1_expected = { 1, true, "abc", 2.0 };
     static const B1 b1_expected = { a1_expected, a1_expected, 1, true };
 
-    static const A2 a2_expected = { a1_expected.b, 5, "xyz", a1_expected.c };
+    static const A2 a2_expected = { a1_expected.b, a1_expected.d, 5, "xyz", a1_expected.c };
     static const B2 b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
     static const C2 c2_expected = { 7 };
 

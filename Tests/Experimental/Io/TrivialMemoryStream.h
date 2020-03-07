@@ -115,24 +115,9 @@ namespace awl::io
         s.WriteArithmetic(val);
     }
 
-    template <>
-    inline void Write(TrivialMemoryStream & s, bool b)
-    {
-        uint8_t val = b ? 1 : 0;
-        s.WriteArithmetic(val);
-    }
-
     template <typename T>
-    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Read(TrivialMemoryStream & s, T & val)
+    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
         s.ReadArithmetic(val);
-    }
-
-    template <>
-    inline void Read(TrivialMemoryStream & s, bool & b)
-    {
-        uint8_t val;
-        s.ReadArithmetic(val);
-        b = val != 0;
     }
 }
