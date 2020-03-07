@@ -44,41 +44,11 @@ namespace awl::io
             return count;
         }
 
-        template <class T>
-        constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> ReadArithmetic(T & val)
-        {
-            val = *(reinterpret_cast<T *>(m_p));
-            m_p += sizeof(val);
-        }
-
         constexpr void Write(const uint8_t * buffer, size_t count)
         {
             //std::memmove(m_p, buffer, count);
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
-        }
-
-        /*
-        template <class T>
-        std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
-        {
-            uint8_t * const new_p = m_p + sizeof(val);
-
-            if (static_cast<size_t>(new_p - pBuf) > m_size)
-            {
-                throw GeneralException(_T("overflow"));
-            }
-
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p = new_p;
-        }
-        */
-
-        template <class T>
-        constexpr std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
-        {
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p += sizeof(val);
         }
 
         constexpr size_t GetCapacity() const
@@ -101,8 +71,27 @@ namespace awl::io
 
     private:
 
-        //how to declare Write specializaion as a friend?
-        //template <class Stream, class T> friend void Write(Stream & s, T val);
+        /*
+        template <class T>
+        std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
+        {
+            uint8_t * const new_p = m_p + sizeof(val);
+
+            if (static_cast<size_t>(new_p - pBuf) > m_size)
+            {
+                throw GeneralException(_T("overflow"));
+            }
+
+            *(reinterpret_cast<T *>(m_p)) = val;
+            m_p = new_p;
+        }
+        */
+
+        template <typename T>
+        friend std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val);
+
+        template <typename T>
+        friend std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val);
 
         const size_t m_size;
         uint8_t * pBuf;
@@ -112,12 +101,14 @@ namespace awl::io
     template <typename T>
     inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
-        s.WriteArithmetic(val);
+        *(reinterpret_cast<T *>(s.m_p)) = val;
+        s.m_p += sizeof(val);
     }
 
     template <typename T>
     inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
-        s.ReadArithmetic(val);
+        val = *(reinterpret_cast<T *>(s.m_p));
+        s.m_p += sizeof(val);
     }
 }
