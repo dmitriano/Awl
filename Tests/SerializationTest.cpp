@@ -193,19 +193,15 @@ namespace awl
             return false;
         }
         
-        template<std::size_t M, std::enable_if_t< M != N, bool > = true>
-        friend constexpr bool operator!=(ct_str lhs, ct_str<M> rhs)
+        template<std::size_t M, std::enable_if_t<M != N, bool> = true>
+        friend constexpr bool operator!=(ct_str, ct_str<M>)
         {
-            static_cast<void>(lhs);
-            static_cast<void>(rhs);
             return true;
         }
 
-        template<std::size_t M, std::enable_if_t< M != N, bool > = true>
+        template<std::size_t M, std::enable_if_t<M != N, bool> = true>
         friend bool operator==(ct_str, ct_str<M>)
         {
-            static_cast<void>(lhs);
-            static_cast<void>(rhs);
             return false;
         }
     };
