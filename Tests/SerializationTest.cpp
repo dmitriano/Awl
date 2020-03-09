@@ -147,6 +147,76 @@ namespace awl
 
 namespace awl
 {
+    template<std::size_t N>
+    struct ct_str
+    {
+        char state[N + 1] = { 0 };
+        constexpr ct_str(char const(&arr)[N + 1])
+        {
+            for (std::size_t i = 0; i < N; ++i)
+                state[i] = arr[i];
+        }
+        constexpr char operator[](std::size_t i) const { return state[i]; }
+        constexpr char& operator[](std::size_t i) { return state[i]; }
+
+        constexpr explicit operator char const*() const { return state; }
+        constexpr char const* data() const { return state; }
+        constexpr std::size_t size() const { return N; }
+        constexpr char const* begin() const { return state; }
+        constexpr char const* end() const { return begin() + size(); }
+
+        constexpr ct_str() = default;
+        constexpr ct_str(ct_str const&) = default;
+        constexpr ct_str& operator=(ct_str const&) = default;
+
+        template<std::size_t M>
+        friend constexpr ct_str<N + M> operator+(ct_str lhs, ct_str<M> rhs)
+        {
+            ct_str<N + M> retval;
+            for (std::size_t i = 0; i < N; ++i)
+                retval[i] = lhs[i];
+            for (std::size_t i = 0; i < M; ++i)
+                retval[N + i] = rhs[i];
+            return retval;
+        }
+
+        friend constexpr bool operator==(ct_str lhs, ct_str rhs)
+        {
+            for (std::size_t i = 0; i < N; ++i)
+                if (lhs[i] != rhs[i]) return false;
+            return true;
+        }
+        friend constexpr bool operator!=(ct_str lhs, ct_str rhs)
+        {
+            for (std::size_t i = 0; i < N; ++i)
+                if (lhs[i] != rhs[i]) return true;
+            return false;
+        }
+        
+        template<std::size_t M, std::enable_if_t< M != N, bool > = true>
+        friend constexpr bool operator!=(ct_str lhs, ct_str<M> rhs)
+        {
+            static_cast<void>(lhs);
+            static_cast<void>(rhs);
+            return true;
+        }
+
+        template<std::size_t M, std::enable_if_t< M != N, bool > = true>
+        friend bool operator==(ct_str, ct_str<M>)
+        {
+            static_cast<void>(lhs);
+            static_cast<void>(rhs);
+            return false;
+        }
+    };
+
+    template<std::size_t N>
+    ct_str(char const(&)[N])->ct_str<N - 1>;
+
+    constexpr ct_str hello = "hello";
+    constexpr ct_str world = "world";
+    constexpr ct_str hello_world = hello + world;
+
     class type_info
     {
     public:
@@ -184,19 +254,33 @@ namespace awl
     };
     
     template <class T>
-    constexpr const char * get_arithmetic_size()
+    constexpr auto get_arithmetic_size()
     {
-        switch (sizeof(T))
-        {
-        case 1: return "1";
-        case 2: return "2";
-        case 4: return "4";
-        case 8: return "8";
-        case 16: return "16";
-        default: static_assert(dependent_false_v<T>);
-        }
+        if constexpr (sizeof(T) == 1)
+            return ct_str{ "1" };
+        else if constexpr (sizeof(T) == 2)
+            return ct_str{ "2" };
+        else if constexpr (sizeof(T) == 4)
+            return ct_str{ "4" };
+        else if constexpr (sizeof(T) == 8)
+            return ct_str{ "8" };
+        else if constexpr (sizeof(T) == 16)
+            return ct_str{ "16" };
+        else static_assert(dependent_false_v<T>);
     }
-    
+
+    template <class T, std::enable_if_t<std::is_arithmetic<T>{}, bool> = true>
+    constexpr auto make_type_name()
+    {
+        if constexpr (std::is_signed<T>{})
+            return ct_str{ "int" } + get_arithmetic_size<T>();
+        else
+            return ct_str{ "uint" } + get_arithmetic_size<T>();
+    }
+
+    static_assert(make_type_name<int>() == make_type_name<int32_t>());
+    static_assert(hello_world != hello);
+
     template <class T>
     constexpr std::enable_if_t<std::is_arithmetic_v<T>, type_info> make_type_info()
     {
