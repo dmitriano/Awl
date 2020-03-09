@@ -140,7 +140,7 @@ AWT_TEST(Hash_ToFromArray)
 
 namespace
 {
-    //Theoretically as an example, StringHash can be used with switch operator, but it is a bit strange usage.
+    //StringHash can be used with switch operator.
     template <class Hash>
     class StringHash
     {
@@ -264,31 +264,39 @@ AWT_TEST(Hash_String)
     }
 }
 
+namespace
+{
+    template <class InternalHash>
+    void TestSwitch()
+    {
+        using namespace awl::crypto;
+
+        using Hash = StringHash<InternalHash>;
+
+        constexpr Hash hash;
+
+        const std::string sample = "communism";
+
+        switch (hash(sample))
+        {
+        case hash("never comes"):
+            AWT_FAIL;
+
+        case hash("communism"):
+            break;
+
+        default:
+            AWT_FAIL;
+        }
+    }
+}
+
 AWT_TEST(Hash_Switch)
 {
     AWT_UNUSED_CONTEXT;
 
-    using namespace awl::crypto;
-
-    using Hash = StringHash<EasyHash>;
-
-    //using Hash = StringHash<Int64Hash>;
-
-    const Hash hash;
-
-    const std::string sample = "communism";
-
-    switch (hash(sample))
-    {
-    case hash("never comes"):
-        AWT_FAIL;
-
-    case hash("communism"):
-        break;
-    
-    default:
-        AWT_FAIL;
-    }
+    TestSwitch<EasyHash>();
+    TestSwitch<Int64Hash>();
 }
 
 AWT_TEST(Hash_Fake)
