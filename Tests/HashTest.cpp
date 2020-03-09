@@ -138,7 +138,7 @@ AWT_TEST(Hash_ToFromArray)
     AWT_ASSERT_EQUAL(sample, val);
 }
 
-namespace examples
+namespace
 {
     //Theoretically as an example, StringHash can be used with switch operator, but it is a bit strange usage.
     template <class Hash>
@@ -153,7 +153,7 @@ namespace examples
 
         using value_type = typename Hash::value_type;
 
-        explicit StringHash(Hash h = {}) : m_hash(h)
+        explicit constexpr StringHash(Hash h = {}) : m_hash(h)
         {
         }
 
@@ -202,12 +202,13 @@ namespace examples
         }
     };
 
-    //Why isn't it a constexpr?
     class Int64Hash
     {
     public:
 
         using value_type = uint64_t;
+
+        constexpr Int64Hash(uint64_t seed = 127) : m_hash(seed) {}
 
         value_type operator()(std::string::const_iterator begin, std::string::const_iterator end) const
         {
@@ -223,6 +224,14 @@ namespace examples
 
         awl::crypto::Crc64 m_hash;
     };
+
+    constexpr char sampleString[] = "123456789";
+    constexpr awl::crypto::HashValue<8> sampleHash = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+    
+    static_assert(StringHash<Int64Hash>(0)("123456789") == 0xe9c6d914c4b8d9ca);
+    
+    //Why isn't it a constexpr?
+    //static_assert(StringHash<awl::crypto::Crc64>(0)("123456789") == sampleHash);
 }
 
 AWT_TEST(Hash_String)
@@ -231,18 +240,16 @@ AWT_TEST(Hash_String)
 
     using namespace awl::crypto;
 
-    using Hash = examples::StringHash<Crc64>;
+    using Hash = StringHash<Crc64>;
 
     const Hash hash(0);
 
     {
-        std::string sample("123456789");
-
-        const Hash::value_type sample_val = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+        std::string sample(sampleString);
 
         const Hash::value_type val = hash(sample);
 
-        Assert::IsTrue(sample_val == val);
+        Assert::IsTrue(val == sampleHash);
     }
 
     {
@@ -262,8 +269,6 @@ AWT_TEST(Hash_Switch)
 
     using namespace awl::crypto;
 
-    using namespace examples;
-    
     using Hash = StringHash<EasyHash>;
 
     //using Hash = StringHash<Int64Hash>;
