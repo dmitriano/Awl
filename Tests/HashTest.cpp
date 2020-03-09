@@ -140,7 +140,7 @@ AWT_TEST(Hash_ToFromArray)
 
 namespace examples
 {
-    //Theoretically as an example, StringHash can be used with switch operator, but is a bit strange usage.
+    //Theoretically as an example, StringHash can be used with switch operator, but it is a bit strange usage.
     template <class Hash>
     class StringHash
     {
@@ -201,6 +201,28 @@ namespace examples
             return seed;
         }
     };
+
+    //Why isn't it a constexpr?
+    class Int64Hash
+    {
+    public:
+
+        using value_type = uint64_t;
+
+        value_type operator()(std::string::const_iterator begin, std::string::const_iterator end) const
+        {
+            return (*this)(&(*begin), &(*begin) + (end - begin));
+        }
+
+        constexpr value_type operator()(const char * begin, const char * end) const
+        {
+            return awl::crypto::from_array<value_type>(m_hash(begin, end));
+        }
+
+    private:
+
+        awl::crypto::Crc64 m_hash;
+    };
 }
 
 AWT_TEST(Hash_String)
@@ -241,8 +263,10 @@ AWT_TEST(Hash_Switch)
     using namespace awl::crypto;
 
     using namespace examples;
-
+    
     using Hash = StringHash<EasyHash>;
+
+    //using Hash = StringHash<Int64Hash>;
 
     const Hash hash;
 

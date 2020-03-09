@@ -3,6 +3,9 @@
 #include "Awl/Io/RwHelpers.h"
 
 #include <string>
+#include <vector>
+#include <list>
+#include <type_traits>
 
 using namespace awl::testing;
 
@@ -209,6 +212,23 @@ namespace awl
     //};
 
     static_assert(awl::make_type_info<int>() == awl::make_type_info<long>());
+
+    template<typename Test, template<typename...> class Ref>
+    struct is_specialization : std::false_type {};
+
+    template<template<typename...> class Ref, typename... Args>
+    struct is_specialization<Ref<Args...>, Ref> : std::true_type {};
+
+    //template<template<typename...> class Ref, typename... Args>
+    //constexpr bool is_specialization_v = is_specialization<Ref<Args...>, Ref>::value;
+
+    template <class T>
+    constexpr std::enable_if_t<is_specialization<T, std::vector>::value || is_specialization<T, std::list>::value, type_info> make_type_info()
+    {
+        return type_info("sequence");// + make_type_info<typename T::value_type>;
+    }
+
+    static_assert(awl::make_type_info<std::vector<int>>() == awl::make_type_info<std::list<int>>());
 }
 
 /*
