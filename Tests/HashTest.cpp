@@ -227,8 +227,9 @@ namespace
 
     constexpr char sampleString[] = "123456789";
     constexpr awl::crypto::HashValue<8> sampleHash = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+    constexpr Int64Hash::value_type sampleIntHash = 0xe9c6d914c4b8d9ca;
     
-    static_assert(StringHash<Int64Hash>(0)("123456789") == 0xe9c6d914c4b8d9ca);
+    static_assert(StringHash<Int64Hash>(0)(sampleString) == sampleIntHash);
     
     //Why isn't it a constexpr?
     //static_assert(StringHash<awl::crypto::Crc64>(0)("123456789") == sampleHash);
