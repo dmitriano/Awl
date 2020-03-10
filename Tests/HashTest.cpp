@@ -116,7 +116,7 @@ namespace
 
     static_assert(StringHash<Int64Hash>(0)(sampleString) == sampleIntHash);
 
-    //It is not a constexpr because std::array::operator == is not constexpr in C++17, but it will in C++20.
+    //It is not a constexpr because std::array::operator == is not constexpr in C++17, but it will be in C++20.
     //static_assert(StringHash<awl::crypto::Crc64>(0)("123456789") == sampleHash);
 }
 
@@ -280,7 +280,7 @@ namespace
         case hash("communism"):
             break;
 
-        case hash("never comes"):
+        case hash("will never come"):
             AWT_FAIL;
 
         case hash("but the crisis"):
