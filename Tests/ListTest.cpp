@@ -25,66 +25,11 @@ namespace
         using Base::Base;
     };
 
-    /*
-    struct BlockLink : awl::quick_link
-    {
-        constexpr BlockLink(size_t size) : m_size(size) {}
-        
-        size_t m_size;
-    };
-
-    using BlockList = awl::quick_list<BlockLink>;
-
-    constexpr BlockList blockList{};
-
-    constexpr size_t AddBlock()
-    {
-        BlockLink link(5);
-        BlockList list;
-        list.push_back(&link);
-        return 1;
-    }
-
-    static_assert(AddBlock() == 1);
-    */
-
-    /*
-    struct BlockLink : awl::single_link
-    {
-        constexpr BlockLink(size_t size) : m_size(size) {}
-
-        size_t m_size;
-    };
-
-    using BlockList = awl::single_list<BlockLink>;
-
-    constexpr BlockList blockList{};
-
-    constexpr size_t AddBlock()
-    {
-        BlockLink link(5);
-        BlockList list;
-        list.push_front(&link);
-        return list.size();
-    }
-
-    constexpr BlockList AddBlock1()
-    {
-        static BlockLink link(5);
-        BlockList list;
-        list.push_front(&link);
-        return list;
-    }
-
-    static_assert(AddBlock() == 1);
-    static_assert(AddBlock1().size() == 1);
-    */
-
     class Element : public LinkA, public LinkB, public awl::quick_link
     {
     public:
 
-        constexpr Element(int val) : Value(val)
+        Element(int val) : Value(val)
         {
             ++elementCount;
         }
@@ -104,8 +49,6 @@ namespace
     };
 
     int Element::elementCount = 0;
-
-    //constexpr Element elemA(1);
 
     template <class DLink>
     class ListHolder

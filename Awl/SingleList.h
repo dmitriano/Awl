@@ -15,22 +15,22 @@ namespace awl
     {
     public:
 
-        constexpr bool included() const
+        bool included() const
         {
             return next() != nullptr;
         }
 
     protected:
 
-        constexpr base_single_link(Link * n) : pNext(n) {}
+        base_single_link(Link * n) : pNext(n) {}
 
-        constexpr base_single_link() : pNext(nullptr) {}
+        base_single_link() : pNext(nullptr) {}
 
-        constexpr Link * next() { return pNext; }
+        Link * next() { return pNext; }
 
-        constexpr const Link * next() const { return pNext; }
+        const Link * next() const { return pNext; }
 
-        constexpr void set_next(Link * n)
+        void set_next(Link * n)
         {
             pNext = n;
         }
@@ -81,20 +81,20 @@ namespace awl
 
         using reference = value_type &;
 
-        constexpr base_single_iterator(Link *p) : pCur(p) {}
+        base_single_iterator(Link *p) : pCur(p) {}
 
-        constexpr T * operator-> () const { return cur(); }
+        T * operator-> () const { return cur(); }
 
-        constexpr T * operator* () const { return cur(); }
+        T * operator* () const { return cur(); }
 
     protected:
 
         //! Results in undefined behavior if the iterator is end().
-        constexpr T * cur() const { return static_cast<T *>(pCur); }
+        T * cur() const { return static_cast<T *>(pCur); }
 
-        constexpr void MoveNext() { pCur = pCur->next(); }
+        void MoveNext() { pCur = pCur->next(); }
 
-        constexpr Link * link() const { return pCur; }
+        Link * link() const { return pCur; }
 
     private:
 
@@ -106,20 +106,20 @@ namespace awl
     {
     public:
 
-        constexpr single_iterator(Link *p) : base_single_iterator<T, Link>(p) {}
+        single_iterator(Link *p) : base_single_iterator<T, Link>(p) {}
 
-        constexpr single_iterator(const single_iterator & other) : single_iterator(*other) {}
+        single_iterator(const single_iterator & other) : single_iterator(*other) {}
 
-        constexpr single_iterator & operator = (const single_iterator &) = default;
+        single_iterator & operator = (const single_iterator &) = default;
 
-        constexpr single_iterator & operator++ ()
+        single_iterator & operator++ ()
         {
             this->MoveNext();
 
             return *this;
         }
 
-        constexpr single_iterator operator++ (int)
+        single_iterator operator++ (int)
         {
             single_iterator tmp = *this;
 
@@ -128,12 +128,12 @@ namespace awl
             return tmp;
         }
 
-        constexpr bool operator == (const single_iterator & r) const
+        bool operator == (const single_iterator & r) const
         {
             return this->link() == r.link();
         }
 
-        constexpr bool operator != (const single_iterator & r)  const
+        bool operator != (const single_iterator & r)  const
         {
             return !(*this == r);
         }
@@ -144,23 +144,23 @@ namespace awl
     {
     public:
 
-        constexpr const_single_iterator(const Link *p) : base_single_iterator<const T, const Link>(p) {}
+        const_single_iterator(const Link *p) : base_single_iterator<const T, const Link>(p) {}
 
-        constexpr const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
+        const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
 
-        constexpr const_single_iterator & operator = (const const_single_iterator &) = default;
+        const_single_iterator & operator = (const const_single_iterator &) = default;
 
         //! The only differece between single_iterator and const_single_iterator is that single_iterator can be converted to const_single_iterator but not vice versa.
-        constexpr const_single_iterator(const single_iterator<T, Link> & other) : const_single_iterator(*other) {}
+        const_single_iterator(const single_iterator<T, Link> & other) : const_single_iterator(*other) {}
 
-        constexpr const_single_iterator& operator++ ()
+        const_single_iterator& operator++ ()
         {
             this->MoveNext();
 
             return *this;
         }
 
-        constexpr const_single_iterator operator++ (int)
+        const_single_iterator operator++ (int)
         {
             const_single_iterator tmp = *this;
 
@@ -169,12 +169,12 @@ namespace awl
             return tmp;
         }
 
-        constexpr bool operator == (const const_single_iterator & r) const
+        bool operator == (const const_single_iterator & r) const
         {
             return this->link() == r.link();
         }
 
-        constexpr bool operator != (const const_single_iterator & r)  const
+        bool operator != (const const_single_iterator & r)  const
         {
             return !(*this == r);
         }
@@ -193,57 +193,59 @@ namespace awl
         using iterator = single_iterator<T, Link>;
         using const_iterator =  const_single_iterator<T, Link>;
 
-        constexpr basic_single_list() {}
+        basic_single_list() {}
 
-        constexpr basic_single_list(const basic_single_list& other) = delete;
+        basic_single_list(const basic_single_list& other) = delete;
 
-        constexpr basic_single_list(basic_single_list&& other) = delete;
+        basic_single_list(basic_single_list&& other) = delete;
 
-        constexpr basic_single_list& operator = (const basic_single_list& other) = delete;
+        ~basic_single_list() {}
 
-        constexpr basic_single_list& operator = (basic_single_list&& other) = delete;
+        basic_single_list& operator = (const basic_single_list& other) = delete;
+
+        basic_single_list& operator = (basic_single_list&& other) = delete;
 
         //! Results in undfined behavior if the list is empty.
-        constexpr T * front()
+        T * front()
         {
             assert(!empty());
             return static_cast<T *>(first());
         }
 
-        constexpr const T * front() const
+        const T * front() const
         {
             assert(!empty());
             return static_cast<const T *>(first());
         }
 
         //! begin() does not cast Null.next() to T *, so it can return a valid end().
-        constexpr iterator begin() { return first(); }
-        constexpr const_iterator begin() const { return first(); }
+        iterator begin() { return first(); }
+        const_iterator begin() const { return first(); }
 
-        constexpr iterator end() { return null(); }
-        constexpr const_iterator end() const { return null(); }
+        iterator end() { return null(); }
+        const_iterator end() const { return null(); }
 
-        static constexpr void insert(iterator i, T * a) { insert_after(i.prev(), a); }
+        static void insert(iterator i, T * a) { insert_after(i.prev(), a); }
 
-        constexpr void push_front(T * a)
+        void push_front(T * a)
         {
             insert_after(null(), a);
         }
 
-        constexpr T * pop_front()
+        T * pop_front()
         {
             assert(!empty());
             return static_cast<T *>(remove_after(null()));
         }
 
-        constexpr bool empty() const { return first() == null(); }
-        constexpr bool empty_or_contains_one() const { return first()->next() == null(); }
-        constexpr bool contains_one() const { return !empty() && empty_or_contains_one(); }
+        bool empty() const { return first() == null(); }
+        bool empty_or_contains_one() const { return first()->next() == null(); }
+        bool contains_one() const { return !empty() && empty_or_contains_one(); }
 
-        constexpr void clear() { null()->set_next(null()); }
+        void clear() { null()->set_next(null()); }
 
         //! Returns the count of elements in the list.
-        constexpr size_t size() const
+        size_t size() const
         {
             size_t count = 0;
 
@@ -261,18 +263,18 @@ namespace awl
     private:
 
         //! The same as front but can be Null.
-        constexpr Link * first() { return null()->next(); }
-        constexpr const Link * first() const { return null()->next(); }
+        Link * first() { return null()->next(); }
+        const Link * first() const { return null()->next(); }
 
         //! One or both the parameters can be end(), so they are not T*.
-        static constexpr void insert_after(Link * p, Link * a)
+        static void insert_after(Link * p, Link * a)
         {
             a->set_next(p->next());
             p->set_next(a);
         }
 
         //! The parameter can be end(), so it is not T*.
-        static constexpr Link * remove_after(Link * p)
+        static Link * remove_after(Link * p)
         {
             Link * r = p->next();
             p->set_next(r->next());
@@ -280,7 +282,7 @@ namespace awl
             return r;
         }
 
-        constexpr void attach(Link * first, Link * last)
+        void attach(Link * first, Link * last)
         {
             null()->set_next(first);
 
@@ -289,7 +291,7 @@ namespace awl
 
         //SingList does not know its last element so it should be provided by QuickList
 
-        constexpr void push_front(Link * first, Link * last)
+        void push_front(Link * first, Link * last)
         {
             Link * old_first = this->first();
 
@@ -298,15 +300,15 @@ namespace awl
             last->set_next(old_first);
         }
 
-        constexpr void push_back(Link * first, Link * last, Link * old_last)
+        void push_back(Link * first, Link * last, Link * old_last)
         {
             old_last->set_next(first);
 
             last->set_next(null());
         }
 
-        constexpr Link * null() { return static_cast<Link *>(&(static_cast<Derived *>(this)->Null)); }
-        constexpr const Link * null() const { return static_cast<const Link *>(&(static_cast<const Derived *>(this)->Null)); }
+        Link * null() { return static_cast<Link *>(&(static_cast<Derived *>(this)->Null)); }
+        const Link * null() const { return static_cast<const Link *>(&(static_cast<const Derived *>(this)->Null)); }
 
         //! quick_list accesses null() function.
         template <class T1, class DLink> friend class quick_list;
@@ -319,7 +321,7 @@ namespace awl
     {
     public:
 
-        constexpr single_list() : Null(&Null)
+        single_list() : Null(&Null)
         {
         }
 

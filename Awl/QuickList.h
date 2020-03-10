@@ -11,9 +11,9 @@ namespace awl
     class forward_link : public base_single_link<forward_link<DLink>>
     {
     protected:
-        constexpr forward_link() {}
+        forward_link() {}
     public:
-        constexpr forward_link(forward_link * n) : base_single_link<forward_link<DLink>>(n) {}
+        forward_link(forward_link * n) : base_single_link<forward_link<DLink>>(n) {}
     };
 
     //! Backward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
@@ -26,22 +26,22 @@ namespace awl
 
     public:
 
-        constexpr bool included() const
+        bool included() const
         {
             return next() != nullptr;
         }
 
     protected:
 
-        constexpr backward_link(Link * n) : pPrev(n) {}
+        backward_link(Link * n) : pPrev(n) {}
 
-        constexpr backward_link() : pPrev(nullptr) {}
+        backward_link() : pPrev(nullptr) {}
 
-        constexpr Link * next() { return pPrev; }
+        Link * next() { return pPrev; }
 
-        constexpr const Link * next() const { return pPrev; }
+        const Link * next() const { return pPrev; }
 
-        constexpr void set_next(Link * n)
+        void set_next(Link * n)
         {
             pPrev = n;
         }
@@ -73,13 +73,13 @@ namespace awl
         using ForwardList = single_list<DLink, ForwardLink>;
         using BackwardList = single_list<DLink, BackwardLink>;
 
-        constexpr bool included() const
+        bool included() const
         {
             assert(ForwardLink::included() == BackwardLink::included());
             return ForwardLink::included();
         }
 
-        constexpr void exclude()
+        void exclude()
         {
             assert(included());
             DLink * prev = static_cast<DLink *>(this->BackwardLink::next());
@@ -88,7 +88,7 @@ namespace awl
             BackwardList::remove_after(next);
         }
 
-        constexpr void safe_exclude()
+        void safe_exclude()
         {
             if (included())
             {
@@ -96,18 +96,18 @@ namespace awl
             }
         }
 
-        constexpr DLink * predecessor()
+        DLink * predecessor()
         {
             return static_cast<DLink *>(this->BackwardLink::next());
         }
 
-        constexpr DLink * successor()
+        DLink * successor()
         {
             return static_cast<DLink *>(this->ForwardLink::next());
         }
 
         //Inserts a after this.
-        constexpr void insert_after(DLink * a)
+        void insert_after(DLink * a)
         {
             DLink * next = successor();
             ForwardList::insert_after(this, a);
@@ -115,7 +115,7 @@ namespace awl
         }
 
         //Inserts a before this.
-        constexpr void insert_before(DLink * a)
+        void insert_before(DLink * a)
         {
             DLink * prev = predecessor();
             ForwardList::insert_after(prev, a);
@@ -124,14 +124,14 @@ namespace awl
 
     protected:
 
-        constexpr basic_quick_link() {}
+        basic_quick_link() {}
 
         //! There should not be template parameter defaults in forward declaration.
         template <class T1, class DLink1> friend class quick_list;
 
     public:
 
-        constexpr basic_quick_link(basic_quick_link * next, basic_quick_link * prev) : ForwardLink(next), BackwardLink(prev)
+        basic_quick_link(basic_quick_link * next, basic_quick_link * prev) : ForwardLink(next), BackwardLink(prev)
         {
         }
     };
@@ -190,20 +190,20 @@ namespace awl
         using const_reverse_iterator = typename BackwardList::const_iterator;
 
         //This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
-        constexpr quick_list() : Null(&Null, &Null)
+        quick_list() : Null(&Null, &Null)
         {
         }
 
-        constexpr quick_list(const quick_list& other) = delete;
+        quick_list(const quick_list& other) = delete;
 
-        constexpr quick_list(quick_list&& other)
+        quick_list(quick_list&& other)
         {
             attach(other);
         }
 
-        constexpr quick_list& operator = (const quick_list& other) = delete;
+        quick_list& operator = (const quick_list& other) = delete;
 
-        constexpr quick_list& operator = (quick_list&& other)
+        quick_list& operator = (quick_list&& other)
         {
             if (this != &other)
             {
@@ -215,43 +215,43 @@ namespace awl
         }
 
         //There can be using ForwardList::front, but not BackwardList::front.
-        constexpr T * front() { return forward().front(); }
-        constexpr const T * front() const { return forward().front(); }
+        T * front() { return forward().front(); }
+        const T * front() const { return forward().front(); }
 
-        constexpr T * back() { return backward().front(); }
-        constexpr const T * back() const { return backward().front(); }
+        T * back() { return backward().front(); }
+        const T * back() const { return backward().front(); }
 
-        constexpr iterator begin() { return forward().begin(); }
-        constexpr const_iterator begin() const { return forward().begin(); }
+        iterator begin() { return forward().begin(); }
+        const_iterator begin() const { return forward().begin(); }
 
-        constexpr iterator end() { return forward().end(); }
-        constexpr const_iterator end() const { return forward().end(); }
+        iterator end() { return forward().end(); }
+        const_iterator end() const { return forward().end(); }
 
-        constexpr reverse_iterator rbegin() { return backward().begin(); }
-        constexpr const_reverse_iterator rbegin() const { return backward().begin(); }
+        reverse_iterator rbegin() { return backward().begin(); }
+        const_reverse_iterator rbegin() const { return backward().begin(); }
 
-        constexpr reverse_iterator rend() { return backward().end(); }
-        constexpr const_reverse_iterator rend() const { return backward().end(); }
+        reverse_iterator rend() { return backward().end(); }
+        const_reverse_iterator rend() const { return backward().end(); }
 
-        constexpr bool empty() const { return forward().empty(); }
-        constexpr bool empty_or_contains_one() const { return forward().empty_or_contains_one(); }
-        constexpr bool contains_one() const { return forward().contains_one(); }
+        bool empty() const { return forward().empty(); }
+        bool empty_or_contains_one() const { return forward().empty_or_contains_one(); }
+        bool contains_one() const { return forward().contains_one(); }
 
-        static constexpr void insert(iterator i, T * a) { insert_after(*i, a); }
-        static constexpr void erase(iterator i) { remove(*i); }
+        static void insert(iterator i, T * a) { insert_after(*i, a); }
+        static void erase(iterator i) { remove(*i); }
 
         static_assert(!std::is_same<iterator, reverse_iterator>::value, "iterator and reverse_iterator are the same types.");
 
-        static constexpr void insert(reverse_iterator i, T * a) { insert_before(*i, a); }
-        static constexpr void erase(reverse_iterator i) { remove(*i); }
+        static void insert(reverse_iterator i, T * a) { insert_before(*i, a); }
+        static void erase(reverse_iterator i) { remove(*i); }
 
-        constexpr void push_front(T * a) { insert_after(static_cast<DLink *>(forward().null()), a); }
-        constexpr void push_back(T * a) { insert_before(static_cast<DLink *>(forward().null()), a); }
+        void push_front(T * a) { insert_after(static_cast<DLink *>(forward().null()), a); }
+        void push_back(T * a) { insert_before(static_cast<DLink *>(forward().null()), a); }
 
-        constexpr T * pop_front() { return remove(forward().front()); }
-        constexpr T * pop_back() { return remove(backward().front()); }
+        T * pop_front() { return remove(forward().front()); }
+        T * pop_back() { return remove(backward().front()); }
 
-        constexpr void push_front(quick_list & src)
+        void push_front(quick_list & src)
         {
             if (!src.empty())
             {
@@ -267,7 +267,7 @@ namespace awl
             }
         }
 
-        constexpr void push_back(quick_list & src)
+        void push_back(quick_list & src)
         {
             if (!src.empty())
             {
@@ -283,31 +283,31 @@ namespace awl
             }
         }
 
-        constexpr void clear()
+        void clear()
         {
             forward().clear();
             backward().clear();
         }
 
-        constexpr size_t size() const
+        size_t size() const
         {
             return forward().size();
         }
 
     private:
 
-        constexpr DLink * first() { return static_cast<DLink *>(forward().first()); }
-        constexpr const DLink * first() const { return static_cast<const DLink *>(forward().first()); }
+        DLink * first() { return static_cast<DLink *>(forward().first()); }
+        const DLink * first() const { return static_cast<const DLink *>(forward().first()); }
 
-        constexpr DLink * last() { return static_cast<DLink *>(backward().first()); }
-        constexpr const DLink * last() const { return static_cast<const DLink *>(backward().first()); }
+        DLink * last() { return static_cast<DLink *>(backward().first()); }
+        const DLink * last() const { return static_cast<const DLink *>(backward().first()); }
 
         //If T is included into multiple lists there can be multiple insert_after in T,
         //so we cast T to DLink first.
-        static constexpr void insert_after(DLink * p, DLink * a) { p->insert_after(a); }
-        static constexpr void insert_before(DLink * p, DLink * a) { p->insert_before(a); }
+        static void insert_after(DLink * p, DLink * a) { p->insert_after(a); }
+        static void insert_before(DLink * p, DLink * a) { p->insert_before(a); }
 
-        constexpr void attach(quick_list & src)
+        void attach(quick_list & src)
         {
             if (src.empty())
             {
@@ -324,14 +324,14 @@ namespace awl
             }
         }
 
-        constexpr void attach(T * first, T * last)
+        void attach(T * first, T * last)
         {
             forward().attach(first, last);
             backward().attach(last, first);
         }
 
         //! Excludes specified element from the list.
-        static constexpr T * remove(T * a)
+        static T * remove(T * a)
         {
             a->DLink::exclude();
             return a;
