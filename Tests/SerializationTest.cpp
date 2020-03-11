@@ -148,20 +148,58 @@ namespace awl
 
 namespace awl
 {
-    template <class T>
-    constexpr auto get_arithmetic_size()
+    template <size_t val>
+    constexpr size_t GetNumberLength()
     {
-        if constexpr (sizeof(T) == 1)
-            return FixedString{ "8" };
-        else if constexpr (sizeof(T) == 2)
-            return FixedString{ "16" };
-        else if constexpr (sizeof(T) == 4)
-            return FixedString{ "32" };
-        else if constexpr (sizeof(T) == 8)
-            return FixedString{ "64" };
-        else if constexpr (sizeof(T) == 16)
-            return FixedString{ "128" };
-        else static_assert(dependent_false_v<T>);
+        size_t i = 0;
+        size_t n = val;
+
+        while (n != 0)
+        {
+            n /= 10;
+            ++i;
+        }
+
+        return i;
+    }
+
+    static_assert(GetNumberLength<0>() == 0);
+    static_assert(GetNumberLength<5>() == 1);
+    static_assert(GetNumberLength<35>() == 2);
+
+    template <size_t val>
+    constexpr auto FormatNumber()
+    {
+        if constexpr (val == 0)
+        {
+            return FixedString("0");
+        }
+        else
+        {
+            constexpr size_t N = GetNumberLength<val>();
+            FixedString<N> buf;
+
+            size_t n = val;
+            for (int i = N - 1; i >= 0; --i)
+            {
+                buf[i] = static_cast<char>(n % 10 + 48);
+                n /= 10;
+            }
+
+            return buf;
+        }
+    }
+
+    static_assert(FormatNumber<5>().size() == 1);
+    static_assert(FixedString{ "5" }.size() == 1);
+    static_assert(FormatNumber<5>() == FixedString{ "5" });
+    static_assert(FormatNumber<0>() == FixedString{ "0" });
+    static_assert(FormatNumber<35>() == FixedString{ "35" });
+
+    template <class T, std::enable_if_t < std::is_arithmetic<T>{}, bool > = true >
+    constexpr auto GetArithmeticSize()
+    {
+        return FormatNumber<sizeof(T) * 8>();
     }
 
     template <class T, std::enable_if_t<std::is_arithmetic<T>{}, bool> = true>
@@ -169,11 +207,11 @@ namespace awl
     {
         if constexpr (std::is_signed<T>{})
         {
-            return FixedString{ "int" } +get_arithmetic_size<T>() + FixedString{ "_t" };
+            return FixedString{ "int" } +GetArithmeticSize<T>() + FixedString{ "_t" };
         }
         else
         {
-            return FixedString{ "uint" } +get_arithmetic_size<T>() + FixedString{ "_t" };
+            return FixedString{ "uint" } +GetArithmeticSize<T>() + FixedString{ "_t" };
         }
     }
 
@@ -216,7 +254,7 @@ namespace awl
     static_assert(make_type_name<std::map<int32_t, int64_t>>() == FixedString{ "map<int32_t, int64_t>" });
 
     template <class T, std::enable_if_t<is_specialization_v<T, std::chrono::time_point>, bool> = true>
-        constexpr auto make_type_name()
+    constexpr auto make_type_name()
     {
         return make_type_name<int64_t>();
     }
@@ -231,15 +269,28 @@ namespace awl
 
     static_assert(make_type_name<std::optional<std::string>>() == FixedString("optional<sequence<int8_t>>"));
 
-    /*
-    template <class T, std::size_t N, std::enable_if_t<std::is_same_v<T, std::array<T, N>>, bool> = true>
+    template<class T>
+    struct is_array :std::is_array<T> {};
+    template<class T, std::size_t N>
+    struct is_array<std::array<T, N>> :std::true_type {};
+    // optional:
+    template<class T>
+    struct is_array<T const> : is_array<T> {};
+    template<class T>
+    struct is_array<T volatile> : is_array<T> {};
+    template<class T>
+    struct is_array<T volatile const> : is_array<T> {};
+
+    template<class T>
+    constexpr bool is_array_v = is_array<T>::value;
+
+    template <class T, std::enable_if_t<is_array_v<T>, bool> = true>
     constexpr auto make_type_name()
     {
-        return FixedString("array<") + make_type_name<typename T::value_type>() + FixedString(">");
+        return FixedString("array<") + make_type_name<typename T::value_type>() + FixedString(", ") + FormatNumber<T{}.size()>() + FixedString(">");
     }
 
-    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<int8_t>" });
-    */
+    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<uint8_t, 5>" });
 }
 
 /*
