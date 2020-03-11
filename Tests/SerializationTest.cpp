@@ -1,4 +1,5 @@
 #include "Awl/Serializable.h"
+#include "Awl/FixedString.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/RwHelpers.h"
 
@@ -147,121 +148,19 @@ namespace awl
 
 namespace awl
 {
-    template<std::size_t N>
-    struct ct_str
-    {
-        char state[N + 1] = { 0 };
-        constexpr ct_str(char const(&arr)[N + 1])
-        {
-            for (std::size_t i = 0; i < N; ++i)
-                state[i] = arr[i];
-        }
-        constexpr char operator[](std::size_t i) const { return state[i]; }
-        constexpr char& operator[](std::size_t i) { return state[i]; }
-
-        constexpr explicit operator char const*() const { return state; }
-        constexpr char const* data() const { return state; }
-        constexpr std::size_t size() const { return N; }
-        constexpr char const* begin() const { return state; }
-        constexpr char const* end() const { return begin() + size(); }
-
-        constexpr ct_str() = default;
-        constexpr ct_str(ct_str const&) = default;
-        constexpr ct_str& operator=(ct_str const&) = default;
-
-        template<std::size_t M>
-        friend constexpr ct_str<N + M> operator+(ct_str lhs, ct_str<M> rhs)
-        {
-            ct_str<N + M> retval;
-            for (std::size_t i = 0; i < N; ++i)
-                retval[i] = lhs[i];
-            for (std::size_t i = 0; i < M; ++i)
-                retval[N + i] = rhs[i];
-            return retval;
-        }
-
-        friend constexpr bool operator==(ct_str lhs, ct_str rhs)
-        {
-            for (std::size_t i = 0; i < N; ++i)
-                if (lhs[i] != rhs[i]) return false;
-            return true;
-        }
-        friend constexpr bool operator!=(ct_str lhs, ct_str rhs)
-        {
-            for (std::size_t i = 0; i < N; ++i)
-                if (lhs[i] != rhs[i]) return true;
-            return false;
-        }
-        
-        template<std::size_t M, std::enable_if_t<M != N, bool> = true>
-        friend constexpr bool operator!=(ct_str, ct_str<M>)
-        {
-            return true;
-        }
-
-        template<std::size_t M, std::enable_if_t<M != N, bool> = true>
-        friend bool operator==(ct_str, ct_str<M>)
-        {
-            return false;
-        }
-    };
-
-    template<std::size_t N>
-    ct_str(char const(&)[N])->ct_str<N - 1>;
-
-    constexpr ct_str hello = "hello";
-    constexpr ct_str world = "world";
-    constexpr ct_str hello_world = hello + world;
-
-    class type_info
-    {
-    public:
-
-        constexpr type_info(const char * name) : m_name(name)
-        {
-        }
-
-        constexpr const char * name() const noexcept
-        {
-            return m_name;
-        }
-
-        constexpr bool operator == (const type_info & other)
-        {
-            const char * a = name();
-            const char * b = other.name();
-
-            while (*a != 0 && *b != 0)
-            {
-                if (*a++ != *b++)
-                {
-                    return false;
-                }
-            }
-
-            return *a == 0 && *b == 0;
-        }
-
-    private:
-
-        const char * m_name;
-
-        friend constexpr const char * make_type_info();
-    };
-    
     template <class T>
     constexpr auto get_arithmetic_size()
     {
         if constexpr (sizeof(T) == 1)
-            return ct_str{ "1" };
+            return FixedString{ "8" };
         else if constexpr (sizeof(T) == 2)
-            return ct_str{ "2" };
+            return FixedString{ "16" };
         else if constexpr (sizeof(T) == 4)
-            return ct_str{ "4" };
+            return FixedString{ "32" };
         else if constexpr (sizeof(T) == 8)
-            return ct_str{ "8" };
+            return FixedString{ "64" };
         else if constexpr (sizeof(T) == 16)
-            return ct_str{ "16" };
+            return FixedString{ "128" };
         else static_assert(dependent_false_v<T>);
     }
 
@@ -269,29 +168,17 @@ namespace awl
     constexpr auto make_type_name()
     {
         if constexpr (std::is_signed<T>{})
-            return ct_str{ "int" } + get_arithmetic_size<T>();
+        {
+            return FixedString{ "int" } +get_arithmetic_size<T>() + FixedString{ "_t" };
+        }
         else
-            return ct_str{ "uint" } + get_arithmetic_size<T>();
+        {
+            return FixedString{ "uint" } +get_arithmetic_size<T>() + FixedString{ "_t" };
+        }
     }
 
-    static_assert(make_type_name<int>() == make_type_name<int32_t>());
-    static_assert(hello_world != hello);
-
-    template <class T>
-    constexpr std::enable_if_t<std::is_arithmetic_v<T>, type_info> make_type_info()
-    {
-        const char * prefix = std::is_signed_v<T> ? "int" : "uint";
-        return type_info(prefix);// +get_arithmetic_size<T>());
-    }
-
-    //template <class T, class Allocator = std::allocator<T>>
-    //constexpr type_info make_type_info(std::vector<T, Allocator> & v)
-    //{
-    //    static_cast<void>(val);
-    //    return "vector" + make_type_info;
-    //};
-
-    static_assert(awl::make_type_info<int>() == awl::make_type_info<long>());
+    static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
+    static_assert(make_type_name<uint16_t>() == FixedString{ "uint16_t" });
 
     template<typename Test, template<typename...> class Ref>
     struct is_specialization : std::false_type {};
@@ -302,13 +189,14 @@ namespace awl
     //template<template<typename...> class Ref, typename... Args>
     //constexpr bool is_specialization_v = is_specialization<Ref<Args...>, Ref>::value;
 
-    template <class T>
-    constexpr std::enable_if_t<is_specialization<T, std::vector>::value || is_specialization<T, std::list>::value, type_info> make_type_info()
+    template <class T, std::enable_if_t<is_specialization<T, std::vector>::value || is_specialization<T, std::list>::value, bool> = true>
+    constexpr auto make_type_name()
     {
-        return type_info("sequence");// + make_type_info<typename T::value_type>;
+        return FixedString("sequence<") + make_type_name<typename T::value_type>() + FixedString(">");
     }
 
-    static_assert(awl::make_type_info<std::vector<int>>() == awl::make_type_info<std::list<int>>());
+    static_assert(make_type_name<std::vector<int32_t>>() == FixedString{ "sequence<int32_t>" });
+    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<uint64_t>>" });
 }
 
 /*
