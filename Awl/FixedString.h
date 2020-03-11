@@ -1,13 +1,4 @@
-#include "Awl/Serializable.h"
-#include "Awl/Testing/UnitTest.h"
-#include "Awl/Io/RwHelpers.h"
-
-#include <string>
-#include <vector>
-#include <list>
 #include <type_traits>
-
-using namespace awl::testing;
 
 namespace awl
 {
@@ -52,6 +43,7 @@ namespace awl
                 if (lhs[i] != rhs[i]) return false;
             return true;
         }
+
         friend constexpr bool operator!=(FixedString lhs, FixedString rhs)
         {
             for (std::size_t i = 0; i < N; ++i)
@@ -66,7 +58,7 @@ namespace awl
         }
 
         template<std::size_t M, std::enable_if_t<M != N, bool> = true>
-        friend bool operator==(FixedString, FixedString<M>)
+        friend constexpr bool operator==(FixedString, FixedString<M>)
         {
             return false;
         }
