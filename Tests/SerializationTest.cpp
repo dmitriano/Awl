@@ -190,6 +190,7 @@ namespace awl
     constexpr bool is_specialization_v = is_specialization<Test, Ref>::value;
 
     template <class T, std::enable_if_t<
+        is_specialization_v<T, std::basic_string> ||
         is_specialization_v<T, std::vector> || 
         is_specialization_v<T, std::list> ||
         is_specialization_v<T, std::set> ||
@@ -199,6 +200,8 @@ namespace awl
         return FixedString("sequence<") + make_type_name<typename T::value_type>() + FixedString(">");
     }
 
+    static_assert(make_type_name<std::string>() == FixedString{ "sequence<int8_t>" });
+    static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<uint16_t>" });
     static_assert(make_type_name<std::vector<int32_t>>() == FixedString{ "sequence<int32_t>" });
     static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<uint64_t>>" });
 
@@ -211,6 +214,15 @@ namespace awl
     }
 
     static_assert(make_type_name<std::map<int32_t, int64_t>>() == FixedString{ "map<int32_t, int64_t>" });
+
+    template <class T, std::enable_if_t<
+        is_specialization_v<T, std::chrono::time_point>, bool> = true>
+        constexpr auto make_type_name()
+    {
+        return make_type_name<int64_t>();
+    }
+
+    static_assert(make_type_name<std::chrono::system_clock::time_point>() == FixedString{ "int64_t" });
 }
 
 /*
