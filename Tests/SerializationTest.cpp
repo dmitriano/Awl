@@ -215,14 +215,31 @@ namespace awl
 
     static_assert(make_type_name<std::map<int32_t, int64_t>>() == FixedString{ "map<int32_t, int64_t>" });
 
-    template <class T, std::enable_if_t<
-        is_specialization_v<T, std::chrono::time_point>, bool> = true>
+    template <class T, std::enable_if_t<is_specialization_v<T, std::chrono::time_point>, bool> = true>
         constexpr auto make_type_name()
     {
         return make_type_name<int64_t>();
     }
 
     static_assert(make_type_name<std::chrono::system_clock::time_point>() == FixedString{ "int64_t" });
+
+    template <class T, std::enable_if_t<is_specialization_v<T, std::optional>, bool> = true>
+    constexpr auto make_type_name()
+    {
+        return FixedString("optional<") + make_type_name<typename T::value_type>() + FixedString(">");
+    }
+
+    static_assert(make_type_name<std::optional<std::string>>() == FixedString("optional<sequence<int8_t>>"));
+
+    /*
+    template <class T, std::size_t N, std::enable_if_t<std::is_same_v<T, std::array<T, N>>, bool> = true>
+    constexpr auto make_type_name()
+    {
+        return FixedString("array<") + make_type_name<typename T::value_type>() + FixedString(">");
+    }
+
+    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<int8_t>" });
+    */
 }
 
 /*
