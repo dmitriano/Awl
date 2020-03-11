@@ -186,14 +186,14 @@ namespace awl
     template<template<typename...> class Ref, typename... Args>
     struct is_specialization<Ref<Args...>, Ref> : std::true_type {};
 
-    //template<template<typename...> class Ref, typename... Args>
-    //constexpr bool is_specialization_v = is_specialization<Ref<Args...>, Ref>::value;
+    template<typename Test, template<typename...> class Ref>
+    constexpr bool is_specialization_v = is_specialization<Test, Ref>::value;
 
     template <class T, std::enable_if_t<
-        is_specialization<T, std::vector>::value || 
-        is_specialization<T, std::list>::value ||
-        is_specialization<T, std::set>::value ||
-        is_specialization<T, std::unordered_set>::value, bool> = true>
+        is_specialization_v<T, std::vector> || 
+        is_specialization_v<T, std::list> ||
+        is_specialization_v<T, std::set> ||
+        is_specialization_v<T, std::unordered_set>, bool> = true>
     constexpr auto make_type_name()
     {
         return FixedString("sequence<") + make_type_name<typename T::value_type>() + FixedString(">");
@@ -203,8 +203,8 @@ namespace awl
     static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<uint64_t>>" });
 
     template <class T, std::enable_if_t<
-        is_specialization<T, std::map>::value ||
-        is_specialization<T, std::unordered_map>::value, bool> = true>
+        is_specialization_v<T, std::map> ||
+        is_specialization_v<T, std::unordered_map>, bool> = true>
     constexpr auto make_type_name()
     {
         return FixedString("map<") + make_type_name<typename T::key_type>() + FixedString(", ") + make_type_name<typename T::mapped_type>() + FixedString(">");
