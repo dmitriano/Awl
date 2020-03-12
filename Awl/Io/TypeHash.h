@@ -1,0 +1,43 @@
+#pragma once
+
+#include "Awl/Crypto/Crc64.h"
+#include "Awl/Io/TypeName.h"
+
+namespace awl::io
+{
+    namespace helpers
+    {
+        class Int64Hash
+        {
+        public:
+
+            using value_type = uint64_t;
+
+            constexpr Int64Hash(uint64_t seed = 0) : m_hash(seed) {}
+
+            value_type operator()(std::string::const_iterator begin, std::string::const_iterator end) const
+            {
+                return (*this)(&(*begin), &(*begin) + (end - begin));
+            }
+
+            constexpr value_type operator()(const char * begin, const char * end) const
+            {
+                return awl::crypto::from_array<value_type>(m_hash(begin, end));
+            }
+
+        private:
+
+            awl::crypto::Crc64 m_hash;
+        };
+    }
+
+    template <class T>
+    constexpr uint64_t make_type_hash()
+    {
+        helpers::Int64Hash hash;
+        auto name = make_type_name<T>();
+        return hash(name.begin(), name.end());
+    }
+
+    static_assert(make_type_hash<uint8_t>() != make_type_hash<int16_t>());
+}

@@ -5,10 +5,10 @@
 namespace awl
 {
     template<std::size_t N>
-    struct FixedString
+    class FixedString
     {
-        char state[N + 1] = { 0 };
-        
+    public:
+
         constexpr FixedString(char const(&arr)[N + 1])
         {
             for (std::size_t i = 0; i < N; ++i)
@@ -64,6 +64,10 @@ namespace awl
         {
             return false;
         }
+
+    private:
+
+        char state[N + 1] = { 0 };
     };
 
     template<std::size_t N>

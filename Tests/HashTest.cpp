@@ -5,8 +5,6 @@
 #include <set>
 #include <memory>
 
-#include "Awl/Crypto/Crc64.h"
-
 #ifdef AWL_OPENSSL
 #include "Awl/Crypto/OpenSslHash.h"
 #endif
@@ -17,11 +15,15 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include "Awl/Io/TypeHash.h"
+
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
+
+using awl::io::helpers::Int64Hash;
 
 namespace
 {
@@ -85,29 +87,6 @@ namespace
 
             return seed;
         }
-    };
-
-    class Int64Hash
-    {
-    public:
-
-        using value_type = uint64_t;
-
-        constexpr Int64Hash(uint64_t seed = 127) : m_hash(seed) {}
-
-        value_type operator()(std::string::const_iterator begin, std::string::const_iterator end) const
-        {
-            return (*this)(&(*begin), &(*begin) + (end - begin));
-        }
-
-        constexpr value_type operator()(const char * begin, const char * end) const
-        {
-            return awl::crypto::from_array<value_type>(m_hash(begin, end));
-        }
-
-    private:
-
-        awl::crypto::Crc64 m_hash;
     };
 
     constexpr char sampleString[] = "123456789";

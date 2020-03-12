@@ -3,6 +3,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/TypeName.h"
+#include "Awl/Io/TypeHash.h"
 
 #include <string>
 #include <vector>
