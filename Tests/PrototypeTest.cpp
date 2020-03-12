@@ -1,5 +1,8 @@
+#include "Awl/String.h"
 #include "Awl/Io/Prototype.h"
 #include "Awl/Testing/UnitTest.h"
+
+#include "Helpers/FormattingHelpers.h"
 
 #include <string>
 #include <vector>
@@ -37,7 +40,16 @@ namespace
 
 AWT_TEST(Prototype)
 {
+    using namespace awl::testing::helpers;
+    
     awl::io::AttachedPrototype<A> ap;
 
     AWT_ASSERT(ap.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A>::Tie>);
+
+    for (size_t i = 0; i < ap.GetCount(); ++i)
+    {
+        const awl::io::Field field = ap.GetField(i);
+        
+        context.out << field.fieldName << _T(":") << field.typeName << _T(", hash=") << std::hex << field.type << std::endl;
+    }
 }

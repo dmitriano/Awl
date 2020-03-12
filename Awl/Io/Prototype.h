@@ -13,9 +13,10 @@ namespace awl::io
     struct Field
     {
         TypeId type;
-        std::string_view name;
+        std::string_view typeName;
+        std::string_view fieldName;
 
-        AWL_SERIALIZABLE(type, name)
+        AWL_SERIALIZABLE(type, fieldName)
     };
 
     AWL_MEMBERWISE_EQUATABLE(Field)
@@ -45,7 +46,7 @@ namespace awl::io
                 {
                     const auto new_field = other.GetField(new_index);
 
-                    if (new_field.name == old_field.name)
+                    if (new_field.fieldName == old_field.fieldName)
                     {
                         v[old_index] = new_index;
                         break;
@@ -79,12 +80,14 @@ namespace awl::io
 
         using Tie = typename tuplizable_traits<S>::Tie;
         using TypeNamesTuple = decltype(helpers::MakeTypeNames<Tie>());
+        static constexpr size_t m_size = std::tuple_size_v<Tie>;
 
     public:
 
         AttachedPrototype() : 
-            typeNames(helpers::MakeTypeNames<Tie>()),
-            typeHashes(tuple_to_array(typeNames, [](const auto & name) { return calc_type_hash(name); }))
+            typeNameTuple(helpers::MakeTypeNames<Tie>()),
+            typeNames(tuple_to_array(typeNameTuple, [](const auto & name) { return std::string_view(name.data(), name.size()); })),
+            typeHashes(tuple_to_array(typeNameTuple, [](const auto & name) { return calc_type_hash(name); }))
         {
             assert(typeHashes.size() == S::get_member_names().size());
         }
@@ -92,7 +95,7 @@ namespace awl::io
         Field GetField(size_t index) const override
         {
             assert(index < GetCount());
-            return { typeHashes[index], S::get_member_names()[index] };
+            return { typeHashes[index], typeNames[index], S::get_member_names()[index] };
         }
 
         size_t GetCount() const override
@@ -102,9 +105,12 @@ namespace awl::io
 
     private:
         
-        TypeNamesTuple typeNames;
+        TypeNamesTuple typeNameTuple;
         
-        using TypesArray = std::array<TypeId, std::tuple_size_v<Tie>>;
+        using TypeNamesArray = std::array<std::string_view, m_size>;
+        TypeNamesArray typeNames;
+
+        using TypesArray = std::array<TypeId, m_size>;
         TypesArray typeHashes;
     };
 

@@ -9,6 +9,16 @@
 
 namespace awl::testing::helpers
 {
+    inline awl::ostream & operator << (awl::ostream & out, const std::string_view & sv)
+    {
+        for (char ch : sv)
+        {
+            out << ch;
+        }
+
+        return out;
+    }
+
     template <size_t N>
     awl::ostream & operator << (awl::ostream & out, awl::crypto::HashValue<N> & h)
     {
