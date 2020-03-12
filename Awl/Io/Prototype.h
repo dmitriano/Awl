@@ -1,35 +1,30 @@
 #pragma once
 
 #include "Awl/Stringizable.h"
+#include "Awl/Io/TypeHash.h"
 
 #include <vector>
 #include <functional>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 
-namespace awl
+namespace awl::io
 {
     struct Field
     {
-        std::string name;
-        size_t type;
+        TypeId type;
+        std::string_view name;
 
-        AWL_SERIALIZABLE(name, type)
+        AWL_SERIALIZABLE(type, name)
     };
 
     AWL_MEMBERWISE_EQUATABLE(Field)
-        
-    struct FieldRef
-    {
-        const std::string & name;
-        size_t type;
-    };
         
     class Prototype
     {
     public:
 
-        virtual FieldRef GetField(size_t index) const = 0;
+        virtual Field GetField(size_t index) const = 0;
 
         virtual size_t GetCount() const = 0;
 
@@ -62,49 +57,58 @@ namespace awl
         }
     };
 
-    //V is std::variant, S is a Stringizable
-    template <class V, class S>
+    namespace helpers
+    {
+        template <class Tuple, std::size_t... index>
+        constexpr auto MakeTypeNames(std::index_sequence<index...>)
+        {
+            return std::make_tuple(make_type_name<std::remove_reference_t<std::tuple_element_t<index, Tuple>>>() ...);
+        }
+
+        template <class Tuple>
+        constexpr auto MakeTypeNames()
+        {
+            return MakeTypeNames<Tuple>(std::make_index_sequence<std::tuple_size_v<Tuple>>());
+        }
+    }
+
+    template <class S>
     class AttachedPrototype : public Prototype
     {
     private:
 
         using Tie = typename tuplizable_traits<S>::Tie;
-    
+        using TypeNamesTuple = decltype(helpers::MakeTypeNames<Tie>());
+
     public:
 
-        AttachedPrototype() : m_types(map_types_t2v<Tie, V>())
+        AttachedPrototype() : 
+            typeNames(helpers::MakeTypeNames<Tie>()),
+            typeHashes(tuple_to_array(typeNames, [](const auto & name) { return calc_type_hash(name); }))
         {
-            assert(m_types.size() == S::get_member_names().size());
+            assert(typeHashes.size() == S::get_member_names().size());
         }
 
-        FieldRef GetField(size_t index) const override
+        Field GetField(size_t index) const override
         {
             assert(index < GetCount());
-            return { S::get_member_names()[index], m_types[index] };
+            return { typeHashes[index], S::get_member_names()[index] };
         }
 
         size_t GetCount() const override
         {
-            return m_types.size();
-        }
-
-        V Get(const S & val, size_t index) const
-        {
-            return runtime_get<V>(val.as_tuple(), index);
-        }
-
-        void Set(S & val, size_t index, V v_field) const
-        {
-            auto temp = val.as_tuple();
-            runtime_set(temp, index, v_field);
+            return typeHashes.size();
         }
 
     private:
-
-        using TypesArray = std::array<size_t, std::tuple_size_v<Tie>>;
-        TypesArray m_types;
+        
+        TypeNamesTuple typeNames;
+        
+        using TypesArray = std::array<TypeId, std::tuple_size_v<Tie>>;
+        TypesArray typeHashes;
     };
 
+    /*
     class DetachedPrototype : public Prototype
     {
     public:
@@ -145,4 +149,5 @@ namespace awl
     };
 
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype)
+    */
 }

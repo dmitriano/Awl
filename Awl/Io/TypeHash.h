@@ -31,15 +31,17 @@ namespace awl::io
         };
     }
 
+    using TypeId = helpers::Int64Hash::value_type;
+
     template <size_t N>
-    constexpr uint64_t calc_type_hash(const FixedString<N> & name)
+    constexpr TypeId calc_type_hash(const FixedString<N> & name)
     {
         helpers::Int64Hash hash;
         return hash(name.begin(), name.end());
     }
 
     template <class T>
-    constexpr uint64_t make_type_hash()
+    constexpr TypeId make_type_hash()
     {
         auto name = make_type_name<T>();
         return calc_type_hash(name);

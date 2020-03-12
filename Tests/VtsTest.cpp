@@ -20,6 +20,8 @@
 #include "Experimental/Io//SampleStreams.h"
 #include "Experimental/TrivialAllocator.h"
 
+#ifdef AWT_INLUCDE_VTS
+
 using namespace awl::testing;
 using namespace awl::testing::helpers;
 
@@ -686,3 +688,5 @@ AWT_TEST(VtsWriteMemoryStreamConstexpr)
 {
     TestWrite<awl::io::TrivialMemoryStream>(context);
 }
+
+#endif

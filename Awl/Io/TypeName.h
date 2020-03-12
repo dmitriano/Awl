@@ -94,7 +94,7 @@ namespace awl::io
         }
         else
         {
-            if constexpr (std::std::is_floating_point<T>)
+            if constexpr (std::is_floating_point_v<T>)
             {
                 return FixedString{ "float" } + suffix;
             }

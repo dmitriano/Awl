@@ -1,15 +1,17 @@
 #pragma once
 
-#include "Awl/Prototype.h"
-#include "Awl/Io/RwHelpers.h"
-#include "Awl/Io/SequentialStream.h"
 #include "Awl/Stringizable.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/Io/Prototype.h"
+#include "Awl/Io/RwHelpers.h"
+#include "Awl/Io/SequentialStream.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/IntRange.h"
 
 #include <cassert>
+
+#ifdef AWT_INLUCDE_VTS
 
 namespace awl::io
 {
@@ -433,3 +435,5 @@ namespace awl::io
         }
     };
 }
+
+#endif
