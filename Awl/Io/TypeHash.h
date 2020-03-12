@@ -31,12 +31,18 @@ namespace awl::io
         };
     }
 
+    template <size_t N>
+    constexpr uint64_t calc_type_hash(const FixedString<N> & name)
+    {
+        helpers::Int64Hash hash;
+        return hash(name.begin(), name.end());
+    }
+
     template <class T>
     constexpr uint64_t make_type_hash()
     {
-        helpers::Int64Hash hash;
         auto name = make_type_name<T>();
-        return hash(name.begin(), name.end());
+        return calc_type_hash(name);
     }
 
     static_assert(make_type_hash<uint8_t>() != make_type_hash<int16_t>());
