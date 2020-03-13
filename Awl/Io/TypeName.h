@@ -125,7 +125,8 @@ namespace awl::io
     }
 
     static_assert(make_type_name<std::string>() == FixedString{ "sequence<int8_t>" });
-    static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<int16_t>" }); //int16_t in GCC and uint16_t in MSVC
+    //wstring is int32_t in GCC and uint16_t in MSVC
+    //static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<int16_t>" });
     static_assert(make_type_name<std::vector<int32_t>>() == FixedString{ "sequence<int32_t>" });
     static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<int64_t>>" });
 
