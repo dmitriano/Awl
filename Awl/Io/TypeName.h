@@ -84,14 +84,8 @@ namespace awl::io
         
         if constexpr (std::is_integral_v<T>)
         {
-            if constexpr (std::is_signed_v<T>)
-            {
-                return FixedString{ "int" } + suffix;
-            }
-            else
-            {
-                return FixedString{ "uint" } + suffix;
-            }
+            //Both signed and unsigned are 'int'.
+            return FixedString{ "int" } + suffix;
         }
         else
         {
@@ -107,7 +101,7 @@ namespace awl::io
     }
 
     static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
-    static_assert(make_type_name<uint16_t>() == FixedString{ "uint16_t" });
+    static_assert(make_type_name<uint16_t>() == FixedString{ "int16_t" });
     static_assert(make_type_name<float>() == FixedString{ "float32_t" });
 
     template<typename Test, template<typename...> class Ref>
@@ -131,9 +125,9 @@ namespace awl::io
     }
 
     static_assert(make_type_name<std::string>() == FixedString{ "sequence<int8_t>" });
-    static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<uint16_t>" });
+    static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<int16_t>" }); //int16_t in GCC and uint16_t in MSVC
     static_assert(make_type_name<std::vector<int32_t>>() == FixedString{ "sequence<int32_t>" });
-    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<uint64_t>>" });
+    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<int64_t>>" });
 
     template <class T, std::enable_if_t<
         is_specialization_v<T, std::map> ||
@@ -182,5 +176,5 @@ namespace awl::io
         return FixedString("array<") + make_type_name<typename T::value_type>() + FixedString(", ") + helpers::FormatNumber<T{}.size()>() + FixedString(">");
     }
 
-    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<uint8_t, 5>" });
+    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<int8_t, 5>" });
 }
