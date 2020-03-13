@@ -22,7 +22,8 @@ namespace awl::io
 
             constexpr value_type operator()(const char * begin, const char * end) const
             {
-                return awl::crypto::from_array<value_type>(m_hash(begin, end));
+                const auto val = m_hash(begin, end);
+                return awl::crypto::from_array<value_type>(val);
             }
 
         private:
