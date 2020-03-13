@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <list>
 #include <bitset>
 #include <set>
 #include <map>
@@ -94,7 +95,7 @@ namespace awl::io
         }
         else
         {
-            if constexpr (std::std::is_floating_point<T>)
+            if constexpr (std::is_floating_point<T>)
             {
                 return FixedString{ "float" } + suffix;
             }
