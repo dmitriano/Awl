@@ -95,7 +95,7 @@ namespace awl::io
         }
         else
         {
-            if constexpr (std::is_floating_point<T>)
+            if constexpr (std::is_floating_point_v<T>)
             {
                 return FixedString{ "float" } + suffix;
             }
@@ -108,6 +108,7 @@ namespace awl::io
 
     static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
     static_assert(make_type_name<uint16_t>() == FixedString{ "uint16_t" });
+    static_assert(make_type_name<float>() == FixedString{ "float32_t" });
 
     template<typename Test, template<typename...> class Ref>
     struct is_specialization : std::false_type {};
