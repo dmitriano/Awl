@@ -108,6 +108,29 @@ namespace awl
         return is_object_fixed_size(ConstT{});
     }
 
+    template <class T>
+    constexpr std::size_t countof_fields();
+
+    template <class Tuple, std::size_t... index>
+    constexpr std::size_t countof_tuple_fields(std::index_sequence<index...>)
+    {
+        return (countof_fields<std::remove_reference_t<std::tuple_element_t<index, Tuple>>>() + ...);
+    }
+
+    template <class T>
+    constexpr std::size_t countof_fields()
+    {
+        if constexpr (is_tuplizable_v<T>)
+        {
+            using Tie = typename tuplizable_traits<T>::Tie;
+            return countof_tuple_fields<Tie>(std::make_index_sequence<std::tuple_size_v<Tie>>());
+        }
+        else
+        {
+            return 1;
+        }
+    }
+
     namespace static_test
     {
         struct A
@@ -145,6 +168,9 @@ namespace awl
         static_assert(is_class_fixed_size<A>());
         static_assert(is_class_fixed_size<B>());
         static_assert(!is_class_fixed_size<C>());
+
+        static_assert(countof_fields<A>() == 2);
+        static_assert(countof_fields<B>() == 3);
     }
 }
 
