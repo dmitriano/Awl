@@ -131,6 +131,32 @@ namespace awl
         }
     }
 
+    using signed_size_t = std::make_signed_t<std::size_t>;
+
+    template <class Struct, class Field>
+    constexpr signed_size_t indexof_type();
+
+    template <class Tuple, class Field, std::size_t... index>
+    constexpr signed_size_t indexof_tuple_type(std::index_sequence<index...>)
+    {
+        return std::max({ (indexof_type<std::remove_reference_t<std::tuple_element_t<index, Tuple>>, Field>() + 
+            /*countof_fields<std::remove_reference_t<std::tuple_element_t<index, Tuple>> + */static_cast<signed_size_t>(index))... });
+    }
+
+    template <class Struct, class Field>
+    constexpr signed_size_t indexof_type()
+    {
+        if constexpr (is_tuplizable_v<Struct>)
+        {
+            using Tie = typename tuplizable_traits<Struct>::Tie;
+            return indexof_tuple_type<Tie, Field>(std::make_index_sequence<std::tuple_size_v<Tie>>());
+        }
+        else
+        {
+            return std::is_same_v<Field, Struct> ? 0 : -1;
+        }
+    }
+
     namespace static_test
     {
         struct A
@@ -171,6 +197,13 @@ namespace awl
 
         static_assert(countof_fields<A>() == 2);
         static_assert(countof_fields<B>() == 3);
+
+        static_assert(indexof_type<A, bool>() == 0);
+        static_assert(indexof_type<A, int>() == 1);
+        static_assert(indexof_type<B, bool>() == 0);
+        static_assert(indexof_type<B, int>() == 1);
+        static_assert(indexof_type<B, double>() == 1);
+        //static_assert(countof_fields<B>() == 3);
     }
 }
 
