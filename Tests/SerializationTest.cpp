@@ -131,20 +131,44 @@ namespace awl
         }
     }
 
-    using signed_size_t = std::make_signed_t<std::size_t>;
+    inline constexpr size_t no_type_index = std::numeric_limits<size_t>::max();
 
     template <class Struct, class Field>
-    constexpr signed_size_t indexof_type();
+    constexpr size_t indexof_type();
 
     template <class Tuple, class Field, std::size_t... index>
-    constexpr signed_size_t indexof_tuple_type(std::index_sequence<index...>)
+    constexpr size_t indexof_tuple_type(std::index_sequence<index...>)
     {
-        return std::max({ (indexof_type<std::remove_reference_t<std::tuple_element_t<index, Tuple>>, Field>() + 
-            /*countof_fields<std::remove_reference_t<std::tuple_element_t<index, Tuple>> + */static_cast<signed_size_t>(index))... });
+        constexpr size_t element_index = std::min({ (indexof_type<std::remove_reference_t<std::tuple_element_t<index, Tuple>>, Field>() != no_type_index ? 
+            index : no_type_index)... });
+        
+        if constexpr (element_index != no_type_index)
+        {
+            using Struct = std::remove_reference_t<std::tuple_element_t<element_index, Tuple>>;
+
+            const size_t local_index = indexof_type<Struct, Field>();
+
+            if constexpr (element_index != 0)
+            {
+                constexpr size_t predecessor_count = countof_tuple_fields<Tuple>(std::make_index_sequence<element_index>());
+
+                return predecessor_count + local_index;
+            }
+            else
+            {
+                //A special case for the empty index_sequence to prevent compiler error
+                //'a unary fold expression over '+' must have a non-empty expansion'.
+                return local_index;
+            }
+        }
+        else
+        {
+            return no_type_index;
+        }
     }
 
     template <class Struct, class Field>
-    constexpr signed_size_t indexof_type()
+    constexpr size_t indexof_type()
     {
         if constexpr (is_tuplizable_v<Struct>)
         {
@@ -153,7 +177,7 @@ namespace awl
         }
         else
         {
-            return std::is_same_v<Field, Struct> ? 0 : -1;
+            return std::is_same_v<Field, Struct> ? 0 : no_type_index;
         }
     }
 
@@ -180,7 +204,7 @@ namespace awl
         struct C
         {
             B b;
-            //std::string s;
+            //std::string d;
             int * p;
 
             AWL_SERIALIZABLE(b, p)
@@ -202,7 +226,7 @@ namespace awl
         static_assert(indexof_type<A, int>() == 1);
         static_assert(indexof_type<B, bool>() == 0);
         static_assert(indexof_type<B, int>() == 1);
-        static_assert(indexof_type<B, double>() == 1);
+        static_assert(indexof_type<B, double>() == 2);
         //static_assert(countof_fields<B>() == 3);
     }
 }
