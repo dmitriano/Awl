@@ -19,7 +19,7 @@ namespace awl::io
     {
     protected:
 
-        using StructV = filter_variant<V, is_stringizable>;
+        using StructV = helpers::filter_variant<V, is_stringizable>;
         using FieldV = V;
 
         using StructIndexType = uint16_t;
