@@ -8,17 +8,14 @@
 
 namespace awl::io::helpers
 {
-    namespace impl
+    template <class V, class T, std::size_t... index>
+    constexpr bool variant_contains_impl(std::index_sequence<index...>)
     {
-        template <class V, class T, std::size_t... index>
-        constexpr bool variant_contains(std::index_sequence<index...>)
-        {
-            return (std::is_same_v<std::variant_alternative_t<index, V>, T> || ...);
-        }
+        return (std::is_same_v<std::variant_alternative_t<index, V>, T> || ...);
     }
 
     template <class V, class T>
-    constexpr inline bool variant_contains = impl::variant_contains<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
+    constexpr inline bool variant_contains = variant_contains_impl<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
 
     static_assert(variant_contains<std::variant<int, bool, double>, int>);
     static_assert(!variant_contains<std::variant<int, bool, double>, float>);
@@ -79,4 +76,34 @@ namespace awl::io::helpers
         static_assert(std::is_same_v<typename result::matching, V1>);
         static_assert(std::is_same_v<typename result::non_matching, V2>);
     }
+
+    //Conversion std::tuple to std::variant
+
+    namespace impl
+    {
+        template <class V, class T>
+        struct tuple_to_variant_convertor;
+
+        template <class V>
+        struct tuple_to_variant_convertor<V, std::tuple<>>
+        {
+            using result = V;
+        };
+
+        template <class... Vs, class Head, class... Tail>
+        struct tuple_to_variant_convertor<std::variant<Vs...>, std::tuple<Head, Tail...>> : std::conditional_t<
+            !variant_contains<std::variant<Vs...>, Head>,
+            tuple_to_variant_convertor<std::variant<Vs..., Head>, std::tuple<Tail...>>,
+            tuple_to_variant_convertor<std::variant<Vs...>, std::tuple<Tail...>>
+        >
+        {
+        };
+    }
+
+    template <class T>
+    using tuple_to_variant = typename impl::tuple_to_variant_convertor<std::variant<>, T>::result;
+
+    static_assert(std::is_same_v<std::variant<int, bool, double>, tuple_to_variant<std::tuple<int, bool, double, int, bool>>>);
+    
+    //GV construction
 }
