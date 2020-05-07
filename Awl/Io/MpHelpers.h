@@ -143,7 +143,7 @@ namespace awl::io::helpers
     template <class T>
     constexpr auto flatten_struct()
     {
-        T val;
+        T val = {};
         return flatten_object(val);
     }
 
