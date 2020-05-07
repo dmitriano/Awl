@@ -67,6 +67,8 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A1)
 
+    static_assert(std::is_same_v<std::variant<A1, int, bool, String, double>, awl::io::helpers::recursive_variant<A1>>);
+
     struct B1
     {
         A1 a;
@@ -78,6 +80,8 @@ namespace
     };
 
     AWL_MEMBERWISE_EQUATABLE(B1)
+
+    static_assert(std::is_same_v<std::variant<B1, A1, int, bool, String, double>, awl::io::helpers::recursive_variant<B1>>);
 
     struct A2
     {
@@ -92,6 +96,8 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A2)
 
+    static_assert(std::is_same_v<std::variant<A2, bool, double, int, String>, awl::io::helpers::recursive_variant<A2>>);
+
     struct B2
     {
         A2 a;
@@ -103,6 +109,8 @@ namespace
     };
 
     AWL_MEMBERWISE_EQUATABLE(B2)
+
+    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>>, awl::io::helpers::recursive_variant<B2>>);
 
     struct C2
     {

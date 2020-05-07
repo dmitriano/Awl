@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Awl/Serializable.h"
+
 #include <tuple>
 #include <variant>
 #include <array>
@@ -106,4 +108,48 @@ namespace awl::io::helpers
     static_assert(std::is_same_v<std::variant<int, bool, double>, tuple_to_variant<std::tuple<int, bool, double, int, bool>>>);
     
     //GV construction
+
+    //We pass tuple of references by value.
+    template <class... Ts>
+    constexpr auto flatten_tuple(std::tuple<Ts...> t);
+
+    template <class T>
+    constexpr auto flatten_object(T & val)
+    {
+        auto val_tuple = std::make_tuple(static_cast<T>(val));
+
+        if constexpr (is_tuplizable_v<T>)
+        {
+            return std::tuple_cat(val_tuple, flatten_tuple(object_as_tuple(val)));
+        }
+        else
+        {
+            return val_tuple;
+        }
+    }
+
+    template <class... Ts, std::size_t... index>
+    constexpr auto flatten_tuple_impl(std::tuple<Ts...> t, std::index_sequence<index...>)
+    {
+        return std::tuple_cat(flatten_object(std::get<index>(t))...);
+    }
+
+    template <class... Ts>
+    constexpr auto flatten_tuple(std::tuple<Ts...> t)
+    {
+        return flatten_tuple_impl(t, std::index_sequence_for<Ts...>{});
+    }
+
+    template <class T>
+    constexpr auto flatten_struct()
+    {
+        T val;
+        return flatten_object(val);
+    }
+
+    template <class T>
+    using recursive_tuple = decltype(flatten_struct<T>());
+
+    template <class T>
+    using recursive_variant = tuple_to_variant<recursive_tuple<T>>;
 }
