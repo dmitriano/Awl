@@ -54,85 +54,91 @@ namespace
     };
     */
 
-    //But currently we use default constructible allocator.
-    struct A1
+    namespace v1
     {
-        int a;
-        bool b;
-        String c;
-        double d;
+        //But currently we use default constructible allocator.
+        struct A
+        {
+            int a;
+            bool b;
+            String c;
+            double d;
 
-        AWL_STRINGIZABLE(a, b, c, d)
-    };
+            AWL_STRINGIZABLE(a, b, c, d)
+        };
 
-    AWL_MEMBERWISE_EQUATABLE(A1)
+        AWL_MEMBERWISE_EQUATABLE(A)
 
-    static_assert(std::is_same_v<std::variant<A1, int, bool, String, double>, awl::io::helpers::variant_from_struct<A1>>);
+        static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::io::helpers::variant_from_struct<A>>);
 
-    struct B1
+        struct B
+        {
+            A a;
+            A b;
+            int x;
+            bool y;
+
+            AWL_STRINGIZABLE(a, b, x, y)
+        };
+
+        AWL_MEMBERWISE_EQUATABLE(B)
+
+        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double>, awl::io::helpers::variant_from_struct<B>>);
+    }
+
+    namespace v2
     {
-        A1 a;
-        A1 b;
-        int x;
-        bool y;
+        struct A
+        {
+            bool b;
+            double d;
+            int e = 5;
+            String f = "xyz";
+            String c;
 
-        AWL_STRINGIZABLE(a, b, x, y)
-    };
+            AWL_STRINGIZABLE(b, d, e, f, c)
+        };
 
-    AWL_MEMBERWISE_EQUATABLE(B1)
+        AWL_MEMBERWISE_EQUATABLE(A)
 
-    static_assert(std::is_same_v<std::variant<B1, A1, int, bool, String, double>, awl::io::helpers::variant_from_struct<B1>>);
+            static_assert(std::is_same_v<std::variant<A, bool, double, int, String>, awl::io::helpers::variant_from_struct<A>>);
 
-    struct A2
-    {
-        bool b;
-        double d;
-        int e = 5;
-        String f = "xyz";
-        String c;
+        struct B
+        {
+            A a;
+            Vector<int> z{ 1, 2, 3 };
+            int x;
+            String w = "xyz";
 
-        AWL_STRINGIZABLE(b, d, e, f, c)
-    };
+            AWL_STRINGIZABLE(a, x, z, w)
+        };
 
-    AWL_MEMBERWISE_EQUATABLE(A2)
+        AWL_MEMBERWISE_EQUATABLE(B)
 
-    static_assert(std::is_same_v<std::variant<A2, bool, double, int, String>, awl::io::helpers::variant_from_struct<A2>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, float>, awl::io::helpers::variant_from_structs<B, float>>);
 
-    struct B2
-    {
-        A2 a;
-        Vector<int> z{ 1, 2, 3 };
-        int x;
-        String w = "xyz";
+        struct C
+        {
+            int x = 7;
 
-        AWL_STRINGIZABLE(a, x, z, w)
-    };
+            AWL_STRINGIZABLE(x)
+        };
 
-    AWL_MEMBERWISE_EQUATABLE(B2)
+        AWL_MEMBERWISE_EQUATABLE(C)
 
-    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>>, awl::io::helpers::variant_from_struct<B2>>);
-    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>, float>, awl::io::helpers::variant_from_structs<B2, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
+    }
 
-    struct C2
-    {
-        int x = 7;
+    static const v1::A a1_expected = { 1, true, "abc", 2.0 };
+    static const v1::B b1_expected = { a1_expected, a1_expected, 1, true };
 
-        AWL_STRINGIZABLE(x)
-    };
+    static const v2::A a2_expected = { a1_expected.b, a1_expected.d, 5, "xyz", a1_expected.c };
+    static const v2::B b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
+    static const v2::C c2_expected = { 7 };
 
-    AWL_MEMBERWISE_EQUATABLE(C2)
-
-    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>, C2, float>, awl::io::helpers::variant_from_structs<B2, C2, float>>);
-
-    static const A1 a1_expected = { 1, true, "abc", 2.0 };
-    static const B1 b1_expected = { a1_expected, a1_expected, 1, true };
-
-    static const A2 a2_expected = { a1_expected.b, a1_expected.d, 5, "xyz", a1_expected.c };
-    static const B2 b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
-    static const C2 c2_expected = { 7 };
-
-    using V1 = std::variant<A1, B1, bool, char, int, float, double, String>;
-    using V2 = std::variant<A2, B2, bool, char, int, float, double, String, C2, Vector<int>>;
+    using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
+    using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
 
     template <class IStream>
     using OldReader = awl::io::Reader<V1, IStream>;
@@ -168,11 +174,11 @@ namespace
         Writer ctx;
 
         {
-            auto & a1_proto = ctx.template FindNewPrototype<A1>();
-            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A1>::Tie>);
+            auto & a1_proto = ctx.template FindNewPrototype<v1::A>();
+            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
 
-            auto & b1_proto = ctx.template FindNewPrototype<B1>();
-            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
+            auto & b1_proto = ctx.template FindNewPrototype<v1::B>();
+            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
         }
 
         if (with_metadata)
@@ -206,11 +212,11 @@ namespace
         {
             static_cast<void>(i);
 
-            A1 a1;
+            v1::A a1;
             ctx.ReadPlain(in, a1);
             AWT_ASSERT(a1 == a1_expected);
 
-            B1 b1;
+            v1::B b1;
             ctx.ReadPlain(in, b1);
             AWT_ASSERT(b1 == b1_expected);
         }
@@ -232,11 +238,11 @@ namespace
         {
             static_cast<void>(i);
 
-            A1 a1;
+            v1::A a1;
             ctx.ReadV(in, a1);
             AWT_ASSERT(a1 == a1_expected);
 
-            B1 b1;
+            v1::B b1;
             ctx.ReadV(in, b1);
             AWT_ASSERT(b1 == b1_expected);
         }
@@ -253,17 +259,17 @@ namespace
         ctx.ReadOldPrototypes(in);
 
         {
-            auto & a2_proto = ctx.template FindNewPrototype<A2>();
-            AWT_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A2>::Tie>);
+            auto & a2_proto = ctx.template FindNewPrototype<v2::A>();
+            AWT_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::A>::Tie>);
 
-            auto & b2_proto = ctx.template FindNewPrototype<B2>();
-            AWT_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B2>::Tie>);
+            auto & b2_proto = ctx.template FindNewPrototype<v2::B>();
+            AWT_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::B>::Tie>);
 
-            auto & a1_proto = ctx.template FindOldPrototype<A2>();
-            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<A1>::Tie>);
+            auto & a1_proto = ctx.template FindOldPrototype<v2::A>();
+            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
 
-            auto & b1_proto = ctx.template FindOldPrototype<B2>();
-            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<B1>::Tie>);
+            auto & b1_proto = ctx.template FindOldPrototype<v2::B>();
+            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
         }
 
         awl::StopWatch w;
@@ -272,23 +278,23 @@ namespace
         {
             static_cast<void>(i);
 
-            A2 a2;
+            v2::A a2;
             ctx.ReadV(in, a2);
             AWT_ASSERT(a2 == a2_expected);
 
-            //Version 1 data has B2 so the condition is true.
-            AWT_ASSERT(ctx.template HasOldPrototype<B2>());
-            B2 b2;
+            //Version 1 data has v2::B so the condition is true.
+            AWT_ASSERT(ctx.template HasOldPrototype<v2::B>());
+            v2::B b2;
             ctx.ReadV(in, b2);
             AWT_ASSERT(b2 == b2_expected);
 
-            //There is no C2 in version 1 so the condition is false.
-            AWT_ASSERT_FALSE(ctx.template HasOldPrototype<C2>());
+            //There is no v2::C in version 1 so the condition is false.
+            AWT_ASSERT_FALSE(ctx.template HasOldPrototype<v2::C>());
 
             //An example of how to read data that may not exist in a previous version.
-            if (ctx.template HasOldPrototype<C2>())
+            if (ctx.template HasOldPrototype<v2::C>())
             {
-                C2 c2;
+                v2::C c2;
                 ctx.ReadV(in, c2);
                 AWT_ASSERT(c2 == c2_expected);
             }
