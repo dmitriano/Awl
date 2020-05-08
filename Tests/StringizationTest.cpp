@@ -129,7 +129,7 @@ AWT_TEST(Prototype_TypeMap)
 
     awl::DetachedPrototype dp(ap);
 
-    awl::DetachedPrototype result(std::vector<awl::Field>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
+    awl::DetachedPrototype result(std::vector<awl::DetachedPrototype::FieldContainer>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
 
     AWT_ASSERT_TRUE(dp == result);
 }

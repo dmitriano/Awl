@@ -11,7 +11,7 @@ namespace awl
 {
     struct Field
     {
-        std::string name;
+        std::string_view name;
         size_t type;
 
         AWL_SERIALIZABLE(name, type)
@@ -19,17 +19,11 @@ namespace awl
 
     AWL_MEMBERWISE_EQUATABLE(Field)
         
-    struct FieldRef
-    {
-        const std::string & name;
-        size_t type;
-    };
-        
     class Prototype
     {
     public:
 
-        virtual FieldRef GetField(size_t index) const = 0;
+        virtual Field GetField(size_t index) const = 0;
 
         virtual size_t GetCount() const = 0;
 
@@ -77,7 +71,7 @@ namespace awl
             assert(m_types.size() == S::get_member_names().size());
         }
 
-        FieldRef GetField(size_t index) const override
+        Field GetField(size_t index) const override
         {
             assert(index < GetCount());
             return { S::get_member_names()[index], m_types[index] };
@@ -109,9 +103,17 @@ namespace awl
     {
     public:
 
+        struct FieldContainer
+        {
+            std::string name;
+            size_t type;
+
+            AWL_SERIALIZABLE(name, type)
+        };
+
         DetachedPrototype() = default;
         
-        explicit DetachedPrototype(std::vector<Field> fields) : m_fields(std::move(fields))
+        explicit DetachedPrototype(std::vector<FieldContainer> fields) : m_fields(std::move(fields))
         {
         }
 
@@ -120,15 +122,15 @@ namespace awl
             m_fields.resize(ap.GetCount());
             for (size_t i = 0; i < ap.GetCount(); ++i)
             {
-                const FieldRef field = ap.GetField(i);
-                m_fields[i] = {field.name, field.type};
+                const Field field = ap.GetField(i);
+                m_fields[i] = {std::string(field.name), field.type};
             }
         }
 
-        FieldRef GetField(size_t index) const override
+        Field GetField(size_t index) const override
         {
             assert(index < GetCount());
-            const Field & m = m_fields[index];
+            const FieldContainer & m = m_fields[index];
             return { m.name, m.type };
         }
 
@@ -141,8 +143,9 @@ namespace awl
 
     private:
 
-        std::vector<Field> m_fields;
+        std::vector<FieldContainer> m_fields;
     };
 
+    AWL_MEMBERWISE_EQUATABLE(DetachedPrototype::FieldContainer)
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype)
 }

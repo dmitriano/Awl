@@ -242,7 +242,7 @@ namespace awl::io
                         {
                             if (!this->allowDelete)
                             {
-                                throw FieldNotFoundException(old_field.name);
+                                throw FieldNotFoundException(std::string(old_field.name));
                             }
 
                             //Skip by type.
@@ -254,7 +254,7 @@ namespace awl::io
 
                             if (new_field.type != old_field.type)
                             {
-                                throw TypeMismatchException(new_field.name, new_field.type, old_field.type);
+                                throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
                             }
 
                             //But read by index.
@@ -400,9 +400,12 @@ namespace awl::io
 
                 for (size_t i = 0; i < count; ++i)
                 {
-                    FieldRef fr = p->GetField(i);
-                    Write(s, fr.name);
-                    Write(s, fr.type);
+                    Field f = p->GetField(i);
+                    //Write name as string_view but read as string.
+                    const size_t len = f.name.length();
+                    Write(s, len);
+                    s.Write(reinterpret_cast<const uint8_t *>(f.name.data()), len * sizeof(char));
+                    Write(s, f.type);
                 }
             }
         }
