@@ -151,5 +151,15 @@ namespace awl::io::helpers
     using recursive_tuple = decltype(flatten_struct<T>());
 
     template <class T>
-    using recursive_variant = tuple_to_variant<recursive_tuple<T>>;
+    using variant_from_struct = tuple_to_variant<recursive_tuple<T>>;
+
+    template <class... Ts>
+    auto variant_from_structs_func()
+    {
+        std::tuple<Ts...> t;
+        return flatten_tuple(t);
+    }
+
+    template <class... Ts>
+    using variant_from_structs = tuple_to_variant<decltype(variant_from_structs_func<Ts...>())>;
 }

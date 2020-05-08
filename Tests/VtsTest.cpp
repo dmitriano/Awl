@@ -67,7 +67,7 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A1)
 
-    static_assert(std::is_same_v<std::variant<A1, int, bool, String, double>, awl::io::helpers::recursive_variant<A1>>);
+    static_assert(std::is_same_v<std::variant<A1, int, bool, String, double>, awl::io::helpers::variant_from_struct<A1>>);
 
     struct B1
     {
@@ -81,7 +81,7 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(B1)
 
-    static_assert(std::is_same_v<std::variant<B1, A1, int, bool, String, double>, awl::io::helpers::recursive_variant<B1>>);
+    static_assert(std::is_same_v<std::variant<B1, A1, int, bool, String, double>, awl::io::helpers::variant_from_struct<B1>>);
 
     struct A2
     {
@@ -96,7 +96,7 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A2)
 
-    static_assert(std::is_same_v<std::variant<A2, bool, double, int, String>, awl::io::helpers::recursive_variant<A2>>);
+    static_assert(std::is_same_v<std::variant<A2, bool, double, int, String>, awl::io::helpers::variant_from_struct<A2>>);
 
     struct B2
     {
@@ -110,7 +110,8 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(B2)
 
-    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>>, awl::io::helpers::recursive_variant<B2>>);
+    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>>, awl::io::helpers::variant_from_struct<B2>>);
+    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>, float>, awl::io::helpers::variant_from_structs<B2, float>>);
 
     struct C2
     {
@@ -120,6 +121,8 @@ namespace
     };
 
     AWL_MEMBERWISE_EQUATABLE(C2)
+
+    static_assert(std::is_same_v<std::variant<B2, A2, bool, double, int, String, Vector<int>, C2, float>, awl::io::helpers::variant_from_structs<B2, C2, float>>);
 
     static const A1 a1_expected = { 1, true, "abc", 2.0 };
     static const B1 b1_expected = { a1_expected, a1_expected, 1, true };
