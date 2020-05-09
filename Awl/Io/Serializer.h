@@ -43,32 +43,49 @@ namespace awl::io
         using I2nMap = std::unordered_map<size_t, std::string>;
         using N2iMap = std::unordered_map<std::string, size_t>;
 
-        struct TypeMapBuilder
+        class TypeMapBuilder
         {
+        private:
+            
+            static constexpr size_t typeCount = std::variant_size_v<FieldV>;
+
+            static constexpr auto MakeSequence()
+            {
+                return std::make_index_sequence<typeCount>();
+            }
+
+            template <std::size_t index>
+            static std::string MakeName()
+            {
+                return make_type_name<std::variant_alternative_t<index, FieldV>>();
+            }
+
             template <std::size_t... index>
             static I2nMap BuildI2nMap(std::index_sequence<index...>)
             {
                 I2nMap tm;
-                (tm.emplace(index, make_type_name<std::variant_alternative_t<index, FieldV>>()), ...);
+                (tm.emplace(index, MakeName<index>()), ...);
                 return tm;
-            }
-
-            static I2nMap BuildI2nMap()
-            {
-                return BuildI2nMap(std::make_index_sequence<std::variant_size_v<FieldV>>());
             }
 
             template <std::size_t... index>
             static N2iMap BuildN2iMap(std::index_sequence<index...>)
             {
                 N2iMap tm;
-                (tm.emplace(make_type_name<std::variant_alternative_t<index, FieldV>>(), index), ...);
+                (tm.emplace(MakeName<index>(), index), ...);
                 return tm;
+            }
+
+        public:
+
+            static I2nMap BuildI2nMap()
+            {
+                return BuildI2nMap(MakeSequence());
             }
 
             static N2iMap BuildN2iMap()
             {
-                return BuildN2iMap(std::make_index_sequence<std::variant_size_v<FieldV>>());
+                return BuildN2iMap(MakeSequence());
             }
         };
 
