@@ -22,7 +22,7 @@ namespace awl::io
     protected:
 
         using Split = helpers::split_variant<V, is_stringizable>;
-        
+
         using StructV = typename Split::matching;
         using FieldV = typename Split::non_matching;
 
@@ -46,7 +46,7 @@ namespace awl::io
         class TypeMapBuilder
         {
         private:
-            
+
             static constexpr size_t typeCount = std::variant_size_v<FieldV>;
 
             static constexpr auto MakeSequence()
@@ -170,7 +170,7 @@ namespace awl::io
         struct FieldReaderTupleCreator
         {
             static constexpr size_t fieldCount = std::tuple_size_v<typename tuplizable_traits<Struct>::Tie>;
-            
+
             template <std::size_t... index>
             static auto MakeTuple(std::index_sequence<index...>)
             {
@@ -185,7 +185,7 @@ namespace awl::io
 
         template <class Struct>
         using FieldReaderTuple = decltype(FieldReaderTupleCreator<Struct>::MakeTuple());
-        
+
         template <class Struct>
         using FieldReaderArray = std::array<const FieldReader<Struct> *, FieldReaderTupleCreator<Struct>::fieldCount>;
 
@@ -193,15 +193,15 @@ namespace awl::io
         struct FieldReaderArrayHolder
         {
             using Struct = std::variant_alternative_t<index, typename Base::StructV>;
-            
+
             FieldReaderArrayHolder(const FieldReaderTuple<Struct> & t) :
                 a(tuple_cast<const FieldReader<Struct>>(t))
             {
             }
-            
+
             FieldReaderArray<Struct> a;
         };
-        
+
         using TupleOfFieldReaderTuple = decltype(transform_v2t<typename Base::StructV, FieldReaderTuple>());
         using TupleOfFieldReaderArray = decltype(transform_t2ti<FieldReaderArrayHolder>(TupleOfFieldReaderTuple{}));
 
@@ -216,40 +216,34 @@ namespace awl::io
             skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_cast<FieldSkipper>(skipperTuple))
         {
-            //const size_t count = std::variant_size_v<FieldV>;
-            
-            for (size_t i = 0; i < std::variant_size_v<FieldV>; ++i)
-            {
-
-            }
         }
 
         //Makes the new and old prototypes identical.
         void Initialize()
         {
             //Type map is trivial, so we do not use it.
-            
+
             assert(oldPrototypes.empty());
-            
+
             for (Prototype * p : this->newPrototypes)
             {
                 oldPrototypes.push_back(DetachedPrototype(*p));
             }
         }
-        
+
         template <class Stream>
         void ReadOldPrototypes(Stream & s)
         {
             //Read type map
             typename Base::I2nMap old_tm;
             Read(s, old_tm);
-            
+
             assert(oldPrototypes.empty());
             //Read std::vector.
             std::vector<DetachedPrototype> protos;
             Read(s, protos);
 
-            typename Base::N2iMap new_tm = typename Base::TypeMapBuilder::BuildN2iMap();
+            typename Base::N2iMap new_tm = Base::TypeMapBuilder::BuildN2iMap();
 
             for (DetachedPrototype & old_proto : protos)
             {
@@ -376,7 +370,7 @@ namespace awl::io
         {
             typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
             const DetachedPrototype & old_proto = oldPrototypes[old_struct_index];
-            
+
             for (size_t old_index = 0; old_index < old_proto.GetCount(); ++old_index)
             {
                 const auto old_field = old_proto.GetField(old_index);
@@ -448,7 +442,7 @@ namespace awl::io
         {
             return MakeProtoMap(old_struct_index, Base::template StructIndex<Struct>);
         }
-            
+
         std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
         {
             std::vector<size_t> v = oldPrototypes[old_struct_index].MapNames(*(this->newPrototypes[new_struct_index]));
@@ -465,7 +459,7 @@ namespace awl::io
 
         TupleOfFieldReaderTuple readerTuples;
         TupleOfFieldReaderArray readerArrays;
-        
+
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
 
@@ -487,9 +481,9 @@ namespace awl::io
         void WriteNewPrototypes(Stream & s) const
         {
             //Write type map
-            typename Base::I2nMap tm = typename Base::TypeMapBuilder::BuildI2nMap();
+            typename Base::I2nMap tm = Base::TypeMapBuilder::BuildI2nMap();
             Write(s, tm);
-            
+
             //Write std::array.
             Write(s, this->newPrototypes.size());
 
