@@ -109,9 +109,6 @@ namespace awl::io
             constexpr size_t index = StructIndex<S>;
             return std::get<index>(newPrototypesTuple);
         }
-
-        bool allowTypeMismatch = false;
-        bool allowDelete = true;
     };
 
     template <class V, class IStream = SequentialInputStream>
@@ -409,6 +406,9 @@ namespace awl::io
                 Read(s, val);
             }
         }
+
+        bool allowTypeMismatch = false;
+        bool allowDelete = true;
 
     private:
 
