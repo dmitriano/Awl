@@ -19,8 +19,10 @@ namespace awl::io
     {
     protected:
 
-        using StructV = helpers::filter_variant<V, is_stringizable>;
-        using FieldV = V;
+        using Split = helpers::split_variant<V, is_stringizable>;
+        
+        using StructV = typename Split::matching;
+        using FieldV = typename Split::non_matching;
 
         using StructIndexType = uint16_t;
 
@@ -206,16 +208,13 @@ namespace awl::io
                 else
                 {
                     auto & new_proto = this->template FindNewPrototype<Struct>();
-                    auto & old_proto = oldPrototypes[old_struct_index];
+                    const DetachedPrototype & old_proto = oldPrototypes[old_struct_index];
 
                     assert(name_map.size() == old_proto.GetCount());
 
-                    auto & readers = this->template FindFieldReaders<Struct>();
-                    auto & skippers = this->GetFieldSkippers();
-
                     for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
                     {
-                        const auto old_field = old_proto.GetField(old_index);
+                        const Field old_field = old_proto.GetField(old_index);
 
                         const size_t new_index = name_map[old_index];
 
@@ -226,8 +225,7 @@ namespace awl::io
                                 throw FieldNotFoundException(std::string(old_field.name));
                             }
 
-                            //Skip by type.
-                            skippers[old_field.type]->SkipField(*this, s);
+                            SkipField(s, old_field);
                         }
                         else
                         {
@@ -238,7 +236,8 @@ namespace awl::io
                                 throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
                             }
 
-                            //But read by index.
+                            //We read by index, not by type, so we call ReadField for both structures and fields.
+                            auto & readers = this->template FindFieldReaders<Struct>();
                             readers[new_index]->ReadField(*this, s, val);
                         }
                     }
@@ -251,6 +250,34 @@ namespace awl::io
             else
             {
                 Read(s, val);
+            }
+        }
+
+        void SkipField(InputStream & s, Field old_field) const
+        {
+            if (old_field.type != Field::NoType)
+            {
+                //Skip by type.
+                auto & skippers = this->GetFieldSkippers();
+                skippers[old_field.type]->SkipField(*this, s);
+            }
+            else
+            {
+                //The common routine for skipping structures.
+                SkipStruct(s);
+            }
+        }
+
+        void SkipStruct(InputStream & s) const
+        {
+            typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
+            const DetachedPrototype & old_proto = oldPrototypes[old_struct_index];
+            
+            for (size_t old_index = 0; old_index < old_proto.GetCount(); ++old_index)
+            {
+                const auto old_field = old_proto.GetField(old_index);
+
+                SkipField(s, old_field);
             }
         }
 

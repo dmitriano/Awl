@@ -11,6 +11,8 @@ namespace awl
 {
     struct Field
     {
+        static constexpr size_t NoType = std::numeric_limits<size_t>::max();
+
         std::string_view name;
         size_t type;
 
@@ -56,6 +58,37 @@ namespace awl
         }
     };
 
+    namespace helpers
+    {
+        template <class U, class T, std::size_t index>
+        constexpr std::size_t find_type_impl() noexcept
+        {
+            using FieldType = std::remove_reference_t<std::tuple_element_t<index, U>>;
+            
+            if constexpr (is_stringizable_v<FieldType>)
+            {
+                return Field::NoType;
+            }
+            else
+            {
+                return find_variant_type_v<FieldType, T>;
+            }
+        }
+
+        template <class U, class T, std::size_t... index>
+        constexpr auto map_types_t2v_no_struct_impl(std::index_sequence<index...>) noexcept
+        {
+            return std::array<std::size_t, sizeof...(index)>{find_type_impl<U, T, index>()...};
+        }
+
+        //U is a tuple, T is a variant
+        template <class U, class T>
+        constexpr auto map_types_t2v_no_struct() noexcept
+        {
+            return map_types_t2v_no_struct_impl<U, T>(std::make_index_sequence<std::tuple_size_v<U>>());
+        }
+    }
+
     //V is std::variant, S is a Stringizable
     template <class V, class S>
     class AttachedPrototype : public Prototype
@@ -66,7 +99,7 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_types(map_types_t2v<Tie, V>())
+        AttachedPrototype() : m_types(helpers::map_types_t2v_no_struct<Tie, V>())
         {
             assert(m_types.size() == S::get_member_names().size());
         }
@@ -82,6 +115,7 @@ namespace awl
             return m_types.size();
         }
 
+        /*
         V Get(const S & val, size_t index) const
         {
             return runtime_get<V>(val.as_tuple(), index);
@@ -92,6 +126,7 @@ namespace awl
             auto temp = val.as_tuple();
             runtime_set(temp, index, v_field);
         }
+        */
 
     private:
 

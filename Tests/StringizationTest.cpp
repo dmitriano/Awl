@@ -134,6 +134,7 @@ AWT_TEST(Prototype_TypeMap)
     AWT_ASSERT_TRUE(dp == result);
 }
 
+/*
 AWT_TEST(Prototype_GetSet)
 {
     AWT_UNUSED_CONTEXT;
@@ -154,3 +155,4 @@ AWT_TEST(Prototype_GetSet)
     AWT_ASSERT_TRUE(ap.Get(a, 1) == V(7.0));
     AWT_ASSERT_TRUE(ap.Get(a, 2) == V(std::string("xyz")));
 }
+*/
