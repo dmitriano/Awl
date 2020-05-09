@@ -91,7 +91,7 @@ namespace awl::io
     {
     public:
 
-        FieldNotFoundException(const std::string & name) : fieldName(name)
+        FieldNotFoundException(std::string name) : fieldName(name)
         {
         }
 
@@ -109,7 +109,7 @@ namespace awl::io
     {
     public:
 
-        TypeMismatchException(const std::string & name, size_t actual, size_t expected) :
+        TypeMismatchException(std::string name, size_t actual, size_t expected) :
             fieldName(name), actualType(actual), expectedType(expected)
         {
         }

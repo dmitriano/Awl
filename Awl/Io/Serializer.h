@@ -9,6 +9,7 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/MpHelpers.h"
+#include "Awl/Io/TypeName.h"
 
 #include <cassert>
 
