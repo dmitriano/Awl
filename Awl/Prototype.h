@@ -174,6 +174,16 @@ namespace awl
             return m_fields.size();
         }
 
+        //For type map
+        void SetFieldType(size_t index, size_t type)
+        {
+            assert(index < GetCount());
+            assert(type != Field::NoType);
+            assert(m_fields[index].type != Field::NoType);
+
+            m_fields[index].type = type;
+        }
+
         AWL_SERIALIZABLE(m_fields)
 
     private:

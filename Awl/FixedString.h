@@ -1,6 +1,8 @@
 #pragma once
 
 #include <type_traits>
+#include <string>
+#include <string_view>
 
 namespace awl
 {
@@ -63,6 +65,16 @@ namespace awl
         friend constexpr bool operator==(FixedString, FixedString<M>)
         {
             return false;
+        }
+
+        operator std::string()
+        {
+            return std::string(data(), size());
+        }
+
+        operator std::string_view()
+        {
+            return std::string_view(data(), size());
         }
 
     private:

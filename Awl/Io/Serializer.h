@@ -12,6 +12,7 @@
 #include "Awl/Io/TypeName.h"
 
 #include <cassert>
+#include <unordered_map>
 
 namespace awl::io
 {
@@ -38,6 +39,38 @@ namespace awl::io
 
         NewPrototypeTuple newPrototypesTuple;
         NewPrototypeArray newPrototypes;
+
+        using I2nMap = std::unordered_map<size_t, std::string>;
+        using N2iMap = std::unordered_map<std::string, size_t>;
+
+        struct TypeMapBuilder
+        {
+            template <std::size_t... index>
+            static I2nMap BuildI2nMap(std::index_sequence<index...>)
+            {
+                I2nMap tm;
+                (tm.emplace(index, make_type_name<std::variant_alternative_t<index, FieldV>>()), ...);
+                return tm;
+            }
+
+            static I2nMap BuildI2nMap()
+            {
+                return BuildI2nMap(std::make_index_sequence<std::variant_size_v<FieldV>>());
+            }
+
+            template <std::size_t... index>
+            static N2iMap BuildN2iMap(std::index_sequence<index...>)
+            {
+                N2iMap tm;
+                (tm.emplace(make_type_name<std::variant_alternative_t<index, FieldV>>(), index), ...);
+                return tm;
+            }
+
+            static N2iMap BuildN2iMap()
+            {
+                return BuildN2iMap(std::make_index_sequence<std::variant_size_v<FieldV>>());
+            }
+        };
 
         Serializer() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
@@ -160,7 +193,7 @@ namespace awl::io
 
         using SkipperTuple = decltype(transform_v2t<typename Base::FieldV, FieldSkipperImpl>());
         using SkipperArray = std::array<FieldSkipper *, std::variant_size_v<typename Base::FieldV>>;
-    
+
     public:
 
         Reader() :
@@ -169,11 +202,19 @@ namespace awl::io
             skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_cast<FieldSkipper>(skipperTuple))
         {
+            //const size_t count = std::variant_size_v<FieldV>;
+            
+            for (size_t i = 0; i < std::variant_size_v<FieldV>; ++i)
+            {
+
+            }
         }
 
         //Makes the new and old prototypes identical.
         void Initialize()
         {
+            //Type map is trivial, so we do not use it.
+            
             assert(oldPrototypes.empty());
             
             for (Prototype * p : this->newPrototypes)
@@ -185,9 +226,57 @@ namespace awl::io
         template <class Stream>
         void ReadOldPrototypes(Stream & s)
         {
+            //Read type map
+            typename Base::I2nMap old_tm;
+            Read(s, old_tm);
+            
             assert(oldPrototypes.empty());
             //Read std::vector.
-            Read(s, oldPrototypes);
+            std::vector<DetachedPrototype> protos;
+            Read(s, protos);
+
+            typename Base::N2iMap new_tm = typename Base::TypeMapBuilder::BuildN2iMap();
+
+            for (DetachedPrototype & old_proto : protos)
+            {
+                for (size_t old_index = 0; old_index < old_proto.GetCount(); ++old_index)
+                {
+                    const auto old_field = old_proto.GetField(old_index);
+
+                    if (old_field.type != Field::NoType)
+                    {
+                        auto old_i = old_tm.find(old_field.type);
+
+                        if (old_i == old_tm.end())
+                        {
+                            //The type table is corrupted.
+                            throw CorruptionException();
+                        }
+
+                        const std::string & name = old_i->second;
+
+                        auto new_i = new_tm.find(name);
+
+                        if (new_i == new_tm.end())
+                        {
+                            //Old type not found in new type table.
+                            throw TypeMismatchException(std::string(old_field.name), old_field.type, Field::NoType);
+                        }
+
+                        size_t new_type = new_i->second;
+
+                        if (new_type == Field::NoType)
+                        {
+                            //A scalar field cannot be mapped to a structure.
+                            throw TypeMismatchException(std::string(old_field.name), old_field.type, Field::NoType);
+                        }
+
+                        old_proto.SetFieldType(old_index, new_type);
+                    }
+                }
+            }
+
+            oldPrototypes = protos;
         }
 
         template<class Struct>
@@ -357,11 +446,13 @@ namespace awl::io
             return v;
         }
 
-        std::vector<DetachedPrototype> oldPrototypes;
         TupleOfFieldReaderTuple readerTuples;
         TupleOfFieldReaderArray readerArrays;
+        
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
+
+        std::vector<DetachedPrototype> oldPrototypes;
     };
 
     template <class V, class OStream = SequentialOutputStream>
@@ -378,6 +469,10 @@ namespace awl::io
         template <class Stream>
         void WriteNewPrototypes(Stream & s) const
         {
+            //Write type map
+            typename Base::I2nMap tm = typename Base::TypeMapBuilder::BuildI2nMap();
+            Write(s, tm);
+            
             //Write std::array.
             Write(s, this->newPrototypes.size());
 

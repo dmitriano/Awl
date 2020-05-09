@@ -137,11 +137,11 @@ namespace
     static const v2::B b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
     static const v2::C c2_expected = { 7 };
 
-    using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
-    using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
+    //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
+    //using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
     
-    //using V1 = awl::io::helpers::variant_from_structs<v1::B>;
-    //using V2 = awl::io::helpers::variant_from_structs<v2::B, v2::C>;
+    using V1 = awl::io::helpers::variant_from_structs<v1::B>;
+    using V2 = awl::io::helpers::variant_from_structs<v2::B, v2::C>;
 
     template <class IStream>
     using OldReader = awl::io::Reader<V1, IStream>;
