@@ -57,7 +57,6 @@ namespace awl::io
             return std::get<index>(newPrototypesTuple);
         }
 
-        bool serializeStructIndex = true;
         bool allowTypeMismatch = false;
         bool allowDelete = true;
     };
@@ -169,21 +168,6 @@ namespace awl::io
         {
         }
 
-        template <class S>
-        bool HasOldPrototype() const
-        {
-            constexpr size_t index = Base::template StructIndex<S>;
-            return index < oldPrototypes.size();
-        }
-
-        template <class S>
-        const Prototype & FindOldPrototype() const
-        {
-            constexpr size_t index = Base::template StructIndex<S>;
-            assert(index < oldPrototypes.size());
-            return oldPrototypes[index];
-        }
-
         //Makes the new and old prototypes identical.
         void Initialize()
         {
@@ -211,9 +195,9 @@ namespace awl::io
         {
             if constexpr (is_stringizable_v<Struct>)
             {
-                ReadStructIndex(s, val);
+                typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
 
-                const std::vector<size_t> & name_map = this->template FindProtoMap<Struct>();
+                const std::vector<size_t> & name_map = protoMaps[old_struct_index];
 
                 //An empty map means either an empty structure or equal prototypes
                 //(the prototypes of empty structures are equal).
@@ -225,7 +209,7 @@ namespace awl::io
                 else
                 {
                     auto & new_proto = this->template FindNewPrototype<Struct>();
-                    auto & old_proto = this->template FindOldPrototype<Struct>();
+                    auto & old_proto = oldPrototypes[old_struct_index];
 
                     assert(name_map.size() == old_proto.GetCount());
 
@@ -279,7 +263,7 @@ namespace awl::io
         {
             if constexpr (is_stringizable_v<Struct>)
             {
-                ReadStructIndex(s, val);
+                ReadStructIndex(s);
             }
 
             if constexpr (is_tuplizable_v<Struct>)
@@ -310,29 +294,12 @@ namespace awl::io
             return skipperArray;
         }
 
-        template <class S>
-        const std::vector<size_t> & FindProtoMap() const
+        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
         {
-            constexpr size_t index = Base::template StructIndex<S>;
+            typename Base::StructIndexType index;
+            Read(s, index);
             assert(index < oldPrototypes.size());
-            return protoMaps[index];
-        }
-
-        template<class Struct>
-        void ReadStructIndex(InputStream & s, Struct & val) const
-        {
-            static_cast<void>(val);
-
-            if (this->serializeStructIndex)
-            {
-                typename Base::StructIndexType index;
-                Read(s, index);
-                constexpr size_t expected_index = Base::template StructIndex<Struct>;
-                if (index != expected_index)
-                {
-                    throw TypeMismatchException(typeid(Struct).name(), index, expected_index);
-                }
-            }
+            return index;
         }
 
         template<class Struct>
@@ -416,11 +383,8 @@ namespace awl::io
         {
             if constexpr (is_stringizable_v<Struct>)
             {
-                if (this->serializeStructIndex)
-                {
-                    const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
-                    Write(s, index);
-                }
+                const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
+                Write(s, index);
             }
 
             if constexpr (is_tuplizable_v<Struct>)

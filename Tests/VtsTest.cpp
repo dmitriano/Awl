@@ -265,11 +265,11 @@ namespace
             auto & b2_proto = ctx.template FindNewPrototype<v2::B>();
             AWT_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::B>::Tie>);
 
-            auto & a1_proto = ctx.template FindOldPrototype<v2::A>();
-            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
+            //auto & a1_proto = ctx.template FindOldPrototype<v2::A>();
+            //AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
 
-            auto & b1_proto = ctx.template FindOldPrototype<v2::B>();
-            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
+            //auto & b1_proto = ctx.template FindOldPrototype<v2::B>();
+            //AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
         }
 
         awl::StopWatch w;
@@ -283,16 +283,12 @@ namespace
             AWT_ASSERT(a2 == a2_expected);
 
             //Version 1 data has v2::B so the condition is true.
-            AWT_ASSERT(ctx.template HasOldPrototype<v2::B>());
             v2::B b2;
             ctx.ReadV(in, b2);
             AWT_ASSERT(b2 == b2_expected);
 
-            //There is no v2::C in version 1 so the condition is false.
-            AWT_ASSERT_FALSE(ctx.template HasOldPrototype<v2::C>());
-
             //An example of how to read data that may not exist in a previous version.
-            if (ctx.template HasOldPrototype<v2::C>())
+            if (false)
             {
                 v2::C c2;
                 ctx.ReadV(in, c2);
