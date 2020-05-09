@@ -177,8 +177,6 @@ namespace awl::io
             {
                 oldPrototypes.push_back(DetachedPrototype(*p));
             }
-            
-            MakeProtoMaps();
         }
         
         template <class Stream>
@@ -187,7 +185,6 @@ namespace awl::io
             assert(oldPrototypes.empty());
             //Read std::vector.
             Read(s, oldPrototypes);
-            MakeProtoMaps();
         }
 
         template<class Struct>
@@ -197,7 +194,7 @@ namespace awl::io
             {
                 typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
 
-                const std::vector<size_t> & name_map = protoMaps[old_struct_index];
+                const std::vector<size_t> name_map = this->template FindProtoMap<Struct>(old_struct_index);
 
                 //An empty map means either an empty structure or equal prototypes
                 //(the prototypes of empty structures are equal).
@@ -312,31 +309,27 @@ namespace awl::io
             });
         }
 
-        void MakeProtoMaps()
+        template<class Struct>
+        std::vector<size_t> FindProtoMap(typename Base::StructIndexType old_struct_index) const
         {
-            assert(protoMaps.empty());
-            constexpr size_t size = std::variant_size_v<typename Base::StructV>;
-            protoMaps.resize(size);
+            return MakeProtoMap(old_struct_index, Base::template StructIndex<Struct>);
+        }
+            
+        std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
+        {
+            std::vector<size_t> v = oldPrototypes[old_struct_index].MapNames(*(this->newPrototypes[new_struct_index]));
 
-            assert(oldPrototypes.size() <= this->newPrototypes.size());
-
-            for (size_t i = 0; i < oldPrototypes.size(); ++i)
+            //Clear the vector if the map is trivial.
+            auto range = awl::make_count(v.size());
+            if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
             {
-                std::vector<size_t> v = oldPrototypes[i].MapNames(*(this->newPrototypes[i]));
-
-                //Clear the vector if the map is trivial.
-                auto range = awl::make_count(v.size());
-                if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
-                {
-                    v.clear();
-                }
-
-                protoMaps[i] = v;
+                v.clear();
             }
+
+            return v;
         }
 
         std::vector<DetachedPrototype> oldPrototypes;
-        std::vector<std::vector<size_t>> protoMaps;
         TupleOfFieldReaderTuple readerTuples;
         TupleOfFieldReaderArray readerArrays;
         SkipperTuple skipperTuple;
