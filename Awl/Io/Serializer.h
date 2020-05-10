@@ -338,11 +338,8 @@ namespace awl::io
 
                             if (new_field.type != old_field.type)
                             {
-                                const std::string & old_name = typeMap.find(old_field.type)->second;
-                                const std::string & new_name = typeMap.find(new_field.type)->second;
-
                                 //The names are equal if a structure contains vector<A> and set<A>, for example.
-                                if (old_name != new_name)
+                                if (AreTypeNamesEqual(old_field.type, new_field.type))
                                 {
                                     throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
                                 }
@@ -500,6 +497,15 @@ namespace awl::io
             }
 
             return v;
+        }
+
+        bool AreTypeNamesEqual(size_t old_type, size_t new_type) const
+        {
+            const std::string & old_name = typeMap.find(old_type)->second;
+            const std::string & new_name = typeMap.find(new_type)->second;
+
+            //The names are equal if a structure contains vector<A> and set<A>, for example.
+            return old_name != new_name;
         }
 
         TupleOfFieldReaderTuple readerTuples;
