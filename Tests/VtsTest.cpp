@@ -79,16 +79,16 @@ namespace
             A b;
             int x;
             bool y;
-            //Vector<A> z{ 1, 2, 3 };
+            Vector<A> v{ a_expected, a_expected, a_expected };
 
-            AWL_STRINGIZABLE(a, b, x, y)
+            AWL_STRINGIZABLE(a, b, x, y, v)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
-        static const B b_expected = { a_expected, a_expected, 1, true };
+        static const B b_expected = { a_expected, a_expected, 1, true, Vector<A>{ a_expected, a_expected, a_expected } };
         
-        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>>, awl::io::helpers::variant_from_struct<B>>);
     }
 
     namespace v2
@@ -116,16 +116,17 @@ namespace
             Vector<int> z{ 1, 2, 3 };
             int x;
             String w = "xyz";
+            Vector<A> v{ a_expected, a_expected, a_expected };
 
-            AWL_STRINGIZABLE(a, x, z, w)
+            AWL_STRINGIZABLE(a, x, z, w, v)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
-        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz" };
+        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected } };
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>>, awl::io::helpers::variant_from_struct<B>>);
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, float>, awl::io::helpers::variant_from_structs<B, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, float>, awl::io::helpers::variant_from_structs<B, float>>);
 
         struct C
         {
@@ -138,7 +139,7 @@ namespace
 
         static const C c_expected = { 7 };
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
     }
 
     //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
@@ -206,6 +207,7 @@ namespace
         return w;
     }
 
+    /*
     template <class Reader>
     Duration ReadDataPlain(typename Reader::InputStream & in, size_t element_count)
     {
@@ -232,6 +234,7 @@ namespace
 
         return w;
     }
+    */
 
     template <class Reader>
     Duration ReadDataV1(typename Reader::InputStream & in, size_t element_count)
@@ -390,6 +393,7 @@ AWT_TEST(VtsReadWriteVectorStream)
     AWT_ASSERT_EQUAL(mem_size, v.size());
     AWT_ASSERT_EQUAL(mem_size, v.capacity());
 
+    /*
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
@@ -408,6 +412,7 @@ AWT_TEST(VtsReadWriteVectorStream)
 
         context.out << std::endl;
     }
+    */
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
@@ -489,6 +494,7 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
         context.out << std::endl;
     }
 
+    /*
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
@@ -507,6 +513,7 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
 
         context.out << std::endl;
     }
+    */
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();

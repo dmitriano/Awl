@@ -183,6 +183,6 @@ namespace awl::io
     template <class T, std::enable_if_t<is_stringizable_v<T>, bool> = true>
     constexpr auto make_type_name()
     {
-        return "struct";
+        return FixedString("struct");
     }
 }
