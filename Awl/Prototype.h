@@ -30,32 +30,6 @@ namespace awl
         virtual size_t GetCount() const = 0;
 
         static constexpr size_t NoIndex = std::numeric_limits<size_t>::max();
-        
-        std::vector<size_t> MapNames(const Prototype & other) const
-        {
-            std::vector<size_t> v;
-            v.resize(GetCount());
-
-            for (size_t old_index = 0; old_index < GetCount(); ++old_index)
-            {
-                v[old_index] = NoIndex;
-                
-                const auto old_field = GetField(old_index);
-
-                for (size_t new_index = 0; new_index < other.GetCount(); ++new_index)
-                {
-                    const auto new_field = other.GetField(new_index);
-
-                    if (new_field.name == old_field.name)
-                    {
-                        v[old_index] = new_index;
-                        break;
-                    }
-                }
-            }
-
-            return v;
-        }
     };
 
     namespace helpers

@@ -484,7 +484,31 @@ namespace awl::io
 
         std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
         {
-            std::vector<size_t> v = oldPrototypes[old_struct_index].MapNames(*(this->newPrototypes[new_struct_index]));
+            return MapPrototypes(oldPrototypes[old_struct_index], *(this->newPrototypes[new_struct_index]));
+        }
+
+        std::vector<size_t> MapPrototypes(const Prototype & left, const Prototype & right) const
+        {
+            std::vector<size_t> v;
+            v.resize(left.GetCount());
+
+            for (size_t old_index = 0; old_index < left.GetCount(); ++old_index)
+            {
+                v[old_index] = Prototype::NoIndex;
+
+                const auto old_field = left.GetField(old_index);
+
+                for (size_t new_index = 0; new_index < right.GetCount(); ++new_index)
+                {
+                    const auto new_field = right.GetField(new_index);
+
+                    if (new_field.name == old_field.name)
+                    {
+                        v[old_index] = new_index;
+                        break;
+                    }
+                }
+            }
 
             //Clear the vector if the map is trivial.
             auto range = awl::make_count(v.size());
