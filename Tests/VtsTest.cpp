@@ -162,7 +162,7 @@ namespace
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
-        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected }, { c_expected } };
+        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected }, { c_expected }, {}};
 
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>>, awl::io::helpers::variant_from_struct<B>>);
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
