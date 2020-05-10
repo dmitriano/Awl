@@ -235,13 +235,16 @@ namespace
         return w;
     }
 
-    /*
     template <class Reader>
     Duration ReadDataPlain(typename Reader::InputStream & in, size_t element_count)
     {
-        //Skip metadata
-        Reader ctx;
-        ctx.ReadOldPrototypes(in);
+        {
+            //Skip metadata
+            Reader ctx;
+            ctx.ReadOldPrototypes(in);
+        }
+
+        awl::io::PlainReader<typename Reader::Variant, typename Reader::InputStream> ctx;
 
         awl::StopWatch w;
 
@@ -250,11 +253,11 @@ namespace
             static_cast<void>(i);
 
             v1::A a1;
-            ctx.ReadPlain(in, a1);
+            ctx.ReadV(in, a1);
             AWT_ASSERT(a1 == v1::a_expected);
 
             v1::B b1;
-            ctx.ReadPlain(in, b1);
+            ctx.ReadV(in, b1);
             AWT_ASSERT(b1 == v1::b_expected);
         }
 
@@ -262,7 +265,6 @@ namespace
 
         return w;
     }
-    */
 
     template <class Reader>
     Duration ReadDataV1(typename Reader::InputStream & in, size_t element_count)
@@ -421,7 +423,6 @@ AWT_TEST(VtsReadWriteVectorStream)
     AWT_ASSERT_EQUAL(mem_size, v.size());
     AWT_ASSERT_EQUAL(mem_size, v.capacity());
 
-    /*
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
@@ -440,7 +441,6 @@ AWT_TEST(VtsReadWriteVectorStream)
 
         context.out << std::endl;
     }
-    */
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
@@ -522,7 +522,6 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
         context.out << std::endl;
     }
 
-    /*
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
 
@@ -541,7 +540,6 @@ AWT_TEST(VtsReadWriteTrivialMemoryStream)
 
         context.out << std::endl;
     }
-    */
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();

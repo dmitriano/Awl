@@ -20,6 +20,10 @@ namespace awl::io
     template <class V>
     class Serializer
     {
+    public:
+
+        using Variant = V;
+
     protected:
 
         using Split = helpers::split_variant<V, is_stringizable>;
@@ -113,7 +117,63 @@ namespace awl::io
     };
 
     template <class V, class IStream = SequentialInputStream>
-    class Reader : public Serializer<V>
+    class BasicReader : public Serializer<V>
+    {
+    private:
+
+        using Base = Serializer<V>;
+
+    public:
+
+        using InputStream = IStream;
+
+    protected:
+
+        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
+        {
+            typename Base::StructIndexType index;
+            Read(s, index);
+            //assert(index < oldPrototypes.size());
+            return index;
+        }
+    };
+
+    template <class V, class IStream = SequentialInputStream>
+    class PlainReader : public BasicReader<V, IStream>
+    {
+    private:
+
+        using Base = BasicReader<V, IStream>;
+
+    public:
+
+        using InputStream = IStream;
+
+        //Reads entire object tree assuming all the prototypes are equal.
+        template<class Struct>
+        void ReadV(InputStream & s, Struct & val) const
+        {
+            if constexpr (is_stringizable_v<Struct>)
+            {
+                ReadStructIndex(s);
+            }
+
+            if constexpr (is_tuplizable_v<Struct>)
+            {
+                for_each(object_as_tuple(val), [this, &s](auto& field)
+                {
+                    ReadV(s, field);
+                });
+            }
+            else
+            {
+                Read(s, val, *this);
+            }
+        }
+    };
+
+    template <class V, class IStream = SequentialInputStream>
+    class Reader : public BasicReader<V, IStream>
     {
     public:
 
@@ -121,7 +181,7 @@ namespace awl::io
 
     private:
 
-        using Base = Serializer<V>;
+        using Base = BasicReader<V, IStream>;
 
         template <class Struct>
         struct FieldReader
@@ -387,28 +447,6 @@ namespace awl::io
             }
         }
 
-        //Reads entire object tree assuming all the prototypes are equal.
-        template<class Struct>
-        void ReadPlain(InputStream & s, Struct & val) const
-        {
-            if constexpr (is_stringizable_v<Struct>)
-            {
-                ReadStructIndex(s);
-            }
-
-            if constexpr (is_tuplizable_v<Struct>)
-            {
-                for_each(object_as_tuple(val), [this, &s](auto& field)
-                {
-                    ReadPlain(s, field);
-                });
-            }
-            else
-            {
-                Read(s, val);
-            }
-        }
-
         bool allowTypeMismatch = false;
         bool allowDelete = true;
 
@@ -425,14 +463,6 @@ namespace awl::io
         const SkipperArray & GetFieldSkippers() const
         {
             return skipperArray;
-        }
-
-        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
-        {
-            typename Base::StructIndexType index;
-            Read(s, index);
-            assert(index < oldPrototypes.size());
-            return index;
         }
 
         template<class Struct>
