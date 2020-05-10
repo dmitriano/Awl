@@ -208,6 +208,12 @@ namespace awl::io
         using SkipperTuple = decltype(transform_v2t<typename Base::FieldV, FieldSkipperImpl>());
         using SkipperArray = std::array<FieldSkipper *, std::variant_size_v<typename Base::FieldV>>;
 
+        struct ProtoMap
+        {
+            size_t newStructIndex;
+            std::vector<size_t> fieldMap;
+        };
+        
     public:
 
         Reader() :
@@ -440,7 +446,35 @@ namespace awl::io
         template<class Struct>
         std::vector<size_t> FindProtoMap(typename Base::StructIndexType old_struct_index) const
         {
-            return MakeProtoMap(old_struct_index, Base::template StructIndex<Struct>);
+            assert(old_struct_index < oldPrototypes.size());
+
+            constexpr size_t new_index = Base::template StructIndex<Struct>;
+
+            if (old_struct_index < protoMaps.size())
+            {
+                std::optional<ProtoMap> & pm = protoMaps[old_struct_index];
+                
+                if (pm.has_value())
+                {
+                    if (new_index != pm->newStructIndex)
+                    {
+                        throw IoError(format() << _T("Inconsisten structure indices: new index 1: ") << pm->newStructIndex << _T(" new index 2: ") << new_index << _T(" old index: ") << old_struct_index << _T("."));
+                    }
+
+                    return pm->fieldMap;
+                }
+            }
+            else
+            {
+                protoMaps.resize(old_struct_index + 1);
+            }
+            
+            std::optional<ProtoMap> & pm = protoMaps[old_struct_index];
+
+            pm->newStructIndex = new_index;
+            pm->fieldMap = MakeProtoMap(old_struct_index, new_index);
+
+            return pm->fieldMap;
         }
 
         std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
@@ -464,6 +498,7 @@ namespace awl::io
         SkipperArray skipperArray;
 
         std::vector<DetachedPrototype> oldPrototypes;
+        mutable std::vector<std::optional<ProtoMap>> protoMaps;
     };
 
     template <class V, class OStream = SequentialOutputStream>
