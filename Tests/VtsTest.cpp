@@ -78,13 +78,19 @@ namespace
         struct C
         {
             int x;
+            A a;
 
-            AWL_STRINGIZABLE(x)
+            AWL_STRINGIZABLE(x, a)
         };
 
-        AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(C)
+        AWL_MEMBERWISE_EQUATABLE(C)
+
+        bool operator < (const C & left, const C & right)
+        {
+            return left.x < right.x;
+        }
             
-        static const C c_expected = { 7 };
+        static const C c_expected = { 7, a_expected };
 
         struct B
         {
@@ -127,13 +133,19 @@ namespace
         struct C
         {
             int x;
+            A a;
 
-            AWL_STRINGIZABLE(x)
+            AWL_STRINGIZABLE(x, a)
         };
 
-        AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(C)
+        AWL_MEMBERWISE_EQUATABLE(C)
 
-        static const C c_expected = { 7 };
+        bool operator < (const C & left, const C & right)
+        {
+            return left.x < right.x;
+        }
+
+        static const C c_expected = { 7, a_expected };
 
         struct B
         {
@@ -143,18 +155,19 @@ namespace
             String w = "xyz";
             Vector<A> v;
             std::set<C> v1;
+            Vector<C> v2;
 
-            AWL_STRINGIZABLE(a, x, z, w, v, v1)
+            AWL_STRINGIZABLE(a, x, z, w, v, v1, v2)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
         static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected }, { c_expected } };
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
     }
 
     //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
