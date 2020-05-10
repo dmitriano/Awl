@@ -339,9 +339,11 @@ namespace awl::io
 
                         size_t new_type = new_i->second;
 
-                        //This was checked previously in CheckTypesCompatible.
-                        //A scalar field cannot be mapped to a structure.
-                        assert(new_type != Field::NoType);
+                        if (new_type == Field::NoType)
+                        {
+                            //A scalar field cannot be mapped to a structure.
+                            throw TypeMismatchException(std::string(old_field.name), old_field.type, Field::NoType);
+                        }
 
                         old_proto.SetFieldType(old_index, new_type);
                     }
