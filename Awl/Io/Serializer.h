@@ -512,7 +512,17 @@ namespace awl::io
 
             //Clear the vector if the map is trivial.
             auto range = awl::make_count(v.size());
-            if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
+            if (std::equal(v.begin(), v.end(), range.begin(), range.end(),
+                [this](size_t left, size_t right)
+                {
+                    if (left == Prototype::NoIndex || right == Prototype::NoIndex)
+                    {
+                        return false;
+                    }
+                
+                    //It is possible that the indices are not equal but names are.
+                    return AreTypesEqual(left, right);
+                }))
             {
                 v.clear();
             }
