@@ -339,11 +339,9 @@ namespace awl::io
 
                         size_t new_type = new_i->second;
 
-                        if (new_type == Field::NoType)
-                        {
-                            //A scalar field cannot be mapped to a structure.
-                            throw TypeMismatchException(std::string(old_field.name), old_field.type, Field::NoType);
-                        }
+                        //This was checked previously in CheckTypesCompatible.
+                        //A scalar field cannot be mapped to a structure.
+                        assert(new_type != Field::NoType);
 
                         old_proto.SetFieldType(old_index, new_type);
                     }
@@ -540,44 +538,45 @@ namespace awl::io
 
                     if (new_field.name == old_field.name)
                     {
+                        //Check if the types are correct.
+                        CheckTypesCompatible(old_field.type, new_field.type);
+
                         v[old_index] = new_index;
                         break;
                     }
                 }
             }
 
-            //The implementation is incorrect if two structure members with index==NoIndex
-            //were switched places, so we do not use it.
-            //CheckProtoMap(v);
+            //Clear the vector if the map is trivial.
+            //If the fields are structures, we do not need to check recursively,
+            //we only guarantee that this structure is read sequentially as a tuple
+            //without readers and skippers.
+            auto range = awl::make_count(v.size());
+            if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
+            {
+                v.clear();
+            }
 
             return v;
         }
 
-        //Clears the vector if the map is trivial (experimental implementation).
-        void CheckProtoMap(std::vector<size_t> & v) const
+        void CheckTypesCompatible(size_t old_type, size_t new_type) const
         {
-            auto range = awl::make_count(v.size());
-            if (std::equal(v.begin(), v.end(), range.begin(), range.end(),
-                [this](size_t left, size_t right)
+            if (old_type != new_type)
             {
-                if (left == right)
-                {
-                    //If they are structures, we do not need to check recursively,
-                    //we only guarantee that this structure is read sequentially as a tuple
-                    //without readers and skippers.
-                    return true;
-                }
-
-                if (left != Prototype::NoIndex && right != Prototype::NoIndex)
+                if (old_type != Prototype::NoIndex && new_type != Prototype::NoIndex)
                 {
                     //It is possible that the indices are not equal but names are.
-                    return AreTypeNamesEqual(left, right);
+                    if (!AreTypeNamesEqual(old_type, new_type))
+                    {
+                        throw IoError(_T("Type mismatch."));
+                    }
                 }
 
-                return false;
-            }))
-            {
-                v.clear();
+                if (old_type == Prototype::NoIndex || new_type == Prototype::NoIndex)
+                {
+                    throw IoError(_T("A structure can't map to a scalar type."));
+                }
             }
         }
 
