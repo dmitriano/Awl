@@ -133,7 +133,6 @@ namespace awl::io
         {
             typename Base::StructIndexType index;
             Read(s, index);
-            //assert(index < oldPrototypes.size());
             return index;
         }
     };
@@ -463,6 +462,13 @@ namespace awl::io
         const SkipperArray & GetFieldSkippers() const
         {
             return skipperArray;
+        }
+
+        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
+        {
+            typename Base::StructIndexType index = Base::ReadStructIndex(s);
+            assert(index < oldPrototypes.size());
+            return index;
         }
 
         template<class Struct>
