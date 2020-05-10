@@ -154,7 +154,7 @@ namespace awl::io
         {
             if constexpr (is_stringizable_v<Struct>)
             {
-                ReadStructIndex(s);
+                this->ReadStructIndex(s);
             }
 
             if constexpr (is_tuplizable_v<Struct>)
