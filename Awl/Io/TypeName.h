@@ -2,6 +2,7 @@
 
 #include "Awl/FixedString.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/Stringizable.h"
 
 #include <string>
 #include <vector>
@@ -178,4 +179,10 @@ namespace awl::io
     }
 
     static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<int8_t, 5>" });
+
+    template <class T, std::enable_if_t<is_stringizable_v<T>, bool> = true>
+    constexpr auto make_type_name()
+    {
+        return "struct";
+    }
 }

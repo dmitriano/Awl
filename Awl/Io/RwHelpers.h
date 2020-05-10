@@ -19,6 +19,7 @@
 #include "Awl/ObservableSet.h"
 
 #include "Awl/Serializable.h"
+#include "Awl/Stringizable.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwAdapters.h"
 #include "Awl/Io/FakeContext.h"
@@ -490,13 +491,27 @@ namespace awl::io
     template <class Stream, typename T, class Context = ReadContext<Stream>>
     inline typename std::enable_if<is_tuplizable_v<T>, void>::type Read(Stream & s, T & val, const Context & ctx = {})
     {
-        Read(s, object_as_tuple(val), ctx);
+        if constexpr (is_stringizable_v<T>)
+        {
+            ctx.ReadV(s, val);
+        }
+        else
+        {
+            Read(s, object_as_tuple(val), ctx);
+        }
     }
 
     template <class Stream, typename T, class Context = WriteContext<Stream>>
     inline typename std::enable_if<is_tuplizable_v<T>, void>::type Write(Stream & s, const T & val, const Context & ctx = {})
     {
-        Write(s, object_as_tuple(val), ctx);
+        if constexpr (is_stringizable_v<T>)
+        {
+            ctx.WriteV(s, val);
+        }
+        else
+        {
+            Write(s, object_as_tuple(val), ctx);
+        }
     }
 
     template <class Stream, typename T, class Context = ReadContext<Stream>>

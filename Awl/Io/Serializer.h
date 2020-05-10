@@ -144,8 +144,7 @@ namespace awl::io
                 }
                 else
                 {
-                    static_cast<void>(context);
-                    Read(in, field_val);
+                    Read(in, field_val, context);
                 }
             }
         };
@@ -354,7 +353,7 @@ namespace awl::io
             }
             else
             {
-                Read(s, val);
+                Read(s, val, *this);
             }
         }
 
@@ -560,7 +559,7 @@ namespace awl::io
             }
             else
             {
-                Write(s, val);
+                Write(s, val, *this);
             }
         }
     };

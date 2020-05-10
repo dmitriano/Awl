@@ -69,6 +69,8 @@ namespace
 
         AWL_MEMBERWISE_EQUATABLE(A)
 
+        static const A a_expected = { 1, true, "abc", 2.0 };
+
         static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::io::helpers::variant_from_struct<A>>);
 
         struct B
@@ -77,12 +79,15 @@ namespace
             A b;
             int x;
             bool y;
+            //Vector<A> z{ 1, 2, 3 };
 
             AWL_STRINGIZABLE(a, b, x, y)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
+        static const B b_expected = { a_expected, a_expected, 1, true };
+        
         static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double>, awl::io::helpers::variant_from_struct<B>>);
     }
 
@@ -101,7 +106,9 @@ namespace
 
         AWL_MEMBERWISE_EQUATABLE(A)
 
-            static_assert(std::is_same_v<std::variant<A, bool, double, int, String>, awl::io::helpers::variant_from_struct<A>>);
+        static const A a_expected = { v1::a_expected.b, v1::a_expected.d, 5, "xyz", v1::a_expected.c };
+
+        static_assert(std::is_same_v<std::variant<A, bool, double, int, String>, awl::io::helpers::variant_from_struct<A>>);
 
         struct B
         {
@@ -115,6 +122,8 @@ namespace
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
+        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz" };
+
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>>, awl::io::helpers::variant_from_struct<B>>);
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, float>, awl::io::helpers::variant_from_structs<B, float>>);
 
@@ -127,15 +136,10 @@ namespace
 
         AWL_MEMBERWISE_EQUATABLE(C)
 
+        static const C c_expected = { 7 };
+
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
     }
-
-    static const v1::A a1_expected = { 1, true, "abc", 2.0 };
-    static const v1::B b1_expected = { a1_expected, a1_expected, 1, true };
-
-    static const v2::A a2_expected = { a1_expected.b, a1_expected.d, 5, "xyz", a1_expected.c };
-    static const v2::B b2_expected = { a2_expected, Vector<int>{ 1, 2, 3 },  b1_expected.x, "xyz" };
-    static const v2::C c2_expected = { 7 };
 
     //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
     //using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
@@ -195,8 +199,8 @@ namespace
         {
             static_cast<void>(i);
 
-            ctx.WriteV(out, a1_expected);
-            ctx.WriteV(out, b1_expected);
+            ctx.WriteV(out, v1::a_expected);
+            ctx.WriteV(out, v1::b_expected);
         }
 
         return w;
@@ -217,11 +221,11 @@ namespace
 
             v1::A a1;
             ctx.ReadPlain(in, a1);
-            AWT_ASSERT(a1 == a1_expected);
+            AWT_ASSERT(a1 == v1::a_expected);
 
             v1::B b1;
             ctx.ReadPlain(in, b1);
-            AWT_ASSERT(b1 == b1_expected);
+            AWT_ASSERT(b1 == v1::b_expected);
         }
 
         AWT_ASSERT(in.End());
@@ -243,11 +247,11 @@ namespace
 
             v1::A a1;
             ctx.ReadV(in, a1);
-            AWT_ASSERT(a1 == a1_expected);
+            AWT_ASSERT(a1 == v1::a_expected);
 
             v1::B b1;
             ctx.ReadV(in, b1);
-            AWT_ASSERT(b1 == b1_expected);
+            AWT_ASSERT(b1 == v1::b_expected);
         }
 
         AWT_ASSERT(in.End());
@@ -283,19 +287,19 @@ namespace
 
             v2::A a2;
             ctx.ReadV(in, a2);
-            AWT_ASSERT(a2 == a2_expected);
+            AWT_ASSERT(a2 == v2::a_expected);
 
             //Version 1 data has v2::B so the condition is true.
             v2::B b2;
             ctx.ReadV(in, b2);
-            AWT_ASSERT(b2 == b2_expected);
+            AWT_ASSERT(b2 == v2::b_expected);
 
             //An example of how to read data that may not exist in a previous version.
             if (false)
             {
                 v2::C c2;
                 ctx.ReadV(in, c2);
-                AWT_ASSERT(c2 == c2_expected);
+                AWT_ASSERT(c2 == v2::c_expected);
             }
         }
 
