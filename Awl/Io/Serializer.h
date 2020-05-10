@@ -336,13 +336,10 @@ namespace awl::io
                         {
                             const auto new_field = new_proto.GetField(new_index);
 
-                            if (new_field.type != old_field.type)
+                            //The names are equal if a structure contains vector<A> and set<A>, for example.
+                            if (!AreTypesEqual(old_field.type, new_field.type))
                             {
-                                //The names are equal if a structure contains vector<A> and set<A>, for example.
-                                if (AreTypeNamesEqual(old_field.type, new_field.type))
-                                {
-                                    throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
-                                }
+                                throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
                             }
 
                             //We read by index, not by type, so we call ReadField for both structures and fields.
@@ -499,13 +496,18 @@ namespace awl::io
             return v;
         }
 
+        bool AreTypesEqual(size_t old_type, size_t new_type) const
+        {
+            return old_type == new_type || AreTypeNamesEqual(old_type, new_type);
+        }
+
         bool AreTypeNamesEqual(size_t old_type, size_t new_type) const
         {
             const std::string & old_name = typeMap.find(old_type)->second;
             const std::string & new_name = typeMap.find(new_type)->second;
 
             //The names are equal if a structure contains vector<A> and set<A>, for example.
-            return old_name != new_name;
+            return old_name == new_name;
         }
 
         TupleOfFieldReaderTuple readerTuples;
