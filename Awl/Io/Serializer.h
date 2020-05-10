@@ -220,7 +220,8 @@ namespace awl::io
             readerTuples(transform_v2t<typename Base::StructV, FieldReaderTuple>()),
             readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
             skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
-            skipperArray(tuple_cast<FieldSkipper>(skipperTuple))
+            skipperArray(tuple_cast<FieldSkipper>(skipperTuple)),
+            typeMap(Base::TypeMapBuilder::BuildI2nMap())
         {
         }
 
@@ -337,7 +338,14 @@ namespace awl::io
 
                             if (new_field.type != old_field.type)
                             {
-                                throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
+                                const std::string & old_name = typeMap.find(old_field.type)->second;
+                                const std::string & new_name = typeMap.find(new_field.type)->second;
+
+                                //The names are equal if a structure contains vector<A> and set<A>, for example.
+                                if (old_name != new_name)
+                                {
+                                    throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
+                                }
                             }
 
                             //We read by index, not by type, so we call ReadField for both structures and fields.
@@ -472,6 +480,8 @@ namespace awl::io
             
             std::optional<ProtoMap> & pm = protoMaps[old_struct_index];
 
+            pm = ProtoMap{};
+            assert(pm.has_value());
             pm->newStructIndex = new_index;
             pm->fieldMap = MakeProtoMap(old_struct_index, new_index);
 
@@ -500,6 +510,8 @@ namespace awl::io
 
         std::vector<DetachedPrototype> oldPrototypes;
         mutable std::vector<std::optional<ProtoMap>> protoMaps;
+
+        typename Base::I2nMap typeMap;
     };
 
     template <class V, class OStream = SequentialOutputStream>

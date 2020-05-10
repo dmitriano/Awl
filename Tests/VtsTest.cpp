@@ -13,6 +13,8 @@
 #include <chrono>
 #include <type_traits>
 #include <cassert>
+#include <vector>
+#include <set>
 
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"
@@ -73,6 +75,17 @@ namespace
 
         static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::io::helpers::variant_from_struct<A>>);
 
+        struct C
+        {
+            int x = 7;
+
+            AWL_STRINGIZABLE(x)
+        };
+
+        AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(C)
+            
+        static const C c_expected = { 7 };
+
         struct B
         {
             A a;
@@ -80,15 +93,16 @@ namespace
             int x;
             bool y;
             Vector<A> v{ a_expected, a_expected, a_expected };
+            std::set<C> v1{ c_expected };
 
-            AWL_STRINGIZABLE(a, b, x, y, v)
+            AWL_STRINGIZABLE(a, b, x, y, v, v1)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
         static const B b_expected = { a_expected, a_expected, 1, true, Vector<A>{ a_expected, a_expected, a_expected } };
         
-        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
     }
 
     namespace v2
@@ -110,24 +124,6 @@ namespace
 
         static_assert(std::is_same_v<std::variant<A, bool, double, int, String>, awl::io::helpers::variant_from_struct<A>>);
 
-        struct B
-        {
-            A a;
-            Vector<int> z{ 1, 2, 3 };
-            int x;
-            String w = "xyz";
-            Vector<A> v{ a_expected, a_expected, a_expected };
-
-            AWL_STRINGIZABLE(a, x, z, w, v)
-        };
-
-        AWL_MEMBERWISE_EQUATABLE(B)
-
-        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected } };
-
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>>, awl::io::helpers::variant_from_struct<B>>);
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, float>, awl::io::helpers::variant_from_structs<B, float>>);
-
         struct C
         {
             int x = 7;
@@ -135,17 +131,36 @@ namespace
             AWL_STRINGIZABLE(x)
         };
 
-        AWL_MEMBERWISE_EQUATABLE(C)
+        AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(C)
 
         static const C c_expected = { 7 };
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
+        struct B
+        {
+            A a;
+            Vector<int> z{ 1, 2, 3 };
+            int x;
+            String w = "xyz";
+            Vector<A> v{ a_expected, a_expected, a_expected };
+            std::set<C> v1 { c_expected };
+
+            AWL_STRINGIZABLE(a, x, z, w, v, v1)
+        };
+
+        AWL_MEMBERWISE_EQUATABLE(B)
+
+        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected } };
+
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
+
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
     }
 
     //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
     //using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
     
-    using V1 = awl::io::helpers::variant_from_structs<v1::B>;
+    using V1 = awl::io::helpers::variant_from_structs<v1::B, v1::C>;
     using V2 = awl::io::helpers::variant_from_structs<v2::B, v2::C>;
 
     template <class IStream>
