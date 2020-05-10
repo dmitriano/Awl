@@ -21,6 +21,7 @@
 #include "Awl/Serializable.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/RwAdapters.h"
+#include "Awl/Io/FakeContext.h"
 
 namespace awl::io
 {
@@ -40,18 +41,24 @@ namespace awl::io
         }
     }
         
-    template <class Stream, typename T>
-    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Read(Stream & s, T & val)
+    template <class Stream, typename T, class Context = ReadContext<Stream>>
+    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
+        Read(Stream & s, T & val, const Context & ctx = {})
     {
+        static_cast<void>(ctx);
+
         const size_t size = sizeof(T);
 
         ReadRaw(s, reinterpret_cast<uint8_t *>(&val), size);
     }
 
     //Scalar types are passed by value but not by const reference.
-    template <class Stream, typename T>
-    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type Write(Stream & s, T val)
+    template <class Stream, typename T, class Context = WriteContext<Stream>>
+    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
+        Write(Stream & s, T val, const Context & ctx = {})
     {
+        static_cast<void>(ctx);
+        
         const size_t size = sizeof(T);
 
         s.Write(reinterpret_cast<const uint8_t *>(&val), size);
@@ -59,41 +66,41 @@ namespace awl::io
 
     //sizeof(bool) is implementation-defined and it is not required to be 1.
 
-    template <class Stream>
-    inline void Read(Stream & s, bool & b)
+    template <class Stream, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, bool & b, const Context & ctx = {})
     {
         uint8_t val;
 
-        Read(s, val);
+        Read(s, val, ctx);
 
         b = val != 0;
     }
 
-    template <class Stream>
-    inline void Write(Stream & s, bool b)
+    template <class Stream, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, bool b, const Context & ctx = {})
     {
         uint8_t val = b ? 1 : 0;
 
-        Write(s, val);
+        Write(s, val, ctx);
     }
 
     //Check if nanoseconds representation is either long or long long and its size is 8, so it can be converted to int64_t.
     static_assert(std::is_arithmetic_v<std::chrono::nanoseconds::rep> && std::is_signed_v<std::chrono::nanoseconds::rep> && sizeof(std::chrono::nanoseconds::rep) == 8);
 
-    template <class Stream, class Clock, class Duration>
-    inline void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val)
+    template <class Stream, class Clock, class Duration, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
         int64_t ns_count;
 
-        Read(s, ns_count);
+        Read(s, ns_count, ctx);
 
         val = std::chrono::time_point<Clock, Duration>(duration_cast<Duration>(nanoseconds(ns_count)));
     }
 
-    template <class Stream, class Clock, class Duration>
-    inline void Write(Stream & s, std::chrono::time_point<Clock, Duration> val)
+    template <class Stream, class Clock, class Duration, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, std::chrono::time_point<Clock, Duration> val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
@@ -101,20 +108,21 @@ namespace awl::io
 
         const int64_t ns_count = ns.count();
 
-        Write(s, ns_count);
+        Write(s, ns_count, ctx);
     }
 
     template<
         class Stream,
         class Char,
         class Traits = std::char_traits<Char>,
-        class Allocator = std::allocator<Char>
+        class Allocator = std::allocator<Char>,
+        class Context = ReadContext<Stream>
     >
-    inline void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val)
+    inline void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len;
 
-        Read(s, len);
+        Read(s, len, ctx);
 
         val.resize(len);
 
@@ -128,55 +136,58 @@ namespace awl::io
         class Stream,
         class Char,
         class Traits = std::char_traits<Char>,
-        class Allocator = std::allocator<Char>
+        class Allocator = std::allocator<Char>,
+        class Context = WriteContext<Stream>
     >
-    inline void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val)
+    inline void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len = val.length();
 
-        Write(s, len);
+        Write(s, len, ctx);
 
         s.Write(reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
     }
 
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = ReadContext<Stream>>
     inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
-        ReadVector(Stream & s, Container & v)
+        ReadVector(Stream & s, Container & v, const Context & ctx = {})
     {
+        static_cast<void>(ctx);
         ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = WriteContext<Stream>>
     inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
-        WriteVector(Stream & s, const Container & v)
+        WriteVector(Stream & s, const Container & v, const Context & ctx = {})
     {
+        static_cast<void>(ctx);
         s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     //vector<string>, for example.
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = ReadContext<Stream>>
     typename std::enable_if<std::is_class<typename Container::value_type>::value, void>::type 
-        ReadVector(Stream & s, Container & v)
+        ReadVector(Stream & s, Container & v, const Context & ctx = {})
     {
         for (auto & elem : v)
         {
-            Read(s, elem);
+            Read(s, elem, ctx);
         }
     }
 
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = WriteContext<Stream>>
     typename std::enable_if<std::is_class<typename Container::value_type>::value, void>::type 
-        WriteVector(Stream & s, const Container & v)
+        WriteVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         for (const auto & elem : v)
         {
-            Write(s, elem);
+            Write(s, elem, ctx);
         }
     }
 
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = ReadContext<Stream>>
     typename std::enable_if<std::is_same<typename Container::value_type, bool>::value, void>::type
-        ReadVector(Stream & s, Container & x)
+        ReadVector(Stream & s, Container & x, const Context & ctx = {})
     {
         typename Container::size_type n = x.size();
 
@@ -184,7 +195,7 @@ namespace awl::io
         {
             uint8_t aggr;
 
-            Read(s, aggr);
+            Read(s, aggr, ctx);
 
             for (uint8_t mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
             {
@@ -193,9 +204,9 @@ namespace awl::io
         }
     }
 
-    template <class Stream, class Container>
+    template <class Stream, class Container, class Context = WriteContext<Stream>>
     typename std::enable_if<std::is_same<typename Container::value_type, bool>::value, void>::type
-        WriteVector(Stream & s, const Container & x)
+        WriteVector(Stream & s, const Container & x, const Context & ctx = {})
     {
         typename Container::size_type n = x.size();
 
@@ -211,221 +222,221 @@ namespace awl::io
                 }
             }
 
-            Write(s, aggr);
+            Write(s, aggr, ctx);
         }
     }
 
-    template <class Stream, class T, class Allocator = std::allocator<T>>
-    inline void Read(Stream & s, std::vector<T, Allocator> & v)
+    template <class Stream, class T, class Allocator = std::allocator<T>, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size;
 
-        Read(s, size);
+        Read(s, size, ctx);
 
         v.resize(size);
 
-        ReadVector(s, v);
+        ReadVector(s, v, ctx);
     }
 
-    template <class Stream, class T, class Allocator = std::allocator<T>>
-    inline void Write(Stream & s, const std::vector<T, Allocator> & v)
+    template <class Stream, class T, class Allocator = std::allocator<T>, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size = v.size();
 
-        Write(s, size);
+        Write(s, size, ctx);
 
-        WriteVector(s, v);
+        WriteVector(s, v, ctx);
     }
 
     //std::array has no specialization for bool type, but we save std::array<bool, N> in the same format as std::vector<bool>.
-    template <class Stream, typename T, std::size_t N>
-    inline void Read(Stream & s, std::array<T, N> & v)
+    template <class Stream, typename T, std::size_t N, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
     {
-        ReadVector(s, v);
+        ReadVector(s, v, ctx);
     }
 
-    template <class Stream, typename T, std::size_t N>
-    inline void Write(Stream & s, const std::array<T, N> & v)
+    template <class Stream, typename T, std::size_t N, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
     {
-        WriteVector(s, v);
+        WriteVector(s, v, ctx);
     }
 
     //Looks like std::bitset<N> does not have value_type, so we use BitSetAdapter
-    template <class Stream, std::size_t N>
-    inline void Read(Stream & s, std::bitset<N> & v)
+    template <class Stream, std::size_t N, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::bitset<N> & v, const Context & ctx = {})
     {
         adapters::BitSetAdapter<std::bitset<N>> a(v);
             
-        ReadVector(s, a);
+        ReadVector(s, a, ctx);
     }
 
-    template <class Stream, std::size_t N>
-    inline void Write(Stream & s, const std::bitset<N> & v)
+    template <class Stream, std::size_t N, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::bitset<N> & v, const Context & ctx = {})
     {
         const adapters::BitSetAdapter<const std::bitset<N>> a(v);
 
-        WriteVector(s, a);
+        WriteVector(s, a, ctx);
     }
 
-    template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
-    inline void Read(Stream & s, bitmap<Enum, N> & v)
+    template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, bitmap<Enum, N> & v, const Context & ctx = {})
     {
         adapters::BitMapAdapter<bitmap<Enum, N>> a(v);
 
-        ReadVector(s, a);
+        ReadVector(s, a, ctx);
     }
 
-    template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N>
-    inline void Write(Stream & s, const bitmap<Enum, N> & v)
+    template <class Stream, typename Enum, typename std::underlying_type<Enum>::type N, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const bitmap<Enum, N> & v, const Context & ctx = {})
     {
         const adapters::BitMapAdapter<const bitmap<Enum, N>> a(v);
 
-        WriteVector(s, a);
+        WriteVector(s, a, ctx);
     }
 
-    template <class Stream, class First, class Second>
-    inline void Write(Stream & s, const std::pair<First, Second> & val)
+    template <class Stream, class First, class Second, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::pair<First, Second> & val, const Context & ctx = {})
     {
-        Write(s, val.first);
-        Write(s, val.second);
+        Write(s, val.first, ctx);
+        Write(s, val.second, ctx);
     }
 
-    template <class Stream, typename Coll>
-    void ReadCollection(Stream & s, Coll & coll)
+    template <class Stream, typename Coll, class Context = ReadContext<Stream>>
+    void ReadCollection(Stream & s, Coll & coll, const Context & ctx = {})
     {
         size_t count;
 
-        Read(s, count);
+        Read(s, count, ctx);
 
         for (size_t i = 0; i < count; ++i)
         {
             typename Coll::value_type elem;
 
-            Read(s, elem);
+            Read(s, elem, ctx);
 
             coll.insert(elem);
         }
     }
 
     //There is a separate function for reading a map because the first pair type is const (std::pair<const Key, T>):
-    template <class Stream, typename Coll>
-    void ReadMap(Stream & s, Coll & coll)
+    template <class Stream, typename Coll, class Context = ReadContext<Stream>>
+    void ReadMap(Stream & s, Coll & coll, const Context & ctx = {})
     {
         size_t count;
 
-        Read(s, count);
+        Read(s, count, ctx);
 
         for (size_t i = 0; i < count; ++i)
         {
             typename Coll::key_type key;
-            Read(s, key);
+            Read(s, key, ctx);
 
             typename Coll::mapped_type value;
-            Read(s, value);
+            Read(s, value, ctx);
 
             coll.insert(std::make_pair(key, value));
         }
     }
 
-    template <class Stream, typename Coll>
-    void WriteCollection(Stream & s, const Coll & coll)
+    template <class Stream, typename Coll, class Context = WriteContext<Stream>>
+    void WriteCollection(Stream & s, const Coll & coll, const Context & ctx = {})
     {
         size_t count = coll.size();
 
-        Write(s, count);
+        Write(s, count, ctx);
 
         for (auto & elem : coll)
         {
-            Write(s, elem);
+            Write(s, elem, ctx);
         }
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Read(Stream & s, std::set<T, Compare, Alloc> & coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
-        ReadCollection(s, coll);
+        ReadCollection(s, coll, ctx);
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Write(Stream & s, const std::set<T, Compare, Alloc> &coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
-        ReadCollection(s, coll);
+        ReadCollection(s, coll, ctx);
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Read(Stream & s, observable_set<T, Compare, Alloc> & coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, observable_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
-        ReadCollection(s, coll);
+        ReadCollection(s, coll, ctx);
     }
 
-    template <class Stream, class T, class Compare, class Alloc>
-    inline void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll)
+    template <class Stream, class T, class Compare, class Alloc, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
-    template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
-    inline void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll)
+    template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
-        ReadCollection(s, coll);
+        ReadCollection(s, coll, ctx);
     }
 
-    template<class Stream, class T, class Hash, class KeyEqual, class Allocator>
-    inline void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll)
+    template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
-    template <class Stream, class Key, class T, class Compare, class Alloc>
-    inline void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll)
+    template <class Stream, class Key, class T, class Compare, class Alloc, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll, const Context & ctx = {})
     {
-        ReadMap(s, coll);
+        ReadMap(s, coll, ctx);
     }
 
-    template <class Stream, class Key, class T, class Compare, class Alloc>
-    inline void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll)
+    template <class Stream, class Key, class T, class Compare, class Alloc, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
-    template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator>
-    inline void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll)
+    template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
-        ReadMap(s, coll);
+        ReadMap(s, coll, ctx);
     }
 
-    template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator>
-    inline void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll)
+    template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
-        WriteCollection(s, coll);
+        WriteCollection(s, coll, ctx);
     }
 
 #if AWL_CPPSTD >= 17
 
     //Implementing Read/WriteEach with fold expressions.
 
-    template<class Stream, typename ... Fields>
-    inline void ReadEach(Stream & s, std::tuple<Fields& ...> val)
+    template<class Stream, typename ... Fields, class Context = ReadContext<Stream>>
+    inline void ReadEach(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
     {
-        for_each(val, [&s](auto& field) { Read(s, field); });
+        for_each(val, [&s, &ctx](auto& field) { Read(s, field, ctx); });
     }
 
-    template<class Stream, typename ... Fields>
-    inline void WriteEach(Stream & s, const std::tuple<Fields& ...> & val)
+    template<class Stream, typename ... Fields, class Context = WriteContext<Stream>>
+    inline void WriteEach(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
     {
-        for_each(val, [&s](auto& field) { Write(s, field); });
+        for_each(val, [&s, &ctx](auto& field) { Write(s, field, ctx); });
     }
 
 #else
@@ -457,10 +468,10 @@ namespace awl::io
 
 #endif
     //A tuple of references is passed by value.
-    template<class Stream, typename ... Fields>
-    inline void Read(Stream & s, std::tuple<Fields& ...> val)
+    template<class Stream, typename ... Fields, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
     {
-        ReadEach(s, val);
+        ReadEach(s, val, ctx);
     }
 
     //A tuple of values is passed by reference. Cannot figure out why this does not compile with VC2017.
@@ -470,51 +481,51 @@ namespace awl::io
     //    ReadEach(s, val);
     //}
 
-    template<class Stream, typename ... Fields>
-    inline void Write(Stream & s, const std::tuple<Fields& ...> & val)
+    template<class Stream, typename ... Fields, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
     {
-        WriteEach(s, val);
+        WriteEach(s, val, ctx);
     }
 
-    template <class Stream, typename T>
-    inline typename std::enable_if<is_tuplizable_v<T>, void>::type Read(Stream & s, T & val)
+    template <class Stream, typename T, class Context = ReadContext<Stream>>
+    inline typename std::enable_if<is_tuplizable_v<T>, void>::type Read(Stream & s, T & val, const Context & ctx = {})
     {
-        Read(s, object_as_tuple(val));
+        Read(s, object_as_tuple(val), ctx);
     }
 
-    template <class Stream, typename T>
-    inline typename std::enable_if<is_tuplizable_v<T>, void>::type Write(Stream & s, const T & val)
+    template <class Stream, typename T, class Context = WriteContext<Stream>>
+    inline typename std::enable_if<is_tuplizable_v<T>, void>::type Write(Stream & s, const T & val, const Context & ctx = {})
     {
-        Write(s, object_as_tuple(val));
+        Write(s, object_as_tuple(val), ctx);
     }
 
-    template <class Stream, typename T>
-    inline void Read(Stream & s, std::optional<T>& opt_val)
+    template <class Stream, typename T, class Context = ReadContext<Stream>>
+    inline void Read(Stream & s, std::optional<T>& opt_val, const Context & ctx = {})
     {
         bool has_value;
 
-        Read(s, has_value);
+        Read(s, has_value, ctx);
 
         if (has_value)
         {
             T val;
 
-            Read(s, val);
+            Read(s, val, ctx);
 
             opt_val = std::move(val);
         }
     }
 
-    template <class Stream, typename T>
-    inline void Write(Stream & s, const std::optional<T>& opt_val)
+    template <class Stream, typename T, class Context = WriteContext<Stream>>
+    inline void Write(Stream & s, const std::optional<T>& opt_val, const Context & ctx = {})
     {
         const bool has_value = opt_val.has_value();
 
-        Write(s, has_value);
+        Write(s, has_value, ctx);
 
         if (has_value)
         {
-            Write(s, opt_val.value());
+            Write(s, opt_val.value(), ctx);
         }
     }
 }
