@@ -77,7 +77,7 @@ namespace
 
         struct C
         {
-            int x = 7;
+            int x;
 
             AWL_STRINGIZABLE(x)
         };
@@ -92,15 +92,15 @@ namespace
             A b;
             int x;
             bool y;
-            Vector<A> v{ a_expected, a_expected, a_expected };
-            std::set<C> v1{ c_expected };
+            Vector<A> v;
+            std::set<C> v1;
 
             AWL_STRINGIZABLE(a, b, x, y, v, v1)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
-        static const B b_expected = { a_expected, a_expected, 1, true, Vector<A>{ a_expected, a_expected, a_expected } };
+        static const B b_expected = { a_expected, a_expected, 1, true, Vector<A>{ a_expected, a_expected, a_expected }, { c_expected } };
         
         static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
     }
@@ -126,7 +126,7 @@ namespace
 
         struct C
         {
-            int x = 7;
+            int x;
 
             AWL_STRINGIZABLE(x)
         };
@@ -141,15 +141,15 @@ namespace
             Vector<int> z{ 1, 2, 3 };
             int x;
             String w = "xyz";
-            Vector<A> v{ a_expected, a_expected, a_expected };
-            std::set<C> v1 { c_expected };
+            Vector<A> v;
+            std::set<C> v1;
 
             AWL_STRINGIZABLE(a, x, z, w, v, v1)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
 
-        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected } };
+        static const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected }, { c_expected } };
 
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
         static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
