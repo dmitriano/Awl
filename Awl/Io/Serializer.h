@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include <unordered_map>
+#include <optional>
 
 namespace awl::io
 {
@@ -458,7 +459,8 @@ namespace awl::io
                 {
                     if (new_index != pm->newStructIndex)
                     {
-                        throw IoError(format() << _T("Inconsisten structure indices: new index 1: ") << pm->newStructIndex << _T(" new index 2: ") << new_index << _T(" old index: ") << old_struct_index << _T("."));
+                        throw IoError(format() << _T("Inconsisten structure indices: new index 1: ") << pm->newStructIndex << 
+                            _T(" new index 2: ") << new_index << _T(" old index: ") << old_struct_index << _T("."));
                     }
 
                     return pm->fieldMap;
