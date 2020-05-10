@@ -546,30 +546,32 @@ namespace awl::io
                 }
             }
 
-            CheckProtoMap(v);
+            //The implementation is incorrect if two structure members with index==NoIndex
+            //were switched places, so we do not use it.
+            //CheckProtoMap(v);
 
             return v;
         }
 
+        //Clears the vector if the map is trivial (experimental implementation).
         void CheckProtoMap(std::vector<size_t> & v) const
         {
-            //Clear the vector if the map is trivial.
             auto range = awl::make_count(v.size());
             if (std::equal(v.begin(), v.end(), range.begin(), range.end(),
                 [this](size_t left, size_t right)
             {
                 if (left == right)
                 {
-                    if (left == Prototype::NoIndex)
-                    {
-                        //They are structures, so we need to check recursively, but we do not know new index.
-                        assert(false);
-                    }
-                    else
-                    {
-                        //It is possible that the indices are not equal but names are.
-                        return AreTypeNamesEqual(left, right);
-                    }
+                    //If they are structures, we do not need to check recursively,
+                    //we only guarantee that this structure is read sequentially as a tuple
+                    //without readers and skippers.
+                    return true;
+                }
+
+                if (left != Prototype::NoIndex && right != Prototype::NoIndex)
+                {
+                    //It is possible that the indices are not equal but names are.
+                    return AreTypeNamesEqual(left, right);
                 }
 
                 return false;
