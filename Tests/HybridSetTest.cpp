@@ -156,6 +156,11 @@ namespace
 
     static void CompareSets(const StdSet & std_set, const MySet & my_set)
     {
+        if (std_set.empty() && my_set.empty())
+        {
+            return;
+        }
+        
         {
             auto i = std_set.begin();
 
