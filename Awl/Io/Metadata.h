@@ -17,13 +17,13 @@ namespace awl::io
         TypeNameVector typeNames;
         PrototypeVector prototypes;
 
-        AWL_SERIALIZABLE(typeNames, prototypes);
+        AWL_SERIALIZABLE(typeNames, prototypes)
     };
 
-    AWL_MEMBERWISE_EQUATABLE(Metadata);
+    AWL_MEMBERWISE_EQUATABLE(Metadata)
 }
 
-namespace awl::io
-{
-    using MetaTable = std::unordered_set<Metadata>;
-}
+//namespace awl::io
+//{
+//    using MetaTable = std::unordered_set<Metadata>;
+//}

@@ -32,10 +32,10 @@ namespace awl
     };
 
     template <typename... Ts>
-    size_t GetTupleHash(std::tuple<Ts...> const& tt)
+    size_t GetTupleHash(std::tuple<Ts...> const& t)
     {
         size_t seed = 0;
-        HashValueImpl<std::tuple<Ts...>>::apply(seed, tt);
+        HashValueImpl<std::tuple<Ts...>>::apply(seed, t);
         return seed;
     }
 }
