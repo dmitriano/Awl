@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/Stringizable.h"
+#include "Awl/Hashable.h"
 
 #include <vector>
 #include <functional>
@@ -168,3 +169,6 @@ namespace awl
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype::FieldContainer)
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype)
 }
+
+AWL_HASHABLE(awl::DetachedPrototype::FieldContainer);
+AWL_HASHABLE(awl::DetachedPrototype);

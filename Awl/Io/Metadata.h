@@ -2,10 +2,11 @@
 
 #include  "Awl/Prototype.h"
 #include  "Awl/Serializable.h"
+#include  "Awl/Hashable.h"
 
 #include <cassert>
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
 
 namespace awl::io
 {
@@ -19,4 +20,9 @@ namespace awl::io
 
         AWL_SERIALIZABLE(typeNames, prototypes);
     };
+}
+
+namespace awl::io
+{
+    using MetaTable = std::unordered_set<Metadata>;
 }
