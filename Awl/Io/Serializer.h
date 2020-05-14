@@ -357,6 +357,12 @@ namespace awl::io
             oldPrototypes = protos;
         }
 
+        void ClearPrototypes()
+        {
+            oldPrototypes.clear();
+            protoMaps.clear();
+        }
+
         template<class Struct>
         void ReadV(InputStream & s, Struct & val) const
         {
