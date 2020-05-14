@@ -2,7 +2,6 @@
 
 #include  "Awl/Prototype.h"
 #include  "Awl/Serializable.h"
-#include  "Awl/Hashable.h"
 
 #include <cassert>
 #include <vector>
@@ -20,6 +19,8 @@ namespace awl::io
 
         AWL_SERIALIZABLE(typeNames, prototypes);
     };
+
+    AWL_MEMBERWISE_EQUATABLE(Metadata);
 }
 
 namespace awl::io

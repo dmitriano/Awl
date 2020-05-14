@@ -31,11 +31,11 @@ namespace awl
         }
     };
 
-    template <typename... TT>
-    size_t GetTupleHash(std::tuple<TT...> const& tt)
+    template <typename... Ts>
+    size_t GetTupleHash(std::tuple<Ts...> const& tt)
     {
         size_t seed = 0;
-        HashValueImpl<std::tuple<TT...>>::apply(seed, tt);
+        HashValueImpl<std::tuple<Ts...>>::apply(seed, tt);
         return seed;
     }
 }
@@ -49,11 +49,14 @@ namespace std
         typedef std::size_t result_type;
         result_type operator()(argument_type const& in) const
         {
-            size_t size = in.size();
             size_t seed = 0;
-            for (size_t i = 0; i < size; i++)
+
+            for (const T & val : in)
+            {
                 //Combine the hash of the current vector with the hashes of the previous ones
-                awl::CombineHash(seed, in[i]);
+                awl::CombineHash(seed, val);
+            }
+
             return seed;
         }
     };

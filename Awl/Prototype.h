@@ -169,6 +169,3 @@ namespace awl
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype::FieldContainer)
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype)
 }
-
-AWL_HASHABLE(awl::DetachedPrototype::FieldContainer)
-AWL_HASHABLE(awl::DetachedPrototype)
