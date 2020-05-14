@@ -45,7 +45,7 @@ namespace awl::io
         NewPrototypeTuple newPrototypesTuple;
         NewPrototypeArray newPrototypes;
 
-        using I2nMap = std::unordered_map<size_t, std::string>;
+        using I2nMap = std::vector<std::string>;
         using N2iMap = std::unordered_map<std::string, size_t>;
 
         class TypeMapBuilder
@@ -69,7 +69,7 @@ namespace awl::io
             static I2nMap BuildI2nMap(std::index_sequence<index...>)
             {
                 I2nMap tm;
-                (tm.emplace(index, MakeName<index>()), ...);
+                (tm.push_back(MakeName<index>()), ...);
                 return tm;
             }
 
@@ -319,15 +319,13 @@ namespace awl::io
 
                     if (old_field.type != Field::NoType)
                     {
-                        auto old_i = old_tm.find(old_field.type);
-
-                        if (old_i == old_tm.end())
+                        if (old_field.type >= old_tm.size())
                         {
                             //The type table is corrupted.
                             throw CorruptionException();
                         }
 
-                        const std::string & name = old_i->second;
+                        const std::string & name = old_tm[old_field.type];
 
                         auto new_i = new_tm.find(name);
 
@@ -589,8 +587,8 @@ namespace awl::io
 
         bool AreTypeNamesEqual(size_t old_type, size_t new_type) const
         {
-            const std::string & old_name = typeMap.find(old_type)->second;
-            const std::string & new_name = typeMap.find(new_type)->second;
+            const std::string & old_name = typeMap[old_type];
+            const std::string & new_name = typeMap[new_type];
 
             //The names are equal if a structure contains vector<A> and set<A>, for example.
             return old_name == new_name;
