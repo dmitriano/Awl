@@ -63,7 +63,7 @@ namespace std
     namespace std \
     { \
         template <> \
-        struct std::hash<ClassName> \
+        struct hash<ClassName> \
         { \
             size_t operator()(const ClassName& val) const \
             { \
