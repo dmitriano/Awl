@@ -10,6 +10,7 @@
 #include "Awl/Io/RwHelpers.h"
 #include "Awl/Io/MpHelpers.h"
 #include "Awl/Io/TypeName.h"
+#include "Awl/Io/Metadata.h"
 
 #include <cassert>
 #include <unordered_map>
@@ -45,7 +46,7 @@ namespace awl::io
         NewPrototypeTuple newPrototypesTuple;
         NewPrototypeArray newPrototypes;
 
-        using I2nMap = std::vector<std::string>;
+        using I2nMap = TypeNameVector;
         using N2iMap = std::unordered_map<std::string, size_t>;
 
         class TypeMapBuilder
@@ -300,14 +301,19 @@ namespace awl::io
         template <class Stream>
         void ReadOldPrototypes(Stream & s)
         {
-            //Read type map
-            typename Base::I2nMap old_tm;
-            Read(s, old_tm);
+            Metadata meta;
+            
+            Read(s, meta);
+            
+            AttachMetadata(meta);
+        }
+
+        void AttachMetadata(Metadata & meta)
+        {
+            const typename Base::I2nMap old_tm = meta.typeNames;
 
             assert(oldPrototypes.empty());
-            //Read std::vector.
-            std::vector<DetachedPrototype> protos;
-            Read(s, protos);
+            std::vector<DetachedPrototype> protos = meta.prototypes;
 
             typename Base::N2iMap new_tm = Base::TypeMapBuilder::BuildN2iMap();
 
@@ -600,7 +606,7 @@ namespace awl::io
         SkipperTuple skipperTuple;
         SkipperArray skipperArray;
 
-        std::vector<DetachedPrototype> oldPrototypes;
+        PrototypeVector oldPrototypes;
         mutable std::vector<std::optional<ProtoMap>> protoMaps;
 
         typename Base::I2nMap typeMap;
