@@ -51,6 +51,78 @@ AWT_TEST(Prototype_TypeMap)
     AWT_ASSERT(dp == result);
 }
 
+namespace awl
+{
+    namespace helpers
+    {
+        template <class Variant, class Tuple, std::size_t Index = 0>
+        Variant runtime_get(Tuple &&tuple, std::size_t index)
+        {
+            if constexpr (Index == std::tuple_size_v<std::decay_t<Tuple>>)
+            {
+                static_cast<void>(tuple);
+                static_cast<void>(index);
+                throw GeneralException(_T("Index out of range for tuple"));
+            }
+            else
+            {
+                if (index == Index)
+                {
+                    return Variant{ std::get<Index>(tuple) };
+                }
+
+                return runtime_get<Variant, Tuple, Index + 1>(std::forward<Tuple>(tuple), index);
+            }
+        }
+
+        template <class Tuple, class Variant, std::size_t Index = 0>
+        void runtime_set(Tuple &tuple, std::size_t index, Variant const& variant)
+        {
+            if constexpr (Index == std::tuple_size_v<std::decay_t<Tuple>>)
+            {
+                static_cast<void>(tuple);
+                static_cast<void>(index);
+                static_cast<void>(variant);
+                throw GeneralException(_T("Index out of range for tuple"));
+            }
+            else
+            {
+                if (index == Index)
+                {
+                    // Note: You should check here that variant holds the correct type
+                    // before assigning.
+                    std::get<Index>(tuple) = std::get<std::remove_reference_t<std::tuple_element_t<Index, Tuple>>>(variant);
+                }
+                else
+                {
+                    runtime_set<Tuple, Variant, Index + 1>(tuple, index, variant);
+                }
+            }
+        }
+    }
+
+    template <class V, class S>
+    class Accessor
+    {
+    private:
+
+        using Tie = typename tuplizable_traits<S>::Tie;
+
+    public:
+
+        V Get(const S & val, size_t index) const
+        {
+            return helpers::runtime_get<V>(object_as_tuple(val), index);
+        }
+
+        void Set(S & val, size_t index, V v_field) const
+        {
+            auto temp = val.as_tuple();
+            helpers::runtime_set(temp, index, v_field);
+        }
+    };
+}
+
 AWT_TEST(Prototype_RuntimeIndex)
 {
     AWT_UNUSED_CONTEXT;
@@ -70,7 +142,7 @@ AWT_TEST(Prototype_GetSetPlain)
 {
     AWT_UNUSED_CONTEXT;
 
-    awl::AttachedPrototype<V, A> ap;
+    awl::Accessor<V, A> ap;
 
     A a = { 1, 5.0, "abc" };
 
@@ -91,7 +163,7 @@ AWT_TEST(Prototype_GetSetRecursive)
 {
     AWT_UNUSED_CONTEXT;
 
-    awl::AttachedPrototype<V, B> bp;
+    //awl::Accessor<V, B> bp;
 
     A a = { 1, 5.0, "abc" };
     B b = { 1, a, 5.0, a, "abc"};
