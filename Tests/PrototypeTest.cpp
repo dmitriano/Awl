@@ -36,7 +36,7 @@ namespace
     AWL_MEMBERWISE_EQUATABLE(B)
 }
 
-using V = std::variant<int, double, std::string>;
+using V = std::variant<bool, char, int, float, double, std::string>;
 
 AWT_TEST(Prototype_TypeMap)
 {
