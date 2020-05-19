@@ -19,11 +19,11 @@ static void TestIntContainer(const C * sample)
 
     V v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE((v == V { 10, -3, 50 }));
+    AWT_ASSERT((v == V { 10, -3, 50 }));
 
     TString s_result = F::ToString(v);
 
-    AWT_ASSERT_TRUE(s_sample == s_result);
+    AWT_ASSERT(s_sample == s_result);
 }
 
 AWT_TEST(Formatter_IntContainer)
@@ -45,11 +45,11 @@ AWT_TEST(Formatter_StringContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE((v == V { _T("a"), _T("b"), _T("cde") }));
+    AWT_ASSERT((v == V { _T("a"), _T("b"), _T("cde") }));
 
     String s_result = F::ToString(v);
 
-    AWT_ASSERT_TRUE(s_sample == s_result);
+    AWT_ASSERT(s_sample == s_result);
 }
 
 AWT_TEST(Formatter_BoolContainer)
@@ -63,11 +63,11 @@ AWT_TEST(Formatter_BoolContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT_TRUE((v == V { true, false, false }));
+    AWT_ASSERT((v == V { true, false, false }));
 
     String s_result = F::ToString(v);
 
-    AWT_ASSERT_TRUE(s_sample == s_result);
+    AWT_ASSERT(s_sample == s_result);
 }
 
 AWT_TEST(Formatter_String)
@@ -80,11 +80,11 @@ AWT_TEST(Formatter_String)
 
     auto from_result = F::FromString(sample);
 
-    AWT_ASSERT_TRUE(from_result == sample);
+    AWT_ASSERT(from_result == sample);
 
     String to_result = F::ToString(sample);
 
-    AWT_ASSERT_TRUE(to_result == sample);
+    AWT_ASSERT(to_result == sample);
 }
 
 AWT_TEST(Formatter_Arithmetic)

@@ -17,7 +17,7 @@ static void EncodeDecode(const TestContext &, const std::wstring sample)
 
     const std::wstring decoded = awl::DecodeString(encoded.c_str());
 
-    AWT_ASSERT_TRUE(decoded == sample);
+    AWT_ASSERT(decoded == sample);
 }
 
 AWT_TEST(DecodeString)

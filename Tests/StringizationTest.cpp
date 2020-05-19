@@ -40,11 +40,11 @@ namespace
 
     void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
     {
-        AWT_ASSERT_TRUE(v.size() == ml.size());
+        AWT_ASSERT(v.size() == ml.size());
 
         for (size_t i = 0; i != v.size(); ++i)
         {
-            AWT_ASSERT_TRUE(v[i] == ml[i]);
+            AWT_ASSERT(v[i] == ml[i]);
         }
     }
 
@@ -106,7 +106,7 @@ AWT_TEST(Stringizable_ForEach)
         map.emplace(a1.get_member_names()[index], val);
     });
 
-    AWT_ASSERT_TRUE(map.size() == 3);
+    AWT_ASSERT(map.size() == 3);
 
     A a2 = {};
 
@@ -115,5 +115,5 @@ AWT_TEST(Stringizable_ForEach)
         val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.get_member_names()[index]]);
     });
 
-    AWT_ASSERT_TRUE(a1 == a2);
+    AWT_ASSERT(a1 == a2);
 }

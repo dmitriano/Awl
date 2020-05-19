@@ -70,7 +70,7 @@ namespace awl::testing
 #define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
 #define AWT_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
-#define AWT_ASSERT_TRUE(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
+#define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
 #define AWT_ASSERTM_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
 
 #define AWT_ASSERT_FALSE(cond) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" is not false. ") AWT_SRC_INFO)
@@ -86,7 +86,7 @@ namespace awl::testing
 #define AWT_ASSERT(cond) AWT_FAKE_ASSERT
 #define AWT_ASSERTM(cond, message) AWT_FAKE_ASSERT
 
-#define AWT_ASSERT_TRUE(cond) AWT_FAKE_ASSERT
+#define AWT_ASSERT(cond) AWT_FAKE_ASSERT
 #define AWT_ASSERTM_TRUE(cond, message) AWT_FAKE_ASSERT
 
 #define AWT_ASSERT_FALSE(cond) AWT_FAKE_ASSERT

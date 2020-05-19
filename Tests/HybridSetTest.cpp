@@ -35,11 +35,11 @@ namespace awl
             }
 
             Set::Node * pn3 = set.FindNodeByKey(3);
-            AWT_ASSERT_TRUE(pn3 != nullptr);
-            AWT_ASSERT_TRUE(pn3->value == 3);
+            AWT_ASSERT(pn3 != nullptr);
+            AWT_ASSERT(pn3->value == 3);
 
             Set::Node * pn7 = set.FindNodeByKey(7);
-            AWT_ASSERT_TRUE(pn7 == nullptr);
+            AWT_ASSERT(pn7 == nullptr);
 
             {
                 std::array<Set::Node *, count> nodes = { n1, n2, n3, n4, n5 };
@@ -51,8 +51,8 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    AWT_ASSERT_TRUE(set.GetPredecessor(x) == predecessor);
-                    AWT_ASSERT_TRUE(set.GetSuccessor(x) == successor);
+                    AWT_ASSERT(set.GetPredecessor(x) == predecessor);
+                    AWT_ASSERT(set.GetSuccessor(x) == successor);
                 }
             }
 
@@ -63,17 +63,17 @@ namespace awl
             AWT_ASSERT_EQUAL(nN->value, set.back());
 
             set.RemoveNode(n1);
-            AWT_ASSERT_TRUE(set.m_root == n2);
+            AWT_ASSERT(set.m_root == n2);
             set.RemoveNode(n2);
-            AWT_ASSERT_TRUE(set.m_root == n4);
+            AWT_ASSERT(set.m_root == n4);
             set.RemoveNode(n4);
-            AWT_ASSERT_TRUE(set.m_root == n5);
+            AWT_ASSERT(set.m_root == n5);
             set.RemoveNode(n3);
-            AWT_ASSERT_TRUE(set.m_root == n5);
+            AWT_ASSERT(set.m_root == n5);
             set.RemoveNode(n5);
-            AWT_ASSERT_TRUE(set.m_root == nN);
+            AWT_ASSERT(set.m_root == nN);
             set.RemoveNode(nN);
-            AWT_ASSERT_TRUE(set.m_root == nullptr);
+            AWT_ASSERT(set.m_root == nullptr);
         }
 
     private:
@@ -81,7 +81,7 @@ namespace awl
         Set::Node * InsertNew(int val)
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
-            AWT_ASSERT_TRUE(p.second);
+            AWT_ASSERT(p.second);
             return *(Set::ExtractListIterator(p.first));
         }
 
@@ -170,7 +170,7 @@ namespace
                 AWT_ASSERT_EQUAL(std_val, val);
             }
 
-            AWT_ASSERT_TRUE(i == std_set.end());
+            AWT_ASSERT(i == std_set.end());
         }
 
         {
@@ -183,7 +183,7 @@ namespace
                 AWT_ASSERTM_EQUAL(std_val, my_val, _T("wrong element"));
             }
 
-            AWT_ASSERT_TRUE(i == std_set.rend());
+            AWT_ASSERT(i == std_set.rend());
         }
     }
 
@@ -224,8 +224,8 @@ AWT_TEST(HybridSetRandom)
     std::uniform_int_distribution<size_t> dist(1, range);
 
     MySet my_set;
-    AWT_ASSERT_TRUE(my_set.empty());
-    AWT_ASSERT_TRUE(my_set.size() == 0);
+    AWT_ASSERT(my_set.empty());
+    AWT_ASSERT(my_set.size() == 0);
 
     StdSet std_set;
 
@@ -257,7 +257,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_set.find(val);
             auto std_i = std_set.find(val);
-            AWT_ASSERT_TRUE((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWT_ASSERT((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         {
@@ -266,7 +266,7 @@ AWT_TEST(HybridSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_const_set.find(val);
             auto std_i = std_set.find(val);
-            AWT_ASSERT_TRUE((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWT_ASSERT((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         //Delete random value.
@@ -288,7 +288,7 @@ AWT_TEST(HybridSetRandom)
 
             context.out << std::endl;
 
-            AWT_ASSERT_TRUE(my_result == std_result);
+            AWT_ASSERT(my_result == std_result);
 
             if (my_result)
             {
@@ -308,8 +308,8 @@ AWT_TEST(HybridSetRandom)
     }
 
     my_set.clear();
-    AWT_ASSERT_TRUE(my_set.empty());
-    AWT_ASSERT_TRUE(my_set.size() == 0);
+    AWT_ASSERT(my_set.empty());
+    AWT_ASSERT(my_set.size() == 0);
     AWT_ASSERTM_EQUAL(0u, memory_size, _T("memory leaks"));
 }
 
@@ -326,10 +326,10 @@ AWT_TEST(HybridSetRValue)
     set.insert(std::move(rval));
     set.emplace(_T("def"));
 
-    AWT_ASSERT_TRUE(rval == _T(""));
-    AWT_ASSERT_TRUE(set.front() == _T("abc"));
-    AWT_ASSERT_TRUE(*(++set.begin()) == _T("def"));
-    AWT_ASSERT_TRUE(set.back() == _T("xyz"));
+    AWT_ASSERT(rval == _T(""));
+    AWT_ASSERT(set.front() == _T("abc"));
+    AWT_ASSERT(*(++set.begin()) == _T("def"));
+    AWT_ASSERT(set.back() == _T("xyz"));
 }
 
 template <class Key, class T = Key, class Compare = std::less<>>
@@ -355,17 +355,17 @@ AWT_TEST(HybridSetCopyMove)
     using Set = awl::hybrid_set<int>;
     
     const Set sample = GenerateIntSet<int>(1000, 1000);
-    AWT_ASSERT_TRUE((sample != Set{ -1, -2, -3, -4, -5 }));
+    AWT_ASSERT((sample != Set{ -1, -2, -3, -4, -5 }));
 
     const Set copy = sample;
-    AWT_ASSERT_TRUE(copy == sample);
+    AWT_ASSERT(copy == sample);
 
     Set temp = copy;
-    AWT_ASSERT_TRUE(temp == copy);
+    AWT_ASSERT(temp == copy);
 
     const Set moved = std::move(temp);
-    AWT_ASSERT_TRUE(moved == copy);
-    AWT_ASSERT_TRUE(temp.empty());
+    AWT_ASSERT(moved == copy);
+    AWT_ASSERT(temp.empty());
 }
 
 //--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
@@ -446,10 +446,10 @@ namespace
         for (auto val : set)
         {
             const auto found_val = set.at(index);
-            AWT_ASSERT_TRUE(val == found_val);
+            AWT_ASSERT(val == found_val);
 
             const auto i = set.find(val.key);
-            AWT_ASSERT_TRUE(i != set.end() && *i == val);
+            AWT_ASSERT(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
             AWT_ASSERT_EQUAL(index, found_index);
@@ -501,21 +501,21 @@ namespace
         {
             const A & val = v[index];
             const A * found_val = set.at(index);
-            AWT_ASSERT_TRUE(val == *found_val);
+            AWT_ASSERT(val == *found_val);
 
             AWT_ASSERT_EQUAL(index, set.index_of(&val));
             AWT_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(&val);
-                AWT_ASSERT_TRUE(i != set.end());
-                AWT_ASSERT_TRUE(*(*i) == val);
+                AWT_ASSERT(i != set.end());
+                AWT_ASSERT(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                AWT_ASSERT_TRUE(i != set.end());
-                AWT_ASSERT_TRUE(*(*i) == val);
+                AWT_ASSERT(i != set.end());
+                AWT_ASSERT(*(*i) == val);
             }
         }
     }
@@ -548,21 +548,21 @@ namespace
         {
             const A & val = v[index];
             const Pointer & p_found = set.at(index);
-            AWT_ASSERT_TRUE(val == *p_found);
+            AWT_ASSERT(val == *p_found);
 
             AWT_ASSERT_EQUAL(index, set.index_of(Pointer(new A(val))));
             AWT_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(Pointer(new A(val)));
-                AWT_ASSERT_TRUE(i != set.end());
-                AWT_ASSERT_TRUE(*(*i) == val);
+                AWT_ASSERT(i != set.end());
+                AWT_ASSERT(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                AWT_ASSERT_TRUE(i != set.end());
-                AWT_ASSERT_TRUE(*(*i) == val);
+                AWT_ASSERT(i != set.end());
+                AWT_ASSERT(*(*i) == val);
             }
         }
     }
@@ -630,10 +630,10 @@ namespace
         for (auto & val : set)
         {
             const auto & found_val = set.at(index);
-            AWT_ASSERT_TRUE(val == found_val);
+            AWT_ASSERT(val == found_val);
 
             const auto i = set.find(val.GetKey());
-            AWT_ASSERT_TRUE(i != set.end() && *i == val);
+            AWT_ASSERT(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
             AWT_ASSERT_EQUAL(index, found_index);
@@ -689,7 +689,7 @@ AWT_TEST(HybridSetNonCopyableElement)
 
         AWT_ASSERT_EQUAL(set1.index_of(found_key), i);
         AWT_ASSERT_EQUAL(set1.index_of(B(found_key)), i);
-        AWT_ASSERT_TRUE(set1.find(B(found_key)) != set1.end());
+        AWT_ASSERT(set1.find(B(found_key)) != set1.end());
     }
 
     TestBComparer<awl::FuncCompare<B, int, &B::GetKey>>(insert_count, range);

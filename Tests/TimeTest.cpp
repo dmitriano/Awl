@@ -31,12 +31,12 @@ static void CheckResult(std::chrono::time_point<Clock, Duration> tp)
     tm utm;
     //gmtime_s(&utm, &t);
     localtime_s(&utm, &t);
-    AWT_ASSERT_TRUE(utm.tm_year + 1900 == 2019);
-    AWT_ASSERT_TRUE(utm.tm_mon == 7);
-    AWT_ASSERT_TRUE(utm.tm_mday == 17);
-    AWT_ASSERT_TRUE(utm.tm_hour == 16);
-    AWT_ASSERT_TRUE(utm.tm_min == 31);
-    AWT_ASSERT_TRUE(utm.tm_sec == 13);
+    AWT_ASSERT(utm.tm_year + 1900 == 2019);
+    AWT_ASSERT(utm.tm_mon == 7);
+    AWT_ASSERT(utm.tm_mday == 17);
+    AWT_ASSERT(utm.tm_hour == 16);
+    AWT_ASSERT(utm.tm_min == 31);
+    AWT_ASSERT(utm.tm_sec == 13);
 }
 
 AWT_TEST(MakeTime)
@@ -52,10 +52,10 @@ AWT_TEST(MakeTime)
     CheckResult(tp);
 
     auto d = duration_cast<Clock::duration>(nanoseconds(ns_count));
-    AWT_ASSERT_TRUE(tp_with_ns - tp == d);
+    AWT_ASSERT(tp_with_ns - tp == d);
 
     auto d_ns = tp_with_ns - time_point_cast<nanoseconds>(tp);
-    AWT_ASSERT_TRUE(d_ns == nanoseconds(ns_count));
+    AWT_ASSERT(d_ns == nanoseconds(ns_count));
 }
 
 #endif

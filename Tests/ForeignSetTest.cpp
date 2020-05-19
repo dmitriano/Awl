@@ -72,7 +72,7 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
             if (f_count != 0)
             {
-                AWT_ASSERT_TRUE(i != fs.end());
+                AWT_ASSERT(i != fs.end());
 
                 const auto & vs = *i;
                 
@@ -80,7 +80,7 @@ AWT_TEST(ForeignSetAddRemoveClear)
             }
             else
             {
-                AWT_ASSERT_TRUE(i == fs.end());
+                AWT_ASSERT(i == fs.end());
             }
         }
     };
@@ -99,7 +99,7 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
     check();
 
-    AWT_ASSERT_TRUE(fs.empty());
+    AWT_ASSERT(fs.empty());
 }
 
 AWT_TEST(ForeignSetDestructor)
@@ -117,5 +117,5 @@ AWT_TEST(ForeignSetDestructor)
         GenerateSet(ps, insert_count, range);
     }
 
-    AWT_ASSERT_TRUE(fs.empty());
+    AWT_ASSERT(fs.empty());
 }

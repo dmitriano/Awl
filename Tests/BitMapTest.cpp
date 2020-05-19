@@ -28,58 +28,58 @@ AWT_TEST(BitMapWithEnumTraits)
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 
-    AWT_ASSERT_TRUE(car.count() == 1);
+    AWT_ASSERT(car.count() == 1);
     static_assert(car.size() == 3);
 
-    AWT_ASSERT_TRUE(car);
+    AWT_ASSERT(car);
     
     static_assert(car[Vehicle::Car]);
-    AWT_ASSERT_TRUE(car & Vehicle::Car);
-    AWT_ASSERT_TRUE(car | Vehicle::Car);
+    AWT_ASSERT(car & Vehicle::Car);
+    AWT_ASSERT(car | Vehicle::Car);
     AWT_ASSERT_FALSE(car ^ Vehicle::Car);
 
     static_assert(!car[Vehicle::Train]);
     AWT_ASSERT_FALSE(car & Vehicle::Train);
     AWT_ASSERT_FALSE(car & Vehicle::Train);
-    AWT_ASSERT_TRUE(car | Vehicle::Train);
-    AWT_ASSERT_TRUE((car ^ Vehicle::Train) & Vehicle::Car);
+    AWT_ASSERT(car | Vehicle::Train);
+    AWT_ASSERT((car ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> other = ~car;
 
     AWT_ASSERT_FALSE(other[Vehicle::Car]);
     AWT_ASSERT_FALSE(other & Vehicle::Car);
-    AWT_ASSERT_TRUE(other | Vehicle::Car);
-    AWT_ASSERT_TRUE(other ^ Vehicle::Car);
+    AWT_ASSERT(other | Vehicle::Car);
+    AWT_ASSERT(other ^ Vehicle::Car);
 
-    AWT_ASSERT_TRUE(other[Vehicle::Train] && other[Vehicle::AirPlain]);
-    AWT_ASSERT_TRUE((other & Vehicle::Train) && (other & Vehicle::AirPlain));
+    AWT_ASSERT(other[Vehicle::Train] && other[Vehicle::AirPlain]);
+    AWT_ASSERT((other & Vehicle::Train) && (other & Vehicle::AirPlain));
     AWT_ASSERT_FALSE(other & Vehicle::Car);
-    AWT_ASSERT_TRUE(other | Vehicle::Car);
+    AWT_ASSERT(other | Vehicle::Car);
     AWT_ASSERT_FALSE((other ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> all = car | other;
-    AWT_ASSERT_TRUE(all.all());
-    AWT_ASSERT_TRUE(all == (car ^ other));
+    AWT_ASSERT(all.all());
+    AWT_ASSERT(all == (car ^ other));
     AWT_ASSERT_FALSE(car & other);
 
     const awl::bitmap<Vehicle> none = ~all;
-    AWT_ASSERT_TRUE(none.none());
+    AWT_ASSERT(none.none());
     AWT_ASSERT_FALSE(none);
 
-    AWT_ASSERT_TRUE(all == ~none);
+    AWT_ASSERT(all == ~none);
 
     awl::bitmap<Vehicle> var;
     AWT_ASSERT_FALSE(var);
     var[Vehicle::Car] = true;
-    AWT_ASSERT_TRUE(var[Vehicle::Car]);
+    AWT_ASSERT(var[Vehicle::Car]);
     AWT_ASSERT_FALSE(var[Vehicle::Train]);
     AWT_ASSERT_FALSE(var[Vehicle::AirPlain]);
-    AWT_ASSERT_TRUE(var == car);
-    AWT_ASSERT_TRUE(var != other);
+    AWT_ASSERT(var == car);
+    AWT_ASSERT(var != other);
 
     //There is no operator == (bool), but this compiles.
-    AWT_ASSERT_TRUE(var == true);
-    AWT_ASSERT_TRUE(none == false);
+    AWT_ASSERT(var == true);
+    AWT_ASSERT(none == false);
 }
 
 namespace BitMapTest1
@@ -102,8 +102,8 @@ namespace BitMapTest1
 
         static void Test()
         {
-            AWT_ASSERT_TRUE(GameLevel1BitMap{}.none());
-            AWT_ASSERT_TRUE((GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all()));
+            AWT_ASSERT(GameLevel1BitMap{}.none());
+            AWT_ASSERT((GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all()));
         }
 
         //error: Cannot specialize template in current scope.
@@ -121,14 +121,14 @@ AWT_TEST(BitMapEnclosed)
 
     A::Test();
 
-    AWT_ASSERT_TRUE(A({ }).m_bm.none());
-    AWT_ASSERT_TRUE((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
+    AWT_ASSERT(A({ }).m_bm.none());
+    AWT_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
 
     using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
-    AWT_ASSERT_TRUE(GameLevelBitMap2{ }.none());
-    AWT_ASSERT_TRUE((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
+    AWT_ASSERT(GameLevelBitMap2{ }.none());
+    AWT_ASSERT((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 
     using GameLevelBitMap3 = awl::bitmap<A::GameLevel>;
-    AWT_ASSERT_TRUE(GameLevelBitMap3{ }.none());
-    AWT_ASSERT_TRUE((GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
+    AWT_ASSERT(GameLevelBitMap3{ }.none());
+    AWT_ASSERT((GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 }

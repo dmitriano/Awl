@@ -35,7 +35,7 @@ namespace
 
         if (param == 2)
         {
-            AWT_ASSERT_TRUE(val == _T("temporary"));
+            AWT_ASSERT(val == _T("temporary"));
         }
 
         changeHandled = true;
@@ -58,7 +58,7 @@ namespace
             //Here val_copy is not temporary.
             Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
 
-            AWT_ASSERT_TRUE(val_copy == val);
+            AWT_ASSERT(val_copy == val);
         }
 
         void SetIt2(int it)
@@ -76,7 +76,7 @@ AWT_TEST(Observable_Events)
     Something something;
 
     AWT_ASSERT_EQUAL(0U, something.size());
-    AWT_ASSERT_TRUE(something.empty());
+    AWT_ASSERT(something.empty());
 
     {
         ChangeHandler handler1(context);
@@ -102,11 +102,11 @@ AWT_TEST(Observable_Events)
         something.Unsubscribe(&handler2);
         AWT_ASSERT_EQUAL(1u, something.size());
 
-        AWT_ASSERT_TRUE(!something.empty());
+        AWT_ASSERT(!something.empty());
     }
 
     AWT_ASSERT_EQUAL(0U, something.size());
-    AWT_ASSERT_TRUE(something.empty());
+    AWT_ASSERT(something.empty());
 }
 
 AWT_TEST(Observable_Move)
@@ -289,6 +289,6 @@ AWT_TEST(Observable_ConstMove)
     const X x1;
     X x2 = std::move(x1);
 
-    AWT_ASSERT_TRUE(x1.called == "");
-    AWT_ASSERT_TRUE(x2.called == "copy");
+    AWT_ASSERT(x1.called == "");
+    AWT_ASSERT(x2.called == "copy");
 }

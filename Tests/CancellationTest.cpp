@@ -16,12 +16,12 @@ AWT_TEST(Cancellation_NegativeTimeDiff)
 
     auto stop = std::chrono::steady_clock::now();
 
-    AWT_ASSERT_TRUE(stop > start);
+    AWT_ASSERT(stop > start);
 
     auto diff = start - stop;
 
-    AWT_ASSERT_TRUE(diff < std::chrono::milliseconds(0));
-    AWT_ASSERT_TRUE(diff.count() < 0);
+    AWT_ASSERT(diff < std::chrono::milliseconds(0));
+    AWT_ASSERT(diff.count() < 0);
 }
 
 static constexpr int default_client_sleep_time = 100;
@@ -50,9 +50,9 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
             const auto elapsed = w.GetElapsedCast<Duration>();
 
-            AWT_ASSERT_TRUE(elapsed.count() >= client_sleep_time);
+            AWT_ASSERT(elapsed.count() >= client_sleep_time);
 
-            AWT_ASSERT_TRUE(elapsed.count() < worker_sleep_time);
+            AWT_ASSERT(elapsed.count() < worker_sleep_time);
         }));
     }
 
@@ -62,7 +62,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
         cancellation.Cancel();
 
-        AWT_ASSERT_TRUE(cancellation.IsCancelled());
+        AWT_ASSERT(cancellation.IsCancelled());
     });
 
     for (auto & t : v)
@@ -85,5 +85,5 @@ AWT_TEST(Cancellation_SimpleSleep)
 
     const auto elapsed = w.GetElapsedCast<Duration>();
 
-    AWT_ASSERT_TRUE(elapsed.count() >= client_sleep_time);
+    AWT_ASSERT(elapsed.count() >= client_sleep_time);
 }

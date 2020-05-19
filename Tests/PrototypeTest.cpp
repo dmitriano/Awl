@@ -28,10 +28,7 @@ namespace
         double y;
         std::string z;
 
-        AWL_STRINGIZABLE(
-            x,
-            y,
-            z)
+        AWL_STRINGIZABLE(x, y, z)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B)
@@ -49,7 +46,7 @@ AWT_TEST(Prototype_TypeMap)
 
     awl::DetachedPrototype result(std::vector<awl::DetachedPrototype::FieldContainer>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
 
-    AWT_ASSERT_TRUE(dp == result);
+    AWT_ASSERT(dp == result);
 }
 
 AWT_TEST(Prototype_RuntimeIndex)
@@ -62,9 +59,9 @@ AWT_TEST(Prototype_RuntimeIndex)
     using namespace std::string_literals;
     Tuple t = std::make_tuple('a', 2, 3, 5.0, "abc");
     Variant v = awl::helpers::runtime_get<Variant>(t, 1);
-    AWT_ASSERT_TRUE(std::get<int>(v) == 2);
+    AWT_ASSERT(std::get<int>(v) == 2);
     awl::helpers::runtime_set(t, 4, Variant("xyz"s));
-    AWT_ASSERT_TRUE(std::get<4>(t) == std::string("xyz"));
+    AWT_ASSERT(std::get<4>(t) == std::string("xyz"));
 }
 
 AWT_TEST(Prototype_GetSet)
@@ -75,15 +72,15 @@ AWT_TEST(Prototype_GetSet)
 
     A a = { 1, 5.0, "abc" };
 
-    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(a.x));
-    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(a.y));
-    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(a.z));
+    AWT_ASSERT(ap.Get(a, 0) == V(a.x));
+    AWT_ASSERT(ap.Get(a, 1) == V(a.y));
+    AWT_ASSERT(ap.Get(a, 2) == V(a.z));
 
     ap.Set(a, 0, 3);
     ap.Set(a, 1, 7.0);
     ap.Set(a, 2, std::string("xyz"));
 
-    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(3));
-    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(7.0));
-    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(std::string("xyz")));
+    AWT_ASSERT(ap.Get(a, 0) == V(3));
+    AWT_ASSERT(ap.Get(a, 1) == V(7.0));
+    AWT_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
 }

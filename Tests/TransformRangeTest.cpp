@@ -46,27 +46,27 @@ AWT_TEST(TransformIterator)
         {
             auto i = begin;
 
-            AWT_ASSERT_TRUE(i == begin);
-            AWT_ASSERT_TRUE(i != end);
+            AWT_ASSERT(i == begin);
+            AWT_ASSERT(i != end);
 
             AWT_ASSERT_EQUAL(1, *i++);
             AWT_ASSERT_EQUAL(2, *i++);
             AWT_ASSERT_EQUAL(3, *i++);
 
-            AWT_ASSERT_TRUE(i == end);
+            AWT_ASSERT(i == end);
         }
 
         {
             auto i = begin;
 
-            AWT_ASSERT_TRUE(i == begin);
-            AWT_ASSERT_TRUE(i != end);
+            AWT_ASSERT(i == begin);
+            AWT_ASSERT(i != end);
 
             AWT_ASSERT_EQUAL(1, *i);
             AWT_ASSERT_EQUAL(2, *(++i));
             AWT_ASSERT_EQUAL(3, *(++i));
 
-            AWT_ASSERT_TRUE(++i == end);
+            AWT_ASSERT(++i == end);
         }
     }
     
@@ -100,8 +100,8 @@ AWT_TEST(TransformIterator)
         {
             auto i = begin;
 
-            AWT_ASSERT_TRUE(i == begin);
-            AWT_ASSERT_TRUE(i != end);
+            AWT_ASSERT(i == begin);
+            AWT_ASSERT(i != end);
 
             AWT_ASSERT_EQUAL(1, *i++);
         
@@ -113,20 +113,20 @@ AWT_TEST(TransformIterator)
 
             AWT_ASSERT_EQUAL(3, *i++);
 
-            AWT_ASSERT_TRUE(i == end);
+            AWT_ASSERT(i == end);
         }
 
         {
             auto i = begin;
 
-            AWT_ASSERT_TRUE(i == begin);
-            AWT_ASSERT_TRUE(i != end);
+            AWT_ASSERT(i == begin);
+            AWT_ASSERT(i != end);
 
             AWT_ASSERT_EQUAL(1, *i++);
             AWT_ASSERT_EQUAL(5, *i++);
             AWT_ASSERT_EQUAL(3, *i++);
 
-            AWT_ASSERT_TRUE(i == end);
+            AWT_ASSERT(i == end);
         }
     }
 
@@ -138,14 +138,14 @@ AWT_TEST(TransformIterator)
         {
             auto i = range.begin();
 
-            AWT_ASSERT_TRUE(i == range.begin());
-            AWT_ASSERT_TRUE(i != range.end());
+            AWT_ASSERT(i == range.begin());
+            AWT_ASSERT(i != range.end());
 
             AWT_ASSERT_EQUAL(_T("a"), *i++);
             AWT_ASSERT_EQUAL(_T("b"), *i++);
             AWT_ASSERT_EQUAL(_T("c"), *i++);
 
-            AWT_ASSERT_TRUE(i == range.end());
+            AWT_ASSERT(i == range.end());
         }
 
         //(until C++20) If no captures are specified, the closure type has a defaulted copy assignment operator and a defaulted move assignment operator.
@@ -163,7 +163,7 @@ AWT_TEST(TransformIterator)
 
             i1 = i2;
 
-            AWT_ASSERT_TRUE(i1 == i2);
+            AWT_ASSERT(i1 == i2);
         }
 
         {
@@ -172,7 +172,7 @@ AWT_TEST(TransformIterator)
             //This requires copy assignment operator to be defined.
             v.insert(v.begin(), range.begin(), range.end());
 
-            AWT_ASSERT_TRUE(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
+            AWT_ASSERT(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
         }
 #endif
     }

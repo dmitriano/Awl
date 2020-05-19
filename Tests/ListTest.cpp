@@ -87,17 +87,17 @@ namespace
 
         ListHolder(const awl::testing::TestContext & test_context) : context(test_context)
         {
-            AWT_ASSERT_TRUE(list.empty());
+            AWT_ASSERT(list.empty());
             AWT_ASSERT_EQUAL(size_t(0), list.size());
-            AWT_ASSERT_TRUE(list.empty_or_contains_one());
+            AWT_ASSERT(list.empty_or_contains_one());
             AWT_ASSERT_FALSE(list.contains_one());
 
             list.push_back(new Element(1));
 
             AWT_ASSERT_FALSE(list.empty());
             AWT_ASSERT_EQUAL(size_t(1), list.size());
-            AWT_ASSERT_TRUE(list.empty_or_contains_one());
-            AWT_ASSERT_TRUE(list.contains_one());
+            AWT_ASSERT(list.empty_or_contains_one());
+            AWT_ASSERT(list.contains_one());
 
             list.push_back(new Element(2));
 
