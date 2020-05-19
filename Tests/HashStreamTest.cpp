@@ -11,7 +11,7 @@
 #include "Awl/Io/BufferedStream.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/StdStream.h"
-#include "Awl/Io/RwHelpers.h"
+#include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/IoException.h"
 
 #include "Awl/Crypto/Crc64.h"

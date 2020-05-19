@@ -4,7 +4,7 @@
 
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/SequentialStream.h"
-#include "Awl/Io/RwHelpers.h"
+#include "Awl/Io/ReadWrite.h"
 
 #include <algorithm>
 #include <memory>
