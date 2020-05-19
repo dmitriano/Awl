@@ -211,51 +211,6 @@ namespace awl
         return map_types_impl_t2v<U, T>(std::make_index_sequence<std::tuple_size_v<U>>());
     }
 
-    template <class Variant, class Tuple, std::size_t Index = 0>
-    Variant runtime_get(Tuple &&tuple, std::size_t index)
-    {
-        if constexpr (Index == std::tuple_size_v<std::decay_t<Tuple>>)
-        {
-            static_cast<void>(tuple);
-            static_cast<void>(index);
-            throw GeneralException(_T("Index out of range for tuple"));
-        }
-        else
-        {
-            if (index == Index)
-            {
-                return Variant{ std::get<Index>(tuple) };
-            }
-            
-            return runtime_get<Variant, Tuple, Index + 1>(std::forward<Tuple>(tuple), index);
-        }
-    }
-
-    template <class Tuple, class Variant, std::size_t Index = 0>
-    void runtime_set(Tuple &tuple, std::size_t index, Variant const& variant)
-    {
-        if constexpr (Index == std::tuple_size_v<std::decay_t<Tuple>>)
-        {
-            static_cast<void>(tuple);
-            static_cast<void>(index);
-            static_cast<void>(variant);
-            throw GeneralException(_T("Index out of range for tuple"));
-        }
-        else
-        {
-            if (index == Index)
-            {
-                // Note: You should check here that variant holds the correct type
-                // before assigning.
-                std::get<Index>(tuple) = std::get<std::remove_reference_t<std::tuple_element_t<Index, Tuple>>>(variant);
-            }
-            else
-            {
-                runtime_set<Tuple, Variant, Index + 1>(tuple, index, variant);
-            }
-        }
-    }
-
 #elif AWL_CPPSTD >= 14
 
     //C++14 version (does not compile with GCC 4.9):

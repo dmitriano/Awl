@@ -1,5 +1,4 @@
 #include "Awl/Stringizable.h"
-#include "Awl/Prototype.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <string>
@@ -118,41 +117,3 @@ AWT_TEST(Stringizable_ForEach)
 
     AWT_ASSERT_TRUE(a1 == a2);
 }
-
-using V = std::variant<bool, char, int, float, double, std::string>;
-
-AWT_TEST(Prototype_TypeMap)
-{
-    AWT_UNUSED_CONTEXT;
-
-    awl::AttachedPrototype<V, A> ap;
-
-    awl::DetachedPrototype dp(ap);
-
-    awl::DetachedPrototype result(std::vector<awl::DetachedPrototype::FieldContainer>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
-
-    AWT_ASSERT_TRUE(dp == result);
-}
-
-/*
-AWT_TEST(Prototype_GetSet)
-{
-    AWT_UNUSED_CONTEXT;
-
-    awl::AttachedPrototype<V, A> ap;
-
-    A a = { 1, 5.0, "abc" };
-
-    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(a.x));
-    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(a.y));
-    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(a.z));
-
-    ap.Set(a, 0, 3);
-    ap.Set(a, 1, 7.0);
-    ap.Set(a, 2, std::string("xyz"));
-
-    AWT_ASSERT_TRUE(ap.Get(a, 0) == V(3));
-    AWT_ASSERT_TRUE(ap.Get(a, 1) == V(7.0));
-    AWT_ASSERT_TRUE(ap.Get(a, 2) == V(std::string("xyz")));
-}
-*/
