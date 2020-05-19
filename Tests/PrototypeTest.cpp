@@ -25,16 +25,18 @@ namespace
     struct B
     {
         int x;
+        A a1;
         double y;
+        A a2;
         std::string z;
 
-        AWL_STRINGIZABLE(x, y, z)
+        AWL_STRINGIZABLE(x, a1, y, a2, z)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B)
 }
 
-using V = std::variant<bool, char, int, float, double, std::string>;
+using V = std::variant<int, double, std::string>;
 
 AWT_TEST(Prototype_TypeMap)
 {
@@ -64,7 +66,7 @@ AWT_TEST(Prototype_RuntimeIndex)
     AWT_ASSERT(std::get<4>(t) == std::string("xyz"));
 }
 
-AWT_TEST(Prototype_GetSet)
+AWT_TEST(Prototype_GetSetPlain)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -83,4 +85,28 @@ AWT_TEST(Prototype_GetSet)
     AWT_ASSERT(ap.Get(a, 0) == V(3));
     AWT_ASSERT(ap.Get(a, 1) == V(7.0));
     AWT_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
+}
+
+AWT_TEST(Prototype_GetSetRecursive)
+{
+    AWT_UNUSED_CONTEXT;
+
+    awl::AttachedPrototype<V, B> bp;
+
+    A a = { 1, 5.0, "abc" };
+    B b = { 1, a, 5.0, a, "abc"};
+
+    /*
+    AWT_ASSERT(ap.Get(a, 0) == V(a.x));
+    AWT_ASSERT(ap.Get(a, 1) == V(a.y));
+    AWT_ASSERT(ap.Get(a, 2) == V(a.z));
+
+    ap.Set(a, 0, 3);
+    ap.Set(a, 1, 7.0);
+    ap.Set(a, 2, std::string("xyz"));
+
+    AWT_ASSERT(ap.Get(a, 0) == V(3));
+    AWT_ASSERT(ap.Get(a, 1) == V(7.0));
+    AWT_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
+    */
 }

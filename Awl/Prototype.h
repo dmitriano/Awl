@@ -137,7 +137,7 @@ namespace awl
 
         V Get(const S & val, size_t index) const
         {
-            return helpers::runtime_get<V>(val.as_tuple(), index);
+            return helpers::runtime_get<V>(object_as_tuple(val), index);
         }
 
         void Set(S & val, size_t index, V v_field) const
