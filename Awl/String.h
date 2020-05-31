@@ -186,8 +186,6 @@ namespace awl
         return FromACStringHelper<Char>(p_src);
     }
 
-#if AWL_CPPSTD >= 17
-
     inline String FromAString(std::string src)
     {
         if constexpr (std::is_same<Char, char>::value)
@@ -197,25 +195,4 @@ namespace awl
 
         return FromACString(src.c_str());
     }
-
-#else
-
-    template <typename C>
-    inline typename std::enable_if<!std::is_same<C, char>::value, std::basic_string<C>>::type FromAStringHelper(std::string src)
-    {
-        return FromACString(src.c_str());
-    }
-
-    template <typename C>
-    inline typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromAStringHelper(std::string src)
-    {
-        return std::forward<std::string>(src);
-    }
-
-    inline String FromAString(std::string src)
-    {
-        return FromAStringHelper<Char>(src);
-    }
-
-#endif
 }

@@ -16,15 +16,7 @@ namespace awl
         {
         }
 
-#if AWL_CPPSTD >= 17
-
         using Value = typename awl::function_traits<UnaryFunction>::result_type;
-        
-#else
-
-        using Value = awl::return_type_t<decltype(&UnaryFunction::operator())>;
-
-#endif
 
         using iterator_category = std::forward_iterator_tag;
 

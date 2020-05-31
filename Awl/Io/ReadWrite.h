@@ -427,8 +427,6 @@ namespace awl::io
         WriteCollection(s, coll, ctx);
     }
 
-#if AWL_CPPSTD >= 17
-
     //Implementing Read/WriteEach with fold expressions.
 
     template<class Stream, typename ... Fields, class Context = FakeContext>
@@ -443,34 +441,6 @@ namespace awl::io
         for_each(val, [&s, &ctx](auto& field) { Write(s, field, ctx); });
     }
 
-#else
-    //Implementing Read/WriteEach with recursive templates.
-
-    template<class Stream, std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<(I == sizeof...(Tp)), void>::type ReadEach(Stream &, std::tuple<Tp...> &)
-    {
-    }
-
-    template<class Stream, std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<(I < sizeof...(Tp)), void>::type ReadEach(Stream & s, std::tuple<Tp...>& t)
-    {
-        Read(s, std::get<I>(t));
-        ReadEach<Stream, I + 1, Tp...>(s, t);
-    }
-
-    template<class Stream, std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<(I == sizeof...(Tp)), void>::type WriteEach(Stream &, const std::tuple<Tp...> &)
-    {
-    }
-
-    template<class Stream, std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<(I < sizeof...(Tp)), void>::type WriteEach(Stream & s, const std::tuple<Tp...>& t)
-    {
-        Write(s, std::get<I>(t));
-        WriteEach<Stream, I + 1, Tp...>(s, t);
-    }
-
-#endif
     //A tuple of references is passed by value.
     template<class Stream, typename ... Fields, class Context = FakeContext>
     inline void Read(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})

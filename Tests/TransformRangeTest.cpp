@@ -27,18 +27,10 @@ AWT_TEST(TransformIterator)
 
         context.out << awl::FromACString(typeid(OperatorType).name()) << std::endl;
 
-#if AWL_CPPSTD >= 17
-
         static_assert(std::is_same<awl::function_traits<decltype(xfunc)>::result_type, int>::value, "function_traits error");
 
         context.out << awl::FromACString(typeid(awl::function_traits<decltype(xfunc)>::result_type).name()) << std::endl;
 
-#else
-        using result_type = awl::return_type_t<OperatorType>;
-        
-        static_assert(std::is_same<result_type, int>::value, "return_type_t error");
-
-#endif
         auto begin = awl::make_transform_iterator(m.cbegin(), xfunc);
 
         auto end = awl::make_transform_iterator(m.cend(), xfunc);

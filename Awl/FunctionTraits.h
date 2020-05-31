@@ -5,8 +5,6 @@
 
 namespace awl
 {
-#if AWL_CPPSTD >= 17
-
     // For generic types, directly use the result of the signature of its 'operator()'
     template <typename T>
     struct function_traits : public function_traits<decltype(&T::operator())> {};
@@ -28,23 +26,4 @@ namespace awl
             // composed of those arguments.
         };
     };
-
-#else
-
-    template <typename T>
-    struct return_type;
-    template <typename R, typename... Args>
-    struct return_type<R(*)(Args...)> { using type = R; };
-    template <typename R, typename C, typename... Args>
-    struct return_type<R(C::*)(Args...)> { using type = R; };
-    template <typename R, typename C, typename... Args>
-    struct return_type<R(C::*)(Args...) const> { using type = R; };
-    template <typename R, typename C, typename... Args>
-    struct return_type<R(C::*)(Args...) volatile> { using type = R; };
-    template <typename R, typename C, typename... Args>
-    struct return_type<R(C::*)(Args...) const volatile> { using type = R; };
-    template <typename T>
-    using return_type_t = typename return_type<T>::type;
-
-#endif
 }
