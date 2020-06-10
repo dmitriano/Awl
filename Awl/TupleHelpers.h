@@ -105,6 +105,18 @@ namespace awl
         return transform_v2t<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
     }
 
+    template <class V, template <size_t> class T, std::size_t... index>
+    inline constexpr auto transform_v2ti(std::index_sequence<index...>)
+    {
+        return std::make_tuple(T<index>() ...);
+    }
+
+    template <class V, template <size_t> class T>
+    inline constexpr auto transform_v2ti()
+    {
+        return transform_v2ti<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
+    }
+
     template <typename... Args, typename Func, std::size_t... index>
     inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {

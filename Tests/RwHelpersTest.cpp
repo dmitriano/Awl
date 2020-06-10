@@ -239,6 +239,15 @@ AWT_TEST(IoObjectReadWrite)
     }
 }
 
+AWT_TEST(IoVariantReadWrite)
+{
+    using V = std::variant<A, B, int>;
+
+    Test(context, V(A{ 5, 8.0 }));
+    Test(context, V(MakeBSample()));
+    Test(context, V(5));
+}
+
 template <class T>
 static void TestVector(const TestContext & context, std::vector<T> sample)
 {
