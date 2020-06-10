@@ -83,12 +83,6 @@ namespace
     {
     public:
 
-        B() : m_set{ 0, 1, 2 }, m_v{ 3, 4 }, m_a{ 'a', 'b', 'c' }, 
-              m_hset {3, 4, 5}, //m_oset{ 6, 7, 8 },
-              m_bm{ GameLevel::Professional }, m_bs(3ul)
-        {
-        }
-
         AWL_SERIALIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b)
 
     private:
@@ -108,15 +102,34 @@ namespace
 
         std::bitset<3> m_bs;
 
-        std::optional<uint32_t> m_u8 = 25u;
+        std::optional<uint32_t> m_u8;
 
-        bool m_b = true;
+        bool m_b;
+
+        friend B MakeBSample();
     };
 
     AWL_MEMBERWISE_EQUATABLE(B)
+
+    B MakeBSample()
+    {
+        B b;
+        
+        b.m_set = { 0, 1, 2 };
+        b.m_v = { 3, 4 };
+        b.m_a = { 'a', 'b', 'c' };
+        b.m_hset = { 3, 4, 5 };
+        //m_oset{ 6, 7, 8 };
+        b.m_bm = { B::GameLevel::Professional };
+        b.m_bs = 3ul;
+        b.m_u8 = 25u;
+        b.m_b = true;
+
+        return b;
+    }
 }
 
-AWT_TEST(IoObjectReadWrite)
+AWT_TEST(IoStdReadWrite)
 {
     {
         std::hash<int> hasher;
@@ -187,7 +200,7 @@ AWT_TEST(IoObjectReadWrite)
     //Test(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
 }
 
-AWT_TEST(IoPod)
+AWT_TEST(IoObjectReadWrite)
 {
     {
         A a1{ 5, 7.0 };
@@ -219,7 +232,7 @@ AWT_TEST(IoPod)
     }
 
     {
-        const B b;
+        const B b = MakeBSample();
 
         Test(context, b);
         Test(context, std::vector<B>{b, b, b});
