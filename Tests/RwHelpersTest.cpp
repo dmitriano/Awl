@@ -10,7 +10,7 @@ using namespace awl::testing;
 using namespace awl::io;
 
 template <class T>
-static void Test(const TestContext & context, T sample)
+static void Test(const TestContext & context, const T & sample)
 {
     AWT_ATTRIBUTE(size_t, iteration_count, 10);
 
