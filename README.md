@@ -17,6 +17,7 @@ Feel free to use it or fork it, but keep in mind that version compatibility is n
 Compiling on Windows with CMake and MSVC2017:
 
     cmake.exe ..\..\Awl -DCMAKE_GENERATOR_PLATFORM=x64
+    set CL=/MP
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 
 Compiling on Linux with CMake and GCC 9:
