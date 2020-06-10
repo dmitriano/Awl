@@ -18,6 +18,7 @@
 #include <tuple>
 #include <utility> 
 #include <optional>
+#include <variant>
 
 namespace awl::io
 {
@@ -71,7 +72,7 @@ namespace awl::io
         static_assert(FormatNumber<0>() == FixedString{ "0" });
         static_assert(FormatNumber<35>() == FixedString{ "35" });
 
-        template <class T, std::enable_if_t < std::is_arithmetic<T>{}, bool > = true >
+        template <class T, std::enable_if_t<std::is_arithmetic<T>{}, bool > = true >
         constexpr auto GetArithmeticSize()
         {
             return FormatNumber<sizeof(T) * 8>();
@@ -183,9 +184,9 @@ namespace awl::io
     static_assert(make_type_name<std::optional<std::string>>() == FixedString("optional<sequence<int8_t>>"));
 
     template<class T>
-    struct is_array :std::is_array<T> {};
+    struct is_array : std::is_array<T> {};
     template<class T, std::size_t N>
-    struct is_array<std::array<T, N>> :std::true_type {};
+    struct is_array<std::array<T, N>> : std::true_type {};
     // optional:
     template<class T>
     struct is_array<T const> : is_array<T> {};
@@ -216,4 +217,15 @@ namespace awl::io
             return FixedString("struct");
         }
     };
+
+    template <class... Ts>
+    struct type_descriptor<std::variant<Ts...>>
+    {
+        static constexpr auto name()
+        {
+            return FixedString("variant<") + ((type_descriptor<Ts>::name() + FixedString(", ")) + ...) + FixedString(">");
+        }
+    };
+
+    static_assert(make_type_name<std::variant<int32_t, int64_t>>() == FixedString{ "variant<int32_t, int64_t, >" });
 }
