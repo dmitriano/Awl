@@ -208,7 +208,7 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return FixedString("variant<") + ((type_descriptor<Ts>::name() + FixedString(", ")) + ...) + FixedString(">");
+            return FixedString("variant<") + ((make_type_name<Ts>() + FixedString(", ")) + ...) + FixedString(">");
         }
     };
 
