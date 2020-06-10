@@ -74,7 +74,7 @@ namespace awl
 
             if (loop_count != 0)
             {
-                context.out << _T("Looping ") << loop_count << _T(" times.");
+                context.out << _T(" Looping ") << loop_count << _T(" times.");
             }
             else
             {
