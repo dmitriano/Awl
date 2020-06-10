@@ -1,8 +1,10 @@
-#include "Awl/StdConsole.h"
 #include "Awl/Testing/TestMap.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
+
+#include "Awl/StdConsole.h"
+#include "Awl/IntRange.h"
 
 #include <set>
 #include <regex>
@@ -63,9 +65,21 @@ namespace awl
         void TestMap::InternalRun(TestLink * p_test_link, const TestContext & context)
         {
             AWT_ATTRIBUTE(String, output, _T("failed"));
+            AWT_ATTRIBUTE(size_t, loop, 0);
             AWT_FLAG(no_asserts);
 
             context.out << p_test_link->GetName();
+
+            size_t loop_count = loop;
+
+            if (loop_count != 0)
+            {
+                context.out << _T("Looping ") << loop_count << _T(" times.");
+            }
+            else
+            {
+                loop_count = 1;
+            }
 
             if (no_asserts)
             {
@@ -95,7 +109,11 @@ namespace awl
 
             const TestContext temp_context{ *p_out, context.cancellation, context.ap, !no_asserts };
 
-            p_test_link->Run(temp_context);
+            for (auto i : awl::make_count(loop_count))
+            {
+                static_cast<void>(i);
+                p_test_link->Run(temp_context);
+            }
 
             lastOutput.str(String());
 

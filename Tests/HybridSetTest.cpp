@@ -146,12 +146,17 @@ namespace
 
     static void CompareBounds(const StdSet & std_set, const MySet & my_set)
     {
-        AWT_ASSERTM_EQUAL(std_set.size(), my_set.size(), _T("wrong size"));
+        const size_t size = my_set.size();
+        
+        AWT_ASSERTM_EQUAL(std_set.size(), size, _T("wrong size"));
 
-        AWT_ASSERTM_EQUAL(*std_set.begin(), my_set.front(), _T("wrong front"));
-        AWT_ASSERTM_EQUAL(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
-        AWT_ASSERTM_EQUAL(*std_set.rbegin(), my_set.back(), _T("wrong back"));
-        AWT_ASSERTM_EQUAL(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
+        if (size != 0)
+        {
+            AWT_ASSERTM_EQUAL(*std_set.begin(), my_set.front(), _T("wrong front"));
+            AWT_ASSERTM_EQUAL(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
+            AWT_ASSERTM_EQUAL(*std_set.rbegin(), my_set.back(), _T("wrong back"));
+            AWT_ASSERTM_EQUAL(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
+        }
     }
 
     static void CompareSets(const StdSet & std_set, const MySet & my_set)
