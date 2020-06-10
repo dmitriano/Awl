@@ -183,27 +183,12 @@ namespace awl::io
 
     static_assert(make_type_name<std::optional<std::string>>() == FixedString("optional<sequence<int8_t>>"));
 
-    template<class T>
-    struct is_array : std::is_array<T> {};
     template<class T, std::size_t N>
-    struct is_array<std::array<T, N>> : std::true_type {};
-    // optional:
-    template<class T>
-    struct is_array<T const> : is_array<T> {};
-    template<class T>
-    struct is_array<T volatile> : is_array<T> {};
-    template<class T>
-    struct is_array<T volatile const> : is_array<T> {};
-
-    template<class T>
-    constexpr bool is_array_v = is_array<T>::value;
-
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<is_array_v<T>>>
+    struct type_descriptor<std::array<T, N>>
     {
         static constexpr auto name()
         {
-            return FixedString("array<") + make_type_name<typename T::value_type>() + FixedString(", ") + helpers::FormatNumber < T{}.size() > () + FixedString(">");
+            return FixedString("array<") + make_type_name<T>() + FixedString(", ") + helpers::FormatNumber<N>() + FixedString(">");
         }
     };
 
