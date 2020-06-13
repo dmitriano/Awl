@@ -6,7 +6,8 @@
 #include <type_traits>
 #include <algorithm>
 #include <wchar.h>
-#include <assert.h>
+#include <cassert>
+#include <iterator>
 
 #ifdef _MSC_VER
 
@@ -36,6 +37,9 @@ namespace awl
 
     using istream = std::basic_istream<Char>;
     using ostream = std::basic_ostream<Char>;
+
+    template <class T>
+    using ostream_iterator = std::ostream_iterator<T, Char>;
     
     using ostringstream = std::basic_ostringstream<Char>;
     using istringstream = std::basic_istringstream<Char>;
