@@ -66,7 +66,6 @@ namespace awl
         {
             AWT_ATTRIBUTE(String, output, _T("failed"));
             AWT_ATTRIBUTE(size_t, loop, 0);
-            AWT_FLAG(no_asserts);
 
             context.out << p_test_link->GetName();
 
@@ -79,11 +78,6 @@ namespace awl
             else
             {
                 loop_count = 1;
-            }
-
-            if (no_asserts)
-            {
-                context.out << _T(" (Asserts are disabled!) ");
             }
 
             context.out << _T("...") << std::endl;
@@ -107,7 +101,7 @@ namespace awl
                 throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
             }
 
-            const TestContext temp_context{ *p_out, context.cancellation, context.ap, !no_asserts };
+            const TestContext temp_context{ *p_out, context.cancellation, context.ap };
 
             for (auto i : awl::make_count(loop_count))
             {
@@ -204,7 +198,7 @@ namespace awl
 
             AttributeProvider ap;
 
-            const TestContext context{ awl::cout(), cancellation, ap, false };
+            const TestContext context{ awl::cout(), cancellation, ap };
 
             return RunAllTests(context);
         }
@@ -217,7 +211,7 @@ namespace awl
 
                 CancellationFlag cancellation;
 
-                const TestContext context{ awl::cout(), cancellation, cl, false };
+                const TestContext context{ awl::cout(), cancellation, cl };
 
                 AWT_FLAG(list);
 
