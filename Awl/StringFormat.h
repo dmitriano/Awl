@@ -16,7 +16,9 @@ namespace awl
             return *this;
         }
 
-        operator std::basic_string<C>() const { return out.str(); }
+        std::basic_string<C> str() const { return out.str(); }
+
+        operator std::basic_string<C>() const { return str(); }
 
     private:
         
@@ -24,4 +26,6 @@ namespace awl
     };
 
     using format = basic_format<Char>;
+    using aformat = basic_format<char>;
+    using wformat = basic_format<wchar_t>;
 }
