@@ -194,9 +194,19 @@ namespace awl
     {
         if constexpr (std::is_same<Char, char>::value)
         {
-            return std::forward<std::string>(src);
+            return src;
         }
 
         return FromACString(src.c_str());
+    }
+
+    inline std::string ToAString(String src)
+    {
+        if constexpr (std::is_same<Char, char>::value)
+        {
+            return src;
+        }
+
+        return EncodeString(src.c_str());
     }
 }
