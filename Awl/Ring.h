@@ -23,7 +23,7 @@ namespace awl
         size_type m_head;
         size_type m_tail;
         size_type m_contents_size;
-        const size_type m_array_size;
+        size_type m_array_size;
 
     public:
 
