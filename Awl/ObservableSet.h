@@ -156,6 +156,36 @@ namespace awl
             return m_set.find(key);
         }
 
+        template <class Key>
+        bool contains(const Key & key) const
+        {
+            return m_set.contains(key);
+        }
+
+        template <class Key>
+        const_iterator lower_bound(const Key & key) const
+        {
+            return m_set.lower_bound(key);
+        }
+
+        template <class Key>
+        iterator lower_bound(const Key & key)
+        {
+            return m_set.lower_bound(key);
+        }
+
+        template <class Key>
+        const_iterator upper_bound(const Key & key) const
+        {
+            return m_set.upper_bound(key);
+        }
+
+        template <class Key>
+        iterator upper_bound(const Key & key)
+        {
+            return m_set.upper_bound(key);
+        }
+
         reference at(size_type pos)
         {
             return m_set.at(pos);
