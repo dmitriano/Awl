@@ -10,7 +10,8 @@
 #include <initializer_list>
 #include <tuple>
 #include <cstdint>
-#include <assert.h>
+#include <cassert>
+#include <stdexcept>
 
 namespace awl
 {
@@ -435,14 +436,26 @@ namespace awl
             return NodeToIterator(node);
         }
 
-        reference at(size_type pos)
+        reference operator[](size_type pos)
         {
             return FindNodeByIndex(pos)->value;
         }
 
-        const_reference at(size_type pos) const
+        const_reference operator[](size_type pos) const
         {
             return FindNodeByIndex(pos)->value;
+        }
+
+        reference at(size_type pos)
+        {
+            CheckPosition(pos);
+            return (*this)[pos];
+        }
+
+        const_reference at(size_type pos) const
+        {
+            CheckPosition(pos);
+            return (*this)[pos];
         }
 
         template <class Key>
@@ -1092,6 +1105,14 @@ namespace awl
             for (const T & val : other)
             {
                 insert(val);
+            }
+        }
+
+        void CheckPosition(size_type pos) const
+        {
+            if (!(pos < size()))
+            {
+                throw std::out_of_range("A specified position is out of a vector_set range.");
             }
         }
         

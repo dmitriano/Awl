@@ -186,22 +186,22 @@ namespace awl
             return m_set.upper_bound(key);
         }
 
+        reference operator[](size_type pos)
+        {
+            return m_set[pos];
+        }
+
+        const_reference operator[](size_type pos) const
+        {
+            return m_set[pos];
+        }
+
         reference at(size_type pos)
         {
             return m_set.at(pos);
         }
 
         const_reference at(size_type pos) const
-        {
-            return m_set.at(pos);
-        }
-
-        reference operator[](size_type pos)
-        {
-            return m_set.at(pos);
-        }
-
-        const_reference operator[](size_type pos) const
         {
             return m_set.at(pos);
         }
