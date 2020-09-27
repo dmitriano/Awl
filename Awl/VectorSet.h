@@ -48,7 +48,7 @@ namespace awl
             void UpdateCount()
             {
                 //Save the old value to check if it changed.
-                std::size_t old_count = this->count;
+                const std::size_t old_count = this->count;
 
                 this->count = 0;
 
