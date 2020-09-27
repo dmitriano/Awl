@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <type_traits>
 
-#include "Awl/HybridSet.h"
+#include "Awl/VectorSet.h"
 #include "Awl/ObservableSet.h"
 
 namespace awl::io
@@ -81,13 +81,13 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Read(Stream & s, hybrid_set<T, Compare, Alloc> & coll, const Context & ctx = {})
+    inline void Read(Stream & s, vector_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Write(Stream & s, const hybrid_set<T, Compare, Alloc> &coll, const Context & ctx = {})
+    inline void Write(Stream & s, const vector_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }

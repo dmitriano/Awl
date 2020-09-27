@@ -91,7 +91,7 @@ namespace
         std::vector<int> m_v;
         std::array<char, 3> m_a;
 
-        awl::hybrid_set<int> m_hset;
+        awl::vector_set<int> m_hset;
         
         //It is not copyable.
         //awl::observable_set<int> m_oset;

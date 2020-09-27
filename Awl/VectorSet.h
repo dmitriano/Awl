@@ -15,7 +15,7 @@
 namespace awl
 {
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class hybrid_set
+    class vector_set
     {
     private:
 
@@ -95,18 +95,18 @@ namespace awl
             }
         };
 
-        struct Node : public hybrid_set::Link, public quick_link
+        struct Node : public vector_set::Link, public quick_link
         {
-            Node(const T & v) : hybrid_set::Link{}, value(v)
+            Node(const T & v) : vector_set::Link{}, value(v)
             {
             }
 
-            Node(T && v) : hybrid_set::Link{}, value(std::move(v))
+            Node(T && v) : vector_set::Link{}, value(std::move(v))
             {
             }
 
             template <class... Args>
-            Node(Args&&... args) : hybrid_set::Link{}, value(std::forward<Args>(args) ...)
+            Node(Args&&... args) : vector_set::Link{}, value(std::forward<Args>(args) ...)
             {
             }
 
@@ -206,15 +206,15 @@ namespace awl
         using ConstXFunc = decltype(IteratorHelper::MakeConstXFunc());
 
         template <class ListIterator>
-        static transform_iterator<XFunc, ListIterator, hybrid_set> MakeIterator(ListIterator i)
+        static transform_iterator<XFunc, ListIterator, vector_set> MakeIterator(ListIterator i)
         {
-            return make_friend_iterator<hybrid_set>(i, IteratorHelper::MakeXFunc());
+            return make_friend_iterator<vector_set>(i, IteratorHelper::MakeXFunc());
         }
 
         template <class ListIterator>
-        static transform_iterator<ConstXFunc, ListIterator, hybrid_set> MakeConstIterator(ListIterator i)
+        static transform_iterator<ConstXFunc, ListIterator, vector_set> MakeConstIterator(ListIterator i)
         {
-            return make_friend_iterator<hybrid_set>(i, IteratorHelper::MakeConstXFunc());
+            return make_friend_iterator<vector_set>(i, IteratorHelper::MakeConstXFunc());
         }
 
     public:
@@ -225,36 +225,36 @@ namespace awl
         using reference = value_type & ;
         using const_reference = const value_type & ;
 
-        using iterator = transform_iterator<XFunc, typename List::iterator, hybrid_set>;
-        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator, hybrid_set>;
+        using iterator = transform_iterator<XFunc, typename List::iterator, vector_set>;
+        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator, vector_set>;
 
-        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, hybrid_set>;
-        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, hybrid_set>;
+        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, vector_set>;
+        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, vector_set>;
 
         using allocator_type = Allocator;
         using key_compare = Compare;
         using value_compare = Compare;
 
-        hybrid_set() : m_nodeAlloc(m_alloc)
+        vector_set() : m_nodeAlloc(m_alloc)
         {
         }
         
-        hybrid_set(Compare comp, const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc), m_nodeAlloc(m_alloc)
+        vector_set(Compare comp, const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc), m_nodeAlloc(m_alloc)
         {
         }
 
-        hybrid_set(const hybrid_set & other) : m_comp(other.m_comp), m_alloc(other.m_alloc), m_nodeAlloc(other.m_nodeAlloc)
+        vector_set(const vector_set & other) : m_comp(other.m_comp), m_alloc(other.m_alloc), m_nodeAlloc(other.m_nodeAlloc)
         {
             CopyElements(other);
         }
 
-        hybrid_set(hybrid_set && other) : m_comp(std::move(other.m_comp)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc)),
+        vector_set(vector_set && other) : m_comp(std::move(other.m_comp)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc)),
             m_root(std::move(other.m_root)), m_list(std::move(other.m_list))
         {
             other.m_root = nullptr;
         }
 
-        hybrid_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc)
+        vector_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc)
         {
             //It is not clear how to move the elemetns from std::initializer_list,
             //see https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
@@ -265,17 +265,17 @@ namespace awl
             }
         }
 
-        hybrid_set(std::initializer_list<value_type> init, const Allocator& alloc)
-            : hybrid_set(init, Compare(), alloc)
+        vector_set(std::initializer_list<value_type> init, const Allocator& alloc)
+            : vector_set(init, Compare(), alloc)
         {
         }
 
-        ~hybrid_set()
+        ~vector_set()
         {
             clear();
         }
 
-        hybrid_set & operator = (const hybrid_set & other)
+        vector_set & operator = (const vector_set & other)
         {
             clear();
             //Should we copy the allocator?
@@ -284,7 +284,7 @@ namespace awl
             return *this;
         }
 
-        hybrid_set & operator = (hybrid_set && other)
+        vector_set & operator = (vector_set && other)
         {
             clear();
             m_comp = std::move(other.m_comp);
@@ -296,7 +296,7 @@ namespace awl
             return *this;
         }
 
-        bool operator == (const hybrid_set & other) const
+        bool operator == (const vector_set & other) const
         {
             if (size() == other.size())
             {
@@ -317,7 +317,7 @@ namespace awl
             return false;
         }
 
-        bool operator != (const hybrid_set & other) const
+        bool operator != (const vector_set & other) const
         {
             return !operator == (other);
         }
@@ -1087,7 +1087,7 @@ namespace awl
             return i.m_i;
         }
 
-        void CopyElements(const hybrid_set & other)
+        void CopyElements(const vector_set & other)
         {
             for (const T & val : other)
             {
@@ -1101,6 +1101,6 @@ namespace awl
         Node * m_root = nullptr;
         List m_list;
 
-        friend class HybridSetTest;
+        friend class VectorSetTest;
     };
 }

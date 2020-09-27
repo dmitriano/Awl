@@ -1,4 +1,4 @@
-#include "Awl/HybridSet.h"
+#include "Awl/VectorSet.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 #include "Awl/String.h"
@@ -13,11 +13,11 @@ using namespace awl::testing;
 
 namespace awl
 {
-    class HybridSetTest
+    class VectorSetTest
     {
     public:
 
-        using Set = awl::hybrid_set<int>;
+        using Set = awl::vector_set<int>;
 
         void Run()
         {
@@ -95,11 +95,11 @@ namespace awl
     };
 }
 
-AWT_TEST(HybridSetInternal)
+AWT_TEST(VectorSetInternal)
 {
     AWT_UNUSED_CONTEXT;
 
-    awl::HybridSetTest test;
+    awl::VectorSetTest test;
     test.Run();
 }
 
@@ -141,7 +141,7 @@ namespace
         friend class TestAllocator;
     };
 
-    using MySet = awl::hybrid_set<size_t, std::less<>, TestAllocator<size_t>>;
+    using MySet = awl::vector_set<size_t, std::less<>, TestAllocator<size_t>>;
     using StdSet = std::set<size_t>;
 
     static void CompareBounds(const StdSet & std_set, const MySet & my_set)
@@ -219,7 +219,7 @@ namespace
 //Parameter examples:
 //--filter Hybrid.* --verbose --insert_count 100 --range 10 --print_set
 //--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
-AWT_TEST(HybridSetRandom)
+AWT_TEST(VectorSetRandom)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(size_t, range, 1000);
@@ -318,11 +318,11 @@ AWT_TEST(HybridSetRandom)
     AWT_ASSERTM_EQUAL(0u, memory_size, _T("memory leaks"));
 }
 
-AWT_TEST(HybridSetRValue)
+AWT_TEST(VectorSetRValue)
 {
     AWT_UNUSED_CONTEXT;
 
-    using Set = awl::hybrid_set<awl::String>;
+    using Set = awl::vector_set<awl::String>;
 
     Set set;
     awl::String lval = _T("abc");
@@ -338,9 +338,9 @@ AWT_TEST(HybridSetRValue)
 }
 
 template <class Key, class T = Key, class Compare = std::less<>>
-static awl::hybrid_set<T, Compare> GenerateIntSet(size_t insert_count, Key range)
+static awl::vector_set<T, Compare> GenerateIntSet(size_t insert_count, Key range)
 {
-    awl::hybrid_set<T, Compare> sample;
+    awl::vector_set<T, Compare> sample;
 
     std::uniform_int_distribution<Key> dist(1, range);
 
@@ -353,11 +353,11 @@ static awl::hybrid_set<T, Compare> GenerateIntSet(size_t insert_count, Key range
     return sample;
 }
 
-AWT_TEST(HybridSetCopyMove)
+AWT_TEST(VectorSetCopyMove)
 {
     AWT_UNUSED_CONTEXT;
 
-    using Set = awl::hybrid_set<int>;
+    using Set = awl::vector_set<int>;
     
     const Set sample = GenerateIntSet<int>(1000, 1000);
     AWT_ASSERT((sample != Set{ -1, -2, -3, -4, -5 }));
@@ -373,8 +373,8 @@ AWT_TEST(HybridSetCopyMove)
     AWT_ASSERT(temp.empty());
 }
 
-//--filter HybridSetIndex_Test --insert_count 10000000 --range 100000000
-AWT_TEST(HybridSetIndex)
+//--filter VectorSetIndex_Test --insert_count 10000000 --range 100000000
+AWT_TEST(VectorSetIndex)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(size_t, range, 1000);
@@ -495,7 +495,7 @@ namespace
         std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
-        awl::hybrid_set<const A *, Compare> set;
+        awl::vector_set<const A *, Compare> set;
 
         for (const A & val : v)
         {
@@ -535,7 +535,7 @@ namespace
         using A = typename Pointer::element_type;
 
         std::vector<A> v;
-        awl::hybrid_set<Pointer, Compare> set;
+        awl::vector_set<Pointer, Compare> set;
 
         std::uniform_int_distribution<size_t> dist(1u, range);
 
@@ -573,7 +573,7 @@ namespace
     }
 }
 
-AWT_TEST(HybridSetComparer)
+AWT_TEST(VectorSetComparer)
 {
     TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
     TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
@@ -661,7 +661,7 @@ namespace
     }
 }
 
-AWT_TEST(HybridSetNonCopyableElement)
+AWT_TEST(VectorSetNonCopyableElement)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(int, range, 2000);
@@ -684,7 +684,7 @@ AWT_TEST(HybridSetNonCopyableElement)
         keys.push_back(b.GetKey());
     }
 
-    awl::hybrid_set<B> set1 = std::move(set);
+    awl::vector_set<B> set1 = std::move(set);
 
     for (size_t i = 0; i < keys.size(); ++i)
     {
@@ -736,8 +736,8 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
     }
 }
 
-//--filter HybridSetBoundAndContains.* --insert_count 1000 --range 1200
-AWT_TEST(HybridSetBoundAndContains)
+//--filter VectorSetBoundAndContains.* --insert_count 1000 --range 1200
+AWT_TEST(VectorSetBoundAndContains)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(size_t, range, 1000);

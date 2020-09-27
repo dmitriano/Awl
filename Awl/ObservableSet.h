@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Awl/HybridSet.h"
+#include "Awl/VectorSet.h"
 #include "Awl/Observable.h"
 
 namespace awl
@@ -19,7 +19,7 @@ namespace awl
     private:
 
         using BaseObservable = Observable<INotifySetChanged<T>>;
-        using InternalSet = hybrid_set<T, Compare, Allocator>;
+        using InternalSet = vector_set<T, Compare, Allocator>;
 
     public:
 
