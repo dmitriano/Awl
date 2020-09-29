@@ -401,7 +401,7 @@ AWT_TEST(VectorSetIndex)
             set.at(set.size() + i);
         });
 
-        Assert::Throws<awl::GeneralException>([&set, range, i]()
+        Assert::Throws<std::out_of_range>([&set, range, i]()
         {
             set.index_of(range + 1 + i);
         });
@@ -469,7 +469,7 @@ namespace
                 set.at(set.size() + i);
             });
 
-            Assert::Throws<awl::GeneralException>([&set, range, i]()
+            Assert::Throws<std::out_of_range>([&set, range, i]()
             {
                 set.index_of(range + 1 + i);
             });
@@ -653,7 +653,7 @@ namespace
                 set.at(set.size() + i);
             });
 
-            Assert::Throws<awl::GeneralException>([&set, range, i]()
+            Assert::Throws<std::out_of_range>([&set, range, i]()
             {
                 set.index_of(static_cast<int>(range + 1 + i));
             });

@@ -50,7 +50,7 @@ namespace awl
 
         Link * pPrev;
 
-        template <class T1, class Link1> friend class base_single_iterator;
+        template <class T1, class Link1> friend class single_iterator;
         template <class T1, class Link1, class Derived1> friend class basic_single_list;
     };
 

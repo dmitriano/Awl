@@ -39,8 +39,8 @@ namespace awl
 
         Link * pNext;
 
-        //It can be template<class T> friend base_single_iterator<Link>, but C++ does not allow this.
-        template <class T1, class Link1> friend class base_single_iterator;
+        //It can be template<class T> friend single_iterator<Link>, but C++ does not allow this.
+        template <class T1, class Link1> friend class single_iterator;
         template <class T1, class Link1, class Derived1> friend class basic_single_list;
         template <class T1, class Link1> friend class single_list;
     };
@@ -56,7 +56,7 @@ namespace awl
 
         using Base::Base;
 
-        template <class T1, class Link1> friend class base_single_iterator;
+        template <class T1, class Link1> friend class single_iterator;
         template <class T1, class Link1, class Derived1> friend class basic_single_list;
         template <class T1, class Link1> friend class single_list;
     };
@@ -65,7 +65,7 @@ namespace awl
     /*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
         of std::iterator.*/
     template <class T, class Link>
-    class base_single_iterator
+    class single_iterator
     {
     public:
 
@@ -81,36 +81,11 @@ namespace awl
 
         using reference = value_type &;
 
-        base_single_iterator(Link *p) : pCur(p) {}
+        single_iterator(Link *p) : pCur(p) {}
 
         T * operator-> () const { return cur(); }
 
         T * operator* () const { return cur(); }
-
-    protected:
-
-        //! Results in undefined behavior if the iterator is end().
-        T * cur() const { return static_cast<T *>(pCur); }
-
-        void MoveNext() { pCur = pCur->next(); }
-
-        Link * link() const { return pCur; }
-
-    private:
-
-        Link * pCur;
-    };
-
-    template <class T, class Link>
-    class single_iterator : public base_single_iterator<T, Link>
-    {
-    public:
-
-        single_iterator(Link *p) : base_single_iterator<T, Link>(p) {}
-
-        single_iterator(const single_iterator & other) : single_iterator(*other) {}
-
-        single_iterator & operator = (const single_iterator &) = default;
 
         single_iterator & operator++ ()
         {
@@ -137,47 +112,23 @@ namespace awl
         {
             return !(*this == r);
         }
-    };
 
-    template <class T, class Link>
-    class const_single_iterator : public base_single_iterator<const T, const Link>
-    {
-    public:
-
-        const_single_iterator(const Link *p) : base_single_iterator<const T, const Link>(p) {}
-
-        const_single_iterator(const const_single_iterator & other) : const_single_iterator(*other) {}
-
-        const_single_iterator & operator = (const const_single_iterator &) = default;
-
-        //! The only differece between single_iterator and const_single_iterator is that single_iterator can be converted to const_single_iterator but not vice versa.
-        const_single_iterator(const single_iterator<T, Link> & other) : const_single_iterator(*other) {}
-
-        const_single_iterator& operator++ ()
+        //Construction of const_iterator from iterator
+        operator single_iterator<const T, const Link>() const
         {
-            this->MoveNext();
-
-            return *this;
+            return single_iterator<const T, const Link>(link());
         }
+    
+    private:
 
-        const_single_iterator operator++ (int)
-        {
-            const_single_iterator tmp = *this;
+        //! Results in undefined behavior if the iterator is end().
+        T * cur() const { return static_cast<T *>(pCur); }
 
-            this->MoveNext();
+        void MoveNext() { pCur = pCur->next(); }
 
-            return tmp;
-        }
+        Link * link() const { return pCur; }
 
-        bool operator == (const const_single_iterator & r) const
-        {
-            return this->link() == r.link();
-        }
-
-        bool operator != (const const_single_iterator & r)  const
-        {
-            return !(*this == r);
-        }
+        Link * pCur;
     };
 
     //! A singly linked list containing elements derived from single_link<T>.
@@ -191,7 +142,7 @@ namespace awl
         using value_type = T *;
 
         using iterator = single_iterator<T, Link>;
-        using const_iterator =  const_single_iterator<T, Link>;
+        using const_iterator =  single_iterator<const T, const Link>;
 
         basic_single_list() {}
 
