@@ -82,7 +82,7 @@ namespace awl
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
             AWT_ASSERT(p.second);
-            return *(Set::ExtractListIterator(p.first));
+            return *p.first.m_i;
         }
 
         void InsertExisting(int val)
@@ -383,13 +383,18 @@ AWT_TEST(VectorSetIndex)
 
     size_t index = 0;
 
-    for (auto val : set)
+    for (auto i = set.begin(); i != set.end(); ++i)
     {
+        auto val = *i;
+
         const auto found_val = set.at(index);
         AWT_ASSERT_EQUAL(val, found_val);
 
         const size_t found_index = set.index_of(val);
         AWT_ASSERT_EQUAL(index, found_index);
+
+        const size_t found_index2 = set.index_of(i);
+        AWT_ASSERT_EQUAL(index, found_index2);
 
         ++index;
     }

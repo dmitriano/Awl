@@ -85,5 +85,7 @@ namespace awl
         ListIterator m_i;
 
         friend Container;
+
+        friend class VectorSetTest;
     };
 }

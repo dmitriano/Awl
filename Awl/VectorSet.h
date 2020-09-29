@@ -434,12 +434,12 @@ namespace awl
         //an insertion or deletion will invalidate it.
         size_type index_of(iterator i) const
         {
-            return IndexOfNode(*i);
+            return IndexOfNode(*i.m_i);
         }
 
         size_type index_of(const_iterator i) const
         {
-            return IndexOfNode(*i);
+            return IndexOfNode(*i.m_i);
         }
 
         //Calculating the index requires the iteration from the root
@@ -476,11 +476,7 @@ namespace awl
 
         void erase(iterator i)
         {
-            typename List::iterator li = ExtractListIterator(i);
-
-            Node * node = *li;
-
-            RemoveNode(node);
+            RemoveNode(*i.m_i);
         }
 
         template <class Key>
@@ -642,22 +638,27 @@ namespace awl
             throw std::out_of_range(aformat() << "Index " << index << " is out of range [0, " << size() << "].");
         }
 
-        size_t IndexOfNode(const Node * node)
+        size_t IndexOfNode(const Node * node) const
         {
             size_t index = node->GetLeftCount();
 
-            const Node * parent = node;
+            const Node * x = node;
 
             while (true)
             {
-                parent = parent->parent;
+                const Node * parent = x->parent;
 
                 if (parent == nullptr)
                 {
                     break;
                 }
 
-                index += parent->GetLeftCount() + 1;
+                if (x == parent->right)
+                {
+                    index += parent->GetLeftCount() + 1;
+                }
+
+                x = parent;
             }
 
             return index;
@@ -1100,11 +1101,6 @@ namespace awl
                 }
             }
             x->color = Color::Black;
-        }
-
-        static typename List::iterator ExtractListIterator(iterator i)
-        {
-            return i.m_i;
         }
 
         void CopyElements(const vector_set & other)
