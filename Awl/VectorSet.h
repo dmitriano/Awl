@@ -23,7 +23,7 @@ namespace awl
         enum class Color : uint8_t { Red, Black };
 
         struct Node;
-        
+
         struct Link
         {
             Node * parent;
@@ -36,7 +36,7 @@ namespace awl
             //The number of the elements in the left subtree.
             size_t GetLeftCount() const
             {
-                return this->left != nullptr ? this->left->count + 1: 0;
+                return this->left != nullptr ? this->left->count + 1 : 0;
             }
 
             //The number of the elements in the right subtree.
@@ -118,7 +118,7 @@ namespace awl
                 //to be included.
                 safe_exclude();
             }
-            
+
             //The only function that requires this to be Node *.
             void CopyFrom(Node * other)
             {
@@ -166,7 +166,7 @@ namespace awl
             new (node) Node(val);
             return node;
         }
-        
+
         Node * CreateNode(T && val)
         {
             Node * node = m_nodeAlloc.allocate(1);
@@ -196,7 +196,7 @@ namespace awl
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = value_type & ;
-        using const_reference = const value_type & ;
+        using const_reference = const value_type &;
 
         using iterator = node_iterator<Node, typename quick_link::ForwardLink, T, &Node::value, vector_set>;
         using const_iterator = node_iterator<const Node, const typename quick_link::ForwardLink, const T, &Node::value, vector_set>;
@@ -211,7 +211,7 @@ namespace awl
         vector_set() : m_nodeAlloc(m_alloc)
         {
         }
-        
+
         vector_set(Compare comp, const Allocator& alloc = Allocator()) : m_comp(comp), m_alloc(alloc), m_nodeAlloc(m_alloc)
         {
         }
@@ -362,6 +362,25 @@ namespace awl
             return NodeToIterator(FindNodeByKey(key));
         }
 
+        //Calculating the index requires the iteration from the root
+        //and the calculation the sum of number of the elements in the left subtrees
+        //of the parent nodes.
+        template <class Key>
+        std::tuple<const_iterator, size_type> find_index(const Key & key) const
+        {
+            auto [node, index] = FindIndexByKey(key);
+
+            return std::make_tuple(NodeToConstIterator(node), index);
+        }
+
+        template <class Key>
+        std::tuple<iterator, size_type> find_index(const Key & key)
+        {
+            auto [node, index] = FindIndexByKey(key);
+
+            return std::make_tuple(NodeToIterator(node), index);
+        }
+
         template <class Key>
         bool contains(const Key & key) const
         {
@@ -384,7 +403,7 @@ namespace awl
         const_iterator upper_bound(const Key & key) const
         {
             auto [node, equal] = FindBoundByKey(key);
-            
+
             if (equal)
             {
                 //return its next
@@ -442,36 +461,17 @@ namespace awl
             return IndexOfNode(*i.m_i);
         }
 
-        //Calculating the index requires the iteration from the root
-        //and the calculation the sum of number of the elements in the left subtrees
-        //of the parent nodes.
         template <class Key>
-        //std::tuple<const_iterator, size_type> 
         size_type index_of(const Key & key) const
         {
-            size_t parent_rank = 0;
-            const size_t size = this->size();
+            auto [node, index] = FindIndexByKey(key);
 
-            Node * found_node = FindNodeByKey(key,
-                [](Node *)
-                {
-                },
-                [&parent_rank, size](Node * node)
-                {
-                    //The parent and its children are at the left side.
-                    parent_rank += node->GetLeftCount() + 1;
-                    assert(parent_rank <= size);
-                }
-            );
-
-            if (found_node != nullptr)
+            if (node == nullptr)
             {
-                const size_t index = found_node->GetLeftCount() + parent_rank;
-                assert(index < size);
-                return index;
+                throw std::out_of_range("Key not found.");
             }
 
-            throw std::out_of_range("Key not found.");
+            return index;
         }
 
         void erase(iterator i)
@@ -530,7 +530,7 @@ namespace awl
         Node * FindNodeByKey(const Key & key) const
         {
             auto accum = [](Node *) {};
-            
+
             return FindNodeByKey(key, accum, accum);
         }
 
@@ -578,6 +578,34 @@ namespace awl
             }
 
             return nullptr;
+        }
+
+        template <class Key>
+        std::tuple<Node *, size_t> FindIndexByKey(const Key & key) const
+        {
+            size_t parent_rank = 0;
+            const size_t size = this->size();
+
+            Node * found_node = FindNodeByKey(key,
+                [](Node *)
+                {
+                },
+                [&parent_rank, size](Node * node)
+                {
+                    //The parent and its children are at the left side.
+                    parent_rank += node->GetLeftCount() + 1;
+                    assert(parent_rank <= size);
+                }
+            );
+
+            if (found_node != nullptr)
+            {
+                const size_t index = found_node->GetLeftCount() + parent_rank;
+                assert(index < size);
+                return std::make_tuple(found_node, index);
+            }
+
+            return std::make_tuple(nullptr, static_cast<size_t>(-1));
         }
 
         //Returns an iterator pointing to the first element that is not less than (i.e. greater or equal to) key.

@@ -390,8 +390,9 @@ AWT_TEST(VectorSetIndex)
         const auto found_val = set.at(index);
         AWT_ASSERT_EQUAL(val, found_val);
 
-        const size_t found_index = set.index_of(val);
+        auto [found_iter, found_index] = set.find_index(val);
         AWT_ASSERT_EQUAL(index, found_index);
+        AWT_ASSERT_EQUAL(index, set.index_of(found_iter));
 
         const size_t found_index2 = set.index_of(i);
         AWT_ASSERT_EQUAL(index, found_index2);
