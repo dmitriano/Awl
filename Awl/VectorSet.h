@@ -458,7 +458,23 @@ namespace awl
             return (*this)[pos];
         }
 
+        //The iterator can't hold the element index because in this case
+        //an insertion or deletion will invalidate it.
+        size_type index_of(iterator i) const
+        {
+            return IndexOfNode(*i);
+        }
+
+        size_type index_of(const_iterator i) const
+        {
+            return IndexOfNode(*i);
+        }
+
+        //Calculating the index requires the iteration from the root
+        //and the calculation the sum of number of the elements in the left subtrees
+        //of the parent nodes.
         template <class Key>
+        //std::tuple<const_iterator, size_type> 
         size_type index_of(const Key & key) const
         {
             size_t parent_rank = 0;
@@ -483,9 +499,7 @@ namespace awl
                 return index;
             }
 
-            static_cast<void>(size);
-
-            throw GeneralException(_T("Key not found."));
+            throw std::out_of_range("Key not found.");
         }
 
         void erase(iterator i)
@@ -653,7 +667,28 @@ namespace awl
                 }
             }
 
-            throw std::out_of_range(basic_format<char>() << "Index " << index << " is out of range [0, " << size() << "].");
+            throw std::out_of_range(aformat() << "Index " << index << " is out of range [0, " << size() << "].");
+        }
+
+        size_t IndexOfNode(const Node * node)
+        {
+            size_t index = node->GetLeftCount();
+
+            const Node * parent = node;
+
+            while (true)
+            {
+                parent = parent->parent;
+
+                if (parent == nullptr)
+                {
+                    break;
+                }
+
+                index += parent->GetLeftCount() + 1;
+            }
+
+            return index;
         }
 
         template <class V>
