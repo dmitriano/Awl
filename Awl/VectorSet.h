@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/QuickList.h"
-#include "Awl/TransformIterator.h"
+#include "Awl/NodeIterator.h"
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
@@ -190,34 +190,6 @@ namespace awl
 
         using List = quick_list<Node>;
 
-        struct IteratorHelper
-        {
-            static auto MakeXFunc()
-            {
-                return [](Node * node) -> T & { return node->value; };
-            }
-
-            static auto MakeConstXFunc()
-            {
-                return [](const Node * node) -> const T & { return node->value; };
-            }
-        };
-
-        using XFunc = decltype(IteratorHelper::MakeXFunc());
-        using ConstXFunc = decltype(IteratorHelper::MakeConstXFunc());
-
-        template <class ListIterator>
-        static transform_iterator<XFunc, ListIterator, vector_set> MakeIterator(ListIterator i)
-        {
-            return make_friend_iterator<vector_set>(i, IteratorHelper::MakeXFunc());
-        }
-
-        template <class ListIterator>
-        static transform_iterator<ConstXFunc, ListIterator, vector_set> MakeConstIterator(ListIterator i)
-        {
-            return make_friend_iterator<vector_set>(i, IteratorHelper::MakeConstXFunc());
-        }
-
     public:
 
         using value_type = T;
@@ -226,11 +198,11 @@ namespace awl
         using reference = value_type & ;
         using const_reference = const value_type & ;
 
-        using iterator = transform_iterator<XFunc, typename List::iterator, vector_set>;
-        using const_iterator = transform_iterator<ConstXFunc, typename List::const_iterator, vector_set>;
+        using iterator = node_iterator<Node, typename quick_link::ForwardLink, T, &Node::value, vector_set>;
+        using const_iterator = node_iterator<const Node, const typename quick_link::ForwardLink, const T, &Node::value, vector_set>;
 
-        using reverse_iterator = transform_iterator<XFunc, typename List::reverse_iterator, vector_set>;
-        using const_reverse_iterator = transform_iterator<ConstXFunc, typename List::const_reverse_iterator, vector_set>;
+        using reverse_iterator = node_iterator<Node, typename quick_link::BackwardLink, T, &Node::value, vector_set>;
+        using const_reverse_iterator = node_iterator<const Node, const typename quick_link::BackwardLink, const T, &Node::value, vector_set>;
 
         using allocator_type = Allocator;
         using key_compare = Compare;
@@ -329,17 +301,17 @@ namespace awl
         T & back() { return m_list.back()->value; }
         const T & back() const { return m_list.back()->value; }
 
-        iterator begin() { return MakeIterator(m_list.begin()); }
-        const_iterator begin() const { return MakeConstIterator(m_list.begin()); }
+        iterator begin() { return m_list.begin(); }
+        const_iterator begin() const { return m_list.begin(); }
 
-        iterator end() { return MakeIterator(m_list.end()); }
-        const_iterator end() const { return MakeConstIterator(m_list.end()); }
+        iterator end() { return m_list.end(); }
+        const_iterator end() const { return m_list.end(); }
 
-        reverse_iterator rbegin() { return MakeIterator(m_list.rbegin()); }
-        const_reverse_iterator rbegin() const { return MakeConstIterator(m_list.rbegin()); }
+        reverse_iterator rbegin() { return m_list.rbegin(); }
+        const_reverse_iterator rbegin() const { return m_list.rbegin(); }
 
-        reverse_iterator rend() { return MakeIterator(m_list.rend()); }
-        const_reverse_iterator rend() const { return MakeConstIterator(m_list.rend()); }
+        reverse_iterator rend() { return m_list.rend(); }
+        const_reverse_iterator rend() const { return m_list.rend(); }
 
         std::pair<iterator, bool> insert(const value_type & value)
         {
@@ -365,7 +337,7 @@ namespace awl
                 InsertNode(node, parent);
             }
 
-            return std::make_pair(MakeIterator(typename List::iterator(node)), !exists);
+            return std::make_pair(iterator(typename List::iterator(node)), !exists);
         }
 
         bool empty() const
@@ -416,7 +388,7 @@ namespace awl
             if (equal)
             {
                 //return its next
-                return MakeConstIterator(++typename List::const_iterator(node));
+                return const_iterator(++typename List::const_iterator(node));
             }
 
             return NodeToConstIterator(node);
@@ -430,7 +402,7 @@ namespace awl
             if (equal)
             {
                 //return its next
-                return MakeIterator(++typename List::iterator(node));
+                return iterator(++typename List::iterator(node));
             }
 
             return NodeToIterator(node);
@@ -542,7 +514,7 @@ namespace awl
         {
             if (node != nullptr)
             {
-                return MakeConstIterator(typename List::const_iterator(node));
+                return const_iterator(typename List::const_iterator(node));
             }
 
             return end();
@@ -552,7 +524,7 @@ namespace awl
         {
             if (node != nullptr)
             {
-                return MakeIterator(typename List::iterator(node));
+                return iterator(typename List::iterator(node));
             }
 
             return end();
@@ -704,7 +676,7 @@ namespace awl
                 InsertNode(node, parent);
             }
 
-            return std::make_pair(MakeIterator(typename List::iterator(node)), !exists);
+            return std::make_pair(iterator(typename List::iterator(node)), !exists);
         }
 
         //Inserts a node that does not exist to the specified parent.
