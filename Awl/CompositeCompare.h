@@ -27,6 +27,8 @@ namespace awl
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
             {
+                static_cast<void>(left);
+                static_cast<void>(right);
                 return false;
             }
             else
