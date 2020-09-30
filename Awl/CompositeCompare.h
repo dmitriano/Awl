@@ -25,25 +25,26 @@ namespace awl
         template <size_t Index>
         bool Compare(const T& left, const T& right) const
         {
-            auto & comp = std::get<Index>(m_comps);
-
-            if (comp(left, right))
-            {
-                return true;
-            }
-
-            if (comp(right, left))
+            if constexpr (Index == std::tuple_size_v<Tuple>)
             {
                 return false;
             }
+            else
+            {
+                auto & comp = std::get<Index>(m_comps);
 
-            return Compare<Index + 1>(left, right);
-        }
+                if (comp(left, right))
+                {
+                    return true;
+                }
 
-        template<>
-        bool Compare<std::tuple_size_v<Tuple>>(const T&, const T&) const
-        {
-            return false;
+                if (comp(right, left))
+                {
+                    return false;
+                }
+
+                return Compare<Index + 1>(left, right);
+            }
         }
 
         Tuple m_comps;

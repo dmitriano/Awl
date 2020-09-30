@@ -172,41 +172,49 @@ namespace awl
     }
 
 #endif
+
+    //'if constexpr' will only conditionally compile a branch within a template. Outside of a template,
+    //all branches will be compiled and must be well formed.
+    template <class Ch>
+    struct StringConvertor
+    {
+        static std::basic_string<Ch> Decode(const char * p_src)
+        {
+            if constexpr (std::is_same_v<Ch, char>)
+            {
+                return p_src;
+            }
+            else
+            {
+                return DecodeString(p_src);
+            }
+        }
+
+        static std::string Encode(const Ch * p_src)
+        {
+            if constexpr (std::is_same_v<Ch, char>)
+            {
+                return p_src;
+            }
+            else
+            {
+                return EncodeString(p_src);
+            }
+        }
+    };
     
-    template <typename C>
-    inline typename std::enable_if<std::is_same<C, wchar_t>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
-    {
-        return DecodeString(p_src);
-    }
-
-    template <typename C>
-    inline typename std::enable_if<std::is_same<C, char>::value, std::basic_string<C>>::type FromACStringHelper(const char * p_src)
-    {
-        return p_src;
-    }
-
     inline String FromACString(const char * p_src)
     {
-        return FromACStringHelper<Char>(p_src);
+        return StringConvertor<Char>::Decode(p_src);
     }
 
-    inline String FromAString(std::string src)
+    inline String FromAString(const std::string & src)
     {
-        if constexpr (std::is_same<Char, char>::value)
-        {
-            return src;
-        }
-
-        return FromACString(src.c_str());
+        return StringConvertor<Char>::Decode(src.c_str());
     }
 
-    inline std::string ToAString(String src)
+    inline std::string ToAString(const String & src)
     {
-        if constexpr (std::is_same<Char, char>::value)
-        {
-            return src;
-        }
-
-        return EncodeString(src.c_str());
+        return StringConvertor<Char>::Encode(src.c_str());
     }
 }

@@ -2,8 +2,7 @@
 
 //Copied from https://codereview.stackexchange.com/questions/208293/ring-buffer-implementation-in-c14
 
-#include <iostream>
-#include <exception>
+#include <stdexcept>
 #include <cassert>
 #include <vector>
 #include <initializer_list>
@@ -24,6 +23,8 @@ namespace awl
         size_type m_tail;
         size_type m_contents_size;
         size_type m_array_size;
+
+        template <bool isconst> struct my_iterator;
 
     public:
 
@@ -47,7 +48,6 @@ namespace awl
             assert(m_array_size > 1 && "size must be greater than 1");
         }
 
-        template <bool isconst> struct my_iterator;
         reference front() { return m_array[m_head]; }
         reference top() { return front(); }
         reference back() { return m_array[m_tail]; }

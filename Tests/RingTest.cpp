@@ -68,7 +68,7 @@ AWT_TEST(Ring)
     for (auto i = mybuf.begin(); i != mybuf.end(); ++i) cout << *i << ": ";
     cout << "\n\nclone: ";
     awl::ring<int> cbuf(mybuf);
-    for (auto i = std::find(mybuf.begin(), mybuf.end(), 100); i != cbuf.end(); ++i) cout << *i << ": ";
+    //for (auto i = std::find(mybuf.begin(), mybuf.end(), 100); i != cbuf.end(); ++i) cout << *i << ": ";
     auto iter = cbuf.cbegin();
     cout << "\nbegin[3] = " << iter[3];
     cout << '\n' << '\n';
