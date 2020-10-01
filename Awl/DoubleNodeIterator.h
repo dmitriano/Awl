@@ -106,4 +106,16 @@ namespace awl
 
         friend class VectorSetTest;
     };
+
+    //Comparison of const_iterator with iterator and vs should be supported https://stackoverflow.com/questions/35390835/is-comparison-of-const-iterator-with-iterator-well-defined
+    //template <class Node, class DLink, class ForwardLink, class BackwardLink,
+    //    class T, T Node::*p_val, class Container = void>
+    //bool operator == (const double_node_iterator<Node, DLink, ForwardLink, BackwardLink, T, p_val, Container> & left,
+    //        const double_node_iterator<const Node, const DLink, const ForwardLink, const BackwardLink, const T, p_val, Container> & right)
+    //{
+    //    const double_node_iterator<const Node, const DLink, const ForwardLink, const BackwardLink, const T, p_val, Container> const_left =
+    //        static_cast<const double_node_iterator<const Node, const DLink, const ForwardLink, const BackwardLink, const T, p_val, Container>>(left);
+
+    //    return left == right;
+    //}
 }
