@@ -350,15 +350,15 @@ namespace
         {
             auto i = list.end();
 
-            AWT_ASSERT_EQUAL((size_t)(2), (--i)->Value);
-            AWT_ASSERT_EQUAL((size_t)(1), (--i)->Value);
-            AWT_ASSERT_EQUAL((size_t)(0), (--i)->Value);
+            AWT_ASSERT_EQUAL(2, (--i)->Value);
+            AWT_ASSERT_EQUAL(1, (--i)->Value);
+            AWT_ASSERT_EQUAL(0, (--i)->Value);
 
             AWT_ASSERT(i == list.begin());
 
-            AWT_ASSERT_EQUAL((size_t)(0), (i++)->Value);
-            AWT_ASSERT_EQUAL((size_t)(1), (i++)->Value);
-            AWT_ASSERT_EQUAL((size_t)(2), (i++)->Value);
+            AWT_ASSERT_EQUAL(0, (i++)->Value);
+            AWT_ASSERT_EQUAL(1, (i++)->Value);
+            AWT_ASSERT_EQUAL(2, (i++)->Value);
 
             AWT_ASSERT(i == list.end());
         }
