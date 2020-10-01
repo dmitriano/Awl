@@ -20,8 +20,6 @@ namespace awl
             return next() != nullptr;
         }
 
-    protected:
-
         base_single_link(Link * n) : pNext(n) {}
 
         base_single_link() : pNext(nullptr) {}
@@ -38,11 +36,6 @@ namespace awl
     private:
 
         Link * pNext;
-
-        //It can be template<class T> friend single_iterator<Link>, but C++ does not allow this.
-        template <class T1, class Link1> friend class single_iterator;
-        template <class T1, class Link1, class Derived1> friend class basic_single_list;
-        template <class T1, class Link1> friend class single_list;
     };
 
     //! If objects of a class included to only one list, single_link can be used by default.
@@ -55,10 +48,6 @@ namespace awl
     public:
 
         using Base::Base;
-
-        template <class T1, class Link1> friend class single_iterator;
-        template <class T1, class Link1, class Derived1> friend class basic_single_list;
-        template <class T1, class Link1> friend class single_list;
     };
 
     //! The base class for list iterators. All the object in the should be of the same type T derived from Link.

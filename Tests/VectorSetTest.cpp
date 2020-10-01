@@ -765,3 +765,30 @@ AWT_TEST(VectorSetBoundAndContains)
 
     TestBound(const_set, const_std_set, range, iter_count);
 }
+
+AWT_TEST(VectorSetBidirectional)
+{
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(size_t, range, 1000);
+
+    auto set = GenerateIntSet(insert_count, range);
+
+    auto comp = set.value_comp();
+
+    for (auto i = set.begin(); i != set.end(); ++i)
+    {
+        if (i != set.begin())
+        {
+            auto i_prev = i;
+            --i_prev;
+            AWT_ASSERT(comp(*i_prev, *i));
+        }
+
+        auto i_next = i;
+        ++i_next;
+        if (i_next != set.end())
+        {
+            AWT_ASSERT(comp(*i, *i_next));
+        }
+    }
+}

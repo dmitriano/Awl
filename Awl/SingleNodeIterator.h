@@ -1,20 +1,21 @@
 #pragma once
 
-#include "SingleList.h"
+#include "Awl/SingleList.h"
+
 #include <cassert>
 
 namespace awl
 {
     //A transform iterator that extracts a value from a node.
     template <class Node, class Link, class T, T Node::*p_val, class Container = void>
-    class node_iterator
+    class single_node_iterator
     {
     private:
 
-        using ListIterator = awl::single_iterator<Node, Link>;
-        using ConstListIterator = awl::single_iterator<const Node, const Link>;
+        using ListIterator = single_iterator<Node, Link>;
+        using ConstListIterator = single_iterator<const Node, const Link>;
 
-        using ConstNodeIterator = node_iterator<const Node, const Link, const T, p_val, Container>;
+        using ConstNodeIterator = single_node_iterator<const Node, const Link, const T, p_val, Container>;
 
     public:
 
@@ -29,7 +30,7 @@ namespace awl
 
         using reference = value_type &;
 
-        node_iterator(ListIterator i) : m_i(std::move(i)) {}
+        single_node_iterator(ListIterator i) : m_i(std::move(i)) {}
 
         T & operator * () const
         {
@@ -41,28 +42,28 @@ namespace awl
             return GetValue();
         }
 
-        node_iterator & operator++ ()
+        single_node_iterator & operator++ ()
         {
             ++m_i;
 
             return *this;
         }
 
-        node_iterator operator++ (int)
+        single_node_iterator operator++ (int)
         {
-            node_iterator tmp = *this;
+            single_node_iterator tmp = *this;
 
             ++m_i;
 
             return tmp;
         }
 
-        bool operator == (const node_iterator & r) const
+        bool operator == (const single_node_iterator & r) const
         {
             return m_i == r.m_i;
         }
 
-        bool operator != (const node_iterator & r)  const
+        bool operator != (const single_node_iterator & r)  const
         {
             return !(*this == r);
         }

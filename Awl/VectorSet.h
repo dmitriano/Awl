@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/QuickList.h"
-#include "Awl/NodeIterator.h"
+#include "Awl/DoubleNodeIterator.h"
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
@@ -198,11 +198,17 @@ namespace awl
         using reference = value_type & ;
         using const_reference = const value_type &;
 
-        using iterator = node_iterator<Node, typename quick_link::ForwardLink, T, &Node::value, vector_set>;
-        using const_iterator = node_iterator<const Node, const typename quick_link::ForwardLink, const T, &Node::value, vector_set>;
+        using iterator = double_node_iterator<Node, quick_link, typename quick_link::ForwardLink, typename quick_link::BackwardLink,
+            T, &Node::value, vector_set>;
 
-        using reverse_iterator = node_iterator<Node, typename quick_link::BackwardLink, T, &Node::value, vector_set>;
-        using const_reverse_iterator = node_iterator<const Node, const typename quick_link::BackwardLink, const T, &Node::value, vector_set>;
+        using const_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::ForwardLink, const typename quick_link::BackwardLink,
+            const T, &Node::value, vector_set>;
+
+        using reverse_iterator = double_node_iterator<Node, quick_link, typename quick_link::BackwardLink, typename quick_link::ForwardLink,
+            T, &Node::value, vector_set>;
+
+        using const_reverse_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::BackwardLink, const typename quick_link::ForwardLink,
+            const T, &Node::value, vector_set>;
 
         using allocator_type = Allocator;
         using key_compare = Compare;
@@ -502,6 +508,17 @@ namespace awl
             }
 
             m_root = nullptr;
+        }
+
+        auto value_comp() const
+        {
+            return m_comp;
+        }
+
+        //Not quite correct - it should compare keys, but not values.
+        auto key_comp() const
+        {
+            return m_comp;
         }
 
     private:

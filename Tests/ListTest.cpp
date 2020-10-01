@@ -346,6 +346,23 @@ namespace
             PrintList();
         }
 
+        void BidirectionalTest()
+        {
+            auto i = list.end();
+
+            AWT_ASSERT_EQUAL((size_t)(2), (--i)->Value);
+            AWT_ASSERT_EQUAL((size_t)(1), (--i)->Value);
+            AWT_ASSERT_EQUAL((size_t)(0), (--i)->Value);
+
+            AWT_ASSERT(i == list.begin());
+
+            AWT_ASSERT_EQUAL((size_t)(0), (i++)->Value);
+            AWT_ASSERT_EQUAL((size_t)(1), (i++)->Value);
+            AWT_ASSERT_EQUAL((size_t)(2), (i++)->Value);
+
+            AWT_ASSERT(i == list.end());
+        }
+
         ~ListHolder()
         {
             while (!list.empty())
@@ -386,6 +403,8 @@ namespace
             holder.MoveTest();
 
             holder.PushBackTest();
+
+            holder.BidirectionalTest();
         }
 
         AWT_ASSERT_EQUAL(0, Element::elementCount);

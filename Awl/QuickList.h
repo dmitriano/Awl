@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "Awl/SingleList.h"
+#include "Awl/DoubleIterator.h"
 
 namespace awl
 {
@@ -30,8 +31,6 @@ namespace awl
         {
             return next() != nullptr;
         }
-
-    protected:
 
         backward_link(Link * n) : pPrev(n) {}
 
@@ -183,11 +182,11 @@ namespace awl
 
         using value_type = T *;
 
-        using iterator = typename ForwardList::iterator;
-        using const_iterator = typename ForwardList::const_iterator;
+        using iterator = double_iterator<T, DLink, ForwardLink, BackwardLink>;
+        using const_iterator = double_iterator<const T, const DLink, const ForwardLink, const BackwardLink>;
 
-        using reverse_iterator = typename BackwardList::iterator;
-        using const_reverse_iterator = typename BackwardList::const_iterator;
+        using reverse_iterator = double_iterator<T, DLink, BackwardLink, ForwardLink>;
+        using const_reverse_iterator = double_iterator<const T, const DLink, const BackwardLink, const ForwardLink>;
 
         //This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
         quick_list() : Null(&Null, &Null)
