@@ -777,18 +777,28 @@ AWT_TEST(VectorSetBidirectional)
 
     for (auto i = set.begin(); i != set.end(); ++i)
     {
+        AWT_ASSERT(set.lower_bound(*i) == i);
+
         if (i != set.begin())
         {
             auto i_prev = i;
             --i_prev;
+
+            AWT_ASSERT(set.upper_bound(*i_prev) == i);
+
             AWT_ASSERT(comp(*i_prev, *i));
         }
 
         auto i_next = i;
         ++i_next;
+
+        AWT_ASSERT(set.upper_bound(*i) == i_next);
+
         if (i_next != set.end())
         {
             AWT_ASSERT(comp(*i, *i_next));
         }
     }
+
+    AWT_ASSERT(set.upper_bound(*(--set.end())) == set.end());
 }
