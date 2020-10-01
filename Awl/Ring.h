@@ -91,7 +91,7 @@ namespace awl
         struct my_iterator
         {
             using iterator_category = std::random_access_iterator_tag;
-            using difference_type = long long;
+            using difference_type = typename std::vector<T>::difference_type;
             using reference = typename std::conditional_t< isconst, T const &, T & >;
             using pointer = typename std::conditional_t< isconst, T const *, T * >;
             using vec_pointer = typename std::conditional_t<isconst, std::vector<T> const *, std::vector<T> *>;

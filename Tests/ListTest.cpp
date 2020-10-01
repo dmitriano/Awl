@@ -245,8 +245,6 @@ namespace
 
         void ConstAlgorithmTest() const
         {
-            //This code does not complile with MSVC in Debug configuration.
-
             auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 1; });
 
             if (i == list.end())
