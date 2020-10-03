@@ -90,6 +90,7 @@ namespace awl
         template <bool isconst = false>
         struct my_iterator
         {
+            using value_type = T;
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = typename std::vector<T>::difference_type;
             using reference = typename std::conditional_t< isconst, T const &, T & >;
