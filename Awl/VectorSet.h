@@ -372,7 +372,7 @@ namespace awl
         //and the calculation the sum of number of the elements in the left subtrees
         //of the parent nodes.
         template <class Key>
-        std::tuple<const_iterator, size_type> find_index(const Key & key) const
+        std::tuple<const_iterator, size_type> find2(const Key & key) const
         {
             auto [node, index] = FindIndexByKey(key);
 
@@ -380,11 +380,22 @@ namespace awl
         }
 
         template <class Key>
-        std::tuple<iterator, size_type> find_index(const Key & key)
+        std::tuple<iterator, size_type> find2(const Key & key)
         {
             auto [node, index] = FindIndexByKey(key);
 
             return std::make_tuple(NodeToIterator(node), index);
+        }
+
+        //With size() and greater it returns end().
+        const_iterator find_by_index(size_type pos) const
+        {
+            return NodeToConstIterator(FindNodeByIndex(pos));
+        }
+
+        iterator find_by_index(size_type pos)
+        {
+            return NodeToIterator(FindNodeByIndex(pos));
         }
 
         template <class Key>
@@ -680,7 +691,7 @@ namespace awl
                 }
             }
 
-            throw std::out_of_range(aformat() << "Index " << index << " is out of range [0, " << size() << "].");
+            return nullptr;
         }
 
         size_t IndexOfNode(const Node * node) const
@@ -1160,7 +1171,7 @@ namespace awl
         {
             if (!(pos < size()))
             {
-                throw std::out_of_range("A specified position is out of a vector_set range.");
+                throw std::out_of_range(aformat() << "Index " << pos << " is out of range [0, " << size() << "].");
             }
         }
         
