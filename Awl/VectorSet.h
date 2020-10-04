@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cassert>
 #include <stdexcept>
+#include <algorithm>
 
 namespace awl
 {
@@ -246,6 +247,21 @@ namespace awl
 
         vector_set(std::initializer_list<value_type> init, const Allocator& alloc)
             : vector_set(init, Compare(), alloc)
+        {
+        }
+
+        template <class InputIt>
+        vector_set(InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) :
+            vector_set(comp, alloc)
+        {
+            //We do not have insert() with two argumets.
+            //std::copy(first, last, std::inserter(*this, begin()));
+            std::for_each(first, last, [this](const T & val) { insert(val); });
+        }
+
+        template <class InputIt>
+        vector_set(InputIt first, InputIt last, const Allocator& alloc = Allocator()) :
+            vector_set(first, last, Compare(), alloc)
         {
         }
 
