@@ -548,6 +548,11 @@ namespace awl
             return m_comp;
         }
 
+        allocator_type get_allocator() const
+        {
+            return m_alloc;
+        }
+
     private:
 
         const_iterator NodeToConstIterator(const Node * node) const
