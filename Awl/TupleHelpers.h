@@ -21,6 +21,8 @@ namespace awl
         return (sizeof(Ts) + ...);
     }
 
+    //Const for_each overloads for iterating over const std::tuple<Args & ...>.
+
     template <typename... Args, typename Func, std::size_t... index>
     inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
@@ -41,6 +43,32 @@ namespace awl
 
     template <typename... Args, typename Func>
     inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
+    {
+        for_each_index(t, f, std::index_sequence_for<Args...>{});
+    }
+
+    //Non const for_each overloads for iterating over std::tuple<Args ...>.
+
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr void for_each(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    {
+        (f(std::get<index>(t)), ...);
+    }
+
+    template <typename... Args, typename Func>
+    inline constexpr void for_each(std::tuple<Args...>& t, Func&& f)
+    {
+        for_each(t, f, std::index_sequence_for<Args...>{});
+    }
+
+    template <typename... Args, typename Func, std::size_t... index>
+    inline constexpr void for_each_index(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    {
+        (f(std::get<index>(t), std::integral_constant<std::size_t, index>()), ...);
+    }
+
+    template <typename... Args, typename Func>
+    inline constexpr void for_each_index(std::tuple<Args...>& t, Func&& f)
     {
         for_each_index(t, f, std::index_sequence_for<Args...>{});
     }
