@@ -38,9 +38,9 @@ namespace awl
             return GetValue();
         }
 
-        T & operator -> () const
+        T * operator -> () const
         {
-            return GetValue();
+            return &GetValue();
         }
 
         double_node_iterator & operator++ ()
