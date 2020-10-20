@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/Testing/ScalarFormatter.h"
-#include "Awl/Testing/TypeTraits.h"
+#include "Awl/Testing/TestTypeTraits.h"
 
 #include <iterator>
 

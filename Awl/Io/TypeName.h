@@ -2,6 +2,7 @@
 
 #include "Awl/FixedString.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/TypeTraits.h"
 #include "Awl/Stringizable.h"
 
 #include <string>
@@ -118,15 +119,6 @@ namespace awl::io
     static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
     static_assert(make_type_name<uint16_t>() == FixedString{ "int16_t" });
     static_assert(make_type_name<float>() == FixedString{ "float32_t" });
-
-    template<typename Test, template<typename...> class Ref>
-    struct is_specialization : std::false_type {};
-
-    template<template<typename...> class Ref, typename... Args>
-    struct is_specialization<Ref<Args...>, Ref> : std::true_type {};
-
-    template<typename Test, template<typename...> class Ref>
-    constexpr bool is_specialization_v = is_specialization<Test, Ref>::value;
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<
