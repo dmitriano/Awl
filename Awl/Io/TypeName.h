@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <array>
 #include <list>
 #include <bitset>
@@ -115,7 +116,6 @@ namespace awl::io
         }
     };
 
-
     static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
     static_assert(make_type_name<uint16_t>() == FixedString{ "int16_t" });
     static_assert(make_type_name<float>() == FixedString{ "float32_t" });
@@ -124,6 +124,7 @@ namespace awl::io
     struct type_descriptor<T, std::enable_if_t<
         is_specialization_v<T, std::basic_string> ||
         is_specialization_v<T, std::vector> ||
+        is_specialization_v<T, std::deque> ||
         is_specialization_v<T, std::list> ||
         is_specialization_v<T, std::set> ||
         is_specialization_v<T, std::unordered_set>>>
