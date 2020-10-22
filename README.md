@@ -14,6 +14,8 @@ AWL is a small cross-platform C++ library that includes:
 
 Feel free to use it or fork it, but keep in mind that version compatibility is not guaranteed and there is no warranty of any kind.
 
+I hope the master branch will compile and work at least with MSVC 2017 and GCC 9 and above.
+
 Compiling on Windows with CMake and MSVC2017:
 
     cmake.exe ..\..\Awl -DCMAKE_GENERATOR_PLATFORM=x64
