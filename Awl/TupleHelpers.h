@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/Exception.h"
+#include "Awl/TypeTraits.h"
 
 #include <tuple>
 #include <variant>
@@ -192,11 +193,6 @@ namespace awl
     {
         return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
     }
-
-    template<class T> struct dependent_false : std::false_type {};
-
-    template <typename T>
-    inline constexpr bool dependent_false_v = dependent_false<T>::value;
 
     //Get the index of the single unique match for an arbitrary type in something tuple-like:
     template <class T, class U, std::size_t... index>
