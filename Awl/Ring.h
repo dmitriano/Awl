@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <cassert>
-#include <vector>
 #include <initializer_list>
 
 namespace awl
@@ -227,8 +226,6 @@ namespace awl
                 delete &elem;
             }
 
-            m_alloc.deallocate(bufBegin, capacity());
-
             dataBegin = bufBegin;
             dataEnd = dataBegin;
         }
@@ -395,14 +392,16 @@ namespace awl
 
         T * allocate_next()
         {
-            T * p_next = next(dataEnd);
+            T * p_write = dataEnd == bufEnd ? bufBegin : dataEnd;
 
-            if (dataBegin == p_next)
+            if (dataBegin == p_write)
             {
                 pop_front();
             }
 
-            return p_next;
+            dataEnd = next(p_write);
+
+            return p_write;
         }
 
         Allocator m_alloc;
