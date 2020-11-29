@@ -53,10 +53,11 @@ AWT_TEST(Ring)
     mybuf.push(20);
     for (size_t i = 0; i < mybuf.size(); ++i) cout << mybuf[i] << ": ";
     cout << '\n';
-    cout << "pop: " << mybuf.top() << '\n';
+    cout << "pop: " << mybuf.front() << '\n';
     mybuf.pop();
     cout << "new front: " << mybuf[0] << " new size: ";
     cout << mybuf.size() << '\n';
+    /*
     cstart = mybuf.end();
     cout << "last: " << *(--cstart) << '\n';
     for (auto i = mybuf.begin(); i != mybuf.end(); ++i) cout << *i << ": ";
@@ -76,6 +77,7 @@ AWT_TEST(Ring)
     cout << "\nbegin[3] = " << iter[3];
     cout << '\n' << '\n';
     cout << "Hello World!\n";
+    */
 
     context.out << awl::FromAString(cout.str());
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-//Copied from https://codereview.stackexchange.com/questions/208293/ring-buffer-implementation-in-c14
-
 #include <stdexcept>
 #include <cassert>
 #include <vector>
@@ -9,388 +7,413 @@
 
 namespace awl
 {
-    template <class T>
+    template <class T, class Allocator = std::allocator<T>>
     class ring
     {
+    public:
+
         using value_type = T;
-        using reference = T & ;
+        using allocator_type = Allocator;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = T &;
         using const_reference = const T &;
-        using size_type = size_t;
-        using circularBuffer = std::vector<value_type>;
+        using pointer = T *;
+        using const_pointer = const T *;
 
-        circularBuffer m_array;
-        size_type m_head;
-        size_type m_tail;
-        size_type m_contents_size;
-        size_type m_array_size;
+    private:
 
-        template <bool isconst> struct my_iterator;
+        template <class E>
+        class ring_iterator
+        {
+        public:
+
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type = E;
+            using difference_type = std::ptrdiff_t;
+            using reference = E &;
+            using pointer = E *;
+
+            ring_iterator & operator = (const ring_iterator & other)
+            {
+                m_p = other.m_p;
+
+                return *this;
+            }
+
+            pointer operator-> () const { return m_p; }
+
+            reference operator* () const { return *m_p; }
+
+            ring_iterator & operator++ ()
+            {
+                move_next();
+
+                return *this;
+            }
+
+            ring_iterator operator++ (int)
+            {
+                my_iterator tmp = *this;
+
+                move_next();
+
+                return tmp;
+            }
+
+            ring_iterator & operator-- ()
+            {
+                move_prev();
+
+                return *this;
+            }
+
+            ring_iterator operator-- (int)
+            {
+                my_iterator tmp = *this;
+
+                move_prev();
+
+                return tmp;
+            }
+
+            ring_iterator & operator += (difference_type diff)
+            {
+                m_p += diff;
+
+                adjust();
+
+                return *this;
+            }
+
+            ring_iterator & operator -= (difference_type diff)
+            {
+                return this->operator+=(-diff);
+            }
+
+            ring_iterator operator + (difference_type diff)
+            {
+                ring_iterator i(m_ring, m_p + diff);
+                
+                i.adjust();
+
+                return i;
+            }
+
+            ring_iterator operator - (difference_type diff)
+            {
+                return this->operator+(-diff);
+            }
+
+            difference_type operator - (const ring_iterator & other)
+            {
+                return position() - other.position();
+            }
+
+            bool operator == (const ring_iterator & other) const
+            {
+                return m_p == other.m_p;
+            }
+
+            bool operator != (const ring_iterator & other)  const
+            {
+                return !(*this == other);
+            }
+
+            bool operator < (const ring_iterator & other) const
+            {
+                return position() < other.position();
+            }
+
+            operator ring_iterator<const E>() const
+            {
+                return ring_iterator<const E>(m_ring, m_p);
+            }
+
+        private:
+
+            ring_iterator(const ring & r, E * p) : m_ring(r), m_p(p)
+            {
+            }
+
+            void move_next()
+            {
+                m_p = m_ring.next(m_p);
+            }
+
+            void move_prev()
+            {
+                m_p = m_ring.prev(m_p);
+            }
+
+            //We do not know the direction the pointer was moved to,
+            //because 'diff' is a signed integer, so we check both begin and end.
+            void adjust()
+            {
+                m_ring.adjust(m_p);
+            }
+
+            difference_type position() const
+            {
+                return m_ring.position(m_p);
+            }
+
+            const ring & m_ring;
+            
+            E * m_p;
+
+            friend ring;
+        };
 
     public:
 
-        ring(size_type size) :
-            m_array(size),
-            m_array_size(size),
-            m_head(1),
-            m_tail(0),
-            m_contents_size(0)
+        using iterator = ring_iterator<T>;
+        using const_iterator = ring_iterator<const T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        ring(Allocator alloc = {}) : m_alloc(alloc)
         {
-            assert(m_array_size > 1 && "size must be greater than 1");
+        }
+
+        ring(size_type cap, Allocator alloc = {}) : m_alloc(alloc),
+            bufBegin(m_alloc.allocate(cap)), bufEnd(bufBegin + cap),
+            dataBegin(bufBegin), dataEnd(dataBegin)
+        {
+        }
+
+        ~ring()
+        {
+            clear();
+            
+            m_alloc.deallocate(bufBegin, capacity());
+        }
+
+        void reserve(size_type new_cap)
+        {
+            T * buf = m_alloc.allocate(cap);
+
+            size_type min_size;
+            
+            if (bufBegin != nullptr)
+            {
+                size_type min_size = std::min(cap, size());
+
+                for (size_type i = 0; ++i; i < min_size)
+                {
+                    buf[i] = std::move(bufBegin[i]);
+                }
+
+                m_alloc.deallocate(bufBegin, capacity());
+            }
+            else
+            {
+                min_size = 0;
+            }
+
+            bufBegin = buf;
+            bufEnd = bufBegin + cap;
+
+            dataBegin = bufBegin;
+            dataEnd = dataBegin + min_size;
+        }
+
+        void clear()
+        {
+            assert(bufBegin != nullptr);
+
+            for (T & elem : *this)
+            {
+                delete &elem;
+            }
+
+            m_alloc.deallocate(bufBegin, capacity());
+
+            dataBegin = bufBegin;
+            dataEnd = dataBegin;
+        }
+
+        reference front() { assert(!empty()); return *dataBegin; }
+        reference back() { assert(!empty()); return *prev(dataEnd); }
+
+        const_reference front() const { assert(!empty()); return *dataBegin; }
+        const_reference back() const { assert(!empty()); return *prev(dataEnd); }
+
+        void push_back(const value_type & val)
+        {
+            *allocate_next() = val;
+        }
+
+        void push_back(value_type && val)
+        {
+            *allocate_next() = std::move(val);
+        }
+
+        void push(const value_type & val) { push_back(val); }
+        void push(value_type && val) { push_back(val); }
+
+        void pop_front()
+        {
+            assert(!empty());
+
+            dataBegin = next(dataBegin);
+        }
+
+        void pop() { pop_front(); }
+        
+        size_type size() const
+        {
+            return static_cast<size_type>(position(dataEnd));
         }
         
-        ring(std::initializer_list<T> l) :
-            m_array(l),
-            m_array_size(l.size()),
-            m_head(0),
-            m_tail(l.size() - 1),
-            m_contents_size(l.size())
+        size_type capacity() const
         {
-            assert(m_array_size > 1 && "size must be greater than 1");
+            return static_cast<size_type>(bufEnd - bufBegin);
+        }
+        
+        bool empty() const
+        {
+            return dataBegin == dataEnd;
+        }
+        
+        bool full() const
+        {
+            return size() == capacity();
         }
 
-        reference front() { return m_array[m_head]; }
-        reference top() { return front(); }
-        reference back() { return m_array[m_tail]; }
-        const_reference front() const { return m_array[m_head]; }
-        const_reference back() const { return m_array[m_tail]; }
-        void clear();
-        void push_back(const value_type &item);
-        void push(const value_type &item) { push_back(item); }
-        void pop_front() { increment_head(); }
-        void pop() { pop_front(); }
-        size_type size() const { return m_contents_size; }
-        size_type capacity() const { return m_array_size; }
-        bool empty() const;
-        bool full() const;
+        reference operator[](size_type index)
+        {
+            return *address<T>(index);
+        }
 
-        size_type max_size() const { return size_type(-1) / sizeof(value_type); }
-        reference operator[](size_type index);
-        const_reference operator[](size_type index) const;
-        reference at(size_type index);
-        const_reference at(size_type index) const;
+        const_reference operator[](size_type index) const
+        {
+            return *address<const T>(index);
+        }
 
-        using iterator = my_iterator<false>;
-        using const_iterator = my_iterator<true>;
-        iterator begin();
-        const_iterator begin() const;
-        const_iterator cbegin() const;
-        iterator rbegin();
-        const_iterator rbegin() const;
-        iterator end();
-        const_iterator end() const;
-        const_iterator cend() const;
-        iterator rend();
-        const_iterator rend() const;
+        reference at(size_type index)
+        {
+            if (index > size())
+            {
+                throw std::out_of_range("ring index is out of range");
+            }
+            
+            return *address<T>(static_cast<difference_type>(index));
+        }
+
+        const_reference at(size_type index) const
+        {
+            if (index > size())
+            {
+                throw std::out_of_range("ring index is out of range");
+            }
+
+            return *address<const T>(static_cast<difference_type>(index));
+        }
+
+        iterator begin() { return ring_iterator(*this, dataBegin); }
+        const_iterator begin() const { return cbegin(); }
+        const_iterator cbegin() const { return ring_iterator(*this, dataBegin); }
+
+        iterator end() { return ring_iterator(*this, dataEnd); }
+        const_iterator end() const { return cend(); }
+        const_iterator cend() const { return ring_iterator(*this, dataEnd);}
+
+        reverse_iterator rbegin() { return std::make_reverse_iterator(begin()); }
+        const_reverse_iterator rbegin() const { return crbegin(); }
+        const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cbegin()); }
+
+        reverse_iterator rend() { return std::make_reverse_iterator(end()); }
+        const_reverse_iterator rend() const { return crend(); }
+        const_reverse_iterator crend() const { return std::make_reverse_iterator(cend()); }
 
     private:
-        
-        void increment_tail();
-        void increment_head();
 
-        template <bool isconst = false>
-        struct my_iterator
+        template <class E>
+        E * next(E * p) const
         {
-            using value_type = T;
-            using iterator_category = std::random_access_iterator_tag;
-            using difference_type = typename std::vector<T>::difference_type;
-            using reference = typename std::conditional_t< isconst, T const &, T & >;
-            using pointer = typename std::conditional_t< isconst, T const *, T * >;
-            using vec_pointer = typename std::conditional_t<isconst, std::vector<T> const *, std::vector<T> *>;
-        private:
-            vec_pointer ptrToBuffer;
-            size_type offset;
-            size_type index;
-            bool reverse;
-
-            bool comparable(const my_iterator & other) {
-                return (reverse == other.reverse);
+            if (p == bufEnd)
+            {
+                return bufBegin;
             }
 
-        public:
-            my_iterator() : ptrToBuffer(nullptr), offset(0), index(0), reverse(false) {}  //
-            my_iterator(const ring<T>::my_iterator<false>& i) :
-                ptrToBuffer(i.ptrToBuffer),
-                offset(i.offset),
-                index(i.index),
-                reverse(i.reverse) {}
-            reference operator*() {
-                if (reverse)
-                    return (*ptrToBuffer)[(ptrToBuffer->size() + offset - index) % (ptrToBuffer->size())];
-                return (*ptrToBuffer)[(offset + index) % (ptrToBuffer->size())];
-            }
-            reference operator[](size_type index) {
-                my_iterator iter = *this;
-                iter.index += index;
-                return *iter;
-            }
-            pointer operator->() { return &(operator *()); }
+            return p + 1;
+        }
 
-            my_iterator& operator++ ()
+        template <class E>
+        E * prev(E * p) const
+        {
+            if (p == bufBegin)
             {
-                ++index;
-                return *this;
-            };
-            my_iterator operator ++(int)
+                return bufEnd - 1;
+            }
+
+            return p - 1;
+        }
+
+        //We do not know the direction the pointer was moved to,
+        //because 'diff' is a signed integer, so we check both begin and end.
+        template <class E>
+        void adjust(E *& p) const
+        {
+            if (p < bufBegin)
             {
-                my_iterator iter = *this;
-                ++index;
-                return iter;
+                const difference_type diff = bufBegin - p;
+
+                p = bufEnd - diff;
             }
-            my_iterator& operator --()
+            else if (p >= bufEnd)
             {
-                --index;
-                return *this;
+                const difference_type diff = p - bufEnd;
+
+                p = bufBegin + diff;
             }
-            my_iterator operator --(int) {
-                my_iterator iter = *this;
-                --index;
-                return iter;
-            }
-            friend my_iterator operator+(my_iterator lhs, int rhs) {
-                lhs.index += rhs;
-                return lhs;
-            }
-            friend my_iterator operator+(int lhs, my_iterator rhs) {
-                rhs.index += lhs;
-                return rhs;
-            }
-            my_iterator& operator+=(int n) {
-                index += n;
-                return *this;
-            }
-            friend my_iterator operator-(my_iterator lhs, int rhs) {
-                lhs.index -= rhs;
-                return lhs;
-            }
-            friend difference_type operator-(const my_iterator& lhs, const my_iterator& rhs) {
-                lhs.index -= rhs;
-                return lhs.index - rhs.index;
-            }
-            my_iterator& operator-=(int n) {
-                index -= n;
-                return *this;
-            }
-            bool operator==(const my_iterator &other)
+        }
+
+        template <class E>
+        difference_type position(E * p) const
+        {
+            const size_type pos = p - dataBegin;
+
+            if (pos >= 0)
             {
-                if (comparable(other))
-                    return (index + offset == other.index + other.offset);
-                return false;
+                return pos;
             }
-            bool operator!=(const my_iterator &other)
+
+            return (p - bufBegin) + (bufEnd - 1 - dataBegin);
+        }
+
+        template <class E>
+        E * address(difference_type pos)
+        {
+            E * p = dataBegin + pos;
+
+            adjust(p);
+
+            return p;
+        }
+
+        T * allocate_next()
+        {
+            T * p_next = next(dataEnd);
+
+            if (dataBegin == p_next)
             {
-                if (comparable(other)) return !this->operator==(other);
-                return true;
+                pop_front();
             }
-            bool operator<(const my_iterator &other)
-            {
-                if (comparable(other))
-                    return (index + offset < other.index + other.offset);
-                return false;
-            }
-            bool operator<=(const my_iterator &other)
-            {
-                if (comparable(other))
-                    return (index + offset <= other.index + other.offset);
-                return false;
-            }
-            bool operator >(const my_iterator &other)
-            {
-                if (comparable(other)) return !this->operator<=(other);
-                return false;
-            }
-            bool operator>=(const my_iterator &other)
-            {
-                if (comparable(other)) return !this->operator<(other);
-                return false;
-            }
-            friend class ring<T>;
-        };
+
+            return p_next;
+        }
+
+        Allocator m_alloc;
+
+        T * bufBegin = nullptr;
+        T * bufEnd = nullptr;
+
+        T * dataBegin = nullptr;
+        T * dataEnd = nullptr;
+
+        template <class E>
+        friend class ring_iterator;
     };
-
-    template<class T>
-    void ring<T>::push_back(const value_type & item)
-    {
-        increment_tail();
-        if (m_contents_size > m_array_size) increment_head(); // > full, == comma
-        m_array[m_tail] = item;
-    }
-
-    template<class T>
-    void ring<T>::clear()
-    {
-        m_head = 1;
-        m_tail = m_contents_size = 0;
-    }
-
-    template<class T>
-    bool ring<T>::empty() const
-    {
-        if (m_contents_size == 0) return true;
-        return false;
-    }
-
-    template<class T>
-    inline bool ring<T>::full() const
-    {
-        if (m_contents_size == m_array_size) return true;
-        return false;
-    }
-
-    template<class T>
-    typename ring<T>::const_reference ring<T>::operator[](size_type index) const
-    {
-        index += m_head;
-        index %= m_array_size;
-        return m_array[index];
-    }
-
-    template<class T>
-    typename ring<T>::reference ring<T>::operator[](size_type index)
-    {
-        const ring<T>& constMe = *this;
-        return const_cast<reference>(constMe.operator[](index));
-        //  return const_cast<reference>(static_cast<const ring<T>&>(*this)[index]);
-    }
-    //*/
-
-    template<class T>
-    typename ring<T>::reference ring<T>::at(size_type index)
-    {
-        if (index < m_contents_size) return this->operator[](index);
-        throw std::out_of_range("index too large");
-    }
-
-    template<class T>
-    typename ring<T>::const_reference ring<T>::at(size_type index) const
-    {
-        if (index < m_contents_size) return this->operator[](index);
-        throw std::out_of_range("index too large");
-    }
-
-    template<class T>
-    typename ring<T>::iterator ring<T>::begin()
-    {
-        iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = 0;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::begin() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = 0;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::cbegin() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = 0;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::iterator ring<T>::rbegin()
-    {
-        iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_tail;
-        iter.index = 0;
-        iter.reverse = true;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::rbegin() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_tail;
-        iter.index = 0;
-        iter.reverse = true;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::iterator ring<T>::end()
-    {
-        iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = m_contents_size;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::end() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = m_contents_size;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::cend() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_head;
-        iter.index = m_contents_size;
-        iter.reverse = false;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::iterator ring<T>::rend()
-    {
-        iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_tail;
-        iter.index = m_contents_size;
-        iter.reverse = true;
-        return iter;
-    }
-
-    template<class T>
-    typename ring<T>::const_iterator ring<T>::rend() const
-    {
-        const_iterator iter;
-        iter.ptrToBuffer = &m_array;
-        iter.offset = m_tail;
-        iter.index = m_contents_size;
-        iter.reverse = true;
-        return iter;
-    }
-
-    template<class T>
-    void ring<T>::increment_tail()
-    {
-        ++m_tail;
-        ++m_contents_size;
-        if (m_tail == m_array_size) m_tail = 0;
-    }
-
-    template<class T>
-    void ring<T>::increment_head()
-    {
-        if (m_contents_size == 0) return;
-        ++m_head;
-        --m_contents_size;
-        if (m_head == m_array_size) m_head = 0;
-    }
 }
