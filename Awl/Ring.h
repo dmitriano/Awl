@@ -162,7 +162,8 @@ namespace awl
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        ring(Allocator alloc = {}) : m_alloc(alloc)
+        ring(Allocator alloc = {}) : m_alloc(alloc),
+            m_buf(nullptr)
         {
         }
 
@@ -172,11 +173,47 @@ namespace awl
         {
         }
 
+        ring(const ring & other)
+        {
+            copy(other);
+        }
+
+        ring(ring && other)
+        {
+            attach(other);
+
+            other.release();
+        }
+
+        ring & operator = (const ring & other)
+        {
+            //Not an assignment to itself.
+            if (m_buf != other.m_buf)
+            {
+                copy(other);
+            }
+
+            return *this;
+        }
+
+        ring & operator = (ring && other)
+        {
+            //Not an assignment to itself.
+            if (m_buf != other.m_buf)
+            {
+                free();
+
+                attach(other);
+
+                other.release();
+            }
+
+            return *this;
+        }
+
         ~ring()
         {
-            clear();
-            
-            m_alloc.deallocate(m_buf, capacity());
+            free();
         }
 
         void reserve(size_type cap)
@@ -187,11 +224,11 @@ namespace awl
             
             if (m_buf != nullptr)
             {
-                size_type min_size = std::min(cap, size());
+                min_size = std::min(cap, size());
 
-                for (size_type i = 0; ++i; i < min_size)
+                for (size_type i = 0; i != min_size; ++i)
                 {
-                    buf[i] = std::move(m_buf[i]);
+                    buf[i] = std::move(operator[](size() - min_size + i));
                 }
 
                 m_alloc.deallocate(m_buf, capacity());
@@ -202,7 +239,7 @@ namespace awl
             }
 
             m_buf = buf;
-            m_capacity = new_cap;
+            m_capacity = cap;
 
             m_data = m_buf;
             m_size = min_size;
@@ -282,14 +319,14 @@ namespace awl
         {
             check_index(index);
 
-            return *address<T>(index);
+            return operator [](index);
         }
 
         const_reference at(size_type index) const
         {
             check_index(index);
 
-            return *address<const T>(index);
+            return operator [](index);
         }
 
         iterator begin() { return ring_iterator<T>(*this, 0u); }
@@ -364,7 +401,7 @@ namespace awl
         {
             E * p = m_data + pos;
 
-            adjust(p);
+            adjust_overflow(p);
 
             return p;
         }
@@ -407,9 +444,49 @@ namespace awl
             return p_write;
         }
 
+        void free()
+        {
+            if (m_buf != nullptr)
+            {
+                clear();
+
+                m_alloc.deallocate(m_buf, capacity());
+
+                m_buf = nullptr;
+            }
+        }
+
+        void release()
+        {
+            m_buf = nullptr;
+        }
+
+        void attach(const ring & other)
+        {
+            m_capacity = other.m_capacity;
+            m_buf = other.m_buf;
+
+            m_data = other.m_data;
+            m_size = other.m_size;
+        }
+
+        void copy(const ring & other)
+        {
+            m_capacity = other.m_capacity;
+            m_buf = m_alloc.allocate(m_capacity);
+
+            m_data = m_buf;
+            m_size = 0;
+
+            for (const T & val : other)
+            {
+                push_back(val);
+            }
+        }
+
         Allocator m_alloc;
 
-        T * m_buf = nullptr;
+        T * m_buf;
         std::size_t m_capacity;
 
         T * buf_end() const

@@ -3,6 +3,8 @@
 #include "Awl/StringFormat.h"
 #include "Awl/IntRange.h"
 
+#include <deque>
+
 namespace
 {
     template <class A, class B>
@@ -24,13 +26,28 @@ namespace
 
             AWT_ASSERT(a.front() == b.front());
             AWT_ASSERT(a.back() == b.back());
-
-            typename A::value_type rbegin_val = *a.rbegin();
-            AWT_ASSERT(rbegin_val == *b.rbegin());
         }
 
         AWT_ASSERT(std::equal(a.begin(), a.end(), b.begin(), b.end()));
         AWT_ASSERT(std::equal(a.rbegin(), a.rend(), b.rbegin(), b.rend()));
+    }
+
+    template <class T>
+    awl::ring<T> MakeRing(std::deque<T> v, size_t cap)
+    {
+        awl::ring<T> r(cap);
+
+        AWT_ASSERT(r.capacity() == cap);
+        AWT_ASSERT(r.size() == 0);
+
+        for (const T & val : v)
+        {
+            r.push_back(val);
+        }
+
+        AWT_ASSERT_EQUAL(std::min(v.size(), cap), r.size());
+
+        return r;
     }
     
     template <class T>
@@ -38,22 +55,12 @@ namespace
     {
     public:
 
-        Test(std::vector<T> v, size_t cap) : m_v(v), m_r(cap)
+        Test(std::deque<T> v, awl::ring<T> r) : m_v(std::move(v)), m_r(std::move(r))
         {
-            AWT_ASSERT(m_r.capacity() == cap);
-            AWT_ASSERT(m_r.size() == 0);
-
-            for (const T & val : v)
-            {
-                m_r.push_back(val);
-            }
-
-            AWT_ASSERT_EQUAL(std::min(m_v.size(), cap), m_r.size());
-
             m_v.erase(m_v.begin(), m_v.end() - m_r.size());
         }
 
-        void TestContent()
+        void Compare()
         {
             CompareContainers(m_r, m_v);
             CompareContainers<const decltype(m_r), const decltype(m_v)>(m_r, m_v);
@@ -61,24 +68,113 @@ namespace
 
         void RunAll()
         {
-            TestContent();
+            Compare();
+
+            do
+            {
+                m_v.pop_front();
+                m_r.pop_front();
+                Compare();
+            }
+            while (!m_r.empty());
         }
 
     private:
 
-        std::vector<T> m_v;
+        std::deque<T> m_v;
         awl::ring<T> m_r;
+    };
+
+    class A
+    {
+    public:
+
+        explicit A(int a) : m_a(a)
+        {
+        }
+
+        A & operator = (const A &) = delete;
+
+        A & operator = (A &&) = default;
+
+        bool operator == (const A & other) const
+        {
+            return m_a == other.m_a;
+        }
+
+        bool operator != (const A & other) const
+        {
+            return !operator==(other);
+        }
+
+        A(A const &) = delete;
+
+        A(A &&) = default;
+
+    private:
+
+        int m_a;
     };
 }
 
-AWT_TEST(RingVectorTest)
+AWT_TEST(RingIntTest)
 {
     AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 3);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
+
+    auto r = awl::make_int_range<int>(0, range);
+
+    std::deque<int> d(r.begin(), r.end());
+    awl::ring<int> ring = MakeRing(d, capacity);
+
+    {
+        Test<int> test(d, ring);
+        test.RunAll();
+    }
+
+    awl::ring<int> ring_copy(100);
+    ring_copy.push_back(25);
+    ring_copy = ring;
+
+    {
+        Test<int> test(d, ring_copy);
+        test.RunAll();
+    }
+
+    ring.reserve(d.size());
+
+    {
+        Test<int> test(d, ring);
+        test.RunAll();
+    }
+
+    ring.reserve(capacity / 2 + 1);
+
+    {
+        Test<int> test(d, ring);
+        test.RunAll();
+    }
+}
+
+AWT_TEST(RingMoveTest)
+{
+    AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
 
     auto r = awl::make_int_range<int>(0, range);
     
-    Test<int> test(std::vector<int>(r.begin(), r.end()), capacity);
+    std::deque<A> d;
+    std::transform(r.begin(), r.end(), std::back_inserter(d), [](int val) { return A(val); });
 
+    awl::ring<A> ring;
+    ring.reserve(capacity + 10);
+    std::transform(r.begin(), r.end(), std::back_inserter(ring), [](int val) { return A(val); });
+    ring.reserve(capacity);
+
+    awl::ring<A> ring_copy(100);
+    ring_copy.push_back(A(25));
+    ring_copy = std::move(ring);
+
+    Test<A> test(std::move(d), std::move(ring_copy));
     test.RunAll();
 }
