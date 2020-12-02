@@ -92,6 +92,12 @@ namespace
 
         explicit A(int a) : m_a(a)
         {
+            ++count;
+        }
+
+        ~A()
+        {
+            --count;
         }
 
         A(A const &) = delete;
@@ -117,10 +123,14 @@ namespace
             return m_a < other.m_a;
         }
 
+        static int count;
+
     private:
 
         int m_a;
     };
+
+    int A::count = 0;
 }
 
 AWT_TEST(RingIntTest)
@@ -167,22 +177,26 @@ AWT_TEST(RingMoveTest)
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
 
-    auto r = awl::make_int_range<int>(0, range);
-    
-    std::deque<A> d;
-    std::transform(r.begin(), r.end(), std::back_inserter(d), [](int val) { return A(val); });
+    {
+        auto r = awl::make_int_range<int>(0, range);
 
-    awl::ring<A> ring;
-    ring.reserve(capacity + 10);
-    std::transform(r.begin(), r.end(), std::back_inserter(ring), [](int val) { return A(val); });
-    ring.reserve(capacity);
+        std::deque<A> d;
+        std::transform(r.begin(), r.end(), std::back_inserter(d), [](int val) { return A(val); });
 
-    awl::ring<A> ring_copy(100);
-    ring_copy.push_back(A(25));
-    ring_copy = std::move(ring);
+        awl::ring<A> ring;
+        ring.reserve(capacity + 10);
+        std::transform(r.begin(), r.end(), std::back_inserter(ring), [](int val) { return A(val); });
+        ring.reserve(capacity);
 
-    Test<A> test(std::move(d), std::move(ring_copy));
-    test.RunAll();
+        awl::ring<A> ring_copy(100);
+        ring_copy.push_back(A(25));
+        ring_copy = std::move(ring);
+
+        Test<A> test(std::move(d), std::move(ring_copy));
+        test.RunAll();
+    }
+
+    AWT_ASSERT_EQUAL(0, A::count);
 }
 
 AWT_TEST(RingAlgoTest)
@@ -190,33 +204,37 @@ AWT_TEST(RingAlgoTest)
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
 
-    awl::ring<A> ring(capacity);
-
-    for (int i : awl::make_count(range))
     {
-        ring.push_back(A(i));
-    }
+        awl::ring<A> ring(capacity);
 
-    const int first = std::max(0, range - static_cast<int>(capacity));
-
-    AWT_ASSERT(ring.front() == A(first));
-
-    for (int i = 0; i < static_cast<int>(ring.size()); ++i)
-    {
+        for (int i : awl::make_count(range))
         {
-            const auto iter = std::find(ring.begin(), ring.end(), A(first + i));
-
-            AWT_ASSERT(iter != ring.end());
-
-            AWT_ASSERT(iter - ring.begin() == i);
+            ring.push_back(A(i));
         }
 
+        const int first = std::max(0, range - static_cast<int>(capacity));
+
+        AWT_ASSERT(ring.front() == A(first));
+
+        for (int i : awl::make_count(static_cast<int>(ring.size())))
         {
-            const auto iter = std::lower_bound(ring.begin(), ring.end(), A(first + i));
+            {
+                const auto iter = std::find(ring.begin(), ring.end(), A(first + i));
 
-            AWT_ASSERT(iter != ring.end());
+                AWT_ASSERT(iter != ring.end());
 
-            AWT_ASSERT(iter - ring.begin() == i);
+                AWT_ASSERT(iter - ring.begin() == i);
+            }
+
+            {
+                const auto iter = std::lower_bound(ring.begin(), ring.end(), A(first + i));
+
+                AWT_ASSERT(iter != ring.end());
+
+                AWT_ASSERT(iter - ring.begin() == i);
+            }
         }
     }
+
+    AWT_ASSERT_EQUAL(0, A::count);
 }
