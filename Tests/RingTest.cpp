@@ -201,7 +201,7 @@ AWT_TEST(RingAlgoTest)
 
     AWT_ASSERT(ring.front() == A(first));
 
-    for (int i = 0; i < ring.size(); ++i)
+    for (int i = 0; i < static_cast<int>(ring.size()); ++i)
     {
         {
             const auto iter = std::find(ring.begin(), ring.end(), A(first + i));
