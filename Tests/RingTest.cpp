@@ -4,6 +4,7 @@
 #include "Awl/IntRange.h"
 
 #include <deque>
+#include <algorithm>
 
 namespace
 {
@@ -93,6 +94,10 @@ namespace
         {
         }
 
+        A(A const &) = delete;
+
+        A(A &&) = default;
+
         A & operator = (const A &) = delete;
 
         A & operator = (A &&) = default;
@@ -107,9 +112,10 @@ namespace
             return !operator==(other);
         }
 
-        A(A const &) = delete;
-
-        A(A &&) = default;
+        bool operator < (const A & other) const
+        {
+            return m_a < other.m_a;
+        }
 
     private:
 
@@ -177,4 +183,40 @@ AWT_TEST(RingMoveTest)
 
     Test<A> test(std::move(d), std::move(ring_copy));
     test.RunAll();
+}
+
+AWT_TEST(RingAlgoTest)
+{
+    AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
+
+    awl::ring<A> ring(capacity);
+
+    for (int i : awl::make_count(range))
+    {
+        ring.push_back(A(i));
+    }
+
+    const int first = std::max(0, range - static_cast<int>(capacity));
+
+    AWT_ASSERT(ring.front() == A(first));
+
+    for (int i = 0; i < ring.size(); ++i)
+    {
+        {
+            const auto iter = std::find(ring.begin(), ring.end(), A(first + i));
+
+            AWT_ASSERT(iter != ring.end());
+
+            AWT_ASSERT(iter - ring.begin() == i);
+        }
+
+        {
+            const auto iter = std::lower_bound(ring.begin(), ring.end(), A(first + i));
+
+            AWT_ASSERT(iter != ring.end());
+
+            AWT_ASSERT(iter - ring.begin() == i);
+        }
+    }
 }
