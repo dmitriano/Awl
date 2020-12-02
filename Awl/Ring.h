@@ -53,7 +53,7 @@ namespace awl
 
             ring_iterator operator++ (int)
             {
-                my_iterator tmp = *this;
+                ring_iterator tmp = *this;
 
                 move_next();
 
@@ -69,7 +69,7 @@ namespace awl
 
             ring_iterator operator-- (int)
             {
-                my_iterator tmp = *this;
+                ring_iterator tmp = *this;
 
                 move_prev();
 
@@ -117,7 +117,7 @@ namespace awl
 
             bool operator < (const ring_iterator & other) const
             {
-                return m_pos < other.m_pos
+                return m_pos < other.m_pos;
             }
 
             operator ring_iterator<const E>() const
@@ -225,6 +225,11 @@ namespace awl
             if (m_buf != nullptr)
             {
                 min_size = std::min(cap, size());
+
+                for (size_type i = 0; i != size() - min_size; ++i)
+                {
+                    m_buf[i].~T();
+                }
 
                 for (size_type i = 0; i != min_size; ++i)
                 {
