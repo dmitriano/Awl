@@ -5,6 +5,34 @@
 
 namespace
 {
+    template <class A, class B>
+    void CompareContainers(A & a, B & b)
+    {
+        AWT_ASSERT(a.size() == b.size());
+
+        AWT_ASSERT(a.empty() == b.empty());
+
+        if (!a.empty())
+        {
+            std::size_t size = a.size();
+
+            for (size_t i = 0; i != size; ++i)
+            {
+                AWT_ASSERT(a[i] == b[i]);
+                AWT_ASSERT(a.at(i) == b.at(i));
+            }
+
+            AWT_ASSERT(a.front() == b.front());
+            AWT_ASSERT(a.back() == b.back());
+
+            typename A::value_type rbegin_val = *a.rbegin();
+            AWT_ASSERT(rbegin_val == *b.rbegin());
+        }
+
+        AWT_ASSERT(std::equal(a.begin(), a.end(), b.begin(), b.end()));
+        AWT_ASSERT(std::equal(a.rbegin(), a.rend(), b.rbegin(), b.rend()));
+    }
+    
     template <class T>
     class Test
     {
@@ -21,14 +49,14 @@ namespace
             }
 
             AWT_ASSERT_EQUAL(std::min(m_v.size(), cap), m_r.size());
+
+            m_v.erase(m_v.begin(), m_v.end() - m_r.size());
         }
 
         void TestContent()
         {
-            for (size_t i = 0; i != m_r.size(); ++i)
-            {
-                AWT_ASSERT(m_r[i] == m_v[m_v.size() - m_r.size() + i]);
-            }
+            CompareContainers(m_r, m_v);
+            CompareContainers<const decltype(m_r), const decltype(m_v)>(m_r, m_v);
         }
 
         void RunAll()

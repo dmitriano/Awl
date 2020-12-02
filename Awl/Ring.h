@@ -88,19 +88,19 @@ namespace awl
                 return this->operator+=(-diff);
             }
 
-            ring_iterator operator + (difference_type diff)
+            ring_iterator operator + (difference_type diff) const
             {
                 ring_iterator i(m_ring, m_pos + diff);
                 
                 return i;
             }
 
-            ring_iterator operator - (difference_type diff)
+            ring_iterator operator - (difference_type diff) const
             {
                 return this->operator+(-diff);
             }
 
-            difference_type operator - (const ring_iterator & other)
+            difference_type operator - (const ring_iterator & other) const
             {
                 return position() - other.position();
             }
@@ -127,7 +127,7 @@ namespace awl
 
         private:
 
-            ring_iterator(const ring & r, std::size_t * pos) : m_ring(r), m_pos(pos)
+            ring_iterator(const ring & r, std::size_t pos) : m_ring(r), m_pos(pos)
             {
             }
 
@@ -239,9 +239,6 @@ namespace awl
             *allocate_next() = std::move(val);
         }
 
-        void push(const value_type & val) { push_back(val); }
-        void push(value_type && val) { push_back(val); }
-
         void pop_front()
         {
             assert(!empty());
@@ -251,8 +248,6 @@ namespace awl
             --m_size;
         }
 
-        void pop() { pop_front(); }
-        
         size_type size() const
         {
             return m_size;
@@ -297,21 +292,21 @@ namespace awl
             return *address<const T>(index);
         }
 
-        iterator begin() { return ring_iterator(*this, m_data); }
+        iterator begin() { return ring_iterator<T>(*this, 0u); }
         const_iterator begin() const { return cbegin(); }
-        const_iterator cbegin() const { return ring_iterator(*this, m_data); }
+        const_iterator cbegin() const { return ring_iterator<const T>(*this, 0u); }
 
-        iterator end() { return ring_iterator(*this, dataEnd); }
+        iterator end() { return ring_iterator<T>(*this, m_size); }
         const_iterator end() const { return cend(); }
-        const_iterator cend() const { return ring_iterator(*this, dataEnd);}
+        const_iterator cend() const { return ring_iterator<const T>(*this, m_size);}
 
-        reverse_iterator rbegin() { return std::make_reverse_iterator(begin()); }
+        reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
         const_reverse_iterator rbegin() const { return crbegin(); }
-        const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cbegin()); }
+        const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cend()); }
 
-        reverse_iterator rend() { return std::make_reverse_iterator(end()); }
+        reverse_iterator rend() { return std::make_reverse_iterator(begin()); }
         const_reverse_iterator rend() const { return crend(); }
-        const_reverse_iterator crend() const { return std::make_reverse_iterator(cend()); }
+        const_reverse_iterator crend() const { return std::make_reverse_iterator(cbegin()); }
 
     private:
 
@@ -377,7 +372,7 @@ namespace awl
         template <class E>
         E * last() const
         {
-            return address(size() - 1);
+            return address<E>(size() - 1);
         }
 
         T * next(T * p) const
@@ -396,12 +391,12 @@ namespace awl
 
         T * allocate_next()
         {
-            T * p_write = data_end();
-
-            adjust_overflow(p_write);
+            T * const p_write = data_end();
 
             if (full())
             {
+                assert(m_data == p_write);
+
                 m_data = next(m_data);
             }
             else
@@ -425,9 +420,15 @@ namespace awl
         T * m_data;
         std::size_t m_size;
 
+        //The address where we write the next element.
+        //If the buffer is full it is equal to m_data.
         T * data_end() const
         {
-            return m_data + size();
+            T * p_write = m_data + size();
+
+            adjust_overflow(p_write);
+
+            return p_write;
         }
 
         template <class E>
