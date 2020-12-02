@@ -1,6 +1,7 @@
 #include "Awl/Ring.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
+#include "Awl/IntRange.h"
 
 namespace
 {
@@ -26,7 +27,7 @@ namespace
         {
             for (size_t i = 0; i != m_r.size(); ++i)
             {
-                AWT_ASSERT(m_r[i] == m_v[m_v.size() - 1 - m_r.size() + i]);
+                AWT_ASSERT(m_r[i] == m_v[m_v.size() - m_r.size() + i]);
             }
         }
 
@@ -44,9 +45,12 @@ namespace
 
 AWT_TEST(RingVectorTest)
 {
+    AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 3);
 
-    Test<int> test({1, 2, 3, 4, 5}, capacity);
+    auto r = awl::make_int_range<int>(0, range);
+    
+    Test<int> test(std::vector<int>(r.begin(), r.end()), capacity);
 
     test.RunAll();
 }

@@ -35,14 +35,14 @@ namespace awl
 
             ring_iterator & operator = (const ring_iterator & other)
             {
-                m_p = other.m_p;
+                m_pos = other.m_pos;
 
                 return *this;
             }
 
-            pointer operator-> () const { return m_p; }
+            pointer operator-> () const { return m_ring.address<E>(m_pos); }
 
-            reference operator* () const { return *m_p; }
+            reference operator* () const { return *m_ring.address<E>(m_pos); }
 
             ring_iterator & operator++ ()
             {
@@ -78,9 +78,7 @@ namespace awl
 
             ring_iterator & operator += (difference_type diff)
             {
-                m_p += diff;
-
-                adjust();
+                m_pos += diff;
 
                 return *this;
             }
@@ -92,10 +90,8 @@ namespace awl
 
             ring_iterator operator + (difference_type diff)
             {
-                ring_iterator i(m_ring, m_p + diff);
+                ring_iterator i(m_ring, m_pos + diff);
                 
-                i.adjust();
-
                 return i;
             }
 
@@ -111,7 +107,7 @@ namespace awl
 
             bool operator == (const ring_iterator & other) const
             {
-                return m_p == other.m_p;
+                return m_pos == other.m_pos;
             }
 
             bool operator != (const ring_iterator & other)  const
@@ -121,45 +117,40 @@ namespace awl
 
             bool operator < (const ring_iterator & other) const
             {
-                return position() < other.position();
+                return m_pos < other.m_pos
             }
 
             operator ring_iterator<const E>() const
             {
-                return ring_iterator<const E>(m_ring, m_p);
+                return ring_iterator<const E>(m_ring, m_pos);
             }
 
         private:
 
-            ring_iterator(const ring & r, E * p) : m_ring(r), m_p(p)
+            ring_iterator(const ring & r, std::size_t * pos) : m_ring(r), m_pos(pos)
             {
             }
 
             void move_next()
             {
-                m_p = m_ring.next(m_p);
+                ++m_pos;
             }
 
             void move_prev()
             {
-                m_p = m_ring.prev(m_p);
-            }
-
-            //We do not know the direction the pointer was moved to,
-            //because 'diff' is a signed integer, so we check both begin and end.
-            void adjust()
-            {
-                m_ring.adjust(m_p);
+                --m_pos;
             }
 
             difference_type position() const
             {
-                return m_ring.position(m_p);
+                return static_cast<difference_type>(m_pos);
             }
 
             const ring & m_ring;
             
-            E * m_p;
+            //It can't be a pointer because there is no
+            //end pointer in a circuallar buffer, so we use an index.
+            std::size_t m_pos;
 
             friend ring;
         };
@@ -176,8 +167,8 @@ namespace awl
         }
 
         ring(size_type cap, Allocator alloc = {}) : m_alloc(alloc),
-            bufBegin(m_alloc.allocate(cap)), bufEnd(bufBegin + cap),
-            dataBegin(bufBegin), dataEnd(dataBegin)
+            m_buf(m_alloc.allocate(cap)), m_capacity(cap),
+            m_data(m_buf), m_size(0)
         {
         }
 
@@ -185,56 +176,58 @@ namespace awl
         {
             clear();
             
-            m_alloc.deallocate(bufBegin, capacity());
+            m_alloc.deallocate(m_buf, capacity());
         }
 
-        void reserve(size_type new_cap)
+        void reserve(size_type cap)
         {
             T * buf = m_alloc.allocate(cap);
 
             size_type min_size;
             
-            if (bufBegin != nullptr)
+            if (m_buf != nullptr)
             {
                 size_type min_size = std::min(cap, size());
 
                 for (size_type i = 0; ++i; i < min_size)
                 {
-                    buf[i] = std::move(bufBegin[i]);
+                    buf[i] = std::move(m_buf[i]);
                 }
 
-                m_alloc.deallocate(bufBegin, capacity());
+                m_alloc.deallocate(m_buf, capacity());
             }
             else
             {
                 min_size = 0;
             }
 
-            bufBegin = buf;
-            bufEnd = bufBegin + cap;
+            m_buf = buf;
+            m_capacity = new_cap;
 
-            dataBegin = bufBegin;
-            dataEnd = dataBegin + min_size;
+            m_data = m_buf;
+            m_size = min_size;
         }
 
         void clear()
         {
-            assert(bufBegin != nullptr);
+            assert(m_buf != nullptr);
 
-            for (T & elem : *this)
+            while(!empty())
             {
-                delete &elem;
+                m_data->~T();
+
+                pop_front();
             }
 
-            dataBegin = bufBegin;
-            dataEnd = dataBegin;
+            m_data = m_buf;
+            m_size = 0;
         }
 
-        reference front() { assert(!empty()); return *dataBegin; }
-        reference back() { assert(!empty()); return *prev(dataEnd); }
+        reference front() { assert(!empty()); return *m_data; }
+        reference back() { assert(!empty()); return *last<T>(); }
 
-        const_reference front() const { assert(!empty()); return *dataBegin; }
-        const_reference back() const { assert(!empty()); return *prev(dataEnd); }
+        const_reference front() const { assert(!empty()); return *m_data; }
+        const_reference back() const { assert(!empty()); return *last<const T>();}
 
         void push_back(const value_type & val)
         {
@@ -253,24 +246,26 @@ namespace awl
         {
             assert(!empty());
 
-            dataBegin = next(dataBegin);
+            m_data = next(m_data);
+
+            --m_size;
         }
 
         void pop() { pop_front(); }
         
         size_type size() const
         {
-            return static_cast<size_type>(position(dataEnd));
+            return m_size;
         }
         
         size_type capacity() const
         {
-            return static_cast<size_type>(bufEnd - bufBegin);
+            return m_capacity;
         }
         
         bool empty() const
         {
-            return dataBegin == dataEnd;
+            return m_size == 0;
         }
         
         bool full() const
@@ -290,27 +285,21 @@ namespace awl
 
         reference at(size_type index)
         {
-            if (index > size())
-            {
-                throw std::out_of_range("ring index is out of range");
-            }
-            
-            return *address<T>(static_cast<difference_type>(index));
+            check_index(index);
+
+            return *address<T>(index);
         }
 
         const_reference at(size_type index) const
         {
-            if (index > size())
-            {
-                throw std::out_of_range("ring index is out of range");
-            }
+            check_index(index);
 
-            return *address<const T>(static_cast<difference_type>(index));
+            return *address<const T>(index);
         }
 
-        iterator begin() { return ring_iterator(*this, dataBegin); }
+        iterator begin() { return ring_iterator(*this, m_data); }
         const_iterator begin() const { return cbegin(); }
-        const_iterator cbegin() const { return ring_iterator(*this, dataBegin); }
+        const_iterator cbegin() const { return ring_iterator(*this, m_data); }
 
         iterator end() { return ring_iterator(*this, dataEnd); }
         const_iterator end() const { return cend(); }
@@ -326,91 +315,120 @@ namespace awl
 
     private:
 
-        template <class E>
-        E * next(E * p) const
+        void check_index(std::size_t index) const
         {
-            if (p == bufEnd)
+            if (index > size())
             {
-                return bufBegin;
+                throw std::out_of_range("ring index is out of range");
             }
-
-            return p + 1;
         }
-
-        template <class E>
-        E * prev(E * p) const
-        {
-            if (p == bufBegin)
-            {
-                return bufEnd - 1;
-            }
-
-            return p - 1;
-        }
-
+        
         //We do not know the direction the pointer was moved to,
         //because 'diff' is a signed integer, so we check both begin and end.
         template <class E>
         void adjust(E *& p) const
         {
-            if (p < bufBegin)
+            if (!adjust_underflow(p))
             {
-                const difference_type diff = bufBegin - p;
-
-                p = bufEnd - diff;
-            }
-            else if (p >= bufEnd)
-            {
-                const difference_type diff = p - bufEnd;
-
-                p = bufBegin + diff;
+                adjust_overflow(p);
             }
         }
 
         template <class E>
-        difference_type position(E * p) const
+        bool adjust_underflow(E *& p) const
         {
-            const size_type pos = p - dataBegin;
-
-            if (pos >= 0)
+            if (p < m_buf)
             {
-                return pos;
+                const difference_type diff = m_buf - p;
+
+                p = buf_end() - diff;
+
+                return true;
             }
 
-            return (p - bufBegin) + (bufEnd - 1 - dataBegin);
+            return false;
         }
 
         template <class E>
-        E * address(difference_type pos)
+        bool adjust_overflow(E *& p) const
         {
-            E * p = dataBegin + pos;
+            if (p >= buf_end())
+            {
+                const difference_type diff = p - buf_end();
+
+                p = m_buf + diff;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        template <class E>
+        E * address(std::size_t pos) const
+        {
+            E * p = m_data + pos;
 
             adjust(p);
 
             return p;
         }
 
-        T * allocate_next()
+        template <class E>
+        E * last() const
         {
-            T * p_write = dataEnd == bufEnd ? bufBegin : dataEnd;
+            return address(size() - 1);
+        }
 
-            if (dataBegin == p_write)
+        T * next(T * p) const
+        {
+            T * p_next = p;
+
+            ++p_next;
+            
+            if (p_next == buf_end())
             {
-                pop_front();
+                return m_buf;
             }
 
-            dataEnd = next(p_write);
+            return p_next;
+        }
+
+        T * allocate_next()
+        {
+            T * p_write = data_end();
+
+            adjust_overflow(p_write);
+
+            if (full())
+            {
+                m_data = next(m_data);
+            }
+            else
+            {
+                ++m_size;
+            }
 
             return p_write;
         }
 
         Allocator m_alloc;
 
-        T * bufBegin = nullptr;
-        T * bufEnd = nullptr;
+        T * m_buf = nullptr;
+        std::size_t m_capacity;
 
-        T * dataBegin = nullptr;
-        T * dataEnd = nullptr;
+        T * buf_end() const
+        {
+            return m_buf + capacity();
+        }
+
+        T * m_data;
+        std::size_t m_size;
+
+        T * data_end() const
+        {
+            return m_data + size();
+        }
 
         template <class E>
         friend class ring_iterator;
