@@ -102,11 +102,20 @@ namespace
 
         A(A const &) = delete;
 
-        A(A &&) = default;
+        A(A && other) : A(other.m_a)
+        {
+            other.m_moved = true;
+        }
 
         A & operator = (const A &) = delete;
 
-        A & operator = (A &&) = default;
+        A & operator = (A && other)
+        {
+            m_a = other.m_a;
+            other.m_moved = true;
+
+            return *this;
+        }
 
         bool operator == (const A & other) const
         {
@@ -127,6 +136,8 @@ namespace
 
     private:
 
+
+        bool m_moved = false;
         int m_a;
     };
 
@@ -233,6 +244,33 @@ AWT_TEST(RingAlgoTest)
 
                 AWT_ASSERT(iter - ring.begin() == i);
             }
+        }
+    }
+
+    AWT_ASSERT_EQUAL(0, A::count);
+}
+
+AWT_TEST(RingDestructionTest)
+{
+    AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
+
+    {
+        A a1(1);
+
+        A a2 = std::move(a1);
+    }
+
+    AWT_ASSERT_EQUAL(0, A::count);
+
+    {
+        awl::ring<A> ring(capacity);
+
+        for (int i : awl::make_count(range))
+        {
+            ring.push_back(A(i));
+
+            context.out << _T("A::count = ") << A::count << std::endl;
         }
     }
 

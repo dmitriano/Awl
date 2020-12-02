@@ -226,17 +226,12 @@ namespace awl
             {
                 min_size = std::min(cap, size());
 
-                for (size_type i = 0; i != size() - min_size; ++i)
-                {
-                    m_buf[i].~T();
-                }
-
                 for (size_type i = 0; i != min_size; ++i)
                 {
                     buf[i] = std::move(operator[](size() - min_size + i));
                 }
 
-                m_alloc.deallocate(m_buf, capacity());
+                free();
             }
             else
             {
@@ -256,8 +251,6 @@ namespace awl
 
             while(!empty())
             {
-                m_data->~T();
-
                 pop_front();
             }
 
@@ -273,18 +266,20 @@ namespace awl
 
         void push_back(const value_type & val)
         {
-            *allocate_next() = val;
+            new (allocate_next()) T(val);
         }
 
         void push_back(value_type && val)
         {
-            *allocate_next() = std::move(val);
+            new (allocate_next()) T(std::move(val));
         }
 
         void pop_front()
         {
             assert(!empty());
 
+            m_data->~T();
+            
             m_data = next(m_data);
 
             --m_size;
@@ -438,6 +433,8 @@ namespace awl
             if (full())
             {
                 assert(m_data == p_write);
+
+                m_data->~T();
 
                 m_data = next(m_data);
             }
