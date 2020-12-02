@@ -228,7 +228,7 @@ namespace awl
 
                 for (size_type i = 0; i != min_size; ++i)
                 {
-                    buf[i] = std::move(operator[](size() - min_size + i));
+                    new (buf + i) T(std::move(operator[](size() - min_size + i)));
                 }
 
                 free();

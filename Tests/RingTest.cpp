@@ -263,16 +263,24 @@ AWT_TEST(RingDestructionTest)
 
     AWT_ASSERT_EQUAL(0, A::count);
 
+    awl::ring<A> ring(capacity);
+
+    for (int i : awl::make_count(range))
     {
-        awl::ring<A> ring(capacity);
+        ring.push_back(A(i));
 
-        for (int i : awl::make_count(range))
-        {
-            ring.push_back(A(i));
-
-            context.out << _T("A::count = ") << A::count << std::endl;
-        }
+        //context.out << _T("A::count = ") << A::count << std::endl;
     }
+
+    AWT_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), ring.size());
+    AWT_ASSERT_EQUAL(ring.size(), A::count);
+
+    const size_t new_cap = std::max(static_cast<std::size_t>(1u), ring.size() / 2u);
+    ring.reserve(new_cap);
+
+    AWT_ASSERT_EQUAL(ring.size(), A::count);
+
+    ring.clear();
 
     AWT_ASSERT_EQUAL(0, A::count);
 }
