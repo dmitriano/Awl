@@ -171,6 +171,7 @@ namespace awl
             m_buf(m_alloc.allocate(cap)), m_capacity(cap),
             m_data(m_buf), m_size(0)
         {
+            assert(cap != 0);
         }
 
         ring(const ring & other)
@@ -218,6 +219,8 @@ namespace awl
 
         void reserve(size_type cap)
         {
+            assert(cap != 0);
+
             T * buf = m_alloc.allocate(cap);
 
             size_type min_size;
