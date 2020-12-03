@@ -30,7 +30,7 @@ static constexpr int default_worker_sleep_time = 1000;
 
 using Duration = std::chrono::milliseconds;
 
-//./AwlTest --filter Cancellation_InterruptibleSleep_Test --thread_count 100 --iteration_count 1000000
+//./AwlTest --filter Cancellation_InterruptibleSleep_Example --thread_count 100 --iteration_count 1000000
 AWT_EXAMPLE(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
