@@ -48,6 +48,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
     
     for (size_t iteration : awl::make_count(iteration_count))
     {
+        std::mutex ex_mutex;
         std::exception_ptr ex_ptr = nullptr;
 
         static_cast<void>(iteration);
@@ -59,7 +60,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
         for (size_t i = 0; i < thread_count; ++i)
         {
-            v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time, &ex_ptr]()
+            v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time, &ex_mutex, &ex_ptr]()
             {
                 try
                 {
@@ -75,12 +76,17 @@ AWT_TEST(Cancellation_InterruptibleSleep)
                 }
                 catch (const std::exception &)
                 {
-                    ex_ptr = std::current_exception();
+                    std::lock_guard lock(ex_mutex);
+
+                    if (ex_ptr == nullptr)
+                    {
+                        ex_ptr = std::current_exception();
+                    }
                 }
             }));
         }
 
-        std::thread client([&context, &cancellation, client_sleep_time, &ex_ptr]()
+        std::thread client([&context, &cancellation, client_sleep_time, &ex_mutex, &ex_ptr]()
         {
             try
             {
@@ -92,22 +98,23 @@ AWT_TEST(Cancellation_InterruptibleSleep)
             }
             catch (const std::exception &)
             {
-                ex_ptr = std::current_exception();
+                std::lock_guard lock(ex_mutex);
+
+                if (ex_ptr == nullptr)
+                {
+                    ex_ptr = std::current_exception();
+                }
             }
         });
 
         for (auto & t : v)
         {
             t.join();
-
-            if (ex_ptr != nullptr)
-            {
-                std::rethrow_exception(ex_ptr);
-            }
         }
 
         client.join();
 
+        //We store only the first exception.
         if (ex_ptr != nullptr)
         {
             std::rethrow_exception(ex_ptr);
