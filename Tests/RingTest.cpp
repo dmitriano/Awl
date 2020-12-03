@@ -4,6 +4,7 @@
 #include "Awl/IntRange.h"
 
 #include <deque>
+#include <queue>
 #include <algorithm>
 
 namespace
@@ -281,6 +282,37 @@ AWT_TEST(RingDestructionTest)
     AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
 
     ring.clear();
+
+    AWT_ASSERT_EQUAL(0, A::count);
+}
+
+AWT_TEST(RingQueueTest)
+{
+    AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
+
+    {
+        awl::ring<A> ring(capacity);
+
+        std::queue q(std::move(ring));
+
+        for (int i : awl::make_count(range))
+        {
+            q.push(A(i));
+        }
+
+        AWT_ASSERT(q.size() == std::min(static_cast<std::size_t>(range), capacity));
+
+        AWT_ASSERT(q.back() == A(range - 1));
+
+        int i = range - static_cast<int>(q.size());
+        
+        while (!q.empty())
+        {
+            AWT_ASSERT(q.front() == A(i++));
+            q.pop();
+        }
+    }
 
     AWT_ASSERT_EQUAL(0, A::count);
 }
