@@ -145,7 +145,7 @@ namespace
     int A::count = 0;
 }
 
-AWT_TEST(RingIntTest)
+AWT_TEST(RingInt)
 {
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
@@ -184,7 +184,7 @@ AWT_TEST(RingIntTest)
     }
 }
 
-AWT_TEST(RingMoveTest)
+AWT_TEST(RingMove)
 {
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
@@ -211,7 +211,7 @@ AWT_TEST(RingMoveTest)
     AWT_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingAlgoTest)
+AWT_TEST(RingAlgo)
 {
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
@@ -251,7 +251,7 @@ AWT_TEST(RingAlgoTest)
     AWT_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingDestructionTest)
+AWT_TEST(RingDestruction)
 {
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
@@ -286,7 +286,7 @@ AWT_TEST(RingDestructionTest)
     AWT_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingQueueTest)
+AWT_TEST(RingQueue)
 {
     AWT_ATTRIBUTE(int, range, 10);
     AWT_ATTRIBUTE(size_t, capacity, 5);
@@ -312,6 +312,34 @@ AWT_TEST(RingQueueTest)
             AWT_ASSERT(q.front() == A(i++));
             q.pop();
         }
+    }
+
+    AWT_ASSERT_EQUAL(0, A::count);
+}
+
+AWT_TEST(RingPushFront)
+{
+    AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(size_t, capacity, 5);
+
+    awl::ring<A> ring(capacity);
+
+    for (int i : awl::make_count(range))
+    {
+        ring.push_front(A(i));
+    }
+
+    AWT_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), static_cast<int>(ring.size()));
+    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+
+    const size_t new_cap = std::max(static_cast<std::size_t>(1u), ring.size() / 2u);
+    ring.reserve(new_cap);
+
+    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+
+    while (!ring.empty())
+    {
+        ring.pop_back();
     }
 
     AWT_ASSERT_EQUAL(0, A::count);

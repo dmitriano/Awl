@@ -149,7 +149,7 @@ namespace awl
             const ring & m_ring;
             
             //It can't be a pointer because there is no
-            //end pointer in a circuallar buffer, so we use an index.
+            //end pointer in a circular buffer, so we use an index.
             std::size_t m_pos;
 
             friend ring;
@@ -267,6 +267,16 @@ namespace awl
         const_reference front() const { assert(!empty()); return *m_data; }
         const_reference back() const { assert(!empty()); return *last<const T>();}
 
+        void push_front(const value_type & val)
+        {
+            new (allocate_prev()) T(val);
+        }
+
+        void push_front(value_type && val)
+        {
+            new (allocate_prev()) T(std::move(val));
+        }
+
         void push_back(const value_type & val)
         {
             new (allocate_next()) T(val);
@@ -284,6 +294,15 @@ namespace awl
             m_data->~T();
             
             m_data = next(m_data);
+
+            --m_size;
+        }
+
+        void pop_back()
+        {
+            assert(!empty());
+
+            last<T>()->~T();
 
             --m_size;
         }
@@ -409,10 +428,22 @@ namespace awl
             return p;
         }
 
+        T * buf_end() const
+        {
+            return m_buf + capacity();
+        }
+
         template <class E>
         E * last() const
         {
             return address<E>(size() - 1);
+        }
+
+        //The address where we write the next element.
+        //If the buffer is full it is equal to m_data.
+        T * data_end() const
+        {
+            return address<T>(size());
         }
 
         T * next(T * p) const
@@ -427,6 +458,20 @@ namespace awl
             }
 
             return p_next;
+        }
+
+        T * prev(T * p) const
+        {
+            T * p_prev = p;
+
+            if (p_prev == m_buf)
+            {
+                p_prev = buf_end();
+            }
+            
+            --p_prev;
+
+            return p_prev;
         }
 
         T * allocate_next()
@@ -447,6 +492,24 @@ namespace awl
             }
 
             return p_write;
+        }
+
+        T * allocate_prev()
+        {
+            const bool saved_full = full();
+            
+            m_data = prev(m_data);
+
+            if (saved_full)
+            {
+                m_data->~T();
+            }
+            else
+            {
+                ++m_size;
+            }
+
+            return m_data;
         }
 
         void free()
@@ -494,24 +557,8 @@ namespace awl
         T * m_buf;
         std::size_t m_capacity;
 
-        T * buf_end() const
-        {
-            return m_buf + capacity();
-        }
-
         T * m_data;
         std::size_t m_size;
-
-        //The address where we write the next element.
-        //If the buffer is full it is equal to m_data.
-        T * data_end() const
-        {
-            T * p_write = m_data + size();
-
-            adjust_overflow(p_write);
-
-            return p_write;
-        }
 
         template <class E>
         friend class ring_iterator;
