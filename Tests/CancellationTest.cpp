@@ -30,16 +30,26 @@ static constexpr int default_worker_sleep_time = 1000;
 
 using Duration = std::chrono::milliseconds;
 
-//It crashes on Linux with GCC!
-AWT_DISABLED_TEST(Cancellation_InterruptibleSleep)
+//It crashes on WSL with GCC. Tell me why? Run
+//./AwlTest --filter Cancellation_InterruptibleSleep_Test --thread_count 100 --iteration_count 1000000
+//and then Ctrl+Z and bg or fg and you get:
+//terminate called without an active exception
+//Aborted (core dumped)
+//
+//Previously it was:
+//terminate called recursively
+//terminate called recursively
+AWT_TEST(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
     AWT_ATTRIBUTE(size_t, thread_count, 10);
-    AWT_ATTRIBUTE(size_t, iteration_count, 10);
+    AWT_ATTRIBUTE(size_t, iteration_count, 1);
     
     for (size_t iteration : awl::make_count(iteration_count))
     {
+        std::exception_ptr ex_ptr = nullptr;
+
         static_cast<void>(iteration);
 
         awl::CancellationFlag cancellation;
@@ -49,35 +59,59 @@ AWT_DISABLED_TEST(Cancellation_InterruptibleSleep)
 
         for (size_t i = 0; i < thread_count; ++i)
         {
-            v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time]()
+            v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time, &ex_ptr]()
             {
-                awl::StopWatch w;
+                try
+                {
+                    awl::StopWatch w;
 
-                cancellation.Sleep(Duration(worker_sleep_time));
+                    cancellation.Sleep(Duration(worker_sleep_time));
 
-                const auto elapsed = w.GetElapsedCast<Duration>();
+                    const auto elapsed = w.GetElapsedCast<Duration>();
 
-                AWT_ASSERT(elapsed.count() >= client_sleep_time);
+                    AWT_ASSERT(elapsed.count() >= client_sleep_time);
 
-                AWT_ASSERT(elapsed.count() < worker_sleep_time);
+                    AWT_ASSERT(elapsed.count() < worker_sleep_time);
+                }
+                catch (const std::exception &)
+                {
+                    ex_ptr = std::current_exception();
+                }
             }));
         }
 
-        std::thread client([&context, &cancellation, client_sleep_time]()
+        std::thread client([&context, &cancellation, client_sleep_time, &ex_ptr]()
         {
-            std::this_thread::sleep_for(Duration(client_sleep_time));
+            try
+            {
+                std::this_thread::sleep_for(Duration(client_sleep_time));
 
-            cancellation.Cancel();
+                cancellation.Cancel();
 
-            AWT_ASSERT(cancellation.IsCancelled());
+                AWT_ASSERT(cancellation.IsCancelled());
+            }
+            catch (const std::exception &)
+            {
+                ex_ptr = std::current_exception();
+            }
         });
 
         for (auto & t : v)
         {
             t.join();
+
+            if (ex_ptr != nullptr)
+            {
+                std::rethrow_exception(ex_ptr);
+            }
         }
 
         client.join();
+
+        if (ex_ptr != nullptr)
+        {
+            std::rethrow_exception(ex_ptr);
+        }
     }
 }
 

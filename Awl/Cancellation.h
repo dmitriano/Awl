@@ -32,12 +32,14 @@ namespace awl
 
         bool IsCancelled() const override
         {
+            std::lock_guard lock(mutex);
+
             return isCancelled;
         }
 
         void InterruptibleSleep(std::chrono::nanoseconds time) const override
         {
-            std::unique_lock<std::mutex> lock(mutex);
+            std::unique_lock lock(mutex);
 
             cv.wait_for(lock, time, [this]() -> bool
             {
@@ -47,31 +49,27 @@ namespace awl
 
         void Cancel()
         {
-            isCancelled = true;
+            {
+                std::lock_guard lock(mutex);
+
+                isCancelled = true;
+            }
 
             cv.notify_all();
         }
 
         void Reset()
         {
+            std::lock_guard lock(mutex);
+
             isCancelled = false;
         }
 
     private:
 
-        std::atomic<bool> isCancelled;
+        bool isCancelled;
 
         mutable std::mutex mutex;
         mutable std::condition_variable cv;
-
-        //std::mutex introduces unnecessary overhead, but I am to sure it is safe to use std::condition_variable_any with a fake lock, but theoretically there can be:
-
-        //struct fake_lock
-        //{
-        //    void lock() {}
-        //    void unlock() {}
-        //};
-
-        //std::condition_variable_any cv;
     };
 }
