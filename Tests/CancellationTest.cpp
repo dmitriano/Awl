@@ -7,7 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/IntRange.h"
 
-AWT_TEST(Cancellation_NegativeTimeDiff)
+AWT_EXAMPLE(Cancellation_NegativeTimeDiff)
 {
     AWT_UNUSED_CONTEXT;
     
@@ -31,7 +31,7 @@ static constexpr int default_worker_sleep_time = 1000;
 using Duration = std::chrono::milliseconds;
 
 //./AwlTest --filter Cancellation_InterruptibleSleep_Test --thread_count 100 --iteration_count 1000000
-AWT_TEST(Cancellation_InterruptibleSleep)
+AWT_EXAMPLE(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
@@ -117,7 +117,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
     }
 }
 
-AWT_TEST(Cancellation_SimpleSleep)
+AWT_EXAMPLE(Cancellation_SimpleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 

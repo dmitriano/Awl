@@ -79,5 +79,6 @@ namespace awl
 
 #define AWT_TEST(test_name) AWT_LINK(test_name, Test)
 #define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
+#define AWT_EXAMPLE(test_name) AWT_LINK(test_name, Example)
 
 #define AWT_UNUSED_CONTEXT static_cast<void>(context)
