@@ -9,7 +9,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # using Clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
-  add_definitions("-Wall -Wextra -pedantic -pthread")
+  add_definitions("-Wall -Wextra -Wno-unused-function -pedantic -pthread")
   #usign GCC sanitizer:
   #add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
   #link_libraries("-fsanitize=thread")
