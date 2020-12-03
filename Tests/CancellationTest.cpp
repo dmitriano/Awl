@@ -40,18 +40,20 @@ AWT_EXAMPLE(Cancellation_InterruptibleSleep)
     
     for (size_t iteration : awl::make_count(iteration_count))
     {
+        static_cast<void>(iteration);
+
         std::mutex ex_mutex;
         std::exception_ptr ex_ptr = nullptr;
-
-        static_cast<void>(iteration);
 
         awl::CancellationFlag cancellation;
 
         std::vector<std::thread> v;
         v.reserve(thread_count);
 
-        for (size_t i = 0; i < thread_count; ++i)
+        for (size_t i : awl::make_count(thread_count))
         {
+            static_cast<void>(i);
+
             v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time, &ex_mutex, &ex_ptr]()
             {
                 try
