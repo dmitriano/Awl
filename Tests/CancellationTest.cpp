@@ -30,20 +30,12 @@ static constexpr int default_worker_sleep_time = 1000;
 
 using Duration = std::chrono::milliseconds;
 
-//It crashes on WSL with GCC. Tell me why? Run
 //./AwlTest --filter Cancellation_InterruptibleSleep_Test --thread_count 100 --iteration_count 1000000
-//and then Ctrl+Z and bg or fg and you get:
-//terminate called without an active exception
-//Aborted (core dumped)
-//
-//Previously it was:
-//terminate called recursively
-//terminate called recursively
 AWT_TEST(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
-    AWT_ATTRIBUTE(size_t, thread_count, 10);
+    AWT_ATTRIBUTE(size_t, thread_count, 3);
     AWT_ATTRIBUTE(size_t, iteration_count, 1);
     
     for (size_t iteration : awl::make_count(iteration_count))
@@ -70,8 +62,11 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
                     const auto elapsed = w.GetElapsedCast<Duration>();
 
+                    //It is not quite correct to check this without some further synchronization,
+                    //so the test will periodically fail.
                     AWT_ASSERT(elapsed.count() >= client_sleep_time);
 
+                    //Ctrl+Z on Linux causes this assertion to fail.
                     AWT_ASSERT(elapsed.count() < worker_sleep_time);
                 }
                 catch (const std::exception &)
