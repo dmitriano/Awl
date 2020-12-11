@@ -12,8 +12,6 @@
 
 namespace awl::testing::helpers
 {
-    using namespace awl::testing;
-
     template <typename value_type>
     inline value_type GetElapsedSeconds(std::chrono::steady_clock::duration d)
     {

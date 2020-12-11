@@ -3,6 +3,8 @@
 #include "Awl/StringFormat.h"
 #include "Awl/IntRange.h"
 
+#include "Helpers/NonCopyable.h"
+
 #include <deque>
 #include <queue>
 #include <algorithm>
@@ -87,62 +89,7 @@ namespace
         awl::ring<T> m_r;
     };
 
-    class A
-    {
-    public:
-
-        explicit A(int a) : m_a(a)
-        {
-            ++count;
-        }
-
-        ~A()
-        {
-            --count;
-        }
-
-        A(A const &) = delete;
-
-        A(A && other) : A(other.m_a)
-        {
-            other.m_moved = true;
-        }
-
-        A & operator = (const A &) = delete;
-
-        A & operator = (A && other)
-        {
-            m_a = other.m_a;
-            other.m_moved = true;
-
-            return *this;
-        }
-
-        bool operator == (const A & other) const
-        {
-            return m_a == other.m_a;
-        }
-
-        bool operator != (const A & other) const
-        {
-            return !operator==(other);
-        }
-
-        bool operator < (const A & other) const
-        {
-            return m_a < other.m_a;
-        }
-
-        static int count;
-
-    private:
-
-
-        bool m_moved = false;
-        int m_a;
-    };
-
-    int A::count = 0;
+    using A = awl::testing::helpers::NonCopyable;
 }
 
 AWT_TEST(RingInt)

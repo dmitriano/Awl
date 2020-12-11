@@ -2,10 +2,11 @@
 
 #include <stdint.h>
 #include <utility>
+#include <type_traits>
 
 namespace awl
 {
-    //! An object that is destroyed explicitly by calling its destructor with p->~T(). Can be used with destructable singleton pattern.
+    //! An object that is destroyed explicitly by calling its destructor with p->~T().
     template <class T>
     class Destructible
     {
@@ -13,23 +14,23 @@ namespace awl
 
         explicit Destructible()
         {
-            new(m_storage) T();
+            new(address()) T();
         }
 
         template <class ...Args>
         explicit Destructible(Args&&... args)
         {
-            new(m_storage) T(std::forward<Args...>(args) ...);
+            new(address()) T(std::forward<Args...>(args) ...);
         }
         
         explicit Destructible(const T & t)
         {
-            new(m_storage) T(t);
+            new(address()) T(t);
         }
 
         explicit Destructible(T && t)
         {
-            new(m_storage) T(std::forward<T>(t));
+            new(address()) T(std::forward<T>(t));
         }
 
         void Destroy()
@@ -42,6 +43,11 @@ namespace awl
             return get();
         }
 
+        T * operator -> ()
+        {
+            return get();
+        }
+
         ~Destructible()
         {
         }
@@ -50,9 +56,15 @@ namespace awl
         
         T * get()
         {
-            return reinterpret_cast<T *>(m_storage);
+            return std::launder(reinterpret_cast<T *>(address()));
         }
 
-        uint8_t m_storage[sizeof(T)];
+        void * address()
+        {
+            return reinterpret_cast<void *>(&m_storage);
+        }
+
+        //Properly aligned uninitialized storage for T
+        std::aligned_storage_t<sizeof(T), alignof(T)> m_storage;
     };
 }
