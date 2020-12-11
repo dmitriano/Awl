@@ -64,18 +64,19 @@ AWT_TEST(SharedSingleton)
         auto p1 = GetObject();
 
         AWT_ASSERT_EQUAL(1, A::count);
+        AWT_ASSERT(*p1 == A(value));
 
         {
             auto p2 = GetObject();
 
             AWT_ASSERT_EQUAL(1, A::count);
-
-            AWT_ASSERT(*p1 == A(value));
             AWT_ASSERT(*p2 == A(value));
         }
 
         AWT_ASSERT_EQUAL(1, A::count);
     }
 
+    AWT_ASSERT_EQUAL(0, A::count);
+    AWT_ASSERT(!GetObject());
     AWT_ASSERT_EQUAL(0, A::count);
 }
