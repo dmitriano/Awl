@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <utility>
 #include <type_traits>
+#include <new>
 
 namespace awl
 {
