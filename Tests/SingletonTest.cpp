@@ -19,14 +19,24 @@ namespace
         return !weak.owner_before(wt{}) && !wt{}.owner_before(weak);
     }
 
-    std::shared_ptr<A> GetObject()
+    template <class T>
+    std::shared_ptr<T> CreateObject();
+
+    template <>
+    inline std::shared_ptr<A> CreateObject()
     {
-        static std::weak_ptr<A> wp;
+        //We have a long leaving std::weak_ptr so we do not use std::make_shared.
+        return std::shared_ptr<A>(new A(value));
+    }
+
+    template <class T>
+    std::shared_ptr<T> GetObject()
+    {
+        static std::weak_ptr<T> wp;
 
         if (is_uninitialized(wp))
         {
-            //We have a long leaving std::weak_ptr so we do not use std::make_shared.
-            std::shared_ptr<A> p(new A(value));
+            std::shared_ptr<T> p = CreateObject<T>();
 
             wp = p;
 
@@ -61,13 +71,13 @@ AWT_TEST(SharedSingleton)
     AWT_ASSERT_EQUAL(0, A::count);
 
     {
-        auto p1 = GetObject();
+        auto p1 = GetObject<A>();
 
         AWT_ASSERT_EQUAL(1, A::count);
         AWT_ASSERT(*p1 == A(value));
 
         {
-            auto p2 = GetObject();
+            auto p2 = GetObject<A>();
 
             AWT_ASSERT_EQUAL(1, A::count);
             AWT_ASSERT(*p2 == A(value));
@@ -77,6 +87,6 @@ AWT_TEST(SharedSingleton)
     }
 
     AWT_ASSERT_EQUAL(0, A::count);
-    AWT_ASSERT(!GetObject());
+    AWT_ASSERT(!GetObject<A>());
     AWT_ASSERT_EQUAL(0, A::count);
 }
