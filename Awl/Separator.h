@@ -44,7 +44,7 @@ namespace awl
         }
         else
         {
-            out << ' ' << sep.content();
+            out << sep.content() << ' ';
         }
         
         return out;
