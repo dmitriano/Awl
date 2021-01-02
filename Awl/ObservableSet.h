@@ -239,6 +239,22 @@ namespace awl
             }
         }
 
+        auto value_comp() const
+        {
+            return m_set.value_comp();
+        }
+
+        //Not quite correct - it should compare keys, but not values.
+        auto key_comp() const
+        {
+            return m_set.key_comp();
+        }
+
+        allocator_type get_allocator() const
+        {
+            return m_set.get_allocator();
+        }
+
     private:
 
         void NotifyAdded(const std::pair<iterator, bool> & result)
