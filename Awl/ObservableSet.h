@@ -14,11 +14,24 @@ namespace awl
     };
     
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class observable_set : public Observable<INotifySetChanged<T>>
+    class observable_set
     {
     private:
 
-        using BaseObservable = Observable<INotifySetChanged<T>>;
+        //Makes Base::Notify public.
+        class InternalObservable : public Observable<INotifySetChanged<T>>
+        {
+        private:
+
+            using Base = Observable<INotifySetChanged<T>>;
+
+        public:
+
+            using Base::Base;
+            using Base::Notify;
+        };
+
+        using InternalObserver = Observer<INotifySetChanged<T>>;
         using InternalSet = vector_set<T, Compare, Allocator>;
 
     public:
@@ -46,7 +59,7 @@ namespace awl
         }
 
         //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
-        // observable_set(const observable_set & other) : BaseObservable{}, m_set(other.m_set)
+        // observable_set(const observable_set & other) : InternalObservable{}, m_set(other.m_set)
         // {
         // }
 
@@ -78,7 +91,7 @@ namespace awl
 
             for (const T & elem : *this)
             {
-                BaseObservable::Notify(&INotifySetChanged<T>::OnAdded, elem);
+                m_observable.Notify(&INotifySetChanged<T>::OnAdded, elem);
             }
         }
 
@@ -86,7 +99,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
+                m_observable.Notify(&INotifySetChanged<T>::OnClearing);
             }
         }
 
@@ -234,7 +247,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                BaseObservable::Notify(&INotifySetChanged<T>::OnClearing);
+                m_observable.Notify(&INotifySetChanged<T>::OnClearing);
                 m_set.clear();
             }
         }
@@ -255,21 +268,33 @@ namespace awl
             return m_set.get_allocator();
         }
 
+        void Subscribe(InternalObserver* p_observer) const
+        {
+            m_observable.Subscribe(p_observer);
+        }
+
+        void Unsubscribe(InternalObserver* p_observer) const
+        {
+            m_observable.Unsubscribe(p_observer);
+        }
+
     private:
 
         void NotifyAdded(const std::pair<iterator, bool> & result)
         {
             if (result.second)
             {
-                BaseObservable::Notify(&INotifySetChanged<T>::OnAdded, *result.first);
+                m_observable.Notify(&INotifySetChanged<T>::OnAdded, *result.first);
             }
         }
 
         void NotifyRemoving(const iterator & i)
         {
-            BaseObservable::Notify(&INotifySetChanged<T>::OnRemoving, *i);
+            m_observable.Notify(&INotifySetChanged<T>::OnRemoving, *i);
         }
 
         InternalSet m_set;
+
+        mutable InternalObservable m_observable;
     };
 }
