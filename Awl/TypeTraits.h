@@ -18,4 +18,15 @@ namespace awl
 
     template <typename T>
     inline constexpr bool dependent_false_v = dependent_false<T>::value;
+
+    template <class T> struct remove_smart_pointer { using type = T; };
+    template <class T> struct remove_smart_pointer<T*> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* const> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* volatile> { using type = T; };
+    template <class T> struct remove_smart_pointer<T* const volatile> { using type = T; };
+    template <class T> struct remove_smart_pointer<std::shared_ptr<T>> { using type = T; };
+    template <class T, class Deleter> struct remove_smart_pointer<std::unique_ptr<T, Deleter>> { using type = T; };
+
+    template <class T>
+    using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;
 }

@@ -153,7 +153,7 @@ namespace awl
             m_set.clear();
         }
 
-        observable_set<ValueSet, ValueSetCompare> m_set;
+        MultiSet m_set;
 
         PrimaryKeyGetter primaryKeyGetter;
         ForeignKeyGetter foreignKeyGetter;
