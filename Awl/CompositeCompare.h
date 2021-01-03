@@ -9,6 +9,7 @@ namespace awl
     {
     public:
 
+        //A template parameter pack cannot have a default argument.
         CompositeCompare(Cs && ... comp) : m_comps(std::forward<Cs>(comp) ...)
         {
         }
@@ -53,7 +54,7 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    inline auto compose_comparers(Cs && ... comp)
+    inline CompositeCompare<T, Cs ...> compose_comparers(Cs && ... comp)
     {
         return CompositeCompare<T, Cs ...>(std::forward<Cs>(comp) ...);
     }
