@@ -170,8 +170,8 @@ AWT_TEST(ForeignSetUnique)
 
     //Check if it compiles.
 
-    using UniquePrimarySet = awl::observable_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
-    using UniqueForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
+    using UniquePrimarySet = awl::observable_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, PrimaryGetter>>;
+    using UniqueForeignSet = awl::foreign_set<std::unique_ptr<A>, PrimaryGetter, ForeignGetter>;
 
     UniqueForeignSet fs;
     UniquePrimarySet ps;
@@ -182,6 +182,6 @@ AWT_TEST(ForeignSetUnique)
 
     for (size_t i = 0; i < insert_count; ++i)
     {
-        ps.insert(std::make_shared<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+        ps.insert(std::make_unique<A>(A{ dist(awl::random()) , dist(awl::random()) }));
     }
 }

@@ -85,6 +85,11 @@ namespace awl
             return m_set.size();
         }
 
+        const_reference operator[](size_type pos) const
+        {
+            return m_set[pos];
+        }
+
         const_reference at(size_type pos) const
         {
             return m_set.at(pos);
