@@ -156,16 +156,21 @@ AWT_TEST(ForeignSetShared)
     static_assert(std::is_same_v<typename SharedForeignSet::value_type::value_type, std::shared_ptr<A>>);
 
     SharedForeignSet fs;
-    SharedPrimarySet ps;
 
-    ps.Subscribe(&fs);
-
-    std::uniform_int_distribution<int> dist(1, range);
-
-    for (size_t i = 0; i < insert_count; ++i)
     {
-        ps.insert(std::make_shared<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+        SharedPrimarySet ps;
+
+        ps.Subscribe(&fs);
+
+        std::uniform_int_distribution<int> dist(1, range);
+
+        for (size_t i = 0; i < insert_count; ++i)
+        {
+            ps.insert(std::make_shared<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+        }
     }
+
+    AWT_ASSERT(fs.empty());
 }
 
 AWT_TEST(ForeignSetUnique)
@@ -181,16 +186,21 @@ AWT_TEST(ForeignSetUnique)
     static_assert(std::is_same_v<typename UniqueForeignSet::value_type::value_type, const A*>);
 
     UniqueForeignSet fs;
-    UniquePrimarySet ps;
-
-    ps.Subscribe(&fs);
-
-    std::uniform_int_distribution<int> dist(1, range);
-
-    for (size_t i = 0; i < insert_count; ++i)
+    
     {
-        ps.insert(std::make_unique<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+        UniquePrimarySet ps;
+
+        ps.Subscribe(&fs);
+
+        std::uniform_int_distribution<int> dist(1, range);
+
+        for (size_t i = 0; i < insert_count; ++i)
+        {
+            ps.insert(std::make_unique<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+        }
     }
+
+    AWT_ASSERT(fs.empty());
 }
 
 AWT_TEST(ForeignSetPlainPointer)
