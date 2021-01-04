@@ -5,6 +5,7 @@
 
 namespace awl
 {
+    //The argument is const probably because it can be 'const shared_ptr<A> &'.
     template <class T>
     struct INotifySetChanged
     {
