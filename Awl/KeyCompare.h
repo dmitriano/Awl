@@ -163,8 +163,8 @@ namespace awl
         }
     };
     
-    template <class T, class Field, Field remove_smart_pointer_t<T>::*field_ptr>
-    using FieldCompare = KeyCompare<T, FieldGetter<remove_smart_pointer_t<T>, Field, field_ptr>>;
+    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr>
+    using FieldCompare = KeyCompare<T, FieldGetter<remove_pointer_t<T>, Field, field_ptr>>;
 
     //A function that returns something like std::tie(x, y, z).
     template <class T, class Field, Field (T::*func_ptr)() const>
@@ -176,8 +176,8 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field (remove_smart_pointer_t<T>::*func_ptr)() const>
-    using FuncCompare = KeyCompare<T, FuncGetter<remove_smart_pointer_t<T>, Field, func_ptr>>;
+    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const>
+    using FuncCompare = KeyCompare<T, FuncGetter<remove_pointer_t<T>, Field, func_ptr>>;
 
     template <class T, size_t index>
     struct TuplizableGetter
@@ -189,5 +189,5 @@ namespace awl
     };
 
     template <class T, size_t index>
-    using TuplizableCompare = KeyCompare<T, TuplizableGetter<remove_smart_pointer_t<T>, index>>;
+    using TuplizableCompare = KeyCompare<T, TuplizableGetter<remove_pointer_t<T>, index>>;
 }

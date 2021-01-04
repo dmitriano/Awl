@@ -2,19 +2,23 @@
 
 #include "Awl/ObservableSet.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/TypeTraits.h"
 
 #include <assert.h>
 
 namespace awl
 {
-    template <class ForeignKeyGetter, class T, class PrimaryKeyGetter>
+    template <class T, class PrimaryKeyGetter, class ForeignKeyGetter>
     class foreign_set : public Observer<INotifySetChanged<T>>
     {
     private:
 
+        //It can be a plain pointer, std::shared_ptr, std::unique_ptr<T> -> T or a value T -> T *.
+        using Pointer = std::conditional_t<is_copyable_pointer_v<T>, T, const remove_pointer_t<T>*>;
+
         using ForeignKey = typename function_traits<ForeignKeyGetter>::result_type;
-        using PrimaryCompare = KeyCompare<const T *, PrimaryKeyGetter>;
-        using ValueSet = observable_set<const T *, PrimaryCompare>;
+        using PrimaryCompare = KeyCompare<Pointer, PrimaryKeyGetter>;
+        using ValueSet = observable_set<Pointer, PrimaryCompare>;
 
         class ValueSetCompare
         {
@@ -100,21 +104,42 @@ namespace awl
 
     private:
 
+        static constexpr Pointer ValueToPointer(const T& val)
+        {
+            if constexpr (is_copyable_pointer_v<T>)
+            {
+                //T
+                return val;
+            }
+            else if constexpr (is_specialization_v<T, std::unique_ptr>)
+            {
+                //const remove_pointer_t<T>*
+                return val.get();
+            }
+            else
+            {
+                //const T*
+                return &val;
+            }
+        }
+
         void OnAdded(const T & val) override
         {
-            auto i = m_set.find(foreignKeyGetter(val));
+            auto& val_ref = *object_address(val);
+
+            auto i = m_set.find(foreignKeyGetter(val_ref));
 
             if (i != m_set.end())
             {
                 ValueSet & vs = *i;
-                const bool is_new = vs.insert(&val).second;
+                const bool is_new = vs.insert(ValueToPointer(val)).second;
                 assert(is_new);
                 static_cast<void>(is_new);
             }
             else
             {
                 ValueSet vs;
-                vs.insert(&val);
+                vs.insert(ValueToPointer(val));
                 const bool is_new = m_set.insert(std::move(vs)).second;
                 assert(is_new);
                 static_cast<void>(is_new);
@@ -123,7 +148,9 @@ namespace awl
 
         void OnRemoving(const T & val) override
         {
-            auto i = m_set.find(foreignKeyGetter(val));
+            auto& val_ref = *object_address(val);
+            
+            auto i = m_set.find(foreignKeyGetter(val_ref));
 
             assert(i != m_set.end());
 
@@ -133,14 +160,14 @@ namespace awl
 
             if (vs.size() == 1)
             {
-                assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val));
+                assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val_ref));
                 
                 //vs destructor will fire 'OnClearing'.
                 m_set.erase(vs);
             }
             else
             {
-                auto j = vs.find(primaryKeyGetter(val));
+                auto j = vs.find(primaryKeyGetter(val_ref));
 
                 assert(j != vs.end());
                 

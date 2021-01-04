@@ -26,7 +26,7 @@ namespace
     using ForeignGetter = awl::FieldGetter<A, int, &A::fk>;
 
     using PrimarySet = awl::observable_set<A, awl::KeyCompare<A, PrimaryGetter>>;
-    using ForeignSet = awl::foreign_set<ForeignGetter, A, PrimaryGetter>;
+    using ForeignSet = awl::foreign_set<A, PrimaryGetter, ForeignGetter>;
 
     static void GenerateSet(PrimarySet & sample, size_t insert_count, int range)
     {
@@ -118,4 +118,69 @@ AWT_TEST(ForeignSetDestructor)
     }
 
     AWT_ASSERT(fs.empty());
+}
+
+AWT_TEST(ForeignSetShared)
+{
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
+
+    {
+        A a;
+        std::shared_ptr<A> shared_p = std::make_shared<A>(A{ 1, 2 });
+        std::shared_ptr<A>& p = shared_p;
+
+        static_assert(awl::is_pointer_v<std::decay_t<decltype(p)>>);
+
+        static_assert(std::is_same_v<decltype(*p), A&>);
+
+        auto plain_p = awl::object_address(p);
+        static_assert(std::is_same_v<decltype(plain_p), A*>);
+
+        auto p_a = awl::object_address(a);
+        static_assert(std::is_same_v<decltype(p_a), A*>);
+
+        ForeignGetter foreign_getter;
+        const int key = foreign_getter(*plain_p);
+    }
+
+    //Check if it compiles.
+    
+    using SharedPrimarySet = awl::observable_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
+    using SharedForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
+
+    SharedForeignSet fs;
+    SharedPrimarySet ps;
+
+    ps.Subscribe(&fs);
+
+    std::uniform_int_distribution<int> dist(1, range);
+
+    for (size_t i = 0; i < insert_count; ++i)
+    {
+        ps.insert(std::make_shared<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+    }
+}
+
+AWT_TEST(ForeignSetUnique)
+{
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
+
+    //Check if it compiles.
+
+    using UniquePrimarySet = awl::observable_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
+    using UniqueForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
+
+    UniqueForeignSet fs;
+    UniquePrimarySet ps;
+
+    ps.Subscribe(&fs);
+
+    std::uniform_int_distribution<int> dist(1, range);
+
+    for (size_t i = 0; i < insert_count; ++i)
+    {
+        ps.insert(std::make_shared<A>(A{ dist(awl::random()) , dist(awl::random()) }));
+    }
 }
