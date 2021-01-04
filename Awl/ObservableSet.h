@@ -240,7 +240,15 @@ namespace awl
         template <class Key>
         bool erase(const Key & key)
         {
-            return m_set.erase(key);
+            iterator i = find(key);
+
+            if (i != end())
+            {
+                erase(i);
+                return true;
+            }
+
+            return false;
         }
 
         void clear()
@@ -288,9 +296,14 @@ namespace awl
             }
         }
 
-        void NotifyRemoving(const iterator & i)
+        void NotifyRemoving(const T & val)
         {
-            m_observable.Notify(&INotifySetChanged<T>::OnRemoving, *i);
+            m_observable.Notify(&INotifySetChanged<T>::OnRemoving, val);
+        }
+
+        void NotifyRemoving(const iterator& i)
+        {
+            NotifyRemoving(*i);
         }
 
         InternalSet m_set;

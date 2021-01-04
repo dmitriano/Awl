@@ -192,3 +192,39 @@ AWT_TEST(ForeignSetUnique)
         ps.insert(std::make_unique<A>(A{ dist(awl::random()) , dist(awl::random()) }));
     }
 }
+
+AWT_TEST(ForeignSetPlainPointer)
+{
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
+
+    //Check if it compiles.
+
+    using PointerPrimarySet = awl::observable_set<A *, awl::KeyCompare<A *, PrimaryGetter>>;
+    using PointerForeignSet = awl::foreign_set<A *, PrimaryGetter, ForeignGetter>;
+
+    static_assert(std::is_same_v<typename PointerForeignSet::value_type::value_type, A*>);
+
+    PointerForeignSet fs;
+    PointerPrimarySet ps;
+
+    ps.Subscribe(&fs);
+
+    std::uniform_int_distribution<int> dist(1, range);
+
+    for (size_t i = 0; i < insert_count; ++i)
+    {
+        ps.insert(new A{ dist(awl::random()) , dist(awl::random()) });
+    }
+
+    while (!ps.empty())
+    {
+        A* p = ps.front();
+        
+        ps.erase(p);
+
+        delete p;
+    }
+
+    AWT_ASSERT(fs.empty());
+}
