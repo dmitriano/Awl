@@ -28,6 +28,9 @@ namespace
     using PrimarySet = awl::observable_set<A, awl::KeyCompare<A, PrimaryGetter>>;
     using ForeignSet = awl::foreign_set<A, PrimaryGetter, ForeignGetter>;
 
+    //Do we really need it to be const?
+    static_assert(std::is_same_v<typename ForeignSet::value_type::value_type, const A*>);
+
     static void GenerateSet(PrimarySet & sample, size_t insert_count, int range)
     {
         std::uniform_int_distribution<int> dist(1, range);
@@ -150,6 +153,8 @@ AWT_TEST(ForeignSetShared)
     using SharedPrimarySet = awl::observable_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
     using SharedForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
 
+    static_assert(std::is_same_v<typename SharedForeignSet::value_type::value_type, std::shared_ptr<A>>);
+
     SharedForeignSet fs;
     SharedPrimarySet ps;
 
@@ -172,6 +177,8 @@ AWT_TEST(ForeignSetUnique)
 
     using UniquePrimarySet = awl::observable_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, PrimaryGetter>>;
     using UniqueForeignSet = awl::foreign_set<std::unique_ptr<A>, PrimaryGetter, ForeignGetter>;
+
+    static_assert(std::is_same_v<typename UniqueForeignSet::value_type::value_type, const A*>);
 
     UniqueForeignSet fs;
     UniquePrimarySet ps;
