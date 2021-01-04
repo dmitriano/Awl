@@ -13,7 +13,9 @@ namespace awl
     {
     private:
 
-        //It can be a plain pointer, std::shared_ptr, std::unique_ptr<T> -> T or a value T -> T *.
+        //Plain pointer and std::shared_ptr<A> -> themselves
+        //std::unique_ptr<A> -> A *
+        //another type A -> A *
         using Pointer = std::conditional_t<is_copyable_pointer_v<T>, T, const remove_pointer_t<T>*>;
 
         using ForeignKey = typename function_traits<ForeignKeyGetter>::result_type;
