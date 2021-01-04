@@ -142,6 +142,7 @@ AWT_TEST(ForeignSetShared)
 
         ForeignGetter foreign_getter;
         const int key = foreign_getter(*plain_p);
+        static_cast<void>(key);
     }
 
     //Check if it compiles.
