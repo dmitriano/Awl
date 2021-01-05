@@ -3,8 +3,9 @@
 #include "Awl/ObservableSet.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/TypeTraits.h"
+#include "Awl/FunctionTraits.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace awl
 {
@@ -53,10 +54,11 @@ namespace awl
         };
         
         using MultiSet = observable_set<ValueSet, ValueSetCompare>;
+        using MultiSetObserver = Observer<INotifySetChanged<ValueSet>>;
 
     public:
 
-        using value_type = const ValueSet;
+        using value_type = ValueSet;
 
         using size_type = typename MultiSet::size_type;
         using difference_type = typename MultiSet::difference_type;
@@ -107,6 +109,16 @@ namespace awl
         const_iterator find(const Key & key) const
         {
             return m_set.find(key);
+        }
+
+        void Subscribe(MultiSetObserver* p_observer) const
+        {
+            m_set.Subscribe(p_observer);
+        }
+
+        void Unsubscribe(MultiSetObserver* p_observer) const
+        {
+            m_set.Unsubscribe(p_observer);
         }
 
     private:
