@@ -558,14 +558,19 @@ namespace awl::io
                 }
             }
 
-            //Clear the vector if the map is trivial.
-            //If the fields are structures, we do not need to check recursively,
-            //we only guarantee that this structure is read sequentially as a tuple
-            //without readers and skippers.
-            auto range = awl::make_count(v.size());
-            if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
+            //If a field is added to the end of a structure the vector is trivial,
+            //but the count of the fields is different.
+            if (left.GetCount() == right.GetCount())
             {
-                v.clear();
+                auto range = awl::make_count(v.size());
+                if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
+                {
+                    //Clear the vector if the map is trivial.
+                    //If the fields are structures, we do not need to check recursively,
+                    //we only guarantee that this structure is read sequentially as a tuple
+                    //without readers and skippers.
+                    v.clear();
+                }
             }
 
             return v;
