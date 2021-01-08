@@ -43,6 +43,12 @@ namespace awl
             return std::chrono::steady_clock::now() - startTime;
         }
 
+        template <class Duration>
+        bool HasElapsed(Duration interval)
+        {
+            return GetElapsedTime() > std::chrono::duration_cast<std::chrono::steady_clock::duration>(interval);
+        }
+
         operator std::chrono::steady_clock::duration() const
         {
             return GetElapsedTime();
