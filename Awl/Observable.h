@@ -56,7 +56,7 @@ namespace awl
         }
     };
 
-    template <class IObserver>
+    template <class IObserver, class Enclosing = void>
     class Observable
     {
     public:
@@ -140,5 +140,7 @@ namespace awl
         using OBSERVER_LIST = quick_list<OBSERVER>;
 
         OBSERVER_LIST Observers;
+
+        friend Enclosing;
     };
 }

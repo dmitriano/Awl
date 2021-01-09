@@ -76,8 +76,8 @@ namespace awl
             return std::shared_ptr<T>(p, MakeDeleter());
         }
 
-        awl::quick_list<T> m_free;
-        awl::quick_list<T> m_used;
+        awl::quick_list<T, pooled_object> m_free;
+        awl::quick_list<T, pooled_object> m_used;
     };
 
     template <class T>

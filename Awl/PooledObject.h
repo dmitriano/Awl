@@ -9,6 +9,8 @@ namespace awl
     {
     public:
 
+        using quick_link::quick_link;
+
         virtual void Finalize()
         {
         }

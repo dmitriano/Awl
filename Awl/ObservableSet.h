@@ -19,19 +19,7 @@ namespace awl
     {
     private:
 
-        //Makes Base::Notify public.
-        class InternalObservable : public Observable<INotifySetChanged<T>>
-        {
-        private:
-
-            using Base = Observable<INotifySetChanged<T>>;
-
-        public:
-
-            using Base::Base;
-            using Base::Notify;
-        };
-
+        using InternalObservable = Observable<INotifySetChanged<T>, observable_set>;
         using InternalObserver = Observer<INotifySetChanged<T>>;
         using InternalSet = vector_set<T, Compare, Allocator>;
 
