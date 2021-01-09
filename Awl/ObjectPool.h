@@ -37,6 +37,11 @@ namespace awl
         {
             assert(m_used.empty());
 
+            clear();
+        }
+
+        void clear()
+        {
             while (!m_free.empty())
             {
                 delete m_free.pop_front();
@@ -72,4 +77,19 @@ namespace awl
         awl::quick_list<T> m_free;
         awl::quick_list<T> m_used;
     };
+
+    template <class T>
+    inline object_pool<T> objectPoolSingleton;
+
+    template <class T>
+    std::shared_ptr<T> make_pooled()
+    {
+        return objectPoolSingleton<T>.make_pooled();
+    }
+
+    template <class T>
+    void clear_pool()
+    {
+        objectPoolSingleton<T>.clear();
+    }
 }

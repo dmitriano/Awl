@@ -68,3 +68,45 @@ AWT_TEST(ObjectPool)
 
     AWT_ASSERT_EQUAL(0, A::elementCount);
 }
+
+AWT_TEST(ObjectPoolSingleton)
+{
+    AWT_UNUSED_CONTEXT;
+
+    {
+        {
+            std::shared_ptr<A> p = awl::make_pooled<A>();
+        }
+
+        AWT_ASSERT_EQUAL(1, A::elementCount);
+
+        {
+            std::shared_ptr<A> p = awl::make_pooled<A>();
+        }
+
+        AWT_ASSERT_EQUAL(1, A::elementCount);
+
+        {
+            std::shared_ptr<A> p1 = awl::make_pooled<A>();
+            std::shared_ptr<A> p2 = awl::make_pooled<A>();
+        }
+
+        AWT_ASSERT_EQUAL(2, A::elementCount);
+
+        {
+            std::shared_ptr<A> p = awl::make_pooled<A>();
+            std::weak_ptr<A> w = p;
+            AWT_ASSERT(w.lock() != nullptr);
+            p = nullptr;
+            AWT_ASSERT(!w.lock());
+        }
+
+        AWT_ASSERT_EQUAL(2, A::elementCount);
+    }
+
+    AWT_ASSERT_EQUAL(2, A::elementCount);
+
+    awl::clear_pool<A>();
+
+    AWT_ASSERT_EQUAL(0, A::elementCount);
+}
