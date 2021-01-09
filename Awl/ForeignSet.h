@@ -58,6 +58,11 @@ namespace awl
 
     public:
 
+        foreign_set(PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
+            primaryKeyGetter(pk_getter), foreignKeyGetter(fk_getter)
+        {
+        }
+
         using value_type = ValueSet;
 
         using size_type = typename MultiSet::size_type;
