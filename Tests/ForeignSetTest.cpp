@@ -123,6 +123,27 @@ AWT_TEST(ForeignSetDestructor)
     AWT_ASSERT(fs.empty());
 }
 
+AWT_TEST(ForeignSetConstructor)
+{
+    AWT_ATTRIBUTE(size_t, insert_count, 1000);
+    AWT_ATTRIBUTE(int, range, 1000);
+
+    PrimarySet ps;
+
+    GenerateSet(ps, insert_count, range);
+
+    ForeignSet fs(ps);
+
+    size_t count = 0;
+    
+    for (auto& set : fs)
+    {
+        count += set.size();
+    }
+
+    AWT_ASSERT_EQUAL(ps.size(), count);
+}
+
 AWT_TEST(ForeignSetShared)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);

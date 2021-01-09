@@ -63,6 +63,16 @@ namespace awl
         {
         }
 
+        template <class SrcSet>
+        foreign_set(const SrcSet& src_set, PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
+            foreign_set(pk_getter, fk_getter)
+        {
+            for (auto& val : src_set)
+            {
+                OnAdded(val);
+            }
+        }
+
         using value_type = ValueSet;
 
         using size_type = typename MultiSet::size_type;
