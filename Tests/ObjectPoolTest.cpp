@@ -5,7 +5,7 @@ using namespace awl::testing;
 
 namespace
 {
-    class A : public awl::quick_link
+    class A : public awl::pooled_object
     {
     public:
 

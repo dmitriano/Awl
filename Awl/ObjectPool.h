@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/QuickList.h"
+#include "Awl/PooledObject.h"
 
 #include <memory>
 #include <cassert>
@@ -59,6 +60,7 @@ namespace awl
                 //p_this->m_used.erase(p);
                 p->exclude();
                 p_this->m_free.push_back(p);
+                p->Finalize();
             }
         };
 
