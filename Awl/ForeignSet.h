@@ -63,6 +63,7 @@ namespace awl
         {
         }
 
+        //TODO: Make it deduce template arguments.
         template <class SrcSet>
         foreign_set(const SrcSet& src_set, PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
             foreign_set(pk_getter, fk_getter)
@@ -71,6 +72,8 @@ namespace awl
             {
                 OnAdded(val);
             }
+
+            src_set.Subscribe(this);
         }
 
         using value_type = ValueSet;

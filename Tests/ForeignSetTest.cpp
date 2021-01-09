@@ -130,9 +130,11 @@ AWT_TEST(ForeignSetConstructor)
 
     PrimarySet ps;
 
-    GenerateSet(ps, insert_count, range);
+    GenerateSet(ps, insert_count / 2, range / 2);
 
     ForeignSet fs(ps);
+
+    GenerateSet(ps, insert_count / 2, range / 2);
 
     size_t count = 0;
     
