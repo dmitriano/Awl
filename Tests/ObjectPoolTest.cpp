@@ -5,7 +5,15 @@ using namespace awl::testing;
 
 namespace
 {
-    class A : public awl::pooled_object
+    //Test if it compiles with multiple links.
+    class another_link : public awl::quick_link
+    {
+    public:
+
+        using quick_link::quick_link;
+    };
+
+    class A : public awl::pooled_object, another_link
     {
     public:
 

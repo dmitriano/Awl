@@ -244,6 +244,8 @@ namespace awl
         static void insert(reverse_iterator i, T * a) { insert_before(*i, a); }
         static void erase(reverse_iterator i) { remove(*i); }
 
+        static void erase(T* a) { remove(a); }
+
         void push_front(T * a) { insert_after(static_cast<DLink *>(forward().null()), a); }
         void push_back(T * a) { insert_before(static_cast<DLink *>(forward().null()), a); }
 

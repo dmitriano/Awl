@@ -57,8 +57,8 @@ namespace awl
 
             void operator () (T* p)
             {
-                //p_this->m_used.erase(p);
-                p->exclude();
+                p_this->m_used.erase(p);
+                //p->pooled_object::exclude();
                 p_this->m_free.push_back(p);
                 p->Finalize();
             }
