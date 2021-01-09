@@ -9,6 +9,9 @@ namespace awl
     {
     public:
 
+        //Can be used if all the comparers are default constructible.
+        CompositeCompare() = default;
+        
         //A template parameter pack cannot have a default argument.
         CompositeCompare(Cs && ... comp) : m_comps(std::forward<Cs>(comp) ...)
         {
