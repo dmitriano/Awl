@@ -4,8 +4,10 @@
 
 namespace awl
 {
+    AWL_DECLARE_QUICK_LINK(observer_link)
+
     template <class IObserver>
-    class Observer : public IObserver, public quick_link
+    class Observer : public IObserver, public observer_link
     {
     public:
 
@@ -22,24 +24,24 @@ namespace awl
 
         Observer & operator = (Observer && other)
         {
-            quick_link::safe_exclude();
+            observer_link::safe_exclude();
             Move(std::move(other));
             return *this;
         }
 
         bool IsSubscribed() const
         {
-            return quick_link::included();
+            return observer_link::included();
         }
 
         void UnsubscribeSelf()
         {
-            quick_link::exclude();
+            observer_link::exclude();
         }
 
         ~Observer()
         {
-            quick_link::safe_exclude();
+            observer_link::safe_exclude();
         }
 
     private:
@@ -49,9 +51,9 @@ namespace awl
         {
             if (other.IsSubscribed())
             {
-                auto * prev = other.quick_link::predecessor();
+                auto * prev = other.observer_link::predecessor();
                 other.UnsubscribeSelf();
-                prev->quick_link::insert_after(this);
+                prev->observer_link::insert_after(this);
             }
         }
     };
@@ -137,7 +139,7 @@ namespace awl
             }
         }
         
-        using OBSERVER_LIST = quick_list<OBSERVER>;
+        using OBSERVER_LIST = quick_list<OBSERVER, observer_link>;
 
         OBSERVER_LIST Observers;
 

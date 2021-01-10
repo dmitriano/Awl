@@ -343,3 +343,12 @@ namespace awl
         template <class T1, class Link1, class Derived1> friend class basic_single_list;
     };
 }
+
+#define AWL_DECLARE_QUICK_LINK(name) \
+    class name : public awl::basic_quick_link<name> \
+    { \
+    private: \
+        using Base = basic_quick_link<name>; \
+    public:\
+        using Base::Base; \
+    };

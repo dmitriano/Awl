@@ -4,16 +4,12 @@
 
 namespace awl
 {
+    AWL_DECLARE_QUICK_LINK(pooled_object_link)
+
     //A default constructible type derived from awl::quick_link.
-    class pooled_object : public basic_quick_link<pooled_object>
+    class pooled_object : public pooled_object_link
     {
-    private:
-
-        using Base = basic_quick_link<pooled_object>;
-
     public:
-
-        using Base::Base;
 
         virtual void Finalize()
         {
