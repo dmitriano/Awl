@@ -8,7 +8,7 @@ AWL is a small cross-platform C++ library that includes:
 3. A [set](https://github.com/dmitriano/Awl/blob/master/Awl/VectorSet.h) that finds an element by both key and index with O(logN) time.
 4. A [doubly linked list](https://github.com/dmitriano/Awl/blob/master/Awl/QuickList.h) with static insert and erase methods.
 5. An [observable](https://github.com/dmitriano/Awl/blob/master/Awl/Observable.h) with movable observers.
-6. A [pool of reusable objects]((https://github.com/dmitriano/Awl/blob/master/Awl/ObjectPool.h)) managed with std::shared_ptr.
+6. A [pool of reusable objects](https://github.com/dmitriano/Awl/blob/master/Awl/ObjectPool.h) managed with std::shared_ptr.
 7. [Bitset based on enum](https://github.com/dmitriano/Awl/blob/master/Awl/BitMap.h).
 8. A [circular buffer](https://github.com/dmitriano/Awl/blob/master/Awl/Ring.h) with an interface similar to std::queue.
 9. And other simple classes like CompositeCompare, ReverseCompare, ScopeGuard, etc...
