@@ -25,7 +25,7 @@ namespace awl
 
         KeyCompare() = default;
         
-        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -44,6 +44,8 @@ namespace awl
             return id < getKey(val);
         }
 
+        using is_transparent = void;
+
     private:
 
         GetKey getKey;
@@ -60,7 +62,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -95,7 +97,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        KeyCompare(GetKey && get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -130,7 +132,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey && get_key) : getKey(std::forward<GetKey>(get_key))
+        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
