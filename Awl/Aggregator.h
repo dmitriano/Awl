@@ -3,6 +3,7 @@
 #include <tuple>
 #include <optional>
 #include <functional>
+#include <memory>
 
 #include "Awl/TupleHelpers.h"
 
@@ -62,4 +63,12 @@ namespace awl
         
         Func m_func;
     };
+
+    template <class... Ts>
+    auto make_shared_aggregator(std::function<void(Ts...)> func)
+    {
+        using A = aggregator<Ts...>;
+
+        return std::make_shared<A>(func);
+    }
 }
