@@ -13,7 +13,7 @@ namespace awl
         CompositeCompare() = default;
         
         //A template parameter pack cannot have a default argument.
-        CompositeCompare(Cs && ... comp) : m_comps(std::forward<Cs>(comp) ...)
+        CompositeCompare(Cs... comp) : m_comps(std::move(comp) ...)
         {
         }
 
@@ -24,7 +24,7 @@ namespace awl
 
     private:
 
-        using Tuple = std::tuple<Cs ...>;
+        using Tuple = std::tuple<std::decay_t<Cs>...>;
 
         template <size_t Index>
         bool Compare(const T& left, const T& right) const
@@ -57,8 +57,8 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    inline CompositeCompare<T, Cs ...> compose_comparers(Cs && ... comp)
+    inline CompositeCompare<T, Cs ...> compose_comparers(Cs... comp)
     {
-        return CompositeCompare<T, Cs ...>(std::forward<Cs>(comp) ...);
+        return CompositeCompare<T, Cs ...>(std::move(comp) ...);
     }
 }

@@ -7,7 +7,7 @@ namespace awl
     {
     public:
 
-        ReverseCompare(Compare && comp = Compare()) : m_comp(std::forward<Compare>(comp))
+        ReverseCompare(Compare comp = Compare()) : m_comp(std::move(comp))
         {
         }
 
