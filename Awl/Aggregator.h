@@ -20,7 +20,7 @@ namespace awl
 
     public:
 
-        constexpr aggregator(Func func) : m_func(func)
+        constexpr aggregator(Func func) : m_func(std::move(func))
         {
         }
 
