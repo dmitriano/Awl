@@ -8,6 +8,7 @@
 
 namespace awl
 {
+    //Calls a function when its arguments have been set.
     template <class... Ts>
     class aggregator
     {
@@ -26,7 +27,7 @@ namespace awl
         template <std::size_t i>
         constexpr void set(std::tuple_element_t<i, Tuple> val)
         {
-            std::get<i>(m_values) = val;
+            std::get<i>(m_values) = std::move(val);
 
             if (all())
             {
@@ -54,7 +55,7 @@ namespace awl
         template <std::size_t... index>
         constexpr void call(std::index_sequence<index...>)
         {
-            m_func(*std::get<index>(m_values)...);
+            m_func(std::move(*std::get<index>(m_values))...);
         }
 
         OptionalTuple m_values;
