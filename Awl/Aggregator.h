@@ -20,12 +20,12 @@ namespace awl
 
     public:
 
-        constexpr aggregator(Func func) : m_func(std::move(func))
+        aggregator(Func func) : m_func(std::move(func))
         {
         }
 
         template <std::size_t i>
-        constexpr void set(std::tuple_element_t<i, Tuple> val)
+        void set(std::tuple_element_t<i, Tuple> val)
         {
             std::get<i>(m_values) = std::move(val);
 
