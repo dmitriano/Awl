@@ -9,7 +9,7 @@ namespace awl
     {
     public:
 
-        scope_guard(Lambda && f, bool e = true) : free(std::forward<Lambda>(f)), engaged(e)
+        scope_guard(Lambda f, bool e = true) : free(std::move(f)), engaged(e)
         {
         }
 
@@ -44,25 +44,25 @@ namespace awl
 
     private:
 
-        Lambda free;
+        std::decay_t<Lambda> free;
 
         bool engaged = true;
     };
 
     template <class Lambda>
-    inline scope_guard<Lambda> make_scope_guard(Lambda && free, bool engaged = true)
+    inline scope_guard<Lambda> make_scope_guard(Lambda free, bool engaged = true)
     {
-        return scope_guard<Lambda>(std::forward<Lambda>(free), engaged);
+        return scope_guard<Lambda>(std::move(free), engaged);
     }
 
     template <class Init, class Free>
-    inline scope_guard<Free> make_scope_guard(Init && init, Free && free, bool engaged = true)
+    inline scope_guard<Free> make_scope_guard(Init init, Free free, bool engaged = true)
     {
         if (engaged)
         {
             init();
         }
 
-        return make_scope_guard(std::forward<Free>(free), engaged);
+        return make_scope_guard(std::move(free), engaged);
     }
 }
