@@ -378,4 +378,6 @@ namespace awl
     }
 
     inline awl::decimal zero;
+    
+    inline awl::decimal nan(std::numeric_limits<int64_t>::max(), 0);
 }
