@@ -41,6 +41,15 @@ namespace
         {
         }
     }
+
+    std::string to_string(awl::decimal d)
+    {
+        std::ostringstream out;
+
+        out << d;
+
+        return out.str();
+    }
 }
 
 AWT_TEST(DecimalStringConversion)
@@ -77,4 +86,42 @@ AWT_TEST(DecimalLimits)
     //19 is wrong
     CheckTrows("0.1234567891234567891"sv);
     CheckTrows(L"0.1234567891234567891"sv);
+}
+
+AWT_TEST(DecimalRescale)
+{
+    AWT_UNUSED_CONTEXT;
+
+    awl::decimal d("123.45678"sv);
+
+    d.rescale(7);
+    
+    AWT_ASSERT(to_string(d) == "123.4567800");
+
+    d.rescale(3);
+
+    AWT_ASSERT(to_string(d) == "123.456");
+
+    d.rescale(0);
+
+    AWT_ASSERT(to_string(d) == "123");
+
+    //15 + 3 == 18
+    d.rescale(15);
+
+    AWT_ASSERT(to_string(d) == "123.000000000000000");
+
+    d.rescale(0);
+
+    AWT_ASSERT(to_string(d) == "123");
+
+    try
+    {
+        d.rescale(16);
+
+        AWT_FAILM("It did not throw.");
+    }
+    catch (const std::exception&)
+    {
+    }
 }

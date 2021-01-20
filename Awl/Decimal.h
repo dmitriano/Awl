@@ -59,6 +59,40 @@ namespace awl
             return static_cast<uint8_t>(calc_digits(m_denom));
         }
 
+        constexpr void rescale(uint8_t digits)
+        {
+            check_digits(digits);
+            
+            const int64_t my_digits = calc_digits(m_denom);
+            
+            if (my_digits < digits)
+            {
+                //We add zeros.
+
+                auto diff = digits - my_digits;
+
+                check_digits(static_cast<uint8_t>(calc_man_digits(m_man) + diff));
+                    
+                for (auto i = 0; i < diff; ++i)
+                {
+                    m_man *= 10;
+                    m_denom *= 10;
+                }
+            }
+            else if (digits < my_digits)
+            {
+                //We loose some digits.
+
+                auto diff = my_digits - digits;
+
+                for (auto i = 0; i < diff; ++i)
+                {
+                    m_man /= 10;
+                    m_denom /= 10;
+                }
+            }
+        }
+
     private:
 
         template <class C, class Int>
@@ -114,9 +148,25 @@ namespace awl
         {
             int64_t digits = 0;
 
-            while (denom != 0)
+            //1 means zero digits
+            while (denom != 1)
             {
                 denom /= 10;
+
+                ++digits;
+            }
+
+            return digits;
+        }
+
+        //How many digits in the mantissa, "123.45" => 5, while denom is 100.
+        static constexpr int64_t calc_man_digits(int64_t man)
+        {
+            int64_t digits = 0;
+
+            while (man != 0)
+            {
+                man/= 10;
 
                 ++digits;
             }
@@ -130,12 +180,12 @@ namespace awl
 
         static constexpr void check_digits(uint8_t digits)
         {
-            if (digits > 18)
+            if (digits > maxDigits)
             {
                 throw std::runtime_error("Too many digits in a decimal.");
             }
         }
-        
+
         int64_t m_man;
         int64_t m_denom;
 
