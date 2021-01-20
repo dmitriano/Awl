@@ -62,6 +62,11 @@ namespace awl
             return calc_digits(m_denom);
         }
 
+        static constexpr uint8_t max_digits()
+        {
+            return maxDigits;
+        }
+
         constexpr void rescale(uint8_t digits)
         {
             check_digits(digits);
