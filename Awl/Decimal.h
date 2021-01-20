@@ -32,11 +32,7 @@ namespace awl
         {
         }
 
-        explicit constexpr decimal(uint8_t digits) : decimal(static_cast<int64_t>(0), digits)
-        {
-        }
-
-        constexpr decimal() : decimal(0)
+        constexpr decimal() : decimal(static_cast<int64_t>(0), 0)
         {
         }
 
@@ -380,4 +376,6 @@ namespace awl
 
         return out;
     }
+
+    inline awl::decimal zero;
 }
