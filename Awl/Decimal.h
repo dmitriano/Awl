@@ -52,14 +52,14 @@ namespace awl
 
         constexpr uint8_t digits() const
         {
-            return static_cast<uint8_t>(calc_digits(m_denom));
+            return calc_digits(m_denom);
         }
 
         constexpr void rescale(uint8_t digits)
         {
             check_digits(digits);
             
-            const int64_t my_digits = calc_digits(m_denom);
+            const int64_t my_digits = static_cast<int64_t>(calc_digits(m_denom));
             
             if (my_digits < digits)
             {
@@ -124,6 +124,36 @@ namespace awl
             return a.m_man > b.m_man;
         }
 
+        decimal operator + (const decimal& other) const
+        {
+            decimal a = *this;
+            decimal b = other;
+
+            align(a, b);
+
+            return decimal(a.m_man + b.m_man, calc_digits(a.m_denom));
+        }
+
+        decimal operator - (const decimal& other) const
+        {
+            decimal a = *this;
+            decimal b = other;
+
+            align(a, b);
+
+            return decimal(a.m_man - b.m_man, calc_digits(a.m_denom));
+        }
+
+        //decimal operator / (const decimal& other) const
+        //{
+        //    const double a = other.cast<double>();
+        //    const double b = cast<double>();
+
+        //    const double result = a / b;
+
+        //    return decimal();
+        //}
+
     private:
 
         template <class C, class Int>
@@ -175,9 +205,9 @@ namespace awl
             return denom;
         }
 
-        static constexpr int64_t calc_digits(int64_t denom)
+        static constexpr uint8_t calc_digits(int64_t denom)
         {
-            int64_t digits = 0;
+            uint8_t digits = 0;
 
             //1 means zero digits
             while (denom != 1)
@@ -221,11 +251,11 @@ namespace awl
         {
             if (a.m_denom > b.m_denom)
             {
-                b.rescale(static_cast<uint8_t>(calc_digits(a.m_denom)));
+                b.rescale(calc_digits(a.m_denom));
             }
             else if (b.m_denom > a.m_denom)
             {
-                a.rescale(static_cast<uint8_t>(calc_digits(b.m_denom)));
+                a.rescale(calc_digits(b.m_denom));
             }
         }
 

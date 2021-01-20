@@ -148,3 +148,12 @@ AWT_TEST(DecimalCast)
     AWT_ASSERT(awl::decimal("1"sv).cast<float>() == 1.0f);
     AWT_ASSERT(awl::decimal("1"sv).cast<int>() == 1);
 }
+
+AWT_TEST(DecimalAdditionSubtraction)
+{
+    AWT_UNUSED_CONTEXT;
+
+    AWT_ASSERT(awl::decimal("1.0"sv) + awl::decimal("2.000"sv) == awl::decimal("3"sv));
+    AWT_ASSERT(awl::decimal("1.05"sv) + awl::decimal("2.005"sv) == awl::decimal("3.055"sv));
+    AWT_ASSERT(awl::decimal("1.05"sv) - awl::decimal("0.05"sv) == awl::decimal("1"sv));
+}
