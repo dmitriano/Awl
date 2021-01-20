@@ -125,3 +125,26 @@ AWT_TEST(DecimalRescale)
     {
     }
 }
+
+AWT_TEST(DecimalOperator)
+{
+    AWT_UNUSED_CONTEXT;
+
+    AWT_ASSERT(awl::decimal("123.456789"sv) == awl::decimal("123.456789000"sv));
+    AWT_ASSERT(awl::decimal("0"sv) == awl::decimal("0"sv));
+    AWT_ASSERT(awl::decimal("123"sv) == awl::decimal("123.000"sv));
+
+    AWT_ASSERT(awl::decimal("1"sv) != awl::decimal("2.000"sv));
+
+    AWT_ASSERT(awl::decimal("1"sv) < awl::decimal("2.000"sv));
+    AWT_ASSERT(awl::decimal("2.000"sv) > awl::decimal("1.000"sv));
+}
+
+AWT_TEST(DecimalCast)
+{
+    AWT_UNUSED_CONTEXT;
+
+    AWT_ASSERT(awl::decimal("1"sv).cast<double>() == 1.0);
+    AWT_ASSERT(awl::decimal("1"sv).cast<float>() == 1.0f);
+    AWT_ASSERT(awl::decimal("1"sv).cast<int>() == 1);
+}

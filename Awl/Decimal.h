@@ -41,14 +41,10 @@ namespace awl
             *this = from_string(text);
         }
             
-        constexpr float to_float() const
+        template <class Float>
+        constexpr Float cast() const
         {
-            return static_cast<float>(to_double());
-        }
-
-        constexpr double to_double() const
-        {
-            return static_cast<double>(m_man) / m_denom;
+            return static_cast<Float>(static_cast<Float>(m_man) / m_denom);
         }
 
         template <class C>
@@ -91,6 +87,41 @@ namespace awl
                     m_denom /= 10;
                 }
             }
+        }
+
+        bool operator == (const decimal& other) const
+        {
+            decimal a = *this;
+            decimal b = other;
+
+            align(a, b);
+
+            return a.m_man == b.m_man;
+        }
+
+        bool operator != (const decimal& other) const
+        {
+            return !operator==(other);
+        }
+
+        bool operator < (const decimal& other) const
+        {
+            decimal a = *this;
+            decimal b = other;
+
+            align(a, b);
+
+            return a.m_man < b.m_man;
+        }
+
+        bool operator > (const decimal& other) const
+        {
+            decimal a = *this;
+            decimal b = other;
+
+            align(a, b);
+
+            return a.m_man > b.m_man;
         }
 
     private:
@@ -183,6 +214,18 @@ namespace awl
             if (digits > maxDigits)
             {
                 throw std::runtime_error("Too many digits in a decimal.");
+            }
+        }
+
+        static void align(decimal& a, decimal& b)
+        {
+            if (a.m_denom > b.m_denom)
+            {
+                b.rescale(static_cast<uint8_t>(calc_digits(a.m_denom)));
+            }
+            else if (b.m_denom > a.m_denom)
+            {
+                a.rescale(static_cast<uint8_t>(calc_digits(b.m_denom)));
             }
         }
 
