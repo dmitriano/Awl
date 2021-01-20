@@ -194,7 +194,7 @@ namespace awl
     };
 
     template <class C>
-    static constexpr decimal decimal::from_string(std::basic_string_view<C> text)
+    constexpr decimal decimal::from_string(std::basic_string_view<C> text)
     {
         int64_t int_part;
 
