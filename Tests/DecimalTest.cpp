@@ -147,13 +147,32 @@ AWT_TEST(DecimalCast)
     AWT_ASSERT(awl::decimal("1"sv).cast<double>() == 1.0);
     AWT_ASSERT(awl::decimal("1"sv).cast<float>() == 1.0f);
     AWT_ASSERT(awl::decimal("1"sv).cast<int>() == 1);
+
+    AWT_ASSERT(awl::decimal("1"sv) == 1.0);
 }
 
-AWT_TEST(DecimalAdditionSubtraction)
+AWT_TEST(DecimalArithmeticOperators)
 {
     AWT_UNUSED_CONTEXT;
 
+    //Addition and subtraction
     AWT_ASSERT(awl::decimal("1.0"sv) + awl::decimal("2.000"sv) == awl::decimal("3"sv));
     AWT_ASSERT(awl::decimal("1.05"sv) + awl::decimal("2.005"sv) == awl::decimal("3.055"sv));
     AWT_ASSERT(awl::decimal("1.05"sv) - awl::decimal("0.05"sv) == awl::decimal("1"sv));
+
+    {
+        awl::decimal d("1.0"sv);
+
+        d += awl::decimal("2.0"sv);
+
+        AWT_ASSERT(d == awl::decimal("3.0"sv));
+
+        d -= awl::decimal("2.0"sv);
+
+        AWT_ASSERT(d == awl::decimal("1.0"sv));
+    }
+
+    //Multiplication and Division
+    AWT_ASSERT(awl::decimal(awl::decimal("2.0"sv) * awl::decimal("3.000"sv), 5) == awl::decimal("6"sv));
+    AWT_ASSERT(awl::decimal(awl::decimal("6.0"sv) / awl::decimal("2.000"sv), 5) == awl::decimal("3"sv));
 }

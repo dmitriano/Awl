@@ -15,19 +15,24 @@ namespace awl
     //so, it is 15 decimal digits.
     //The result of right - shifting a negative number in C++ is implementation - defined.
 
-    //Do not use this class, if you worry about an extra 8 bytes used by the exponent :)
+    //Do not use this class, if you worry about an extra 8 bytes used by the exponent or something else :)
     //Consider using boost/multiprecision or decNumber Library, for example, or use std::decimal in GCC.
     class decimal
     {
     public:
 
         constexpr decimal(int64_t mantissa, uint8_t digits) : 
-            m_man(mantissa), m_denom(calc_denom(digits))
+            m_denom(calc_denom(digits)), m_man(mantissa)
         {
-            check_digits(digits);
         }
 
-        constexpr decimal(uint8_t digits) : decimal(0, digits)
+        //template <class Float> requires std::is_floating_point_v<Float>
+        constexpr decimal(double val, uint8_t digits) :
+            m_denom(calc_denom(digits)), m_man(static_cast<int64_t>(val * m_denom))
+        {
+        }
+
+        explicit constexpr decimal(uint8_t digits) : decimal(static_cast<int64_t>(0), digits)
         {
         }
 
@@ -36,7 +41,7 @@ namespace awl
         }
 
         template <class C>
-        decimal(std::basic_string_view<C> text)
+        explicit decimal(std::basic_string_view<C> text)
         {
             *this = from_string(text);
         }
@@ -47,8 +52,10 @@ namespace awl
             return static_cast<Float>(static_cast<Float>(m_man) / m_denom);
         }
 
-        template <class C>
-        static constexpr decimal from_string(std::basic_string_view<C> text);
+        constexpr operator double() const
+        {
+            return cast<double>();
+        }
 
         constexpr uint8_t digits() const
         {
@@ -144,15 +151,38 @@ namespace awl
             return decimal(a.m_man - b.m_man, calc_digits(a.m_denom));
         }
 
-        //decimal operator / (const decimal& other) const
-        //{
-        //    const double a = other.cast<double>();
-        //    const double b = cast<double>();
+        decimal& operator += (const decimal& other)
+        {
+            *this = *this + other;
 
-        //    const double result = a / b;
+            return *this;
+        }
 
-        //    return decimal();
-        //}
+        decimal& operator -= (const decimal& other)
+        {
+            *this = *this - other;
+
+            return *this;
+        }
+
+        double operator * (const decimal& other) const
+        {
+            const double a = other.cast<double>();
+            const double b = cast<double>();
+
+            return a * b;
+        }
+
+        double operator / (const decimal& other) const
+        {
+            const double a = other.cast<double>();
+            const double b = cast<double>();
+
+            return b / a;
+        }
+
+        template <class C>
+        static constexpr decimal from_string(std::basic_string_view<C> text);
 
     private:
 
@@ -195,6 +225,8 @@ namespace awl
 
         static constexpr int64_t calc_denom(uint8_t digits)
         {
+            check_digits(digits);
+
             int64_t denom = 1;
 
             for (uint8_t i = 0; i < digits; ++i)
@@ -259,8 +291,8 @@ namespace awl
             }
         }
 
-        int64_t m_man;
         int64_t m_denom;
+        int64_t m_man;
 
         template <class C>
         friend std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal d);
