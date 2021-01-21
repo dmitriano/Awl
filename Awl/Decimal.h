@@ -328,6 +328,11 @@ namespace awl
 
         const int64_t denom = calc_denom(digits);
 
+        if (int_part < 0)
+        {
+            fractional_part = -fractional_part;
+        }
+
         int_part *= denom;
 
         return decimal(int_part + fractional_part, digits);
@@ -336,9 +341,14 @@ namespace awl
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal d)
     {
+        if (d.m_man < 0)
+        {
+            out << '-';
+        }
+        
         int64_t denom = d.calc_denom(decimal::maxDigits);
 
-        int64_t man = d.m_man;
+        int64_t man = std::abs(d.m_man);
 
         bool started = false;
 
@@ -431,21 +441,44 @@ namespace awl
             }
         };
 
-        for (auto i = text.begin(); i != text.end(); ++i)
+        auto i = text.begin();
+
+        bool positive = true;
+
+        if (i != text.end())
         {
-            C symbol = *i;
-
-            if (point_terminator && symbol == '.')
+            if (point_terminator)
             {
-                return std::make_tuple(i + 1, digit_count);
+                if (*i == '+' || *i == '-')
+                {
+                    positive = *i == '+';
+
+                    ++i;
+                }
             }
+            
+            for (; i != text.end(); ++i)
+            {
+                C symbol = *i;
 
-            const int64_t digit = symbol_to_digit(symbol);
+                if (point_terminator && symbol == '.')
+                {
+                    i = i + 1;
+                    break;
+                }
 
-            append(digit);
+                const int64_t digit = symbol_to_digit(symbol);
+
+                append(digit);
+            }
         }
 
-        return std::make_tuple(text.end(), digit_count);
+        if (!positive)
+        {
+            val = -val;
+        }
+
+        return std::make_tuple(i, digit_count);
     }
 
     inline awl::decimal zero;
