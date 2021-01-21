@@ -34,7 +34,7 @@ namespace awl
             normalize();
         }
 
-        constexpr decimal() : decimal(static_cast<int64_t>(0), 0)
+        constexpr decimal() : m_denom(1), m_man(0)
         {
         }
 
