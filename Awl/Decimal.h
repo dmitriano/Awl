@@ -187,25 +187,9 @@ namespace awl
 
     private:
 
-        template <class C, class Int>
-        static constexpr typename std::basic_string_view<C>::const_iterator parse_int(std::basic_string_view<C> text, bool point_terminator, Int& val)
-        {
-            val = 0;
-
-            for (auto i = text.begin(); i != text.end(); ++i)
-            {
-                C symbol = *i;
-
-                if (point_terminator && symbol == '.')
-                {
-                    return i + 1;
-                }
-
-                val = val * 10 + symbol_to_digit(symbol);
-            }
-
-            return text.end();
-        }
+        template <class C>
+        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t>
+            parse_int(std::basic_string_view<C> text, bool point_terminator, int64_t& val);
 
         template <class C>
         static constexpr int64_t symbol_to_digit(C symbol)
@@ -304,23 +288,19 @@ namespace awl
     {
         int64_t int_part;
 
-        auto i = parse_int(text, true, int_part);
-
-        const auto fractional_i = i;
+        auto [i, int_digits] = parse_int(text, true, int_part);
 
         //MSVC 2019 can't construct it from the iterators yet, it is C++20 feature.
         //std::basic_string_view<C> fractional_text(fractional_i, text.cend());
-        std::basic_string_view<C> fractional_text(text.data() + (fractional_i - text.begin()), text.end() - fractional_i);
+        std::basic_string_view<C> fractional_text(text.data() + (i - text.begin()), text.end() - i);
 
         int64_t fractional_part;
 
-        i = parse_int(fractional_text, false, fractional_part);
+        auto [fractional_i, digits] = parse_int(fractional_text, false, fractional_part);
 
-        assert(i == fractional_text.end());
+        assert(fractional_i == fractional_text.end());
 
-        const uint8_t digits = static_cast<uint8_t>(fractional_text.length());
-
-        check_digits(digits);
+        check_digits(int_digits + digits);
 
         const int64_t denom = calc_denom(digits);
 
@@ -375,6 +355,73 @@ namespace awl
         while (denom != 0);
 
         return out;
+    }
+
+    template <class C>
+    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t>
+        decimal::parse_int(std::basic_string_view<C> text, bool point_terminator, int64_t& val)
+    {
+        uint8_t digit_count = 0;
+
+        uint8_t zero_count = 0;
+
+        val = 0;
+
+        auto do_append = [&digit_count, &val](int64_t digit)
+        {
+            val = val * 10 + digit;
+
+            ++digit_count;
+        };
+
+        auto append = [&zero_count, &val, point_terminator, &do_append](int64_t digit)
+        {
+            if (point_terminator)
+            {
+                //Leading zeros are ignored when val is zero.
+                if (digit != 0 || val != 0)
+                {
+                    do_append(digit);
+                }
+            }
+            else
+            {
+                //Ignore trailing zeroz after decimal point.
+                if (digit == 0)
+                {
+                    //accumulate leading zeros
+                    ++zero_count;
+                }
+                else
+                {
+                    //flush accumulated zeros
+                    for (uint8_t i = 0; i < zero_count; ++i)
+                    {
+                        do_append(0);
+                    }
+
+                    zero_count = 0;
+
+                    do_append(digit);
+                }
+            }
+        };
+
+        for (auto i = text.begin(); i != text.end(); ++i)
+        {
+            C symbol = *i;
+
+            if (point_terminator && symbol == '.')
+            {
+                return std::make_tuple(i + 1, digit_count);
+            }
+
+            const int64_t digit = symbol_to_digit(symbol);
+
+            append(digit);
+        }
+
+        return std::make_tuple(text.end(), digit_count);
     }
 
     inline awl::decimal zero;

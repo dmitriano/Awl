@@ -59,6 +59,12 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion("123.456789"sv);
     TestStringConversion(L"123.456789"sv);
 
+    TestStringConversion("000123.456789"sv, "123.456789"sv);
+    TestStringConversion(L"000123.456789"sv, L"123.456789"sv);
+
+    TestStringConversion("0123.456789"sv, "123.456789"sv);
+    TestStringConversion(L"0123.456789"sv, L"123.456789"sv);
+
     TestStringConversion("0.456789"sv);
     TestStringConversion(L"0.456789"sv);
 
@@ -68,8 +74,8 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion("0.001"sv);
     TestStringConversion(L"0.001"sv);
 
-    TestStringConversion("0.00100"sv);
-    TestStringConversion(L"0.00100"sv);
+    TestStringConversion("0.00100"sv, "0.001"sv);
+    TestStringConversion(L"0.00100"sv, L"0.001"sv);
 
     TestStringConversion(".456789"sv, "0.456789"sv);
     TestStringConversion(L".456789"sv, L"0.456789"sv);
