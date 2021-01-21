@@ -24,12 +24,14 @@ namespace awl
         constexpr decimal(int64_t mantissa, uint8_t digits) : 
             m_denom(calc_denom(digits)), m_man(mantissa)
         {
+            normalize();
         }
 
         //template <class Float> requires std::is_floating_point_v<Float>
         constexpr decimal(double val, uint8_t digits) :
             m_denom(calc_denom(digits)), m_man(static_cast<int64_t>(val * m_denom))
         {
+            normalize();
         }
 
         constexpr decimal() : decimal(static_cast<int64_t>(0), 0)
@@ -94,6 +96,28 @@ namespace awl
                     m_man /= 10;
                     m_denom /= 10;
                 }
+            }
+        }
+
+        //Removes traling zeros.
+        constexpr void normalize()
+        {
+            while (m_man != 0 && m_denom != 1)
+            {
+                const int64_t remainder = m_man % 10;
+
+                if (remainder != 0)
+                {
+                    break;
+                }
+
+                m_man /= 10;
+                m_denom /= 10;
+            }
+
+            if (m_man == 0)
+            {
+                m_denom = 1;
             }
         }
 
