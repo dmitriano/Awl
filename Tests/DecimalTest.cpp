@@ -81,8 +81,17 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion(L".456789"sv, L"0.456789"sv);
 
     //18 is OK.
-    TestStringConversion("0.123456789123456789"sv, "0.123456789123456789"sv);
-    TestStringConversion(L"0.123456789123456789"sv, L"0.123456789123456789"sv);
+    TestStringConversion("0.123456789123456789"sv);
+    TestStringConversion(L"0.123456789123456789"sv);
+
+    TestStringConversion("1.12345678912345678"sv);
+    TestStringConversion(L"1.12345678912345678"sv);
+
+    TestStringConversion("12.1234567891234567"sv);
+    TestStringConversion(L"12.1234567891234567"sv);
+
+    TestStringConversion("121234567891234567"sv);
+    TestStringConversion(L"121234567891234567"sv);
 }
 
 AWT_TEST(DecimalLimits)
@@ -92,6 +101,15 @@ AWT_TEST(DecimalLimits)
     //19 is wrong
     CheckTrows("0.1234567891234567891"sv);
     CheckTrows(L"0.1234567891234567891"sv);
+
+    CheckTrows("1.123456789123456789"sv);
+    CheckTrows(L"1.123456789123456789"sv);
+
+    CheckTrows("12.12345678912345678"sv);
+    CheckTrows(L"12.12345678912345678"sv);
+
+    CheckTrows("1212345678912345678"sv);
+    CheckTrows(L"1212345678912345678"sv);
 }
 
 AWT_TEST(DecimalRescale)
@@ -132,7 +150,7 @@ AWT_TEST(DecimalRescale)
     }
 }
 
-AWT_TEST(DecimalOperator)
+AWT_TEST(DecimalCompare)
 {
     AWT_UNUSED_CONTEXT;
 
