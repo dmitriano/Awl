@@ -55,6 +55,11 @@ namespace awl
             return cast<double>();
         }
 
+        constexpr int64_t mantissa() const
+        {
+            return m_man;
+        }
+        
         constexpr uint8_t digits() const
         {
             return calc_digits(m_denom);
