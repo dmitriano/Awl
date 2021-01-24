@@ -59,6 +59,11 @@ namespace awl
         {
             return m_man;
         }
+
+        void set_mantissa(int64_t val)
+        {
+            m_man = val;
+        }
         
         constexpr uint8_t digits() const
         {
