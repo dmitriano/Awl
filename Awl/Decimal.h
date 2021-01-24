@@ -211,32 +211,54 @@ namespace awl
             return *this;
         }
 
-        double operator * (const decimal& other) const
+        decimal operator + (double val) const
         {
-            const double a = other.cast<double>();
+            return *this + make_other(val);
+        }
+
+        decimal operator - (double val) const
+        {
+            return *this - make_other(val);
+        }
+
+        decimal& operator += (double val)
+        {
+            *this += make_other(val);
+
+            return *this;
+        }
+
+        decimal& operator -= (double val)
+        {
+            *this -= make_other(val);
+
+            return *this;
+        }
+
+        double operator * (double a) const
+        {
             const double b = cast<double>();
 
             return a * b;
         }
 
-        double operator / (const decimal& other) const
+        double operator / (double a) const
         {
-            const double a = other.cast<double>();
             const double b = cast<double>();
 
             return b / a;
         }
 
-        decimal& operator *= (const decimal& other)
+        decimal& operator *= (double a)
         {
-            *this = make_other(*this * other);
+            *this = make_other(*this * a);
 
             return *this;
         }
 
-        decimal& operator /= (const decimal& other)
+        decimal& operator /= (double a)
         {
-            *this = make_other(*this / other);
+            *this = make_other(*this / a);
 
             return *this;
         }
@@ -269,7 +291,7 @@ namespace awl
         }
 
         template <class Float>
-        constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_other(Float val)
+        constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_other(Float val) const
         {
             decimal other(digits());
 
