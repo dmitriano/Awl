@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <limits>
 
 #include "Awl/Exception.h"
 
@@ -21,20 +22,18 @@ namespace awl
     {
     public:
 
-        constexpr decimal(int64_t mantissa, uint8_t digits) : 
-            m_denom(calc_denom(digits)), m_man(mantissa)
-        {
-            normalize();
-        }
-
-        //template <class Float> requires std::is_floating_point_v<Float>
-        constexpr decimal(double val, uint8_t digits) :
-            m_denom(calc_denom(digits)), m_man(static_cast<int64_t>(val * m_denom))
-        {
-            normalize();
-        }
-
         constexpr decimal() : m_denom(1), m_man(0)
+        {
+        }
+
+        explicit constexpr decimal(uint8_t digits) :
+            m_denom(calc_denom(digits)), m_man(0)
+        {
+        }
+
+        //We do not normalize it in the constructor.
+        constexpr decimal(int64_t mantissa, uint8_t digits) :
+            m_denom(calc_denom(digits)), m_man(mantissa)
         {
         }
 
@@ -45,11 +44,12 @@ namespace awl
         }
             
         template <class Float>
-        constexpr Float cast() const
+        constexpr std::enable_if_t<std::is_arithmetic_v<Float>, Float> cast() const
         {
             return static_cast<Float>(static_cast<Float>(m_man) / m_denom);
         }
 
+        //The comparison with arithmetic types is performed via conversion to double.
         constexpr operator double() const
         {
             return cast<double>();
@@ -126,14 +126,30 @@ namespace awl
             }
         }
 
+        decimal& operator = (const decimal& other) = default;
+
+        template <class Float>
+        constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
+        {
+            //decimal temp(static_cast<int64_t>(val), 0);
+
+            //temp.normalize();
+
+            //check_digits(calc_man_digits(temp.mantissa()) + digits());
+            
+            m_man = static_cast<int64_t>(val * m_denom);
+
+            return *this;
+        }
+
+        //auto operator <=> (const decimal& other) const
+        //{
+        //    return other.as_normalized_tie() <=> as_normalized_tie();
+        //}
+
         bool operator == (const decimal& other) const
         {
-            decimal a = *this;
-            decimal b = other;
-
-            align(a, b);
-
-            return a.m_man == b.m_man;
+            return other.as_normalized_tie() == as_normalized_tie();
         }
 
         bool operator != (const decimal& other) const
@@ -143,22 +159,22 @@ namespace awl
 
         bool operator < (const decimal& other) const
         {
-            decimal a = *this;
-            decimal b = other;
-
-            align(a, b);
-
-            return a.m_man < b.m_man;
+            return as_normalized_tie() < other.as_normalized_tie();
         }
 
         bool operator > (const decimal& other) const
         {
-            decimal a = *this;
-            decimal b = other;
+            return as_normalized_tie() > other.as_normalized_tie();
+        }
 
-            align(a, b);
+        bool operator <= (const decimal& other) const
+        {
+            return as_normalized_tie() <= other.as_normalized_tie();
+        }
 
-            return a.m_man > b.m_man;
+        bool operator >= (const decimal& other) const
+        {
+            return as_normalized_tie() >= other.as_normalized_tie();
         }
 
         decimal operator + (const decimal& other) const
@@ -211,10 +227,56 @@ namespace awl
             return b / a;
         }
 
+        decimal& operator *= (const decimal& other)
+        {
+            *this = make_other(*this * other);
+
+            return *this;
+        }
+
+        decimal& operator /= (const decimal& other)
+        {
+            *this = make_other(*this / other);
+
+            return *this;
+        }
+
         template <class C>
         static constexpr decimal from_string(std::basic_string_view<C> text);
 
     private:
+
+        constexpr std::tuple<const int64_t&, const int64_t&> as_tie() const
+        {
+            return std::tie(m_denom, m_man);
+        }
+
+        constexpr std::tuple<int64_t&, int64_t&> as_tie()
+        {
+            return std::tie(m_denom, m_man);
+        }
+
+        constexpr awl::decimal as_normalized() const
+        {
+            awl::decimal temp = *this;
+            temp.normalize();
+            return temp;
+        }
+
+        constexpr std::tuple<int64_t, int64_t> as_normalized_tie() const
+        {
+            return as_normalized().as_tie();
+        }
+
+        template <class Float>
+        constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_other(Float val)
+        {
+            decimal other(digits());
+
+            other = val;
+
+            return other;
+        }
 
         template <class C>
         static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t>
@@ -267,9 +329,9 @@ namespace awl
         }
 
         //How many digits in the mantissa, "123.45" => 5, while denom is 100.
-        static constexpr int64_t calc_man_digits(int64_t man)
+        static constexpr uint8_t calc_man_digits(int64_t man)
         {
-            int64_t digits = 0;
+            uint8_t digits = 0;
 
             while (man != 0)
             {
@@ -340,6 +402,7 @@ namespace awl
 
         int_part *= denom;
 
+        //It should be normalized, because we trimmed zeros.
         return decimal(int_part + fractional_part, digits);
     }
 
@@ -486,7 +549,48 @@ namespace awl
         return std::make_tuple(i, digit_count);
     }
 
-    inline awl::decimal zero;
-    
-    inline awl::decimal nan(std::numeric_limits<int64_t>::max(), 0);
+    template <class Float>
+    constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_decimal(Float val, uint8_t digits)
+    {
+        decimal d(digits);
+
+        d = val;
+
+        return d;
+    }
+        
+    inline constexpr awl::decimal zero;
+
+    constexpr awl::decimal rescale(const awl::decimal& d, uint8_t digits)
+    {
+        awl::decimal temp = d;
+        temp.rescale(digits);
+        return temp;
+    }
+
+    constexpr awl::decimal normalize(const awl::decimal& d)
+    {
+        awl::decimal temp = d;
+        temp.normalize();
+        return temp;
+    }
+}
+
+namespace std
+{
+    template <>
+    class numeric_limits<awl::decimal>
+    {
+    public:
+        
+        static constexpr awl::decimal min() noexcept
+        {
+            return awl::decimal(numeric_limits<int64_t>::min(), 0);
+        }
+
+        static constexpr awl::decimal max() noexcept
+        {
+            return awl::decimal(numeric_limits<int64_t>::max(), 0);
+        }
+    };
 }

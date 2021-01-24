@@ -157,11 +157,15 @@ AWT_TEST(DecimalCompare)
     AWT_ASSERT(awl::decimal("123.456789"sv) == awl::decimal("123.456789000"sv));
     AWT_ASSERT(awl::decimal("0"sv) == awl::decimal("0"sv));
     AWT_ASSERT(awl::decimal("123"sv) == awl::decimal("123.000"sv));
+    AWT_ASSERT(awl::decimal("123"sv) <= awl::decimal("123.000"sv));
+    AWT_ASSERT(awl::decimal("123"sv) >= awl::decimal("123.000"sv));
 
     AWT_ASSERT(awl::decimal("1"sv) != awl::decimal("2.000"sv));
 
     AWT_ASSERT(awl::decimal("1"sv) < awl::decimal("2.000"sv));
     AWT_ASSERT(awl::decimal("2.000"sv) > awl::decimal("1.000"sv));
+    AWT_ASSERT(awl::decimal("1"sv) <= awl::decimal("2.000"sv));
+    AWT_ASSERT(awl::decimal("2.000"sv) >= awl::decimal("1.000"sv));
 }
 
 AWT_TEST(DecimalCast)
@@ -197,6 +201,23 @@ AWT_TEST(DecimalArithmeticOperators)
     }
 
     //Multiplication and Division
-    AWT_ASSERT(awl::decimal(awl::decimal("2.0"sv) * awl::decimal("3.000"sv), 5) == awl::decimal("6"sv));
-    AWT_ASSERT(awl::decimal(awl::decimal("6.0"sv) / awl::decimal("2.000"sv), 5) == awl::decimal("3"sv));
+    AWT_ASSERT(awl::make_decimal(awl::decimal("2.0"sv) * awl::decimal("3.000"sv), 5) == awl::decimal("6"sv));
+    AWT_ASSERT(awl::make_decimal(awl::decimal("6.0"sv) / awl::decimal("2.000"sv), 5) == awl::decimal("3"sv));
+}
+
+AWT_TEST(DecimalMinMax)
+{
+    AWT_UNUSED_CONTEXT;
+
+    awl::decimal max = std::numeric_limits<awl::decimal>::max();
+    awl::decimal min = std::numeric_limits<awl::decimal>::min();
+
+    AWT_ASSERT(max == max);
+    AWT_ASSERT(awl::decimal(std::numeric_limits<int64_t>::max() - 1, 0) < max);
+    AWT_ASSERT(awl::zero < max);
+    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_digits()) < max);
+
+    AWT_ASSERT(min == min);
+    AWT_ASSERT(min < awl::make_decimal(std::numeric_limits<int64_t>::min() + 1, 0));
+    AWT_ASSERT(min < awl::zero);
 }
