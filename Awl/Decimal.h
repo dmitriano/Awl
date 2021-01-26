@@ -271,6 +271,26 @@ namespace awl
         template <class C>
         static constexpr decimal from_string(std::basic_string_view<C> text);
 
+        template <class C>
+        constexpr std::basic_string<C> to_string() const
+        {
+            std::basic_ostringstream<C> out;
+
+            out << *this;
+
+            return out.str();
+        }
+
+        std::string to_astring() const
+        {
+            return to_string<char>();
+        }
+
+        std::wstring to_wstring() const
+        {
+            return to_string<wchar_t>();
+        }
+
         constexpr decimal as_rescaled(uint8_t digits) const
         {
             awl::decimal temp = *this;

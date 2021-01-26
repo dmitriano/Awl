@@ -41,15 +41,6 @@ namespace
         {
         }
     }
-
-    std::string to_string(awl::decimal d)
-    {
-        std::ostringstream out;
-
-        out << d;
-
-        return out.str();
-    }
 }
 
 AWT_TEST(DecimalStringConversion)
@@ -120,24 +111,24 @@ AWT_TEST(DecimalRescale)
 
     d.rescale(7);
     
-    AWT_ASSERT(to_string(d) == "123.4567800");
+    AWT_ASSERT(d.to_astring() == "123.4567800");
 
     d.rescale(3);
 
-    AWT_ASSERT(to_string(d) == "123.456");
+    AWT_ASSERT(d.to_astring() == "123.456");
 
     d.rescale(0);
 
-    AWT_ASSERT(to_string(d) == "123");
+    AWT_ASSERT(d.to_astring() == "123");
 
     //15 + 3 == 18
     d.rescale(15);
 
-    AWT_ASSERT(to_string(d) == "123.000000000000000");
+    AWT_ASSERT(d.to_astring() == "123.000000000000000");
 
     d.rescale(0);
 
-    AWT_ASSERT(to_string(d) == "123");
+    AWT_ASSERT(d.to_astring() == "123");
 
     try
     {
