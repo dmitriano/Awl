@@ -164,22 +164,22 @@ namespace awl
 
         bool operator < (const decimal& other) const
         {
-            return as_normalized_tie() < other.as_normalized_tie();
+            return compare(*this, other, std::less<int64_t>());
         }
 
         bool operator > (const decimal& other) const
         {
-            return as_normalized_tie() > other.as_normalized_tie();
+            return compare(*this, other, std::greater<int64_t>());
         }
 
         bool operator <= (const decimal& other) const
         {
-            return as_normalized_tie() <= other.as_normalized_tie();
+            return compare(*this, other, std::less_equal<int64_t>());
         }
 
         bool operator >= (const decimal& other) const
         {
-            return as_normalized_tie() >= other.as_normalized_tie();
+            return compare(*this, other, std::greater_equal<int64_t>());
         }
 
         decimal operator + (const decimal& other) const
@@ -293,6 +293,92 @@ namespace awl
         constexpr std::tuple<int64_t, int64_t> as_normalized_tie() const
         {
             return as_normalized().as_tie();
+        }
+
+        template <class Comp>
+        static constexpr bool compare(const decimal& a, const decimal& b, Comp comp)
+        {
+            //Negating the minimal integer result in an overflow in C++, so we use it as NaN.
+            assert(a.m_man != std::numeric_limits<int64_t>::min() && b.m_man != std::numeric_limits<int64_t>::min());
+            
+            if (a.m_man < 0 && b.m_man < 0)
+            {
+                decimal temp_a = a;
+                temp_a.m_man = -temp_a.m_man;
+                
+                decimal temp_b = b;
+                temp_b.m_man = -temp_b.m_man;
+
+                return compare_positive(temp_b, temp_a, comp);
+            }
+
+            if (a.m_man >= 0 && b.m_man >= 0)
+            {
+                return compare_positive(a, b, comp);
+            }
+
+            return comp(a.m_man, b.m_man);
+        }
+
+        template <class Comp>
+        static constexpr bool compare_positive(const decimal& a, const decimal& b, Comp comp)
+        {
+            //We can't align decimals when we compare them, but we can iterate over their digits.
+            
+            //They can be {10, 3} < {10000, 3143} or {100000, -1} < {1, max_int}
+
+            auto [a_man_denom, a_pos] = a.hi_digit_pos();
+            auto [b_man_denom, b_pos] = b.hi_digit_pos();
+            
+            if (a_pos != b_pos)
+            {
+                return comp(a_pos, b_pos);
+            }
+
+            int64_t a_man = a.m_man;
+            int64_t b_man = b.m_man;
+
+            do
+            {
+                const int64_t a_digit = a_man / a_man_denom;
+                const int64_t b_digit = b_man / b_man_denom;
+
+                if (a_digit != b_digit)
+                {
+                    return comp(a_digit, b_digit);
+                }
+
+                a_man %= a_man_denom;
+                b_man %= b_man_denom;
+
+                a_man_denom /= 10;
+                b_man_denom /= 10;
+            }
+            while (a_man_denom != 0 && b_man_denom != 0);
+
+            assert(a_man == 0 || b_man == 0);
+            
+            return comp(a_man, b_man);
+        }
+
+        std::tuple<int64_t, int64_t> hi_digit_pos() const
+        {
+            int64_t denom = calc_denom(maxDigits);
+
+            do
+            {
+                const int64_t digit = m_man / denom;
+
+                if (digit != 0)
+                {
+                    return std::make_tuple(denom, static_cast<int64_t>(calc_digits(denom)) - static_cast<int64_t>(calc_digits(m_denom)));
+                }
+
+                denom /= 10;
+            }
+            while (denom != 0);
+
+            return std::make_tuple(0, 0);
         }
 
         template <class Float>
@@ -441,7 +527,7 @@ namespace awl
             out << '-';
         }
         
-        int64_t denom = d.calc_denom(decimal::maxDigits);
+        int64_t denom = decimal::calc_denom(decimal::maxDigits);
 
         int64_t man = std::abs(d.m_man);
 
@@ -612,12 +698,18 @@ namespace std
         
         static constexpr awl::decimal min() noexcept
         {
-            return awl::decimal(numeric_limits<int64_t>::min(), 0);
+            //Negating the minimal integer result in an overflow in C++, so we use it as NaN.
+            return awl::decimal(numeric_limits<int64_t>::min() + 1, 0);
         }
 
         static constexpr awl::decimal max() noexcept
         {
             return awl::decimal(numeric_limits<int64_t>::max(), 0);
+        }
+
+        static constexpr awl::decimal quiet_NaN() noexcept
+        {
+            return awl::decimal(numeric_limits<int64_t>::min(), 0);
         }
     };
 }

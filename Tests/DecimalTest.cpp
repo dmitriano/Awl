@@ -171,6 +171,12 @@ AWT_TEST(DecimalCompare)
     AWT_ASSERT(awl::decimal("2.000"sv) > 1.000);
     AWT_ASSERT(awl::decimal("1"sv) <= 2.000);
     AWT_ASSERT(awl::decimal("2.000"sv) >= 1.000);
+
+    //From BZRX/USDT order data
+    AWT_ASSERT(awl::decimal("0.2678"sv) < awl::decimal("0.3000"sv));
+    AWT_ASSERT(awl::decimal("0.2678"sv) < awl::decimal("0.3400"sv));
+    AWT_ASSERT(awl::decimal("0.3000"sv) < awl::decimal("0.3143"sv));
+    AWT_ASSERT(awl::decimal("0.3143"sv) < awl::decimal("0.3400"sv));
 }
 
 AWT_TEST(DecimalCast)
@@ -225,12 +231,19 @@ AWT_TEST(DecimalMinMax)
     awl::decimal max = std::numeric_limits<awl::decimal>::max();
     awl::decimal min = std::numeric_limits<awl::decimal>::min();
 
+    AWT_ASSERT(min < max);
+    AWT_ASSERT(max > min);
+
     AWT_ASSERT(max == max);
-    AWT_ASSERT(awl::decimal(std::numeric_limits<int64_t>::max() - 1, 0) < max);
+    AWT_ASSERT(max - awl::decimal(1, 0) < max);
+    AWT_ASSERT(awl::decimal(1, 18) < max);
+    AWT_ASSERT(awl::decimal(-1, 18) < max);
     AWT_ASSERT(awl::zero < max);
     AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_digits()) < max);
 
     AWT_ASSERT(min == min);
-    AWT_ASSERT(min < awl::make_decimal(std::numeric_limits<int64_t>::min() + 1, 0));
+    AWT_ASSERT(min < min + awl::decimal(1, 0));
     AWT_ASSERT(min < awl::zero);
+    AWT_ASSERT(awl::decimal(1, 18) > min);
+    AWT_ASSERT(awl::decimal(-1, 18) > min);
 }
