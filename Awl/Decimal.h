@@ -38,7 +38,7 @@ namespace awl
         }
 
         template <class C>
-        explicit decimal(std::basic_string_view<C> text)
+        constexpr explicit decimal(std::basic_string_view<C> text)
         {
             *this = from_string(text);
         }
@@ -271,6 +271,25 @@ namespace awl
         template <class C>
         static constexpr decimal from_string(std::basic_string_view<C> text);
 
+        constexpr decimal as_rescaled(uint8_t digits) const
+        {
+            awl::decimal temp = *this;
+            temp.rescale(digits);
+            return temp;
+        }
+
+        constexpr decimal as_normalized() const
+        {
+            awl::decimal temp = *this;
+            temp.normalize();
+            return temp;
+        }
+
+        constexpr int64_t rescaled_mantissa(uint8_t digits) const
+        {
+            return as_rescaled(digits).mantissa();
+        }
+
     private:
 
         constexpr std::tuple<const int64_t&, const int64_t&> as_tie() const
@@ -281,13 +300,6 @@ namespace awl
         constexpr std::tuple<int64_t&, int64_t&> as_tie()
         {
             return std::tie(m_denom, m_man);
-        }
-
-        constexpr awl::decimal as_normalized() const
-        {
-            awl::decimal temp = *this;
-            temp.normalize();
-            return temp;
         }
 
         constexpr std::tuple<int64_t, int64_t> as_normalized_tie() const
@@ -679,20 +691,6 @@ namespace awl
     }
         
     inline constexpr awl::decimal zero;
-
-    constexpr awl::decimal rescale(const awl::decimal& d, uint8_t digits)
-    {
-        awl::decimal temp = d;
-        temp.rescale(digits);
-        return temp;
-    }
-
-    constexpr awl::decimal normalize(const awl::decimal& d)
-    {
-        awl::decimal temp = d;
-        temp.normalize();
-        return temp;
-    }
 }
 
 namespace std
