@@ -323,7 +323,13 @@ namespace awl
         template <class Comp>
         static constexpr bool compare_positive(const decimal& a, const decimal& b, Comp comp)
         {
-            //We can't align decimals when we compare them, but we can iterate over their digits.
+            //We can't align decimals when we compare them, but we can iterate over their digits,
+            //the only exception is zero.
+
+            if (a.m_man == 0 || b.m_man == 0)
+            {
+                return comp(a.m_man, b.m_man);
+            }
             
             //They can be {10, 3} < {10000, 3143} or {100000, -1} < {1, max_int}
 
