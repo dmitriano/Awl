@@ -74,13 +74,13 @@ namespace awl
         {
             clear();
 
-            other.Notify(&INotifySetChanged<T>::OnClearing);
+            other.NotifyClearing();
             m_set = std::move(other.m_set);
             other.m_set.clear();
 
             for (const T & elem : *this)
             {
-                m_observable.Notify(&INotifySetChanged<T>::OnAdded, elem);
+                NotifyAdded(elem);
             }
         }
 
@@ -88,7 +88,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                m_observable.Notify(&INotifySetChanged<T>::OnClearing);
+                NotifyClearing();
             }
         }
 
@@ -281,8 +281,13 @@ namespace awl
         {
             if (result.second)
             {
-                m_observable.Notify(&INotifySetChanged<T>::OnAdded, *result.first);
+                NotifyAdded(*result.first);
             }
+        }
+
+        void NotifyAdded(const T& val)
+        {
+            m_observable.Notify(&INotifySetChanged<T>::OnAdded, val);
         }
 
         void NotifyRemoving(const T & val)
@@ -293,6 +298,11 @@ namespace awl
         void NotifyRemoving(const iterator& i)
         {
             NotifyRemoving(*i);
+        }
+
+        void NotifyClearing()
+        {
+            m_observable.Notify(&INotifySetChanged<T>::OnClearing);
         }
 
         InternalSet m_set;
