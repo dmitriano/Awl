@@ -430,8 +430,8 @@ namespace awl
         }
 
         template <class C>
-        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t>
-            parse_int(std::basic_string_view<C> text, bool point_terminator, int64_t& val);
+        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, int64_t>
+            parse_int(std::basic_string_view<C> text, bool point_terminator);
 
         template <class C>
         static constexpr int64_t symbol_to_digit(C symbol)
@@ -528,17 +528,13 @@ namespace awl
     template <class C>
     constexpr decimal decimal::from_string(std::basic_string_view<C> text)
     {
-        int64_t int_part;
-
-        auto [i, int_digits] = parse_int(text, true, int_part);
+        auto [i, int_digits, int_part] = parse_int(text, true);
 
         //MSVC 2019 can't construct it from the iterators yet, it is C++20 feature.
         //std::basic_string_view<C> fractional_text(fractional_i, text.cend());
         std::basic_string_view<C> fractional_text(text.data() + (i - text.begin()), text.end() - i);
 
-        int64_t fractional_part;
-
-        auto [fractional_i, digits] = parse_int(fractional_text, false, fractional_part);
+        auto [fractional_i, digits, fractional_part] = parse_int(fractional_text, false);
 
         assert(fractional_i == fractional_text.end());
 
@@ -611,14 +607,14 @@ namespace awl
     }
 
     template <class C>
-    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t>
-        decimal::parse_int(std::basic_string_view<C> text, bool point_terminator, int64_t& val)
+    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, int64_t>
+        decimal::parse_int(std::basic_string_view<C> text, bool point_terminator)
     {
         uint8_t digit_count = 0;
 
         uint8_t zero_count = 0;
 
-        val = 0;
+        int64_t val = 0;
 
         auto do_append = [&digit_count, &val](int64_t digit)
         {
@@ -697,7 +693,7 @@ namespace awl
             val = -val;
         }
 
-        return std::make_tuple(i, digit_count);
+        return std::make_tuple(i, digit_count, val);
     }
 
     template <class Float>
