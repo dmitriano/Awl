@@ -48,6 +48,9 @@ namespace awl
                 return true;
             }
 
+            //Reset the date after unsuccessful read.
+            m_val = {};
+
             bool master_success;
             std::tie(m_s, master_success) = LoadFromFile(file_name);
 
