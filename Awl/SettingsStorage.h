@@ -10,7 +10,7 @@
 
 namespace awl
 {
-    template <class T, class V, class Logger>
+    template <class T, class V, class Logger, class Format>
     class SettingsStorage
     {
     private:
@@ -50,11 +50,9 @@ namespace awl
                     m_logger.warning("Some data at the end of the settings file remained unread.");
                 }
             }
-            catch (const io::NativeException& e)
+            catch (const io::NativeException&)
             {
-                //str().c_str() converts to QString. TO DO: transparent conversion.
-                //m_logger.warning((format() << _T("Can't open settings file '") << file_name << _T("'.")).str().c_str());
-                m_logger.warning("Can't open settings file");
+                m_logger.warning((Format() << _T("Can't open settings file '") << file_name << _T("'.")));
             }
             catch (const io::CorruptionException&)
             {
