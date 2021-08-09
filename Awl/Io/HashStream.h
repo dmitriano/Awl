@@ -14,6 +14,7 @@ namespace awl
     {
         constexpr size_t defaultBlockSize = 1024 * 64;
         
+        //TO DO: Make stream type a template parameter.
         template <class Hash>
         class HashInputStream : public SequentialInputStream
         {
