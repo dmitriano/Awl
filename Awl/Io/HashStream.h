@@ -15,17 +15,17 @@ namespace awl
         constexpr size_t defaultBlockSize = 1024 * 64;
         
         //TO DO: Make stream type a template parameter.
-        template <class Hash>
+        template <class Hash, class UnderlyingStream = SequentialInputStream>
         class HashInputStream : public SequentialInputStream
         {
         public:
 
-            HashInputStream(SequentialInputStream & in, size_t block_size = defaultBlockSize, Hash hash = {}) : m_hash(hash), m_in(in), blockSize(block_size), m_i(m_block.end())
+            HashInputStream(UnderlyingStream& in, size_t block_size = defaultBlockSize, Hash hash = {}) : m_hash(hash), m_in(in), blockSize(block_size), m_i(m_block.end())
             {
                 assert(blockSize > Hash::size());
             }
 
-            HashInputStream(SequentialInputStream & in, Hash hash) : HashInputStream(in, defaultBlockSize, hash)
+            HashInputStream(UnderlyingStream& in, Hash hash) : HashInputStream(in, defaultBlockSize, hash)
             {
             }
 
@@ -114,7 +114,7 @@ namespace awl
 
             const Hash m_hash;
             
-            SequentialInputStream & m_in;
+            UnderlyingStream& m_in;
             
             const size_t blockSize;
 
@@ -123,8 +123,8 @@ namespace awl
             std::vector<uint8_t>::iterator m_i;
         };
 
-        template <class Hash>
-        size_t HashInputStream<Hash>::Read(uint8_t * buffer, size_t count)
+        template <class Hash, class UnderlyingStream>
+        size_t HashInputStream<Hash, UnderlyingStream>::Read(uint8_t * buffer, size_t count)
         {
             size_t flushed_count = 0;
 
@@ -150,12 +150,12 @@ namespace awl
             return flushed_count;
         }
 
-        template <class Hash>
+        template <class Hash, class UnderlyingStream = SequentialOutputStream>
         class HashOutputStream : public SequentialOutputStream
         {
         public:
 
-            HashOutputStream(SequentialOutputStream & out, size_t block_size = defaultBlockSize, Hash hash = {}) : 
+            HashOutputStream(UnderlyingStream& out, size_t block_size = defaultBlockSize, Hash hash = {}) :
                 m_hash(hash), m_out(out), blockSize(block_size)
             {
                 assert(blockSize > Hash::size());
@@ -163,7 +163,7 @@ namespace awl
                 m_v.reserve(blockSize);
             }
 
-            HashOutputStream(SequentialOutputStream & out, Hash hash) : HashOutputStream(out, defaultBlockSize, hash)
+            HashOutputStream(UnderlyingStream& out, Hash hash) : HashOutputStream(out, defaultBlockSize, hash)
             {
             }
 
@@ -192,15 +192,15 @@ namespace awl
 
             Hash m_hash;
 
-            SequentialOutputStream & m_out;
+            UnderlyingStream& m_out;
 
             const size_t blockSize;
 
             std::vector<uint8_t> m_v;
         };
 
-        template <class Hash>
-        void HashOutputStream<Hash>::Write(const uint8_t * buffer, size_t count)
+        template <class Hash, class UnderlyingStream>
+        void HashOutputStream<Hash, UnderlyingStream>::Write(const uint8_t * buffer, size_t count)
         {
             assert(m_v.size() < blockSize - Hash::size());
 

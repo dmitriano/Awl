@@ -17,8 +17,11 @@ namespace awl
 
         using Hash = awl::crypto::Crc64;
 
-        using Reader = io::Reader<V, io::HashInputStream<Hash>>;
-        using Writer = io::Writer<V, io::HashOutputStream<Hash>>;
+        using HashInputStream = io::HashInputStream<Hash, io::UniqueStream>;
+        using HashOutputStream = io::HashOutputStream<Hash, io::UniqueStream>;
+        
+        using Reader = io::Reader<V, HashInputStream>;
+        using Writer = io::Writer<V, HashOutputStream>;
 
     public:
 
@@ -64,7 +67,7 @@ namespace awl
 
         bool ReadFromStream(io::UniqueStream& s)
         {
-            io::HashInputStream<Hash> in(s);
+            HashInputStream in(s);
 
             Reader ctx;
             ctx.ReadOldPrototypes(in);
@@ -79,7 +82,7 @@ namespace awl
             s.Seek(0);
 
             {
-                io::HashOutputStream<Hash> out(s);
+                HashOutputStream out(s);
 
                 Writer ctx;
 
