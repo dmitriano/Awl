@@ -1,6 +1,5 @@
 #pragma once
 
+#define NOMINMAX
 #include "windows.h"
 #undef GetMessage
-#undef min
-#undef max
