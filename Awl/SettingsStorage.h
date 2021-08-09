@@ -26,22 +26,82 @@ namespace awl
         {
         }
 
-        bool Load(const String& file_name)
+        bool Load(const String& file_name, const String& backup_name)
         {
-            bool success = false;
-
-            try
+            bool backup_success;
+            std::tie(m_backup, backup_success) = LoadFromFile(backup_name);
+            
+            if (backup_success)
             {
                 m_s = io::CreateUniqueFile(file_name);
 
-                io::HashInputStream<Hash> in(m_s);
+                WriteToStream(m_s);
+            }
 
-                Reader ctx;
-                ctx.ReadOldPrototypes(in);
+            ClearBackup();
 
-                ctx.ReadV(in, m_val);
+            if (backup_success)
+            {
+                return true;
+            }
 
-                if (in.End())
+            bool master_success;
+            std::tie(m_s, master_success) = LoadFromFile(file_name);
+
+            return master_success;
+        }
+
+        void Save()
+        {
+            WriteToStream(m_backup);
+
+            WriteToStream(m_s);
+
+            ClearBackup();
+        }
+
+    private:
+
+        bool ReadFromStream(io::UniqueStream& s)
+        {
+            io::HashInputStream<Hash> in(s);
+
+            Reader ctx;
+            ctx.ReadOldPrototypes(in);
+
+            ctx.ReadV(in, m_val);
+
+            return in.End();
+        }
+
+        void WriteToStream(io::UniqueStream& s)
+        {
+            s.Seek(0);
+
+            {
+                io::HashOutputStream<Hash> out(s);
+
+                Writer ctx;
+
+                ctx.WriteNewPrototypes(out);
+                ctx.WriteV(out, m_val);
+            }
+
+            s.Truncate();
+            s.Flush();
+        }
+
+        std::tuple<io::UniqueStream, bool> LoadFromFile(const String& file_name)
+        {
+            bool success = false;
+
+            io::UniqueStream s;
+            
+            try
+            {
+                s = io::CreateUniqueFile(file_name);
+
+                if (ReadFromStream(s))
                 {
                     success = true;
                 }
@@ -50,49 +110,40 @@ namespace awl
                     m_logger.warning("Some data at the end of the settings file remained unread.");
                 }
             }
-            catch (const io::NativeException&)
+            catch (const io::NativeException& e)
             {
-                m_logger.warning((Format() << _T("Can't open settings file '") << file_name << _T("'.")));
+                m_logger.warning((Format() << _T("Can't open settings file '") << file_name << 
+                    _T("' Native error: ") << e.GetMessage()));
             }
             catch (const io::CorruptionException&)
             {
-                m_logger.warning("Corrupted settings file.");
+                m_logger.warning((Format() << _T("Corrupted settings file '") << file_name << _T("'.")));
             }
             catch (const io::EndOfFileException&)
             {
-                m_logger.warning("Corrupted settings file (probably truncated).");
+                m_logger.warning((Format() << _T("Unexpected end of settings file '") << file_name << _T("'.")));
             }
-            catch (const io::TypeMismatchException&)
+            catch (const io::TypeMismatchException& e)
             {
-                m_logger.warning("Type mismatch error in the settings file. Did you include all the types including those that were removed?");
+                m_logger.warning((Format() << _T("Type mismatch error ") << e.GetMessage() << _T(" in the settings file '") << file_name <<
+                    _T("' Did you include all the types including those that were removed ? .")));
             }
 
-            return success;
+            return std::make_tuple(std::move(s), success);
         }
 
-        void Save()
+        void ClearBackup()
         {
-            {
-                m_s.Seek(0);
-
-                io::HashOutputStream<Hash> out(m_s);
-
-                Writer ctx;
-
-                ctx.WriteNewPrototypes(out);
-                ctx.WriteV(out, m_val);
-            }
-
-            m_s.Truncate();
-            m_s.Flush();
+            m_backup.Seek(0);
+            m_backup.Truncate();
+            m_backup.Flush();
         }
-
-    private:
 
         Logger& m_logger;
         
         T& m_val;
         
         io::UniqueStream m_s;
+        io::UniqueStream m_backup;
     };
 }

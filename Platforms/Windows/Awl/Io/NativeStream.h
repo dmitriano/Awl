@@ -158,4 +158,32 @@ namespace awl::io
 
         return hFile;
     }
+
+    inline UniqueFileHandle OpenUniqueFile(const String& file_name)
+    {
+        //CREATEFILE2_EXTENDED_PARAMETERS extendedParams = { 0 };
+        //extendedParams.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);
+        //extendedParams.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+        //extendedParams.dwFileFlags = FILE_FLAG_SEQUENTIAL_SCAN;
+        //extendedParams.dwSecurityQosFlags = SECURITY_ANONYMOUS;
+        //extendedParams.lpSecurityAttributes = nullptr;
+        //extendedParams.hTemplateFile = nullptr;
+
+        HANDLE hFile = ::CreateFile2(
+            file_name.c_str(),
+            GENERIC_READ,
+            0, //FILE_SHARE_READ | FILE_SHARE_WRITE,
+            OPEN_EXISTING,
+            NULL //&extendedParams
+        );
+
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
+            DWORD dw_err = ::GetLastError();
+
+            throw IoError(format() << _T("Cannot open file ')" << file_name << "' for reading, error = " << dw_err));
+        }
+
+        return hFile;
+    }
 }
