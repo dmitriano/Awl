@@ -109,30 +109,30 @@ AWT_TEST(DecimalRescale)
 
     awl::decimal d("123.45678"sv);
 
-    d.rescale(7);
+    d = d.rescale(7);
     
     AWT_ASSERT(d.to_astring() == "123.4567800");
 
-    d.rescale(3);
+    d = d.rescale(3);
 
     AWT_ASSERT(d.to_astring() == "123.456");
 
-    d.rescale(0);
+    d = d.rescale(0);
 
     AWT_ASSERT(d.to_astring() == "123");
 
     //15 + 3 == 18
-    d.rescale(15);
+    d = d.rescale(15);
 
     AWT_ASSERT(d.to_astring() == "123.000000000000000");
 
-    d.rescale(0);
+    d = d.rescale(0);
 
     AWT_ASSERT(d.to_astring() == "123");
 
     try
     {
-        d.rescale(16);
+        d = d.rescale(16);
 
         AWT_FAILM("It did not throw.");
     }

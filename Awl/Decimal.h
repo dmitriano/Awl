@@ -80,73 +80,11 @@ namespace awl
             return m_denom;
         }
 
-        constexpr void rescale(uint8_t digits)
-        {
-            check_digits(digits);
-            
-            const int64_t my_digits = static_cast<int64_t>(calc_digits(m_denom));
-            
-            if (my_digits < digits)
-            {
-                //We add zeros.
-
-                auto diff = digits - my_digits;
-
-                check_digits(static_cast<uint8_t>(calc_man_digits(m_man) + diff));
-                    
-                for (auto i = 0; i < diff; ++i)
-                {
-                    m_man *= 10;
-                    m_denom *= 10;
-                }
-            }
-            else if (digits < my_digits)
-            {
-                //We loose some digits.
-
-                auto diff = my_digits - digits;
-
-                for (auto i = 0; i < diff; ++i)
-                {
-                    m_man /= 10;
-                    m_denom /= 10;
-                }
-            }
-        }
-
-        //Removes traling zeros.
-        constexpr void normalize()
-        {
-            while (m_man != 0 && m_denom != 1)
-            {
-                const int64_t remainder = m_man % 10;
-
-                if (remainder != 0)
-                {
-                    break;
-                }
-
-                m_man /= 10;
-                m_denom /= 10;
-            }
-
-            if (m_man == 0)
-            {
-                m_denom = 1;
-            }
-        }
-
         decimal& operator = (const decimal& other) = default;
 
         template <class Float>
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
         {
-            //decimal temp(static_cast<int64_t>(val), 0);
-
-            //temp.normalize();
-
-            //check_digits(calc_man_digits(temp.mantissa()) + digits());
-            
             m_man = static_cast<int64_t>(val * m_denom);
 
             return *this;
@@ -296,26 +234,82 @@ namespace awl
             return to_string<wchar_t>();
         }
 
-        constexpr decimal as_rescaled(uint8_t digits) const
+        constexpr decimal rescale(uint8_t digits) const
         {
             awl::decimal temp = *this;
-            temp.rescale(digits);
+            temp.rescale_self(digits);
             return temp;
         }
 
-        constexpr decimal as_normalized() const
+        constexpr decimal normalize() const
         {
             awl::decimal temp = *this;
-            temp.normalize();
+            temp.normalize_self();
             return temp;
         }
 
         constexpr int64_t rescaled_mantissa(uint8_t digits) const
         {
-            return as_rescaled(digits).mantissa();
+            return rescale(digits).mantissa();
         }
 
     private:
+
+        constexpr void rescale_self(uint8_t digits)
+        {
+            check_digits(digits);
+
+            const int64_t my_digits = static_cast<int64_t>(calc_digits(m_denom));
+
+            if (my_digits < digits)
+            {
+                //We add zeros.
+
+                auto diff = digits - my_digits;
+
+                check_digits(static_cast<uint8_t>(calc_man_digits(m_man) + diff));
+
+                for (auto i = 0; i < diff; ++i)
+                {
+                    m_man *= 10;
+                    m_denom *= 10;
+                }
+            }
+            else if (digits < my_digits)
+            {
+                //We loose some digits.
+
+                auto diff = my_digits - digits;
+
+                for (auto i = 0; i < diff; ++i)
+                {
+                    m_man /= 10;
+                    m_denom /= 10;
+                }
+            }
+        }
+
+        //Removes traling zeros.
+        constexpr void normalize_self()
+        {
+            while (m_man != 0 && m_denom != 1)
+            {
+                const int64_t remainder = m_man % 10;
+
+                if (remainder != 0)
+                {
+                    break;
+                }
+
+                m_man /= 10;
+                m_denom /= 10;
+            }
+
+            if (m_man == 0)
+            {
+                m_denom = 1;
+            }
+        }
 
         constexpr std::tuple<const int64_t&, const int64_t&> as_tie() const
         {
@@ -329,7 +323,7 @@ namespace awl
 
         constexpr std::tuple<int64_t, int64_t> as_normalized_tie() const
         {
-            return as_normalized().as_tie();
+            return normalize().as_tie();
         }
 
         template <class Comp>
@@ -515,11 +509,11 @@ namespace awl
         {
             if (a.m_denom > b.m_denom)
             {
-                b.rescale(calc_digits(a.m_denom));
+                b.rescale_self(calc_digits(a.m_denom));
             }
             else if (b.m_denom > a.m_denom)
             {
-                a.rescale(calc_digits(b.m_denom));
+                a.rescale_self(calc_digits(b.m_denom));
             }
         }
 
