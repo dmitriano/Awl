@@ -75,6 +75,11 @@ namespace awl
             return maxDigits;
         }
 
+        constexpr int64_t denominator() const
+        {
+            return m_denom;
+        }
+
         constexpr void rescale(uint8_t digits)
         {
             check_digits(digits);
