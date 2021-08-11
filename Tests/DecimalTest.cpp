@@ -85,6 +85,21 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion(L"121234567891234567"sv);
 }
 
+AWT_TEST(DecimalDoubleConversion)
+{
+    AWT_UNUSED_CONTEXT;
+
+    const double val = 10.128;
+
+    awl::decimal d(5);
+
+    d = val;
+
+    const awl::String text = d.to_string();
+
+    AWT_ASSERT(text == _T("10.12800"));
+}
+
 AWT_TEST(DecimalLimits)
 {
     AWT_UNUSED_CONTEXT;

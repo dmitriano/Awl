@@ -215,7 +215,7 @@ namespace awl
         static constexpr decimal from_string(std::basic_string_view<C> text);
 
         template <class C>
-        constexpr std::basic_string<C> to_string() const
+        constexpr std::basic_string<C> basic_to_string() const
         {
             std::basic_ostringstream<C> out;
 
@@ -224,14 +224,19 @@ namespace awl
             return out.str();
         }
 
+        std::basic_string<Char> to_string() const
+        {
+            return basic_to_string<Char>();
+        }
+
         std::string to_astring() const
         {
-            return to_string<char>();
+            return basic_to_string<char>();
         }
 
         std::wstring to_wstring() const
         {
-            return to_string<wchar_t>();
+            return basic_to_string<wchar_t>();
         }
 
         constexpr decimal rescale(uint8_t digits) const
