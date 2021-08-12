@@ -9,7 +9,12 @@ namespace awl
     {
     public:
 
-        basic_separator(C ch) : m_ch(ch)
+        basic_separator(C ch) : m_sep(1, ch)
+        {
+            m_sep += ' ';
+        }
+
+        basic_separator(std::basic_string<C> s) : m_sep(s)
         {
         }
 
@@ -23,14 +28,14 @@ namespace awl
             m_first = false;
         }
 
-        C content() const
+        const std::basic_string<C>& content()
         {
-            return m_ch;
+            return m_sep;
         }
 
     private:
 
-        C m_ch;
+        std::basic_string<C> m_sep;
         
         bool m_first = true;
     };
@@ -44,7 +49,7 @@ namespace awl
         }
         else
         {
-            out << sep.content() << ' ';
+            out << sep.content();
         }
         
         return out;

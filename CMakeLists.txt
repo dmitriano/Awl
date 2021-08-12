@@ -24,6 +24,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # using Visual Studio C++
   add_compile_options("/W4")
   add_definitions(-D_UNICODE)
+  add_definitions(-MP)
 endif()
 
 find_package (Threads)
