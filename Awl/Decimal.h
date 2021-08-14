@@ -379,19 +379,23 @@ namespace awl
 
             if (m_data.exp < digits)
             {
-                //the difference of two unsigned values is unsigned
-                const uint8_t diff = digits - exponent();
-
-                const uint64_t max_diff = helpers::max_man() / m_data.man;
-
-                const uint64_t denom = m_denoms[diff];
-                
-                if (denom > max_diff)
+                //Nothing to do if the mantissa is zero.
+                if (m_data.man != 0)
                 {
-                    throw std::logic_error("Decimal overflow.");
-                }
+                    //the difference of two unsigned values is unsigned
+                    const uint8_t diff = digits - exponent();
 
-                m_data.man *= denom;
+                    const uint64_t denom = m_denoms[diff];
+
+                    const uint64_t max_diff = helpers::max_man() / m_data.man;
+
+                    if (denom > max_diff)
+                    {
+                        throw std::logic_error("Decimal overflow.");
+                    }
+
+                    m_data.man *= denom;
+                }
             }
             else if (digits < m_data.exp)
             {
