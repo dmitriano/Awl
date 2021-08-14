@@ -16,15 +16,15 @@ AWL is a small cross-platform C++ library that includes:
 
 Feel free to use it or fork it, but keep in mind that version compatibility is not guaranteed and there is no warranty of any kind.
 
-Theoretically, the master branch should compile and work at least with MSVC 2017 and GCC 9 and above.
+Theoretically, the master branch should compile and work with C++20.
 
-Compiling on Windows with CMake and MSVC2017:
+Compiling on Windows with CMake and MSVC:
 
     cmake.exe ..\..\Awl -DCMAKE_GENERATOR_PLATFORM=x64
     set CL=/MP
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 
-Compiling on Linux with CMake and GCC 9:
+Compiling on Linux with CMake and GCC:
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     make -j2

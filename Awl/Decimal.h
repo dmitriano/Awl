@@ -7,6 +7,7 @@
 #include <cassert>
 #include <limits>
 #include <array>
+#include <bit>
 
 #include "Awl/Exception.h"
 
@@ -106,16 +107,18 @@ namespace awl
             *this = from_string(text);
         }
 
-        static decimal from_int(uint64_t val)
+        //The value of resulting uint64_t may be different with different compilers. But the value of Data structure
+        //should be the same when I convert it back from uint64_t. See Bit field.
+        static constexpr decimal from_int(uint64_t val)
         {
             decimal a;
-            a.m_data = *(reinterpret_cast<const Data*>(&val));
+            a.m_data = std::bit_cast<Data>(val);
             return a;
         }
 
-        int64_t to_int() const
+        constexpr int64_t to_int() const
         {
-            return *(reinterpret_cast<const int64_t*>(&m_data));
+            return std::bit_cast<int64_t>(m_data);
         }
 
         template <class Float>
