@@ -71,18 +71,30 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion(".456789"sv, "0.456789"sv);
     TestStringConversion(L".456789"sv, L"0.456789"sv);
 
-    //18 is OK.
-    TestStringConversion("0.123456789123456789"sv);
-    TestStringConversion(L"0.123456789123456789"sv);
+    //15 is OK.
+    TestStringConversion("0.123456789123456"sv);
+    TestStringConversion(L"0.123456789123456"sv);
 
-    TestStringConversion("1.12345678912345678"sv);
-    TestStringConversion(L"1.12345678912345678"sv);
+    TestStringConversion("1.123456789123456"sv);
+    TestStringConversion(L"1.123456789123456"sv);
 
-    TestStringConversion("12.1234567891234567"sv);
-    TestStringConversion(L"12.1234567891234567"sv);
+    TestStringConversion("12.123456789123456"sv);
+    TestStringConversion(L"12.123456789123456"sv);
 
-    TestStringConversion("121234567891234567"sv);
-    TestStringConversion(L"121234567891234567"sv);
+    try
+    {
+        //18 digits total
+        TestStringConversion("12.123456789123456"sv);
+
+        AWT_FAILM("It did not throw.");
+    }
+    catch (const std::exception&)
+    {
+    }
+
+    //17 is OK
+    TestStringConversion("12123456789123456"sv);
+    TestStringConversion(L"12123456789123456"sv);
 }
 
 AWT_TEST(DecimalDoubleConversion)
@@ -128,26 +140,28 @@ AWT_TEST(DecimalRescale)
     
     AWT_ASSERT(d.to_astring() == "123.4567800");
 
-    d = d.rescale(3);
+    d = d.rescale(5);
 
-    AWT_ASSERT(d.to_astring() == "123.456");
+    AWT_ASSERT(d.to_astring() == "123.45678");
+
+    d *= awl::decimal(100000, 0);
+    
+    d = d.rescale(0);
+
+    AWT_ASSERT(d.to_astring() == "12345678");
+
+    //9 + 8 = 17
+    d = d.rescale(9);
+
+    AWT_ASSERT(d.to_astring() == "12345678.000000000");
 
     d = d.rescale(0);
 
-    AWT_ASSERT(d.to_astring() == "123");
-
-    //15 + 3 == 18
-    d = d.rescale(15);
-
-    AWT_ASSERT(d.to_astring() == "123.000000000000000");
-
-    d = d.rescale(0);
-
-    AWT_ASSERT(d.to_astring() == "123");
+    AWT_ASSERT(d.to_astring() == "12345678");
 
     try
     {
-        d = d.rescale(16);
+        d = d.rescale(10);
 
         AWT_FAILM("It did not throw.");
     }

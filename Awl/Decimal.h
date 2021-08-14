@@ -49,7 +49,7 @@ namespace awl
             return count;
         }
 
-        using DenomArray = std::array<uint64_t, max_exp()>;
+        using DenomArray = std::array<uint64_t, p2(exp_len)>;
 
         constexpr DenomArray make_denoms()
         {
@@ -57,7 +57,7 @@ namespace awl
 
             uint64_t denom = 1;
 
-            for (uint64_t e = 0; e < max_exp(); ++e)
+            for (uint64_t e = 0; e < p2(exp_len); ++e)
             {
                 a[e] = denom;
 
@@ -68,7 +68,7 @@ namespace awl
         }
     }
     
-    //Do not use this class, if you worry about its efficiency.
+    //I am not sure about the efficiency of this class.
     //Consider using boost/multiprecision or decNumber Library, for example, or use std::decimal in GCC.
     class decimal
     {
@@ -214,7 +214,16 @@ namespace awl
             return compare(*this, other, std::greater_equal<uint64_t>());
         }
 
-        decimal operator + (const decimal& other) const
+        constexpr decimal operator - () const
+        {
+            decimal temp = *this;
+
+            temp.negate();
+
+            return temp;
+        }
+
+        constexpr decimal operator + (const decimal& other) const
         {
             decimal a = *this;
             decimal b = other;
@@ -224,7 +233,7 @@ namespace awl
             return decimal(a.mantissa() + b.mantissa(), a.m_data.exp);
         }
 
-        decimal operator - (const decimal& other) const
+        constexpr decimal operator - (const decimal& other) const
         {
             decimal a = *this;
             decimal b = other;
@@ -234,14 +243,14 @@ namespace awl
             return decimal(a.mantissa() - b.mantissa(), a.m_data.exp);
         }
 
-        decimal& operator += (const decimal& other)
+        constexpr decimal& operator += (const decimal& other)
         {
             *this = *this + other;
 
             return *this;
         }
 
-        decimal& operator -= (const decimal& other)
+        constexpr decimal& operator -= (const decimal& other)
         {
             *this = *this - other;
 
@@ -523,7 +532,7 @@ namespace awl
             }
         }
 
-        static void align(decimal& a, decimal& b)
+        static constexpr void align(decimal& a, decimal& b)
         {
             if (a.m_data.exp > b.m_data.exp)
             {
@@ -589,7 +598,7 @@ namespace awl
 
         out << int_part;
 
-        if (fractional_part != 0)
+        if (d.exponent() != 0)
         {
             out << "." << std::setfill(static_cast<C>('0')) << std::setw(d.exponent()) << fractional_part;
         }
@@ -700,7 +709,6 @@ namespace awl
     inline constexpr awl::decimal zero;
 }
 
-/*
 namespace std
 {
     template <>
@@ -710,13 +718,12 @@ namespace std
         
         static constexpr awl::decimal min() noexcept
         {
-            return awl::decimal(numeric_limits<int64_t>::min(), 0);
+            return -awl::decimal(awl::helpers::max_man(), 0);
         }
 
         static constexpr awl::decimal max() noexcept
         {
-            return awl::decimal(numeric_limits<int64_t>::max(), 0);
+            return awl::decimal(awl::helpers::max_man(), 0);
         }
     };
 }
-*/
