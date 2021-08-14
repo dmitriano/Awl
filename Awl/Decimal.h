@@ -53,7 +53,7 @@ namespace awl
 
         constexpr DenomArray make_denoms()
         {
-            DenomArray a;
+            DenomArray a{};
 
             uint64_t denom = 1;
 
@@ -368,9 +368,9 @@ namespace awl
             return !positive();
         }
 
-        constexpr bool negate()
+        constexpr void negate()
         {
-            return m_data.sign = m_data.sign ? 0 : 1;
+            m_data.sign = m_data.sign ? 0 : 1;
         }
 
         constexpr void rescale_self(uint8_t digits, bool check = true)
