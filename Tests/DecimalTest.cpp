@@ -245,7 +245,7 @@ AWT_TEST(DecimalMinMax)
     AWT_ASSERT(awl::decimal(1, 18) < max);
     AWT_ASSERT(awl::decimal(-1, 18) < max);
     AWT_ASSERT(awl::zero < max);
-    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_digits()) < max);
+    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_exponent()) < max);
 
     AWT_ASSERT(min == min);
     AWT_ASSERT(min < min + awl::decimal(1, 0));
@@ -257,13 +257,13 @@ AWT_TEST(DecimalMinMax)
     AWT_ASSERT(max != max - awl::decimal(1, 0));
     AWT_ASSERT(max - awl::decimal(1, 0) <= max);
     AWT_ASSERT(awl::zero <= max);
-    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_digits()) <= max);
+    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_exponent()) <= max);
 
     AWT_ASSERT(min != min + awl::decimal(1, 0));
     AWT_ASSERT(min <= min + awl::decimal(1, 0));
     AWT_ASSERT(min <= awl::zero);
 
-    for (uint8_t precision = 0; precision <= awl::decimal::max_digits(); ++precision)
+    for (uint8_t precision = 0; precision <= awl::decimal::max_exponent(); ++precision)
     {
         AWT_ASSERT(awl::decimal(1, precision) > min);
         AWT_ASSERT(awl::decimal(-1, precision) > min);

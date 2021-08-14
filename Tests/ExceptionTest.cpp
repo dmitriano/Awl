@@ -25,7 +25,7 @@ AWT_TEST(DecodeString)
     setlocale(LC_ALL, "ru_RU.utf8");
 
     {
-        const char * encoded = u8"z\u00df\u6c34\U0001f34c";
+        const char * encoded = reinterpret_cast<const char*>(u8"z\u00df\u6c34\U0001f34c");
 
         context.out << _T("Decoded string: ") << awl::FromACString(encoded) << std::endl;
     }
