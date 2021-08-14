@@ -196,22 +196,22 @@ namespace awl
 
         bool operator < (const decimal& other) const
         {
-            return compare(*this, other, std::less<int64_t>());
+            return compare(*this, other, std::less<uint64_t>());
         }
 
         bool operator > (const decimal& other) const
         {
-            return compare(*this, other, std::greater<int64_t>());
+            return compare(*this, other, std::greater<uint64_t>());
         }
 
         bool operator <= (const decimal& other) const
         {
-            return compare(*this, other, std::less_equal<int64_t>());
+            return compare(*this, other, std::less_equal<uint64_t>());
         }
 
         bool operator >= (const decimal& other) const
         {
-            return compare(*this, other, std::greater_equal<int64_t>());
+            return compare(*this, other, std::greater_equal<uint64_t>());
         }
 
         decimal operator + (const decimal& other) const
@@ -439,7 +439,8 @@ namespace awl
                 return compare_positive(a, b, comp);
             }
 
-            return comp(a.m_data.sign, b.m_data.sign);
+            //1 < 0
+            return comp(b.m_data.sign, a.m_data.sign);
         }
 
         template <class Comp>
@@ -447,10 +448,10 @@ namespace awl
         {
             //We can't align decimals when we compare them, but we can iterate over their digits.
 
-            uint64_t a_denom = m_denoms[a.m_data.exp];
-            uint64_t b_denom = m_denoms[b.m_data.exp];
+            const uint64_t a_denom = m_denoms[a.m_data.exp];
+            const uint64_t b_denom = m_denoms[b.m_data.exp];
 
-            do
+            //Compare int parts.
             {
                 const uint64_t a_val = a.m_data.man / a_denom;
                 const uint64_t b_val = b.m_data.man / b_denom;
@@ -459,13 +460,15 @@ namespace awl
                 {
                     return comp(a_val, b_val);
                 }
-
-                a_denom /= 10;
-                b_denom /= 10;
             }
-            while (a_denom != 0 && b_denom != 0);
 
-            return comp(a_denom, a_denom);
+            //Compare fractional parts.
+            {
+                const uint64_t a_val = a.m_data.man % a_denom;
+                const uint64_t b_val = b.m_data.man % b_denom;
+
+                return comp(a_val, b_val);
+            }
         }
 
         template <class Float>
