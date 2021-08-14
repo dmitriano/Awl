@@ -337,10 +337,10 @@ namespace awl
             return basic_to_string<wchar_t>();
         }
 
-        constexpr decimal rescale(uint8_t digits) const
+        constexpr decimal rescale(uint8_t digits, bool check = true) const
         {
             awl::decimal temp = *this;
-            temp.rescale_self(digits);
+            temp.rescale_self(digits, check);
             return temp;
         }
 
@@ -373,7 +373,7 @@ namespace awl
             return m_data.sign = m_data.sign ? 0 : 1;
         }
 
-        constexpr void rescale_self(uint8_t digits)
+        constexpr void rescale_self(uint8_t digits, bool check = true)
         {
             check_digits(digits);
 
@@ -387,11 +387,14 @@ namespace awl
 
                     const uint64_t denom = m_denoms[diff];
 
-                    const uint64_t max_diff = helpers::max_man() / m_data.man;
-
-                    if (denom > max_diff)
+                    if (check)
                     {
-                        throw std::logic_error("Decimal overflow.");
+                        const uint64_t max_diff = helpers::max_man() / m_data.man;
+
+                        if (denom > max_diff)
+                        {
+                            throw std::logic_error("Decimal overflow.");
+                        }
                     }
 
                     m_data.man *= denom;
@@ -403,7 +406,7 @@ namespace awl
 
                 const uint64_t denom = m_denoms[diff];
 
-                if (m_data.man % denom != 0)
+                if (check && m_data.man % denom != 0)
                 {
                     throw std::logic_error("Decimal underflow.");
                 }
