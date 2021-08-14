@@ -373,7 +373,7 @@ namespace awl
             m_data.sign = m_data.sign ? 0 : 1;
         }
 
-        //If check==false the underflow (trimming) is allowed.
+        //If check==false losing precision (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
         {
             check_digits(digits);
@@ -406,7 +406,7 @@ namespace awl
 
                 if (check && m_data.man % denom != 0)
                 {
-                    throw std::logic_error("Decimal underflow.");
+                    throw std::logic_error("Decimal is losing precision.");
                 }
                 
                 m_data.man /= denom;
