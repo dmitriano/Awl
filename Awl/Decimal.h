@@ -446,10 +446,10 @@ namespace awl
         template <class Comp>
         static constexpr bool compare_positive(const decimal& a, const decimal& b, Comp comp)
         {
-            //We can't align decimals when we compare them, but we can iterate over their digits.
+            //We can't align decimals when we compare them.
 
-            const uint64_t a_denom = m_denoms[a.m_data.exp];
-            const uint64_t b_denom = m_denoms[b.m_data.exp];
+            const uint64_t a_denom = a.denominator();
+            const uint64_t b_denom = b.denominator();
 
             //Compare int parts.
             {
@@ -462,10 +462,23 @@ namespace awl
                 }
             }
 
-            //Compare fractional parts.
+            //We can align fractional parts.
             {
-                const uint64_t a_val = a.m_data.man % a_denom;
-                const uint64_t b_val = b.m_data.man % b_denom;
+                uint64_t a_val = a.m_data.man % a_denom;
+                uint64_t b_val = b.m_data.man % b_denom;
+
+                if (a.exponent() > b.exponent())
+                {
+                    const uint64_t diff = a.exponent() - b.exponent();
+
+                    b_val *= m_denoms[diff];
+                }
+                else if (b.exponent() > a.exponent())
+                {
+                    const uint64_t diff = b.exponent() - a.exponent();
+
+                    a_val *= m_denoms[diff];
+                }
 
                 return comp(a_val, b_val);
             }
