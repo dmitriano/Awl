@@ -373,6 +373,7 @@ namespace awl
             m_data.sign = m_data.sign ? 0 : 1;
         }
 
+        //If check==false the underflow (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
         {
             check_digits(digits);
@@ -387,14 +388,11 @@ namespace awl
 
                     const uint64_t denom = m_denoms[diff];
 
-                    if (check)
-                    {
-                        const uint64_t max_diff = helpers::max_man() / m_data.man;
+                    const uint64_t max_diff = helpers::max_man() / m_data.man;
 
-                        if (denom > max_diff)
-                        {
-                            throw std::logic_error("Decimal overflow.");
-                        }
+                    if (denom > max_diff)
+                    {
+                        throw std::logic_error("Decimal overflow.");
                     }
 
                     m_data.man *= denom;
