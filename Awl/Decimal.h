@@ -523,7 +523,7 @@ namespace awl
                 return static_cast<int64_t>(symbol - '0');
             }
 
-            throw std::runtime_error("Not a valid decimal string.");
+            throw std::logic_error("Not a valid decimal string.");
         }
 
         template <class C>
@@ -571,8 +571,15 @@ namespace awl
 
         auto [fractional_i, digits, fractional_part] = parse_int(fractional_text, false);
 
-        assert(fractional_i == fractional_text.end());
+        if (fractional_i != fractional_text.end())
+        {
+            throw std::logic_error("Some characters left at the end of a decimal string.");
+        }
 
+        //{
+        //    if (std::numeric_limits<uint64_t>::max() - int_part)
+        //}
+        
         check_digits(digits);
 
         const int64_t denom = m_denoms[digits];
@@ -627,6 +634,12 @@ namespace awl
         auto do_append = [&digit_count, &val](int64_t digit)
         {
             val = val * 10 + digit;
+
+            //It does not make a sense to parse a string longer than the mantissa.
+            if (static_cast<uint64_t>(std::abs(val)) > helpers::max_man())
+            {
+                throw std::logic_error("A decimal string is too long.");
+            }
 
             ++digit_count;
         };
