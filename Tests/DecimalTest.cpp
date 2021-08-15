@@ -98,11 +98,10 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion("12.123456789123456"sv);
     TestStringConversion(L"12.123456789123456"sv);
 
-    //TO DO: parser does not throw yet.
-    //CheckTrows([&]()
-    //{
-    //    TestStringConversion("12.123456789123456"sv);
-    //});
+    CheckTrows([&]()
+    {
+        TestStringConversion("1234.123456789123456"sv);
+    });
 
     //17 is OK
     TestStringConversion("12123456789123456"sv);
@@ -124,8 +123,7 @@ AWT_TEST(DecimalDoubleConversion)
     AWT_ASSERT(text == _T("10.12800"));
 }
 
-//TO DO: Parser should check the limits.
-AWT_EXAMPLE(DecimalLimits)
+AWT_TEST(DecimalLimits)
 {
     AWT_UNUSED_CONTEXT;
 

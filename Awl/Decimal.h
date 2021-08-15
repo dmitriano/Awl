@@ -379,7 +379,7 @@ namespace awl
         //If check==false losing precision (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
         {
-            check_digits(digits);
+            check_exp(digits);
 
             if (m_data.exp < digits)
             {
@@ -512,27 +512,21 @@ namespace awl
         }
 
         template <class C>
-        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, int64_t>
+        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
             parse_int(std::basic_string_view<C> text, bool point_terminator);
 
         template <class C>
-        static constexpr int64_t symbol_to_digit(C symbol)
+        static constexpr uint8_t symbol_to_digit(C symbol)
         {
             if ('0' <= symbol && symbol <= '9')
             {
-                return static_cast<int64_t>(symbol - '0');
+                return static_cast<uint8_t>(symbol - '0');
             }
 
             throw std::logic_error("Not a valid decimal string.");
         }
 
-        template <class C>
-        static constexpr C digit_to_symbol(int64_t digit)
-        {
-            return static_cast<C>('0' + digit);
-        }
-
-        static constexpr void check_digits(uint8_t digits)
+        static constexpr void check_exp(uint8_t digits)
         {
             if (digits > max_exponent())
             {
@@ -560,14 +554,31 @@ namespace awl
         friend std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal d);
     };
 
+    //Returns a normalized decimal, because we trimmed zeros.
     template <class C>
     constexpr decimal decimal::from_string(std::basic_string_view<C> text)
     {
+        using string_view = std::basic_string_view<C>;
+        
+        bool positive = true;
+
+        {
+            typename string_view::const_iterator i = text.begin();
+
+            if (*i == '+' || *i == '-')
+            {
+                positive = *i == '+';
+
+                ++i;
+            }
+
+            //Construction from the iterators is C++20 feature.
+            text = string_view(i, text.end());
+        }
+
         auto [i, int_digits, int_part] = parse_int(text, true);
 
-        //MSVC 2019 can't construct it from the iterators yet, it is C++20 feature.
-        //std::basic_string_view<C> fractional_text(fractional_i, text.cend());
-        std::basic_string_view<C> fractional_text(text.data() + (i - text.begin()), text.end() - i);
+        string_view fractional_text(i, text.end());
 
         auto [fractional_i, digits, fractional_part] = parse_int(fractional_text, false);
 
@@ -576,23 +587,28 @@ namespace awl
             throw std::logic_error("Some characters left at the end of a decimal string.");
         }
 
-        //{
-        //    if (std::numeric_limits<uint64_t>::max() - int_part)
-        //}
-        
-        check_digits(digits);
+        check_exp(digits);
 
         const int64_t denom = m_denoms[digits];
 
-        if (int_part < 0)
-        {
-            fractional_part = -fractional_part;
-        }
-
         int_part *= denom;
 
-        //It should be normalized, because we trimmed zeros.
-        return decimal(int_part + fractional_part, digits);
+        if (fractional_part > std::numeric_limits<uint64_t>::max() - int_part)
+        {
+            throw std::logic_error("Too long decimal string resulted in an overflow.");
+        }
+
+        decimal result;
+
+        result.m_data.man = int_part + fractional_part;
+        result.m_data.exp = digits;
+
+        if (!positive)
+        {
+            result.negate();
+        }
+
+        return result;
     }
 
     template <class C>
@@ -622,21 +638,21 @@ namespace awl
     }
 
     template <class C>
-    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, int64_t>
+    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
         decimal::parse_int(std::basic_string_view<C> text, bool point_terminator)
     {
         uint8_t digit_count = 0;
 
         uint8_t zero_count = 0;
 
-        int64_t val = 0;
+        uint64_t val = 0;
 
-        auto do_append = [&digit_count, &val](int64_t digit)
+        auto do_append = [&digit_count, &val](uint64_t digit)
         {
             val = val * 10 + digit;
 
             //It does not make a sense to parse a string longer than the mantissa.
-            if (static_cast<uint64_t>(std::abs(val)) > helpers::max_man())
+            if (val > helpers::max_man())
             {
                 throw std::logic_error("A decimal string is too long.");
             }
@@ -644,7 +660,7 @@ namespace awl
             ++digit_count;
         };
 
-        auto append = [&zero_count, &val, point_terminator, &do_append](int64_t digit)
+        auto append = [&zero_count, &val, point_terminator, &do_append](uint64_t digit)
         {
             if (point_terminator)
             {
@@ -679,39 +695,19 @@ namespace awl
 
         auto i = text.begin();
 
-        bool positive = true;
-
-        if (i != text.end())
+        for (; i != text.end(); ++i)
         {
-            if (point_terminator)
+            C symbol = *i;
+
+            if (point_terminator && symbol == '.')
             {
-                if (*i == '+' || *i == '-')
-                {
-                    positive = *i == '+';
-
-                    ++i;
-                }
+                i = i + 1;
+                break;
             }
-            
-            for (; i != text.end(); ++i)
-            {
-                C symbol = *i;
 
-                if (point_terminator && symbol == '.')
-                {
-                    i = i + 1;
-                    break;
-                }
+            const uint64_t digit = symbol_to_digit(symbol);
 
-                const int64_t digit = symbol_to_digit(symbol);
-
-                append(digit);
-            }
-        }
-
-        if (!positive)
-        {
-            val = -val;
+            append(digit);
         }
 
         return std::make_tuple(i, digit_count, val);
