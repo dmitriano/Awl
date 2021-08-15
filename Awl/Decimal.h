@@ -591,11 +591,16 @@ namespace awl
 
         const int64_t denom = m_denoms[digits];
 
+        if (int_part > helpers::max_man() / denom)
+        {
+            throw std::logic_error("Too long decimal string.");
+        }
+        
         int_part *= denom;
 
-        if (fractional_part > std::numeric_limits<uint64_t>::max() - int_part)
+        if (fractional_part > helpers::max_man() - int_part)
         {
-            throw std::logic_error("Too long decimal string resulted in an overflow.");
+            throw std::logic_error("Too long decimal string.");
         }
 
         decimal result;
