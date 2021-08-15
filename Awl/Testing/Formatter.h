@@ -71,7 +71,7 @@ namespace awl
 
                 bool first = true;
 
-                for (const auto e : val)
+                for (const auto& e : val)
                 {
                     if (first)
                     {

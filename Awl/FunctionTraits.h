@@ -18,7 +18,7 @@ namespace awl
 
         using result_type = ReturnType;
 
-        template <size_t i>
+        template <std::size_t i>
         struct arg
         {
             using type = std::tuple_element_t<i, std::tuple<Args...>>;

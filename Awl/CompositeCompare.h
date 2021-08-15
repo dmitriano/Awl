@@ -26,7 +26,7 @@ namespace awl
 
         using Tuple = std::tuple<std::decay_t<Cs>...>;
 
-        template <size_t Index>
+        template <std::size_t Index>
         bool Compare(const T& left, const T& right) const
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
