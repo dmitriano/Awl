@@ -127,7 +127,9 @@ namespace awl
             return static_cast<Float>(static_cast<Float>(mantissa()) / denominator());
         }
 
-        //The comparison with arithmetic types is performed via conversion to double.
+        //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
+        //so the comparison with arithmetic (both integral and floating-point) types is performed
+        //via conversion to double.
         constexpr operator double() const
         {
             return cast<double>();
