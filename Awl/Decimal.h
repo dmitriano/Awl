@@ -349,6 +349,13 @@ namespace awl
             return temp;
         }
 
+        constexpr decimal stratch(uint8_t digits) const
+        {
+            awl::decimal temp = *this;
+            temp.stratch_self(digits);
+            return temp;
+        }
+
         constexpr decimal trim(uint8_t digits) const
         {
             awl::decimal temp = *this;
@@ -388,10 +395,22 @@ namespace awl
         //If check==false losing precision (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
         {
-            check_exp(digits);
-
             if (m_data.exp < digits)
             {
+                stratch_self(digits);
+            }
+            else if (digits < m_data.exp)
+            {
+                trim_self(digits, check);
+            }
+        }
+
+        constexpr void stratch_self(uint8_t digits)
+        {
+            if (m_data.exp < digits)
+            {
+                check_exp(digits);
+
                 //Nothing to do if the mantissa is zero.
                 if (m_data.man != 0)
                 {
@@ -411,10 +430,6 @@ namespace awl
 
                     m_data.exp = digits;
                 }
-            }
-            else if (digits < m_data.exp)
-            {
-                trim_self(digits, check);
             }
         }
 
