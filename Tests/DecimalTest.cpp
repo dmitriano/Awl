@@ -182,6 +182,22 @@ AWT_TEST(DecimalRescale)
     });
 }
 
+AWT_TEST(DecimalTrim)
+{
+    AWT_UNUSED_CONTEXT;
+
+    awl::decimal d("123.45678"sv);
+
+    d = d.trim(3);
+
+    AWT_ASSERT(d.to_astring() == "123.456");
+
+    d = d.trim(0);
+
+    AWT_ASSERT(d.to_astring() == "123");
+}
+
+
 AWT_TEST(DecimalCompare)
 {
     AWT_UNUSED_CONTEXT;

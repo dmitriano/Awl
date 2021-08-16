@@ -349,6 +349,13 @@ namespace awl
             return temp;
         }
 
+        constexpr decimal trim(uint8_t digits) const
+        {
+            awl::decimal temp = *this;
+            temp.trim_self(digits, false);
+            return temp;
+        }
+
         constexpr decimal normalize() const
         {
             awl::decimal temp = *this;
@@ -401,9 +408,19 @@ namespace awl
                     }
 
                     m_data.man *= denom;
+
+                    m_data.exp = digits;
                 }
             }
             else if (digits < m_data.exp)
+            {
+                trim_self(digits, check);
+            }
+        }
+
+        constexpr void trim_self(uint8_t digits, bool check)
+        {
+            if (digits < m_data.exp)
             {
                 const uint8_t diff = exponent() - digits;
 
@@ -413,12 +430,9 @@ namespace awl
                 {
                     throw std::logic_error("Decimal is losing precision.");
                 }
-                
-                m_data.man /= denom;
-            }
 
-            if (digits != m_data.exp)
-            {
+                m_data.man /= denom;
+
                 m_data.exp = digits;
             }
         }
