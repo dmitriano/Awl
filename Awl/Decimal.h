@@ -174,7 +174,7 @@ namespace awl
         template <class Float>
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
         {
-            set_mantissa(static_cast<int64_t>(val * denominator()));
+            set_mantissa(static_cast<int64_t>(std::llround(val * denominator())));
 
             return *this;
         }
