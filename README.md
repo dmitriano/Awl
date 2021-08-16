@@ -28,7 +28,7 @@ Compiling on Linux with CMake and GCC:
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     make -j2
 
-[Compiling Ubuntu 18 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/).
+[Compiling on Ubuntu 18 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
 
 Running the tests:
 
