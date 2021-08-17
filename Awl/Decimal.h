@@ -427,9 +427,9 @@ namespace awl
                     }
 
                     m_data.man *= denom;
-
-                    m_data.exp = digits;
                 }
+
+                m_data.exp = digits;
             }
         }
 

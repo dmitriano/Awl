@@ -145,6 +145,8 @@ AWT_TEST(DecimalRescale)
 {
     AWT_UNUSED_CONTEXT;
 
+    AWT_ASSERT(awl::zero.rescale(3).to_astring() == "0.000");
+
     awl::decimal d("123.45678"sv);
 
     d = d.rescale(7);
