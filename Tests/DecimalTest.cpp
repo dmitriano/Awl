@@ -212,6 +212,9 @@ AWT_TEST(DecimalCompare)
 
     AWT_ASSERT(awl::decimal("1"sv) != awl::decimal("2.000"sv));
 
+    AWT_ASSERT(awl::decimal("0.5"sv) < awl::decimal("2"sv));
+    AWT_ASSERT(awl::decimal("0.596"sv) < awl::decimal("2.232"sv));
+    AWT_ASSERT(!(awl::decimal("0.596"sv) >= awl::decimal("2.232"sv)));
     AWT_ASSERT(awl::decimal("1"sv) < awl::decimal("2.000"sv));
     AWT_ASSERT(awl::decimal("2.000"sv) > awl::decimal("1.000"sv));
     AWT_ASSERT(awl::decimal("1"sv) <= awl::decimal("2.000"sv));
