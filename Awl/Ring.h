@@ -33,6 +33,9 @@ namespace awl
             using reference = E &;
             using pointer = E *;
 
+            ring_iterator(const ring_iterator& other) = default;
+            ring_iterator(ring_iterator&& other) = default;
+
             ring_iterator & operator = (const ring_iterator & other)
             {
                 m_pos = other.m_pos;
@@ -149,7 +152,7 @@ namespace awl
             const ring & m_ring;
             
             //It can't be a pointer because there is no
-            //end pointer in a circular buffer, so we use an index.
+            //end pointer in a circularï¿½buffer, so we use an index.
             std::size_t m_pos;
 
             friend ring;
