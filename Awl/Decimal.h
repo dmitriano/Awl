@@ -108,6 +108,11 @@ namespace awl
             *this = from_string(text);
         }
 
+        template <class C>
+        constexpr explicit decimal(const C* text) : decimal(std::basic_string_view<C>(text))
+        {
+        }
+
         //The value of resulting uint64_t may be different with different compilers. But the value of Data structure
         //should be the same when I convert it back from uint64_t. See Bit field.
         static constexpr decimal from_int(uint64_t val)
@@ -177,7 +182,8 @@ namespace awl
         template <class Float>
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
         {
-            set_mantissa(static_cast<int64_t>(std::llround(val * denominator())));
+            //We do not round the floating point value here so abs(decimal) < abs(val).
+            set_mantissa(static_cast<int64_t>(val * denominator()));
 
             return *this;
         }
@@ -760,6 +766,56 @@ namespace awl
         return d;
     }
         
+    template <class Float>
+    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
+    {
+        decimal d(digits);
+
+        d.set_mantissa(static_cast<int64_t>(std::llround(val * d.denominator())));
+
+        return d;
+    }
+
+    template <class Float>
+    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
+    {
+        return decimal(val, digits);
+    }
+
+    //Computes the smallest decimal value not less than arg.
+    template <class Float>
+    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
+    {
+        decimal d(digits);
+
+        d.set_mantissa(static_cast<int64_t>(std::ceil(val * d.denominator())));
+
+        return d;
+    }
+
+    template <class Float>
+    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
+    {
+        return decimal(val, digits);
+    }
+
+    //Computes the largest decimal value not greater than arg.
+    template <class Float>
+    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_floored(Float val, uint8_t digits)
+    {
+        decimal d(digits);
+
+        d.set_mantissa(static_cast<int64_t>(std::floor(val * d.denominator())));
+
+        return d;
+    }
+
+    template <class Float>
+    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_floored(Float val, uint8_t digits)
+    {
+        return decimal(val, digits);
+    }
+
     inline constexpr awl::decimal zero;
 }
 

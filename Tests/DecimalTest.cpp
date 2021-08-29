@@ -333,3 +333,80 @@ AWT_TEST(DecimalMinMax)
         AWT_ASSERT(awl::decimal(1, precision) >= awl::decimal(-1, precision));
     }
 }
+
+AWT_TEST(DecimalRound)
+{
+    AWT_UNUSED_CONTEXT;
+    
+    {
+        const awl::decimal d33 = awl::make_decimal(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("0.33"));
+
+        const awl::decimal d66 = awl::make_decimal(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("0.66"));
+
+        const awl::decimal d67 = awl::make_rounded(2.0 / 3.0, 2);
+        AWT_ASSERT(d67 == awl::decimal("0.67"));
+
+        const awl::decimal d3 = awl::make_rounded(3, 1);
+        AWT_ASSERT(d3 == awl::decimal("0.3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_decimal(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+
+        const awl::decimal d66 = awl::make_decimal(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+
+        const awl::decimal d67 = awl::make_rounded(-2.0 / 3.0, 2);
+        AWT_ASSERT(d67 == awl::decimal("-0.67"));
+
+        const awl::decimal d3 = awl::make_rounded(-3, 1);
+        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_ceiled(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("0.34"));
+
+        const awl::decimal d66 = awl::make_ceiled(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("0.67"));
+
+        const awl::decimal d3 = awl::make_ceiled(3, 1);
+        AWT_ASSERT(d3 == awl::decimal("0.3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_ceiled(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+
+        const awl::decimal d66 = awl::make_ceiled(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+
+        const awl::decimal d3 = awl::make_ceiled(-3, 1);
+        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_floored(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("0.33"));
+
+        const awl::decimal d66 = awl::make_floored(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("0.66"));
+
+        const awl::decimal d3 = awl::make_floored(3, 1);
+        AWT_ASSERT(d3 == awl::decimal("0.3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_floored(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("-0.34"));
+
+        const awl::decimal d66 = awl::make_floored(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("-0.67"));
+
+        const awl::decimal d3 = awl::make_floored(-3, 1);
+        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+    }
+}
