@@ -16,7 +16,7 @@ namespace awl
 
         using value_type = T;
         
-        std::shared_ptr<T> make_pooled()
+        std::shared_ptr<T> make()
         {
             T* p;
             
@@ -29,6 +29,11 @@ namespace awl
                 p = new T();
             }
 
+            return add(p);
+        }
+
+        std::shared_ptr<T> add(T* p)
+        {
             m_used.push_back(p);
 
             return MakePointer(p);
@@ -88,7 +93,7 @@ namespace awl
     template <class T>
     std::shared_ptr<T> make_pooled()
     {
-        return objectPoolSingleton<T>.make_pooled();
+        return objectPoolSingleton<T>.make();
     }
 
     template <class T>
