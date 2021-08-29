@@ -150,32 +150,36 @@ AWT_TEST(ObjectPoolSharedFromThis)
     {
         awl::object_pool<B> pool;
 
-        B* p_instance = new B;
+        B* raw_p = new B;
 
-        std::shared_ptr<B> p1 = pool.add(p_instance);
+        {
+            std::shared_ptr<B> p1 = pool.add(raw_p);
 
-        AWT_ASSERT_EQUAL(1, B::elementCount);
+            AWT_ASSERT_EQUAL(1, B::elementCount);
 
-        std::shared_ptr<B> p2 = p_instance->shared_from_this();
+            std::shared_ptr<B> p2 = raw_p->shared_from_this();
 
-        AWT_ASSERT(p1 == p2);
-    }
-
-    AWT_ASSERT_EQUAL(0, A::elementCount);
-
-    {
-        awl::object_pool<B> pool;
-
-        std::shared_ptr<B> p1 = pool.make();
-
-        B* p_instance = p1.get();
+            AWT_ASSERT(p1 == p2);
+        }
 
         AWT_ASSERT_EQUAL(1, B::elementCount);
 
-        std::shared_ptr<B> p2 = p_instance->shared_from_this();
+        {
+            std::shared_ptr<B> p1 = pool.make();
 
-        AWT_ASSERT(p1 == p2);
+            B* p_instance = p1.get();
+
+            AWT_ASSERT_EQUAL(1, B::elementCount);
+
+            AWT_ASSERT_EQUAL(raw_p, p1.get());
+
+            std::shared_ptr<B> p2 = p_instance->shared_from_this();
+
+            AWT_ASSERT(p1 == p2);
+        }
+
+        AWT_ASSERT_EQUAL(1, B::elementCount);
     }
 
-    AWT_ASSERT_EQUAL(0, A::elementCount);
+    AWT_ASSERT_EQUAL(0, B::elementCount);
 }
