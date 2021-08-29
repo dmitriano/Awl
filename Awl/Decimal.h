@@ -356,14 +356,14 @@ namespace awl
             return temp;
         }
 
-        constexpr decimal stratch(uint8_t digits) const
+        constexpr decimal extend(uint8_t digits) const
         {
             awl::decimal temp = *this;
-            temp.stratch_self(digits);
+            temp.extend_self(digits);
             return temp;
         }
 
-        constexpr decimal trim(uint8_t digits) const
+        constexpr decimal truncate(uint8_t digits) const
         {
             awl::decimal temp = *this;
             temp.trim_self(digits, false);
@@ -404,7 +404,7 @@ namespace awl
         {
             if (m_data.exp < digits)
             {
-                stratch_self(digits);
+                extend_self(digits);
             }
             else if (digits < m_data.exp)
             {
@@ -412,7 +412,7 @@ namespace awl
             }
         }
 
-        constexpr void stratch_self(uint8_t digits)
+        constexpr void extend_self(uint8_t digits)
         {
             if (m_data.exp < digits)
             {
@@ -779,7 +779,7 @@ namespace awl
     template <class Float>
     constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
     {
-        return decimal(val, digits);
+        return make_decimal(val, digits);
     }
 
     //Computes the smallest decimal value not less than arg.
@@ -796,7 +796,7 @@ namespace awl
     template <class Float>
     constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
     {
-        return decimal(val, digits);
+        return make_decimal(val, digits);
     }
 
     //Computes the largest decimal value not greater than arg.
@@ -813,7 +813,14 @@ namespace awl
     template <class Float>
     constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_floored(Float val, uint8_t digits)
     {
-        return decimal(val, digits);
+        return make_decimal(val, digits);
+    }
+
+    //Computes the nearest decimal not greater in magnitude than arg.
+    template <class Float>
+    constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_truncated(Float val, uint8_t digits)
+    {
+        return make_decimal(val, digits);
     }
 
     inline constexpr awl::decimal zero;

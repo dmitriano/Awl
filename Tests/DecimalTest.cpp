@@ -190,11 +190,11 @@ AWT_TEST(DecimalTrim)
 
     awl::decimal d("123.45678"sv);
 
-    d = d.trim(3);
+    d = d.truncate(3);
 
     AWT_ASSERT(d.to_astring() == "123.456");
 
-    d = d.trim(0);
+    d = d.truncate(0);
 
     AWT_ASSERT(d.to_astring() == "123");
 }
@@ -349,7 +349,10 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d67 == awl::decimal("0.67"));
 
         const awl::decimal d3 = awl::make_rounded(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("0.3"));
+        AWT_ASSERT(d3 == awl::decimal("3"));
+
+        const awl::decimal d3d = awl::make_rounded(3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("3"));
     }
 
     {
@@ -363,7 +366,10 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d67 == awl::decimal("-0.67"));
 
         const awl::decimal d3 = awl::make_rounded(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+        AWT_ASSERT(d3 == awl::decimal("-3"));
+
+        const awl::decimal d3d = awl::make_rounded(-3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("-3"));
     }
 
     {
@@ -374,7 +380,10 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d66 == awl::decimal("0.67"));
 
         const awl::decimal d3 = awl::make_ceiled(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("0.3"));
+        AWT_ASSERT(d3 == awl::decimal("3"));
+
+        const awl::decimal d3d = awl::make_ceiled(3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("3"));
     }
 
     {
@@ -385,7 +394,10 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d66 == awl::decimal("-0.66"));
 
         const awl::decimal d3 = awl::make_ceiled(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+        AWT_ASSERT(d3 == awl::decimal("-3"));
+
+        const awl::decimal d3d = awl::make_ceiled(-3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("-3"));
     }
 
     {
@@ -396,7 +408,10 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d66 == awl::decimal("0.66"));
 
         const awl::decimal d3 = awl::make_floored(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("0.3"));
+        AWT_ASSERT(d3 == awl::decimal("3"));
+
+        const awl::decimal d3d = awl::make_floored(3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("3"));
     }
 
     {
@@ -407,6 +422,31 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d66 == awl::decimal("-0.67"));
 
         const awl::decimal d3 = awl::make_floored(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-0.3"));
+        AWT_ASSERT(d3 == awl::decimal("-3"));
+
+        const awl::decimal d3d = awl::make_floored(-3.0, 1);
+        AWT_ASSERT(d3d == awl::decimal("-3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_truncated(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("0.33"));
+
+        const awl::decimal d66 = awl::make_truncated(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("0.66"));
+
+        const awl::decimal d3 = awl::make_truncated(3, 1);
+        AWT_ASSERT(d3 == awl::decimal("3"));
+    }
+
+    {
+        const awl::decimal d33 = awl::make_truncated(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+
+        const awl::decimal d66 = awl::make_truncated(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+
+        const awl::decimal d3 = awl::make_truncated(-3, 1);
+        AWT_ASSERT(d3 == awl::decimal("-3"));
     }
 }
