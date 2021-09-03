@@ -54,8 +54,8 @@ namespace awl
             return !operator == (other);
         }
 
-        template <class Compare, class Allocator>
-        void reflect(const observable_set<T, Compare, Allocator>& src_set)
+        template <class SrcCompare, class SrcAllocator>
+        void reflect(const observable_set<T, SrcCompare, SrcAllocator>& src_set)
         {
             for (const T& val : src_set)
             {
@@ -67,8 +67,8 @@ namespace awl
         }
 
         //A mirror successfully reflects another mirror.
-        template <class Compare, class Allocator>
-        void reflect(const mirror_set<T, Compare, Allocator>& src_set)
+        template <class SrcCompare, class SrcAllocator>
+        void reflect(const mirror_set<T, SrcCompare, SrcAllocator>& src_set)
         {
             for (const T& val : src_set)
             {
