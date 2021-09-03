@@ -54,6 +54,8 @@ namespace awl
 
         observable_set(const observable_set & other) = delete;
 
+        //If it is returned from a function by value it should keep its observers and
+        //do not fire a notification because the content was not changed.
         observable_set(observable_set && other) = default;
 
         observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
@@ -67,7 +69,20 @@ namespace awl
 
         observable_set & operator = (const observable_set & other) = delete;
 
-        observable_set & operator = (observable_set && other) = default;
+        //Notifies that the set is clearing and removes (and clears) all the subscribers,
+        //so with move assignment one set becomes another set with its content and subscribers.
+        observable_set& operator = (observable_set&& other)
+        {
+            if (!m_set.empty())
+            {
+                NotifyClearing();
+            }
+
+            m_set = std::move(other.m_set);
+            m_observable = std::move(other.m_observable);
+
+            return *this;
+        }
 
         //It does not move observers, only set elements.
         void migrate(observable_set && other)
@@ -220,6 +235,7 @@ namespace awl
             return m_set.find(key);
         }
 
+        //TODO: It should return an iterator pointing to the next element.
         void erase(iterator i)
         {
             NotifyRemoving(i);
@@ -227,17 +243,17 @@ namespace awl
         }
 
         template <class Key>
-        bool erase(const Key & key)
+        size_type erase(const Key & key)
         {
             iterator i = find(key);
 
             if (i != end())
             {
                 erase(i);
-                return true;
+                return 1;
             }
 
-            return false;
+            return 0;
         }
 
         void clear()

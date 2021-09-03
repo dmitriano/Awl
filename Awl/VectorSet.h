@@ -507,23 +507,25 @@ namespace awl
             return index;
         }
 
+        //TODO: It should return an iterator pointing to the next element.
         void erase(iterator i)
         {
             RemoveNode(*i.m_i);
         }
 
+        //Retutns the number of removed elements.
         template <class Key>
-        bool erase(const Key & key)
+        size_type erase(const Key & key)
         {
             iterator i = find(key);
 
             if (i != end())
             {
                 erase(i);
-                return true;
+                return 1;
             }
 
-            return false;
+            return 0;
         }
 
         void clear()
