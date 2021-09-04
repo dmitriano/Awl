@@ -349,6 +349,7 @@ namespace awl
         std::pair<iterator, bool> emplace(Args&&... args)
         {
             Node * parent;
+            //TODO: It is probably a bug. We probably need a deleter here.
             std::unique_ptr<Node> val_node(CreateNode(std::forward<Args>(args) ...));
             Node * node = FindNodeByKey(val_node->value, &parent);
             const bool exists = node != nullptr;
