@@ -84,11 +84,6 @@ namespace awl
             return m_p != nullptr;
         }
 
-        constexpr void Destroy()
-        {
-            delete m_p;
-        }
-
         constexpr T* get() const
         {
             return m_p;
@@ -112,6 +107,11 @@ namespace awl
 
     private:
         
+        constexpr void Destroy()
+        {
+            delete m_p;
+        }
+
         T* m_p;
     };
 
