@@ -46,6 +46,3 @@ AWT_TEST(UniquePtrBegingDestoyed)
 
     AWT_ASSERT_EQUAL(0, count);
 }
-
-//There should another test to check what happens with the deleter throws.
-//AWT_TEST(UniquePtrDeleterThrows)
