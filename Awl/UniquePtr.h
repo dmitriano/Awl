@@ -5,10 +5,14 @@
 
 namespace awl
 {
-    //A unique_ptr that does not prevent the access to the object being destroyed.
-    //std::unique_ptr's assignment operator clears its internal pointer first and then deletes
-    //the object and thus prevents the access to the object being destroyed.
-    //The implementation is not complete, it does not cast from a derived type.
+    // At least in MSVC:
+    // std::unique_ptr::reset() function clears its internal pointer first and then deletes the object and thus
+    // prevents access to the object being destroyed. If the deleter throws an exception std::unique_ptr keeps new object and looses old.
+    // IMHO this behaviour is not intuitive. I would expect std::unique_ptr to keep old object if reset did not succeed,
+    // so in catch block I have the access to both old file and new file. For example, if std::fflush failed because
+    // there is no space left on the disk, in catch block I free some space and call reset again.
+    
+    //The implementation is not complete yet, it does not have deleter and does not cast from a derived type.
     template <class T>
     class unique_ptr
     {
@@ -34,22 +38,22 @@ namespace awl
             Destroy();
         }
 
-        bool operator == (const unique_ptr& other) const
+        constexpr bool operator == (const unique_ptr& other) const
         {
             return m_p == other.m_p;
         }
 
-        bool operator != (const unique_ptr& other) const
+        constexpr bool operator != (const unique_ptr& other) const
         {
             return !operator==(other);
         }
 
-        bool operator == (const T* p) const
+        constexpr bool operator == (const T* p) const
         {
             return m_p == p;
         }
 
-        bool operator != (const T* p) const
+        constexpr bool operator != (const T* p) const
         {
             return !operator==(p);
         }
@@ -58,9 +62,7 @@ namespace awl
 
         constexpr unique_ptr& operator=(unique_ptr&& other)
         {
-            Destroy();
-
-            m_p = other.m_p;
+            reset(other.m_p);
 
             other.m_p = nullptr;
 
@@ -94,6 +96,8 @@ namespace awl
 
         constexpr void reset(T* p)
         {
+            Destroy();
+
             m_p = p;
         }
         
