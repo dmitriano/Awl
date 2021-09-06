@@ -4,6 +4,7 @@
 using namespace std::literals; 
 
 using namespace awl::testing;
+using namespace awl::literals;
 
 namespace
 {
@@ -275,6 +276,8 @@ AWT_TEST(DecimalArithmeticOperators)
     AWT_ASSERT((awl::decimal("6.0"sv) /= awl::decimal("2.000"sv)) == awl::decimal("3"sv));
     AWT_ASSERT((awl::decimal("2.0"sv) *= 3.000) == awl::decimal("6"sv));
     AWT_ASSERT((awl::decimal("6.0"sv) /= 2.000) == awl::decimal("3"sv));
+
+    AWT_ASSERT(awl::multiply("7"_d, "33"_d) == "231"_d);
 }
 
 AWT_TEST(DecimalMinMax)

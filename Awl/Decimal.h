@@ -70,8 +70,14 @@ namespace awl
         }
     }
     
-    //I am not sure about the efficiency of this class.
+    //The implementation of decimal class is not complete and I am not sure about its efficiency.
     //Consider using boost/multiprecision or decNumber Library, for example, or use std::decimal in GCC.
+    
+    //It does addition, subtraction and conversion to/from a string without loosing the precision.
+    //Multiplication and division are performed via conversion to double.
+    //An instance of decimal can be serialized as uint64_t with to_int() and from_int() methods,
+    //but uint64_t value may be different with different compilers and platforms.
+
     class decimal
     {
     private:
@@ -823,7 +829,30 @@ namespace awl
         return make_decimal(val, digits);
     }
 
+    //Multiplies two decimals without loosing the precision and throws if an overflow occurs.
+    constexpr decimal multiply(decimal a, decimal b)
+    {
+        awl::decimal c(a.exponent() + b.exponent());
+
+        c.set_mantissa(a.mantissa() * b.mantissa());
+
+        return c;
+    }
+
     inline constexpr awl::decimal zero;
+
+    namespace literals
+    {
+        constexpr decimal operator"" _d(const char* str, std::size_t len)
+        {
+            return decimal(std::string_view(str, len));
+        }
+
+        constexpr decimal operator"" _d(const wchar_t* str, std::size_t len)
+        {
+            return decimal(std::wstring_view(str, len));
+        }
+    }
 }
 
 namespace std
