@@ -10,12 +10,10 @@
 #include <bit>
 #include <cmath>
 
-#include "Awl/Exception.h"
+#include "Awl/String.h"
 
 namespace awl
 {
-    //AWL_DEFINE_EXCEPTION(DecimalException);
-        
     namespace helpers
     {
         constexpr uint8_t sign_len = 1;
