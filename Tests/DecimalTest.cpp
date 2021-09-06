@@ -278,6 +278,8 @@ AWT_TEST(DecimalArithmeticOperators)
     AWT_ASSERT((awl::decimal("6.0"sv) /= 2.000) == awl::decimal("3"sv));
 
     AWT_ASSERT(awl::multiply("7"_d, "33"_d) == "231"_d);
+    //With double it is probably something like 0.23099999999999998
+    AWT_ASSERT(awl::multiply("0.7"_d, "0.33"_d) == "0.231"_d);
 }
 
 AWT_TEST(DecimalMinMax)
