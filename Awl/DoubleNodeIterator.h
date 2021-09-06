@@ -31,6 +31,8 @@ namespace awl
 
         using reference = value_type &;
 
+        double_node_iterator() = default;
+        
         double_node_iterator(ListIterator i) : m_i(std::move(i)) {}
 
         T & operator * () const

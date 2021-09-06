@@ -27,11 +27,9 @@ namespace awl
 
         using reference = value_type &;
 
+        double_iterator() : m_p(nullptr) {}
+        
         double_iterator(DLink * p) : m_p(p) {}
-
-        //double_iterator(ForwardLink * p) : double_iterator(static_cast<DLink *>(p)) {}
-
-        //double_iterator(BackwardLink * p) : double_iterator(static_cast<DLink *>(p)) {}
 
         double_iterator(single_iterator<T, ForwardLink> i) : double_iterator(static_cast<DLink *>(*i)) {}
 
