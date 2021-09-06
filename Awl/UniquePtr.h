@@ -5,13 +5,9 @@
 
 namespace awl
 {
-    // At least in MSVC:
+    // At least in MSVC (and probably in GCC also):
     // std::unique_ptr::reset() function clears its internal pointer first and then deletes the object and thus
-    // prevents access to the object being destroyed. If the deleter throws an exception std::unique_ptr keeps new object and looses old.
-    // IMHO this behaviour is not intuitive. I would expect std::unique_ptr to keep old object if reset did not succeed,
-    // so in catch block I have the access to both old file and new file. For example, if std::fflush failed because
-    // there is no space left on the disk, in catch block I free some space and call reset again.
-    // My idea was that it prevents a recursion when reset throws an exception(from the deleter) and then std::unique_ptr destructor is called,
+    // My idea was that it prevents a recursion when reset throws an exception (from the deleter) and then std::unique_ptr destructor is called,
     // but deleter can't throw exceptions because reset is declared with noexcept.
 
     //The implementation is not complete yet, it does not have deleter and does not cast from a derived type.
