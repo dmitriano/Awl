@@ -8,8 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <set>
+#include <ranges>
 
 using namespace awl::testing;
+
+//Check if it satisfies the concept std::ranges::range.
+static_assert(std::ranges::range<awl::vector_set<int>>);
 
 namespace awl
 {

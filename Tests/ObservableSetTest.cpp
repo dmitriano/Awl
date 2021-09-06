@@ -5,6 +5,8 @@
 #include "Awl/KeyCompare.h"
 #include "Awl/Serializable.h"
 
+#include <ranges>
+
 using namespace awl::testing;
 
 namespace
@@ -41,6 +43,9 @@ AWT_TEST(ObservableSetAssignment)
 
     using Compare = awl::FieldCompare<A, size_t, &A::key>;
     using Set = awl::observable_set<A, Compare>;
+
+    //Check if it satisfies the concept std::ranges::range.
+    static_assert(std::ranges::range<Set>);
 
     Set s;
     s = {};

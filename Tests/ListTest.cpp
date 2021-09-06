@@ -3,6 +3,8 @@
 #include "Awl/QuickList.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <ranges>
+
 using namespace awl::testing;
 
 namespace
@@ -54,6 +56,9 @@ namespace
     class ListHolder
     {
         using ELEMENT_LIST = awl::quick_list<Element, DLink>;
+
+        //Check if it satisfies the concept std::ranges::range.
+        static_assert(std::ranges::range<ELEMENT_LIST>);
 
         ELEMENT_LIST list;
 
