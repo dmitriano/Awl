@@ -7,7 +7,7 @@
 namespace awl::io
 {
     template <class Stream, typename T, class Context = FakeContext>
-    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
+    typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
         Read(Stream & s, T & val, const Context & ctx = {})
     {
         static_cast<void>(ctx);
@@ -19,7 +19,7 @@ namespace awl::io
 
     //Scalar types are passed by value but not by const reference.
     template <class Stream, typename T, class Context = FakeContext>
-    inline typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
+    typename std::enable_if<std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type 
         Write(Stream & s, T val, const Context & ctx = {})
     {
         static_cast<void>(ctx);
@@ -32,7 +32,7 @@ namespace awl::io
     //sizeof(bool) is implementation-defined and it is not required to be 1.
 
     template <class Stream, class Context = FakeContext>
-    inline void Read(Stream & s, bool & b, const Context & ctx = {})
+    void Read(Stream & s, bool & b, const Context & ctx = {})
     {
         uint8_t val;
 
@@ -42,7 +42,7 @@ namespace awl::io
     }
 
     template <class Stream, class Context = FakeContext>
-    inline void Write(Stream & s, bool b, const Context & ctx = {})
+    void Write(Stream & s, bool b, const Context & ctx = {})
     {
         uint8_t val = b ? 1 : 0;
 

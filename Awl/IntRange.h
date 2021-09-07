@@ -69,19 +69,19 @@ namespace awl
     };
 
     template <class T>
-    inline auto make_int_iterator(T n)
+    auto make_int_iterator(T n)
     {
         return int_iterator<T>(n);
     }
 
     template <class T>
-    inline auto make_int_range(T begin, T end)
+    auto make_int_range(T begin, T end)
     {
         return make_range(int_iterator<T>(begin), int_iterator<T>(end));
     }
 
     template <class T>
-    inline auto make_count(T end)
+    auto make_count(T end)
     {
         return make_int_range(static_cast<T>(0), end);
     }

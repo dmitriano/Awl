@@ -12,7 +12,7 @@
 namespace awl::io
 {
     template <class Stream, class First, class Second, class Context = FakeContext>
-    inline void Write(Stream & s, const std::pair<First, Second> & val, const Context & ctx = {})
+    void Write(Stream & s, const std::pair<First, Second> & val, const Context & ctx = {})
     {
         Write(s, val.first, ctx);
         Write(s, val.second, ctx);
@@ -69,73 +69,73 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Read(Stream & s, std::set<T, Compare, Alloc> & coll, const Context & ctx = {})
+    void Read(Stream & s, std::set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Write(Stream & s, const std::set<T, Compare, Alloc> &coll, const Context & ctx = {})
+    void Write(Stream & s, const std::set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Read(Stream & s, vector_set<T, Compare, Alloc> & coll, const Context & ctx = {})
+    void Read(Stream & s, vector_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Write(Stream & s, const vector_set<T, Compare, Alloc> &coll, const Context & ctx = {})
+    void Write(Stream & s, const vector_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Read(Stream & s, observable_set<T, Compare, Alloc> & coll, const Context & ctx = {})
+    void Read(Stream & s, observable_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll, const Context & ctx = {})
+    void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
-    inline void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
+    void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
-    inline void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
+    void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class Key, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll, const Context & ctx = {})
+    void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadMap(s, coll, ctx);
     }
 
     template <class Stream, class Key, class T, class Compare, class Alloc, class Context = FakeContext>
-    inline void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll, const Context & ctx = {})
+    void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
-    inline void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
+    void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
         ReadMap(s, coll, ctx);
     }
 
     template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
-    inline void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
+    void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }

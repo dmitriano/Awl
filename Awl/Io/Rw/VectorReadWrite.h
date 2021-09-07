@@ -8,7 +8,7 @@
 namespace awl::io
 {
     template <class Stream, class Container, class Context = FakeContext>
-    inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
+    typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
         ReadVector(Stream & s, Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
@@ -16,7 +16,7 @@ namespace awl::io
     }
 
     template <class Stream, class Container, class Context = FakeContext>
-    inline typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
+    typename std::enable_if<std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value, void>::type
         WriteVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
@@ -86,7 +86,7 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Allocator = std::allocator<T>, class Context = FakeContext>
-    inline void Read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
+    void Read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size;
 
@@ -98,7 +98,7 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Allocator = std::allocator<T>, class Context = FakeContext>
-    inline void Write(Stream & s, const std::vector<T, Allocator> & v, const Context & ctx = {})
+    void Write(Stream & s, const std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size = v.size();
 
@@ -109,13 +109,13 @@ namespace awl::io
 
     //std::array has no specialization for bool type, but we save std::array<bool, N> in the same format as std::vector<bool>.
     template <class Stream, typename T, std::size_t N, class Context = FakeContext>
-    inline void Read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
+    void Read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
     {
         ReadVector(s, v, ctx);
     }
 
     template <class Stream, typename T, std::size_t N, class Context = FakeContext>
-    inline void Write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
+    void Write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
     {
         WriteVector(s, v, ctx);
     }

@@ -100,7 +100,7 @@ namespace awl::io
     }
     
     template <class Stream, typename... Ts, class Context = FakeContext>
-    inline void Read(Stream & s, std::variant<Ts...> & v, const Context & ctx = {})
+    void Read(Stream & s, std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
 
@@ -108,7 +108,7 @@ namespace awl::io
     }
 
     template <class Stream, typename... Ts, class Context = FakeContext>
-    inline void Write(Stream & s, const std::variant<Ts...> & v, const Context & ctx = {})
+    void Write(Stream & s, const std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
 

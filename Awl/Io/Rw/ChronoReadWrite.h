@@ -11,7 +11,7 @@ namespace awl::io
     static_assert(std::is_arithmetic_v<std::chrono::nanoseconds::rep> && std::is_signed_v<std::chrono::nanoseconds::rep> && sizeof(std::chrono::nanoseconds::rep) == 8);
 
     template <class Stream, class Clock, class Duration, class Context = FakeContext>
-    inline void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val, const Context & ctx = {})
+    void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
@@ -23,7 +23,7 @@ namespace awl::io
     }
 
     template <class Stream, class Clock, class Duration, class Context = FakeContext>
-    inline void Write(Stream & s, std::chrono::time_point<Clock, Duration> val, const Context & ctx = {})
+    void Write(Stream & s, std::chrono::time_point<Clock, Duration> val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
