@@ -73,13 +73,13 @@ namespace awl
     };
 
     template <class Iterator, class UnaryFunction>
-    inline auto make_transform_iterator(Iterator i, UnaryFunction func)
+    auto make_transform_iterator(Iterator i, UnaryFunction func)
     {
         return transform_iterator<UnaryFunction, Iterator>(i, func);
     }
 
     template <class Container, class Iterator, class UnaryFunction>
-    inline auto make_friend_iterator(Iterator i, UnaryFunction func)
+    auto make_friend_iterator(Iterator i, UnaryFunction func)
     {
         return transform_iterator<UnaryFunction, Iterator, Container>(i, func);
     }

@@ -50,13 +50,13 @@ namespace awl
     };
 
     template <class Lambda>
-    inline scope_guard<Lambda> make_scope_guard(Lambda free, bool engaged = true)
+    scope_guard<Lambda> make_scope_guard(Lambda free, bool engaged = true)
     {
         return scope_guard<Lambda>(std::move(free), engaged);
     }
 
     template <class Init, class Free>
-    inline scope_guard<Free> make_scope_guard(Init init, Free free, bool engaged = true)
+    scope_guard<Free> make_scope_guard(Init init, Free free, bool engaged = true)
     {
         if (engaged)
         {

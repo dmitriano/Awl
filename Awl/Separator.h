@@ -41,7 +41,7 @@ namespace awl
     };
 
     template <class C>
-    inline std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, basic_separator<C>& sep)
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, basic_separator<C>& sep)
     {
         if (sep.first())
         {

@@ -14,7 +14,7 @@ namespace awl::io
         class Allocator = std::allocator<Char>,
         class Context = FakeContext
     >
-    inline void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
+    void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len;
 
@@ -35,7 +35,7 @@ namespace awl::io
         class Allocator = std::allocator<Char>,
         class Context = FakeContext
     >
-    inline void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
+    void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len = val.length();
 

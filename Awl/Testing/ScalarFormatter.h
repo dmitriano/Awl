@@ -10,20 +10,20 @@ namespace awl
     {
         // used when C is specified as char
         template<typename C, typename T>
-        inline typename std::enable_if<std::is_same<C, char>::value, std::string>::type ToBasicString(T val)
+        typename std::enable_if<std::is_same<C, char>::value, std::string>::type ToBasicString(T val)
         {
             return std::to_string(val);
         }
 
         // used when C is specified as wchar_t
         template<typename C, typename T>
-        inline typename std::enable_if<std::is_same<C, wchar_t>::value, std::wstring>::type ToBasicString(T val)
+        typename std::enable_if<std::is_same<C, wchar_t>::value, std::wstring>::type ToBasicString(T val)
         {
             return std::to_wstring(val);
         }
 
         template<typename C>
-        inline typename std::enable_if<std::is_same<C, char>::value || std::is_same<C, wchar_t>::value, std::basic_string<C>>::type ToBasicString(bool)
+        typename std::enable_if<std::is_same<C, char>::value || std::is_same<C, wchar_t>::value, std::basic_string<C>>::type ToBasicString(bool)
         {
             return std::basic_string<C>{};
         }

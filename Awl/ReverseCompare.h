@@ -22,7 +22,7 @@ namespace awl
     };
 
     template <class T, class Compare>
-    inline ReverseCompare<T, Compare> reverse_comparer(Compare comp)
+    ReverseCompare<T, Compare> reverse_comparer(Compare comp)
     {
         return ReverseCompare<T, Compare>(std::move(comp));
     }

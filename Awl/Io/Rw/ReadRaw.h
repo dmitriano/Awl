@@ -9,7 +9,7 @@ namespace awl::io
     //can be called as non-virtual and even as constexpr if the final Stream type is known at compile time.
 
     template <class Stream>
-    inline void ReadRaw(Stream & s, uint8_t * buffer, size_t count)
+    void ReadRaw(Stream & s, uint8_t * buffer, size_t count)
     {
         const size_t actually_read = s.Read(buffer, count);
 

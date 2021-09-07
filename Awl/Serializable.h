@@ -7,37 +7,37 @@
 namespace awl
 {
     template <class T>
-    inline constexpr auto object_as_tuple(T & val)
+    constexpr auto object_as_tuple(T & val)
     {
         return val.as_tuple();
     }
 
     template <class T>
-    inline constexpr auto object_as_const_tuple(const T & val)
+    constexpr auto object_as_const_tuple(const T & val)
     {
         return val.as_const_tuple();
     }
 
     template <class T>
-    inline constexpr auto object_as_tuple(const T & val)
+    constexpr auto object_as_tuple(const T & val)
     {
         return object_as_const_tuple(val);
     }
 
     template <class T>
-    inline constexpr bool objects_equal(const T & left, const T & right)
+    constexpr bool objects_equal(const T & left, const T & right)
     {
         return object_as_tuple(left) == object_as_tuple(right);
     }
 
     template <class T>
-    inline constexpr bool objects_less(const T & left, const T & right)
+    constexpr bool objects_less(const T & left, const T & right)
     {
         return object_as_tuple(left) < object_as_tuple(right);
     }
 
     template <class T>
-    inline constexpr bool objects_greater(const T & left, const T & right)
+    constexpr bool objects_greater(const T & left, const T & right)
     {
         return object_as_tuple(left) > object_as_tuple(right);
     }
@@ -47,9 +47,6 @@ namespace awl
 
     template <class T>
     struct is_tuplizable<T, std::void_t<decltype(T{}.as_const_tuple())>> : std::true_type {};
-    //There can be 
-    //static inline constexpr bool isTuplizable = true;
-    //in AWL_SERIALIZABLE macro.
 
     template <class T>
     inline constexpr bool is_tuplizable_v = is_tuplizable<T>::value;
@@ -105,12 +102,12 @@ namespace awl
     namespace awl \
     { \
         template <> \
-        inline auto object_as_tuple(const ClassName & val) \
+        auto object_as_tuple(const ClassName & val) \
         { \
             return std::tie(__VA_ARGS__); \
         } \
         template <> \
-        inline auto object_as_tuple(ClassName & val) \
+        auto object_as_tuple(ClassName & val) \
         { \
             return std::tie(__VA_ARGS__); \
         } \
