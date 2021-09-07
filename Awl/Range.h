@@ -34,25 +34,25 @@ namespace awl
     };
 
     template <class Iterator>
-    inline range<Iterator> make_range(Iterator begin, Iterator end)
+    range<Iterator> make_range(Iterator begin, Iterator end)
     {
         return range<Iterator>(begin, end);
     }
 
     template <class Container>
-    inline range<typename Container::iterator> make_range(Container & container)
+    range<typename Container::iterator> make_range(Container & container)
     {
         return make_range(container.begin(), container.end());
     }
 
     template <class Container>
-    inline range<typename Container::const_iterator> make_crange(const Container & container)
+    range<typename Container::const_iterator> make_crange(const Container & container)
     {
         return make_range(container.begin(), container.end());
     }
 
     template <class Container>
-    inline range<typename Container::const_iterator> make_range(const Container & container)
+    range<typename Container::const_iterator> make_range(const Container & container)
     {
         return make_crange(container);
     }

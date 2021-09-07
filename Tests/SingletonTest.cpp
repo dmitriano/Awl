@@ -13,7 +13,7 @@ namespace
     using A = awl::testing::helpers::NonCopyable;
 
     template <typename T>
-    inline bool is_uninitialized(std::weak_ptr<T> const& weak)
+    bool is_uninitialized(std::weak_ptr<T> const& weak)
     {
         using wt = std::weak_ptr<T>;
         return !weak.owner_before(wt{}) && !wt{}.owner_before(weak);
@@ -23,7 +23,7 @@ namespace
     std::shared_ptr<T> CreateObject();
 
     template <>
-    inline std::shared_ptr<A> CreateObject()
+    std::shared_ptr<A> CreateObject()
     {
         //We have a long leaving std::weak_ptr so we do not use std::make_shared.
         return std::shared_ptr<A>(new A(value));

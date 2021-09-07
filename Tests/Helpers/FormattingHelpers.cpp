@@ -14,7 +14,7 @@ namespace awl::testing::helpers
     using Durations = std::variant<hours, minutes, seconds, milliseconds, microseconds, nanoseconds>;
 
     template <size_t index>
-    inline void PrintDuration(awl::ostream & out, std::chrono::steady_clock::duration d)
+    void PrintDuration(awl::ostream & out, std::chrono::steady_clock::duration d)
     {
         constexpr std::array<const awl::Char *, std::variant_size_v<Durations>> durationUnits = { _T("h"), _T("min"), _T("s"), _T("ms"), _T("us"), _T("ns") };
 

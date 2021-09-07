@@ -13,7 +13,7 @@
 namespace awl::testing::helpers
 {
     template <typename value_type>
-    inline value_type GetElapsedSeconds(std::chrono::steady_clock::duration d)
+    value_type GetElapsedSeconds(std::chrono::steady_clock::duration d)
     {
         return std::chrono::duration_cast<std::chrono::duration<value_type>>(d).count();
     }

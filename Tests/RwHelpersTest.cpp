@@ -52,19 +52,19 @@ namespace
 namespace awl
 {
     template <>
-    inline auto object_as_const_tuple(const A & val)
+    constexpr auto object_as_const_tuple(const A & val)
     {
         return std::tie(val.x, val.y);
     }
 
     template <>
-    inline auto object_as_tuple(A & val)
+    constexpr auto object_as_tuple(A & val)
     {
         return std::tie(val.x, val.y);
     }
 
     template <>
-    inline constexpr bool is_tuplizable_v<A> = true;
+    constexpr bool is_tuplizable_v<A> = true;
 }
 
 namespace

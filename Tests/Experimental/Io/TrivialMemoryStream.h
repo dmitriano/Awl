@@ -99,14 +99,14 @@ namespace awl::io
     };
 
     template <typename T>
-    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
+    std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
         *(reinterpret_cast<T *>(s.m_p)) = val;
         s.m_p += sizeof(val);
     }
 
     template <typename T>
-    inline std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
+    std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
         val = *(reinterpret_cast<T *>(s.m_p));
         s.m_p += sizeof(val);

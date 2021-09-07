@@ -25,25 +25,25 @@ namespace awl
     //Const for_each overloads for iterating over const std::tuple<Args & ...>.
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         (f(std::get<index>(t)), ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
+    constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
     {
         for_each(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         (f(std::get<index>(t), std::integral_constant<std::size_t, index>()), ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
+    constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
     {
         for_each_index(t, f, std::index_sequence_for<Args...>{});
     }
@@ -51,145 +51,145 @@ namespace awl
     //Non const for_each overloads for iterating over std::tuple<Args ...>.
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr void for_each(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr void for_each(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         (f(std::get<index>(t)), ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr void for_each(std::tuple<Args...>& t, Func&& f)
+    constexpr void for_each(std::tuple<Args...>& t, Func&& f)
     {
         for_each(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr void for_each_index(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr void for_each_index(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         (f(std::get<index>(t), std::integral_constant<std::size_t, index>()), ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr void for_each_index(std::tuple<Args...>& t, Func&& f)
+    constexpr void for_each_index(std::tuple<Args...>& t, Func&& f)
     {
         for_each_index(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::make_tuple(f(std::get<index>(t)) ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f)
+    constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f)
     {
         return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::make_tuple(f(std::get<index>(t)) ...);
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f)
+    constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f)
     {
         return transform_tuple(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <template <class> class T, class Tuple, std::size_t... index>
-    inline constexpr auto transform_t2t(const Tuple & t, std::index_sequence<index...>)
+    constexpr auto transform_t2t(const Tuple & t, std::index_sequence<index...>)
     {
         return std::make_tuple(T<std::tuple_element_t<index, Tuple>>(std::get<index>(t)) ...);
     }
 
     template <template <class> class T, class Tuple>
-    inline constexpr auto transform_t2t(const Tuple & t)
+    constexpr auto transform_t2t(const Tuple & t)
     {
         return transform_t2t<T>(t, std::make_index_sequence<std::tuple_size_v<Tuple>>());
     }
 
     template <template <size_t index> class T, class Tuple, std::size_t... index>
-    inline constexpr auto transform_t2ti(const Tuple & t, std::index_sequence<index...>)
+    constexpr auto transform_t2ti(const Tuple & t, std::index_sequence<index...>)
     {
         return std::make_tuple(T<index>(std::get<index>(t)) ...);
     }
 
     template <template <size_t index> class T, class Tuple>
-    inline constexpr auto transform_t2ti(const Tuple & t)
+    constexpr auto transform_t2ti(const Tuple & t)
     {
         return transform_t2ti<T>(t, std::make_index_sequence<std::tuple_size_v<Tuple>>());
     }
 
     template <class V, template <class> class T, std::size_t... index>
-    inline constexpr auto transform_v2t(std::index_sequence<index...>)
+    constexpr auto transform_v2t(std::index_sequence<index...>)
     {
         return std::make_tuple(T<std::variant_alternative_t<index, V>>() ...);
     }
 
     template <class V, template <class> class T>
-    inline constexpr auto transform_v2t()
+    constexpr auto transform_v2t()
     {
         return transform_v2t<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
     }
 
     template <class V, template <size_t> class T, std::size_t... index>
-    inline constexpr auto transform_v2ti(std::index_sequence<index...>)
+    constexpr auto transform_v2ti(std::index_sequence<index...>)
     {
         return std::make_tuple(T<index>() ...);
     }
 
     template <class V, template <size_t> class T>
-    inline constexpr auto transform_v2ti()
+    constexpr auto transform_v2ti()
     {
         return transform_v2ti<V, T>(std::make_index_sequence<std::variant_size_v<V>>());
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::array{f(std::get<index>(t)) ...};
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f)
+    constexpr auto tuple_to_array(const std::tuple<Args...>& t, Func&& f)
     {
         return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
     }
 
     template <class I, typename... Args, std::size_t... index>
-    inline constexpr auto tuple_cast(const std::tuple<Args...>& t, std::index_sequence<index...>)
+    constexpr auto tuple_cast(const std::tuple<Args...>& t, std::index_sequence<index...>)
     {
         return std::array{ static_cast<I *>(&std::get<index>(t)) ... };
     }
 
     template <class I, typename... Args>
-    inline constexpr auto tuple_cast(const std::tuple<Args...>& t)
+    constexpr auto tuple_cast(const std::tuple<Args...>& t)
     {
         return tuple_cast<I>(t, std::index_sequence_for<Args...>{});
     }
 
     template <class I, typename... Args, std::size_t... index>
-    inline constexpr auto tuple_cast(std::tuple<Args...>& t, std::index_sequence<index...>)
+    constexpr auto tuple_cast(std::tuple<Args...>& t, std::index_sequence<index...>)
     {
         return std::array{ static_cast<I *>(&std::get<index>(t)) ... };
     }
 
     template <class I, typename... Args>
-    inline constexpr auto tuple_cast(std::tuple<Args...>& t)
+    constexpr auto tuple_cast(std::tuple<Args...>& t)
     {
         return tuple_cast<I>(t, std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
-    inline constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
     {
         return std::array{ f(std::get<index>(t)) ... };
     }
 
     template <typename... Args, typename Func>
-    inline constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f)
+    constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f)
     {
         return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
     }
