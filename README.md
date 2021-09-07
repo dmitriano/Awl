@@ -11,7 +11,7 @@ AWL is a small cross-platform C++ library that includes:
 6. A [pool of reusable objects](https://github.com/dmitriano/Awl/blob/master/Awl/ObjectPool.h) managed with std::shared_ptr.
 7. [Bitset based on enum](https://github.com/dmitriano/Awl/blob/master/Awl/BitMap.h).
 8. A [circular buffer](https://github.com/dmitriano/Awl/blob/master/Awl/Ring.h) with an interface similar to std::queue.
-9. And other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
+9. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 10. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
 Theoretically, the master branch should compile and work with C++20, at least it is periodically built with MSVC 19.29.30040+ and GCC 11, but not with CLang yet.
