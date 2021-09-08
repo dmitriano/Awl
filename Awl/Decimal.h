@@ -117,6 +117,12 @@ namespace awl
         {
         }
 
+        decimal(const decimal& other) = default;
+        decimal(decimal&& other) = default;
+
+        decimal& operator = (const decimal& other) = default;
+        decimal& operator = (decimal && other) = default;
+
         //The value of resulting uint64_t may be different with different compilers. But the value of Data structure
         //should be the same when I convert it back from uint64_t. See Bit field.
         static constexpr decimal from_int(uint64_t val)
@@ -180,8 +186,6 @@ namespace awl
         {
             return m_denoms[m_data.exp];
         }
-
-        decimal& operator = (const decimal& other) = default;
 
         template <class Float>
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
