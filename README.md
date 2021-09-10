@@ -20,7 +20,9 @@ There is also cpp17 branch that probably compiles with C++17.
 
 Version compatibility is not guaranteed and there is no warranty of any kind.
 
-Feel free to use it or fork it.
+Feel free to use it or fork it, report a bug by opening an issue.
+
+To leave the author a message fill the [form on his website](https://developernote.com/contact/).
 
 Compiling on Windows with CMake and MSVC 2019:
 
