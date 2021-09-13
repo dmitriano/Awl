@@ -13,9 +13,9 @@ namespace awl
     {
     public:
 
-        StopWatch()
+        explicit StopWatch(std::chrono::steady_clock::time_point from = std::chrono::steady_clock::now()) :
+            startTime(from)
         {
-            Reset();
         }
 
         void Reset()
@@ -49,7 +49,7 @@ namespace awl
         }
 
         template <class Duration>
-        bool HasElapsed(Duration interval)
+        bool HasElapsed(Duration interval) const
         {
             return GetElapsedTime() > std::chrono::duration_cast<std::chrono::steady_clock::duration>(interval);
         }
