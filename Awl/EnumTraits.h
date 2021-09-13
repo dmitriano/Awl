@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Awl/Stringizable.h"
+
 namespace awl
 {
     template <class T> class EnumTraits;
@@ -39,6 +41,8 @@ namespace awl
         enum : size_type { __VA_ARGS__, Last }; \
     public: \
         static constexpr size_type m_count = Last; \
+        /*I was unable to make std::vector constexpr even in MSVC 19.29.30133, probably we need to wait a bit.*/ \
+        static inline const awl::helpers::MemberList m_ml{#__VA_ARGS__}; \
     };
 
 //This awl::EnumTraits should be specialized at the global namespace level.
@@ -50,5 +54,9 @@ namespace awl
         static constexpr ns::EnumName##Traits::size_type count() \
         { \
             return ns::EnumName##Traits::m_count; \
+        } \
+        static const awl::helpers::MemberList& names() \
+        { \
+            return ns::EnumName##Traits::m_ml; \
         } \
     };

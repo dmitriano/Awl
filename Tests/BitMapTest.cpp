@@ -23,6 +23,8 @@ namespace BitMapTest
     static_assert(ConstBitMap{ Vehicle::Car }[Vehicle::Car]);
     static_assert(!ConstBitMap{ Vehicle::Car }[Vehicle::Train]);
     static_assert(ConstBitMap{ Vehicle::Car, Vehicle::Train }[Vehicle::Train]);
+
+    const std::vector<std::string> expected_names{ "Car", "Train", "AirPlain" };
 }
 
 AWT_TEST(BitMapWithEnumTraits)
@@ -30,6 +32,8 @@ AWT_TEST(BitMapWithEnumTraits)
     AWT_UNUSED_CONTEXT;
     
     using namespace BitMapTest;
+
+    AWT_ASSERT(std::ranges::equal(awl::EnumTraits<Vehicle>::names(), expected_names));
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 
