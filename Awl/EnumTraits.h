@@ -38,7 +38,7 @@ namespace awl
     private: \
         enum : size_type { __VA_ARGS__, Last }; \
     public: \
-        static constexpr size_type Count = Last; \
+        static constexpr size_type m_count = Last; \
     };
 
 //This awl::EnumTraits should be specialized at the global namespace level.
@@ -49,6 +49,6 @@ namespace awl
     public: \
         static constexpr ns::EnumName##Traits::size_type count() \
         { \
-            return ns::EnumName##Traits::Count; \
+            return ns::EnumName##Traits::m_count; \
         } \
     };
