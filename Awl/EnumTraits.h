@@ -10,6 +10,27 @@
 namespace awl
 {
     template <class T> class EnumTraits;
+
+    template<typename T, typename = void>
+    constexpr bool is_defined_v = false;
+
+    template<typename T>
+    constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
+
+    template <class T>
+    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
+    {
+        auto& names = awl::EnumTraits<T>::names();
+
+        const size_t int_val = static_cast<size_t>(val);
+
+        if (int_val >= names.size())
+        {
+            throw std::logic_error("Wrong enum value.");
+        }
+
+        return names[int_val];
+    }
 }
 
 /*
