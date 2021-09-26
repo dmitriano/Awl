@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Awl/FixedString.h"
+#include "Awl/Text.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/TypeTraits.h"
 #include "Awl/Stringizable.h"
@@ -56,12 +56,12 @@ namespace awl::io
         {
             if constexpr (val == 0)
             {
-                return FixedString("0");
+                return text("0");
             }
             else
             {
                 constexpr size_t N = GetNumberLength<val>();
-                FixedString<N> buf;
+                text<char, N> buf;
 
                 size_t n = val;
                 for (int i = N - 1; i >= 0; --i)
@@ -75,10 +75,10 @@ namespace awl::io
         }
 
         static_assert(FormatNumber<5>().size() == 1);
-        static_assert(FixedString{ "5" }.size() == 1);
-        static_assert(FormatNumber<5>() == FixedString{ "5" });
-        static_assert(FormatNumber<0>() == FixedString{ "0" });
-        static_assert(FormatNumber<35>() == FixedString{ "35" });
+        static_assert(text{ "5" }.size() == 1);
+        static_assert(FormatNumber<5>() == text{ "5" });
+        static_assert(FormatNumber<0>() == text{ "0" });
+        static_assert(FormatNumber<35>() == text{ "35" });
 
         template <class T, std::enable_if_t<std::is_arithmetic<T>{}, bool > = true >
         constexpr auto GetArithmeticSize()
@@ -101,18 +101,18 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            auto suffix = helpers::GetArithmeticSize<T>() + FixedString{ "_t" };
+            auto suffix = helpers::GetArithmeticSize<T>() + text{ "_t" };
 
             if constexpr (std::is_integral_v<T>)
             {
                 //Both signed and unsigned are 'int'.
-                return FixedString{ "int" } +suffix;
+                return text{ "int" } +suffix;
             }
             else
             {
                 if constexpr (std::is_floating_point_v<T>)
                 {
-                    return FixedString{ "float" } +suffix;
+                    return text{ "float" } +suffix;
                 }
                 else
                 {
@@ -122,9 +122,9 @@ namespace awl::io
         }
     };
 
-    static_assert(make_type_name<int32_t>() == FixedString{ "int32_t" });
-    static_assert(make_type_name<uint16_t>() == FixedString{ "int16_t" });
-    static_assert(make_type_name<float>() == FixedString{ "float32_t" });
+    static_assert(make_type_name<int32_t>() == text{ "int32_t" });
+    static_assert(make_type_name<uint16_t>() == text{ "int16_t" });
+    static_assert(make_type_name<float>() == text{ "float32_t" });
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<
@@ -137,15 +137,15 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return FixedString("sequence<") + make_type_name<typename T::value_type>() + FixedString(">");
+            return text("sequence<") + make_type_name<typename T::value_type>() + text(">");
         }
     };
 
-    static_assert(make_type_name<std::string>() == FixedString{ "sequence<int8_t>" });
+    static_assert(make_type_name<std::string>() == text{ "sequence<int8_t>" });
     //wstring is int32_t in GCC and uint16_t in MSVC
-    //static_assert(make_type_name<std::wstring>() == FixedString{ "sequence<int16_t>" });
-    static_assert(make_type_name<std::vector<int32_t>>() == FixedString{ "sequence<int32_t>" });
-    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == FixedString{ "sequence<sequence<int64_t>>" });
+    //static_assert(make_type_name<std::wstring>() == text{ "sequence<int16_t>" });
+    static_assert(make_type_name<std::vector<int32_t>>() == text{ "sequence<int32_t>" });
+    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == text{ "sequence<sequence<int64_t>>" });
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<
@@ -154,11 +154,11 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return FixedString("map<") + make_type_name<typename T::key_type>() + FixedString(", ") + make_type_name<typename T::mapped_type>() + FixedString(">");
+            return text("map<") + make_type_name<typename T::key_type>() + text(", ") + make_type_name<typename T::mapped_type>() + text(">");
         }
     };
 
-    static_assert(make_type_name<std::map<int32_t, int64_t>>() == FixedString{ "map<int32_t, int64_t>" });
+    static_assert(make_type_name<std::map<int32_t, int64_t>>() == text{ "map<int32_t, int64_t>" });
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<is_specialization_v<T, std::chrono::time_point>>>
@@ -169,36 +169,36 @@ namespace awl::io
         }
     };
 
-    static_assert(make_type_name<std::chrono::system_clock::time_point>() == FixedString{ "int64_t" });
+    static_assert(make_type_name<std::chrono::system_clock::time_point>() == text{ "int64_t" });
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<is_specialization_v<T, std::optional>>>
     {
         static constexpr auto name()
         {
-            return FixedString("optional<") + make_type_name<typename T::value_type>() + FixedString(">");
+            return text("optional<") + make_type_name<typename T::value_type>() + text(">");
         }
     };
 
-    static_assert(make_type_name<std::optional<std::string>>() == FixedString("optional<sequence<int8_t>>"));
+    static_assert(make_type_name<std::optional<std::string>>() == text("optional<sequence<int8_t>>"));
 
     template<class T, std::size_t N>
     struct type_descriptor<std::array<T, N>>
     {
         static constexpr auto name()
         {
-            return FixedString("array<") + make_type_name<T>() + FixedString(", ") + helpers::FormatNumber<N>() + FixedString(">");
+            return text("array<") + make_type_name<T>() + text(", ") + helpers::FormatNumber<N>() + text(">");
         }
     };
 
-    static_assert(make_type_name<std::array<uint8_t, 5>>() == FixedString{ "array<int8_t, 5>" });
+    static_assert(make_type_name<std::array<uint8_t, 5>>() == text{ "array<int8_t, 5>" });
 
     template <class T>
     struct type_descriptor<T, std::enable_if_t<is_stringizable_v<T>>>
     {
         static constexpr auto name()
         {
-            return FixedString("struct");
+            return text("struct");
         }
     };
 
@@ -207,20 +207,20 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return FixedString("variant<") + ((make_type_name<Ts>() + FixedString(", ")) + ...) + FixedString(">");
+            return text("variant<") + ((make_type_name<Ts>() + text(", ")) + ...) + text(">");
         }
     };
 
-    static_assert(make_type_name<std::variant<int32_t, int64_t>>() == FixedString{ "variant<int32_t, int64_t, >" });
+    static_assert(make_type_name<std::variant<int32_t, int64_t>>() == text{ "variant<int32_t, int64_t, >" });
 
     template<>
     struct type_descriptor<awl::decimal>
     {
         static constexpr auto name()
         {
-            return FixedString("decimal");
+            return text("decimal");
         }
     };
 
-    static_assert(make_type_name<awl::decimal>() == FixedString{ "decimal" });
+    static_assert(make_type_name<awl::decimal>() == text{ "decimal" });
 }
