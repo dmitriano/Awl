@@ -7,12 +7,15 @@
 
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <type_traits>
 #include <algorithm>
 #include <wchar.h>
 #include <cassert>
 #include <iterator>
+
+#include "Awl/FixedString.h"
 
 #ifdef _MSC_VER
 
@@ -35,6 +38,21 @@ static_assert(sizeof(_T(" ")[0]) == sizeof(TCHAR), "Wrong _T macro definition.")
 namespace awl
 {
     using Char = TCHAR;
+
+    template<std::size_t N>
+    auto text(const char(&arr)[N])
+    {
+        return fixed_string<Char, N - 1>::from_ascii(arr);
+    }
+
+    template<typename CharT, std::size_t N>
+    std::basic_ostream<CharT>& operator << (std::basic_ostream<CharT>& out, const fixed_string<Char, N>& val)
+    {
+        //Why it does not compile with std::basic_string_view<const CharT> ?
+        out << static_cast<std::basic_string<CharT>>(val);
+
+        return out;
+    }
 
     using String = std::basic_string<Char>;
 

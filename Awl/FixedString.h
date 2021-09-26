@@ -72,9 +72,14 @@ namespace awl
             return false;
         }
 
-        operator std::basic_string<CharT>()
+        operator std::basic_string<CharT>() const
         {
             return std::basic_string<CharT>(data(), size());
+        }
+
+        operator std::basic_string_view<const CharT>() const
+        {
+            return std::basic_string_view<CharT>(data(), size());
         }
 
         operator std::basic_string_view<CharT>()
@@ -82,7 +87,7 @@ namespace awl
             return std::basic_string_view<CharT>(data(), size());
         }
 
-        friend constexpr fixed_string from_ascii(const char(&arr)[N + 1])
+        static constexpr fixed_string from_ascii(const char(&arr)[N + 1])
         {
             fixed_string s;
             
