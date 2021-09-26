@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Serializable.h"
-#include "Awl/Text.h"
+#include "Awl/FixedString.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/TypeName.h"

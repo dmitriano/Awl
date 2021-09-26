@@ -22,15 +22,15 @@ namespace
 
         out << d;
 
-        auto text = out.str();
+        auto fixed_string = out.str();
 
         if (result.empty())
         {
-            AWT_ASSERT(text == sample);
+            AWT_ASSERT(fixed_string == sample);
         }
         else
         {
-            AWT_ASSERT(text == result);
+            AWT_ASSERT(fixed_string == result);
         }
     }
 
@@ -124,9 +124,9 @@ AWT_TEST(DecimalDoubleConversion)
 
     d = val;
 
-    const awl::String text = d.to_string();
+    const awl::String fixed_string = d.to_string();
 
-    AWT_ASSERT(text == _T("10.12800"));
+    AWT_ASSERT(fixed_string == _T("10.12800"));
 }
 
 AWT_TEST(DecimalLimits)

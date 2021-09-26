@@ -112,13 +112,13 @@ namespace awl
         }
 
         template <class C>
-        constexpr explicit decimal(std::basic_string_view<C> text)
+        constexpr explicit decimal(std::basic_string_view<C> fixed_string)
         {
-            *this = from_string(text);
+            *this = from_string(fixed_string);
         }
 
         template <class C>
-        constexpr explicit decimal(const C* text) : decimal(std::basic_string_view<C>(text))
+        constexpr explicit decimal(const C* fixed_string) : decimal(std::basic_string_view<C>(fixed_string))
         {
         }
 
@@ -335,7 +335,7 @@ namespace awl
         }
 
         template <class C>
-        static constexpr decimal from_string(std::basic_string_view<C> text);
+        static constexpr decimal from_string(std::basic_string_view<C> fixed_string);
 
         template <class C>
         constexpr std::basic_string<C> to_basic_string() const
@@ -564,7 +564,7 @@ namespace awl
 
         template <class C>
         static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
-            parse_int(std::basic_string_view<C> text, bool point_terminator);
+            parse_int(std::basic_string_view<C> fixed_string, bool point_terminator);
 
         template <class C>
         static constexpr uint8_t symbol_to_digit(C symbol)
@@ -607,14 +607,14 @@ namespace awl
 
     //Returns a normalized decimal, because we trimmed zeros.
     template <class C>
-    constexpr decimal decimal::from_string(std::basic_string_view<C> text)
+    constexpr decimal decimal::from_string(std::basic_string_view<C> fixed_string)
     {
         using string_view = std::basic_string_view<C>;
         
         bool positive = true;
 
         {
-            typename string_view::const_iterator i = text.begin();
+            typename string_view::const_iterator i = fixed_string.begin();
 
             if (*i == '+' || *i == '-')
             {
@@ -624,12 +624,12 @@ namespace awl
             }
 
             //Construction from the iterators is C++20 feature.
-            text = string_view(i, text.end());
+            fixed_string = string_view(i, fixed_string.end());
         }
 
-        auto [i, int_digits, int_part] = parse_int(text, true);
+        auto [i, int_digits, int_part] = parse_int(fixed_string, true);
 
-        string_view fractional_text(i, text.end());
+        string_view fractional_text(i, fixed_string.end());
 
         auto [fractional_i, digits, fractional_part] = parse_int(fractional_text, false);
 
@@ -695,7 +695,7 @@ namespace awl
 
     template <class C>
     constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
-        decimal::parse_int(std::basic_string_view<C> text, bool point_terminator)
+        decimal::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
     {
         uint8_t digit_count = 0;
 
@@ -749,9 +749,9 @@ namespace awl
             }
         };
 
-        auto i = text.begin();
+        auto i = fixed_string.begin();
 
-        for (; i != text.end(); ++i)
+        for (; i != fixed_string.end(); ++i)
         {
             C symbol = *i;
 

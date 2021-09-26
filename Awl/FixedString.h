@@ -12,11 +12,11 @@
 namespace awl
 {
     template<typename CharT, std::size_t N>
-    class text
+    class fixed_string
     {
     public:
 
-        constexpr text(CharT const(&arr)[N + 1])
+        constexpr fixed_string(CharT const(&arr)[N + 1])
         {
             for (std::size_t i = 0; i < N; ++i)
                 state[i] = arr[i];
@@ -31,14 +31,14 @@ namespace awl
         constexpr CharT const* begin() const { return state; }
         constexpr CharT const* end() const { return begin() + size(); }
 
-        constexpr text() = default;
-        constexpr text(text const&) = default;
-        constexpr text& operator=(text const&) = default;
+        constexpr fixed_string() = default;
+        constexpr fixed_string(fixed_string const&) = default;
+        constexpr fixed_string& operator=(fixed_string const&) = default;
 
         template<std::size_t M>
-        friend constexpr text<CharT, N + M> operator+(text lhs, text<CharT, M> rhs)
+        friend constexpr fixed_string<CharT, N + M> operator+(fixed_string lhs, fixed_string<CharT, M> rhs)
         {
-            text<CharT, N + M> retval;
+            fixed_string<CharT, N + M> retval;
             for (std::size_t i = 0; i < N; ++i)
                 retval[i] = lhs[i];
             for (std::size_t i = 0; i < M; ++i)
@@ -46,14 +46,14 @@ namespace awl
             return retval;
         }
 
-        friend constexpr bool operator==(text lhs, text rhs)
+        friend constexpr bool operator==(fixed_string lhs, fixed_string rhs)
         {
             for (std::size_t i = 0; i < N; ++i)
                 if (lhs[i] != rhs[i]) return false;
             return true;
         }
 
-        friend constexpr bool operator!=(text lhs, text rhs)
+        friend constexpr bool operator!=(fixed_string lhs, fixed_string rhs)
         {
             for (std::size_t i = 0; i < N; ++i)
                 if (lhs[i] != rhs[i]) return true;
@@ -61,13 +61,13 @@ namespace awl
         }
         
         template<std::size_t M, std::enable_if_t<M != N, bool> = true>
-        friend constexpr bool operator!=(text, text<CharT, M>)
+        friend constexpr bool operator!=(fixed_string, fixed_string<CharT, M>)
         {
             return true;
         }
 
         template<std::size_t M, std::enable_if_t<M != N, bool> = true>
-        friend constexpr bool operator==(text, text<CharT, M>)
+        friend constexpr bool operator==(fixed_string, fixed_string<CharT, M>)
         {
             return false;
         }
@@ -82,11 +82,23 @@ namespace awl
             return std::basic_string_view<CharT>(data(), size());
         }
 
+        friend constexpr fixed_string from_ascii(const char(&arr)[N + 1])
+        {
+            fixed_string s;
+            
+            for (std::size_t i = 0; i < N; ++i)
+            {
+                s.state[i] = static_cast<CharT>(arr[i]);
+            }
+
+            return s;
+        }
+
     private:
 
         CharT state[N + 1] = { 0 };
     };
 
     template<typename CharT, std::size_t N>
-    text(CharT const(&)[N])->text<CharT, N - 1>;
+    fixed_string(CharT const(&)[N])->fixed_string<CharT, N - 1>;
 }

@@ -38,7 +38,7 @@ namespace awl::io
     }
 
     template <size_t N>
-    constexpr uint64_t calc_type_hash(const text<char, N> & name)
+    constexpr uint64_t calc_type_hash(const fixed_string<char, N> & name)
     {
         helpers::Int64Hash hash;
         return hash(name.begin(), name.end());
