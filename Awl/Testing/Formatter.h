@@ -8,6 +8,8 @@
 #include "Awl/Testing/ScalarFormatter.h"
 #include "Awl/Testing/TestTypeTraits.h"
 
+#include "Awl/TypeTraits.h"
+
 #include <iterator>
 
 namespace awl
@@ -40,7 +42,7 @@ namespace awl
         };
 
         template <typename C, typename T>
-        class BasicFormatter<C, T, typename std::enable_if<is_string<C, T>::value>::type>
+        class BasicFormatter<C, T, std::enable_if_t<is_specialization_v<T, std::basic_string>>>
         {
         public:
 
@@ -48,12 +50,34 @@ namespace awl
 
             static String ToString(T val)
             {
-                return val;
+                if constexpr (std::is_same_v<typename T::value_type, C>)
+                {
+                    return val;
+                }
+                else if constexpr (std::is_same_v<typename T::value_type, char>)
+                {
+                    return FromAString(val);
+                }
+                else
+                {
+                    static_assert(dependent_false_v<T>, "Unknown char type");
+                }
             }
 
             static T FromString(String s)
             {
-                return s;
+                if constexpr (std::is_same_v<typename T::value_type, C>)
+                {
+                    return s;
+                }
+                else if constexpr (std::is_same_v<typename T::value_type, char>)
+                {
+                    return ToAString(s);
+                }
+                else
+                {
+                    static_assert(dependent_false_v<T>, "Unknown char type");
+                }
             }
         };
 
