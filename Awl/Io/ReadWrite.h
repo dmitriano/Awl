@@ -10,4 +10,3 @@
 #include "Awl/Io/Rw/TuplizableReadWrite.h"
 #include "Awl/Io/Rw/VariantReadWrite.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
-#include "Awl/Io/Rw/DecimalReadWrite.h"
