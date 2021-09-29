@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <cmath>
 
 //#define M_PI_4     0.785398163397448309616  // pi/4
 //#define M_1_PI     0.318309886183790671538  // 1/pi
@@ -39,7 +40,7 @@ namespace awl
 #ifdef __GNUC__
             return static_cast<I>(f + 0.5f);
 #else
-            return static_cast<I>(std::lruond(f));
+            return static_cast<I>(std::lround(f));
 #endif
         }
     }
