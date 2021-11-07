@@ -38,19 +38,17 @@ namespace awl
             using reference = E &;
             using pointer = E *;
 
+            ring_iterator() : m_pRing(nullptr), m_pos(0) {}
+            
             ring_iterator(const ring_iterator& other) = default;
             ring_iterator(ring_iterator&& other) = default;
 
-            ring_iterator & operator = (const ring_iterator & other)
-            {
-                m_pos = other.m_pos;
+            ring_iterator& operator = (const ring_iterator& other) = default;
+            ring_iterator& operator = (ring_iterator&& other) = default;
 
-                return *this;
-            }
+            pointer operator-> () const { return container().address<E>(m_pos); }
 
-            pointer operator-> () const { return m_ring.address<E>(m_pos); }
-
-            reference operator* () const { return *m_ring.address<E>(m_pos); }
+            reference operator* () const { return *container().address<E>(m_pos); }
 
             ring_iterator & operator++ ()
             {
@@ -98,7 +96,7 @@ namespace awl
 
             ring_iterator operator + (difference_type diff) const
             {
-                ring_iterator i(m_ring, m_pos + diff);
+                ring_iterator i(container(), m_pos + diff);
                 
                 return i;
             }
@@ -130,12 +128,12 @@ namespace awl
 
             operator ring_iterator<const E>() const
             {
-                return ring_iterator<const E>(m_ring, m_pos);
+                return ring_iterator<const E>(container(), m_pos);
             }
 
         private:
 
-            ring_iterator(const ring & r, std::size_t pos) : m_ring(r), m_pos(pos)
+            ring_iterator(const ring & r, std::size_t pos) : m_pRing(&r), m_pos(pos)
             {
             }
 
@@ -149,15 +147,20 @@ namespace awl
                 --m_pos;
             }
 
+            const ring& container() const
+            {
+                return *m_pRing;
+            }
+
             difference_type position() const
             {
                 return static_cast<difference_type>(m_pos);
             }
 
-            const ring & m_ring;
+            const ring * m_pRing;
             
             //It can't be a pointer because there is no
-            //end pointer in a circular�buffer, so we use an index.
+            //end pointer in a circular buffer, so we use an index.
             std::size_t m_pos;
 
             friend ring;
