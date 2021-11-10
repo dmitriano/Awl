@@ -24,7 +24,7 @@
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"
 #include "Experimental/Io/TrivialMemoryStream.h"
-#include "Experimental/Io//SampleStreams.h"
+#include "Experimental/Io/SampleStreams.h"
 #include "Experimental/TrivialAllocator.h"
 
 using namespace awl::testing;
