@@ -46,9 +46,9 @@ namespace awl
             ring_iterator& operator = (const ring_iterator& other) = default;
             ring_iterator& operator = (ring_iterator&& other) = default;
 
-            pointer operator-> () const { return container().address<E>(m_pos); }
+            pointer operator-> () const { return container().template address<E>(m_pos); }
 
-            reference operator* () const { return *container().address<E>(m_pos); }
+            reference operator* () const { return *container().template address<E>(m_pos); }
 
             ring_iterator & operator++ ()
             {
