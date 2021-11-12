@@ -12,6 +12,21 @@
 
 namespace awl
 {
+    //It can be implemented with std::ranges as follows:
+    /*
+    template <class T>
+    auto make_int_range(T begin, T end)
+    {
+        return std::views::iota(begin, end);
+    }
+
+    template <class T>
+    auto make_count(T end)
+    {
+        return make_int_range(static_cast<T>(0), end);
+    }
+    */
+
     template <typename T, typename Enable = void>
     class int_iterator;
 
