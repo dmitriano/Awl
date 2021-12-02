@@ -65,6 +65,6 @@ namespace awl
     }
 }
 
-#define AWT_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name = awl::testing::LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue()
+#define AWT_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name(awl::testing::LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue())
 
 #define AWT_FLAG(attribute_name) AWT_ATTRIBUTE(bool, attribute_name, false)
