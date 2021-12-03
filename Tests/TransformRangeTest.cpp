@@ -147,7 +147,6 @@ AWT_TEST(TransformIterator)
 
         //(until C++20) If no captures are specified, the closure type has a defaulted copy assignment operator and a defaulted move assignment operator.
         //Otherwise, it has a deleted copy assignment operator (this includes the case when there is a capture-default, even if it does not actually capture anything).
-#if AWL_CPPSTD >= 20
         {
             //This does not compile with CLang 7, but compiles with CLang 8.
             auto func1 = func;
@@ -169,8 +168,9 @@ AWT_TEST(TransformIterator)
             //This requires copy assignment operator to be defined.
             v.insert(v.begin(), range.begin(), range.end());
 
-            AWT_ASSERT(v == std::vector<awl::String>{_T("a"), _T("b"), _T("c")});
+            std::vector<awl::String> expected{ _T("a"), _T("b"), _T("c") };
+
+            AWT_ASSERT(v == expected);
         }
-#endif
     }
 }
