@@ -61,7 +61,7 @@ namespace awl
     private: \
         enum : size_type { __VA_ARGS__, Last }; \
     public: \
-        static constexpr size_type m_count = Last; \
+        static constexpr size_type Count = Last; \
         /*I was unable to make std::vector constexpr even in MSVC 19.29.30133, probably we need to wait a bit.*/ \
         static inline const awl::helpers::MemberList m_ml{#__VA_ARGS__}; \
     };
@@ -74,7 +74,7 @@ namespace awl
     public: \
         static constexpr ns::EnumName##Traits::size_type count() \
         { \
-            return ns::EnumName##Traits::m_count; \
+            return ns::EnumName##Traits::Count; \
         } \
         static const awl::helpers::MemberList& names() \
         { \

@@ -205,4 +205,4 @@ namespace awl
 
 #define AWL_BITMAP(EnumName, ...) \
     AWL_SEQUENTIAL_ENUM(EnumName, __VA_ARGS__) \
-    using EnumName##BitMap = awl::bitmap<EnumName, EnumName##Traits::m_count>;
+    using EnumName##BitMap = awl::bitmap<EnumName, EnumName##Traits::Count>;

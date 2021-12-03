@@ -133,7 +133,7 @@ AWT_TEST(BitMapEnclosed)
     AWT_ASSERT(A({ }).m_bm.none());
     AWT_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
 
-    using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::m_count>;
+    using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
     AWT_ASSERT(GameLevelBitMap2{ }.none());
     AWT_ASSERT((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 
