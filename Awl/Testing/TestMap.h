@@ -69,11 +69,5 @@ namespace awl
         {
             return std::make_shared<TestMap>();
         }
-
-        int RunAllTests();
-        
-        int RunAllTests(const TestContext & context);
-
-        int Run(int argc, Char * argv[]);
     }
 }

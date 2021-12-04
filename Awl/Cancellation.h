@@ -5,12 +5,14 @@
 
 #pragma once
 
+#include "Awl/StopWatch.h"
+
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
 
-namespace awl 
+namespace awl
 {
     class Cancellation
     {
@@ -37,16 +39,16 @@ namespace awl
 
         bool IsCancelled() const override
         {
-            std::lock_guard lock(mutex);
+            std::lock_guard lock(m_mutex);
 
             return isCancelled;
         }
 
         void InterruptibleSleep(std::chrono::nanoseconds time) const override
         {
-            std::unique_lock lock(mutex);
+            std::unique_lock lock(m_mutex);
 
-            cv.wait_for(lock, time, [this]() -> bool
+            m_cv.wait_for(lock, time, [this]() -> bool
             {
                 return isCancelled;
             });
@@ -55,26 +57,63 @@ namespace awl
         void Cancel()
         {
             {
-                std::lock_guard lock(mutex);
+                std::lock_guard lock(m_mutex);
 
                 isCancelled = true;
             }
 
-            cv.notify_all();
+            m_cv.notify_all();
         }
 
-        void Reset()
+        virtual void Reset()
         {
-            std::lock_guard lock(mutex);
+            std::lock_guard lock(m_mutex);
 
             isCancelled = false;
         }
 
-    private:
+    protected:
 
         bool isCancelled;
 
-        mutable std::mutex mutex;
-        mutable std::condition_variable cv;
+        mutable std::mutex m_mutex;
+
+    private:
+
+        mutable std::condition_variable m_cv;
+    };
+
+    class TimedCancellationFlag : public CancellationFlag
+    {
+    public:
+
+        TimedCancellationFlag(std::chrono::nanoseconds d) : m_d(d) {}
+
+        bool IsCancelled() const override
+        {
+            std::lock_guard lock(m_mutex);
+
+            return isCancelled || m_sw.HasElapsed(m_d);
+        }
+
+        void Reset() override
+        {
+            std::lock_guard lock(m_mutex);
+
+            isCancelled = false;
+            m_sw.Reset();
+        }
+
+        void SetTimeout(std::chrono::nanoseconds d)
+        {
+            std::lock_guard lock(m_mutex);
+
+            m_d = d;
+        }
+
+    private:
+
+        awl::StopWatch m_sw;
+        std::chrono::nanoseconds m_d;
     };
 }
