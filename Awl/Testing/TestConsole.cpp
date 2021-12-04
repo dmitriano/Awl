@@ -17,6 +17,24 @@
 
 namespace awl::testing
 {
+    int Run()
+    {
+        AttributeProvider ap;
+
+        TestConsole console(ap);
+
+        return console.Run();
+    }
+
+    int Run(int argc, Char* argv[])
+    {
+        CommandLineProvider ap(argc, argv);
+
+        TestConsole console(ap);
+
+        return console.Run();
+    }
+
     std::function<bool(const String& s)> TestConsole::CreateFilter(const String filter)
     {
         if (filter.empty())
@@ -43,6 +61,23 @@ namespace awl::testing
 
     int TestConsole::RunTests(const TestContext& context)
     {
+        AWT_FLAG(list);
+
+        if (list)
+        {
+            auto test_map = awl::testing::CreateTestMap();
+
+            AWT_ATTRIBUTE(String, filter, {});
+
+            auto f = CreateFilter(filter);
+
+            test_map->PrintNames(awl::cout(), f);
+
+            awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
+
+            return 0;
+        }
+
         AWT_ATTRIBUTE(size_t, timeout, default_cancellation_timeout); //test timeout in seconds
 
         m_cancellation.SetTimeout(std::chrono::seconds(timeout));
@@ -94,39 +129,11 @@ namespace awl::testing
         return error;
     }
 
-    int TestConsole::RunAllTests()
-    {
-        AttributeProvider ap;
-
-        const TestContext context{ awl::cout(), m_cancellation, ap };
-
-        return RunTests(context);
-    }
-
-    int TestConsole::Run(int argc, Char* argv[])
+    int TestConsole::Run()
     {
         try
         {
-            CommandLineProvider cl(argc, argv);
-
-            const TestContext context{ awl::cout(), m_cancellation, cl };
-
-            AWT_FLAG(list);
-
-            if (list)
-            {
-                auto test_map = awl::testing::CreateTestMap();
-
-                AWT_ATTRIBUTE(String, filter, {});
-
-                auto f = CreateFilter(filter);
-
-                test_map->PrintNames(awl::cout(), f);
-
-                awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
-
-                return 0;
-            }
+            const TestContext context{ awl::cout(), m_cancellation, m_ap };
 
             return RunTests(context);
         }

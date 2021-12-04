@@ -7,6 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Testing/TestContext.h"
+#include "Awl/Testing/AttributeProvider.h"
 
 #include "Awl/Cancellation.h"
 
@@ -23,27 +24,27 @@ namespace awl::testing
     {
     public:
 
-        TestConsole() : m_cancellation(std::chrono::seconds(default_cancellation_timeout)) {}
+        TestConsole(AttributeProvider& ap) : 
+            m_ap(ap),
+            m_cancellation(std::chrono::seconds(default_cancellation_timeout))
+        {}
 
-        int RunAllTests();
-
-        int Run(int argc, Char* argv[]);
+        int Run();
 
     private:
 
         int RunTests(const TestContext& context);
             
         std::function<bool(const String& s)> CreateFilter(const String filter);
+
+        AttributeProvider m_ap;
             
         TimedCancellationFlag m_cancellation;
 
         static const size_t default_cancellation_timeout = 5;
     };
 
-    inline int Run(int argc, Char* argv[])
-    {
-        TestConsole console;
+    int Run();
 
-        return console.Run(argc, argv);
-    }
+    int Run(int argc, Char* argv[]);
 }
