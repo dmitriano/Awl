@@ -24,10 +24,7 @@ namespace awl::testing
     {
     public:
 
-        TestConsole(AttributeProvider& ap) : 
-            m_ap(ap),
-            m_cancellation(std::chrono::seconds(default_cancellation_timeout))
-        {}
+        TestConsole(AttributeProvider& ap) : m_ap(ap) {}
 
         int Run();
 
@@ -39,9 +36,7 @@ namespace awl::testing
 
         AttributeProvider m_ap;
             
-        TimedCancellationFlag m_cancellation;
-
-        static const size_t default_cancellation_timeout = 5;
+        CancellationFlag m_cancellation;
     };
 
     int Run();

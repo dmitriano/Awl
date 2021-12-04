@@ -83,37 +83,27 @@ namespace awl
         mutable std::condition_variable m_cv;
     };
 
-    class TimedCancellationFlag : public CancellationFlag
+    class TimedCancellation : public Cancellation
     {
     public:
 
-        TimedCancellationFlag(std::chrono::nanoseconds d) : m_d(d) {}
+        TimedCancellation(const Cancellation& wrapped, std::chrono::nanoseconds d) : m_wrapped(wrapped), m_d(d) {}
 
         bool IsCancelled() const override
         {
-            std::lock_guard lock(m_mutex);
-
-            return isCancelled || m_sw.HasElapsed(m_d);
+            return m_wrapped.IsCancelled() || m_sw.HasElapsed(m_d);
         }
 
-        void Reset() override
+        void InterruptibleSleep(std::chrono::nanoseconds time) const override
         {
-            std::lock_guard lock(m_mutex);
-
-            isCancelled = false;
-            m_sw.Reset();
-        }
-
-        void SetTimeout(std::chrono::nanoseconds d)
-        {
-            std::lock_guard lock(m_mutex);
-
-            m_d = d;
+            m_wrapped.InterruptibleSleep(time);
         }
 
     private:
 
-        awl::StopWatch m_sw;
-        std::chrono::nanoseconds m_d;
+        //There is no mutex becuase all data members are const.
+        const Cancellation& m_wrapped;
+        const awl::StopWatch m_sw;
+        const std::chrono::nanoseconds m_d;
     };
 }

@@ -69,6 +69,7 @@ namespace awl::testing
     {
         AWT_ATTRIBUTE(String, output, _T("failed"));
         AWT_ATTRIBUTE(size_t, loop, 0);
+        AWT_ATTRIBUTE(size_t, timeout, 5); //test timeout in seconds
 
         context.out << p_test_link->GetName();
 
@@ -104,7 +105,9 @@ namespace awl::testing
             throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
         }
 
-        const TestContext temp_context{ *p_out, context.cancellation, context.ap };
+        TimedCancellation timed_cancellation(context.cancellation, std::chrono::seconds(timeout));
+        
+        const TestContext temp_context{ *p_out, timed_cancellation, context.ap };
 
         for (auto i : awl::make_count(loop_count))
         {

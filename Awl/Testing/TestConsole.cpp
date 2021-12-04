@@ -78,10 +78,6 @@ namespace awl::testing
             return 0;
         }
 
-        AWT_ATTRIBUTE(size_t, timeout, default_cancellation_timeout); //test timeout in seconds
-
-        m_cancellation.SetTimeout(std::chrono::seconds(timeout));
-        
         int error = 1;
 
         auto test_map = awl::testing::CreateTestMap();

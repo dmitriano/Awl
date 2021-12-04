@@ -18,6 +18,7 @@ namespace awl
 {
     namespace testing 
     {
+        //TODO: Implement QueryTests(filter) with std::ranges and move all output related code to TestConsole.
         class TestMap
         {
         public:
