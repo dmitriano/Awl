@@ -44,7 +44,6 @@ namespace awl::testing
         CancellationFlag m_cancellation;
 
         const TestContext m_context;
-
     };
 
     int Run();
