@@ -24,19 +24,22 @@ namespace awl::testing
     {
     public:
 
-        TestConsole(AttributeProvider& ap) : m_ap(ap) {}
+        TestConsole(AttributeProvider& ap);
 
         int Run();
 
     private:
 
-        int RunTests(const TestContext& context);
+        int RunTests();
             
         std::function<bool(const String& s)> CreateFilter(const String filter);
 
-        AttributeProvider m_ap;
+        AttributeProvider& m_ap;
             
         CancellationFlag m_cancellation;
+
+        const TestContext m_context;
+
     };
 
     int Run();

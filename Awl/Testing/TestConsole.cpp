@@ -35,6 +35,12 @@ namespace awl::testing
         return console.Run();
     }
 
+    TestConsole::TestConsole(AttributeProvider& ap) :
+        m_ap(ap),
+        m_context{ awl::cout(), m_cancellation, m_ap }
+    {
+    }
+
     std::function<bool(const String& s)> TestConsole::CreateFilter(const String filter)
     {
         if (filter.empty())
@@ -59,8 +65,10 @@ namespace awl::testing
         };
     }
 
-    int TestConsole::RunTests(const TestContext& context)
+    int TestConsole::RunTests()
     {
+        const TestContext& context = m_context;
+
         AWT_FLAG(list);
 
         if (list)
@@ -129,9 +137,7 @@ namespace awl::testing
     {
         try
         {
-            const TestContext context{ awl::cout(), m_cancellation, m_ap };
-
-            return RunTests(context);
+            return RunTests();
         }
         catch (const TestException& e)
         {
