@@ -28,6 +28,11 @@ namespace awl::testing
 
         int Run();
 
+        const TestContext& context() const
+        {
+            return m_context;
+        }
+
     private:
 
         int RunTests();
