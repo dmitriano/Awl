@@ -16,7 +16,7 @@ AWL is a small cross-platform C++ library that includes:
 
 Theoretically, the master branch should compile and work with C++20, at least it is periodically built with MSVC 19.29.30040+ and GCC 11, but not with CLang yet.
 
-There is also cpp17 branch that probably compiles with C++17.
+There is also cpp17 branch that partially compiles with C++17.
 
 Version compatibility is not guaranteed and there is no warranty of any kind.
 
