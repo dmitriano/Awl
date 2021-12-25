@@ -4,7 +4,6 @@
 #include "Awl/TupleHelpers.h"
 #include "Awl/TypeTraits.h"
 #include "Awl/Stringizable.h"
-#include "Awl/Decimal.h"
 
 #include <string>
 #include <vector>
@@ -207,15 +206,4 @@ namespace awl::io
     };
 
     static_assert(make_type_name<std::variant<int32_t, int64_t>>() == FixedString{ "variant<int32_t, int64_t, >" });
-
-    template<>
-    struct type_descriptor<awl::decimal>
-    {
-        static constexpr auto name()
-        {
-            return FixedString("decimal");
-        }
-    };
-
-    static_assert(make_type_name<awl::decimal>() == FixedString{ "decimal" });
 }

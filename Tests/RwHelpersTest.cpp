@@ -85,7 +85,7 @@ namespace
     {
     public:
 
-        AWL_SERIALIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b, m_dec)
+        AWL_SERIALIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b)
 
     private:
 
@@ -108,7 +108,7 @@ namespace
 
         bool m_b;
 
-        awl::decimal m_dec;
+        //awl::decimal m_dec;
 
         friend B MakeBSample();
     };
@@ -128,7 +128,7 @@ namespace
         b.m_bs = 3ul;
         b.m_u8 = 25u;
         b.m_b = true;
-        b.m_dec = awl::decimal("123.4567890"sv);
+        //b.m_dec = awl::decimal("123.4567890"sv);
 
         return b;
     }

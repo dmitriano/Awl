@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <cassert>
 #include <initializer_list>
+#include <iterator>
+#include <algorithm>
 
 namespace awl
 {
