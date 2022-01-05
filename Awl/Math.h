@@ -10,6 +10,8 @@
 
 namespace awl::math
 {
+    //Constants can be replaced with std::numbers in C++20.
+
     template <class T> constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type pi() { return static_cast<T>(3.14159265358979323846); }
 
     template <class T> constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type half_pi() { return static_cast<T>(1.57079632679489661923); }
