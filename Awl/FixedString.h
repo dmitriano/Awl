@@ -72,6 +72,11 @@ namespace awl
             return false;
         }
 
+        const CharT* c_str() const
+        {
+            return state;
+        }
+        
         operator std::basic_string<CharT>() const
         {
             return std::basic_string<CharT>(data(), size());

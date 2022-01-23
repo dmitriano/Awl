@@ -14,7 +14,7 @@
 
 namespace awl
 {
-    template <class T, class GetKey>
+    template <class T, class GetKey, class Compare = std::less<void>>
     class KeyCompare
     {
     public:
@@ -36,17 +36,17 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return getKey(left) < getKey(right);
+            return m_comp(getKey(left), getKey(right));
         }
 
         constexpr bool operator()(const T& val, const key_type & id) const
         {
-            return getKey(val) < id;
+            return m_comp(getKey(val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T& val) const
         {
-            return id < getKey(val);
+            return m_comp(id, getKey(val));
         }
 
         using is_transparent = void;
@@ -54,10 +54,12 @@ namespace awl
     private:
 
         GetKey getKey;
+
+        Compare m_comp;
     };
 
-    template <class T, class GetKey>
-    class KeyCompare<T *, GetKey>
+    template <class T, class GetKey, class Compare>
+    class KeyCompare<T *, GetKey, Compare>
     {
     public:
 
@@ -73,26 +75,28 @@ namespace awl
 
         constexpr bool operator()(const T * left, const T * right) const
         {
-            return getKey(*left) < getKey(*right);
+            return m_comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const T * val, const key_type & id) const
         {
-            return getKey(*val) < id;
+            return m_comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T * val) const
         {
-            return id < getKey(*val);
+            return m_comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
+
+        Compare m_comp;
     };
 
-    template <class T, class GetKey>
-    class KeyCompare<std::shared_ptr<T>, GetKey>
+    template <class T, class GetKey, class Compare>
+    class KeyCompare<std::shared_ptr<T>, GetKey, Compare>
     {
     public:
 
@@ -108,26 +112,28 @@ namespace awl
 
         constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
         {
-            return getKey(*left) < getKey(*right);
+            return m_comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const std::shared_ptr<T> & val, const key_type & id) const
         {
-            return getKey(*val) < id;
+            return m_comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::shared_ptr<T> & val) const
         {
-            return id < getKey(*val);
+            return m_comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
+
+        Compare m_comp;
     };
 
-    template <class T, class Deleter, class GetKey>
-    class KeyCompare<std::unique_ptr<T, Deleter>, GetKey>
+    template <class T, class Deleter, class GetKey, class Compare>
+    class KeyCompare<std::unique_ptr<T, Deleter>, GetKey, Compare>
     {
     public:
 
@@ -143,22 +149,24 @@ namespace awl
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & left, const std::unique_ptr<T, Deleter> & right) const
         {
-            return getKey(*left) < getKey(*right);
+            return m_comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & val, const key_type & id) const
         {
-            return getKey(*val) < id;
+            return m_comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::unique_ptr<T, Deleter> & val) const
         {
-            return id < getKey(*val);
+            return m_comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
+
+        Compare m_comp;
     };
 
     template <class T, class Field, Field T::*field_ptr>
@@ -170,8 +178,8 @@ namespace awl
         }
     };
     
-    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr>
-    using FieldCompare = KeyCompare<T, FieldGetter<remove_pointer_t<T>, Field, field_ptr>>;
+    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr, class Compare>
+    using FieldCompare = KeyCompare<T, FieldGetter<remove_pointer_t<T>, Field, field_ptr>, Compare>;
 
     //A function that returns something like std::tie(x, y, z).
     template <class T, class Field, Field (T::*func_ptr)() const>
@@ -183,8 +191,8 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const>
-    using FuncCompare = KeyCompare<T, FuncGetter<remove_pointer_t<T>, Field, func_ptr>>;
+    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const, class Compare>
+    using FuncCompare = KeyCompare<T, FuncGetter<remove_pointer_t<T>, Field, func_ptr>, Compare>;
 
     template <class T, size_t index>
     struct TuplizableGetter
