@@ -178,7 +178,7 @@ namespace awl
         }
     };
     
-    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr, class Compare>
+    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr, class Compare = std::less<void>>
     using FieldCompare = KeyCompare<T, FieldGetter<remove_pointer_t<T>, Field, field_ptr>, Compare>;
 
     //A function that returns something like std::tie(x, y, z).
@@ -191,7 +191,7 @@ namespace awl
         }
     };
 
-    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const, class Compare>
+    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const, class Compare = std::less<void>>
     using FuncCompare = KeyCompare<T, FuncGetter<remove_pointer_t<T>, Field, func_ptr>, Compare>;
 
     template <class T, size_t index>
