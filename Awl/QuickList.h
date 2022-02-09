@@ -5,7 +5,8 @@
 
 #pragma once
 
-#include <assert.h>
+#include <cassert>
+#include <initializer_list>
 
 #include "Awl/SingleList.h"
 #include "Awl/DoubleIterator.h"
@@ -196,6 +197,14 @@ namespace awl
         //This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
         quick_list() : Null(&Null, &Null)
         {
+        }
+
+        quick_list(std::initializer_list<value_type> init) : quick_list()
+        {
+            for (const value_type& val : init)
+            {
+                push_back(val);
+            }
         }
 
         quick_list(const quick_list& other) = delete;
