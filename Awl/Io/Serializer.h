@@ -302,13 +302,26 @@ namespace awl::io
             }
         }
 
+        //We can't handle the situation when type representation changes,
+        //but when type name changes, type_map parameter can be used.
+        //Tt can be {{"QString"}, {"sequence<int8_t>"}}, for example.
         template <class Stream>
-        void ReadOldPrototypes(Stream & s)
+        void ReadOldPrototypes(Stream& s, std::unordered_map<std::string, std::string> type_map = {})
         {
             Metadata meta;
             
             Read(s, meta);
-            
+
+            for (std::string& type_name : meta.typeNames)
+            {
+                auto i = type_map.find(type_name);
+
+                if (i != type_map.end())
+                {
+                    type_name = i->second;
+                }
+            }
+
             AttachMetadata(meta);
         }
 
