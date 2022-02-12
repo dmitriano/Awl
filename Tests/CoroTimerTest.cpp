@@ -103,11 +103,11 @@ namespace
         // I used `await_transform`
 
         // use `co_await std::chrono::seconds{n}` to wait specified amount of time
-        auto await_transform(std::chrono::seconds duration)
+        auto await_transform(std::chrono::nanoseconds duration)
         {
             struct timer_awaitable
             {
-                std::chrono::seconds duration;
+                std::chrono::nanoseconds duration;
                 // always suspend
                 bool await_ready()
                 {
@@ -237,7 +237,7 @@ namespace
 
     std::priority_queue<timer_task, std::vector<timer_task>, timer_task_before_cmp> timers;
 
-    void submit_timer_task(std::coroutine_handle<> handle, std::chrono::seconds timeout)
+    void submit_timer_task(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
     {
         timers.push(timer_task{ std::chrono::steady_clock::now() + timeout, handle });
     }
@@ -275,7 +275,7 @@ namespace
     {
         for (auto c : "hello world\n") {
             std::cout << c;
-            co_await 1s;
+            co_await 100ms;
         }
 
         std::cout << "test step 1\n";
