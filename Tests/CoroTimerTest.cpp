@@ -130,10 +130,13 @@ namespace
         template<typename U>
         auto await_transform(task<U>& task)
         {
-            if (!task.handle) {
+            if (!task.handle)
+            {
                 throw std::runtime_error("coroutine without promise awaited");
             }
-            if (task.handle.promise().awaiting_coroutine) {
+
+            if (task.handle.promise().awaiting_coroutine)
+            {
                 throw std::runtime_error("coroutine already awaited");
             }
 
@@ -177,15 +180,18 @@ namespace
 
         task& operator=(task&& other)
         {
-            if (handle) {
+            if (handle)
+            {
                 handle.destroy();
             }
+            
             handle = other.handle;
         }
 
         ~task()
         {
-            if (handle) {
+            if (handle)
+            {
                 handle.destroy();
             }
         }
@@ -245,15 +251,18 @@ namespace
     // timer loop
     void loop()
     {
-        while (!timers.empty()) {
+        while (!timers.empty())
+        {
             auto& timer = timers.top();
             // if it is time to run a coroutine
-            if (timer.target_time < std::chrono::steady_clock::now()) {
+            if (timer.target_time < std::chrono::steady_clock::now())
+            {
                 auto handle = timer.handle;
                 timers.pop();
                 handle.resume();
             }
-            else {
+            else
+            {
                 std::this_thread::sleep_until(timer.target_time);
             }
         }
@@ -273,7 +282,8 @@ namespace
 
     task<int> test()
     {
-        for (auto c : "hello world\n") {
+        for (auto c : "hello world\n")
+        {
             std::cout << c;
             co_await 100ms;
         }
