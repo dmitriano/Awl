@@ -154,6 +154,28 @@ namespace awl
 
     template <typename T>
     inline constexpr bool is_stringizable_v = is_stringizable<T>::value;
+
+    struct EmptyStringizable
+    {
+        constexpr auto as_const_tuple() const
+        {
+            return std::tie();
+        }
+        constexpr auto as_tuple() const
+        {
+            return as_const_tuple();
+        }
+        constexpr auto as_tuple()
+        {
+            return std::tie();
+        }
+
+        static const awl::helpers::MemberList& get_member_names()
+        {
+            static const awl::helpers::MemberList ml("");
+            return ml;
+        }
+    };
 }
 
 #define AWL_STRINGIZABLE(...) \
