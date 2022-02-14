@@ -7,45 +7,17 @@
 #include "Awl/Time.h"
 
 #include "Awl/Testing/UnitTest.h"
+#include "Tests/Helpers/TimeQueue.h"
 
 #include <coroutine>
 #include <optional>
 
 #include <iostream>
-#include <thread>
-
-#include <chrono>
-#include <queue>
-#include <vector>
-#include <memory>
 
 namespace
 {
-    // simple timers
-
-    // stored timer tasks
-    struct timer_task
-    {
-        std::chrono::steady_clock::time_point target_time;
-        std::coroutine_handle<> handle;
-    };
-
-    // comparator
-    struct timer_task_before_cmp
-    {
-        bool operator()(const timer_task& left, const timer_task& right) const
-        {
-            return left.target_time > right.target_time;
-        }
-    };
-
-    std::priority_queue<timer_task, std::vector<timer_task>, timer_task_before_cmp> timers;
-
-    inline void submit_timer_task(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
-    {
-        timers.push(timer_task{ std::chrono::steady_clock::now() + timeout, handle });
-    }
-
+    awl::testing::TimeQueue time_queue;
+    
     //template <bool owning>
     struct UpdatePromise;
 
@@ -152,7 +124,7 @@ namespace
                 void await_suspend(std::coroutine_handle<> h)
                 {
                     // submit suspended coroutine to be resumed after timeout
-                    submit_timer_task(h, m_d);
+                    time_queue.push(h, m_d);
                 }
                 void await_resume() {}
             };
@@ -205,26 +177,6 @@ namespace
         return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
     }
 
-    // timer loop
-    void loop()
-    {
-        while (!timers.empty())
-        {
-            auto& timer = timers.top();
-            // if it is time to run a coroutine
-            if (timer.target_time < std::chrono::steady_clock::now())
-            {
-                auto handle = timer.handle;
-                timers.pop();
-                handle.resume();
-            }
-            else
-            {
-                std::this_thread::sleep_until(timer.target_time);
-            }
-        }
-    }
-
     // example
 
     using namespace std::chrono_literals;
@@ -260,5 +212,5 @@ AWT_EXAMPLE(CoroNonOwningTimer)
     auto task = TestNestedTimerAwait(context);
 
     // execute deferred coroutines
-    loop();
+    time_queue.loop();
 }
