@@ -75,6 +75,8 @@ namespace
             handle = other.handle;
 
             std::cout << "UpdateTask move assignment." << std::endl;
+
+            return *this;
         }
 
         ~UpdateTask()
