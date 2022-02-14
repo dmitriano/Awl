@@ -48,9 +48,13 @@ namespace awl
 
                 auto pos = m_i - m_v.begin();
 
-                const uint8_t * src = m_v.data() + pos;
+                //Do not call std::memcpy with zero length to avoid GCC Address Sanitizer warnings.
+                if (read_count != 0)
+                {
+                    const uint8_t* src = m_v.data() + pos;
 
-                std::memcpy(buffer, src, read_count * sizeof(uint8_t));
+                    std::memcpy(buffer, src, read_count * sizeof(uint8_t));
+                }
 
                 auto end = m_i + read_count;
 
