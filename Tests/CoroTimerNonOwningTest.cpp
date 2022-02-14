@@ -17,6 +17,7 @@
 #include <chrono>
 #include <queue>
 #include <vector>
+#include <memory>
 
 namespace
 {
@@ -45,36 +46,41 @@ namespace
         timers.push(timer_task{ std::chrono::steady_clock::now() + timeout, handle });
     }
 
+    //template <bool owning>
     struct UpdatePromise;
 
+    //template <bool owning>
     struct UpdateTask
     {
         // declare promise type
         using promise_type = UpdatePromise;
 
-        UpdateTask(std::coroutine_handle<promise_type> handle) : handle(handle) {}
-
-        /*
-        UpdateTask(UpdateTask&& other) : handle(std::exchange(other.handle, nullptr)) {}
-
-        UpdateTask& operator=(UpdateTask&& other)
+        UpdateTask(std::coroutine_handle<promise_type> handle) : 
+            handle(handle)
         {
-            if (handle)
-            {
-                handle.destroy();
-            }
+            std::cout << "UpdateTask constructor." << std::endl;
+        }
 
+        UpdateTask(const UpdateTask&) = delete;
+        
+        UpdateTask(UpdateTask&& other) : handle(other.handle)
+        {
+            std::cout << "UpdateTask move constructor." << std::endl;
+        }
+
+        UpdateTask& operator = (const UpdateTask&) = delete;
+
+        UpdateTask& operator = (const UpdateTask&& other)
+        {
             handle = other.handle;
+
+            std::cout << "UpdateTask move assignment." << std::endl;
         }
 
         ~UpdateTask()
         {
-            if (handle)
-            {
-                handle.destroy();
-            }
+            std::cout << "UpdateTask destructor." << std::endl;
         }
-        */
 
         std::coroutine_handle<promise_type> handle;
     };
@@ -225,33 +231,31 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("testTimerAwait started.");
+        context.out << _T("testTimerAwait started.") << std::endl;
 
         co_await 3s;
 
-        context.out << _T("testTimerAwait finished.");
+        context.out << _T("testTimerAwait finished.") << std::endl;
     }
 
     UpdateTask TestNestedTimerAwait(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("testNestedTimerAwait started.");
+        context.out << _T("testNestedTimerAwait started.") << std::endl;
 
         auto task = TestTimerAwait(context);
 
         co_await task;
 
-        context.out << _T("testNestedTimerAwait finished.");
+        context.out << _T("testNestedTimerAwait finished.") << std::endl;
     }
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
 AWT_EXAMPLE(CoroNonOwningTimer)
 {
-    // do something
-
-    TestNestedTimerAwait(context);
+    auto task = TestNestedTimerAwait(context);
 
     // execute deferred coroutines
     loop();
