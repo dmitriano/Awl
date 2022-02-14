@@ -46,11 +46,11 @@ namespace awl
                 //This results in an assert if diff == 0
                 //const uint8_t * src = &(*m_i);
 
-                auto pos = m_i - m_v.begin();
-
                 //Do not call std::memcpy with zero length to avoid GCC Address Sanitizer warnings.
                 if (read_count != 0)
                 {
+                    auto pos = m_i - m_v.begin();
+
                     const uint8_t* src = m_v.data() + pos;
 
                     std::memcpy(buffer, src, read_count * sizeof(uint8_t));
