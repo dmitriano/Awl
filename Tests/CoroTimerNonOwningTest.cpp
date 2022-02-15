@@ -7,7 +7,7 @@
 #include "Awl/Time.h"
 
 #include "Awl/Testing/UnitTest.h"
-#include "Tests/Helpers/TimeQueue.h"
+#include "Awl/Testing/TimeQueue.h"
 
 #include <coroutine>
 #include <optional>
@@ -126,6 +126,7 @@ namespace
                     // submit suspended coroutine to be resumed after timeout
                     time_queue.push(h, m_d);
                 }
+
                 void await_resume() {}
             };
 

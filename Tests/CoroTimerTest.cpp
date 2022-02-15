@@ -7,26 +7,21 @@
 #include "Awl/Time.h"
 
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/TimeQueue.h"
 
 #include <coroutine>
 #include <optional>
-
 #include <iostream>
-#include <thread>
-
 #include <chrono>
-#include <queue>
-#include <vector>
 
 namespace
 {
+    awl::testing::TimeQueue time_queue;
+
     // basic coroutine single-threaded async task example
 
     template<typename T>
     struct task_promise_type;
-
-    // simple single-threaded timer for coroutines
-    void submit_timer_task(std::coroutine_handle<> handle, std::chrono::seconds timeout);
 
     template<typename T>
     struct task;
@@ -118,7 +113,7 @@ namespace
                 void await_suspend(std::coroutine_handle<task_promise_type> h)
                 {
                     // submit suspended coroutine to be resumed after timeout
-                    submit_timer_task(h, duration);
+                    time_queue.push(h, duration);
                 }
                 void await_resume() {}
             };
@@ -223,51 +218,6 @@ namespace
         return { std::coroutine_handle<task_promise_type>::from_promise(*this) };
     }
 
-    // simple timers
-
-    // stored timer tasks
-    struct timer_task
-    {
-        std::chrono::steady_clock::time_point target_time;
-        std::coroutine_handle<> handle;
-    };
-
-    // comparator
-    struct timer_task_before_cmp
-    {
-        bool operator()(const timer_task& left, const timer_task& right) const
-        {
-            return left.target_time > right.target_time;
-        }
-    };
-
-    std::priority_queue<timer_task, std::vector<timer_task>, timer_task_before_cmp> timers;
-
-    void submit_timer_task(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
-    {
-        timers.push(timer_task{ std::chrono::steady_clock::now() + timeout, handle });
-    }
-
-    // timer loop
-    void loop()
-    {
-        while (!timers.empty())
-        {
-            auto& timer = timers.top();
-            // if it is time to run a coroutine
-            if (timer.target_time < std::chrono::steady_clock::now())
-            {
-                auto handle = timer.handle;
-                timers.pop();
-                handle.resume();
-            }
-            else
-            {
-                std::this_thread::sleep_until(timer.target_time);
-            }
-        }
-    }
-
     // example
 
     using namespace std::chrono_literals;
@@ -309,7 +259,7 @@ AWT_EXAMPLE(CoroTimer)
     auto result = test();
 
     // execute deferred coroutines
-    loop();
+    time_queue.loop();
 
     context.out << "result: " << result.get();
 }

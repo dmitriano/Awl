@@ -17,7 +17,7 @@ namespace awl::testing
 
         void push(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
         {
-            m_timers.push(timer_task{ std::chrono::steady_clock::now() + timeout, handle });
+            m_timers.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
         }
 
         void loop()
@@ -41,7 +41,7 @@ namespace awl::testing
 
     private:
 
-        struct timer_task
+        struct Task
         {
             std::chrono::steady_clock::time_point targetTime;
             std::coroutine_handle<> handle;
@@ -50,12 +50,12 @@ namespace awl::testing
         // comparator
         struct timer_task_before_cmp
         {
-            bool operator()(const timer_task& left, const timer_task& right) const
+            bool operator()(const Task& left, const Task& right) const
             {
                 return left.targetTime > right.targetTime;
             }
         };
 
-        std::priority_queue<timer_task, std::vector<timer_task>, timer_task_before_cmp> m_timers;
+        std::priority_queue<Task, std::vector<Task>, timer_task_before_cmp> m_timers;
     };
 }
