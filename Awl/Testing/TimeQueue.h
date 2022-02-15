@@ -69,10 +69,9 @@ namespace awl::testing
         {
         }
 
-        // always suspend
         bool await_ready()
         {
-            return false;
+            return m_d <= std::chrono::nanoseconds(0);
         }
 
         // h is a handler for current coroutine which is suspended
