@@ -48,7 +48,7 @@ namespace awl::testing
         };
 
         // comparator
-        struct timer_task_before_cmp
+        struct Compare
         {
             bool operator()(const Task& left, const Task& right) const
             {
@@ -56,6 +56,37 @@ namespace awl::testing
             }
         };
 
-        std::priority_queue<Task, std::vector<Task>, timer_task_before_cmp> m_timers;
+        std::priority_queue<Task, std::vector<Task>, Compare> m_timers;
+    };
+
+    class TimeAwaitable
+    {
+    public:
+
+        TimeAwaitable(TimeQueue& time_queue, std::chrono::nanoseconds d) :
+            timeQueue(time_queue),
+            m_d(d)
+        {
+        }
+
+        // always suspend
+        bool await_ready()
+        {
+            return false;
+        }
+
+        // h is a handler for current coroutine which is suspended
+        void await_suspend(std::coroutine_handle<> h)
+        {
+            // submit suspended coroutine to be resumed after timeout
+            timeQueue.push(h, m_d);
+        }
+
+        void await_resume() {}
+
+    private:
+
+        TimeQueue& timeQueue;
+        std::chrono::nanoseconds m_d;
     };
 }

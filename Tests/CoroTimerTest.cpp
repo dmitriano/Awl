@@ -98,27 +98,9 @@ namespace
         // I used `await_transform`
 
         // use `co_await std::chrono::seconds{n}` to wait specified amount of time
-        auto await_transform(std::chrono::nanoseconds duration)
+        auto await_transform(std::chrono::nanoseconds d)
         {
-            struct timer_awaitable
-            {
-                std::chrono::nanoseconds duration;
-                // always suspend
-                bool await_ready()
-                {
-                    return false;
-                }
-
-                // h is a handler for current coroutine which is suspended
-                void await_suspend(std::coroutine_handle<task_promise_type> h)
-                {
-                    // submit suspended coroutine to be resumed after timeout
-                    time_queue.push(h, duration);
-                }
-                void await_resume() {}
-            };
-
-            return timer_awaitable{ duration };
+            return awl::testing::TimeAwaitable{ time_queue, d };
         }
 
         // also we can await other task<T>
