@@ -123,6 +123,9 @@ namespace awl
         Link * link() const { return pCur; }
 
         Link * pCur;
+
+        template <class T1, class DLink, class ForwardLink, class BackwardLink>
+        friend class double_iterator;
     };
 
     //! A singly linked list containing elements derived from single_link<T>.

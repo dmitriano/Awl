@@ -36,9 +36,10 @@ namespace awl
         
         double_iterator(DLink * p) : m_p(p) {}
 
-        double_iterator(single_iterator<T, ForwardLink> i) : double_iterator(static_cast<DLink *>(*i)) {}
+        //Casting the iterator with static_cast<DLink*>(*i) is UB if i == end().
+        double_iterator(single_iterator<T, ForwardLink> i) : double_iterator(static_cast<DLink*>(i.link())) {}
 
-        double_iterator(single_iterator<T, BackwardLink> i) : double_iterator(static_cast<DLink *>(*i)) {}
+        double_iterator(single_iterator<T, BackwardLink> i) : double_iterator(static_cast<DLink*>(i.link())) {}
 
         T * operator-> () const { return cur(); }
 
