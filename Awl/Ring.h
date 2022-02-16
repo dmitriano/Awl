@@ -202,6 +202,8 @@ namespace awl
             //Not an assignment to itself.
             if (m_buf != other.m_buf)
             {
+                free();
+
                 copy(other);
             }
 
