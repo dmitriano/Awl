@@ -25,7 +25,7 @@ namespace awl::io
 
         ~TrivialMemoryStream()
         {
-            delete pBuf;
+            delete[] pBuf;
         }
 
         constexpr bool End()

@@ -644,7 +644,7 @@ AWT_BENCHMARK(VtsMemSetMove)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
-    std::unique_ptr<uint8_t> p(new uint8_t[element_count]);
+    std::unique_ptr<uint8_t[]> p(new uint8_t[element_count]);
 
     {
         context.out << _T("std::memset: ");
@@ -658,7 +658,7 @@ AWT_BENCHMARK(VtsMemSetMove)
         context.out << std::endl;
     }
 
-    std::unique_ptr<uint8_t> p1(new uint8_t[element_count]);
+    std::unique_ptr<uint8_t[]> p1(new uint8_t[element_count]);
 
     {
         context.out << _T("std::memmove: ");

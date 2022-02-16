@@ -29,7 +29,7 @@ namespace awl::io
 
         ~SwitchMemoryOutputStream()
         {
-            delete pBuf;
+            delete[] pBuf;
         }
 
         //To make this look better and get gid of switch operator we would probably define
