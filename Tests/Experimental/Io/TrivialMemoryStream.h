@@ -110,6 +110,7 @@ namespace awl::io
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
         assert(s.GetLength() + sizeof(val) <= s.m_size);
+        //store to misaligned address:
         val = *(reinterpret_cast<T *>(s.m_p));
         s.m_p += sizeof(val);
     }

@@ -252,7 +252,12 @@ AWT_TEST(ForeignSetPlainPointer)
 
     for (size_t i = 0; i < insert_count; ++i)
     {
-        ps.insert(new A{ dist(awl::random()) , dist(awl::random()) });
+        A* p = new A{ dist(awl::random()) , dist(awl::random()) };
+        
+        if (!ps.insert(p).second)
+        {
+            delete p;
+        }
     }
 
     while (!ps.empty())
