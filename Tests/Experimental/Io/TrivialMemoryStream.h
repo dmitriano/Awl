@@ -10,6 +10,8 @@
 
 #include "StreamUtils.h"
 
+#include <cassert>
+
 namespace awl::io
 {
     class TrivialMemoryStream
@@ -44,13 +46,15 @@ namespace awl::io
 
         constexpr size_t Read(uint8_t * buffer, size_t count)
         {
-            StdCopy(m_p, m_p + count, buffer);
-            m_p += count;
-            return count;
+            size_t available_count = std::min(count, GetCapacity() - GetLength());
+            StdCopy(m_p, m_p + available_count, buffer);
+            m_p += available_count;
+            return available_count;
         }
 
         constexpr void Write(const uint8_t * buffer, size_t count)
         {
+            assert(GetLength() + count <= m_size);
             //std::memmove(m_p, buffer, count);
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
@@ -106,6 +110,7 @@ namespace awl::io
     template <typename T>
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
+        assert(s.GetLength() + sizeof(val) <= s.m_size);
         *(reinterpret_cast<T *>(s.m_p)) = val;
         s.m_p += sizeof(val);
     }
@@ -113,6 +118,7 @@ namespace awl::io
     template <typename T>
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
+        assert(s.GetLength() + sizeof(val) <= s.m_size);
         val = *(reinterpret_cast<T *>(s.m_p));
         s.m_p += sizeof(val);
     }
