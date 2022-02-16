@@ -36,6 +36,8 @@ Compiling on Linux with CMake and GCC:
 
 [Compiling on Ubuntu 18 and 20 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
 
+To enable GCC sanitizer uncomment corresponding lines in CMakeLists.txt.
+
 Running the tests (remove "./" prefix on Windows and do not forget quotes on Linux):
 
     ./AwlTest --filter ".*Test"
