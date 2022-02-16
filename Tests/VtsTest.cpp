@@ -487,7 +487,7 @@ AWT_TEST(VtsReadWriteVectorStream)
 }
 
 //store to/load of misaligned address
-AWT_DISABLED_TEST(VtsReadWriteTrivialMemoryStream)
+AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 {
     AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWT_ATTRIBUTE(size_t, write_count, 1);
@@ -737,13 +737,13 @@ AWT_TEST(VtsWriteMemoryStreamMemmove)
 }
 
 //store to/load of misaligned address
-AWT_DISABLED_TEST(VtsWriteMemoryStreamSwitch)
+AWT_UNSTABLE_TEST(VtsWriteMemoryStreamSwitch)
 {
     TestWrite<awl::io::SwitchMemoryOutputStream>(context);
 }
 
 //store to/load of misaligned address
-AWT_DISABLED_TEST(VtsWriteMemoryStreamConstexpr)
+AWT_UNSTABLE_TEST(VtsWriteMemoryStreamConstexpr)
 {
     TestWrite<awl::io::TrivialMemoryStream>(context);
 }

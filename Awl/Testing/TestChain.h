@@ -86,13 +86,8 @@ namespace awl
 #define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
 #define AWT_EXAMPLE(test_name) AWT_LINK(test_name, Example)
 
-#define AWT_DISABLED_TEST(test_name) \
-    AWT_DISABLED_FUNC(test_name)
-
-#define AWT_DISABLED_BENCHMARK(test_name) \
-    AWT_DISABLED_FUNC(test_name)
-
-#define AWT_DISABLED_EXAMPLE(test_name) \
-    AWT_DISABLED_FUNC(test_name)
+#define AWT_UNSTABLE_TEST(test_name) AWT_LINK(test_name, Test_Unstable)
+#define AWT_UNSTABLE_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark_Unstable)
+#define AWT_UNSTABLE_EXAMPLE(test_name) AWT_LINK(test_name, Example_Unstable)
 
 #define AWT_UNUSED_CONTEXT static_cast<void>(context)

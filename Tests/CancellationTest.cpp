@@ -37,7 +37,7 @@ using Duration = std::chrono::milliseconds;
 
 //./AwlTest --filter Cancellation_InterruptibleSleep_Example --thread_count 100 --iteration_count 1000000
 //double lock of a mutex
-AWT_DISABLED_EXAMPLE(Cancellation_InterruptibleSleep)
+AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);

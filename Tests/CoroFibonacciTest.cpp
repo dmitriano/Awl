@@ -112,7 +112,7 @@ namespace
     }
 }
 
-AWT_DISABLED_EXAMPLE(CoroGenerator)
+AWT_UNSTABLE_EXAMPLE(CoroGenerator)
 {
     try {
 

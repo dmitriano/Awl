@@ -45,12 +45,26 @@ To enable GCC sanitizer uncomment corresponding lines in CMakeLists.txt.
 
 Running the tests (remove "./" prefix on Windows and do not forget quotes on Linux):
 
-    ./AwlTest --filter ".*Test"
+    ./AwlTest
+
+of
+
+    ./AwlTest --filter ".*_Test"
 
 Running the benchmarks:
 
-    ./AwlTest --filter ".*Benchmark" --output all
+    ./AwlTest --filter ".*_Benchmark" --output all
 
-Running the tests, benchmarks and examples:
+Running the examples:
+
+    ./AwlTest --filter ".*_Example" --output all
+
+Do not run the command below:
+
+    ./AwlTest --filter ".*_Unstable"
+
+or
 
     ./AwlTest --filter ".*"
+
+It potentially can format your hard drive.
