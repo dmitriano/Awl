@@ -33,7 +33,6 @@ namespace awl::io
             return GetLength() == m_size;
         }
 
-        /*
         constexpr size_t Read(uint8_t * buffer, size_t count)
         {
             const size_t available_count = m_size - GetLength();
@@ -41,15 +40,6 @@ namespace awl::io
             StdCopy(m_p, m_p + read_count, buffer);
             m_p += read_count;
             return read_count;
-        }
-        */
-
-        constexpr size_t Read(uint8_t * buffer, size_t count)
-        {
-            size_t available_count = std::min(count, GetCapacity() - GetLength());
-            StdCopy(m_p, m_p + available_count, buffer);
-            m_p += available_count;
-            return available_count;
         }
 
         constexpr void Write(const uint8_t * buffer, size_t count)
@@ -67,6 +57,7 @@ namespace awl::io
 
         constexpr size_t GetLength() const
         {
+            assert(pBuf <= m_p);
             return static_cast<size_t>(m_p - pBuf);
         }
 

@@ -98,6 +98,7 @@ namespace awl::io
 
         void Write(const uint8_t * buffer, size_t count) override
         {
+            assert(GetLength() + count <= m_size);
             std::memmove(m_p, buffer, count);
             //std::copy(buffer, buffer + count, m_p);
             m_p += count;
@@ -110,6 +111,7 @@ namespace awl::io
 
         size_t GetLength() const
         {
+            assert(pBuf.get() <= m_p);
             return m_p - pBuf.get();
         }
 
@@ -124,7 +126,7 @@ namespace awl::io
     private:
 
         const size_t m_size;
-        std::unique_ptr<uint8_t> pBuf;
+        std::unique_ptr<uint8_t[]> pBuf;
         uint8_t * m_p;
     };
 
@@ -135,7 +137,9 @@ namespace awl::io
         void Write(const uint8_t * buffer, size_t count) override
         {
             static_cast<void>(buffer);
-            m_pos += count;
+            //compound assignment with ‘volatile’-qualified left operand is deprecated
+            //m_pos += count;
+            m_pos = m_pos + count;
         }
 
         size_t GetLength() const
@@ -156,7 +160,9 @@ namespace awl::io
         void Write(const uint8_t * buffer, size_t count)
         {
             static_cast<void>(buffer);
-            m_pos += count;
+            //compound assignment with ‘volatile’-qualified left operand is deprecated
+            //m_pos += count;
+            m_pos = m_pos + count;
         }
 
         size_t GetLength() const
