@@ -79,11 +79,20 @@ namespace awl
     static awl::testing::TestLink test_name##_##suffix_TestLink(_T(#test_name) _T("_") _T(#suffix), &AWT_LINK_FUNC_NAME(test_name)); \
     AWT_LINK_FUNC_SIGNATURE(test_name)
 
-#define AWT_DISABLED_TEST(test_name) \
+#define AWT_DISABLED_FUNC(test_name) \
     AWT_LINK_FUNC_SIGNATURE(test_name)
 
 #define AWT_TEST(test_name) AWT_LINK(test_name, Test)
 #define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
 #define AWT_EXAMPLE(test_name) AWT_LINK(test_name, Example)
+
+#define AWT_DISABLED_TEST(test_name) \
+    AWT_DISABLED_FUNC(test_name)
+
+#define AWT_DISABLED_BENCHMARK(test_name) \
+    AWT_DISABLED_FUNC(test_name)
+
+#define AWT_DISABLED_EXAMPLE(test_name) \
+    AWT_DISABLED_FUNC(test_name)
 
 #define AWT_UNUSED_CONTEXT static_cast<void>(context)

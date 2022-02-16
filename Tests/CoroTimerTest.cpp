@@ -234,7 +234,7 @@ namespace
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
-AWT_EXAMPLE(CoroTimer)
+AWT_DISABLED_EXAMPLE(CoroTimer)
 {
     // do something
 
