@@ -102,6 +102,7 @@ namespace awl::io
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
         assert(s.GetLength() + sizeof(val) <= s.m_size);
+        //load of misaligned address
         *(reinterpret_cast<T *>(s.m_p)) = val;
         s.m_p += sizeof(val);
     }
