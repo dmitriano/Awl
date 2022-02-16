@@ -188,7 +188,7 @@ namespace
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
-AWT_EXAMPLE(CoroNonOwningTimer)
+AWT_DISABLED_EXAMPLE(CoroNonOwningTimer)
 {
     auto task = TestNestedTimerAwait(context);
 
