@@ -59,7 +59,7 @@ Running the examples:
 
     ./AwlTest --filter ".*_Example" --output all
 
-Do not run the command below:
+Do not run the commands below:
 
     ./AwlTest --filter ".*_Unstable"
 
@@ -67,4 +67,4 @@ or
 
     ./AwlTest --filter ".*"
 
-It potentially can format your hard drive.
+they potentially can format your hard drive.
