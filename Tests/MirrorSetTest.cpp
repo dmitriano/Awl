@@ -103,6 +103,6 @@ AWT_TEST(MirrorSet)
     s.insert({ 5, 6, 102 }).second;
 
     //We stopped to receive the notifications.
-    AWT_ASSERT_EQUAL(0, mirror1.size());
-    AWT_ASSERT_EQUAL(0, mirror2.size());
+    AWT_ASSERT_EQUAL(0u, mirror1.size());
+    AWT_ASSERT_EQUAL(0u, mirror2.size());
 }
