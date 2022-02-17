@@ -88,15 +88,25 @@ namespace
                     return false;
                 }
 
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
-                {
-                    // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
-                    // nothing
-                    std::coroutine_handle<> val = awaiting_coroutine ? awaiting_coroutine : std::noop_coroutine();
+                // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
+                // nothing
+                //std::coroutine_handle<> await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                //{
+                //    std::coroutine_handle<> val = awaiting_coroutine ? awaiting_coroutine : std::noop_coroutine();
 
+                //    h.destroy();
+
+                //    return val;
+                //}
+
+                void await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                {
                     h.destroy();
 
-                    return val;
+                    if (awaiting_coroutine)
+                    {
+                        awaiting_coroutine.resume();
+                    }
                 }
 
                 void await_resume() noexcept {}
