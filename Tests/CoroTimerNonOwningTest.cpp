@@ -99,13 +99,21 @@ namespace
                 //    return val;
                 //}
 
+                //if await_suspend returns void, control is immediately returned to the caller/resumer of the current coroutine (this coroutine remains suspended), otherwise
+                //if await_suspend returns bool,
+                //the value true returns control to the caller/resumer of the current coroutine
+                //the value false resumes the current coroutine.
+                //if await_suspend returns a coroutine handle for some other coroutine, that handle is resumed (by a call to handle.resume())
+                //(note this may chain to eventually cause the current coroutine to resume)
                 void await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
                 {
+                    auto coro = awaiting_coroutine;
+                    
                     h.destroy();
 
-                    if (awaiting_coroutine)
+                    if (coro)
                     {
-                        awaiting_coroutine.resume();
+                        coro.resume();
                     }
                 }
 
