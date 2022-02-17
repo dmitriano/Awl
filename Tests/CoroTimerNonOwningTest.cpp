@@ -61,7 +61,7 @@ namespace
 
     struct UpdatePromise
     {
-        std::coroutine_handle<> awaiting_coroutine;
+        std::coroutine_handle<> m_awaitingCoroutine;
 
         UpdateTask get_return_object();
 
@@ -80,8 +80,6 @@ namespace
             // if there is a coroutine that is awaiting on this coroutine resume it
             struct transfer_awaitable
             {
-                std::coroutine_handle<> awaiting_coroutine;
-
                 // always stop at final suspend
                 bool await_ready() noexcept
                 {
@@ -92,7 +90,7 @@ namespace
                 // nothing
                 //std::coroutine_handle<> await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
                 //{
-                //    std::coroutine_handle<> val = awaiting_coroutine ? awaiting_coroutine : std::noop_coroutine();
+                //    std::coroutine_handle<> val = m_awaitingCoroutine ? m_awaitingCoroutine : std::noop_coroutine();
 
                 //    h.destroy();
 
@@ -107,7 +105,7 @@ namespace
                 //(note this may chain to eventually cause the current coroutine to resume)
                 void await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
                 {
-                    auto coro = awaiting_coroutine;
+                    auto coro = h.promise().m_awaitingCoroutine;
                     
                     h.destroy();
 
@@ -120,7 +118,7 @@ namespace
                 void await_resume() noexcept {}
             };
 
-            return transfer_awaitable{ awaiting_coroutine };
+            return transfer_awaitable{};
         }
 
         void return_void() {}
@@ -139,7 +137,7 @@ namespace
                 throw std::runtime_error("coroutine without promise awaited");
             }
 
-            if (update_task.handle.promise().awaiting_coroutine)
+            if (update_task.handle.promise().m_awaitingCoroutine)
             {
                 throw std::runtime_error("coroutine already awaited");
             }
@@ -158,7 +156,7 @@ namespace
                 // store coroutine handle to be resumed after computing UpdateTask value
                 void await_suspend(std::coroutine_handle<> h)
                 {
-                    handle.promise().awaiting_coroutine = h;
+                    handle.promise().m_awaitingCoroutine = h;
                 }
 
                 // when ready return value to a consumer
