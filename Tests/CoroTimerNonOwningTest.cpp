@@ -132,7 +132,7 @@ namespace
         }
 
         // also we can await other UpdateTask<T>
-        auto await_transform(UpdateTask& update_task)
+        auto await_transform(const UpdateTask& update_task)
         {
             if (!update_task.handle)
             {
@@ -184,31 +184,36 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("testTimerAwait started.") << std::endl;
+        context.out << _T("TestTimerAwait started.") << std::endl;
 
-        co_await 3s;
+        co_await 1s;
 
-        context.out << _T("testTimerAwait finished.") << std::endl;
+        context.out << _T("TestTimerAwait finished.") << std::endl;
     }
 
-    UpdateTask TestNestedTimerAwait(awl::testing::TestContext context)
+    UpdateTask TestNestedTask(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("testNestedTimerAwait started.") << std::endl;
+        context.out << _T("TestNestedTask started.") << std::endl;
 
         auto task = TestTimerAwait(context);
 
-        co_await task;
+        co_await 2s;
 
-        context.out << _T("testNestedTimerAwait finished.") << std::endl;
+        context.out << _T("Time interval has elapsed.") << std::endl;
+
+        //We can't wait for a destroyed task.
+        //co_await task;
+
+        context.out << _T("TestNestedTask finished.") << std::endl;
     }
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
 AWT_UNSTABLE_EXAMPLE(CoroNonOwningTimer)
 {
-    auto task = TestNestedTimerAwait(context);
+    auto task = TestNestedTask(context);
 
     // execute deferred coroutines
     time_queue.loop();
