@@ -11,7 +11,7 @@
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/StopWatch.h"
-#include "Awl/Separator.h"
+#include "Awl/Time.h"
 
 #include <set>
 #include <regex>
@@ -126,35 +126,13 @@ namespace awl::testing
             p_test_link->Run(temp_context);
         }
 
-        context.out << _T("Passed within ");
+        context.out << _T("\tPassed within ");
 
         auto elapsed = sw.GetElapsedTime();
         
-        {
-            using namespace std::chrono;
-
-            awl::separator sep(_T(":"));
-
-            const seconds s = duration_cast<seconds>(elapsed);
-
-            if (s != seconds::zero())
-            {
-                context.out << sep << s;
-
-                elapsed -= s;
-            }
-
-            milliseconds ms = duration_cast<milliseconds>(elapsed);
-
-            if (!sep.first() || ms != milliseconds::zero())
-            {
-                context.out << sep << ms;
-
-                elapsed -= ms;
-            }
-
-            context.out << sep << elapsed << std::endl;
-        }
+        awl::format_duration(context.out, elapsed, 2);
+        
+        context.out << std::endl;
 
         lastOutput.str(String());
     }
