@@ -59,18 +59,21 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
             context.out << text << std::endl;
         };
 
+        out(awl::format() << _T("Main thread ") << std::this_thread::get_id());
+
         std::exception_ptr ex_ptr = nullptr;
 
         std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
         {
-            out(_T("Client  started."));
+            out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
                 
+            //Is not called because client thread is already finished.
             std::stop_callback stop_wait
             {
                 token,
                 [&out]()
                 {
-                    out(_T("Stop callback on client thread."));
+                    out(awl::format() << _T("Client stop callback on thread ") << std::this_thread::get_id());
                 }
             };
 
@@ -97,14 +100,15 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
                     
                 try
                 {
-                    out(_T("Worker started."));
+                    out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" started "));
 
+                    //Is not called because client thread is already finished.
                     std::stop_callback stop_wait
                     {
                         token,
                         [&out]()
                         {
-                            out(_T("Stop callback on worker thread."));
+                            out(awl::format() << _T("Worker stop callback on thread ") << std::this_thread::get_id());
                         }
                     };
 
@@ -167,7 +171,7 @@ AWT_EXAMPLE(Cancellation_SimpleSleep)
     AWT_ASSERT(elapsed.count() >= client_sleep_time);
 }
 
-AWT_EXAMPLE(Cancellation_JThreadTest)
+AWT_EXAMPLE(Cancellation_JThread)
 {
     using namespace std::chrono_literals;
 
