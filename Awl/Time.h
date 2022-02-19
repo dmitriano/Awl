@@ -44,11 +44,16 @@ namespace awl
     template<class C, class Rep, class Period>
     void format_duration(std::basic_ostream<C>& out, std::chrono::duration<Rep, Period> val, uint8_t part_count = default_duration_part_count)
     {
-#ifdef __GNUC__
-        static_cast<void>(part_count);
-        out << val.count() << _T("ns");
-#else
         using namespace std::chrono;
+
+#ifdef __GNUC__
+
+        static_cast<void>(part_count);
+
+        nanoseconds ns = val;
+
+        out << ns.count() << _T("ns");
+#else
 
         awl::separator sep(_T(":"));
 
