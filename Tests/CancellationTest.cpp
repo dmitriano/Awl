@@ -137,14 +137,14 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
             }));
         }
 
+        client.join();
+
+        client.request_stop();
+
         for (auto & t : v)
         {
             t.join();
         }
-
-        client.request_stop();
-
-        client.join();
 
         //We store only the first exception.
         if (ex_ptr != nullptr)
