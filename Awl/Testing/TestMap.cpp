@@ -124,10 +124,13 @@ namespace awl::testing
             static_cast<void>(i);
 
             p_test_link->Run(temp_context);
+
+            if (p_out == &lastOutput)
+            {
+                lastOutput.str(String());
+            }
         }
 
         context.out << _T("\tPassed within ") << sw << std::endl;
-
-        lastOutput.str(String());
     }
 }

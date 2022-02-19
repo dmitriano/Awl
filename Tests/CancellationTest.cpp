@@ -37,8 +37,7 @@ static constexpr int default_worker_sleep_time = 1000;
 
 using Duration = std::chrono::milliseconds;
 
-//./AwlTest --filter Cancellation_InterruptibleSleep_Example --thread_count 100 --iteration_count 1000000
-//double lock of a mutex
+//./AwlTest --filter Cancellation_InterruptibleSleep.* --output failed --loop 100 --thread_count 10
 AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
@@ -111,22 +110,22 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 
                 awl::sleep_for(Duration(worker_sleep_time), token);
 
-                out(awl::format() << _T("Worker has woken up within ") << sw);
+                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" has woken up within ") << sw);
 
                 const auto elapsed = sw.GetElapsedCast<Duration>();
 
                 //It is not quite correct to check this without some further synchronization,
                 //so the test will periodically fail.
-                AWT_ASSERT(elapsed.count() >= client_sleep_time);
+                AWT_ASSERT(elapsed >= Duration(client_sleep_time));
 
                 //Ctrl+Z on Linux causes this assertion to fail.
-                AWT_ASSERT(elapsed.count() < worker_sleep_time);
+                AWT_ASSERT(elapsed < Duration(worker_sleep_time));
 
-                out(_T("Worker succeeded."));
+                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" succeeded."));
             }
             catch (const std::exception&)
             {
-                out(_T("Worker failed."));
+                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" failed."));
 
                 if (ex_ptr == nullptr)
                 {

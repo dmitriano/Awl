@@ -60,6 +60,7 @@ namespace awl
 
                 if (s != Duration::zero())
                 {
+                    //This requires GCC 12.
                     out << sep << s;
 
                     left -= s;
