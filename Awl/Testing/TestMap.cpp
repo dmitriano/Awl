@@ -89,6 +89,9 @@ namespace awl::testing
 
         context.out << _T("... ");
 
+        //Required on Linux with GCC.
+        context.out.flush();
+
         std::basic_ostream<Char>* p_out = nullptr;
 
         if (output == _T("all"))
