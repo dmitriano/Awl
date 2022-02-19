@@ -28,13 +28,22 @@ namespace awl::testing
 
         int Run();
 
+        const TestContext& context() const
+        {
+            return m_context;
+        }
+
     private:
 
         bool RunTests();
             
+        std::stop_source m_source;
+
         std::function<bool(const String& s)> CreateFilter(const String filter);
 
         AttributeProvider& m_ap;
+
+        TestContext m_context;
     };
 
     int Run();
