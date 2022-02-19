@@ -44,29 +44,24 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
     AWT_ATTRIBUTE(size_t, thread_count, 3);
-    AWT_ATTRIBUTE(size_t, iteration_count, 1);
     
-    for (size_t iteration : awl::make_count(iteration_count))
+    std::mutex m;
+
+    auto out = [&context, &m](const awl::String& text)
     {
-        static_cast<void>(iteration);
+        std::lock_guard lock(m);
 
-        std::mutex m;
+        context.out << text << std::endl;
+    };
 
-        auto out = [&context, &m](const awl::String& text)
-        {
-            std::lock_guard lock(m);
+    out(awl::format() << _T("Main thread ") << std::this_thread::get_id());
 
-            context.out << text << std::endl;
-        };
+    std::exception_ptr ex_ptr = nullptr;
 
-        out(awl::format() << _T("Main thread ") << std::this_thread::get_id());
-
-        std::exception_ptr ex_ptr = nullptr;
-
-        std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
+    std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
         {
             out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
-                
+
             //Is not called because client thread is already finished.
             std::stop_callback stop_wait
             {
@@ -86,75 +81,74 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
             out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
         });
 
-        const std::stop_token token = client.get_stop_token();
+    const std::stop_token token = client.get_stop_token();
 
-        std::vector<std::thread> v;
-        v.reserve(thread_count);
+    std::vector<std::thread> v;
+    v.reserve(thread_count);
 
-        for (size_t i : awl::make_count(thread_count))
+    for (size_t i : awl::make_count(thread_count))
+    {
+        static_cast<void>(i);
+
+        v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, &ex_ptr]()
         {
-            static_cast<void>(i);
 
-            v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, &ex_ptr]()
+            try
             {
-                    
-                try
+                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" started "));
+
+                //Is not called because client thread is already finished.
+                std::stop_callback stop_wait
                 {
-                    out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" started "));
-
-                    //Is not called because client thread is already finished.
-                    std::stop_callback stop_wait
+                    token,
+                    [&out]()
                     {
-                        token,
-                        [&out]()
-                        {
-                            out(awl::format() << _T("Worker stop callback on thread ") << std::this_thread::get_id());
-                        }
-                    };
-
-                    awl::StopWatch sw;
-
-                    awl::sleep_for(Duration(worker_sleep_time), token);
-
-                    out(awl::format() << _T("Worker has woken up within ") << sw);
-
-                    const auto elapsed = sw.GetElapsedCast<Duration>();
-
-                    //It is not quite correct to check this without some further synchronization,
-                    //so the test will periodically fail.
-                    AWT_ASSERT(elapsed.count() >= client_sleep_time);
-
-                    //Ctrl+Z on Linux causes this assertion to fail.
-                    AWT_ASSERT(elapsed.count() < worker_sleep_time);
-
-                    out(_T("Worker succeeded."));
-                }
-                catch (const std::exception &)
-                {
-                    out(_T("Worker failed."));
-
-                    if (ex_ptr == nullptr)
-                    {
-                        ex_ptr = std::current_exception();
+                        out(awl::format() << _T("Worker stop callback on thread ") << std::this_thread::get_id());
                     }
+                };
+
+                awl::StopWatch sw;
+
+                awl::sleep_for(Duration(worker_sleep_time), token);
+
+                out(awl::format() << _T("Worker has woken up within ") << sw);
+
+                const auto elapsed = sw.GetElapsedCast<Duration>();
+
+                //It is not quite correct to check this without some further synchronization,
+                //so the test will periodically fail.
+                AWT_ASSERT(elapsed.count() >= client_sleep_time);
+
+                //Ctrl+Z on Linux causes this assertion to fail.
+                AWT_ASSERT(elapsed.count() < worker_sleep_time);
+
+                out(_T("Worker succeeded."));
+            }
+            catch (const std::exception&)
+            {
+                out(_T("Worker failed."));
+
+                if (ex_ptr == nullptr)
+                {
+                    ex_ptr = std::current_exception();
                 }
-            }));
-        }
+            }
+        }));
+    }
 
-        client.join();
+    client.join();
 
-        client.request_stop();
+    client.request_stop();
 
-        for (auto & t : v)
-        {
-            t.join();
-        }
+    for (auto& t : v)
+    {
+        t.join();
+    }
 
-        //We store only the first exception.
-        if (ex_ptr != nullptr)
-        {
-            std::rethrow_exception(ex_ptr);
-        }
+    //We store only the first exception.
+    if (ex_ptr != nullptr)
+    {
+        std::rethrow_exception(ex_ptr);
     }
 }
 
