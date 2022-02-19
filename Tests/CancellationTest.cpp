@@ -166,3 +166,50 @@ AWT_EXAMPLE(Cancellation_SimpleSleep)
 
     AWT_ASSERT(elapsed.count() >= client_sleep_time);
 }
+
+AWT_EXAMPLE(Cancellation_JThreadTest)
+{
+    using namespace std::chrono_literals;
+
+    // A sleepy worker thread
+    std::jthread sleepy_worker([&context](std::stop_token stoken)
+    {
+        for (int i = 10; i; --i)
+        {
+            std::this_thread::sleep_for(300ms);
+
+            if (stoken.stop_requested())
+            {
+                context.out << "Sleepy worker is requested to stop\n";
+                return;
+            }
+
+            context.out << "Sleepy worker goes back to sleep\n";
+        }
+    });
+
+    // A waiting worker thread
+    // The condition variable will be awoken by the stop request.
+    std::jthread waiting_worker([&context](std::stop_token stoken)
+    {
+        std::mutex mutex;
+        std::unique_lock lock(mutex);
+
+        std::condition_variable_any().wait(lock, stoken, [&stoken] { return false; });
+
+        if (stoken.stop_requested())
+        {
+            context.out << "Waiting worker is requested to stop\n";
+        }
+    });
+
+    // std::jthread::request_stop() can be called explicitly:
+    context.out << "Requesting stop of sleepy worker\n";
+    sleepy_worker.request_stop();
+    sleepy_worker.join();
+    context.out << "Sleepy worker joined\n";
+
+    // Or automatically using RAII:
+    // waiting_worker's destructor will call request_stop()
+    // and join the thread automatically.
+}
