@@ -64,7 +64,7 @@ namespace awl::testing
         };
     }
 
-    int TestConsole::RunTests()
+    bool TestConsole::RunTests()
     {
         //TODO: Probably make it possible to cancel all the tests.
         std::stop_source source;
@@ -88,12 +88,12 @@ namespace awl::testing
             return 0;
         }
 
-        int error = 1;
-
         auto test_map = awl::testing::CreateTestMap();
 
         AWT_ATTRIBUTE(std::set<String>, run, {});
 
+        bool passed = false;
+        
         try
         {
             if (run.empty())
@@ -118,21 +118,18 @@ namespace awl::testing
 
             context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
 
-            error = 0;
+            passed = true;
         }
         catch (const awl::testing::TestException& e)
         {
-            context.out << std::endl << _T("***************** The tests failed: ") << e.GetMessage() << std::endl;
-        }
+            context.out << std::endl << test_map->GetLastOutput();
 
-        if (error != 0)
-        {
-            context.out << test_map->GetLastOutput();
+            context.out << std::endl << _T("***************** The tests failed: ") << e.GetMessage() << std::endl;
         }
 
         awl::testing::Shutdown();
 
-        return error;
+        return passed;
     }
 
     int TestConsole::Run()

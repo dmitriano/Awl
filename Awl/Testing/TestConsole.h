@@ -30,7 +30,7 @@ namespace awl::testing
 
     private:
 
-        int RunTests();
+        bool RunTests();
             
         std::function<bool(const String& s)> CreateFilter(const String filter);
 

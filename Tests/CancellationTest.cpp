@@ -57,8 +57,22 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 
     std::exception_ptr ex_ptr = nullptr;
 
-    std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
+    std::condition_variable event_cv;
+    std::mutex event_m;
+    bool ready = false;
+
+    std::jthread client([&context, &out, client_sleep_time, &event_cv, &event_m, &ready](std::stop_token token)
     {
+        //Wait until all the worker threads are started.
+        {
+            std::unique_lock<std::mutex> lock(event_m);
+
+            event_cv.wait(lock, [&ready]()
+            {
+                return ready;
+            });
+        }
+
         out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
 
         //Is not called because client thread is already finished.
@@ -82,6 +96,9 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 
     const std::stop_token token = client.get_stop_token();
 
+    //We can move this before std::jthread and got rid of event_cv.
+    awl::StopWatch sw;
+
     std::vector<std::thread> v;
     v.reserve(thread_count);
 
@@ -89,9 +106,8 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
     {
         static_cast<void>(i);
 
-        v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, &ex_ptr]()
+        v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, sw, &ex_ptr]()
         {
-
             try
             {
                 out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" started "));
@@ -106,16 +122,13 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
                     }
                 };
 
-                awl::StopWatch sw;
-
                 awl::sleep_for(Duration(worker_sleep_time), token);
 
                 out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" has woken up within ") << sw);
 
                 const auto elapsed = sw.GetElapsedCast<Duration>();
 
-                //It is not quite correct to check this without some further synchronization,
-                //so the test will periodically fail.
+                //This assert failed until I moved StopWatch to the main thread.
                 AWT_ASSERT(elapsed >= Duration(client_sleep_time));
 
                 //Ctrl+Z on Linux causes this assertion to fail.
@@ -134,6 +147,14 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
             }
         }));
     }
+
+    {
+        std::unique_lock<std::mutex> lock(event_m);
+
+        ready = true;
+    }
+
+    event_cv.notify_all();
 
     client.join();
 
