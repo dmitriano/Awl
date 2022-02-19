@@ -64,9 +64,13 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
         {
             out(_T("Client  started."));
                 
+            awl::StopWatch w;
+
             awl::sleep_for(Duration(client_sleep_time), token);
 
-            out(_T("Client finished."));
+            const auto elapsed = w.GetElapsedCast<Duration>();
+
+            out(awl::format() << _T("Client has woken up within ") << elapsed << _T(" and finished."));
         });
 
         const std::stop_token token = client.get_stop_token();
@@ -91,7 +95,7 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 
                     const auto elapsed = w.GetElapsedCast<Duration>();
 
-                    out(awl::format() << _T("Worker has woken up within ") << elapsed << _T("ms"));
+                    out(awl::format() << _T("Worker has woken up within ") << elapsed);
 
                     //It is not quite correct to check this without some further synchronization,
                     //so the test will periodically fail.
@@ -118,6 +122,8 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
         {
             t.join();
         }
+
+        client.request_stop();
 
         client.join();
 
