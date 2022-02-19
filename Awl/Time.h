@@ -7,6 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Separator.h"
+#include "Awl/StopWatch.h"
 
 #include <ctime>
 #include <chrono>
@@ -38,8 +39,10 @@ namespace awl
         return tp + fs;
     }
 
+    constexpr uint8_t default_duration_part_count = 2;
+
     template<class C, class Rep, class Period>
-    void format_duration(std::basic_ostream<C>& out, std::chrono::duration<Rep, Period> val, uint8_t part_count)
+    void format_duration(std::basic_ostream<C>& out, std::chrono::duration<Rep, Period> val, uint8_t part_count = default_duration_part_count)
     {
         using namespace std::chrono;
 
@@ -86,5 +89,24 @@ namespace awl
         print.template operator()<microseconds>();
 
         print.template operator()<nanoseconds>();
+    }
+
+    //It did not compile for some unknown reason.
+    //template<class C, class Rep, class Period>
+    //std::basic_string<C> duration_to_string(std::chrono::duration<Rep, Period> d, uint8_t part_count = default_duration_part_count)
+    //{
+    //    std::basic_ostringstream<C> out;
+
+    //    awl::format_duration(out, d, part_count);
+
+    //    return out.str();
+    //}
+
+    template <class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const StopWatch& sw)
+    {
+        format_duration(out, sw.GetElapsedTime(), default_duration_part_count);
+        
+        return out;
     }
 }

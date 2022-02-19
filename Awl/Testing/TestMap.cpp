@@ -126,13 +126,7 @@ namespace awl::testing
             p_test_link->Run(temp_context);
         }
 
-        context.out << _T("\tPassed within ");
-
-        auto elapsed = sw.GetElapsedTime();
-        
-        awl::format_duration(context.out, elapsed, 2);
-        
-        context.out << std::endl;
+        context.out << _T("\tPassed within ") << sw << std::endl;
 
         lastOutput.str(String());
     }

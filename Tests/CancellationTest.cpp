@@ -12,6 +12,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/IntRange.h"
 #include "Awl/StringFormat.h"
+#include "Awl/Time.h"
 
 AWT_EXAMPLE(Cancellation_NegativeTimeDiff)
 {
@@ -64,13 +65,13 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
         {
             out(_T("Client  started."));
                 
-            awl::StopWatch w;
+            awl::StopWatch sw;
 
             awl::sleep_for(Duration(client_sleep_time), token);
 
-            const auto elapsed = w.GetElapsedCast<Duration>();
+            const auto elapsed = sw.GetElapsedCast<Duration>();
 
-            out(awl::format() << _T("Client has woken up within ") << elapsed << _T(" and finished."));
+            out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
         });
 
         const std::stop_token token = client.get_stop_token();
@@ -89,13 +90,13 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
                 {
                     out(_T("Worker started."));
 
-                    awl::StopWatch w;
+                    awl::StopWatch sw;
 
                     awl::sleep_for(Duration(worker_sleep_time), token);
 
-                    const auto elapsed = w.GetElapsedCast<Duration>();
+                    out(awl::format() << _T("Worker has woken up within ") << sw);
 
-                    out(awl::format() << _T("Worker has woken up within ") << elapsed);
+                    const auto elapsed = sw.GetElapsedCast<Duration>();
 
                     //It is not quite correct to check this without some further synchronization,
                     //so the test will periodically fail.
