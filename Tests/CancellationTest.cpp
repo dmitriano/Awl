@@ -59,27 +59,27 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
     std::exception_ptr ex_ptr = nullptr;
 
     std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
+    {
+        out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
+
+        //Is not called because client thread is already finished.
+        std::stop_callback stop_wait
         {
-            out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
-
-            //Is not called because client thread is already finished.
-            std::stop_callback stop_wait
+            token,
+            [&out]()
             {
-                token,
-                [&out]()
-                {
-                    out(awl::format() << _T("Client stop callback on thread ") << std::this_thread::get_id());
-                }
-            };
+                out(awl::format() << _T("Client stop callback on thread ") << std::this_thread::get_id());
+            }
+        };
 
-            awl::StopWatch sw;
+        awl::StopWatch sw;
 
-            awl::sleep_for(Duration(client_sleep_time), token);
+        awl::sleep_for(Duration(client_sleep_time), token);
 
-            const auto elapsed = sw.GetElapsedCast<Duration>();
+        const auto elapsed = sw.GetElapsedCast<Duration>();
 
-            out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
-        });
+        out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
+    });
 
     const std::stop_token token = client.get_stop_token();
 
