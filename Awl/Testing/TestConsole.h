@@ -28,11 +28,6 @@ namespace awl::testing
 
         int Run();
 
-        const TestContext& context() const
-        {
-            return m_context;
-        }
-
     private:
 
         int RunTests();
@@ -40,10 +35,6 @@ namespace awl::testing
         std::function<bool(const String& s)> CreateFilter(const String filter);
 
         AttributeProvider& m_ap;
-            
-        CancellationFlag m_cancellation;
-
-        const TestContext m_context;
     };
 
     int Run();

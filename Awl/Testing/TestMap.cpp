@@ -13,6 +13,7 @@
 
 #include <set>
 #include <regex>
+#include <thread>
 
 namespace awl::testing
 {
@@ -105,13 +106,17 @@ namespace awl::testing
             throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
         }
 
-        TimedCancellation timed_cancellation(context.cancellation, std::chrono::seconds(timeout));
-        
-        const TestContext temp_context{ *p_out, timed_cancellation, context.ap };
-
         for (auto i : awl::make_count(loop_count))
         {
             static_cast<void>(i);
+
+            std::jthread watch_dog_thread([timeout](std::stop_token token)
+            {
+                awl::sleep_for(std::chrono::seconds(timeout), token);
+            });
+
+            const TestContext temp_context{ *p_out, watch_dog_thread.get_stop_token(), context.ap };
+
             p_test_link->Run(temp_context);
         }
 

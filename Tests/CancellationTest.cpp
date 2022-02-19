@@ -11,6 +11,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/IntRange.h"
+#include "Awl/StringFormat.h"
 
 AWT_EXAMPLE(Cancellation_NegativeTimeDiff)
 {
@@ -48,10 +49,27 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
     {
         static_cast<void>(iteration);
 
-        std::mutex ex_mutex;
+        std::mutex m;
+
+        auto out = [&context, &m](const awl::String& text)
+        {
+            std::lock_guard lock(m);
+
+            context.out << text << std::endl;
+        };
+
         std::exception_ptr ex_ptr = nullptr;
 
-        awl::CancellationFlag cancellation;
+        std::jthread client([&context, &out, client_sleep_time](std::stop_token token)
+        {
+            out(_T("Client  started."));
+                
+            awl::sleep_for(Duration(client_sleep_time), token);
+
+            out(_T("Client finished."));
+        });
+
+        const std::stop_token token = client.get_stop_token();
 
         std::vector<std::thread> v;
         v.reserve(thread_count);
@@ -60,15 +78,20 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
         {
             static_cast<void>(i);
 
-            v.push_back(std::thread([&context, &cancellation, client_sleep_time, worker_sleep_time, &ex_mutex, &ex_ptr]()
+            v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, &ex_ptr]()
             {
+                    
                 try
                 {
+                    out(_T("Worker started."));
+
                     awl::StopWatch w;
 
-                    cancellation.Sleep(Duration(worker_sleep_time));
+                    awl::sleep_for(Duration(worker_sleep_time), token);
 
                     const auto elapsed = w.GetElapsedCast<Duration>();
+
+                    out(awl::format() << _T("Worker has woken up within ") << elapsed << _T("ms"));
 
                     //It is not quite correct to check this without some further synchronization,
                     //so the test will periodically fail.
@@ -76,10 +99,12 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
 
                     //Ctrl+Z on Linux causes this assertion to fail.
                     AWT_ASSERT(elapsed.count() < worker_sleep_time);
+
+                    out(_T("Worker succeeded."));
                 }
                 catch (const std::exception &)
                 {
-                    std::lock_guard lock(ex_mutex);
+                    out(_T("Worker failed."));
 
                     if (ex_ptr == nullptr)
                     {
@@ -88,27 +113,6 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
                 }
             }));
         }
-
-        std::thread client([&context, &cancellation, client_sleep_time, &ex_mutex, &ex_ptr]()
-        {
-            try
-            {
-                std::this_thread::sleep_for(Duration(client_sleep_time));
-
-                cancellation.Cancel();
-
-                AWT_ASSERT(cancellation.IsCancelled());
-            }
-            catch (const std::exception &)
-            {
-                std::lock_guard lock(ex_mutex);
-
-                if (ex_ptr == nullptr)
-                {
-                    ex_ptr = std::current_exception();
-                }
-            }
-        });
 
         for (auto & t : v)
         {
@@ -129,11 +133,9 @@ AWT_EXAMPLE(Cancellation_SimpleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
-    awl::CancellationFlag cancellation;
-
     awl::StopWatch w;
 
-    cancellation.Sleep(Duration(client_sleep_time));
+    awl::sleep_for(Duration(client_sleep_time), context.stopToken);
 
     const auto elapsed = w.GetElapsedCast<Duration>();
 

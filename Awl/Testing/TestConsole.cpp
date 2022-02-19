@@ -36,8 +36,7 @@ namespace awl::testing
     }
 
     TestConsole::TestConsole(AttributeProvider& ap) :
-        m_ap(ap),
-        m_context{ awl::cout(), m_cancellation, m_ap }
+        m_ap(ap)
     {
     }
 
@@ -67,8 +66,11 @@ namespace awl::testing
 
     int TestConsole::RunTests()
     {
-        const TestContext& context = m_context;
-
+        //TODO: Probably make it possible to cancel all the tests.
+        std::stop_source source;
+        
+        TestContext context{ awl::cout(), source.get_token(), m_ap };
+        
         AWT_FLAG(list);
 
         if (list)

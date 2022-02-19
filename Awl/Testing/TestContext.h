@@ -20,11 +20,11 @@ namespace awl
         struct TestContext
         {
             //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
-            std::basic_ostream<Char> & out;
+            awl::ostream& out;
 
-            const Cancellation & cancellation;
+            const std::stop_token stopToken;
 
-            const AttributeProvider & ap;
+            const AttributeProvider& ap;
         };
     }
 }

@@ -6,7 +6,6 @@
 #include <vector>
 #include <set>
 
-#include "Awl/Cancellation.h"
 #include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/UnitTest.h"
 
