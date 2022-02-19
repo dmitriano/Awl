@@ -69,9 +69,9 @@ namespace awl
             }
         };
 
-        print.template operator()<years> ();
+        print.template operator()<years>();
 
-        print.template operator()<months> ();
+        print.template operator()<months>();
 
         print.template operator()<days>();
 
