@@ -21,12 +21,12 @@ namespace awl
 
         std::unique_lock<std::mutex> lock{ mutex };
 
-        std::condition_variable_any().wait_for(lock, token, d, [&token]
-        {
-            return token.stop_requested();
-        });
+        // ThreadSanitizer: double lock of a mutex
+        // std::condition_variable_any().wait_for(lock, token, d, [&token]
+        // {
+        //     return token.stop_requested();
+        // });
 
-        /*
         std::stop_callback stop_wait
         {
             token,
@@ -40,6 +40,5 @@ namespace awl
         {
             return token.stop_requested();
         });
-        */
     }
 }
