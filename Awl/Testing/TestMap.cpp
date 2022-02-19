@@ -10,6 +10,8 @@
 
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
+#include "Awl/StopWatch.h"
+#include "Awl/Separator.h"
 
 #include <set>
 #include <regex>
@@ -85,12 +87,14 @@ namespace awl::testing
             loop_count = 1;
         }
 
-        context.out << _T("...") << std::endl;
+        context.out << _T("... ");
 
         std::basic_ostream<Char>* p_out = nullptr;
 
         if (output == _T("all"))
         {
+            context.out << std::endl;
+            
             p_out = &context.out;
         }
         else if (output == _T("failed"))
@@ -106,22 +110,52 @@ namespace awl::testing
             throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
         }
 
+        std::jthread watch_dog_thread([timeout](std::stop_token token)
+        {
+            awl::sleep_for(std::chrono::seconds(timeout), token);
+        });
+
+        const TestContext temp_context{ *p_out, watch_dog_thread.get_stop_token(), context.ap };
+
+        awl::StopWatch sw;
+
         for (auto i : awl::make_count(loop_count))
         {
             static_cast<void>(i);
 
-            std::jthread watch_dog_thread([timeout](std::stop_token token)
-            {
-                awl::sleep_for(std::chrono::seconds(timeout), token);
-            });
-
-            const TestContext temp_context{ *p_out, watch_dog_thread.get_stop_token(), context.ap };
-
             p_test_link->Run(temp_context);
         }
 
-        lastOutput.str(String());
+        context.out << _T("Passed within ");
 
-        context.out << _T("OK") << std::endl;
+        auto elapsed = sw.GetElapsedTime();
+        
+        {
+            using namespace std::chrono;
+
+            awl::separator sep(_T(":"));
+
+            const seconds s = duration_cast<seconds>(elapsed);
+
+            if (s != seconds::zero())
+            {
+                context.out << sep << s;
+
+                elapsed -= s;
+            }
+
+            milliseconds ms = duration_cast<milliseconds>(elapsed);
+
+            if (!sep.first() || ms != milliseconds::zero())
+            {
+                context.out << sep << ms;
+
+                elapsed -= ms;
+            }
+
+            context.out << sep << elapsed << std::endl;
+        }
+
+        lastOutput.str(String());
     }
 }
