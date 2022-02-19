@@ -65,6 +65,15 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
         {
             out(_T("Client  started."));
                 
+            std::stop_callback stop_wait
+            {
+                token,
+                [&out]()
+                {
+                    out(_T("Stop callback on client thread."));
+                }
+            };
+
             awl::StopWatch sw;
 
             awl::sleep_for(Duration(client_sleep_time), token);
@@ -89,6 +98,15 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
                 try
                 {
                     out(_T("Worker started."));
+
+                    std::stop_callback stop_wait
+                    {
+                        token,
+                        [&out]()
+                        {
+                            out(_T("Stop callback on worker thread."));
+                        }
+                    };
 
                     awl::StopWatch sw;
 

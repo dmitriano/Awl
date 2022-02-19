@@ -21,9 +21,13 @@ namespace awl
 
         std::unique_lock<std::mutex> lock{ mutex };
 
-        std::stop_callback stop_wait{ token, [&cv]()
+        std::stop_callback stop_wait
         {
-            cv.notify_one(); }
+            token,
+            [&cv]()
+            {
+                cv.notify_one();
+            }
         };
 
         cv.wait_for(lock, d, [&token]()
