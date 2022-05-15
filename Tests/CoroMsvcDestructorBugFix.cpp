@@ -208,11 +208,19 @@ namespace
     }
 }
 
-// main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
-AWT_UNSTABLE_EXAMPLE(CoroNonOwningTimer)
+//The correct output ends with two destructor calls:
+//UpdateTask constructor.
+//TestNestedTask started.
+//UpdateTask constructor.
+//TestTimerAwait started.
+//TestTimerAwait finished.
+//Time interval has elapsed.
+//TestNestedTask finished.
+//UpdateTask destructor.
+//UpdateTask destructor.
+AWT_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
 {
     auto task = TestNestedTask(context);
 
-    // execute deferred coroutines
     time_queue.loop();
 }
