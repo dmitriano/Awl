@@ -6,9 +6,6 @@
 namespace awl
 {
     template<typename T>
-    struct ProcessPromise;
-
-    template<typename T>
     struct ProcessTask;
 
     template<typename T>
