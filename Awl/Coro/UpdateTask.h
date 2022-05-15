@@ -1,18 +1,10 @@
 #pragma once
 
-#include "Qtil/Coro/HttpTask.h"
-#include "Qtil/Coro/TimerAwait.h"
-
-#include <QTimer>
-
 #include <coroutine>
-#include <optional>
-#include <iostream>
-#include <chrono>
-#include <queue>
-#include <vector>
+#include <exception>
+#include <utility>
 
-namespace qtil::coro
+namespace awl
 {
     struct UpdatePromise;
 
