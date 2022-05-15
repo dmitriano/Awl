@@ -3,8 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/String.h"
-#include "Awl/Time.h"
 #include "Awl/Coro/ProcessTask.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -51,10 +49,8 @@ namespace
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
-AWT_UNSTABLE_EXAMPLE(CoroTimer)
+AWT_EXAMPLE(CoroTimer)
 {
-    // do something
-
     auto result = test();
 
     // execute deferred coroutines
