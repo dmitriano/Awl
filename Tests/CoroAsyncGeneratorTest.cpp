@@ -5,6 +5,7 @@
 
 #include "Awl/Separator.h"
 #include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/ProcessTask.h"
 #include "Awl/Coro/AsyncGenerator.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -16,17 +17,22 @@ namespace
 
     using namespace std::chrono_literals;
 
-    awl::async_generator<int> gen()
+    awl::async_generator<int> gen(int count)
     {
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < count; ++i)
         {
             co_await awl::testing::TimeAwaitable(time_queue, 100ms);
+
+            if (i > 5)
+            {
+                throw std::runtime_error("Generator overflow.");
+            }
 
             co_yield i;
         }
     }
 
-    awl::UpdateTask print(const awl::testing::TestContext& context)
+    awl::ProcessTask<void> print(const awl::testing::TestContext& context, int count)
     {
         awl::separator sep(_T(','));
         
@@ -34,7 +40,7 @@ namespace
         //old school for loop with previously captured by rvalue generator.
         //for co_await(int i : gen())
 
-        auto g = gen();
+        auto g = gen(count);
 
         for (auto i = co_await g.begin(); i != g.end(); co_await ++i)
         {
@@ -46,9 +52,26 @@ namespace
     }
 }
 
-AWT_EXAMPLE(CoroAsyncGenerator)
+AWT_TEST(CoroAsyncGenerator)
 {
-    awl::UpdateTask task = print(context);
+    awl::ProcessTask<void> task1 = print(context, 5);
+
+    awl::ProcessTask<void> task2;
+
+    try
+    {
+        task2 = print(context, 10);
+
+        AWT_FAILM(_T("AsyncGenerator did not throw."));
+    }
+    catch (const std::exception& ex)
+    {
+        context.out << "Exception: " << ex.what() << '\n';
+    }
+    catch (...)
+    {
+        context.out << "Unknown exception.\n";
+    }
 
     time_queue.loop();
 }

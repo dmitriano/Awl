@@ -13,6 +13,8 @@ namespace awl
         // declare promise type
         using promise_type = UpdatePromise;
 
+        UpdateTask() : handle(nullptr) {}
+        
         UpdateTask(std::coroutine_handle<promise_type> handle) : handle(handle) {}
 
         UpdateTask(UpdateTask&& other) noexcept : handle(std::exchange(other.handle, nullptr)) {}
