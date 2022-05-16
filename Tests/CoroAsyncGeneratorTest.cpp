@@ -50,28 +50,31 @@ namespace
 
         context.out << std::endl;
     }
+
+    awl::UpdateTask test(const awl::testing::TestContext& context)
+    {
+        co_await print(context, 3);
+
+        try
+        {
+            co_await print(context, 10);
+
+            AWT_FAILM(_T("AsyncGenerator did not throw."));
+        }
+        catch (const std::exception& ex)
+        {
+            context.out << std::endl << "Exception: " << ex.what() << std::endl;
+        }
+        catch (...)
+        {
+            AWT_FAILM(_T("AsyncGenerator thrown a wrong exception."));
+        }
+    }
 }
 
 AWT_TEST(CoroAsyncGenerator)
 {
-    awl::ProcessTask<void> task1 = print(context, 5);
-
-    awl::ProcessTask<void> task2;
-
-    try
-    {
-        task2 = print(context, 10);
-
-        AWT_FAILM(_T("AsyncGenerator did not throw."));
-    }
-    catch (const std::exception& ex)
-    {
-        context.out << "Exception: " << ex.what() << '\n';
-    }
-    catch (...)
-    {
-        context.out << "Unknown exception.\n";
-    }
+    awl::UpdateTask task = test(context);
 
     time_queue.loop();
 }

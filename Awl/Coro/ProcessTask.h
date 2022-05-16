@@ -251,16 +251,16 @@ namespace awl
     }
 
     // also we can await other ProcessTask<T>
-    template<typename U>
-    auto operator co_await(const ProcessTask<U>& http_task) noexcept
+    template<typename T>
+    auto operator co_await(const ProcessTask<T>& task) noexcept
     {
-        if (!http_task.m_handle)
+        if (!task.m_handle)
         {
             //coroutine without promise awaited
             std::terminate();
         }
 
-        if (http_task.m_handle.promise().m_awaitingCoroutine)
+        if (task.m_handle.promise().m_awaitingCoroutine)
         {
             //coroutine already awaited
             std::terminate();
@@ -268,7 +268,7 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<ProcessPromise<U>> handle;
+            std::coroutine_handle<ProcessPromise<T>> handle;
 
             // check if this ProcessTask already has value computed
             bool await_ready()
@@ -289,10 +289,13 @@ namespace awl
             {
                 handle.promise().rethrow();
 
-                return std::move(*(handle.promise().value));
+                if constexpr (!std::is_same_v<T, void>)
+                {
+                    return std::move(*(handle.promise().value));
+                }
             }
         };
 
-        return task_awaitable{ http_task.m_handle };
+        return task_awaitable{ task.m_handle };
     }
 }
