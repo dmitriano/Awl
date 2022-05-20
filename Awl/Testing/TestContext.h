@@ -22,9 +22,9 @@ namespace awl
             //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
             awl::ostream& out;
 
-            const std::stop_token stopToken;
+            std::stop_token stopToken;
 
-            const AttributeProvider& ap;
+            AttributeProvider& ap;
         };
     }
 }
