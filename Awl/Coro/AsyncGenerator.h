@@ -396,8 +396,7 @@ namespace awl
 
 		void swap(async_generator& other) noexcept
 		{
-			using std::swap;
-			swap(m_coroutine, other.m_coroutine);
+			std::swap(m_coroutine, other.m_coroutine);
 		}
 
 	private:
