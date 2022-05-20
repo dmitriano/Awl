@@ -9,6 +9,8 @@
 #include <thread>
 #include <coroutine>
 
+#include "Awl/KeyCompare.h"
+
 namespace awl::testing
 {
     class TimeQueue
@@ -47,14 +49,7 @@ namespace awl::testing
             std::coroutine_handle<> handle;
         };
 
-        // comparator
-        struct Compare
-        {
-            bool operator()(const Task& left, const Task& right) const
-            {
-                return left.targetTime > right.targetTime;
-            }
-        };
+        using Compare = FieldCompare<Task, std::chrono::steady_clock::time_point, &Task::targetTime>;
 
         std::priority_queue<Task, std::vector<Task>, Compare> m_timers;
     };
