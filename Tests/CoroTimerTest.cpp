@@ -10,14 +10,13 @@
 
 namespace
 {
-    awl::testing::TimeQueue time_queue;
-
+    using awl::testing::operator co_await;
     using namespace std::chrono_literals;
 
     awl::ProcessTask<int> wait_n(const awl::testing::TestContext& context, int n)
     {
         context.out << "before wait " << n << '\n';
-        co_await awl::testing::TimeAwaitable(time_queue, std::chrono::seconds(n));
+        co_await std::chrono::seconds(n);
         context.out << "after wait " << n << '\n';
         co_return n;
     }
@@ -27,7 +26,7 @@ namespace
         for (auto c : "hello world\n")
         {
             context.out << c;
-            co_await awl::testing::TimeAwaitable(time_queue, 100ms);
+            co_await 100ms;
         }
 
         context.out << "test step 1\n";
@@ -49,7 +48,7 @@ AWT_EXAMPLE(CoroTimer)
     auto result = test(context);
 
     // execute deferred coroutines
-    time_queue.loop();
+    awl::testing::timeQueue.loop();
 
     context.out << "result: " << result.get() << std::endl;
 }

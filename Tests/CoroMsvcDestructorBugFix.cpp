@@ -13,8 +13,6 @@
 
 namespace
 {
-    awl::testing::TimeQueue time_queue;
-    
     //template <bool owning>
     struct UpdatePromise;
 
@@ -123,7 +121,7 @@ namespace
         // use `co_await std::chrono::seconds{n}` to wait specified amount of time
         auto await_transform(std::chrono::milliseconds d)
         {
-            return awl::testing::TimeAwaitable{ time_queue, d };
+            return awl::testing::TimeAwaitable{ awl::testing::timeQueue, d };
         }
 
         // also we can await other UpdateTask<T>
@@ -219,5 +217,5 @@ AWT_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
 {
     auto task = TestNestedTask(context);
 
-    time_queue.loop();
+    awl::testing::timeQueue.loop();
 }

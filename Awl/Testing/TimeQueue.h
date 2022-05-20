@@ -88,4 +88,11 @@ namespace awl::testing
         TimeQueue& timeQueue;
         std::chrono::nanoseconds m_d;
     };
+
+    inline awl::testing::TimeQueue timeQueue;
+
+    inline TimeAwaitable operator co_await(std::chrono::nanoseconds d) noexcept
+    {
+        return TimeAwaitable(timeQueue, d);
+    }
 }

@@ -13,15 +13,14 @@
 
 namespace
 {
-    awl::testing::TimeQueue time_queue;
-
+    using awl::testing::operator co_await;
     using namespace std::chrono_literals;
 
     awl::async_generator<int> gen(int count)
     {
         for (int i = 0; i < count; ++i)
         {
-            co_await awl::testing::TimeAwaitable(time_queue, 100ms);
+            co_await 100ms;
 
             if (i > 5)
             {
@@ -76,5 +75,5 @@ AWT_TEST(CoroAsyncGenerator)
 {
     awl::UpdateTask task = test(context);
 
-    time_queue.loop();
+    awl::testing::timeQueue.loop();
 }
