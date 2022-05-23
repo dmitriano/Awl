@@ -31,7 +31,7 @@ namespace
         }
     }
 
-    awl::ProcessTask<void> print(const awl::testing::TestContext& context, int count)
+    awl::ProcessTask<void> print(const awl::testing::TestContext& context, int count, std::optional<int> limit = {})
     {
         awl::separator sep(_T(','));
         
@@ -41,10 +41,17 @@ namespace
 
         auto g = gen(count);
 
+        int n = 0;
+
         for (auto i = co_await g.begin(); i != g.end(); co_await ++i)
         {
             context.out << sep << *i;
             context.out.flush();
+
+            if (limit && ++n == *limit)
+            {
+                break;
+            }
         }
 
         context.out << std::endl;
@@ -53,6 +60,8 @@ namespace
     awl::UpdateTask test(const awl::testing::TestContext& context)
     {
         co_await print(context, 3);
+
+        co_await print(context, 10, 2);
 
         try
         {
