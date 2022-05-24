@@ -460,3 +460,17 @@ AWT_TEST(DecimalRound)
         AWT_ASSERT(d3 == awl::decimal("-3"));
     }
 }
+
+//It is not enough to store some values from Binance.
+AWT_EXAMPLE(DecimalBinanceValues)
+{
+    constexpr uint64_t max_uint = std::numeric_limits<uint64_t>::max();
+
+    context.out << _T("uint64_t max: ") << max_uint << ", decimal digits: " << static_cast<size_t>(std::log10(max_uint)) << std::endl;
+
+    context.out << _T("max decimal man: ") << awl::decimal::max_mantissa() << _T(", max decimal exp: ") << awl::decimal::max_exponent() << std::endl;
+
+    CheckConstructorTrows("8426879770.74001051"sv); //BTC day volume
+
+    CheckConstructorTrows("92233720368.54775807"sv); //LUNA max position
+}

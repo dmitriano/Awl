@@ -177,6 +177,11 @@ namespace awl
             }
         }
         
+        static constexpr uint64_t max_mantissa()
+        {
+            return helpers::max_man();
+        }
+
         constexpr uint8_t exponent() const
         {
             return static_cast<uint8_t>(m_data.exp);
