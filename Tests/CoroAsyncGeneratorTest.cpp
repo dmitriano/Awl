@@ -11,6 +11,9 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
 
+//Why does it fail?
+//static_assert(std::ranges::range<awl::async_generator<int>>);
+
 namespace
 {
     using awl::testing::operator co_await;
