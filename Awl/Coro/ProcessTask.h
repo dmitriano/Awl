@@ -15,7 +15,7 @@ namespace awl
 
         // value to be computed
         // when ProcessTask is not completed (coroutine didn't co_return anything yet) value is empty
-        std::optional<T> value;
+        std::optional<T> m_value;
         std::exception_ptr m_exception;
 
         void rethrow() const
@@ -51,7 +51,7 @@ namespace awl
         {
             rethrow();
             
-            value = std::move(val);
+            m_value = std::move(val);
         }
 
         void unhandled_exception()
@@ -175,17 +175,17 @@ namespace awl
         // declare promise type
         using promise_type = ProcessPromise<T>;
 
-        ProcessTask() : m_handle(nullptr) {}
+        ProcessTask() : m_h(nullptr) {}
         
-        ProcessTask(std::coroutine_handle<promise_type> handle) noexcept : m_handle(handle) {}
+        ProcessTask(std::coroutine_handle<promise_type> handle) noexcept : m_h(handle) {}
 
-        ProcessTask(ProcessTask&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
+        ProcessTask(ProcessTask&& other) noexcept : m_h(std::exchange(other.m_h, nullptr)) {}
 
         ProcessTask& operator=(ProcessTask&& other) noexcept
         {
             free();
 
-            m_handle = std::exchange(other.m_handle, nullptr);
+            m_h = std::exchange(other.m_h, nullptr);
 
             return *this;
         }
@@ -201,9 +201,9 @@ namespace awl
         {
             check_handle();
 
-            m_handle.promise().rethrow();
+            m_h.promise().rethrow();
 
-            return m_handle.promise().value.has_value();
+            return m_h.promise().m_value.has_value();
 
             return false;
         }
@@ -212,14 +212,14 @@ namespace awl
         {
             check_handle();
             
-            m_handle.promise().rethrow();
+            m_h.promise().rethrow();
 
-            return std::move(*m_handle.promise().value);
+            return std::move(*m_h.promise().m_value);
         }
 
         void check_handle() const
         {
-            if (!m_handle)
+            if (!m_h)
             {
                 //Uninitialized ProcessTask without promise
                 std::terminate();
@@ -228,15 +228,15 @@ namespace awl
 
         void free()
         {
-            if (m_handle)
+            if (m_h)
             {
-                m_handle.destroy();
+                m_h.destroy();
 
-                m_handle = nullptr;
+                m_h = nullptr;
             }
         }
 
-        std::coroutine_handle<promise_type> m_handle;
+        std::coroutine_handle<promise_type> m_h;
     };
 
     template<typename T>
@@ -254,13 +254,13 @@ namespace awl
     template<typename T>
     auto operator co_await(const ProcessTask<T>& task) noexcept
     {
-        if (!task.m_handle)
+        if (!task.m_h)
         {
             //coroutine without promise awaited
             std::terminate();
         }
 
-        if (task.m_handle.promise().m_awaitingCoroutine)
+        if (task.m_h.promise().m_awaitingCoroutine)
         {
             //coroutine already awaited
             std::terminate();
@@ -268,12 +268,12 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<ProcessPromise<T>> handle;
+            std::coroutine_handle<ProcessPromise<T>> m_h;
 
             // check if this ProcessTask already has value computed
             bool await_ready()
             {
-                return handle.done();
+                return m_h.done();
                 //return handle.promise().value.has_value();
             }
 
@@ -281,21 +281,21 @@ namespace awl
             // store coroutine handle to be resumed after computing ProcessTask value
             void await_suspend(std::coroutine_handle<> h)
             {
-                handle.promise().m_awaitingCoroutine = h;
+                m_h.promise().m_awaitingCoroutine = h;
             }
 
             // when ready return value to a consumer
             auto await_resume()
             {
-                handle.promise().rethrow();
+                m_h.promise().rethrow();
 
                 if constexpr (!std::is_same_v<T, void>)
                 {
-                    return std::move(*(handle.promise().value));
+                    return std::move(*(m_h.promise().m_value));
                 }
             }
         };
 
-        return task_awaitable{ task.m_handle };
+        return task_awaitable{ task.m_h };
     }
 }
