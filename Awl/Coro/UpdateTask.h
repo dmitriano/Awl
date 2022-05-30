@@ -13,17 +13,17 @@ namespace awl
         // declare promise type
         using promise_type = UpdatePromise;
 
-        UpdateTask() : handle(nullptr) {}
+        UpdateTask() : m_h(nullptr) {}
         
-        UpdateTask(std::coroutine_handle<promise_type> handle) : handle(handle) {}
+        UpdateTask(std::coroutine_handle<promise_type> m_h) : m_h(m_h) {}
 
-        UpdateTask(UpdateTask&& other) noexcept : handle(std::exchange(other.handle, nullptr)) {}
+        UpdateTask(UpdateTask&& other) noexcept : m_h(std::exchange(other.m_h, nullptr)) {}
 
         UpdateTask& operator=(UpdateTask&& other) noexcept
         {
             free();
 
-            handle = std::exchange(other.handle, nullptr);
+            m_h = std::exchange(other.m_h, nullptr);
 
             return *this;
         }
@@ -37,13 +37,13 @@ namespace awl
 
         void free()
         {
-            if (handle)
+            if (m_h)
             {
-                handle.destroy();
+                m_h.destroy();
             }
         }
 
-        std::coroutine_handle<promise_type> handle;
+        std::coroutine_handle<promise_type> m_h;
     };
 
     struct UpdatePromise
@@ -132,23 +132,23 @@ namespace awl
 
     inline void UpdateTask::release()
     {
-        if (handle)
+        if (m_h)
         {
-            handle.promise().m_owned = false;
+            m_h.promise().m_owned = false;
 
-            handle = nullptr;
+            m_h = nullptr;
         }
     }
 
     auto operator co_await(const UpdateTask& update_task) noexcept
     {
-        if (!update_task.handle)
+        if (!update_task.m_h)
         {
             //coroutine without promise awaited
             std::terminate();
         }
 
-        if (update_task.handle.promise().m_awaitingCoroutine)
+        if (update_task.m_h.promise().m_awaitingCoroutine)
         {
             //coroutine already awaited
             std::terminate();
@@ -156,19 +156,19 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<UpdatePromise> handle;
+            std::coroutine_handle<UpdatePromise> m_h;
 
             // check if this UpdateTask already has value computed
             bool await_ready()
             {
-                return handle.done();
+                return m_h.done();
             }
 
             // h - is a handle to coroutine that calls co_await
             // store coroutine handle to be resumed after computing UpdateTask value
             void await_suspend(std::coroutine_handle<> h)
             {
-                handle.promise().m_awaitingCoroutine = h;
+                m_h.promise().m_awaitingCoroutine = h;
             }
 
             // when ready return value to a consumer
@@ -177,6 +177,6 @@ namespace awl
             }
         };
 
-        return task_awaitable{ update_task.handle };
+        return task_awaitable{ update_task.m_h };
     }
 }
