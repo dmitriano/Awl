@@ -40,6 +40,8 @@ namespace awl
             if (m_h)
             {
                 m_h.destroy();
+
+                m_h = nullptr;
             }
         }
 
