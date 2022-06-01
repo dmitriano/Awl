@@ -10,6 +10,7 @@
 #include <limits>
 #include <array>
 #include <cmath>
+#include <bit>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define AWL_DECIMAL_128 1
@@ -85,48 +86,62 @@ namespace awl
 
         constexpr BuiltInDecimalData() : BuiltInDecimalData(0, 0, 0) {}
         
-        constexpr BuiltInDecimalData(UInt sign, UInt exp, UInt man) :
-            m_sign(sign), m_exp(exp), m_man(man)
-        {
-        }
+        constexpr BuiltInDecimalData(UInt sign, UInt exp, UInt man) : m_pack{ sign, exp, man } {}
 
         constexpr UInt sign() const
         {
-            return m_sign;
+            return m_pack.sign;
         }
 
         constexpr uint8_t exp() const
         {
-            return m_exp;
+            return m_pack.exp;
         }
 
         constexpr UInt man() const
         {
-            return m_man;
+            return m_pack.man;
         }
 
         constexpr void set_sign(UInt val)
         {
-            m_sign = val;
+            m_pack.sign = val;
         }
 
         constexpr void set_exp(UInt val)
         {
-            m_exp = val;
+            m_pack.exp = val;
         }
 
         constexpr void set_man(UInt val)
         {
-            m_man = val;
+            m_pack.man = val;
+        }
+
+        static constexpr BuiltInDecimalData from_bits(UInt val)
+        {
+            BuiltInDecimalData a;
+            a.m_pack = std::bit_cast<Pack>(val);
+            return a;
+        }
+
+        constexpr UInt to_bits() const
+        {
+            return std::bit_cast<UInt>(m_pack);
         }
 
     private:
 
         using Constants = helpers::DecimalConstants<UInt, exp_len>;
 
-        //0 - positive, 1 - negative
-        UInt m_sign : Constants::sign_len;
-        UInt m_exp : Constants::exp_len;
-        UInt m_man : Constants::man_len;
+        struct Pack
+        {
+            //0 - positive, 1 - negative
+            UInt sign : Constants::sign_len;
+            UInt exp : Constants::exp_len;
+            UInt man : Constants::man_len;
+        };
+
+        Pack m_pack;
     };
 }

@@ -15,7 +15,6 @@
 #include <cassert>
 #include <limits>
 #include <array>
-#include <bit>
 #include <cmath>
 
 namespace awl
@@ -78,13 +77,13 @@ namespace awl
         static constexpr decimal from_bits(UInt val)
         {
             decimal a;
-            a.m_data = std::bit_cast<Data>(val);
+            a.m_data = Data::from_bits(val);
             return a;
         }
 
         constexpr UInt to_bits() const
         {
-            return std::bit_cast<UInt>(m_data);
+            return m_data.to_bits();
         }
 
         template <class Float>
