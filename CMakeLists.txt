@@ -27,15 +27,25 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # using Visual Studio C++
   # add_compile_options("/std:c++latest")
-  add_compile_options("/Zc:__cplusplus")
-  add_compile_options("/W4")
-  add_definitions(-D_UNICODE)
-  add_definitions(-MP)
+  add_compile_options("/W4" "/Zc:__cplusplus")
+  add_definitions(-MP -D_UNICODE)
 endif()
 
 find_package(Threads)
 
-file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/*.h ${CMAKE_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/Awl/*.h ${CMAKE_SOURCE_DIR}/Awl/*.cpp
+	${CMAKE_SOURCE_DIR}/Tests/*.h ${CMAKE_SOURCE_DIR}/Tests/*.cpp)
+
+IF(DEFINED ENV{BOOST_SRC_DIR})
+	message("Boost found in $ENV{BOOST_SRC_DIR}")
+	include_directories(ENV{BOOST_SRC_DIR} ${CMAKE_SOURCE_DIR}/Extras/Boost)
+	add_definitions(-DAWL_BOOST)
+	file(GLOB_RECURSE BOOST_FILES
+		${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${CMAKE_SOURCE_DIR}/Extras/Boost/*.cpp)
+	list (APPEND CPP_FILES ${BOOST_FILES})
+ELSE()
+	message("BOOST_SRC_DIR is not defined, AWL will compile without BOOST.")
+ENDIF()
 
 add_executable(${PROJECT_NAME} ${CPP_FILES})
 

@@ -700,17 +700,6 @@ namespace awl
         return result;
     }
 
-#ifdef AWL_DECIMAL_128
-
-    template <class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
-    {
-        //Obviously not the real implementation, just here as an example
-        return out << static_cast<uint64_t>(val);
-    }
-
-#endif
-
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate> d)
     {
@@ -823,27 +812,6 @@ namespace awl
         c.set_mantissa(a.mantissa() * b.mantissa());
 
         return c;
-    }
-
-    using decimal64 = decimal<uint64_t, 4>;
-
-#ifdef AWL_DECIMAL_128
-
-    using decimal128 = decimal<__uint128_t, 4>;
-
-#endif
-
-    namespace literals
-    {
-        constexpr decimal64 operator"" _d(const char* str, std::size_t len)
-        {
-            return decimal64(std::string_view(str, len));
-        }
-
-        constexpr decimal64 operator"" _d(const wchar_t* str, std::size_t len)
-        {
-            return decimal64(std::wstring_view(str, len));
-        }
     }
 }
 

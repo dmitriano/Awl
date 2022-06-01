@@ -16,36 +16,38 @@ using namespace std::literals;
 using namespace awl::testing;
 using namespace awl::io;
 
-template <class T>
-static void Test(const TestContext & context, const T & sample)
-{
-    AWT_ATTRIBUTE(size_t, iteration_count, 10);
-
-    std::vector<uint8_t> reusable_v;
-
-    VectorOutputStream out(reusable_v);
-
-    for (size_t i = 0; i < iteration_count; ++i)
-    {
-        Write(out, sample);
-    }
-
-    VectorInputStream in(reusable_v);
-
-    for (size_t i = 0; i < iteration_count; ++i)
-    {
-        T result;
-
-        Read(in, result);
-
-        AWT_ASSERT(sample == result);
-    }
-
-    AWT_ASSERT(in.End());
-}
-
 namespace
 {
+    template <class T>
+    static void Test(const TestContext& context, const T& sample)
+    {
+        AWT_ATTRIBUTE(size_t, iteration_count, 10);
+
+        std::vector<uint8_t> reusable_v;
+
+        VectorOutputStream out(reusable_v);
+
+        for (size_t i = 0; i < iteration_count; ++i)
+        {
+            Write(out, sample);
+        }
+
+        VectorInputStream in(reusable_v);
+
+        for (size_t i = 0; i < iteration_count; ++i)
+        {
+            T result;
+
+            Read(in, result);
+
+            AWT_ASSERT(sample == result);
+        }
+
+        AWT_ASSERT(in.End());
+    }
+
+    using Decimal64 = awl::decimal<uint64_t, 4>;
+
     //An example of a third-party structure that we cannot change, but need to serialize.
     struct A
     {
@@ -112,8 +114,8 @@ namespace
         std::optional<uint32_t> m_u8;
 
         bool m_b;
-
-        awl::decimal64 m_dec;
+        
+        Decimal64 m_dec;
 
         friend B MakeBSample();
     };
@@ -133,7 +135,7 @@ namespace
         b.m_bs = 3ul;
         b.m_u8 = 25u;
         b.m_b = true;
-        b.m_dec = awl::decimal64("123.4567890"sv);
+        b.m_dec = Decimal64("123.4567890"sv);
 
         return b;
     }

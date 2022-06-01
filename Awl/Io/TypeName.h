@@ -218,17 +218,9 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            if constexpr (std::is_same_v<UInt, uint64_t> && exp_len == 4)
-            {
-                return fixed_string("decimal");
-            }
-            else
-            {
-                return fixed_string("decimal<") + make_type_name<UInt>() + fixed_string(", ") + helpers::FormatNumber<exp_len>() + fixed_string(">");
-            }
+            return fixed_string("decimal<") + make_type_name<UInt>() + fixed_string(", ") + helpers::FormatNumber<exp_len>() + fixed_string(">");
         }
     };
 
-    static_assert(make_type_name<decimal64>() == fixed_string{ "decimal" });
     static_assert(make_type_name<decimal<uint64_t, 5>>() == fixed_string{ "decimal<int64_t, 5>" });
 }
