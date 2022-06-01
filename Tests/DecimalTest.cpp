@@ -13,7 +13,7 @@
 #include <functional>
 
 #if defined(__GNUC__) || defined(__clang__)
-#define AWL_DECIMAL_128 1
+//#define AWL_DECIMAL_128 1
 #endif
 
 #ifdef AWL_DECIMAL_128
