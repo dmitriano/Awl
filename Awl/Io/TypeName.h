@@ -213,14 +213,22 @@ namespace awl::io
 
     static_assert(make_type_name<std::variant<int32_t, int64_t>>() == fixed_string{ "variant<int32_t, int64_t, >" });
 
-    template<>
-    struct type_descriptor<awl::decimal>
+    template<typename UInt, uint8_t exp_len>
+    struct type_descriptor<decimal<UInt, exp_len>>
     {
         static constexpr auto name()
         {
-            return fixed_string("decimal");
+            if constexpr (std::is_same_v<UInt, uint64_t> && exp_len == 4)
+            {
+                return fixed_string("decimal");
+            }
+            else
+            {
+                return fixed_string("decimal<") + make_type_name<UInt>() + fixed_string(", ") + helpers::FormatNumber<exp_len>() + fixed_string(">");
+            }
         }
     };
 
-    static_assert(make_type_name<awl::decimal>() == fixed_string{ "decimal" });
+    static_assert(make_type_name<decimal64>() == fixed_string{ "decimal" });
+    static_assert(make_type_name<decimal<uint64_t, 5>>() == fixed_string{ "decimal<int64_t, 5>" });
 }

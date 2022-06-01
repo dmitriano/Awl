@@ -11,19 +11,19 @@
 
 namespace awl::io
 {
-    template <class Stream, class Context = FakeContext>
-    inline void Read(Stream & s, awl::decimal& d, const Context & ctx = {})
+    template <class Stream, typename UInt, uint8_t exp_len, class Context = FakeContext>
+    void Read(Stream & s, decimal<UInt, exp_len>& d, const Context & ctx = {})
     {
         uint64_t val;
 
         Read(s, val, ctx);
 
-        d = awl::decimal::from_int(val);
+        d = decimal<UInt, exp_len>::from_bits(val);
     }
 
-    template <class Stream, class Context = FakeContext>
-    inline void Write(Stream & s, const awl::decimal& d, const Context & ctx = {})
+    template <class Stream, typename UInt, uint8_t exp_len, class Context = FakeContext>
+    void Write(Stream & s, const decimal<UInt, exp_len>& d, const Context & ctx = {})
     {
-        Write(s, d.to_int(), ctx);
+        Write(s, d.to_bits(), ctx);
     }
 }

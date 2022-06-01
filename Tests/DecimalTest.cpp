@@ -13,10 +13,12 @@ using namespace awl::literals;
 
 namespace
 {
+    using Decimal = awl::decimal64;
+
     template <class C>
     void TestStringConversion(std::basic_string_view<C> sample, std::basic_string_view<C> result = {})
     {
-        awl::decimal d(sample);
+        Decimal d(sample);
 
         std::basic_ostringstream<C> out;
 
@@ -61,7 +63,7 @@ namespace
     {
         CheckTrows([&]()
         {
-            awl::decimal d(sample);
+            Decimal d(sample);
         });
     }
 }
@@ -120,7 +122,7 @@ AWT_TEST(DecimalDoubleConversion)
 
     const double val = 10.128;
 
-    awl::decimal d(5);
+    Decimal d(5);
 
     d = val;
 
@@ -151,9 +153,9 @@ AWT_TEST(DecimalRescale)
 {
     AWT_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::zero.rescale(3).to_astring() == "0.000");
+    AWT_ASSERT(Decimal::zero().rescale(3).to_astring() == "0.000");
 
-    awl::decimal d("123.45678"sv);
+    Decimal d("123.45678"sv);
 
     d = d.rescale(7);
     
@@ -163,7 +165,7 @@ AWT_TEST(DecimalRescale)
 
     AWT_ASSERT(d.to_astring() == "123.45678");
 
-    d *= awl::decimal(100000, 0);
+    d *= Decimal(100000, 0);
     
     d = d.rescale(0);
 
@@ -194,7 +196,7 @@ AWT_TEST(DecimalTrim)
 {
     AWT_UNUSED_CONTEXT;
 
-    awl::decimal d("123.45678"sv);
+    Decimal d("123.45678"sv);
 
     d = d.truncate(3);
 
@@ -210,43 +212,43 @@ AWT_TEST(DecimalCompare)
 {
     AWT_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::decimal("123.456789"sv) == awl::decimal("123.456789000"sv));
-    AWT_ASSERT(awl::decimal("0"sv) == awl::decimal("0"sv));
-    AWT_ASSERT(awl::decimal("123"sv) == awl::decimal("123.000"sv));
-    AWT_ASSERT(awl::decimal("123"sv) <= awl::decimal("123.000"sv));
-    AWT_ASSERT(awl::decimal("123"sv) >= awl::decimal("123.000"sv));
+    AWT_ASSERT(Decimal("123.456789"sv) == Decimal("123.456789000"sv));
+    AWT_ASSERT(Decimal("0"sv) == Decimal("0"sv));
+    AWT_ASSERT(Decimal("123"sv) == Decimal("123.000"sv));
+    AWT_ASSERT(Decimal("123"sv) <= Decimal("123.000"sv));
+    AWT_ASSERT(Decimal("123"sv) >= Decimal("123.000"sv));
 
-    AWT_ASSERT(awl::decimal("1"sv) != awl::decimal("2.000"sv));
+    AWT_ASSERT(Decimal("1"sv) != Decimal("2.000"sv));
 
-    AWT_ASSERT(awl::decimal("0.5"sv) < awl::decimal("2"sv));
-    AWT_ASSERT(awl::decimal("0.596"sv) < awl::decimal("2.232"sv));
-    AWT_ASSERT(!(awl::decimal("0.596"sv) >= awl::decimal("2.232"sv)));
-    AWT_ASSERT(awl::decimal("1"sv) < awl::decimal("2.000"sv));
-    AWT_ASSERT(awl::decimal("2.000"sv) > awl::decimal("1.000"sv));
-    AWT_ASSERT(awl::decimal("1"sv) <= awl::decimal("2.000"sv));
-    AWT_ASSERT(awl::decimal("2.000"sv) >= awl::decimal("1.000"sv));
+    AWT_ASSERT(Decimal("0.5"sv) < Decimal("2"sv));
+    AWT_ASSERT(Decimal("0.596"sv) < Decimal("2.232"sv));
+    AWT_ASSERT(!(Decimal("0.596"sv) >= Decimal("2.232"sv)));
+    AWT_ASSERT(Decimal("1"sv) < Decimal("2.000"sv));
+    AWT_ASSERT(Decimal("2.000"sv) > Decimal("1.000"sv));
+    AWT_ASSERT(Decimal("1"sv) <= Decimal("2.000"sv));
+    AWT_ASSERT(Decimal("2.000"sv) >= Decimal("1.000"sv));
 
-    AWT_ASSERT(awl::decimal("1"sv) < 2.000);
-    AWT_ASSERT(awl::decimal("2.000"sv) > 1.000);
-    AWT_ASSERT(awl::decimal("1"sv) <= 2.000);
-    AWT_ASSERT(awl::decimal("2.000"sv) >= 1.000);
+    AWT_ASSERT(Decimal("1"sv) < 2.000);
+    AWT_ASSERT(Decimal("2.000"sv) > 1.000);
+    AWT_ASSERT(Decimal("1"sv) <= 2.000);
+    AWT_ASSERT(Decimal("2.000"sv) >= 1.000);
 
     //From BZRX/USDT order data
-    AWT_ASSERT(awl::decimal("0.2678"sv) < awl::decimal("0.3000"sv));
-    AWT_ASSERT(awl::decimal("0.2678"sv) < awl::decimal("0.3400"sv));
-    AWT_ASSERT(awl::decimal("0.3000"sv) < awl::decimal("0.3143"sv));
-    AWT_ASSERT(awl::decimal("0.3143"sv) < awl::decimal("0.3400"sv));
+    AWT_ASSERT(Decimal("0.2678"sv) < Decimal("0.3000"sv));
+    AWT_ASSERT(Decimal("0.2678"sv) < Decimal("0.3400"sv));
+    AWT_ASSERT(Decimal("0.3000"sv) < Decimal("0.3143"sv));
+    AWT_ASSERT(Decimal("0.3143"sv) < Decimal("0.3400"sv));
 }
 
 AWT_TEST(DecimalCast)
 {
     AWT_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::decimal("1"sv).cast<double>() == 1.0);
-    AWT_ASSERT(awl::decimal("1"sv).cast<float>() == 1.0f);
-    AWT_ASSERT(awl::decimal("1"sv).cast<int>() == 1);
+    AWT_ASSERT(Decimal("1"sv).cast<double>() == 1.0);
+    AWT_ASSERT(Decimal("1"sv).cast<float>() == 1.0f);
+    AWT_ASSERT(Decimal("1"sv).cast<int>() == 1);
 
-    AWT_ASSERT(awl::decimal("1"sv) == 1.0);
+    AWT_ASSERT(Decimal("1"sv) == 1.0);
 }
 
 AWT_TEST(DecimalArithmeticOperators)
@@ -254,33 +256,33 @@ AWT_TEST(DecimalArithmeticOperators)
     AWT_UNUSED_CONTEXT;
 
     //Addition and subtraction
-    AWT_ASSERT(awl::decimal("1.0"sv) + awl::decimal("2.000"sv) == awl::decimal("3"sv));
-    AWT_ASSERT(awl::decimal("1.05"sv) + awl::decimal("2.005"sv) == awl::decimal("3.055"sv));
-    AWT_ASSERT(awl::decimal("1.05"sv) - awl::decimal("0.05"sv) == awl::decimal("1"sv));
-    AWT_ASSERT((awl::decimal("1.05"sv) += awl::decimal("2.005"sv)) == awl::decimal("3.055"sv));
-    AWT_ASSERT((awl::decimal("1.05"sv) -= awl::decimal("0.05"sv)) == awl::decimal("1"sv));
-    AWT_ASSERT((awl::decimal("1"sv) += 2.00) == awl::decimal("3.0"sv));
-    AWT_ASSERT((awl::decimal("5"sv) -= 2.00) == awl::decimal("3"sv));
+    AWT_ASSERT(Decimal("1.0"sv) + Decimal("2.000"sv) == Decimal("3"sv));
+    AWT_ASSERT(Decimal("1.05"sv) + Decimal("2.005"sv) == Decimal("3.055"sv));
+    AWT_ASSERT(Decimal("1.05"sv) - Decimal("0.05"sv) == Decimal("1"sv));
+    AWT_ASSERT((Decimal("1.05"sv) += Decimal("2.005"sv)) == Decimal("3.055"sv));
+    AWT_ASSERT((Decimal("1.05"sv) -= Decimal("0.05"sv)) == Decimal("1"sv));
+    AWT_ASSERT((Decimal("1"sv) += 2.00) == Decimal("3.0"sv));
+    AWT_ASSERT((Decimal("5"sv) -= 2.00) == Decimal("3"sv));
 
     {
-        awl::decimal d("1.0"sv);
+        Decimal d("1.0"sv);
 
-        d += awl::decimal("2.0"sv);
+        d += Decimal("2.0"sv);
 
-        AWT_ASSERT(d == awl::decimal("3.0"sv));
+        AWT_ASSERT(d == Decimal("3.0"sv));
 
-        d -= awl::decimal("2.0"sv);
+        d -= Decimal("2.0"sv);
 
-        AWT_ASSERT(d == awl::decimal("1.0"sv));
+        AWT_ASSERT(d == Decimal("1.0"sv));
     }
 
     //Multiplication and Division
-    AWT_ASSERT(awl::make_decimal(awl::decimal("2.0"sv) * awl::decimal("3.000"sv), 5) == awl::decimal("6"sv));
-    AWT_ASSERT(awl::make_decimal(awl::decimal("6.0"sv) / awl::decimal("2.000"sv), 5) == awl::decimal("3"sv));
-    AWT_ASSERT((awl::decimal("2.0"sv) *= awl::decimal("3.000"sv)) == awl::decimal("6"sv));
-    AWT_ASSERT((awl::decimal("6.0"sv) /= awl::decimal("2.000"sv)) == awl::decimal("3"sv));
-    AWT_ASSERT((awl::decimal("2.0"sv) *= 3.000) == awl::decimal("6"sv));
-    AWT_ASSERT((awl::decimal("6.0"sv) /= 2.000) == awl::decimal("3"sv));
+    AWT_ASSERT(Decimal::make_decimal(Decimal("2.0"sv) * Decimal("3.000"sv), 5) == Decimal("6"sv));
+    AWT_ASSERT(Decimal::make_decimal(Decimal("6.0"sv) / Decimal("2.000"sv), 5) == Decimal("3"sv));
+    AWT_ASSERT((Decimal("2.0"sv) *= Decimal("3.000"sv)) == Decimal("6"sv));
+    AWT_ASSERT((Decimal("6.0"sv) /= Decimal("2.000"sv)) == Decimal("3"sv));
+    AWT_ASSERT((Decimal("2.0"sv) *= 3.000) == Decimal("6"sv));
+    AWT_ASSERT((Decimal("6.0"sv) /= 2.000) == Decimal("3"sv));
 
     AWT_ASSERT(awl::multiply("7"_d, "33"_d) == "231"_d);
     //With double it is probably something like 0.23099999999999998
@@ -291,56 +293,56 @@ AWT_TEST(DecimalMinMax)
 {
     AWT_UNUSED_CONTEXT;
 
-    awl::decimal max = std::numeric_limits<awl::decimal>::max();
-    awl::decimal min = std::numeric_limits<awl::decimal>::min();
+    Decimal max = std::numeric_limits<Decimal>::max();
+    Decimal min = std::numeric_limits<Decimal>::min();
 
     AWT_ASSERT(min < max);
     AWT_ASSERT(max > min);
 
     AWT_ASSERT(max == max);
-    AWT_ASSERT(max - awl::decimal(1, 0) < max);
-    AWT_ASSERT(awl::decimal(1, 18) < max);
-    AWT_ASSERT(awl::decimal(-1, 18) < max);
-    AWT_ASSERT(awl::zero < max);
-    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_exponent()) < max);
+    AWT_ASSERT(max - Decimal(1, 0) < max);
+    AWT_ASSERT(Decimal(1, 18) < max);
+    AWT_ASSERT(Decimal(-1, 18) < max);
+    AWT_ASSERT(Decimal::zero() < max);
+    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) < max);
 
     AWT_ASSERT(min == min);
-    AWT_ASSERT(min < min + awl::decimal(1, 0));
-    AWT_ASSERT(min < awl::zero);
+    AWT_ASSERT(min < min + Decimal(1, 0));
+    AWT_ASSERT(min < Decimal::zero());
 
     AWT_ASSERT(min <= max);
     AWT_ASSERT(max >= min);
 
-    AWT_ASSERT(max != max - awl::decimal(1, 0));
-    AWT_ASSERT(max - awl::decimal(1, 0) <= max);
-    AWT_ASSERT(awl::zero <= max);
-    AWT_ASSERT(awl::make_decimal(1, awl::decimal::max_exponent()) <= max);
+    AWT_ASSERT(max != max - Decimal(1, 0));
+    AWT_ASSERT(max - Decimal(1, 0) <= max);
+    AWT_ASSERT(Decimal::zero() <= max);
+    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) <= max);
 
-    AWT_ASSERT(min != min + awl::decimal(1, 0));
-    AWT_ASSERT(min <= min + awl::decimal(1, 0));
-    AWT_ASSERT(min <= awl::zero);
+    AWT_ASSERT(min != min + Decimal(1, 0));
+    AWT_ASSERT(min <= min + Decimal(1, 0));
+    AWT_ASSERT(min <= Decimal::zero());
 
-    for (uint8_t precision = 0; precision <= awl::decimal::max_exponent(); ++precision)
+    for (uint8_t precision = 0; precision <= Decimal::max_exponent(); ++precision)
     {
-        AWT_ASSERT(awl::decimal(1, precision) > min);
-        AWT_ASSERT(awl::decimal(-1, precision) > min);
-        AWT_ASSERT(awl::decimal(1, precision) >= min);
-        AWT_ASSERT(awl::decimal(-1, precision) >= min);
+        AWT_ASSERT(Decimal(1, precision) > min);
+        AWT_ASSERT(Decimal(-1, precision) > min);
+        AWT_ASSERT(Decimal(1, precision) >= min);
+        AWT_ASSERT(Decimal(-1, precision) >= min);
 
-        AWT_ASSERT(awl::decimal(1, precision) < max);
-        AWT_ASSERT(awl::decimal(-1, precision) < max);
-        AWT_ASSERT(awl::decimal(1, precision) <= max);
-        AWT_ASSERT(awl::decimal(-1, precision) <= max);
+        AWT_ASSERT(Decimal(1, precision) < max);
+        AWT_ASSERT(Decimal(-1, precision) < max);
+        AWT_ASSERT(Decimal(1, precision) <= max);
+        AWT_ASSERT(Decimal(-1, precision) <= max);
 
-        AWT_ASSERT(awl::decimal(1, precision) > awl::zero);
-        AWT_ASSERT(awl::decimal(-1, precision) < awl::zero);
-        AWT_ASSERT(awl::decimal(-1, precision) < awl::decimal(1, precision));
-        AWT_ASSERT(awl::decimal(1, precision) > awl::decimal(-1, precision));
+        AWT_ASSERT(Decimal(1, precision) > Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) < Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) < Decimal(1, precision));
+        AWT_ASSERT(Decimal(1, precision) > Decimal(-1, precision));
 
-        AWT_ASSERT(awl::decimal(1, precision) >= awl::zero);
-        AWT_ASSERT(awl::decimal(-1, precision) <= awl::zero);
-        AWT_ASSERT(awl::decimal(-1, precision) <= awl::decimal(1, precision));
-        AWT_ASSERT(awl::decimal(1, precision) >= awl::decimal(-1, precision));
+        AWT_ASSERT(Decimal(1, precision) >= Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) <= Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) <= Decimal(1, precision));
+        AWT_ASSERT(Decimal(1, precision) >= Decimal(-1, precision));
     }
 }
 
@@ -349,115 +351,115 @@ AWT_TEST(DecimalRound)
     AWT_UNUSED_CONTEXT;
     
     {
-        const awl::decimal d33 = awl::make_decimal(1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("0.33"));
+        const Decimal d33 = Decimal::make_decimal(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("0.33"));
 
-        const awl::decimal d66 = awl::make_decimal(2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("0.66"));
+        const Decimal d66 = Decimal::make_decimal(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("0.66"));
 
-        const awl::decimal d67 = awl::make_rounded(2.0 / 3.0, 2);
-        AWT_ASSERT(d67 == awl::decimal("0.67"));
+        const Decimal d67 = Decimal::make_rounded(2.0 / 3.0, 2);
+        AWT_ASSERT(d67 == Decimal("0.67"));
 
-        const awl::decimal d3 = awl::make_rounded(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("3"));
+        const Decimal d3 = Decimal::make_rounded(3, 1);
+        AWT_ASSERT(d3 == Decimal("3"));
 
-        const awl::decimal d3d = awl::make_rounded(3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("3"));
+        const Decimal d3d = Decimal::make_rounded(3.0, 1);
+        AWT_ASSERT(d3d == Decimal("3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_decimal(-1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+        const Decimal d33 = Decimal::make_decimal(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("-0.33"));
 
-        const awl::decimal d66 = awl::make_decimal(-2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+        const Decimal d66 = Decimal::make_decimal(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("-0.66"));
 
-        const awl::decimal d67 = awl::make_rounded(-2.0 / 3.0, 2);
-        AWT_ASSERT(d67 == awl::decimal("-0.67"));
+        const Decimal d67 = Decimal::make_rounded(-2.0 / 3.0, 2);
+        AWT_ASSERT(d67 == Decimal("-0.67"));
 
-        const awl::decimal d3 = awl::make_rounded(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-3"));
+        const Decimal d3 = Decimal::make_rounded(-3, 1);
+        AWT_ASSERT(d3 == Decimal("-3"));
 
-        const awl::decimal d3d = awl::make_rounded(-3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("-3"));
+        const Decimal d3d = Decimal::make_rounded(-3.0, 1);
+        AWT_ASSERT(d3d == Decimal("-3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_ceiled(1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("0.34"));
+        const Decimal d33 = Decimal::make_ceiled(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("0.34"));
 
-        const awl::decimal d66 = awl::make_ceiled(2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("0.67"));
+        const Decimal d66 = Decimal::make_ceiled(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("0.67"));
 
-        const awl::decimal d3 = awl::make_ceiled(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("3"));
+        const Decimal d3 = Decimal::make_ceiled(3, 1);
+        AWT_ASSERT(d3 == Decimal("3"));
 
-        const awl::decimal d3d = awl::make_ceiled(3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("3"));
+        const Decimal d3d = Decimal::make_ceiled(3.0, 1);
+        AWT_ASSERT(d3d == Decimal("3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_ceiled(-1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+        const Decimal d33 = Decimal::make_ceiled(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("-0.33"));
 
-        const awl::decimal d66 = awl::make_ceiled(-2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+        const Decimal d66 = Decimal::make_ceiled(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("-0.66"));
 
-        const awl::decimal d3 = awl::make_ceiled(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-3"));
+        const Decimal d3 = Decimal::make_ceiled(-3, 1);
+        AWT_ASSERT(d3 == Decimal("-3"));
 
-        const awl::decimal d3d = awl::make_ceiled(-3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("-3"));
+        const Decimal d3d = Decimal::make_ceiled(-3.0, 1);
+        AWT_ASSERT(d3d == Decimal("-3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_floored(1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("0.33"));
+        const Decimal d33 = Decimal::make_floored(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("0.33"));
 
-        const awl::decimal d66 = awl::make_floored(2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("0.66"));
+        const Decimal d66 = Decimal::make_floored(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("0.66"));
 
-        const awl::decimal d3 = awl::make_floored(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("3"));
+        const Decimal d3 = Decimal::make_floored(3, 1);
+        AWT_ASSERT(d3 == Decimal("3"));
 
-        const awl::decimal d3d = awl::make_floored(3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("3"));
+        const Decimal d3d = Decimal::make_floored(3.0, 1);
+        AWT_ASSERT(d3d == Decimal("3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_floored(-1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("-0.34"));
+        const Decimal d33 = Decimal::make_floored(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("-0.34"));
 
-        const awl::decimal d66 = awl::make_floored(-2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("-0.67"));
+        const Decimal d66 = Decimal::make_floored(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("-0.67"));
 
-        const awl::decimal d3 = awl::make_floored(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-3"));
+        const Decimal d3 = Decimal::make_floored(-3, 1);
+        AWT_ASSERT(d3 == Decimal("-3"));
 
-        const awl::decimal d3d = awl::make_floored(-3.0, 1);
-        AWT_ASSERT(d3d == awl::decimal("-3"));
+        const Decimal d3d = Decimal::make_floored(-3.0, 1);
+        AWT_ASSERT(d3d == Decimal("-3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_truncated(1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("0.33"));
+        const Decimal d33 = Decimal::make_truncated(1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("0.33"));
 
-        const awl::decimal d66 = awl::make_truncated(2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("0.66"));
+        const Decimal d66 = Decimal::make_truncated(2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("0.66"));
 
-        const awl::decimal d3 = awl::make_truncated(3, 1);
-        AWT_ASSERT(d3 == awl::decimal("3"));
+        const Decimal d3 = Decimal::make_truncated(3, 1);
+        AWT_ASSERT(d3 == Decimal("3"));
     }
 
     {
-        const awl::decimal d33 = awl::make_truncated(-1.0 / 3.0, 2);
-        AWT_ASSERT(d33 == awl::decimal("-0.33"));
+        const Decimal d33 = Decimal::make_truncated(-1.0 / 3.0, 2);
+        AWT_ASSERT(d33 == Decimal("-0.33"));
 
-        const awl::decimal d66 = awl::make_truncated(-2.0 / 3.0, 2);
-        AWT_ASSERT(d66 == awl::decimal("-0.66"));
+        const Decimal d66 = Decimal::make_truncated(-2.0 / 3.0, 2);
+        AWT_ASSERT(d66 == Decimal("-0.66"));
 
-        const awl::decimal d3 = awl::make_truncated(-3, 1);
-        AWT_ASSERT(d3 == awl::decimal("-3"));
+        const Decimal d3 = Decimal::make_truncated(-3, 1);
+        AWT_ASSERT(d3 == Decimal("-3"));
     }
 }
 
@@ -468,7 +470,7 @@ AWT_EXAMPLE(DecimalBinanceValues)
 
     context.out << _T("uint64_t max: ") << max_uint << ", decimal digits: " << static_cast<size_t>(std::log10(max_uint)) << std::endl;
 
-    context.out << _T("max decimal man: ") << awl::decimal::max_mantissa() << _T(", max decimal exp: ") << awl::decimal::max_exponent() << std::endl;
+    context.out << _T("max decimal man: ") << Decimal::max_mantissa() << _T(", max decimal exp: ") << Decimal::max_exponent() << std::endl;
 
     CheckConstructorTrows("8426879770.74001051"sv); //BTC day volume
 

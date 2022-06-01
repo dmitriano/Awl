@@ -21,56 +21,67 @@ namespace awl
 {
     namespace helpers
     {
-        constexpr uint8_t sign_len = 1;
-        constexpr uint8_t exp_len = 4;
-        constexpr uint8_t man_len = 59;
-
-        constexpr uint64_t p2(uint8_t n)
+        template <typename UInt, uint8_t exp_len>
+        struct DecimalData
         {
-            return static_cast<uint64_t>(1) << n;
-        }
+            static constexpr uint8_t sign_len = 1;
+            //With UInt and exp_len == 4 the mantissa length is 59.
+            static constexpr uint8_t man_len = sizeof(UInt) * 8 - (exp_len + sign_len);
 
-        constexpr uint64_t max_exp()
-        {
-            return p2(exp_len) - 1;
-        }
-
-        constexpr uint64_t max_man()
-        {
-            return p2(man_len) - 1;
-        }
-
-        constexpr uint8_t log10(uint8_t len)
-        {
-            uint64_t val = p2(len) - 1;
-            
-            uint8_t count = 0;
-
-            while ((val /= 10) != 0)
+            static constexpr UInt p2(uint8_t n)
             {
-                ++count;
+                return static_cast<UInt>(1) << n;
             }
 
-            return count;
-        }
-
-        using DenomArray = std::array<uint64_t, p2(exp_len)>;
-
-        constexpr DenomArray make_denoms()
-        {
-            DenomArray a{};
-
-            uint64_t denom = 1;
-
-            for (uint64_t e = 0; e < p2(exp_len); ++e)
+            static constexpr UInt max_exp()
             {
-                a[e] = denom;
-
-                denom *= 10;
+                return p2(exp_len) - 1;
             }
 
-            return a;
-        }
+            static constexpr UInt max_man()
+            {
+                return p2(man_len) - 1;
+            }
+
+            static constexpr uint8_t log10(uint8_t len)
+            {
+                UInt val = p2(len) - 1;
+
+                uint8_t count = 0;
+
+                while ((val /= 10) != 0)
+                {
+                    ++count;
+                }
+
+                return count;
+            }
+
+            using DenomArray = std::array<UInt, p2(exp_len)>;
+
+            static constexpr DenomArray make_denoms()
+            {
+                DenomArray a{};
+
+                UInt denom = 1;
+
+                for (UInt e = 0; e < p2(exp_len); ++e)
+                {
+                    a[e] = denom;
+
+                    denom *= 10;
+                }
+
+                return a;
+            }
+
+            //0 - positive, 1 - negative
+            UInt sign : sign_len;
+            UInt exp : exp_len;
+            UInt man : man_len;
+        };
+
+        static_assert(DecimalData<uint64_t, 4>::man_len == 59u);
     }
     
     //The implementation of decimal class is not complete and I am not sure about its efficiency.
@@ -78,22 +89,19 @@ namespace awl
     
     //It does addition, subtraction and conversion to/from a string without loosing the precision.
     //Multiplication and division are performed via conversion to double.
-    //An instance of decimal can be serialized as uint64_t with to_int() and from_int() methods,
-    //but uint64_t value may be different with different compilers and platforms.
+    //An instance of decimal can be serialized as UInt with to_bits() and from_bits() methods,
+    //but UInt value may be different with different compilers and platforms.
 
+    template <typename UInt, uint8_t exp_len>
     class decimal
     {
     private:
 
-        struct Data
-        {
-            //0 - positive, 1 - negative
-            uint64_t sign : helpers::sign_len;
-            uint64_t exp : helpers::exp_len;
-            uint64_t man : helpers::man_len;
-        };
+        using Data = helpers::DecimalData<UInt, exp_len>;
+        
+        static_assert(sizeof(Data) == sizeof(UInt));
 
-        static_assert(sizeof(Data) == sizeof(uint64_t));
+        using Int = std::make_signed_t<UInt>;
 
     public:
 
@@ -106,7 +114,7 @@ namespace awl
         }
 
         //We do not normalize it in the constructor.
-        constexpr decimal(int64_t man, uint8_t digits) : decimal(digits)
+        constexpr decimal(Int man, uint8_t digits) : decimal(digits)
         {
             set_mantissa(man);
         }
@@ -128,18 +136,18 @@ namespace awl
         decimal& operator = (const decimal& other) = default;
         decimal& operator = (decimal && other) = default;
 
-        //The value of resulting uint64_t may be different with different compilers. But the value of Data structure
-        //should be the same when I convert it back from uint64_t. See Bit field.
-        static constexpr decimal from_int(uint64_t val)
+        //The value of resulting UInt may be different with different compilers. But the value of Data structure
+        //should be the same when I convert it back from UInt. See Bit field.
+        static constexpr decimal from_bits(UInt val)
         {
             decimal a;
             a.m_data = std::bit_cast<Data>(val);
             return a;
         }
 
-        constexpr int64_t to_int() const
+        constexpr UInt to_bits() const
         {
-            return std::bit_cast<int64_t>(m_data);
+            return std::bit_cast<UInt>(m_data);
         }
 
         template <class Float>
@@ -156,30 +164,55 @@ namespace awl
             return cast<double>();
         }
 
-        constexpr int64_t mantissa() const
+        constexpr bool positive() const
         {
-            const int64_t signed_man = static_cast<int64_t>(m_data.man);
+            return m_data.sign == 0;
+        }
+
+        constexpr bool negative() const
+        {
+            return !positive();
+        }
+
+        constexpr void negate()
+        {
+            m_data.sign = m_data.sign ? 0 : 1;
+        }
+
+        constexpr Int mantissa() const
+        {
+            const Int signed_man = static_cast<Int>(m_data.man);
 
             return positive() ? signed_man : -signed_man;
         }
 
-        constexpr void set_mantissa(int64_t val)
+        constexpr void set_mantissa(Int val)
         {
             if (val >= 0)
             {
                 m_data.sign = 0;
-                m_data.man = static_cast<int64_t>(val);
+                m_data.man = static_cast<UInt>(val);
             }
             else
             {
                 m_data.sign = 1;
-                m_data.man = static_cast<int64_t>(-val);
+                m_data.man = static_cast<UInt>(-val);
             }
         }
         
-        static constexpr uint64_t max_mantissa()
+        constexpr UInt unsigned_mantissa() const
         {
-            return helpers::max_man();
+            return m_data.man;
+        }
+
+        constexpr void set_unsigned_mantissa(UInt val)
+        {
+            m_data.man = val;
+        }
+
+        static constexpr UInt max_mantissa()
+        {
+            return Data::max_man();
         }
 
         constexpr uint8_t exponent() const
@@ -189,10 +222,10 @@ namespace awl
 
         static constexpr uint8_t max_exponent()
         {
-            return static_cast<uint8_t>(helpers::max_exp());
+            return static_cast<uint8_t>(Data::max_exp());
         }
 
-        constexpr uint64_t denominator() const
+        constexpr UInt denominator() const
         {
             return m_denoms[m_data.exp];
         }
@@ -201,7 +234,7 @@ namespace awl
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
         {
             //We do not round the floating point value here so abs(decimal) < abs(val).
-            set_mantissa(static_cast<int64_t>(val * denominator()));
+            set_mantissa(static_cast<Int>(val * denominator()));
 
             return *this;
         }
@@ -226,22 +259,22 @@ namespace awl
 
         bool operator < (const decimal& other) const
         {
-            return compare(*this, other, std::less<uint64_t>());
+            return compare(*this, other, std::less<UInt>());
         }
 
         bool operator > (const decimal& other) const
         {
-            return compare(*this, other, std::greater<uint64_t>());
+            return compare(*this, other, std::greater<UInt>());
         }
 
         bool operator <= (const decimal& other) const
         {
-            return compare(*this, other, std::less_equal<uint64_t>());
+            return compare(*this, other, std::less_equal<UInt>());
         }
 
         bool operator >= (const decimal& other) const
         {
-            return compare(*this, other, std::greater_equal<uint64_t>());
+            return compare(*this, other, std::greater_equal<UInt>());
         }
 
         constexpr decimal operator - () const
@@ -395,27 +428,84 @@ namespace awl
             return temp;
         }
 
-        constexpr int64_t rescaled_mantissa(uint8_t digits) const
+        constexpr Int rescaled_mantissa(uint8_t digits) const
         {
             return rescale(digits).mantissa();
         }
 
+        static constexpr decimal zero()
+        {
+            return decimal();
+        }
+
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_decimal(Float val, uint8_t digits)
+        {
+            decimal d(digits);
+
+            d = val;
+
+            return d;
+        }
+
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
+        {
+            decimal d(digits);
+
+            d.set_mantissa(static_cast<Int>(std::llround(val * d.denominator())));
+
+            return d;
+        }
+
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
+        {
+            return make_decimal(val, digits);
+        }
+
+        //Computes the smallest decimal value not less than arg.
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
+        {
+            decimal d(digits);
+
+            d.set_mantissa(static_cast<Int>(std::ceil(val * d.denominator())));
+
+            return d;
+        }
+
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
+        {
+            return make_decimal(val, digits);
+        }
+
+        //Computes the largest decimal value not greater than arg.
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_floored(Float val, uint8_t digits)
+        {
+            decimal d(digits);
+
+            d.set_mantissa(static_cast<Int>(std::floor(val * d.denominator())));
+
+            return d;
+        }
+
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_floored(Float val, uint8_t digits)
+        {
+            return make_decimal(val, digits);
+        }
+
+        //Computes the nearest decimal not greater in magnitude than arg.
+        template <class Float>
+        static constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_truncated(Float val, uint8_t digits)
+        {
+            return make_decimal(val, digits);
+        }
+
     private:
-
-        constexpr bool positive() const
-        {
-            return m_data.sign == 0;
-        }
-
-        constexpr bool negative() const
-        {
-            return !positive();
-        }
-
-        constexpr void negate()
-        {
-            m_data.sign = m_data.sign ? 0 : 1;
-        }
 
         //If check==false losing precision (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
@@ -442,9 +532,9 @@ namespace awl
                     //the difference of two unsigned values is unsigned
                     const uint8_t diff = digits - exponent();
 
-                    const uint64_t denom = m_denoms[diff];
+                    const UInt denom = m_denoms[diff];
 
-                    const uint64_t max_diff = helpers::max_man() / m_data.man;
+                    const UInt max_diff = max_mantissa() / m_data.man;
 
                     if (denom > max_diff)
                     {
@@ -464,7 +554,7 @@ namespace awl
             {
                 const uint8_t diff = exponent() - digits;
 
-                const uint64_t denom = m_denoms[diff];
+                const UInt denom = m_denoms[diff];
 
                 if (check && m_data.man % denom != 0)
                 {
@@ -482,7 +572,7 @@ namespace awl
         {
             while (m_data.man != 0 && m_data.exp != 0)
             {
-                const int64_t remainder = m_data.man % 10;
+                const Int remainder = m_data.man % 10;
 
                 if (remainder != 0)
                 {
@@ -521,13 +611,13 @@ namespace awl
         {
             //We can't align decimals when we compare them.
 
-            const uint64_t a_denom = a.denominator();
-            const uint64_t b_denom = b.denominator();
+            const UInt a_denom = a.denominator();
+            const UInt b_denom = b.denominator();
 
             //Compare int parts.
             {
-                const uint64_t a_val = a.m_data.man / a_denom;
-                const uint64_t b_val = b.m_data.man / b_denom;
+                const UInt a_val = a.m_data.man / a_denom;
+                const UInt b_val = b.m_data.man / b_denom;
 
                 if (a_val != b_val)
                 {
@@ -537,18 +627,18 @@ namespace awl
 
             //We can align fractional parts.
             {
-                uint64_t a_val = a.m_data.man % a_denom;
-                uint64_t b_val = b.m_data.man % b_denom;
+                UInt a_val = a.m_data.man % a_denom;
+                UInt b_val = b.m_data.man % b_denom;
 
                 if (a.exponent() > b.exponent())
                 {
-                    const uint64_t diff = a.exponent() - b.exponent();
+                    const UInt diff = a.exponent() - b.exponent();
 
                     b_val *= m_denoms[diff];
                 }
                 else if (b.exponent() > a.exponent())
                 {
-                    const uint64_t diff = b.exponent() - a.exponent();
+                    const UInt diff = b.exponent() - a.exponent();
 
                     a_val *= m_denoms[diff];
                 }
@@ -568,7 +658,7 @@ namespace awl
         }
 
         template <class C>
-        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
+        static constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, UInt>
             parse_int(std::basic_string_view<C> fixed_string, bool point_terminator);
 
         template <class C>
@@ -602,17 +692,15 @@ namespace awl
             }
         }
 
-        static constexpr helpers::DenomArray m_denoms = helpers::make_denoms();
+        static constexpr Data::DenomArray m_denoms = Data::make_denoms();
         
         Data m_data;
-
-        template <class C>
-        friend std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal d);
     };
 
     //Returns a normalized decimal, because we trimmed zeros.
+    template <typename UInt, uint8_t exp_len>
     template <class C>
-    constexpr decimal decimal::from_string(std::basic_string_view<C> fixed_string)
+    constexpr decimal<UInt, exp_len> decimal<UInt, exp_len>::from_string(std::basic_string_view<C> fixed_string)
     {
         using string_view = std::basic_string_view<C>;
         
@@ -645,16 +733,16 @@ namespace awl
 
         check_exp(digits);
 
-        const int64_t denom = m_denoms[digits];
+        const Int denom = m_denoms[digits];
 
-        if (int_part > helpers::max_man() / denom)
+        if (int_part > max_mantissa() / denom)
         {
             throw std::logic_error("Too long decimal string.");
         }
         
         int_part *= denom;
 
-        if (fractional_part > helpers::max_man() - int_part)
+        if (fractional_part > max_mantissa() - int_part)
         {
             throw std::logic_error("Too long decimal string.");
         }
@@ -672,21 +760,21 @@ namespace awl
         return result;
     }
 
-    template <class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal d)
+    template <typename UInt, uint8_t exp_len, class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len> d)
     {
         if (d.negative())
         {
             out << '-';
         }
 
-        const uint64_t man = d.m_data.man;
+        const UInt man = d.unsigned_mantissa();
 
-        const uint64_t denom = d.denominator();
+        const UInt denom = d.denominator();
 
-        const uint64_t int_part = man / denom;
+        const UInt int_part = man / denom;
 
-        const uint64_t fractional_part = man % denom;
+        const UInt fractional_part = man % denom;
 
         out << int_part;
 
@@ -698,22 +786,23 @@ namespace awl
         return out;
     }
 
+    template <typename UInt, uint8_t exp_len>
     template <class C>
-    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, uint64_t>
-        decimal::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
+    constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, UInt>
+        decimal<UInt, exp_len>::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
     {
         uint8_t digit_count = 0;
 
         uint8_t zero_count = 0;
 
-        uint64_t val = 0;
+        UInt val = 0;
 
-        auto do_append = [&digit_count, &val](uint64_t digit)
+        auto do_append = [&digit_count, &val](UInt digit)
         {
             val = val * 10 + digit;
 
             //It does not make a sense to parse a string longer than the mantissa.
-            if (val > helpers::max_man())
+            if (val > max_mantissa())
             {
                 throw std::logic_error("A decimal string is too long.");
             }
@@ -721,7 +810,7 @@ namespace awl
             ++digit_count;
         };
 
-        auto append = [&zero_count, &val, point_terminator, &do_append](uint64_t digit)
+        auto append = [&zero_count, &val, point_terminator, &do_append](UInt digit)
         {
             if (point_terminator)
             {
@@ -766,7 +855,7 @@ namespace awl
                 break;
             }
 
-            const uint64_t digit = symbol_to_digit(symbol);
+            const UInt digit = symbol_to_digit(symbol);
 
             append(digit);
         }
@@ -774,114 +863,52 @@ namespace awl
         return std::make_tuple(i, digit_count, val);
     }
 
-    template <class Float>
-    constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_decimal(Float val, uint8_t digits)
-    {
-        decimal d(digits);
-
-        d = val;
-
-        return d;
-    }
-        
-    template <class Float>
-    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
-    {
-        decimal d(digits);
-
-        d.set_mantissa(static_cast<int64_t>(std::llround(val * d.denominator())));
-
-        return d;
-    }
-
-    template <class Float>
-    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_rounded(Float val, uint8_t digits)
-    {
-        return make_decimal(val, digits);
-    }
-
-    //Computes the smallest decimal value not less than arg.
-    template <class Float>
-    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
-    {
-        decimal d(digits);
-
-        d.set_mantissa(static_cast<int64_t>(std::ceil(val * d.denominator())));
-
-        return d;
-    }
-
-    template <class Float>
-    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_ceiled(Float val, uint8_t digits)
-    {
-        return make_decimal(val, digits);
-    }
-
-    //Computes the largest decimal value not greater than arg.
-    template <class Float>
-    constexpr std::enable_if_t<std::is_floating_point_v<Float>, decimal> make_floored(Float val, uint8_t digits)
-    {
-        decimal d(digits);
-
-        d.set_mantissa(static_cast<int64_t>(std::floor(val * d.denominator())));
-
-        return d;
-    }
-
-    template <class Float>
-    constexpr std::enable_if_t<std::is_integral_v<Float>, decimal> make_floored(Float val, uint8_t digits)
-    {
-        return make_decimal(val, digits);
-    }
-
-    //Computes the nearest decimal not greater in magnitude than arg.
-    template <class Float>
-    constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal> make_truncated(Float val, uint8_t digits)
-    {
-        return make_decimal(val, digits);
-    }
-
     //Multiplies two decimals without loosing the precision and throws if an overflow occurs.
-    constexpr decimal multiply(decimal a, decimal b)
+    template <typename UInt, uint8_t exp_len>
+    constexpr decimal<UInt, exp_len> multiply(decimal<UInt, exp_len> a, decimal<UInt, exp_len> b)
     {
-        awl::decimal c(a.exponent() + b.exponent());
+        decimal<UInt, exp_len> c(a.exponent() + b.exponent());
 
         c.set_mantissa(a.mantissa() * b.mantissa());
 
         return c;
     }
 
-    inline constexpr awl::decimal zero;
+    using decimal64 = decimal<uint64_t, 4>;
 
     namespace literals
     {
-        constexpr decimal operator"" _d(const char* str, std::size_t len)
+        constexpr decimal64 operator"" _d(const char* str, std::size_t len)
         {
-            return decimal(std::string_view(str, len));
+            return decimal64(std::string_view(str, len));
         }
 
-        constexpr decimal operator"" _d(const wchar_t* str, std::size_t len)
+        constexpr decimal64 operator"" _d(const wchar_t* str, std::size_t len)
         {
-            return decimal(std::wstring_view(str, len));
+            return decimal64(std::wstring_view(str, len));
         }
     }
 }
 
 namespace std
 {
-    template <>
-    class numeric_limits<awl::decimal>
+    template <typename UInt, uint8_t exp_len>
+    class numeric_limits<awl::decimal<UInt, exp_len>>
     {
+    private:
+
+        using decimal = awl::decimal<UInt, exp_len>;
+
     public:
         
-        static constexpr awl::decimal min() noexcept
+        static constexpr decimal min() noexcept
         {
-            return -awl::decimal(awl::helpers::max_man(), 0);
+            return -decimal(decimal::max_mantissa(), 0);
         }
 
-        static constexpr awl::decimal max() noexcept
+        static constexpr decimal max() noexcept
         {
-            return awl::decimal(awl::helpers::max_man(), 0);
+            return decimal(decimal::max_mantissa(), 0);
         }
     };
 }
