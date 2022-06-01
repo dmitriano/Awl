@@ -37,9 +37,10 @@ namespace awl
         
         static_assert(sizeof(Data) == sizeof(UInt));
 
-        using Int = typename Data::Int;
-
     public:
+
+        using Int = typename Data::Int;
+        using Rep = typename Data::Rep;
 
         constexpr decimal()
         {
@@ -74,14 +75,14 @@ namespace awl
 
         //The value of resulting UInt may be different with different compilers. But the value of Data structure
         //should be the same when I convert it back from UInt. See Bit field.
-        static constexpr decimal from_bits(UInt val)
+        static constexpr decimal from_bits(Rep val)
         {
             decimal a;
             a.m_data = Data::from_bits(val);
             return a;
         }
 
-        constexpr UInt to_bits() const
+        constexpr Rep to_bits() const
         {
             return m_data.to_bits();
         }

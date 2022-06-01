@@ -6,11 +6,11 @@
 #pragma once
 
 #include "Awl/DecimalConstants.h"
+#include "Awl/Int2Array.h"
 
 #include <cstdint>
 #include <cassert>
 #include <limits>
-#include <array>
 #include <bit>
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -22,7 +22,23 @@ namespace awl
     template <typename UInt, uint8_t exp_len>
     class BuiltInDecimalData
     {
+    private:
+
+        using Constants = helpers::DecimalConstants<UInt, exp_len>;
+
+        struct Pack
+        {
+            //0 - positive, 1 - negative
+            UInt sign : Constants::sign_len;
+            UInt exp : Constants::exp_len;
+            UInt man : Constants::man_len;
+        };
+
+        static_assert(sizeof(Pack) == sizeof(UInt));
+
     public:
+
+        using Rep = std::array<std::uint8_t, sizeof(Pack)>;
 
         using Int = std::make_signed_t<UInt>;
 
@@ -60,31 +76,19 @@ namespace awl
             m_pack.man = val;
         }
 
-        static constexpr BuiltInDecimalData from_bits(UInt val)
+        static constexpr BuiltInDecimalData from_bits(Rep val)
         {
             BuiltInDecimalData a;
             a.m_pack = std::bit_cast<Pack>(val);
             return a;
         }
 
-        constexpr UInt to_bits() const
+        constexpr Rep to_bits() const
         {
-            return std::bit_cast<UInt>(m_pack);
+            return std::bit_cast<Rep>(m_pack);
         }
 
     private:
-
-        using Constants = helpers::DecimalConstants<UInt, exp_len>;
-
-        struct Pack
-        {
-            //0 - positive, 1 - negative
-            UInt sign : Constants::sign_len;
-            UInt exp : Constants::exp_len;
-            UInt man : Constants::man_len;
-        };
-
-        static_assert(sizeof(Pack) == sizeof(UInt));
 
         Pack m_pack;
     };
