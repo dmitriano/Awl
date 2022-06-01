@@ -269,9 +269,9 @@ namespace
 
         void DecimalCast()
         {
-            AWT_ASSERT(Decimal("1"sv).cast<double>() == 1.0);
-            AWT_ASSERT(Decimal("1"sv).cast<float>() == 1.0f);
-            AWT_ASSERT(Decimal("1"sv).cast<int>() == 1);
+            AWT_ASSERT(Decimal("1"sv).template cast<double>() == 1.0);
+            AWT_ASSERT(Decimal("1"sv).template cast<float>() == 1.0f);
+            AWT_ASSERT(Decimal("1"sv).template cast<int>() == 1);
 
             AWT_ASSERT(Decimal("1"sv) == 1.0);
         }
