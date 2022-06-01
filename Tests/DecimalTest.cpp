@@ -16,7 +16,13 @@
 #define AWL_DECIMAL_128 1
 #endif
 
-#define LOCAL_TEST(test_name) AWT_TEST(test_name) { AWT_UNUSED_CONTEXT; Test<Decimal64> test; test.test_name(); }
+#define LOCAL_TEST(test_name) AWT_TEST(test_name) \
+{ \
+    AWT_UNUSED_CONTEXT; \
+    { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 5>> test; test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 6>> test; test.test_name(); } \
+}
 
 using namespace std::literals;
 
