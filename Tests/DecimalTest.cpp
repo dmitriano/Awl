@@ -16,12 +16,33 @@
 #define AWL_DECIMAL_128 1
 #endif
 
+#ifdef AWL_DECIMAL_128
+
+template <class C>
+std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
+{
+    //Obviously not the real implementation, just here to make the tests work
+    return out << static_cast<uint64_t>(val);
+}
+
+#define GCC_SECTION(test_name) \
+    { Test<awl::decimal<__uint128_t, 4>> test; test.test_name(); } \
+    { Test<awl::decimal<__uint128_t, 5>> test; test.test_name(); } \
+    { Test<awl::decimal<__uint128_t, 6>> test; test.test_name(); }
+
+#else
+
+#define GCC_SECTION(test_name)
+
+#endif
+
 #define LOCAL_TEST(test_name) AWT_TEST(test_name) \
 { \
     AWT_UNUSED_CONTEXT; \
     { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \
     { Test<awl::decimal<uint64_t, 5>> test; test.test_name(); } \
     { Test<awl::decimal<uint64_t, 6>> test; test.test_name(); } \
+    GCC_SECTION(test_name) \
 }
 
 using namespace std::literals;
