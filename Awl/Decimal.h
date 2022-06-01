@@ -25,11 +25,12 @@ namespace awl
 {
     namespace helpers
     {
-        template <typename UInt, uint8_t exp_len>
-        struct DecimalData
+        template <typename UInt, uint8_t exp_length>
+        struct DecimalConstants
         {
             static constexpr uint8_t sign_len = 1;
             //With UInt and exp_len == 4 the mantissa length is 59.
+            static constexpr uint8_t exp_len = exp_length;
             static constexpr uint8_t man_len = sizeof(UInt) * 8 - (exp_len + sign_len);
 
             static constexpr UInt p2(uint8_t n)
@@ -78,16 +79,22 @@ namespace awl
 
                 return a;
             }
-
-            //0 - positive, 1 - negative
-            UInt sign : sign_len;
-            UInt exp : exp_len;
-            UInt man : man_len;
         };
 
-        static_assert(DecimalData<uint64_t, 4>::man_len == 59u);
+        static_assert(DecimalConstants<uint64_t, 4>::man_len == 59u);
     }
     
+    template <typename UInt, uint8_t exp_len>
+    struct BuiltInDecimalData
+    {
+        using Constants = helpers::DecimalConstants<UInt, exp_len>;
+
+        //0 - positive, 1 - negative
+        UInt sign : Constants::sign_len;
+        UInt exp : Constants::exp_len;
+        UInt man : Constants::man_len;
+    };
+
     //The implementation of decimal class is not complete and I am not sure about its efficiency.
     //Consider using boost/multiprecision or decNumber Library, for example, or use std::decimal in GCC.
     
@@ -96,12 +103,13 @@ namespace awl
     //An instance of decimal can be serialized as UInt with to_bits() and from_bits() methods,
     //but UInt value may be different with different compilers and platforms.
 
-    template <typename UInt, uint8_t exp_len>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltInDecimalData>
     class decimal
     {
     private:
 
-        using Data = helpers::DecimalData<UInt, exp_len>;
+        using Constants = helpers::DecimalConstants<UInt, exp_len>;
+        using Data = DataTemplate<UInt, exp_len>;
         
         static_assert(sizeof(Data) == sizeof(UInt));
 
@@ -216,7 +224,7 @@ namespace awl
 
         static constexpr UInt max_mantissa()
         {
-            return Data::max_man();
+            return Constants::max_man();
         }
 
         constexpr uint8_t exponent() const
@@ -226,7 +234,7 @@ namespace awl
 
         static constexpr uint8_t max_exponent()
         {
-            return static_cast<uint8_t>(Data::max_exp());
+            return static_cast<uint8_t>(Constants::max_exp());
         }
 
         constexpr UInt denominator() const
@@ -696,15 +704,15 @@ namespace awl
             }
         }
 
-        static constexpr Data::DenomArray m_denoms = Data::make_denoms();
+        static constexpr Constants::DenomArray m_denoms = Constants::make_denoms();
         
         Data m_data;
     };
 
     //Returns a normalized decimal, because we trimmed zeros.
-    template <typename UInt, uint8_t exp_len>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     template <class C>
-    constexpr decimal<UInt, exp_len> decimal<UInt, exp_len>::from_string(std::basic_string_view<C> fixed_string)
+    constexpr decimal<UInt, exp_len, DataTemplate> decimal<UInt, exp_len, DataTemplate>::from_string(std::basic_string_view<C> fixed_string)
     {
         using string_view = std::basic_string_view<C>;
         
@@ -775,8 +783,8 @@ namespace awl
 
 #endif
 
-    template <typename UInt, uint8_t exp_len, class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len> d)
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate> d)
     {
         if (d.negative())
         {
@@ -801,10 +809,10 @@ namespace awl
         return out;
     }
 
-    template <typename UInt, uint8_t exp_len>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     template <class C>
     constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, UInt>
-        decimal<UInt, exp_len>::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
+        decimal<UInt, exp_len, DataTemplate>::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
     {
         uint8_t digit_count = 0;
 
@@ -879,10 +887,10 @@ namespace awl
     }
 
     //Multiplies two decimals without loosing the precision and throws if an overflow occurs.
-    template <typename UInt, uint8_t exp_len>
-    constexpr decimal<UInt, exp_len> multiply(decimal<UInt, exp_len> a, decimal<UInt, exp_len> b)
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
+    constexpr decimal<UInt, exp_len, DataTemplate> multiply(decimal<UInt, exp_len, DataTemplate> a, decimal<UInt, exp_len, DataTemplate> b)
     {
-        decimal<UInt, exp_len> c(a.exponent() + b.exponent());
+        decimal<UInt, exp_len, DataTemplate> c(a.exponent() + b.exponent());
 
         c.set_mantissa(a.mantissa() * b.mantissa());
 
@@ -913,12 +921,12 @@ namespace awl
 
 namespace std
 {
-    template <typename UInt, uint8_t exp_len>
-    class numeric_limits<awl::decimal<UInt, exp_len>>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
+    class numeric_limits<awl::decimal<UInt, exp_len, DataTemplate>>
     {
     private:
 
-        using decimal = awl::decimal<UInt, exp_len>;
+        using decimal = awl::decimal<UInt, exp_len, DataTemplate>;
 
     public:
         
