@@ -84,6 +84,8 @@ namespace awl
     {
     public:
 
+        using Int = std::make_signed_t<UInt>;
+
         constexpr BuiltInDecimalData() : BuiltInDecimalData(0, 0, 0) {}
         
         constexpr BuiltInDecimalData(UInt sign, UInt exp, UInt man) : m_pack{ sign, exp, man } {}

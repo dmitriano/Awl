@@ -37,7 +37,7 @@ namespace awl
         
         static_assert(sizeof(Data) == sizeof(UInt));
 
-        using Int = std::make_signed_t<UInt>;
+        using Int = typename Data::Int;
 
     public:
 
