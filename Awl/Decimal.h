@@ -17,6 +17,10 @@
 
 #include "Awl/String.h"
 
+#if defined(__GNUC__) || defined(__clang__)
+    #define AWL_DECIMAL_128 1
+#endif
+
 namespace awl
 {
     namespace helpers
@@ -875,6 +879,12 @@ namespace awl
     }
 
     using decimal64 = decimal<uint64_t, 4>;
+
+#ifdef AWL_DECIMAL_128
+
+    using decimal128 = decimal<uint128_t, 4>;
+
+#endif
 
     namespace literals
     {

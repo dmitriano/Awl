@@ -13,7 +13,11 @@ using namespace awl::literals;
 
 namespace
 {
+#ifdef AWL_DECIMAL_128
+    using Decimal = awl::decimal128;
+#else
     using Decimal = awl::decimal64;
+#endif
 
     template <class C>
     void TestStringConversion(std::basic_string_view<C> sample, std::basic_string_view<C> result = {})
