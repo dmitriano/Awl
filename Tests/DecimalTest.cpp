@@ -259,9 +259,9 @@ AWT_TEST(DecimalArithmeticOperators)
     AWT_ASSERT((Decimal("2.0"sv) *= 3.000) == Decimal("6"sv));
     AWT_ASSERT((Decimal("6.0"sv) /= 2.000) == Decimal("3"sv));
 
-    AWT_ASSERT(awl::multiply("7"_d, "33"_d) == "231"_d);
+    AWT_ASSERT(awl::multiply(Decimal("7"), Decimal("33")) == Decimal("231"));
     //With double it is probably something like 0.23099999999999998
-    AWT_ASSERT(awl::multiply("0.7"_d, "0.33"_d) == "0.231"_d);
+    AWT_ASSERT(awl::multiply(Decimal("0.7"), Decimal("0.33")) == Decimal("0.231"));
 }
 
 AWT_TEST(DecimalRound)
