@@ -764,6 +764,17 @@ namespace awl
         return result;
     }
 
+#ifdef AWL_DECIMAL_128
+
+    template <class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
+    {
+        //Obviously not the real implementation, just here as an example
+        return out << static_cast<uint64_t>(val);
+    }
+
+#endif
+
     template <typename UInt, uint8_t exp_len, class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len> d)
     {
@@ -882,7 +893,7 @@ namespace awl
 
 #ifdef AWL_DECIMAL_128
 
-    using decimal128 = decimal<uint128_t, 4>;
+    using decimal128 = decimal<__uint128_t, 4>;
 
 #endif
 

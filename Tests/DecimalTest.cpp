@@ -11,14 +11,14 @@ using namespace std::literals;
 using namespace awl::testing;
 using namespace awl::literals;
 
-namespace
-{
 #ifdef AWL_DECIMAL_128
     using Decimal = awl::decimal128;
 #else
     using Decimal = awl::decimal64;
 #endif
 
+namespace
+{
     template <class C>
     void TestStringConversion(std::basic_string_view<C> sample, std::basic_string_view<C> result = {})
     {
@@ -110,11 +110,6 @@ AWT_TEST(DecimalStringConversion)
     TestStringConversion("12.123456789123456"sv);
     TestStringConversion(L"12.123456789123456"sv);
 
-    CheckTrows([&]()
-    {
-        TestStringConversion("1234.123456789123456"sv);
-    });
-
     //17 is OK
     TestStringConversion("12123456789123456"sv);
     TestStringConversion(L"12123456789123456"sv);
@@ -133,24 +128,6 @@ AWT_TEST(DecimalDoubleConversion)
     const awl::String fixed_string = d.to_string();
 
     AWT_ASSERT(fixed_string == _T("10.12800"));
-}
-
-AWT_TEST(DecimalLimits)
-{
-    AWT_UNUSED_CONTEXT;
-
-    //19 is wrong
-    CheckConstructorTrows("0.1234567891234567891"sv);
-    CheckConstructorTrows(L"0.1234567891234567891"sv);
-
-    CheckConstructorTrows("1.123456789123456789"sv);
-    CheckConstructorTrows(L"1.123456789123456789"sv);
-
-    CheckConstructorTrows("12.12345678912345678"sv);
-    CheckConstructorTrows(L"12.12345678912345678"sv);
-
-    CheckConstructorTrows("1212345678912345678"sv);
-    CheckConstructorTrows(L"1212345678912345678"sv);
 }
 
 AWT_TEST(DecimalRescale)
@@ -188,12 +165,6 @@ AWT_TEST(DecimalRescale)
     d = d.rescale(10);
 
     AWT_ASSERT(d.to_astring() == "12345678.0000000000");
-
-    CheckTrows([&]()
-    {
-        //TO DO: Why 11?
-        d.rescale(11);
-    });
 }
 
 AWT_TEST(DecimalTrim)
@@ -291,63 +262,6 @@ AWT_TEST(DecimalArithmeticOperators)
     AWT_ASSERT(awl::multiply("7"_d, "33"_d) == "231"_d);
     //With double it is probably something like 0.23099999999999998
     AWT_ASSERT(awl::multiply("0.7"_d, "0.33"_d) == "0.231"_d);
-}
-
-AWT_TEST(DecimalMinMax)
-{
-    AWT_UNUSED_CONTEXT;
-
-    Decimal max = std::numeric_limits<Decimal>::max();
-    Decimal min = std::numeric_limits<Decimal>::min();
-
-    AWT_ASSERT(min < max);
-    AWT_ASSERT(max > min);
-
-    AWT_ASSERT(max == max);
-    AWT_ASSERT(max - Decimal(1, 0) < max);
-    AWT_ASSERT(Decimal(1, 18) < max);
-    AWT_ASSERT(Decimal(-1, 18) < max);
-    AWT_ASSERT(Decimal::zero() < max);
-    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) < max);
-
-    AWT_ASSERT(min == min);
-    AWT_ASSERT(min < min + Decimal(1, 0));
-    AWT_ASSERT(min < Decimal::zero());
-
-    AWT_ASSERT(min <= max);
-    AWT_ASSERT(max >= min);
-
-    AWT_ASSERT(max != max - Decimal(1, 0));
-    AWT_ASSERT(max - Decimal(1, 0) <= max);
-    AWT_ASSERT(Decimal::zero() <= max);
-    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) <= max);
-
-    AWT_ASSERT(min != min + Decimal(1, 0));
-    AWT_ASSERT(min <= min + Decimal(1, 0));
-    AWT_ASSERT(min <= Decimal::zero());
-
-    for (uint8_t precision = 0; precision <= Decimal::max_exponent(); ++precision)
-    {
-        AWT_ASSERT(Decimal(1, precision) > min);
-        AWT_ASSERT(Decimal(-1, precision) > min);
-        AWT_ASSERT(Decimal(1, precision) >= min);
-        AWT_ASSERT(Decimal(-1, precision) >= min);
-
-        AWT_ASSERT(Decimal(1, precision) < max);
-        AWT_ASSERT(Decimal(-1, precision) < max);
-        AWT_ASSERT(Decimal(1, precision) <= max);
-        AWT_ASSERT(Decimal(-1, precision) <= max);
-
-        AWT_ASSERT(Decimal(1, precision) > Decimal::zero());
-        AWT_ASSERT(Decimal(-1, precision) < Decimal::zero());
-        AWT_ASSERT(Decimal(-1, precision) < Decimal(1, precision));
-        AWT_ASSERT(Decimal(1, precision) > Decimal(-1, precision));
-
-        AWT_ASSERT(Decimal(1, precision) >= Decimal::zero());
-        AWT_ASSERT(Decimal(-1, precision) <= Decimal::zero());
-        AWT_ASSERT(Decimal(-1, precision) <= Decimal(1, precision));
-        AWT_ASSERT(Decimal(1, precision) >= Decimal(-1, precision));
-    }
 }
 
 AWT_TEST(DecimalRound)
@@ -467,6 +381,106 @@ AWT_TEST(DecimalRound)
     }
 }
 
+#ifndef AWL_DECIMAL_128
+
+AWT_TEST(DecimalRescaleOverflow)
+{
+    AWT_UNUSED_CONTEXT;
+
+    Decimal d("123.45678"sv);
+
+    CheckTrows([&]()
+    {
+        //TO DO: Why 11?
+        d.rescale(11);
+    });
+}
+
+AWT_TEST(DecimalStringConversionOverflow)
+{
+    AWT_UNUSED_CONTEXT;
+
+    CheckTrows([&]()
+    {
+        TestStringConversion("1234.123456789123456"sv);
+    });
+}
+
+AWT_TEST(DecimalLimits)
+{
+    AWT_UNUSED_CONTEXT;
+
+    //19 is wrong
+    CheckConstructorTrows("0.1234567891234567891"sv);
+    CheckConstructorTrows(L"0.1234567891234567891"sv);
+
+    CheckConstructorTrows("1.123456789123456789"sv);
+    CheckConstructorTrows(L"1.123456789123456789"sv);
+
+    CheckConstructorTrows("12.12345678912345678"sv);
+    CheckConstructorTrows(L"12.12345678912345678"sv);
+
+    CheckConstructorTrows("1212345678912345678"sv);
+    CheckConstructorTrows(L"1212345678912345678"sv);
+}
+
+AWT_TEST(DecimalMinMax)
+{
+    AWT_UNUSED_CONTEXT;
+
+    Decimal max = std::numeric_limits<Decimal>::max();
+    Decimal min = std::numeric_limits<Decimal>::min();
+
+    AWT_ASSERT(min < max);
+    AWT_ASSERT(max > min);
+
+    AWT_ASSERT(max == max);
+    AWT_ASSERT(max - Decimal(1, 0) < max);
+    AWT_ASSERT(Decimal(1, 18) < max);
+    AWT_ASSERT(Decimal(-1, 18) < max);
+    AWT_ASSERT(Decimal::zero() < max);
+    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) < max);
+
+    AWT_ASSERT(min == min);
+    AWT_ASSERT(min < min + Decimal(1, 0));
+    AWT_ASSERT(min < Decimal::zero());
+
+    AWT_ASSERT(min <= max);
+    AWT_ASSERT(max >= min);
+
+    AWT_ASSERT(max != max - Decimal(1, 0));
+    AWT_ASSERT(max - Decimal(1, 0) <= max);
+    AWT_ASSERT(Decimal::zero() <= max);
+    AWT_ASSERT(Decimal::make_decimal(1, Decimal::max_exponent()) <= max);
+
+    AWT_ASSERT(min != min + Decimal(1, 0));
+    AWT_ASSERT(min <= min + Decimal(1, 0));
+    AWT_ASSERT(min <= Decimal::zero());
+
+    for (uint8_t precision = 0; precision <= Decimal::max_exponent(); ++precision)
+    {
+        AWT_ASSERT(Decimal(1, precision) > min);
+        AWT_ASSERT(Decimal(-1, precision) > min);
+        AWT_ASSERT(Decimal(1, precision) >= min);
+        AWT_ASSERT(Decimal(-1, precision) >= min);
+
+        AWT_ASSERT(Decimal(1, precision) < max);
+        AWT_ASSERT(Decimal(-1, precision) < max);
+        AWT_ASSERT(Decimal(1, precision) <= max);
+        AWT_ASSERT(Decimal(-1, precision) <= max);
+
+        AWT_ASSERT(Decimal(1, precision) > Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) < Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) < Decimal(1, precision));
+        AWT_ASSERT(Decimal(1, precision) > Decimal(-1, precision));
+
+        AWT_ASSERT(Decimal(1, precision) >= Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) <= Decimal::zero());
+        AWT_ASSERT(Decimal(-1, precision) <= Decimal(1, precision));
+        AWT_ASSERT(Decimal(1, precision) >= Decimal(-1, precision));
+    }
+}
+
 //It is not enough to store some values from Binance.
 AWT_EXAMPLE(DecimalBinanceValues)
 {
@@ -480,3 +494,5 @@ AWT_EXAMPLE(DecimalBinanceValues)
 
     CheckConstructorTrows("92233720368.54775807"sv); //LUNA max position
 }
+
+#endif //AWL_DECIMAL_128
