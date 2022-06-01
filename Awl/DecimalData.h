@@ -84,6 +84,8 @@ namespace awl
             UInt man : Constants::man_len;
         };
 
+        static_assert(sizeof(Pack) == sizeof(UInt));
+
         Pack m_pack;
     };
 }
