@@ -88,9 +88,14 @@ namespace awl
         
         constexpr BuiltInDecimalData(UInt sign, UInt exp, UInt man) : m_pack{ sign, exp, man } {}
 
-        constexpr UInt sign() const
+        constexpr bool positive() const
         {
-            return m_pack.sign;
+            return m_pack.sign == 0;
+        }
+
+        constexpr void set_positive(bool val)
+        {
+            m_pack.sign = val ? 0 : 1;
         }
 
         constexpr uint8_t exp() const
@@ -98,19 +103,14 @@ namespace awl
             return m_pack.exp;
         }
 
-        constexpr UInt man() const
-        {
-            return m_pack.man;
-        }
-
-        constexpr void set_sign(UInt val)
-        {
-            m_pack.sign = val;
-        }
-
         constexpr void set_exp(UInt val)
         {
             m_pack.exp = val;
+        }
+
+        constexpr UInt man() const
+        {
+            return m_pack.man;
         }
 
         constexpr void set_man(UInt val)

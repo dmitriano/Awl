@@ -102,7 +102,7 @@ namespace awl
 
         constexpr bool positive() const
         {
-            return m_data.sign() == 0;
+            return m_data.positive();
         }
 
         constexpr bool negative() const
@@ -112,7 +112,7 @@ namespace awl
 
         constexpr void negate()
         {
-            m_data.set_sign(m_data.sign() ? 0 : 1);
+            m_data.set_positive(!m_data.positive());
         }
 
         constexpr Int mantissa() const
@@ -126,12 +126,12 @@ namespace awl
         {
             if (val >= 0)
             {
-                m_data.set_sign(0);
+                m_data.set_positive(true);
                 m_data.set_man(static_cast<UInt>(val));
             }
             else
             {
-                m_data.set_sign(1);
+                m_data.set_positive(false);
                 m_data.set_man(static_cast<UInt>(-val));
             }
         }
@@ -177,7 +177,7 @@ namespace awl
 
         bool operator == (const decimal& other) const
         {
-            if (m_data.sign() == other.m_data.sign())
+            if (m_data.positive() == other.m_data.positive())
             {
                 const decimal a = normalize();
                 const decimal b = other.normalize();
@@ -539,7 +539,10 @@ namespace awl
             }
 
             //1 < 0
-            return comp(b.m_data.sign(), a.m_data.sign());
+
+            auto make_sign = [](const Data& data) -> uint8_t { return data.positive() ? 0 : 1; };
+            
+            return comp(make_sign(b.m_data), make_sign(a.m_data));
         }
 
         template <class Comp>
