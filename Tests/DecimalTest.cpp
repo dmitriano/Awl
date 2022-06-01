@@ -381,7 +381,7 @@ AWT_TEST(DecimalRound)
     }
 }
 
-//#ifndef AWL_DECIMAL_128
+#ifndef AWL_DECIMAL_128
 
 AWT_TEST(DecimalRescaleOverflow)
 {
@@ -495,4 +495,4 @@ AWT_EXAMPLE(DecimalBinanceValues)
     CheckConstructorTrows("92233720368.54775807"sv); //LUNA max position
 }
 
-//#endif //AWL_DECIMAL_128
+#endif //AWL_DECIMAL_128

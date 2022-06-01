@@ -11,6 +11,10 @@
 #include <array>
 #include <cmath>
 
+#if defined(__GNUC__) || defined(__clang__)
+#define AWL_DECIMAL_128 1
+#endif
+
 namespace awl
 {
     namespace helpers
