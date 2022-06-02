@@ -38,9 +38,9 @@ namespace awl
 
         using Int = std::make_signed_t<UInt>;
 
-        constexpr BuiltInDecimalData() : BuiltInDecimalData(0, 0, 0) {}
+        constexpr BuiltInDecimalData() : BuiltInDecimalData(true, 0, 0) {}
         
-        constexpr BuiltInDecimalData(UInt sign, UInt exp, UInt man) : m_pack{ sign, exp, man } {}
+        constexpr BuiltInDecimalData(bool sign, uint8_t exp, UInt man) : m_pack{ sign ? 0u : 1u, exp, man } {}
 
         constexpr bool positive() const
         {
@@ -49,7 +49,7 @@ namespace awl
 
         constexpr void set_positive(bool val)
         {
-            m_pack.sign = val ? 0 : 1;
+            m_pack.sign = val ? 0u : 1u;
         }
 
         constexpr uint8_t exp() const

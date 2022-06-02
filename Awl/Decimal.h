@@ -46,7 +46,7 @@ namespace awl
         {
         }
 
-        explicit constexpr decimal(uint8_t digits) : m_data(0, digits, 0)
+        explicit constexpr decimal(uint8_t digits) : m_data(true, digits, 0)
         {
         }
 
