@@ -51,7 +51,7 @@ namespace bmp = boost::multiprecision;
 
 #endif
 
-#if false
+#if true
 
 #define BUILTIN_SECTION(test_name) \
     { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \

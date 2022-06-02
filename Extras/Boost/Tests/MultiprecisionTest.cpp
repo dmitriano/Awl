@@ -156,9 +156,17 @@ namespace
     static_assert(Data(true, 0, 15).exp() == 0);
 }
 
-//AWT_EXAMPLE(MultiprecisionDecimalData)
-//{
-//    awl::BoostDecimalData<bmp::uint128_t, 4> d(true, 3, 0);
-//
-//    context.out << d.exp() << std::endl;
-//}
+AWT_EXAMPLE(MultiprecisionDecimalData)
+{
+    using UInt = bmp::uint128_t;
+    
+    awl::BoostDecimalData<UInt, 4> d(true, 2, 105);
+
+    context.out << d.man() << ", " << d.exp() << std::endl;
+
+    d.set_man(UInt(105) * UInt(10));
+    
+    d.set_exp(3);
+
+    context.out << d.man() << ", " << d.exp() << std::endl;
+}

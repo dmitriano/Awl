@@ -89,7 +89,7 @@ namespace awl
 
         static constexpr UInt expMask = ((UInt(1) << Constants::exp_len) - 1) << 1;
 
-        static constexpr UInt manMask = UInt(-1) & !(expMask | signMask);
+        static constexpr UInt manMask = UInt(-1) & ~(expMask | signMask);
 
         UInt m_val;
     };
