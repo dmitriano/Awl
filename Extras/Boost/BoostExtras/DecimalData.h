@@ -16,6 +16,39 @@
 
 namespace awl
 {
+    namespace detail
+    {
+        template <class T>
+        struct make_signed;
+
+        template <>
+        struct make_signed<boost::multiprecision::uint128_t>
+        {
+            using type = boost::multiprecision::int128_t;
+        };
+
+        template <>
+        struct make_signed<boost::multiprecision::uint256_t>
+        {
+            using type = boost::multiprecision::int256_t;
+        };
+
+        template <>
+        struct make_signed<boost::multiprecision::uint512_t>
+        {
+            using type = boost::multiprecision::int512_t;
+        };
+
+        template <>
+        struct make_signed<boost::multiprecision::uint1024_t>
+        {
+            using type = boost::multiprecision::int1024_t;
+        };
+
+        template <class T>
+        using make_signed_t = typename make_signed<T>::type;
+    }
+
     template <typename UInt, uint8_t exp_len>
     class BoostDecimalData
     {
@@ -29,8 +62,7 @@ namespace awl
 
         using Rep = UInt;
 
-        //using Int = boost::multiprecision::make_signed_t<UInt>;
-        using Int = boost::multiprecision::int128_t;
+        using Int = detail::make_signed_t<UInt>;
 
         constexpr BoostDecimalData() : BoostDecimalData(true, 0, 0) {}
         
