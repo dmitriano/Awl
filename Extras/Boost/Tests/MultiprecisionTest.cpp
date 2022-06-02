@@ -145,9 +145,20 @@ namespace
     using Data = awl::BoostDecimalData<bmp::uint128_t, 4>;
 
     static_assert(Data().positive());
+    static_assert(!Data(false, 3, 15).positive());
+
+    static_assert(Data(true, 3, 15).man() == 15);
+    static_assert(Data(true, 3, 1).man() == 1);
+    static_assert(Data(true, 3, 0).man() == 0);
+
+    static_assert(Data(true, 3, 15).exp() == 3);
+    static_assert(Data(true, 1, 15).exp() == 1);
+    static_assert(Data(true, 0, 15).exp() == 0);
 }
 
-AWT_EXAMPLE(MultiprecisionDecimalData)
-{
-    awl::BoostDecimalData<bmp::uint128_t, 4> data;
-}
+//AWT_EXAMPLE(MultiprecisionDecimalData)
+//{
+//    awl::BoostDecimalData<bmp::uint128_t, 4> d(true, 3, 0);
+//
+//    context.out << d.exp() << std::endl;
+//}

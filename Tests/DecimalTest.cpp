@@ -36,13 +36,40 @@ std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
 
 #endif
 
+#ifdef AWL_BOOST
+
+namespace bmp = boost::multiprecision; 
+
+#define BOOST_SECTION(test_name) \
+    { Test<awl::decimal<bmp::uint128_t, 4, awl::BoostDecimalData>> test; test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 5, awl::BoostDecimalData>> test; test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 6, awl::BoostDecimalData>> test; test.test_name(); }
+
+#else
+
+#define GCC_SECTION(test_name)
+
+#endif
+
+#if false
+
+#define BUILTIN_SECTION(test_name) \
+    { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 5>> test; test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 6>> test; test.test_name(); }
+
+#else
+
+#define BUILTIN_SECTION(test_name)
+
+#endif
+
 #define LOCAL_TEST(test_name) AWT_TEST(test_name) \
 { \
     AWT_UNUSED_CONTEXT; \
-    { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 5>> test; test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 6>> test; test.test_name(); } \
+    BUILTIN_SECTION(test_name) \
     GCC_SECTION(test_name) \
+    BOOST_SECTION(test_name) \
 }
 
 using namespace std::literals;

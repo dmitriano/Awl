@@ -35,7 +35,7 @@ namespace awl
         using Constants = helpers::DecimalConstants<UInt, exp_len>;
         using Data = DataTemplate<UInt, exp_len>;
         
-        static_assert(sizeof(Data) == sizeof(UInt));
+        //static_assert(sizeof(Data) == sizeof(UInt));
 
     public:
 
@@ -90,7 +90,7 @@ namespace awl
         template <class Float>
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, Float> cast() const
         {
-            return static_cast<Float>(static_cast<Float>(mantissa()) / denominator());
+            return static_cast<Float>(static_cast<Float>(mantissa()) / static_cast<double>(denominator()));
         }
 
         //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
@@ -171,7 +171,7 @@ namespace awl
         constexpr std::enable_if_t<std::is_arithmetic_v<Float>, decimal&> operator = (Float val)
         {
             //We do not round the floating point value here so abs(decimal) < abs(val).
-            set_mantissa(static_cast<Int>(val * denominator()));
+            set_mantissa(static_cast<Int>(val * static_cast<double>(denominator())));
 
             return *this;
         }
@@ -390,7 +390,7 @@ namespace awl
         {
             decimal d(digits);
 
-            d.set_mantissa(static_cast<Int>(std::llround(val * d.denominator())));
+            d.set_mantissa(static_cast<Int>(std::llround(val * static_cast<double>(d.denominator()))));
 
             return d;
         }
@@ -407,7 +407,7 @@ namespace awl
         {
             decimal d(digits);
 
-            d.set_mantissa(static_cast<Int>(std::ceil(val * d.denominator())));
+            d.set_mantissa(static_cast<Int>(std::ceil(val * static_cast<double>(d.denominator()))));
 
             return d;
         }
@@ -424,7 +424,7 @@ namespace awl
         {
             decimal d(digits);
 
-            d.set_mantissa(static_cast<Int>(std::floor(val * d.denominator())));
+            d.set_mantissa(static_cast<Int>(std::floor(val * static_cast<double>(d.denominator()))));
 
             return d;
         }
@@ -572,13 +572,13 @@ namespace awl
 
                 if (a.exponent() > b.exponent())
                 {
-                    const UInt diff = a.exponent() - b.exponent();
+                    const uint8_t diff = a.exponent() - b.exponent();
 
                     b_val *= m_denoms[diff];
                 }
                 else if (b.exponent() > a.exponent())
                 {
-                    const UInt diff = b.exponent() - a.exponent();
+                    const uint8_t diff = b.exponent() - a.exponent();
 
                     a_val *= m_denoms[diff];
                 }
@@ -673,7 +673,7 @@ namespace awl
 
         check_exp(digits);
 
-        const Int denom = m_denoms[digits];
+        const UInt denom = m_denoms[digits];
 
         if (int_part > max_mantissa() / denom)
         {

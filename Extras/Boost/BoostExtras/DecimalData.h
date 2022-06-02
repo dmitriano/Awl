@@ -49,12 +49,12 @@ namespace awl
 
         constexpr void set_positive(bool pos)
         {
-            m_val = m_val & ~signMask | pos ? 0x0 : 0x1;
+            m_val = (m_val & ~signMask) | (pos ? 0x0 : 0x1);
         }
 
         constexpr uint8_t exp() const
         {
-            return static_cast<uint8_t>(m_val & expMask >> 1);
+            return static_cast<uint8_t>((m_val & expMask) >> 1);
         }
 
         constexpr void set_exp(uint8_t val)

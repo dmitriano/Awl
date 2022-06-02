@@ -61,7 +61,7 @@ namespace awl
 
                 UInt denom = 1;
 
-                for (UInt e = 0; e < p2(exp_len); ++e)
+                for (size_t e = 0; e < static_cast<size_t>(p2(exp_len)); ++e)
                 {
                     a[e] = denom;
 
