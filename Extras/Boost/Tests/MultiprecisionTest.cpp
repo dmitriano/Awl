@@ -12,6 +12,7 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
 #include "Awl/String.h"
+#include "Awl/Separator.h"
 #include "BoostExtras/DecimalData.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -169,4 +170,39 @@ AWT_EXAMPLE(MultiprecisionDecimalData)
     d.set_exp(3);
 
     context.out << d.man() << ", " << d.exp() << std::endl;
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBits)
+{
+    AWT_ATTRIBUTE(size_t, number, 333u);
+
+    using UInt = bmp::uint128_t;
+    using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
+
+    // Create a cpp_int with just a couple of bits set:
+    UInt i(number);
+    //Decimal i("33.3");
+
+    // export into 8-bit unsigned values, most significant bit first:
+    std::vector<unsigned char> v;
+    export_bits(i, std::back_inserter(v), 8);
+
+    context.out << "Vector size: " << v.size() << std::endl;
+    
+    context.out << "Vector elements:" << std::endl;
+
+    awl::separator sep(_T(','));
+
+    for (unsigned char val : v)
+    {
+        context.out << sep << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << val;
+    }
+
+    context.out << std::endl;
+
+    // import back again, and check for equality:
+    UInt j;
+    import_bits(j, v.begin(), v.end());
+    
+    AWT_ASSERT(i == j);
 }
