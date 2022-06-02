@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Awl/DecimalConstants.h"
-#include "Awl/Int2Array.h"
 
 #include <cstdint>
 #include <cassert>
@@ -34,7 +33,7 @@ namespace awl
 
     public:
 
-        using Rep = std::array<std::uint8_t, sizeof(Pack)>;
+        using Rep = UInt;
 
         using Int = std::make_signed_t<UInt>;
 
