@@ -19,34 +19,42 @@ namespace awl
     namespace detail
     {
         template <class T>
-        struct make_signed;
+        struct multiprecision_descriptor;
 
         template <>
-        struct make_signed<boost::multiprecision::uint128_t>
+        struct multiprecision_descriptor<boost::multiprecision::uint128_t>
         {
-            using type = boost::multiprecision::int128_t;
+            using signed_type = boost::multiprecision::int128_t;
+
+            static constexpr std::size_t size = 16;
         };
 
         template <>
-        struct make_signed<boost::multiprecision::uint256_t>
+        struct multiprecision_descriptor<boost::multiprecision::uint256_t>
         {
-            using type = boost::multiprecision::int256_t;
+            using signed_type = boost::multiprecision::int256_t;
+
+            static constexpr std::size_t size = 32;
         };
 
         template <>
-        struct make_signed<boost::multiprecision::uint512_t>
+        struct multiprecision_descriptor<boost::multiprecision::uint512_t>
         {
-            using type = boost::multiprecision::int512_t;
+            using signed_type = boost::multiprecision::int512_t;
+
+            static constexpr std::size_t size = 64;
         };
 
         template <>
-        struct make_signed<boost::multiprecision::uint1024_t>
+        struct multiprecision_descriptor<boost::multiprecision::uint1024_t>
         {
-            using type = boost::multiprecision::int1024_t;
+            using signed_type = boost::multiprecision::int1024_t;
+
+            static constexpr std::size_t size = 128;
         };
 
         template <class T>
-        using make_signed_t = typename make_signed<T>::type;
+        using make_signed_t = typename multiprecision_descriptor<T>::signed_type;
     }
 
     template <typename UInt, uint8_t exp_len>
@@ -54,7 +62,7 @@ namespace awl
     {
     private:
 
-        static constexpr size_t type_size = sizeof(UInt) - 8;
+        static constexpr size_t type_size = detail::multiprecision_descriptor<UInt>::size;
         
         using Constants = helpers::DecimalConstants<UInt, exp_len, type_size>;
 
