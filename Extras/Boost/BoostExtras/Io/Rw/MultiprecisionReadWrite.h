@@ -14,7 +14,7 @@ namespace awl::io
 {
     namespace detail
     {
-        inline constexpr std::uint8_t signMask = 0x80; // static_cast<std::uint8_t>(1) << (sizeof(std::uint8_t) - 1u);
+        inline constexpr std::uint8_t signMask = 0x80;
     }
     
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
@@ -45,6 +45,7 @@ namespace awl::io
 
         export_bits(val, std::back_inserter(v), 8);
 
+        //The size of bmp::int1024_t vector can be 128, so 1 byte is not enough for size + sign.
         if (v.size() > (std::numeric_limits<std::uint8_t>::max() & ~detail::signMask))
         {
             throw CorruptionException();
