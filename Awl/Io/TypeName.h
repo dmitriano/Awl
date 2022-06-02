@@ -218,7 +218,15 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return fixed_string("decimal<") + make_type_name<UInt>() + fixed_string(", ") + helpers::FormatNumber<exp_len>() + fixed_string(">");
+            if constexpr (std::is_same_v<UInt, uint64_t> && exp_len == 4)
+            {
+                //Compatibility with the previous version.
+                return fixed_string("decimal");
+            }
+            else
+            {
+                return fixed_string("decimal<") + make_type_name<UInt>() + fixed_string(", ") + helpers::FormatNumber<exp_len>() + fixed_string(">");
+            }
         }
     };
 
