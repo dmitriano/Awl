@@ -509,14 +509,14 @@ namespace awl
         {
             while (m_data.man() != 0 && m_data.exp() != 0)
             {
-                const Int remainder = m_data.man() % 10;
+                const UInt remainder = m_data.man() % 10u;
 
                 if (remainder != 0)
                 {
                     break;
                 }
 
-                m_data.set_man(m_data.man() / 10);
+                m_data.set_man(m_data.man() / 10u);
                 m_data.set_exp(m_data.exp() - 1u);
             }
 
@@ -739,7 +739,7 @@ namespace awl
 
         auto do_append = [&digit_count, &val](UInt digit)
         {
-            val = val * 10 + digit;
+            val = val * 10u + digit;
 
             //It does not make a sense to parse a string longer than the mantissa.
             if (val > max_mantissa())

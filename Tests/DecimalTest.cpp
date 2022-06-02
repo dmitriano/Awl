@@ -3,6 +3,8 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Tests/Helpers/RwTest.h"
+
 #include "Awl/Decimal.h"
 #include "Awl/Testing/UnitTest.h"
 
@@ -26,9 +28,9 @@ std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
 }
 
 #define GCC_SECTION(test_name) \
-    { Test<awl::decimal<__uint128_t, 4>> test; test.test_name(); } \
-    { Test<awl::decimal<__uint128_t, 5>> test; test.test_name(); } \
-    { Test<awl::decimal<__uint128_t, 6>> test; test.test_name(); }
+    { Test<awl::decimal<__uint128_t, 4>> test(context); test.test_name(); } \
+    { Test<awl::decimal<__uint128_t, 5>> test(context); test.test_name(); } \
+    { Test<awl::decimal<__uint128_t, 6>> test(context); test.test_name(); }
 
 #else
 
@@ -41,9 +43,9 @@ std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
 namespace bmp = boost::multiprecision; 
 
 #define BOOST_SECTION(test_name) \
-    { Test<awl::decimal<bmp::uint128_t, 4, awl::BoostDecimalData>> test; test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 5, awl::BoostDecimalData>> test; test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 6, awl::BoostDecimalData>> test; test.test_name(); }
+    { Test<awl::decimal<bmp::uint128_t, 4, awl::BoostDecimalData>> test(context); test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 5, awl::BoostDecimalData>> test(context); test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 6, awl::BoostDecimalData>> test(context); test.test_name(); }
 
 #else
 
@@ -54,9 +56,9 @@ namespace bmp = boost::multiprecision;
 #if true
 
 #define BUILTIN_SECTION(test_name) \
-    { Test<awl::decimal<uint64_t, 4>> test; test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 5>> test; test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 6>> test; test.test_name(); }
+    { Test<awl::decimal<uint64_t, 4>> test(context); test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 5>> test(context); test.test_name(); } \
+    { Test<awl::decimal<uint64_t, 6>> test(context); test.test_name(); }
 
 #else
 
@@ -66,7 +68,6 @@ namespace bmp = boost::multiprecision;
 
 #define LOCAL_TEST(test_name) AWT_TEST(test_name) \
 { \
-    AWT_UNUSED_CONTEXT; \
     BUILTIN_SECTION(test_name) \
     GCC_SECTION(test_name) \
     BOOST_SECTION(test_name) \
@@ -106,8 +107,13 @@ namespace
     template <class Decimal>
     class Test
     {
+    private:
+
+        const awl::testing::TestContext& context;
 
     public:
+
+        Test(const awl::testing::TestContext& ctx) : context(ctx) {}
 
         template <class C>
         void TestStringConversion(std::basic_string_view<C> sample, std::basic_string_view<C> result = {})
@@ -453,6 +459,17 @@ namespace
                 AWT_ASSERT(d3 == Decimal("-3"));
             }
         }
+
+        void DecimalReadWrite()
+        {
+            helpers::TestReadWrite<Decimal>(context, Decimal("0"));
+            helpers::TestReadWrite<Decimal>(context, Decimal("0.3"));
+            helpers::TestReadWrite<Decimal>(context, Decimal("3.3"));
+            helpers::TestReadWrite<Decimal>(context, Decimal("33.33"));
+            helpers::TestReadWrite<Decimal>(context, Decimal("333.333"));
+            helpers::TestReadWrite<Decimal>(context, std::numeric_limits<Decimal>::max());
+            helpers::TestReadWrite<Decimal>(context, std::numeric_limits<Decimal>::min());
+        }
     };
 }
 
@@ -468,13 +485,11 @@ LOCAL_TEST(DecimalArithmeticOperators)
 
 LOCAL_TEST(DecimalRound)
 
-#ifndef AWL_DECIMAL_128
+LOCAL_TEST(DecimalReadWrite)
 
 AWT_TEST(DecimalRescaleOverflow)
 {
-    AWT_UNUSED_CONTEXT;
-
-    Test<Decimal64> test;
+    Test<Decimal64> test(context);
 
     Decimal64 d("12345678.0000000000"sv);
 
@@ -487,9 +502,7 @@ AWT_TEST(DecimalRescaleOverflow)
 
 AWT_TEST(DecimalStringConversionOverflow)
 {
-    AWT_UNUSED_CONTEXT;
-
-    Test<Decimal64> test;
+    Test<Decimal64> test(context);
 
     test.CheckTrows([&]()
     {
@@ -499,9 +512,7 @@ AWT_TEST(DecimalStringConversionOverflow)
 
 AWT_TEST(DecimalLimits)
 {
-    AWT_UNUSED_CONTEXT;
-
-    Test<Decimal64> test;
+    Test<Decimal64> test(context);
 
     //19 is wrong
     test.CheckConstructorTrows("0.1234567891234567891"sv);
@@ -577,7 +588,7 @@ AWT_TEST(DecimalMinMax)
 //It is not enough to store some values from Binance.
 AWT_EXAMPLE(DecimalBinanceValues)
 {
-    Test<Decimal64> test;
+    Test<Decimal64> test(context);
     
     constexpr uint64_t max_uint = std::numeric_limits<uint64_t>::max();
 
@@ -589,5 +600,3 @@ AWT_EXAMPLE(DecimalBinanceValues)
 
     test.CheckConstructorTrows("92233720368.54775807"sv); //LUNA max position
 }
-
-#endif //AWL_DECIMAL_128

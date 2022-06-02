@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Awl/DecimalConstants.h"
-#include "Awl/Int2Array.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -28,7 +27,7 @@ namespace awl
 
     public:
 
-        using Rep = std::array<std::uint8_t, type_size>;
+        using Rep = UInt;
 
         //using Int = boost::multiprecision::make_signed_t<UInt>;
         using Int = boost::multiprecision::int128_t;
@@ -75,12 +74,13 @@ namespace awl
         static constexpr BoostDecimalData from_bits(Rep val)
         {
             BoostDecimalData a;
+            a.m_val = val;
             return a;
         }
 
         constexpr Rep to_bits() const
         {
-            return {};
+            return m_val;
         }
 
     private:
