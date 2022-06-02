@@ -283,7 +283,7 @@ namespace boost::multiprecision
         //we can't copy formatting from wstream
         //a_out.copyfmt(out);
 
-        a_out << std::fixed << val;
+        a_out << val;
 
         return out << awl::FromAString(a_out.str());
     }

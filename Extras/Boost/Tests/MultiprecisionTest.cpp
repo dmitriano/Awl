@@ -10,6 +10,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
 
 #include "Awl/String.h"
 #include "Awl/Separator.h"
@@ -172,37 +173,73 @@ AWT_EXAMPLE(MultiprecisionDecimalData)
     context.out << d.man() << ", " << d.exp() << std::endl;
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBits)
+namespace
 {
-    AWT_ATTRIBUTE(size_t, number, 333u);
+    void PrintVector(awl::ostream& out, const std::vector<uint8_t>& v)
+    {
+        out << "Vector size: " << v.size() << std::endl;
+
+        out << "Vector elements:" << std::endl;
+
+        awl::separator sep(_T(','));
+
+        for (unsigned char val : v)
+        {
+            out << sep << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << val;
+        }
+
+        out << std::endl;
+    }
+}
+
+AWT_EXAMPLE(MultiprecisionIntImportExportBits)
+{
+    AWT_ATTRIBUTE(size_t, number, std::numeric_limits<size_t>::max());
+    AWT_FLAG(max);
 
     using UInt = bmp::uint128_t;
-    using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
 
     // Create a cpp_int with just a couple of bits set:
-    UInt i(number);
-    //Decimal i("33.3");
+
+    UInt i = max ? std::numeric_limits<UInt>::max() : UInt(number);
 
     // export into 8-bit unsigned values, most significant bit first:
-    std::vector<unsigned char> v;
+    std::vector<uint8_t> v;
     export_bits(i, std::back_inserter(v), 8);
 
-    context.out << "Vector size: " << v.size() << std::endl;
-    
-    context.out << "Vector elements:" << std::endl;
-
-    awl::separator sep(_T(','));
-
-    for (unsigned char val : v)
-    {
-        context.out << sep << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << val;
-    }
-
-    context.out << std::endl;
+    PrintVector(context.out, v);
 
     // import back again, and check for equality:
     UInt j;
     import_bits(j, v.begin(), v.end());
     
     AWT_ASSERT(i == j);
+}
+
+AWT_EXAMPLE(MultiprecisionFloatImportExportBits)
+{
+    //using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
+    //Decimal i("33.3");
+    using boost::multiprecision::cpp_bin_float_100;
+    using boost::multiprecision::cpp_int;
+
+    // Create a cpp_bin_float to import/export:
+    cpp_bin_float_100 f(1);
+    f /= 3;
+    // export into 8-bit unsigned values, most significant bit first:
+    std::vector<unsigned char> v;
+    export_bits(cpp_int(f.backend().bits()), std::back_inserter(v), 8);
+
+    PrintVector(context.out, v);
+
+    // Grab the exponent as well:
+    int e = f.backend().exponent();
+    // Import back again, and check for equality, we have to procede via
+    // an intermediate integer:
+    cpp_int i;
+    import_bits(i, v.begin(), v.end());
+    cpp_bin_float_100 g(i);
+    g.backend().exponent() = e;
+    
+    AWT_ASSERT(f == g);
 }
