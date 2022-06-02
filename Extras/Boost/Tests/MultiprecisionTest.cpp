@@ -44,6 +44,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
     AWT_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
     AWT_ATTRIBUTE(size_t, iter_count, 1000000u);
     AWT_ATTRIBUTE(size_t, div_count, 50);
+    AWT_FLAG(test_square);
     AWT_ATTRIBUTE(size_t, square_count, 5);
 
     //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
@@ -92,25 +93,24 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
     {
         Decimal a_quotient = a;
 
-        std::cout << std::fixed << std::setprecision(div_count);
+        std::cout << "decimal quotient: " << std::endl << std::fixed << std::setprecision(div_count);
 
         //while (a_quotient != 0)
         for (size_t i = 0; i < div_count; ++i)
         {
             a_quotient /= 10;
 
-            std::cout <<
-                "decimal quotient: " << a_quotient << std::endl;
+            std::cout << a_quotient << std::endl;
         }
     }
 
+    if (test_square)
     {
         Decimal a_square = a;
         Decimal a_sqrt = a;
 
         //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
 
-        //while (a_quotient != 0)
         for (size_t i = 0; i < square_count; ++i)
         {
             a_square = a_square * a_square;
