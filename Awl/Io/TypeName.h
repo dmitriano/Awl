@@ -213,8 +213,8 @@ namespace awl::io
 
     static_assert(make_type_name<std::variant<int32_t, int64_t>>() == fixed_string{ "variant<int32_t, int64_t, >" });
 
-    template<typename UInt, uint8_t exp_len>
-    struct type_descriptor<decimal<UInt, exp_len>>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
+    struct type_descriptor<decimal<UInt, exp_len, DataTemplate>>
     {
         static constexpr auto name()
         {
