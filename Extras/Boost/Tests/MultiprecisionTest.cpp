@@ -4,19 +4,21 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream>
-#include <iomanip>
-#include <limits>
-
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_dec_float.hpp>
-#include <boost/multiprecision/cpp_bin_float.hpp>
+#include "Tests/Helpers/RwTest.h"
 
 #include "Awl/String.h"
 #include "Awl/Separator.h"
 #include "BoostExtras/DecimalData.h"
 
 #include "Awl/Testing/UnitTest.h"
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
 
 using namespace awl::testing;
 namespace bmp = boost::multiprecision;
@@ -194,14 +196,19 @@ namespace
 
 AWT_EXAMPLE(MultiprecisionIntImportExportBits)
 {
-    AWT_ATTRIBUTE(size_t, number, std::numeric_limits<size_t>::max());
+    AWT_ATTRIBUTE(int, number, std::numeric_limits<int>::max());
     AWT_FLAG(max);
 
-    using UInt = bmp::uint128_t;
+    using Int = bmp::uint128_t;
+    //using Int = bmp::int128_t;
 
     // Create a cpp_int with just a couple of bits set:
 
-    UInt i = max ? std::numeric_limits<UInt>::max() : UInt(number);
+    Int i = max ? std::numeric_limits<Int>::max() : Int(number);
+
+    i.backend().negate();
+
+    context.out << _T("sign:") << i.sign() << std::endl;
 
     // export into 8-bit unsigned values, most significant bit first:
     std::vector<uint8_t> v;
@@ -210,7 +217,7 @@ AWT_EXAMPLE(MultiprecisionIntImportExportBits)
     PrintVector(context.out, v);
 
     // import back again, and check for equality:
-    UInt j;
+    Int j;
     import_bits(j, v.begin(), v.end());
     
     AWT_ASSERT(i == j);
@@ -242,4 +249,42 @@ AWT_EXAMPLE(MultiprecisionFloatImportExportBits)
     g.backend().exponent() = e;
     
     AWT_ASSERT(f == g);
+}
+
+namespace
+{
+    template <class T>
+    void TestInt(const TestContext& context)
+    {
+        //Does not work.
+        //if constexpr (boost::is_signed<T>::value)
+
+        helpers::TestReadWrite(context, T(-1));
+        helpers::TestReadWrite(context, T(-3));
+        helpers::TestReadWrite(context, T(-33));
+        helpers::TestReadWrite(context, T(-333));
+        helpers::TestReadWrite(context, T(-3333));
+
+        helpers::TestReadWrite(context, std::numeric_limits<T>::max());
+        helpers::TestReadWrite(context, std::numeric_limits<T>::min());
+        helpers::TestReadWrite(context, T(0));
+        helpers::TestReadWrite(context, T(1));
+        helpers::TestReadWrite(context, T(3));
+        helpers::TestReadWrite(context, T(33));
+        helpers::TestReadWrite(context, T(333));
+        helpers::TestReadWrite(context, T(3333));
+    }
+}
+
+AWT_TEST(MultiprecisionReadWrite)
+{
+    TestInt<bmp::uint128_t>(context);
+    TestInt<bmp::uint256_t>(context);
+    TestInt<bmp::uint512_t>(context);
+    //TestInt<bmp::uint1024_t>(context);
+
+    TestInt<bmp::int128_t>(context);
+    TestInt<bmp::int256_t>(context);
+    TestInt<bmp::int512_t>(context);
+    //TestInt<bmp::int1024_t>(context);
 }
