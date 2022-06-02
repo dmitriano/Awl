@@ -50,15 +50,16 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
     //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
     constexpr unsigned lenght = 30;
     
-    using Decimal = bmp::number<bmp::cpp_dec_float<lenght>>;
+    using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
 
     const Decimal a(number);
     const double b = std::stod(number);
 
     std::cout <<
         "sizeof(Decimal): " << sizeof(Decimal) << std::endl <<
-        "boost: " << std::fixed << std::setprecision(lenght) << a << std::endl <<
-        "double: " << std::fixed << std::setprecision(lenght) << b <<
+        "boost:\t" << std::fixed << std::setprecision(lenght) << a << std::endl <<
+        "double:\t" << std::fixed << std::setprecision(lenght) << b << std::endl <<
+        "cast:\t" << std::fixed << std::setprecision(lenght) << static_cast<double>(a) <<
         std::endl;
 
     //context.out <<
@@ -105,16 +106,21 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
 
     {
         Decimal a_square = a;
+        Decimal a_sqrt = a;
 
-        std::cout << std::fixed << std::setprecision(lenght * square_count);
+        //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
 
         //while (a_quotient != 0)
         for (size_t i = 0; i < square_count; ++i)
         {
             a_square = a_square * a_square;
 
+            a_sqrt = bmp::sqrt(a_sqrt);
+
             std::cout <<
-                "square: " << a_square << std::endl;
+                "square: " << a_square << std::endl <<
+                "sqrt: " << a_sqrt << std::endl <<
+                "square + sqrt: " << a_square + a_sqrt << std::endl;
         }
     }
 }
