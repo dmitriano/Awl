@@ -15,13 +15,14 @@ namespace awl
 {
     namespace helpers
     {
-        template <typename UInt, uint8_t exp_length>
+        template <typename UInt, uint8_t exp_length, uint8_t type_size = sizeof(UInt)>
         struct DecimalConstants
         {
             static constexpr uint8_t sign_len = 1;
             //With UInt and exp_len == 4 the mantissa length is 59.
             static constexpr uint8_t exp_len = exp_length;
-            static constexpr uint8_t man_len = sizeof(UInt) * 8 - (exp_len + sign_len);
+            //TODO: uint8_t is not enough for boost::multiprecision
+            static constexpr uint8_t man_len = type_size * 8 - (exp_len + sign_len);
 
             static constexpr UInt p2(uint8_t n)
             {
@@ -52,7 +53,7 @@ namespace awl
                 return count;
             }
 
-            using DenomArray = std::array<UInt, p2(exp_len)>;
+            using DenomArray = std::array<UInt, static_cast<size_t>(p2(exp_len))>;
 
             static constexpr DenomArray make_denoms()
             {

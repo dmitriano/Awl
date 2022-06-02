@@ -8,6 +8,8 @@
 #include "Awl/DecimalConstants.h"
 #include "Awl/Int2Array.h"
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include <cstdint>
 #include <cassert>
 #include <limits>
@@ -22,22 +24,13 @@ namespace awl
 
         using Constants = helpers::DecimalConstants<UInt, exp_len>;
 
-        struct Pack
-        {
-            //0 - positive, 1 - negative
-            UInt sign : Constants::sign_len;
-            UInt exp : Constants::exp_len;
-            UInt man : Constants::man_len;
-        };
-
-        static_assert(sizeof(Pack) == sizeof(UInt));
-
     public:
 
-        using Rep = std::array<std::uint8_t, sizeof(Pack)>;
+        //using Rep = std::array<std::uint8_t, sizeof(Pack)>;
 
         using Int = std::make_signed_t<UInt>;
 
+        /*
         constexpr BoostDecimalData() : BoostDecimalData(0, 0, 0) {}
         
         constexpr BoostDecimalData(UInt sign, UInt exp, UInt man) : m_pack{ sign, exp, man } {}
@@ -87,5 +80,6 @@ namespace awl
     private:
 
         Pack m_pack;
+        */
     };
 }

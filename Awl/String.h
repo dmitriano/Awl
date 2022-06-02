@@ -5,17 +5,22 @@
 
 #pragma once
 
+#include "Awl/FixedString.h"
+
+#ifdef AWL_BOOST
+#include "BoostExtras/DecimalData.h"
+#endif
+
 #include <cstring>
 #include <string>
 #include <string_view>
 #include <sstream>
+#include <iomanip>
 #include <type_traits>
 #include <algorithm>
 #include <wchar.h>
 #include <cassert>
 #include <iterator>
-
-#include "Awl/FixedString.h"
 
 #ifdef _MSC_VER
 
@@ -264,3 +269,24 @@ namespace awl
         return StringConvertor<Char>::Encode(src.c_str());
     }
 }
+
+#ifdef AWL_BOOST
+
+namespace boost::multiprecision
+{
+    //boost::multiprecision does not have wostream operator
+    template <class Backend, expression_template_option ExpressionTemplates>
+    std::wostream& operator << (std::wostream& out, const number<Backend, ExpressionTemplates>& val)
+    {
+        std::ostringstream a_out;
+
+        //we can't copy formatting from wstream
+        //a_out.copyfmt(out);
+
+        a_out << std::fixed << val;
+
+        return out << awl::FromAString(a_out.str());
+    }
+}
+
+#endif

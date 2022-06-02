@@ -38,7 +38,7 @@ file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/Awl/*.h ${CMAKE_SOURCE_DIR}/Awl/
 
 IF(DEFINED ENV{BOOST_SRC_DIR})
 	message("Boost found in $ENV{BOOST_SRC_DIR}")
-	include_directories(ENV{BOOST_SRC_DIR} ${CMAKE_SOURCE_DIR}/Extras/Boost)
+	include_directories($ENV{BOOST_SRC_DIR} ${CMAKE_SOURCE_DIR}/Extras/Boost)
 	add_definitions(-DAWL_BOOST)
 	file(GLOB_RECURSE BOOST_FILES
 		${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${CMAKE_SOURCE_DIR}/Extras/Boost/*.cpp)
