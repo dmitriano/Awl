@@ -58,9 +58,9 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
 
     std::cout <<
         "sizeof(Decimal): " << sizeof(Decimal) << std::endl <<
-        "boost:\t" << std::fixed << std::setprecision(lenght) << a << std::endl <<
-        "double:\t" << std::fixed << std::setprecision(lenght) << b << std::endl <<
-        "cast:\t" << std::fixed << std::setprecision(lenght) << static_cast<double>(a) <<
+        "boost:\t" << std::fixed << a << std::endl <<
+        "double:\t" << std::fixed << b << std::endl <<
+        "cast:\t" << std::fixed << static_cast<double>(a) <<
         std::endl;
 
     //context.out <<
@@ -93,7 +93,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
     {
         Decimal a_quotient = a;
 
-        std::cout << "decimal quotient: " << std::endl << std::fixed << std::setprecision(div_count);
+        std::cout << "decimal quotient: " << std::endl;
 
         //while (a_quotient != 0)
         for (size_t i = 0; i < div_count; ++i)
@@ -123,4 +123,31 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
                 "square + sqrt: " << a_square + a_sqrt << std::endl;
         }
     }
+}
+
+//AWT_EXAMPLE(MultiprecisionDecBackend)
+//{
+//    AWT_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
+//
+//    constexpr unsigned lenght = 30;
+//
+//    using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
+//
+//    Decimal d(number);
+//
+//    //bmp::cpp_int n;
+//
+//    std::cout << "exponent: " << d.backend().exponent();
+//}
+
+namespace
+{
+    using Data = awl::BoostDecimalData<bmp::uint128_t, 4>;
+
+    static_assert(Data().positive());
+}
+
+AWT_EXAMPLE(MultiprecisionDecimalData)
+{
+    awl::BoostDecimalData<bmp::uint128_t, 4> data;
 }
