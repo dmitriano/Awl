@@ -11,7 +11,7 @@
 #include "Awl/Io/Rw/VectorReadWrite.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/container/static_vector.hpp>
+#include <boost/container/small_vector.hpp>
 
 namespace awl::io
 {
@@ -32,17 +32,11 @@ namespace awl::io
 
         size &= ~detail::signMask;
 
-        boost::container::static_vector<std::uint8_t, helpers::multiprecision_descriptor<Number>::size> v(size);
+        //Floating point number may require variable size buffer, so we do not use boost::container::static_vector.
+        boost::container::small_vector<std::uint8_t, awl::helpers::multiprecision_descriptor<Number>::size> v(size);
 
-        try
-        {
-            ReadVector(s, v, ctx);
-        }
-        catch (boost::container::bad_alloc&)
-        {
-            //It is probably not a curruption, it can happen if Int type was changed.
-            throw CorruptionException();
-        }
+        //We read exactly size bytes here.
+        ReadVector(s, v, ctx);
 
         import_bits(val, v.begin(), v.end());
 
@@ -57,17 +51,9 @@ namespace awl::io
     {
         using Number = boost::multiprecision::number<Backend, ExpressionTemplates>;
 
-        boost::container::static_vector<std::uint8_t, helpers::multiprecision_descriptor<Number>::size> v;
+        boost::container::small_vector<std::uint8_t, awl::helpers::multiprecision_descriptor<Number>::size> v;
 
-        try
-        {
-            export_bits(val, std::back_inserter(v), 8);
-        }
-        catch (boost::container::bad_alloc&)
-        {
-            //Buffer is not enough for the number.
-            throw CorruptionException();
-        }
+        export_bits(val, std::back_inserter(v), 8);
 
         //The size of bmp::int1024_t vector can be 128, so 1 byte is not enough for size + sign.
         if (v.size() > (std::numeric_limits<std::uint8_t>::max() & ~detail::signMask))

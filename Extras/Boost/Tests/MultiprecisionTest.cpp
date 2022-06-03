@@ -17,6 +17,7 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/container/static_vector.hpp>
+#include <boost/container/small_vector.hpp>
 
 #include <iostream>
 #include <iomanip>
@@ -390,7 +391,8 @@ AWT_EXAMPLE(MultiprecisionContainer)
     {
         constexpr std::size_t size = awl::helpers::multiprecision_descriptor<Int>::size;
 
-        boost::container::static_vector<std::uint8_t, size> v;
+        //boost::container::static_vector<std::uint8_t, size> v;
+        boost::container::small_vector<std::uint8_t, size> v;
 
         export_bits(i, std::back_inserter(v), 8);
  
