@@ -8,7 +8,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Separator.h"
-#include "BoostExtras/DecimalData.h"
+#include "BoostExtras/MultiprecisionDecimalData.h"
 
 #include "Awl/Testing/UnitTest.h"
 

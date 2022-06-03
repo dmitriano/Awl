@@ -9,7 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #ifdef AWL_BOOST
-#include "BoostExtras/DecimalData.h"
+#include "BoostExtras/MultiprecisionDecimalData.h"
 #endif
 
 #include <functional>
