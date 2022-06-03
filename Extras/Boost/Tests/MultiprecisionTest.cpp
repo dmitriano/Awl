@@ -9,12 +9,14 @@
 #include "Awl/String.h"
 #include "Awl/Separator.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
+#include "BoostExtras/MultiprecisionTraits.h"
 
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
+#include <boost/container/static_vector.hpp>
 
 #include <iostream>
 #include <iomanip>
@@ -199,13 +201,8 @@ namespace
 namespace
 {
     template <class Int>
-    void TestMultiprecisionIntImportExportBits(const awl::testing::TestContext& context)
+    void ParseNumber(const std::string& number, Int& i)
     {
-        AWT_ATTRIBUTE(std::string, number, "max");
-        AWT_FLAG(negate);
-
-        Int i;
-
         if (number == "max")
         {
             i = std::numeric_limits<Int>::max();
@@ -218,6 +215,17 @@ namespace
         {
             i = Int(number);
         }
+    }
+
+    template <class Int>
+    void TestMultiprecisionIntImportExportBits(const awl::testing::TestContext& context)
+    {
+        AWT_ATTRIBUTE(std::string, number, "max");
+        AWT_FLAG(negate);
+
+        Int i;
+
+        ParseNumber(number, i);
 
         if (negate)
         {
@@ -351,4 +359,45 @@ AWT_TEST(MultiprecisionReadWrite)
     TestInt<bmp::int256_t>(context);
     TestInt<bmp::int512_t>(context);
     //TestInt<bmp::int1024_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionContainer)
+{
+    AWT_ATTRIBUTE(std::string, number, "max");
+
+    using Int = bmp::uint128_t;
+
+    Int i;
+
+    ParseNumber(number, i);
+
+    {
+        constexpr std::size_t size = 5;
+
+        boost::container::static_vector<std::uint8_t, size> v;
+
+        try
+        {
+            export_bits(i, std::back_inserter(v), 8);
+
+            AWT_FAILM("static_vector did not throw.");
+        }
+        catch (boost::container::bad_alloc&)
+        {
+        }
+    }
+
+    {
+        constexpr std::size_t size = awl::helpers::multiprecision_descriptor<Int>::size;
+
+        boost::container::static_vector<std::uint8_t, size> v;
+
+        export_bits(i, std::back_inserter(v), 8);
+ 
+        // import back again, and check for equality:
+        Int j;
+        import_bits(j, v.begin(), v.end());
+    
+        AWT_ASSERT(i == j);
+    }
 }

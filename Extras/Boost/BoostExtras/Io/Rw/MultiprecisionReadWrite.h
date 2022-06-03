@@ -5,10 +5,13 @@
 
 #pragma once
 
+#include "BoostExtras/MultiprecisionTraits.h"
+
 #include "Awl/Io/Rw/ReadRaw.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/container/static_vector.hpp>
 
 namespace awl::io
 {
@@ -20,6 +23,8 @@ namespace awl::io
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
     void Read(Stream & s, boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
     {
+        using Number = boost::multiprecision::number<Backend, ExpressionTemplates>;
+
         std::uint8_t size;
         Read(s, size, ctx);
 
@@ -27,9 +32,17 @@ namespace awl::io
 
         size &= ~detail::signMask;
 
-        //TODO: Use std::array here
-        std::vector<std::uint8_t> v(size);
-        ReadVector(s, v, ctx);
+        boost::container::static_vector<std::uint8_t, helpers::multiprecision_descriptor<Number>::size> v(size);
+
+        try
+        {
+            ReadVector(s, v, ctx);
+        }
+        catch (boost::container::bad_alloc&)
+        {
+            //It is probably not a curruption, it can happen if Int type was changed.
+            throw CorruptionException();
+        }
 
         import_bits(val, v.begin(), v.end());
 
@@ -42,10 +55,19 @@ namespace awl::io
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
     void Write(Stream & s, const boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
     {
-        //TODO: Use std::array with an output iterator here.
-        std::vector<std::uint8_t> v;
+        using Number = boost::multiprecision::number<Backend, ExpressionTemplates>;
 
-        export_bits(val, std::back_inserter(v), 8);
+        boost::container::static_vector<std::uint8_t, helpers::multiprecision_descriptor<Number>::size> v;
+
+        try
+        {
+            export_bits(val, std::back_inserter(v), 8);
+        }
+        catch (boost::container::bad_alloc&)
+        {
+            //Buffer is not enough for the number.
+            throw CorruptionException();
+        }
 
         //The size of bmp::int1024_t vector can be 128, so 1 byte is not enough for size + sign.
         if (v.size() > (std::numeric_limits<std::uint8_t>::max() & ~detail::signMask))

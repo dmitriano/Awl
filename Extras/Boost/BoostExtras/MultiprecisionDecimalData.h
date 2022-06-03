@@ -22,7 +22,7 @@ namespace awl
     {
     private:
 
-        static constexpr size_t type_size = detail::multiprecision_descriptor<UInt>::size;
+        static constexpr size_t type_size = helpers::multiprecision_descriptor<UInt>::size;
         
         using Constants = helpers::DecimalConstants<UInt, exp_len, type_size>;
 
@@ -30,7 +30,7 @@ namespace awl
 
         using Rep = UInt;
 
-        using Int = detail::make_signed_t<UInt>;
+        using Int = helpers::make_signed_t<UInt>;
 
         constexpr MultiprecisionDecimalData() : MultiprecisionDecimalData(true, 0, 0) {}
         
