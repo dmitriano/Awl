@@ -148,7 +148,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
 
 namespace
 {
-    using Data = awl::BoostDecimalData<bmp::uint128_t, 4>;
+    using Data = awl::MultiprecisionDecimalData<bmp::uint128_t, 4>;
 
     static_assert(Data().positive());
     static_assert(!Data(false, 3, 15).positive());
@@ -166,7 +166,7 @@ AWT_EXAMPLE(MultiprecisionDecimalData)
 {
     using UInt = bmp::uint128_t;
     
-    awl::BoostDecimalData<UInt, 4> d(true, 2, 105);
+    awl::MultiprecisionDecimalData<UInt, 4> d(true, 2, 105);
 
     context.out << d.man() << ", " << d.exp() << std::endl;
 

@@ -43,9 +43,9 @@ std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
 namespace bmp = boost::multiprecision; 
 
 #define BOOST_SECTION(test_name) \
-    { Test<awl::decimal<bmp::uint128_t, 4, awl::BoostDecimalData>> test(context); test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 5, awl::BoostDecimalData>> test(context); test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 6, awl::BoostDecimalData>> test(context); test.test_name(); }
+    { Test<awl::decimal<bmp::uint128_t, 4, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 5, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
+    { Test<awl::decimal<bmp::uint128_t, 6, awl::MultiprecisionDecimalData>> test(context); test.test_name(); }
 
 #else
 

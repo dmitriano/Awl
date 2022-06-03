@@ -15,7 +15,7 @@
 namespace awl
 {
     template <typename UInt, uint8_t exp_len>
-    class BuiltInDecimalData
+    class BuiltinDecimalData
     {
     private:
 
@@ -37,9 +37,9 @@ namespace awl
 
         using Int = std::make_signed_t<UInt>;
 
-        constexpr BuiltInDecimalData() : BuiltInDecimalData(true, 0, 0) {}
+        constexpr BuiltinDecimalData() : BuiltinDecimalData(true, 0, 0) {}
         
-        constexpr BuiltInDecimalData(bool sign, uint8_t exp, UInt man) : m_pack{ sign ? 0u : 1u, exp, man } {}
+        constexpr BuiltinDecimalData(bool sign, uint8_t exp, UInt man) : m_pack{ sign ? 0u : 1u, exp, man } {}
 
         constexpr bool positive() const
         {
@@ -71,9 +71,9 @@ namespace awl
             m_pack.man = val;
         }
 
-        static constexpr BuiltInDecimalData from_bits(Rep val)
+        static constexpr BuiltinDecimalData from_bits(Rep val)
         {
-            BuiltInDecimalData a;
+            BuiltinDecimalData a;
             a.m_pack = std::bit_cast<Pack>(val);
             return a;
         }

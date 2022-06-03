@@ -58,7 +58,7 @@ namespace awl
     }
 
     template <typename UInt, uint8_t exp_len>
-    class BoostDecimalData
+    class MultiprecisionDecimalData
     {
     private:
 
@@ -72,9 +72,9 @@ namespace awl
 
         using Int = detail::make_signed_t<UInt>;
 
-        constexpr BoostDecimalData() : BoostDecimalData(true, 0, 0) {}
+        constexpr MultiprecisionDecimalData() : MultiprecisionDecimalData(true, 0, 0) {}
         
-        constexpr BoostDecimalData(bool pos, uint8_t exp, UInt man)
+        constexpr MultiprecisionDecimalData(bool pos, uint8_t exp, UInt man)
         {
             set_positive(pos);
             set_exp(exp);
@@ -111,9 +111,9 @@ namespace awl
             m_val = m_val & ~manMask | (UInt(val) << (Constants::exp_len + 1));
         }
 
-        static constexpr BoostDecimalData from_bits(Rep val)
+        static constexpr MultiprecisionDecimalData from_bits(Rep val)
         {
-            BoostDecimalData a;
+            MultiprecisionDecimalData a;
             a.m_val = val;
             return a;
         }

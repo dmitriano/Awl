@@ -28,7 +28,7 @@ namespace awl
     //but UInt value may be different with different compilers and platforms.
 
     //It does not make a sense to make the exponent wider that 1 byte because the denominator array contains 64 or 128 bit integers.
-    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltInDecimalData>
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltinDecimalData>
     class decimal
     {
     private:
