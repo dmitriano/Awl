@@ -257,12 +257,12 @@ AWT_EXAMPLE(MultiprecisionImportExportBitsUInt128)
     TestMultiprecisionIntImportExportBits<bmp::uint128_t>(context);
 }
 
-AWT_EXAMPLE(multiprecisionimportexportbitsint256)
+AWT_EXAMPLE(MultiprecisionImportExportBitsInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::int256_t>(context);
 }
 
-AWT_EXAMPLE(multiprecisionimportexportbitsuint256)
+AWT_EXAMPLE(MultiprecisionImportExportBitsUInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint256_t>(context);
 }
