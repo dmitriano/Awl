@@ -196,33 +196,95 @@ namespace
     }
 }
 
-AWT_EXAMPLE(MultiprecisionIntImportExportBits)
+namespace
 {
-    AWT_ATTRIBUTE(int, number, std::numeric_limits<int>::max());
-    AWT_FLAG(max);
+    template <class Int>
+    void TestMultiprecisionIntImportExportBits(const awl::testing::TestContext& context)
+    {
+        AWT_ATTRIBUTE(std::string, number, "max");
+        AWT_FLAG(negate);
 
-    using Int = bmp::uint128_t;
-    //using Int = bmp::int128_t;
+        Int i;
 
-    // Create a cpp_int with just a couple of bits set:
+        if (number == "max")
+        {
+            i = std::numeric_limits<Int>::max();
+        }
+        else if (number == "min")
+        {
+            i = std::numeric_limits<Int>::min();
+        }
+        else
+        {
+            i = Int(number);
+        }
 
-    Int i = max ? std::numeric_limits<Int>::max() : Int(number);
+        if (negate)
+        {
+            i.backend().negate();
+        }
 
-    i.backend().negate();
+        context.out <<
+            _T("number: ") << i << std::endl <<
+            _T("sign:") << i.sign() << std::endl;
 
-    context.out << _T("sign:") << i.sign() << std::endl;
+        // export into 8-bit unsigned values, most significant bit first:
+        std::vector<uint8_t> v;
+        export_bits(i, std::back_inserter(v), 8);
 
-    // export into 8-bit unsigned values, most significant bit first:
-    std::vector<uint8_t> v;
-    export_bits(i, std::back_inserter(v), 8);
+        PrintVector(context.out, v);
 
-    PrintVector(context.out, v);
+        // import back again, and check for equality:
+        Int j;
+        import_bits(j, v.begin(), v.end());
 
-    // import back again, and check for equality:
-    Int j;
-    import_bits(j, v.begin(), v.end());
-    
-    AWT_ASSERT(i == j);
+        if (i < 0)
+        {
+            j.backend().negate();
+        }
+
+        AWT_ASSERT(i == j);
+    }
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsInt128)
+{
+    TestMultiprecisionIntImportExportBits<bmp::int128_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsUInt128)
+{
+    TestMultiprecisionIntImportExportBits<bmp::uint128_t>(context);
+}
+
+AWT_EXAMPLE(multiprecisionimportexportbitsint256)
+{
+    TestMultiprecisionIntImportExportBits<bmp::int256_t>(context);
+}
+
+AWT_EXAMPLE(multiprecisionimportexportbitsuint256)
+{
+    TestMultiprecisionIntImportExportBits<bmp::uint256_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsInt512)
+{
+    TestMultiprecisionIntImportExportBits<bmp::int512_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsUInt512)
+{
+    TestMultiprecisionIntImportExportBits<bmp::uint512_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsInt1024)
+{
+    TestMultiprecisionIntImportExportBits<bmp::int1024_t>(context);
+}
+
+AWT_EXAMPLE(MultiprecisionImportExportBitsUInt1024)
+{
+    TestMultiprecisionIntImportExportBits<bmp::uint1024_t>(context);
 }
 
 AWT_EXAMPLE(MultiprecisionFloatImportExportBits)
