@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "SequentialStream.h" 
+#include "Awl/Io/SequentialStream.h"
 
 #include <cstddef>
 

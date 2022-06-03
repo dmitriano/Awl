@@ -27,6 +27,7 @@ namespace awl::io
 
         size &= ~detail::signMask;
 
+        //TODO: Use std::array here
         std::vector<std::uint8_t> v(size);
         ReadVector(s, v, ctx);
 
@@ -41,6 +42,7 @@ namespace awl::io
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
     void Write(Stream & s, const boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
     {
+        //TODO: Use std::array with an output iterator here.
         std::vector<std::uint8_t> v;
 
         export_bits(val, std::back_inserter(v), 8);
