@@ -204,8 +204,6 @@ namespace awl
             m_h.promise().rethrow();
 
             return m_h.promise().m_value.has_value();
-
-            return false;
         }
 
         T get()
