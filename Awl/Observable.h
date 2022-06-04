@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    AWL_DECLARE_QUICK_LINK(observer_link)
+    AWL_DECLARE_MOVABLE_LINK(observer_link)
 
     template <class IObserver>
     class Observer : public IObserver, public observer_link
@@ -20,19 +20,11 @@ namespace awl
 
         Observer(const Observer & other) = delete;
 
-        Observer(Observer && other)
-        {
-            Move(std::move(other));
-        }
+        Observer(Observer&& other) = default;
 
         Observer & operator = (const Observer & other) = delete;
 
-        Observer & operator = (Observer && other)
-        {
-            observer_link::safe_exclude();
-            Move(std::move(other));
-            return *this;
-        }
+        Observer& operator = (Observer&& other) = default;
 
         bool IsSubscribed() const
         {
@@ -47,19 +39,6 @@ namespace awl
         ~Observer()
         {
             observer_link::safe_exclude();
-        }
-
-    private:
-
-        //Reinserts the copy into the list :)
-        void Move(Observer && other)
-        {
-            if (other.IsSubscribed())
-            {
-                auto * prev = other.observer_link::predecessor();
-                other.UnsubscribeSelf();
-                prev->observer_link::insert_after(this);
-            }
         }
     };
 

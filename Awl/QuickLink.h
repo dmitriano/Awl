@@ -152,6 +152,45 @@ namespace awl
 
         template <class T1, class DLink1> friend class quick_list;
     };
+
+    template <class DLink>
+    class basic_movable_link : public basic_quick_link<DLink>
+    {
+    private:
+
+        using Base = basic_quick_link<DLink>;
+
+    public:
+
+        using Base::Base;
+
+        basic_movable_link(basic_movable_link&& other)
+        {
+            reinsert(std::move(other));
+        }
+
+        basic_movable_link& operator = (basic_movable_link&& other)
+        {
+            Base::safe_exclude();
+            reinsert(std::move(other));
+            return *this;
+        }
+
+    private:
+
+        //Reinserts the copy into the list :)
+        void reinsert(basic_movable_link&& other)
+        {
+            if (other.included())
+            {
+                DLink* prev = other.predecessor();
+                other.exclude();
+                prev->insert_after(static_cast<DLink*>(this));
+            }
+        }
+
+        template <class T1, class DLink1> friend class quick_list;
+    };
 }
 
 #define AWL_DECLARE_QUICK_LINK(name) \
@@ -159,6 +198,15 @@ namespace awl
     { \
     private: \
         using Base = basic_quick_link<name>; \
+    public:\
+        using Base::Base; \
+    };
+
+#define AWL_DECLARE_MOVABLE_LINK(name) \
+    class name : public awl::basic_movable_link<name> \
+    { \
+    private: \
+        using Base = basic_movable_link<name>; \
     public:\
         using Base::Base; \
     };
