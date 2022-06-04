@@ -49,7 +49,7 @@ namespace bmp = boost::multiprecision;
 
 #else
 
-#define GCC_SECTION(test_name)
+#define BOOST_SECTION(test_name)
 
 #endif
 
