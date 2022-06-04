@@ -19,19 +19,19 @@ namespace awl::testing
 
         void push(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
         {
-            m_timers.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
+            m_tasks.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
         }
 
         void loop()
         {
-            while (!m_timers.empty())
+            while (!m_tasks.empty())
             {
-                auto& timer = m_timers.top();
+                auto& timer = m_tasks.top();
                 // if it is time to run a coroutine
                 if (timer.targetTime < std::chrono::steady_clock::now())
                 {
                     auto handle = timer.handle;
-                    m_timers.pop();
+                    m_tasks.pop();
                     handle.resume();
                 }
                 else
@@ -51,7 +51,7 @@ namespace awl::testing
 
         using Compare = FieldCompare<Task, std::chrono::steady_clock::time_point, &Task::targetTime>;
 
-        std::priority_queue<Task, std::vector<Task>, Compare> m_timers;
+        std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
     };
 
     class TimeAwaitable
