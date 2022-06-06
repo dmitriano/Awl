@@ -40,12 +40,27 @@ namespace
         context.out << "awaiting already computed coroutine\n";
         co_return co_await w1 + r;
     }
+
+    awl::ProcessTask<int> wait_0(const awl::testing::TestContext& context)
+    {
+        co_return co_await wait_n(context, 0);
+    }
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
 AWT_EXAMPLE(CoroTimer)
 {
     auto result = test(context);
+
+    // execute deferred coroutines
+    awl::testing::timeQueue.loop();
+
+    context.out << "result: " << result.get() << std::endl;
+}
+
+AWT_EXAMPLE(CoroTimer0)
+{
+    auto result = wait_0(context);
 
     // execute deferred coroutines
     awl::testing::timeQueue.loop();
