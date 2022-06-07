@@ -31,7 +31,7 @@
 using namespace awl::testing;
 using namespace awl::testing::helpers;
 
-using awl::io::helpers::Int64Hash;
+using awl::crypto::Int64Hash;
 
 namespace
 {

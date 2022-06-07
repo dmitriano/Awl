@@ -11,6 +11,7 @@
 
 namespace awl::crypto
 {
+    //Can be calculated in compile time with Int64Hash, for example.
     template <class Hash>
     class FixedHash
     {
