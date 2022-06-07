@@ -45,6 +45,11 @@ namespace awl
             }
         }
 
+        operator bool() const
+        {
+            return m_h != nullptr;
+        }
+
         std::coroutine_handle<promise_type> m_h;
     };
 
