@@ -18,6 +18,9 @@
 #include "Awl/IntRange.h"
 
 #include "Awl/StopWatch.h"
+#include "Awl/Crypto/Crc64.h"
+#include "Awl/Crypto/FixedHash.h"
+
 #include "Awl/Testing/UnitTest.h"
 
 #include "Awl/Io/TypeHash.h"
@@ -34,41 +37,7 @@ namespace
 {
     //StringHash can be used with switch operator.
     template <class Hash>
-    class StringHash
-    {
-    public:
-
-        static constexpr size_t size()
-        {
-            return Hash::size();
-        }
-
-        using value_type = typename Hash::value_type;
-
-        explicit constexpr StringHash(Hash h = {}) : m_hash(h)
-        {
-        }
-
-        template <typename C>
-        value_type operator()(const std::basic_string<C> & str) const
-        {
-            return m_hash(str.begin(), str.end());
-        }
-
-        template <typename C, size_t N>
-        constexpr value_type operator()(const C(&s)[N]) const
-        {
-            static_assert(N >= 1, "The parameter is not a string literal.");
-
-            constexpr size_t length = N - 1;
-
-            return m_hash(s, s + length);
-        }
-
-    private:
-
-        Hash m_hash;
-    };
+    using StringHash = awl::crypto::FixedHash<Hash>;
 
     class EasyHash
     {
