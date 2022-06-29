@@ -8,6 +8,8 @@
 #include <vector>
 #include <memory>
 #include <future>
+#include <ranges>
+#include <span>
 
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
@@ -38,6 +40,11 @@ namespace
         {
         }
 
+        double ToReal() const
+        {
+            return static_cast<double>(i + x + y);
+        }
+
     private:
 
         int i;
@@ -46,7 +53,7 @@ namespace
     };
 
     template <class T>
-    static void FromInt(T & val, int i)
+    void FromInt(T & val, int i)
     {
         val = static_cast<T>(i);
     }
@@ -57,6 +64,24 @@ namespace
         val.i = i;
         val.x = i * 10.0;
         val.y = i * 10.0;
+    }
+
+    template <class T>
+    double ToReal(const T& val)
+    {
+        return static_cast<double>(val);
+    }
+
+    template <>
+    double ToReal(const ElementStruct& val)
+    {
+        return static_cast<double>(val.i + val.x + val.y);
+    }
+
+    template <>
+    double ToReal(const ElementClass& val)
+    {
+        return val.ToReal();
     }
 
     template <class T>
@@ -217,6 +242,109 @@ namespace
         }
     };
 
+    template <class T>
+    struct SumVector
+    {
+        void operator()(const TestContext& context, const awl::Char* type_name)
+        {
+            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWT_ATTRIBUTE(size_t, iteration_count, 1);
+            AWT_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
+            AWT_FLAG(show_result);
+
+            context.out << _T("std::vector<") << type_name << _T(">\t");
+
+            std::unique_ptr<T[]> p_buffer;
+
+            try
+            {
+                p_buffer = std::make_unique<T[]>(vector_size);
+            }
+            catch (const std::bad_alloc&)
+            {
+                context.out << "Too long vector. Can't allocate memory." << std::endl;
+
+                return;
+            }
+
+            for (auto i : awl::make_count(static_cast<int>(vector_size)))
+            {
+                FromInt(p_buffer[i], i);
+            }
+
+            auto sum = [&](size_t begin, size_t end) -> double
+            {
+                double result = 0.0;
+                
+                for (auto i : awl::make_count(iteration_count))
+                {
+                    static_cast<void>(i);
+
+                    std::span<T> span(p_buffer.get() + begin, p_buffer.get() + end);
+
+                    auto range = span | std::views::transform([](const T& val) -> double { return ToReal(val); });
+
+                    result += std::accumulate(range.begin(), range.end(), 0.0);
+                }
+
+                return result;
+            };
+
+            double ratio;
+
+            {
+                awl::StopWatch w;
+
+                std::vector<std::future<double>> futures;
+
+                const size_t chunk_size = vector_size / thread_count;
+
+                for (size_t i = 0; i < thread_count; ++i)
+                {
+                    const size_t begin = i * chunk_size;
+
+                    const size_t end = begin + chunk_size;
+
+                    futures.push_back(std::async(std::launch::async, sum, begin, end));
+                }
+
+                futures.push_back(std::async(std::launch::async, sum, chunk_size * thread_count, vector_size));
+
+                auto range = futures | std::views::transform([](std::future<double>& f) -> double { return f.get(); });
+                
+                const double result = std::accumulate(range.begin(), range.end(), 0.0);
+
+                context.out << _T("\tasync: ");
+
+                if (show_result)
+                {
+                    context.out << _T("\tresult=" << result << ", ");
+                }
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
+            }
+
+            {
+                awl::StopWatch w;
+
+                const double result = sum(0, vector_size);
+
+                context.out << _T("\tsync: ");
+
+                if (show_result)
+                {
+                    context.out << _T("\tresult=" << result << ", ");
+                }
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
+            }
+
+            context.out << _T("\t (") << ratio << _T(")");
+
+            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+        }
+    };
+
     template <template <class> class copy>
     void CopyVectors(const TestContext& context)
     {
@@ -244,4 +372,11 @@ AWT_BENCHMARK(VectorCopyAsync)
     context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
 
     CopyVectors<CopyVectorAsync>(context);
+}
+
+AWT_BENCHMARK(VectorSum)
+{
+    context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
+
+    CopyVectors<SumVector>(context);
 }
