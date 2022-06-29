@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <vector>
 #include <memory>
+#include <future>
 
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
@@ -59,83 +60,186 @@ namespace
     }
 
     template <class T>
-    static void CopyVector(const TestContext & context, const awl::Char * type_name)
+    struct CopyVector
     {
-        AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-        AWT_ATTRIBUTE(size_t, iteration_count, 1);
-
-        std::unique_ptr<T[]> p_buffer(new T[vector_size]);
-
-        for (auto i : awl::make_count(static_cast<int>(vector_size)))
+        void operator()(const TestContext& context, const awl::Char* type_name)
         {
-            FromInt(p_buffer[i], i);
-        }
+            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-        std::vector<T> v;
-        v.reserve(vector_size);
-        AWT_ASSERT_EQUAL(vector_size, v.capacity());
+            std::unique_ptr<T[]> p_buffer(new T[vector_size]);
 
-        context.out << _T("std::vector<") << type_name << _T(">\t");
-
-        double ratio;
-
-        {
-            awl::StopWatch w;
-
-            for (auto i : awl::make_count(iteration_count))
+            for (auto i : awl::make_count(static_cast<int>(vector_size)))
             {
-                static_cast<void>(i);
-
-                std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
-
-                //Ensure the vector was not resized.
-                AWT_ASSERT_EQUAL(vector_size, v.capacity());
-                AWT_ASSERT_EQUAL(vector_size, v.size());
-                v.resize(0);
+                FromInt(p_buffer[i], i);
             }
 
-            context.out << _T("copy: ");
+            std::vector<T> v;
+            v.reserve(vector_size);
+            AWT_ASSERT_EQUAL(vector_size, v.capacity());
 
-            ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
-        }
+            context.out << _T("std::vector<") << type_name << _T(">\t");
 
-        {
-            awl::StopWatch w;
+            double ratio;
 
-            for (auto i : awl::make_count(iteration_count))
             {
-                static_cast<void>(i);
+                awl::StopWatch w;
 
-                v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
+                for (auto i : awl::make_count(iteration_count))
+                {
+                    static_cast<void>(i);
 
-                //Ensure the vector was not resized.
-                AWT_ASSERT_EQUAL(vector_size, v.capacity());
-                AWT_ASSERT_EQUAL(vector_size, v.size());
-                v.resize(0);
+                    std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
+
+                    //Ensure the vector was not resized.
+                    AWT_ASSERT_EQUAL(vector_size, v.capacity());
+                    AWT_ASSERT_EQUAL(vector_size, v.size());
+                    v.resize(0);
+                }
+
+                context.out << _T("copy: ");
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
             }
 
-            context.out << _T("\tinsert: ");
+            {
+                awl::StopWatch w;
 
-            ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
+                for (auto i : awl::make_count(iteration_count))
+                {
+                    static_cast<void>(i);
+
+                    v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
+
+                    //Ensure the vector was not resized.
+                    AWT_ASSERT_EQUAL(vector_size, v.capacity());
+                    AWT_ASSERT_EQUAL(vector_size, v.size());
+                    v.resize(0);
+                }
+
+                context.out << _T("\tinsert: ");
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
+            }
+
+            context.out << _T("\t (") << ratio << _T(")");
+
+            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
         }
+    };
 
-        context.out << _T("\t (") << ratio << _T(")");
+    template <class T>
+    struct CopyVectorAsync
+    {
+        void operator()(const TestContext& context, const awl::Char* type_name)
+        {
+            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-        context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+            std::unique_ptr<T[]> p_buffer(new T[vector_size]);
+
+            for (auto i : awl::make_count(static_cast<int>(vector_size)))
+            {
+                FromInt(p_buffer[i], i);
+            }
+
+            std::vector<T> v;
+            
+            context.out << _T("std::vector<") << type_name << _T(">\t");
+
+            try
+            {
+                v.resize(vector_size);
+            }
+            catch (const std::bad_alloc&)
+            {
+                context.out << "Too long vector. Can't allocate memory." << std::endl;
+
+                return;
+            }
+
+            AWT_ASSERT_EQUAL(vector_size, v.size());
+
+            auto copy = [&](size_t begin, size_t end)
+            {
+                for (auto i : awl::make_count(iteration_count))
+                {
+                    static_cast<void>(i);
+
+                    std::copy(p_buffer.get() + begin, p_buffer.get() + end, v.begin() + begin);
+                }
+            };
+
+            double ratio;
+
+            {
+                awl::StopWatch w;
+
+                std::vector<std::future<void>> futures;
+
+                const size_t thread_count = std::thread::hardware_concurrency();
+
+                const size_t chunk_size = vector_size / thread_count;
+                
+                for (size_t i = 0; i < thread_count; ++i)
+                {
+                    const size_t begin = i * chunk_size;
+
+                    const size_t end = begin + chunk_size;
+
+                    futures.push_back(std::async(std::launch::async, copy, begin, end));
+                }
+
+                futures.push_back(std::async(std::launch::async, copy, chunk_size * thread_count, vector_size));
+
+                std::for_each(futures.begin(), futures.end(), [](std::future<void>& f) { f.get(); });
+
+                context.out << _T("async: ");
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
+            }
+
+            {
+                awl::StopWatch w;
+
+                copy(0, vector_size);
+
+                context.out << _T("\tsync: ");
+
+                ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
+            }
+
+            context.out << _T("\t (") << ratio << _T(")");
+
+            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+        }
+    };
+
+    template <template <class> class copy>
+    void CopyVectors(const TestContext& context)
+    {
+        copy<uint8_t>{}(context, _T("byte"));
+        copy<short>{}(context, _T("short"));
+        copy<int>{}(context, _T("int"));
+        copy<long>{}(context, _T("long"));
+        copy<long long>{}(context, _T("long long"));
+        copy<float>{}(context, _T("float"));
+        copy<double>{}(context, _T("double"));
+        copy<long double>{}(context, _T("long double"));
+        copy<long long>{}(context, _T("long double"));
+        copy<ElementStruct>{}(context, _T("struct"));
+        copy<ElementClass>{}(context, _T("class"));
     }
 }
 
-AWT_BENCHMARK(VectorCopyPerformance)
+AWT_BENCHMARK(VectorCopy)
 {
-    CopyVector<uint8_t>(context, _T("byte"));
-    CopyVector<short>(context, _T("short"));
-    CopyVector<int>(context, _T("int"));
-    CopyVector<long>(context, _T("long"));
-    CopyVector<long long>(context, _T("long long"));
-    CopyVector<float>(context, _T("float"));
-    CopyVector<double>(context, _T("double"));
-    CopyVector<long double>(context, _T("long double"));
-    CopyVector<long long>(context, _T("long double"));
-    CopyVector<ElementStruct>(context, _T("struct"));
-    CopyVector<ElementClass>(context, _T("class"));
+    CopyVectors<CopyVector>(context);
+}
+
+AWT_BENCHMARK(VectorCopyAsync)
+{
+    context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
+
+    CopyVectors<CopyVectorAsync>(context);
 }
