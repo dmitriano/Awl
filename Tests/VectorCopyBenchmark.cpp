@@ -10,6 +10,7 @@
 #include <future>
 #include <ranges>
 #include <span>
+#include <numeric>
 
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
