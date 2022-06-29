@@ -228,7 +228,7 @@ namespace
         copy<float>{}(context, _T("float"));
         copy<double>{}(context, _T("double"));
         copy<long double>{}(context, _T("long double"));
-        copy<long long>{}(context, _T("long double"));
+        copy<long long>{}(context, _T("long long"));
         copy<ElementStruct>{}(context, _T("struct"));
         copy<ElementClass>{}(context, _T("class"));
     }
