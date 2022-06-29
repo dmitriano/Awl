@@ -136,19 +136,16 @@ namespace
             AWT_ATTRIBUTE(size_t, vector_size, 1000000);
             AWT_ATTRIBUTE(size_t, iteration_count, 1);
 
-            std::unique_ptr<T[]> p_buffer(new T[vector_size]);
+            context.out << _T("std::vector<") << type_name << _T(">\t");
 
-            for (auto i : awl::make_count(static_cast<int>(vector_size)))
-            {
-                FromInt(p_buffer[i], i);
-            }
+            std::unique_ptr<T[]> p_buffer;
 
             std::vector<T> v;
             
-            context.out << _T("std::vector<") << type_name << _T(">\t");
-
             try
             {
+                p_buffer = std::make_unique<T[]>(vector_size);
+
                 v.resize(vector_size);
             }
             catch (const std::bad_alloc&)
@@ -156,6 +153,11 @@ namespace
                 context.out << "Too long vector. Can't allocate memory." << std::endl;
 
                 return;
+            }
+
+            for (auto i : awl::make_count(static_cast<int>(vector_size)))
+            {
+                FromInt(p_buffer[i], i);
             }
 
             AWT_ASSERT_EQUAL(vector_size, v.size());
