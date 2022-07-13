@@ -120,6 +120,8 @@ namespace
     using WalletAssetCompare = awl::FieldCompare<data::Wallet, std::string, &data::Wallet::asset>;
     using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
     using WalletKey = WalletPrimaryCompare::key_type;
+
+    static_assert(std::is_same_v<WalletKey, std::tuple<const data::AccountType&, const std::string&>>);
 }
 
 AWT_TEST(TransparentCompositeCompare2)
@@ -131,9 +133,13 @@ AWT_TEST(TransparentCompositeCompare2)
     const double free = 5;
     const double locked = 7;
 
-    const WalletKey spot_key(data::AccountType::Spot, asset);
+    const data::AccountType spot_account = data::AccountType::Spot;
 
-    const WalletKey im_key(data::AccountType::IsolatedMargin, asset);
+    const data::AccountType im_account = data::AccountType::IsolatedMargin;
+
+    const WalletKey spot_key(spot_account /*data::AccountType::Spot*/, asset);
+
+    const WalletKey im_key(im_account /*data::AccountType::IsolatedMargin*/, asset);
 
     const data::Wallet spot_wallet = { data::AccountType::Spot, asset, free, locked, 5 };
 
