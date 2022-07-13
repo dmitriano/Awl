@@ -122,6 +122,9 @@ namespace
     using WalletKey = WalletPrimaryCompare::key_type;
 
     static_assert(std::is_same_v<WalletKey, std::tuple<const data::AccountType&, const std::string&>>);
+
+    using IntRef = int&;
+    static_assert(std::is_same_v<IntRef, IntRef&>);
 }
 
 AWT_TEST(TransparentCompositeCompare2)
