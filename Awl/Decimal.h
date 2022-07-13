@@ -525,11 +525,14 @@ namespace awl
 
                 const UInt denom = m_denoms[diff];
 
-                const UInt increment = (m_data.man() % denom != 0) ? 1 : 0;
+                UInt new_man = m_data.man() / denom;
 
-                const UInt new_man = m_data.man() / denom;
+                if (m_data.man() % denom != 0)
+                {
+                    ++new_man;
+                }
 
-                m_data.set_man(new_man + increment);
+                m_data.set_man(new_man);
 
                 m_data.set_exp(digits);
             }
