@@ -269,6 +269,18 @@ namespace
             AWT_ASSERT(d.to_astring() == "123");
         }
 
+        void DecimalCeil()
+        {
+            Decimal d("123.45678"sv);
+
+            d = d.ceil(3);
+
+            AWT_ASSERT(d.to_astring() == "123.457");
+
+            d = d.ceil(0);
+
+            AWT_ASSERT(d.to_astring() == "124");
+        }
 
         void DecimalCompare()
         {
@@ -482,6 +494,10 @@ LOCAL_TEST(DecimalCompare)
 LOCAL_TEST(DecimalCast)
 
 LOCAL_TEST(DecimalArithmeticOperators)
+
+LOCAL_TEST(DecimalTrim)
+
+LOCAL_TEST(DecimalCeil)
 
 LOCAL_TEST(DecimalRound)
 

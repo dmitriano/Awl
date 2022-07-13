@@ -366,6 +366,18 @@ namespace awl
             return temp;
         }
 
+        constexpr decimal floor(uint8_t digits) const
+        {
+            return truncate(digits);
+        }
+
+        constexpr decimal ceil(uint8_t digits) const
+        {
+            awl::decimal temp = *this;
+            temp.ceil_self(digits);
+            return temp;
+        }
+
         constexpr Int rescaled_mantissa(uint8_t digits) const
         {
             return rescale(digits).mantissa();
@@ -500,6 +512,24 @@ namespace awl
                 }
 
                 m_data.set_man(m_data.man() / denom);
+
+                m_data.set_exp(digits);
+            }
+        }
+
+        constexpr void ceil_self(uint8_t digits)
+        {
+            if (digits < m_data.exp())
+            {
+                const uint8_t diff = exponent() - digits;
+
+                const UInt denom = m_denoms[diff];
+
+                const UInt increment = (m_data.man() % denom != 0) ? 1 : 0;
+
+                const UInt new_man = m_data.man() / denom;
+
+                m_data.set_man(new_man + increment);
 
                 m_data.set_exp(digits);
             }
