@@ -5,6 +5,7 @@
 
 #include "Awl/CompositeCompare.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/EnumTraits.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -91,4 +92,57 @@ AWT_TEST(TransparentCompositeCompare)
 
     AWT_ASSERT(comp(MakeKey(x2a), x3a));
     AWT_ASSERT(!comp(MakeKey(x3a), x2a));
+}
+
+namespace data
+{
+    AWL_SEQUENTIAL_ENUM(AccountType, Spot, CrossMargin, IsolatedMargin)
+
+    struct Wallet
+    {
+        AccountType accountType;
+        std::string asset;
+        double freeBalance;
+        double lockedBalance;
+        int updateTime;
+
+        AWL_STRINGIZABLE(accountType, asset, freeBalance, lockedBalance, updateTime);
+    };
+
+    AWL_MEMBERWISE_EQUATABLE(Wallet)
+}
+
+AWL_ENUM_TRAITS(data, AccountType)
+
+namespace
+{
+    using WalletAccountCompare = awl::FieldCompare<data::Wallet, data::AccountType, &data::Wallet::accountType>;
+    using WalletAssetCompare = awl::FieldCompare<data::Wallet, std::string, &data::Wallet::asset>;
+    using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
+    using WalletKey = WalletPrimaryCompare::key_type;
+}
+
+AWT_TEST(TransparentCompositeCompare2)
+{
+    AWT_UNUSED_CONTEXT;
+
+    const std::string asset = "BTC";
+
+    const double free = 5;
+    const double locked = 7;
+
+    const WalletKey spot_key(data::AccountType::Spot, asset);
+
+    const WalletKey im_key(data::AccountType::IsolatedMargin, asset);
+
+    const data::Wallet spot_wallet = { data::AccountType::Spot, asset, free, locked, 5 };
+
+    const data::Wallet im_wallet = { data::AccountType::IsolatedMargin, asset, free, locked, 10 };
+
+    WalletPrimaryCompare comp;
+
+    AWT_ASSERT(!comp(spot_key, spot_wallet));
+    AWT_ASSERT(comp(spot_key, im_wallet));
+    AWT_ASSERT(!comp(im_key, im_wallet));
+    AWT_ASSERT(!comp(im_key, spot_wallet));
 }
