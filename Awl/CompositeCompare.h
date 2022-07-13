@@ -142,7 +142,7 @@ namespace awl
             {
                 auto& comp = std::get<Index>(m_comps);
 
-                auto right = std::get<Index>(right_key);
+                auto& right = std::get<Index>(right_key);
 
                 if (comp(left, right))
                 {
@@ -171,7 +171,7 @@ namespace awl
             {
                 auto& comp = std::get<Index>(m_comps);
 
-                auto left = std::get<Index>(left_key);
+                auto& left = std::get<Index>(left_key);
 
                 if (comp(left, right))
                 {
