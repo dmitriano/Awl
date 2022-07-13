@@ -271,15 +271,36 @@ namespace
 
         void DecimalCeil()
         {
-            Decimal d("123.45678"sv);
+            {
+                Decimal d("123.45678"sv);
 
-            d = d.ceil(3);
+                d = d.ceil(3);
 
-            AWT_ASSERT(d.to_astring() == "123.457");
+                AWT_ASSERT(d.to_astring() == "123.457");
 
-            d = d.ceil(0);
+                d = d.ceil(0);
 
-            AWT_ASSERT(d.to_astring() == "124");
+                AWT_ASSERT(d.to_astring() == "124");
+            }
+
+            {
+                Decimal d("123.00000"sv);
+
+                //it is constructed as normalized.
+                AWT_ASSERT(d.to_astring() == "123");
+
+                d = d.extend(5);
+
+                AWT_ASSERT(d.to_astring() == "123.00000");
+
+                d = d.ceil(3);
+
+                AWT_ASSERT(d.to_astring() == "123.000");
+
+                d = d.ceil(0);
+
+                AWT_ASSERT(d.to_astring() == "123");
+            }
         }
 
         void DecimalCompare()
