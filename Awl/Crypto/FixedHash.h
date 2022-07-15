@@ -55,6 +55,12 @@ namespace awl::crypto
             return m_hash(s, s + length);
         }
 
+        template <class I>
+        value_type operator()(I begin, I end) const
+        {
+            return m_hash(begin, end);
+        }
+
     private:
 
         Hash m_hash;
