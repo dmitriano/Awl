@@ -39,7 +39,20 @@ or
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
     make -j4
 
-[Compiling on Ubuntu 18 and 20 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
+[Compiling on Ubuntu 18.04 and 20.04 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
+
+Compiling on Ubuntu 22.04:
+
+    sudo apt install build-essential
+    sudo apt install cmake
+
+    mkdir repos
+    cd repos
+    git clone https://github.com/dmitriano/Awl
+    mkdir -p build/awl
+    cd build/awl
+    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
+    make -j4
 
 To enable GCC sanitizer uncomment corresponding lines in CMakeLists.txt.
 
