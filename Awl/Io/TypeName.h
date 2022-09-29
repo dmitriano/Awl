@@ -10,6 +10,7 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/Stringizable.h"
 #include "Awl/Decimal.h"
+#include "Awl/VectorSet.h"
 
 #include <string>
 #include <vector>
@@ -133,7 +134,8 @@ namespace awl::io
         is_specialization_v<T, std::deque> ||
         is_specialization_v<T, std::list> ||
         is_specialization_v<T, std::set> ||
-        is_specialization_v<T, std::unordered_set>>>
+        is_specialization_v<T, std::unordered_set> ||
+        is_specialization_v<T, awl::vector_set>>>
     {
         static constexpr auto name()
         {
