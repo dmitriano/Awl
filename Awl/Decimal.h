@@ -666,7 +666,7 @@ namespace awl
             }
         }
 
-        static constexpr Constants::DenomArray m_denoms = Constants::make_denoms();
+        static constexpr typename Constants::DenomArray m_denoms = Constants::make_denoms();
         
         Data m_data;
     };
