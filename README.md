@@ -26,18 +26,22 @@ To leave the author a message fill the [form on his website](https://developerno
 
 Compiling on Windows with CMake and MSVC 2022:
 
-    cmake.exe ..\..\Awl -G "Visual Studio 17 2022" -A x64
+    cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
+    cmake --build . --target AwlTest --config Release
+
+or
+
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 
 Compiling on Linux with CMake and GCC:
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
-    make -j4
+    cmake --build . --parallel
 
 or
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
-    make -j4
+    cmake --build . --parallel
 
 [Compiling on Ubuntu 18.04 and 20.04 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
 
@@ -52,7 +56,7 @@ Compiling on Ubuntu 22.04:
     mkdir -p build/awl
     cd build/awl
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
-    make -j4
+    cmake --build . --parallel
 
 To enable GCC sanitizer uncomment corresponding lines in CMakeLists.txt.
 
