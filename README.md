@@ -58,6 +58,11 @@ Compiling on Ubuntu 22.04:
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     cmake --build . --parallel
 
+Compiling a separate source file:
+
+    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug -G Ninja
+    cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
+
 To enable GCC sanitizer uncomment corresponding lines in CMakeLists.txt.
 
 Running the tests (remove "./" prefix on Windows and do not forget quotes on Linux):
