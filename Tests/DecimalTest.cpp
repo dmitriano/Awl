@@ -637,3 +637,40 @@ AWT_EXAMPLE(DecimalBinanceValues)
 
     test.CheckConstructorTrows("92233720368.54775807"sv); //LUNA max position
 }
+
+namespace
+{
+    Decimal64 square(Decimal64 val)
+    {
+        return awl::multiply(val, val);
+    }
+}
+
+AWT_EXAMPLE(DecimalSimpleCalculation)
+{
+    const Decimal64 src_side("1.525");
+
+    const Decimal64 src_area = square(src_side);
+
+    context.out << _T("Src. side: ") << src_side << _T(", src. area: ") << src_area << std::endl;
+
+    {
+        const Decimal64 a("0.85");
+        const Decimal64 b("0.67");
+        const Decimal64 c("0.80");
+
+        const Decimal64 area = awl::multiply((awl::multiply(a, b) + awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
+
+        context.out << "area #1: " << area << std::endl;
+    }
+
+    {
+        const Decimal64 a("0.70");
+        const Decimal64 b("0.60");
+        const Decimal64 c("0.20");
+
+        const Decimal64 area = awl::multiply(a, b) + awl::multiply((awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
+
+        context.out << "area #2: " << area << std::endl;
+    }
+}
