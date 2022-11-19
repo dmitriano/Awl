@@ -39,24 +39,24 @@ namespace awl
             return observer_link::included();
         }
 
-        void UnsubscribeSelf()
-        {
-            observer_link::exclude();
-        }
+void UnsubscribeSelf()
+{
+    observer_link::exclude();
+}
 
-        ~Observer()
-        {
-            observer_link::safe_exclude();
-        }
+~Observer()
+{
+    observer_link::safe_exclude();
+}
 
     private:
 
         //Reinserts the copy into the list :)
-        void Move(Observer && other)
+        void Move(Observer&& other)
         {
             if (other.IsSubscribed())
             {
-                auto * prev = other.observer_link::predecessor();
+                auto* prev = other.observer_link::predecessor();
                 other.UnsubscribeSelf();
                 prev->observer_link::insert_after(this);
             }
@@ -94,12 +94,12 @@ namespace awl
             return *this;
         }
 
-        void Subscribe(OBSERVER * p_observer)
+        void Subscribe(OBSERVER* p_observer)
         {
             Observers.push_back(p_observer);
         }
 
-        void Unsubscribe(OBSERVER * p_observer)
+        void Unsubscribe(OBSERVER* p_observer)
         {
             p_observer->UnsubscribeSelf();
         }
@@ -119,15 +119,32 @@ namespace awl
         //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
-        void Notify(void (IObserver::*func)(Params ...), const Args& ... args)
+        void Notify(void (IObserver::* func)(Params ...), const Args& ... args)
         {
             for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                IObserver * p_observer = *(i++);
+                IObserver* p_observer = *(i++);
 
                 (p_observer->*func)(args ...);
             }
+        }
+
+        template<typename ...Params, typename ... Args>
+        bool Notify(bool (IObserver::* func)(Params ...), const Args& ... args)
+        {
+            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
+            {
+                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                IObserver* p_observer = *(i++);
+
+                if (!(p_observer->*func)(args ...))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
     private:
