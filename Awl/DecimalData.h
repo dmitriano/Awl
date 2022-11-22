@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <cassert>
 #include <limits>
-#include <bit>
 
 namespace awl
 {
@@ -37,54 +36,66 @@ namespace awl
 
         using Int = std::make_signed_t<UInt>;
 
+    private:
+
+        union Data
+        {
+            Data(bool sign, uint8_t exp, UInt man) : pack{ sign ? 0u : 1u, exp, man } {}
+
+            Pack pack;
+            Rep rep;
+        };
+
+    public:
+
         constexpr BuiltinDecimalData() : BuiltinDecimalData(true, 0, 0) {}
         
-        constexpr BuiltinDecimalData(bool sign, uint8_t exp, UInt man) : m_pack{ sign ? 0u : 1u, exp, man } {}
+        constexpr BuiltinDecimalData(bool sign, uint8_t exp, UInt man) : m_data(sign, exp, man) {}
 
         constexpr bool positive() const
         {
-            return m_pack.sign == 0;
+            return m_data.pack.sign == 0;
         }
 
         constexpr void set_positive(bool val)
         {
-            m_pack.sign = val ? 0u : 1u;
+            m_data.pack.sign = val ? 0u : 1u;
         }
 
         constexpr uint8_t exp() const
         {
-            return m_pack.exp;
+            return m_data.pack.exp;
         }
 
         constexpr void set_exp(UInt val)
         {
-            m_pack.exp = val;
+            m_data.pack.exp = val;
         }
 
         constexpr UInt man() const
         {
-            return m_pack.man;
+            return m_data.pack.man;
         }
 
         constexpr void set_man(UInt val)
         {
-            m_pack.man = val;
+            m_data.pack.man = val;
         }
 
         static constexpr BuiltinDecimalData from_bits(Rep val)
         {
             BuiltinDecimalData a;
-            a.m_pack = std::bit_cast<Pack>(val);
+            a.m_data.rep = val;
             return a;
         }
 
         constexpr Rep to_bits() const
         {
-            return std::bit_cast<Rep>(m_pack);
+            return m_data.rep;
         }
 
     private:
 
-        Pack m_pack;
+        Data m_data;
     };
 }

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/FixedString.h"
-#include "Awl/StringView.h"
+#include "Awl/CppStd/StringView.h"
 
 #ifdef AWL_BOOST
 #include "BoostExtras/MultiprecisionDecimalData.h"
