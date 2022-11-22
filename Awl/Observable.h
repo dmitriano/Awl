@@ -109,6 +109,23 @@ namespace awl
             }
         }
 
+        template<typename ...Params, typename ... Args>
+        bool NotifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
+        {
+            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
+            {
+                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                IObserver* p_observer = *(i++);
+
+                if (!(p_observer->*func)(args ...))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
     private:
 
         //If the observable is deleted before its observers,
