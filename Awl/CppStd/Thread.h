@@ -2,7 +2,7 @@
 
 #include <thread>
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
 
     #include "Awl/CppStd/jthread.hpp"
     #include "Awl/CppStd/condition_variable_any2.hpp"
