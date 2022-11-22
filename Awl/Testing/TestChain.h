@@ -82,6 +82,15 @@ namespace awl
 #define AWT_DISABLED_FUNC(test_name) \
     AWT_LINK_FUNC_SIGNATURE(test_name)
 
+#define AWT_DISABLED_TEST(test_name) \
+    AWT_DISABLED_FUNC(test_name)
+
+#define AWT_DISABLED_BENCHMARK(test_name) \
+    AWT_DISABLED_FUNC(test_name)
+
+#define AWT_DISABLED_EXAMPLE(test_name) \
+    AWT_DISABLED_FUNC(test_name)
+
 #define AWT_TEST(test_name) AWT_LINK(test_name, Test)
 #define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
 #define AWT_EXAMPLE(test_name) AWT_LINK(test_name, Example)
