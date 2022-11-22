@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.6.2)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     set(CMAKE_CXX_STANDARD 23)
 else()
     set(CMAKE_CXX_STANDARD 20)
@@ -11,10 +11,11 @@ option(AWL_COMPILE_SOURCES "Compile AWL sources." ON)
 option(AWL_COMPILE_TESTS "Compile AWL tests.")
 option(AWL_COMPILE_EXPERIMENTAL "Compile experimental AWL code.")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    #AppleClang and Android Clang do not have std::jthread.
     set(AWL_JTHREAD_EXTRAS ON)
     add_definitions("-Wall -Wextra -pedantic")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_definitions("-Wall -Wextra -pedantic")
     #add_definitions("-Wall -Wextra -pedantic -pthread")
     #add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
@@ -24,9 +25,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     #add_definitions("-fsanitize=address -fno-omit-frame-pointer")
     #link_libraries("-fsanitize=address")
     #set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=gold")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
     # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     # using Visual Studio C++
     # add_compile_options("/std:c++latest")
     add_compile_options("/W4" "/Zc:__cplusplus")
