@@ -6,7 +6,7 @@
 #include <chrono>
 #include <vector>
 
-#include "Awl/Cancellation.h"
+#include "Awl/Sleep.h"
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/IntRange.h"

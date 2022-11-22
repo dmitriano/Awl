@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/String.h"
-#include "Awl/Cancellation.h"
+#include "Awl/Sleep.h"
 #include "Awl/Testing/AttributeProvider.h"
 
 #include <atomic>
