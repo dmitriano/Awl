@@ -114,12 +114,25 @@ namespace awl::testing
             throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
         }
 
-        std::jthread watch_dog_thread([timeout](std::stop_token token)
+        std::stop_source test_stop_source;
+
+        std::jthread watch_dog_thread([timeout, &test_stop_source](std::stop_token token)
         {
             awl::sleep_for(std::chrono::seconds(timeout), token);
+
+            test_stop_source.request_stop();
         });
 
-        const TestContext temp_context{ *p_out, watch_dog_thread.get_stop_token(), context.ap };
+        std::stop_callback context_callback
+        {
+            context.stopToken,
+            [&test_stop_source]()
+            {
+                test_stop_source.request_stop();
+            }
+        };
+
+        const TestContext temp_context{ *p_out, test_stop_source.get_token(), context.ap };
 
         awl::StopWatch sw;
 
