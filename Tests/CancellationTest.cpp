@@ -231,7 +231,7 @@ AWT_TEST(Cancellation_JThread)
     // and join the thread automatically.
 }
 
-AWT_TEST(Cancellation_WatchDogThread)
+AWT_TEST(Cancellation_WatchDogThread1)
 {
     AWT_ATTRIBUTE(int, timeout, 1);
 
@@ -251,4 +251,24 @@ AWT_TEST(Cancellation_WatchDogThread)
     watch_dog_thread.request_stop();
 
     AWT_ASSERT(token.stop_requested());
+}
+
+AWT_TEST(Cancellation_WatchDogThread2)
+{
+    AWT_ATTRIBUTE(int, timeout, 5);
+
+    awl::StopWatch sw;
+
+    {
+        std::jthread watch_dog_thread([timeout](std::stop_token token)
+        {
+            awl::sleep_for(std::chrono::seconds(timeout), token);
+        });
+
+        watch_dog_thread.request_stop();
+
+        watch_dog_thread.join();
+    }
+
+    AWT_ASSERT(!sw.HasElapsed(std::chrono::seconds(timeout)));
 }
