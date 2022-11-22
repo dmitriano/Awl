@@ -2,10 +2,10 @@
 
 #include <thread>
 
-#ifdef AWL_JTHREAD_EXTRAS
+#ifdef __APPLE__
 
-    #include "JThreadExtras/jthread.hpp"
-    #include "JThreadExtras/condition_variable_any2.hpp"
+    #include "Awl/CppStd/jthread.hpp"
+    #include "Awl/CppStd/condition_variable_any2.hpp"
 
     namespace awl
     {
