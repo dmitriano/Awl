@@ -691,12 +691,12 @@ namespace awl
             }
 
             //Construction from the iterators is C++20 feature.
-            fixed_string = string_view(i, fixed_string.end());
+            fixed_string = make_string_view<C>(i, fixed_string.end());
         }
 
         auto [i, int_digits, int_part] = parse_int(fixed_string, true);
 
-        string_view fractional_text(i, fixed_string.end());
+        string_view fractional_text = make_string_view<C>(i, fixed_string.end());
 
         auto [fractional_i, digits, fractional_part] = parse_int(fractional_text, false);
 
