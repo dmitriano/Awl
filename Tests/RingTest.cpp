@@ -12,7 +12,6 @@
 
 #include <deque>
 #include <queue>
-#include <algorithm>
 #include <ranges>
 
 static_assert(std::ranges::range<awl::ring<int>>);

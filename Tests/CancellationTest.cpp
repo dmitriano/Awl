@@ -3,7 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <thread>
 #include <chrono>
 #include <vector>
 
@@ -213,7 +212,7 @@ AWT_EXAMPLE(Cancellation_JThread)
         std::mutex mutex;
         std::unique_lock lock(mutex);
 
-        std::condition_variable_any().wait(lock, stoken, [&stoken] { return false; });
+        awl::condition_variable_any().wait(lock, stoken, [&stoken] { return false; });
 
         if (stoken.stop_requested())
         {

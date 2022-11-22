@@ -8,6 +8,7 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
 
+#include "Awl/Thread.h"
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/StopWatch.h"

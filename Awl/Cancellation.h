@@ -8,7 +8,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
-#include <stop_token>
+
+#include "Awl/Thread.h"
 
 namespace awl
 {

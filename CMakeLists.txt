@@ -9,8 +9,10 @@ else()
   set(CMAKE_CXX_STANDARD 20)
 endif()
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  # using Clang
+option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  set(AWL_JTHREAD_EXTRAS ON)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
   add_definitions("-Wall -Wextra -Wno-unused-function -pedantic -pthread")
@@ -31,6 +33,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(-MP -D_UNICODE)
 endif()
 
+if (AWL_JTHREAD_EXTRAS)
+  message("Using home made implementation of std::jthread.")
+  include_directories(${CMAKE_SOURCE_DIR}/Extras/JThread)
+  add_definitions(-DAWL_JTHREAD_EXTRAS)
+endif()
+
 find_package(Threads)
 
 file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/Awl/*.h ${CMAKE_SOURCE_DIR}/Awl/*.cpp
@@ -40,7 +48,7 @@ file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/Awl/*.h ${CMAKE_SOURCE_DIR}/Awl/
 find_package(Boost)
 
 if(Boost_FOUND)
-    message("Boost include: ${Boost_INCLUDE_DIRS}")
+    message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS}")
     include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Extras/Boost)
     add_definitions(-DAWL_BOOST)
     file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${CMAKE_SOURCE_DIR}/Extras/Boost/*.cpp)
