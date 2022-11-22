@@ -13,7 +13,7 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Time.h"
 
-AWT_EXAMPLE(Cancellation_NegativeTimeDiff)
+AWT_TEST(Cancellation_NegativeTimeDiff)
 {
     AWT_UNUSED_CONTEXT;
     
@@ -37,7 +37,7 @@ static constexpr int default_worker_sleep_time = 1000;
 using Duration = std::chrono::milliseconds;
 
 //./AwlTest --filter Cancellation_InterruptibleSleep.* --output failed --loop 100 --thread_count 10
-AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
+AWT_TEST(Cancellation_InterruptibleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
     AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
@@ -171,7 +171,7 @@ AWT_UNSTABLE_EXAMPLE(Cancellation_InterruptibleSleep)
     }
 }
 
-AWT_EXAMPLE(Cancellation_SimpleSleep)
+AWT_TEST(Cancellation_SimpleSleep)
 {
     AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
@@ -184,7 +184,7 @@ AWT_EXAMPLE(Cancellation_SimpleSleep)
     AWT_ASSERT(elapsed.count() >= client_sleep_time);
 }
 
-AWT_EXAMPLE(Cancellation_JThread)
+AWT_TEST(Cancellation_JThread)
 {
     using namespace std::chrono_literals;
 
@@ -229,4 +229,20 @@ AWT_EXAMPLE(Cancellation_JThread)
     // Or automatically using RAII:
     // waiting_worker's destructor will call request_stop()
     // and join the thread automatically.
+}
+
+AWT_TEST(Cancellation_WatchDogThread)
+{
+    AWT_ATTRIBUTE(int, timeout, 1);
+
+    std::jthread watch_dog_thread([timeout](std::stop_token token)
+    {
+        awl::sleep_for(std::chrono::milliseconds(timeout), token);
+    });
+
+    std::stop_token token = watch_dog_thread.get_stop_token();
+
+    const bool cancelled = token.stop_requested();
+
+    AWT_ASSERT(!cancelled);
 }
