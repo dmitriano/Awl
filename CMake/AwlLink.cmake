@@ -23,7 +23,7 @@ endif()
 
 find_package(Threads)
 
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 if (AWL_COMPILE_SOURCES)
     file(GLOB_RECURSE AWL_CPP_SOURCE_FILES ${AWL_ROOT_DIR}/Awl/*.h ${AWL_ROOT_DIR}/Awl/*.cpp)

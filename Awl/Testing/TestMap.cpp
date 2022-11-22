@@ -114,31 +114,31 @@ namespace awl::testing
             throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
         }
 
-        std::stop_source test_stop_source;
-
-        std::jthread watch_dog_thread([timeout, &test_stop_source](std::stop_token token)
-        {
-            awl::sleep_for(std::chrono::seconds(timeout), token);
-
-            test_stop_source.request_stop();
-        });
-
-        std::stop_callback context_callback
-        {
-            context.stopToken,
-            [&test_stop_source]()
-            {
-                test_stop_source.request_stop();
-            }
-        };
-
-        const TestContext temp_context{ *p_out, test_stop_source.get_token(), context.ap };
-
-        awl::StopWatch sw;
-
         for (auto i : awl::make_count(loop_count))
         {
             static_cast<void>(i);
+
+            std::stop_source test_stop_source;
+
+            std::jthread watch_dog_thread([timeout, &test_stop_source](std::stop_token token)
+            {
+                awl::sleep_for(std::chrono::seconds(timeout), token);
+
+                test_stop_source.request_stop();
+            });
+
+            std::stop_callback context_callback
+            {
+                context.stopToken,
+                [&test_stop_source]()
+                {
+                    test_stop_source.request_stop();
+                }
+            };
+
+            const TestContext temp_context{ *p_out, test_stop_source.get_token(), context.ap };
+
+            awl::StopWatch sw;
 
             p_test_link->Run(temp_context);
 
@@ -146,8 +146,8 @@ namespace awl::testing
             {
                 lastOutput.str(String());
             }
-        }
 
-        context.out << _T("\tPassed within ") << sw << std::endl;
+            context.out << _T("\tPassed within ") << sw << std::endl;
+        }
     }
 }
