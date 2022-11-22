@@ -242,7 +242,13 @@ AWT_TEST(Cancellation_WatchDogThread)
 
     std::stop_token token = watch_dog_thread.get_stop_token();
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
     const bool cancelled = token.stop_requested();
 
     AWT_ASSERT(!cancelled);
+
+    watch_dog_thread.request_stop();
+
+    AWT_ASSERT(token.stop_requested());
 }
