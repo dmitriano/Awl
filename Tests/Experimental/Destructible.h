@@ -70,7 +70,7 @@ namespace awl
             return reinterpret_cast<void *>(&m_storage);
         }
 
-        //Properly aligned uninitialized storage for T
-        std::aligned_storage_t<sizeof(T), alignof(T)> m_storage;
+        //Properly aligned uninitialized storage for T.
+        alignas(alignof(T)) uint8_t m_storage[sizeof(T)];
     };
 }

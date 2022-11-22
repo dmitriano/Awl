@@ -1,62 +1,16 @@
 cmake_minimum_required (VERSION 3.6.2)
-project (AwlTest)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+project(AwlTest)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  set(CMAKE_CXX_STANDARD 23)
-else()
-  set(CMAKE_CXX_STANDARD 20)
-endif()
+include(CMake/AwlConfig.cmake)
 
-option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
+add_executable(${PROJECT_NAME})
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-  set(AWL_JTHREAD_EXTRAS ON)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  # using GCC
-  add_definitions("-Wall -Wextra -Wno-unused-function -pedantic -pthread")
-  #usign GCC sanitizer:
-  #add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
-  #link_libraries("-fsanitize=thread")
-  #add_definitions("-fsanitize=undefined -fno-omit-frame-pointer")
-  #link_libraries("-fsanitize=undefined")
-  #add_definitions("-fsanitize=address -fno-omit-frame-pointer")
-  #link_libraries("-fsanitize=address")
-  #set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=gold")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  # add_compile_options("/std:c++latest")
-  add_compile_options("/W4" "/Zc:__cplusplus")
-  add_definitions(-MP -D_UNICODE)
-endif()
+message("Awl C++ standard: ${CMAKE_CXX_STANDARD}")
 
-if (AWL_JTHREAD_EXTRAS)
-  message("Using home made implementation of std::jthread.")
-  include_directories(${CMAKE_SOURCE_DIR}/Extras/JThread)
-  add_definitions(-DAWL_JTHREAD_EXTRAS)
-endif()
+#${CMAKE_SOURCE_DIR}
+set(AWL_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-find_package(Threads)
+set(AWL_COMPILE_TESTS ON)
 
-file(GLOB_RECURSE CPP_FILES ${CMAKE_SOURCE_DIR}/Awl/*.h ${CMAKE_SOURCE_DIR}/Awl/*.cpp
-	${CMAKE_SOURCE_DIR}/Tests/*.h ${CMAKE_SOURCE_DIR}/Tests/*.cpp)
-
-#header-only libraries have no designated component
-find_package(Boost)
-
-if(Boost_FOUND)
-    message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Extras/Boost)
-    add_definitions(-DAWL_BOOST)
-    file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${CMAKE_SOURCE_DIR}/Extras/Boost/*.cpp)
-    list (APPEND CPP_FILES ${BOOST_FILES})
-else()
-	message("BOOST not found, AWL will compile without BOOST.")
-endif()
-
-add_executable(${PROJECT_NAME} ${CPP_FILES})
-
-target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+include(CMake/AwlLink.cmake)
