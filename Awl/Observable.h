@@ -36,6 +36,14 @@ namespace awl
             observer_link::exclude();
         }
 
+        void UnsubscribeSafe()
+        {
+            if (IsSubscribed())
+            {
+                UnsubscribeSelf();
+            }
+        }
+
         ~Observer()
         {
             observer_link::safe_exclude();
