@@ -81,7 +81,7 @@ namespace awl
         {
             if (this != &other)
             {
-                //quick_list cannot free it resources, so it is supposed to be empty
+                //quick_list cannot free its resources, so it is supposed to be empty
                 assert(empty());
                 attach(other);
             }
