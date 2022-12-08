@@ -233,7 +233,7 @@ namespace awl
             CopyElements(other);
         }
 
-        vector_set(vector_set && other) : m_comp(std::move(other.m_comp)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc)),
+        vector_set(vector_set && other) noexcept : m_comp(std::move(other.m_comp)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc)),
             m_root(std::move(other.m_root)), m_list(std::move(other.m_list))
         {
             other.m_root = nullptr;
@@ -284,7 +284,7 @@ namespace awl
             return *this;
         }
 
-        vector_set & operator = (vector_set && other)
+        vector_set & operator = (vector_set && other) noexcept
         {
             clear();
             m_comp = std::move(other.m_comp);

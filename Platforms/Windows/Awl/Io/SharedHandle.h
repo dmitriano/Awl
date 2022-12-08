@@ -30,7 +30,7 @@ namespace awl::io
             Duplicate(other.m_h);
         }
 
-        SharedHandle(SharedHandle&& other)
+        SharedHandle(SharedHandle&& other) noexcept
             : m_h(other.m_h)
         {
             other.m_h = NullHandleValue;
@@ -50,7 +50,7 @@ namespace awl::io
             return *this;
         }
 
-        SharedHandle& operator=(SharedHandle&& other)
+        SharedHandle& operator=(SharedHandle&& other) noexcept
         {
             Close();
 

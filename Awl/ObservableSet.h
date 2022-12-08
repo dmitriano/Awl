@@ -76,7 +76,7 @@ namespace awl
 
         //Notifies that the set is clearing and removes (and clears) all the subscribers,
         //so with move assignment one set becomes another set with its content and subscribers.
-        observable_set& operator = (observable_set&& other)
+        observable_set& operator = (observable_set&& other) noexcept
         {
             if (!m_set.empty())
             {

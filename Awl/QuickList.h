@@ -70,14 +70,14 @@ namespace awl
 
         quick_list(const quick_list& other) = delete;
 
-        quick_list(quick_list&& other)
+        quick_list(quick_list&& other) noexcept
         {
             attach(other);
         }
 
         quick_list& operator = (const quick_list& other) = delete;
 
-        quick_list& operator = (quick_list&& other)
+        quick_list& operator = (quick_list&& other) noexcept
         {
             if (this != &other)
             {

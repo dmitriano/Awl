@@ -28,7 +28,7 @@ namespace awl::io
 
         UniqueHandle(const UniqueHandle& other) = delete;
 
-        UniqueHandle(UniqueHandle&& other)
+        UniqueHandle(UniqueHandle&& other) noexcept
             : m_h(other.m_h)
         {
             other.m_h = NullHandleValue;
@@ -41,7 +41,7 @@ namespace awl::io
 
         UniqueHandle& operator=(const UniqueHandle& other) = delete;
 
-        UniqueHandle& operator=(UniqueHandle&& other)
+        UniqueHandle& operator=(UniqueHandle&& other) noexcept
         {
             Close();
 

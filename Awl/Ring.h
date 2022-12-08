@@ -192,7 +192,7 @@ namespace awl
             copy(other);
         }
 
-        ring(ring && other)
+        ring(ring && other) noexcept
         {
             attach(other);
 
@@ -212,7 +212,7 @@ namespace awl
             return *this;
         }
 
-        ring & operator = (ring && other)
+        ring & operator = (ring && other) noexcept
         {
             //Not an assignment to itself.
             if (m_buf != other.m_buf)

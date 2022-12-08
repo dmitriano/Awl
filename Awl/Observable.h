@@ -74,7 +74,7 @@ namespace awl
 
         Observable& operator = (const Observable& other) = delete;
 
-        Observable& operator = (Observable&& other)
+        Observable& operator = (Observable&& other) noexcept
         {
             ClearObservers();
             Observers = std::move(other.Observers);
