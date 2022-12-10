@@ -60,6 +60,11 @@ namespace awl
                 val = std::stoi(s);
             }
 
+            static void FromString(const String & s, unsigned int & val)
+            {
+                val = static_cast<unsigned int>(std::stoi(s));
+            }
+
             static void FromString(const String & s, long & val)
             {
                 val = std::stol(s);
