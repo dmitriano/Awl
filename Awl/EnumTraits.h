@@ -18,7 +18,7 @@ namespace awl
     constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
 
     template <class T>
-    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
+    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
     {
         auto& names = awl::EnumTraits<T>::names();
 
@@ -26,10 +26,30 @@ namespace awl
 
         if (int_val >= names.size())
         {
-            throw std::logic_error("Wrong enum value.");
+            throw std::runtime_error("Wrong enum index.");
         }
 
         return names[int_val];
+    }
+
+    template <class T>
+    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, T> enum_from_string(const std::string& s)
+    {
+        auto& names = awl::EnumTraits<T>::names();
+
+        std::underlying_type_t<T> index = 0;
+
+        for (const auto& name : names)
+        {
+            if (name == s)
+            {
+                return static_cast<T>(index);
+            }
+
+            ++index;
+        }
+
+        throw std::runtime_error("Wrong enum value.");
     }
 }
 
