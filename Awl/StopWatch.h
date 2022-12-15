@@ -51,7 +51,7 @@ namespace awl
         template <class Duration>
         bool HasElapsed(Duration interval) const
         {
-            return GetElapsedTime() > std::chrono::duration_cast<std::chrono::steady_clock::duration>(interval);
+            return GetElapsedTime() >= std::chrono::duration_cast<std::chrono::steady_clock::duration>(interval);
         }
 
         operator std::chrono::steady_clock::duration() const
