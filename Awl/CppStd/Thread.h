@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <condition_variable>
 
 //defined(__APPLE__) || defined(__ANDROID__)
 #ifdef AWL_JTHREAD_EXTRAS
