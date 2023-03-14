@@ -7,6 +7,7 @@
 
 #include "Awl/Io/Rw/ReadRaw.h"
 
+#include <array>
 #include <vector>
 #include <type_traits>
 
