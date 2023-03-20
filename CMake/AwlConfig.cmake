@@ -33,3 +33,5 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options("/W4" "/Zc:__cplusplus")
     add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
 endif()
+
+set(AWL_DIR ${AWL_ROOT_DIR}/Awl)

@@ -1,5 +1,3 @@
-set(AWL_DIR ${AWL_ROOT_DIR}/Awl)
-
 target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
 
 if (AWL_JTHREAD_EXTRAS)

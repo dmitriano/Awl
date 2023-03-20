@@ -5,6 +5,8 @@
 
 #pragma once
 
-#define NOMINMAX
+//Now NOMINMAX is defined from the compiler option.
+//#define NOMINMAX
+
 #include "windows.h"
 #undef GetMessage
