@@ -18,11 +18,12 @@ namespace awl
     {
     public:
 
-        watch_dog(std::stop_token token, std::chrono::nanoseconds timeout) :
+        watch_dog(std::stop_token token, std::chrono::nanoseconds timeout, std::function<void()> log) :
             m_token(token),
             m_timeout(timeout),
             m_thread(std::bind(&watch_dog::thread_proc, this, std::placeholders::_1)),
-            m_callback(m_token, std::bind(&watch_dog::callback_proc, this))
+            m_callback(m_token, std::bind(&watch_dog::callback_proc, this)),
+            m_log(log)
         {
         }
 
@@ -37,6 +38,12 @@ namespace awl
         void thread_proc(std::stop_token token)
         {
             awl::sleep_for(m_timeout, token);
+
+            if (!token.stop_requested())
+            {
+                //The timeout has elapsed.
+                m_log();
+            }
 
             m_source.request_stop();
         }
@@ -56,5 +63,7 @@ namespace awl
         std::jthread m_thread;
 
         std::stop_callback<std::function<void()>> m_callback;
+
+        std::function<void()> m_log;
     };
 }
