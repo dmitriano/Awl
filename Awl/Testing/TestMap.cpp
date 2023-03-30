@@ -8,11 +8,11 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
 
-#include "Awl/CppStd/Thread.h"
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
+#include "Awl/WatchDog.h"
 
 #include <set>
 #include <regex>
@@ -73,7 +73,7 @@ namespace awl::testing
     {
         AWT_ATTRIBUTE(String, output, _T("failed"));
         AWT_ATTRIBUTE(size_t, loop, 0);
-        AWT_ATTRIBUTE(size_t, timeout, 5); //test timeout in seconds
+        AWT_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
         context.out << p_test_link->GetName();
 
@@ -118,25 +118,30 @@ namespace awl::testing
         {
             static_cast<void>(i);
 
-            std::stop_source test_stop_source;
+            std::unique_ptr<awl::watch_dog> watch_dog;
 
-            std::jthread watch_dog_thread([timeout, &test_stop_source](std::stop_token token)
+            std::stop_token test_token;
+
+            if (timeout >= 0)
             {
-                awl::sleep_for(std::chrono::seconds(timeout), token);
+                std::chrono::milliseconds t(timeout);
+                
+                watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
+                    [&context, t]()
+                    {
+                        std::chrono::hh_mm_ss formatted{ std::chrono::duration_cast<std::chrono::milliseconds>(t) };
 
-                test_stop_source.request_stop();
-            });
+                        context.out << _T("The timeout of ") << formatted << _T("ms has elapsed, requesting the test to stop...");
+                    });
 
-            std::stop_callback context_callback
+                test_token = watch_dog->get_token();
+            }
+            else
             {
-                context.stopToken,
-                [&test_stop_source]()
-                {
-                    test_stop_source.request_stop();
-                }
-            };
-
-            const TestContext temp_context{ *p_out, test_stop_source.get_token(), context.ap };
+                test_token = context.stopToken;
+            }
+            
+            const TestContext temp_context{ *p_out, test_token, context.ap };
 
             awl::StopWatch sw;
 
