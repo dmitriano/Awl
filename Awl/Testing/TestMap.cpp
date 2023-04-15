@@ -129,9 +129,11 @@ namespace awl::testing
                 watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
                     [&context, t]()
                     {
-                        std::chrono::hh_mm_ss formatted{ std::chrono::duration_cast<std::chrono::milliseconds>(t) };
+                        context.out << _T("The timeout of ");
 
-                        context.out << _T("The timeout of ") << formatted << _T("ms has elapsed, requesting the test to stop...");
+                        format_duration(context.out, t);
+
+                        context.out << _T("ms has elapsed, requesting the test to stop...");
                     });
 
                 test_token = watch_dog->get_token();
