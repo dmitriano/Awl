@@ -131,7 +131,8 @@ namespace awl::testing
                     {
                         context.out << _T("The timeout of ");
 
-                        format_duration(context.out, t);
+                        //TODO: Casting to std::chrono::nanoseconds is a workround. It does not compile with milliseconds.
+                        format_duration(context.out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
 
                         context.out << _T("ms has elapsed, requesting the test to stop...");
                     });
