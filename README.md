@@ -62,7 +62,7 @@ or
 
 ## Compiling with Ninja generator
 
-    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug -G Ninja
+    cmake ../../repos/Awl/ -G Ninja
     cmake --build . --parallel --target AwlTest --config RelWithDebInfo
 
 Compiling a separate source file:
