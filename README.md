@@ -60,9 +60,13 @@ or
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     cmake --build . --parallel
 
-## Compiling a separate source file:
+## Compiling with Ninja generator
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug -G Ninja
+    cmake --build . --parallel --target AwlTest --config RelWithDebInfo
+
+Compiling a separate source file:
+
     cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 
 ## Using GCC sanitizer
