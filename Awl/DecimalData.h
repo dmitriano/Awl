@@ -40,7 +40,7 @@ namespace awl
 
         union Data
         {
-            Data(bool sign, uint8_t exp, UInt man) : pack{ sign ? 0u : 1u, exp, man } {}
+            constexpr Data(bool sign, uint8_t exp, UInt man) : pack{ sign ? 0u : 1u, exp, man } {}
 
             Pack pack;
             Rep rep;
