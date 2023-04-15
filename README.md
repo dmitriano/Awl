@@ -43,7 +43,9 @@ or
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
     cmake --build . --parallel
 
-## [Compiling on Ubuntu 18.04 and 20.04 with GCC 11](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/) (open the link).
+## Compiling on Ubuntu 18.04 and 20.04 with GCC 11
+
+[Open this link.](https://developernote.com/2021/08/compiling-awl-on-ubuntu-18-with-gcc-11/)
 
 ## Compiling on Ubuntu 22.04:
 
