@@ -33,6 +33,12 @@ or
 
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 
+It also builds for x86 using the following command:
+
+    cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
+
+but with couple warnings related to std::streamsize that are not fixed yet.
+
 ## Compiling on Linux with CMake and GCC:
 
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
