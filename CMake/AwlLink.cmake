@@ -19,6 +19,19 @@ else()
     message("BOOST not found, AWL will compile without BOOST.")
 endif()
 
+# Check if the project is built with QT.
+find_package(Qt6)
+
+if(Qt6_FOUND)
+    message("Applying the workaround for QT Creator.")
+    # Sometimes QT Creator requires the configuration to be exactly Debug or Release and not RelWithDebInfo,
+    # so we make Release to be RelWithDebinfo with O3.
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/Zi>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-g>
+    )
+endif()
+
 find_package(Threads)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
