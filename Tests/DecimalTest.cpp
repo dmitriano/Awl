@@ -14,18 +14,7 @@
 
 #include <functional>
 
-#if defined(__GNUC__) || defined(__clang__)
-//#define AWL_DECIMAL_128 1
-#endif
-
-#ifdef AWL_DECIMAL_128
-
-template <class C>
-std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
-{
-    //Obviously not the real implementation, just here to make the tests work
-    return out << static_cast<uint64_t>(val);
-}
+#ifdef AWL_INT_128
 
 #define GCC_SECTION(test_name) \
     { Test<awl::decimal<__uint128_t, 4>> test(context); test.test_name(); } \
@@ -81,14 +70,7 @@ namespace
 {
     using Decimal64 = awl::decimal<uint64_t, 4>;
 
-#ifdef AWL_DECIMAL_128
-
-    template <class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
-    {
-        //Obviously not the real implementation, just here as an example
-        return out << static_cast<uint64_t>(val);
-    }
+#ifdef AWL_INT_128
 
     using Decimal128 = awl::decimal<__uint128_t, 4>;
 

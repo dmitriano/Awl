@@ -17,6 +17,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID
     add_definitions("-Wall -Wextra -pedantic")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions("-Wall -Wextra -pedantic")
+    message("Enabling 128 bit integer support with GCC compiler.")
+    add_compile_definitions(AWL_INT_128)
     #add_definitions("-Wall -Wextra -pedantic -pthread")
     #add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
     #link_libraries("-fsanitize=thread")

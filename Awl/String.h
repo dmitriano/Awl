@@ -12,6 +12,7 @@
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #endif
 
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <string_view>
@@ -290,4 +291,50 @@ namespace boost::multiprecision
     }
 }
 
-#endif
+#endif //AWL_BOOST
+
+#ifdef AWL_INT_128
+
+namespace awl
+{
+    //We need also implement std::setfill(static_cast<C>('0')) << std::setw(d.exponent())
+    template <class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
+    {
+        constexpr const C zero_symbol = static_cast<C>('0');
+        
+        if (val == 0)
+        {
+            out << zero_symbol;
+        }
+        else
+        {
+            do
+            {
+                const __uint128_t next_val = val / 10;
+ 
+                out << zero_symbol + static_cast<awl::Char>(val - next_val * 10);
+ 
+                val = next_val;
+            }
+            while (val != 0);
+        }
+ 
+        return out;
+    }
+
+    template <class C>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __int128_t val)
+    {
+        if (val < 0)
+        {
+            out << static_cast<C>('-');
+
+            return out << static_cast<__uint128_t>(-val);
+        }
+
+        return out << static_cast<__uint128_t>(val);
+    }
+}
+
+#endif //AWL_INT_128
