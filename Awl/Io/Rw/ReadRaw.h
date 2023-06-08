@@ -8,6 +8,8 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/Rw/FakeContext.h"
 
+#include <cstdint>
+
 namespace awl::io
 {
     //The benefit of having Stream template parameter in all Read/Write methods is that Stream::Read and Stream::Write functions
