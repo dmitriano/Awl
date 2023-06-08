@@ -85,3 +85,12 @@ AWT_TEST(StringCompare)
     TestStringCompare<char>();
     TestStringCompare<wchar_t>();
 }
+
+#ifdef AWL_INT_128
+
+AWT_TEST(StringInt128)
+{
+    AWT_UNUSED_CONTEXT;
+}
+
+#endif //AWL_INT_128

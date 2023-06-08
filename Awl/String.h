@@ -301,6 +301,32 @@ namespace awl
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
     {
+        // There is always at least one digit.
+        if (out.width() > 1)
+        {
+            std::streamsize len = 1;
+
+            if (val != 0)
+            {
+                __uint128_t temp_val = val;
+
+                while ((temp_val /= 10) != 0)
+                {
+                    ++len;
+                }
+            }
+
+            if (len > out.width())
+            {
+                std::streamsize diff = len - out.width();
+                
+                for (std::streamsize i = 0; i < diff; ++i)
+                {
+                    out << out.fill();
+                }
+            }
+        }
+
         constexpr const C zero_symbol = static_cast<C>('0');
         
         if (val == 0)
@@ -326,6 +352,11 @@ namespace awl
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __int128_t val)
     {
+        if (out.width() != 0)
+        {
+            throw std::runtime_error("Width is not supported with negative integers.");
+        }
+        
         if (val < 0)
         {
             out << static_cast<C>('-');
