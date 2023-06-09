@@ -301,37 +301,40 @@ namespace awl
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, __uint128_t val)
     {
-        // There is always at least one digit.
-        if (out.width() > 1)
+        //Calculate the number of decimal digits.
+        std::streamsize len = 1;
+
+        if (val != 0)
         {
-            std::streamsize len = 1;
+            __uint128_t temp_val = val;
 
-            if (val != 0)
+            while ((temp_val /= 10) != 0)
             {
-                __uint128_t temp_val = val;
-
-                while ((temp_val /= 10) != 0)
-                {
-                    ++len;
-                }
+                ++len;
             }
+        }
 
-            if (len > out.width())
+        // There is always at least one digit.
+        if (out.width() > 1 && len > out.width())
+        {
+            const std::streamsize diff = len - out.width();
+            
+            for (std::streamsize i = 0; i < diff; ++i)
             {
-                std::streamsize diff = len - out.width();
-                
-                for (std::streamsize i = 0; i < diff; ++i)
-                {
-                    out << out.fill();
-                }
+                out << out.fill();
             }
         }
 
         constexpr const C zero_symbol = static_cast<C>('0');
+
+        std::size_t length = static_cast<std::size_t>(len);
+        
+        std::basic_string<C> result;
+        result.reserve(length);
         
         if (val == 0)
         {
-            out << zero_symbol;
+            result.push_back(zero_symbol);
         }
         else
         {
@@ -339,14 +342,18 @@ namespace awl
             {
                 const __uint128_t next_val = val / 10;
  
-                out << zero_symbol + static_cast<awl::Char>(val - next_val * 10);
+                const C digit_symbol = zero_symbol + static_cast<C>(val - next_val * 10);
+                
+                result.push_back(digit_symbol);
  
                 val = next_val;
             }
             while (val != 0);
         }
+
+        std::reverse(result.begin(), result.end());
  
-        return out;
+        return (out << result);
     }
 
     template <class C>
