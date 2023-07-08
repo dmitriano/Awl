@@ -11,31 +11,30 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <filesystem>
+#include <ranges>
 
 using namespace awl::testing;
 
 AWT_TEST(NativeStream)
 {
-    AWT_UNUSED_CONTEXT;
-
     const awl::Char file_name[] = _T("native.dat");
 
     std::filesystem::remove(file_name);
 
-    const std::vector<uint8_t> sample = {'A', 'B', 'C'};
+    const std::vector<uint8_t> sample = {'A', 'B', 'C', 'D'};
 
     {
-        awl::io::UniqueStream out(awl::io::CreateUniqueFile(file_name));
+        awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
 
-        AWT_ASSERT(out.GetLength() == 0);
-        AWT_ASSERT(out.GetPosition() == 0);
-        AWT_ASSERT(out.End());
+        AWT_ASSERT(s.GetLength() == 0);
+        AWT_ASSERT(s.GetPosition() == 0);
+        AWT_ASSERT(s.End());
 
-        out.Write(sample.data(), sample.size());
+        s.Write(sample.data(), sample.size());
 
-        AWT_ASSERT(out.GetLength() == sample.size());
+        AWT_ASSERT(s.GetLength() == sample.size());
 
-        AWT_ASSERT(out.End());
+        AWT_ASSERT(s.End());
     }
 
     {
@@ -53,5 +52,33 @@ AWT_TEST(NativeStream)
         AWT_ASSERT(in.End());
 
         AWT_ASSERT(actual == sample);
+    }
+
+    {
+        awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
+
+        AWT_ASSERT(s.GetLength() == sample.size());
+        AWT_ASSERT(s.GetPosition() == 0);
+
+        AWT_ATTRIBUTE(std::size_t, pos, 3);
+
+        s.Seek(pos);
+        AWT_ASSERT(s.GetPosition() == pos);
+        s.Truncate();
+        AWT_ASSERT_EQUAL(pos, s.GetPosition());
+        AWT_ASSERT_EQUAL(pos, s.GetLength());
+        AWT_ASSERT(s.End());
+
+        s.Seek(0);
+
+        std::vector<uint8_t> actual(pos);
+
+        AWT_ASSERT(s.Read(actual.data(), actual.size()) == actual.size());
+
+        AWT_ASSERT(s.GetLength() == actual.size());
+        AWT_ASSERT(s.GetPosition() == actual.size());
+        AWT_ASSERT(s.End());
+
+        AWT_ASSERT(std::ranges::equal(sample | std::ranges::views::take(pos), actual));
     }
 }
