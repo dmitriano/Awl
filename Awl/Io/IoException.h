@@ -82,7 +82,7 @@ namespace awl::io
 
     public:
 
-        explicit IoError(String message) : theMessage(message)
+        explicit IoError(String message) : theMessage(std::move(message))
         {
         }
 
