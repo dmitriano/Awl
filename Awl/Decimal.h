@@ -16,6 +16,7 @@
 #include <limits>
 #include <array>
 #include <cmath>
+#include <tuple>
 
 namespace awl
 {
