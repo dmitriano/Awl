@@ -46,14 +46,16 @@ namespace awl
     {
         using namespace std::chrono;
 
-#ifdef __GNUC__
+#ifdef _MSC_VER
 
         static_cast<void>(part_count);
 
-        nanoseconds ns = val;
+        //GCC12 does not have this.
+        std::chrono::hh_mm_ss formatted{ val };
 
-        out << ns.count() << _T("ns");
-#else
+        out << formatted;
+
+#elif __GNUC__
 
         awl::separator sep(_T(":"));
 
@@ -69,7 +71,7 @@ namespace awl
 
                 if (s != Duration::zero())
                 {
-                    //This requires GCC 12.
+                    //This requires GCC12.
                     out << sep << s;
 
                     left -= s;
@@ -99,19 +101,28 @@ namespace awl
         print.template operator()<microseconds>();
 
         print.template operator()<nanoseconds>();
+
+#else
+
+        static_cast<void>(part_count);
+
+        nanoseconds ns = val;
+
+        out << ns.count() << _T("ns");
+
 #endif
     }
 
     //It did not compile for some unknown reason.
-    //template<class C, class Rep, class Period>
-    //std::basic_string<C> duration_to_string(std::chrono::duration<Rep, Period> d, uint8_t part_count = default_duration_part_count)
-    //{
-    //    std::basic_ostringstream<C> out;
+    template<class C, class Rep, class Period>
+    std::basic_string<C> duration_to_string(std::chrono::duration<Rep, Period> d, uint8_t part_count = default_duration_part_count)
+    {
+        std::basic_ostringstream<C> out;
 
-    //    awl::format_duration(out, d, part_count);
+        awl::format_duration(out, d, part_count);
 
-    //    return out.str();
-    //}
+        return out.str();
+    }
 
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const StopWatch& sw)

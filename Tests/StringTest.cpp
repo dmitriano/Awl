@@ -81,6 +81,8 @@ namespace
             }
         }
 
+#ifdef AWL_INT_128
+
         static void TestInt128Format()
         {
             const uint64_t max = std::numeric_limits<uint64_t>::max();
@@ -126,6 +128,8 @@ namespace
 
             AWT_ASSERT(val_text_with_prefix == prefix_text + val_text);
         }
+
+#endif //AWL_INT_128
 
     private:
 

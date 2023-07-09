@@ -10,6 +10,7 @@ option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
 option(AWL_COMPILE_SOURCES "Compile AWL sources." ON)
 option(AWL_COMPILE_TESTS "Compile AWL tests.")
 option(AWL_COMPILE_EXPERIMENTAL "Compile experimental AWL code.")
+option(AWL_COMPILE_MAIN "Compile and link AWL main() function.")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     #AppleClang and Android Clang do not have std::jthread.

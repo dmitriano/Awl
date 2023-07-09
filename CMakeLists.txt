@@ -12,5 +12,6 @@ message("Awl C++ standard: ${CMAKE_CXX_STANDARD}")
 set(AWL_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(AWL_COMPILE_TESTS ON)
+set(AWL_COMPILE_MAIN ON)
 
 include(CMake/AwlLink.cmake)

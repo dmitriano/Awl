@@ -6,6 +6,10 @@ if (AWL_JTHREAD_EXTRAS)
     add_definitions(-DAWL_JTHREAD_EXTRAS)
 endif()
 
+if (AWL_COMPILE_MAIN)
+    add_definitions(-DAWL_COMPILE_MAIN)
+endif()
+
 message("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 
 if (WIN32)
@@ -21,8 +25,12 @@ endif()
 if (DEFINED AWL_PLATFORM_DIR)
     message("AWL_PLATFORM_DIR: ${AWL_PLATFORM_DIR}")
     target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_PLATFORM_DIR})
-    file(GLOB_RECURSE AWL_PLATFORM_FILES ${AWL_PLATFORM_DIR}/*.h ${AWL_PLATFORM_DIR}/*.cpp ${AWL_ROOT_DIR}/PlatformTests/*.h ${AWL_ROOT_DIR}/PlatformTests/*.cpp)
+    file(GLOB_RECURSE AWL_PLATFORM_FILES ${AWL_PLATFORM_DIR}/*.h ${AWL_PLATFORM_DIR}/*.cpp)
     target_sources(${PROJECT_NAME} PRIVATE ${AWL_PLATFORM_FILES})
+    if (AWL_COMPILE_TESTS)
+        file(GLOB_RECURSE AWL_PLATFORM_TEST_FILES ${AWL_ROOT_DIR}/PlatformTests/*.h ${AWL_ROOT_DIR}/PlatformTests/*.cpp)
+        target_sources(${PROJECT_NAME} PRIVATE ${AWL_PLATFORM_TEST_FILES})
+    endif()
 endif()
 
 #header-only libraries have no designated component
