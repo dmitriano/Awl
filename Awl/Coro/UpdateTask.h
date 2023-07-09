@@ -147,7 +147,7 @@ namespace awl
         }
     }
 
-    auto operator co_await(const UpdateTask& update_task) noexcept
+    inline auto operator co_await(const UpdateTask& update_task) noexcept
     {
         if (!update_task.m_h)
         {
