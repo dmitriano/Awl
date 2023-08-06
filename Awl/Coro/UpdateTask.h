@@ -50,6 +50,11 @@ namespace awl
             return m_h != nullptr;
         }
 
+        bool done() const
+        {
+            return m_h.done();
+        }
+
         std::coroutine_handle<promise_type> m_h;
     };
 
