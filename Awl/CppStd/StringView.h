@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
 
     namespace awl
     {
