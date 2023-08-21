@@ -74,7 +74,7 @@ namespace awl
                     //This requires GCC12.
                     out << sep << s;
 
-                    left -= s;
+                    left -= duration_cast<std::chrono::duration<Rep, Period>>(s);
 
                     if constexpr (Duration::period::den > 1)
                     {
