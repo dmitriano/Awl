@@ -46,7 +46,7 @@ namespace awl
     {
         using namespace std::chrono;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 
         static_cast<void>(part_count);
 
@@ -55,7 +55,7 @@ namespace awl
 
         out << formatted;
 
-#elif __GNUC__
+#elif defined(__GNUC__) || defined(__clang__)
 
         awl::basic_separator<C> sep(':');
 
@@ -132,7 +132,7 @@ namespace awl
         return out;
     }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 
     template <class C, class Clock, class Duration = typename Clock::duration>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const std::chrono::time_point<Clock, Duration>& tp)
