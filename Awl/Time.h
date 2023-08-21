@@ -55,7 +55,7 @@ namespace awl
 
         out << formatted;
 
-#elif defined(__GNUC__) || defined(__clang__)
+#elif defined(__GNUC__) && !defined(__clang__)
 
         awl::basic_separator<C> sep(':');
 
