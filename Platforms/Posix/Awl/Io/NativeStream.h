@@ -117,7 +117,8 @@ namespace awl::io
 
     inline UniqueFileHandle CreateUniqueFile(const String& file_name)
     {
-        HANDLE hFile = ::open(file_name.c_str(), O_RDWR | O_CREAT);
+        // user readable and writable
+        HANDLE hFile = ::open(file_name.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
         if (hFile == NullHandleValue)
         {
