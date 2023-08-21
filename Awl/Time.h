@@ -131,9 +131,11 @@ namespace awl
         
         return out;
     }
+}
 
 #if defined(__GNUC__) || defined(__clang__)
-
+namespace std
+{
     template <class C, class Clock, class Duration = typename Clock::duration>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const std::chrono::time_point<Clock, Duration>& tp)
     {
@@ -141,6 +143,5 @@ namespace awl
 
         return out << std::ctime(&t);
     }
-
-#endif
 }
+#endif

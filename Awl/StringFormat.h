@@ -7,11 +7,6 @@
 
 #include "Awl/String.h"
 
-// Can't figure out why do we need this header with GCC but not with MSVC.
-#if defined(__GNUC__)
-#include "Awl/Time.h"
-#endif
-
 namespace awl
 {
     template <class C>
