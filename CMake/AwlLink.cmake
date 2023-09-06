@@ -1,5 +1,11 @@
 target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
 
+if (AWL_STATIC_RUNTIME)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
+endif()
+
 if (AWL_JTHREAD_EXTRAS)
     message("Using home made implementation of std::jthread.")
     target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR}/Extras/JThread)

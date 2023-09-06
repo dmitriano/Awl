@@ -12,6 +12,7 @@ option(AWL_COMPILE_TESTS "Compile AWL tests.")
 option(AWL_COMPILE_EXPERIMENTAL "Compile experimental AWL code.")
 option(AWL_COMPILE_MAIN "Compile and link AWL main() function.")
 option(AWL_NO_DEPRECATED "Disable deprecated warnings in C++.")
+option(AWL_STATIC_RUNTIME "Linking statically against libgcc and libstdc++.")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     message("Enabling 128 bit integer support.")
