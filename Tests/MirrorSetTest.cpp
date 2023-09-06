@@ -83,7 +83,7 @@ AWT_TEST(MirrorSet)
 
     assert_equal();
 
-    s.insert({ 3, 4, 101 }).second;
+    s.insert({ 3, 4, 101 });
 
     assert_equal();
 
@@ -95,12 +95,12 @@ AWT_TEST(MirrorSet)
 
     assert_equal();
 
-    s.insert({ 3, 4, 101 }).second;
+    s.insert({ 3, 4, 101 });
 
     //Move assignment unsubscribes.
     s = {};
 
-    s.insert({ 5, 6, 102 }).second;
+    s.insert({ 5, 6, 102 });
 
     //We stopped to receive the notifications.
     AWT_ASSERT_EQUAL(0u, mirror1.size());

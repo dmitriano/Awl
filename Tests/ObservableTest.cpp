@@ -255,7 +255,7 @@ namespace
     }
 
     template<typename ...Params>
-    static void WrongNotify2(ChangeHandler2 & h, void (ChangeHandler2::*func)(Params ...), awl::String && val)
+    static void WrongNotify2(ChangeHandler2 &, void (ChangeHandler2::*func)(Params ...), awl::String && val)
     {
         func(std::forward<const awl::String &&>(val));
     }

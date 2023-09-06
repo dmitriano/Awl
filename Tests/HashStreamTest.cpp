@@ -241,7 +241,7 @@ AWT_TEST(IoHashStreamCorruption)
 
     awl::crypto::Crc64 hash;
 
-    TestCorruption(context, hash, sample, [&context](std::vector<uint8_t> & v)
+    TestCorruption(context, hash, sample, [](std::vector<uint8_t> & v)
     {
         std::uniform_int_distribution<size_t> dist(1, v.size() - 1);
 

@@ -35,6 +35,8 @@ namespace awl
 
         virtual size_t GetCount() const = 0;
 
+        virtual ~Prototype() {}
+
         static constexpr size_t NoIndex = std::numeric_limits<size_t>::max();
     };
 

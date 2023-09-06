@@ -137,7 +137,7 @@ namespace awl::io
         void Write(const uint8_t * buffer, size_t count) override
         {
             static_cast<void>(buffer);
-            //compound assignment with ‘volatile’-qualified left operand is deprecated
+            //compound assignment with volatile-qualified left operand is deprecated
             //m_pos += count;
             m_pos = m_pos + count;
         }
@@ -160,7 +160,7 @@ namespace awl::io
         void Write(const uint8_t * buffer, size_t count)
         {
             static_cast<void>(buffer);
-            //compound assignment with ‘volatile’-qualified left operand is deprecated
+            //compound assignment with volatile-qualified left operand is deprecated
             //m_pos += count;
             m_pos = m_pos + count;
         }

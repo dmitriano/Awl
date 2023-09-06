@@ -103,7 +103,7 @@ namespace awl
             return reinterpret_cast<T*>(m_space.Allocate(n * sizeof(T)));
         }
 
-        void deallocate(T* p, std::size_t n)
+        void deallocate(T*, std::size_t)
         {
         }
 

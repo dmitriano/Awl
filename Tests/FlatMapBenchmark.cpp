@@ -61,7 +61,7 @@ namespace
         void insert(const value_type & val)
         {
             auto i = binary_find(m_v.begin(), m_v.end(), val,
-                [&val](const value_type & left, const value_type & right)
+                [](const value_type & left, const value_type & right)
             {
                 return left.first < right.first;
             });

@@ -60,7 +60,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
     std::mutex event_m;
     bool ready = false;
 
-    std::jthread client([&context, &out, client_sleep_time, &event_cv, &event_m, &ready](std::stop_token token)
+    std::jthread client([&out, client_sleep_time, &event_cv, &event_m, &ready](std::stop_token token)
     {
         //Wait until all the worker threads are started.
         {
@@ -88,8 +88,6 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
         awl::sleep_for(Duration(client_sleep_time), token);
 
-        const auto elapsed = sw.GetElapsedCast<Duration>();
-
         out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
     });
 
@@ -105,7 +103,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
     {
         static_cast<void>(i);
 
-        v.push_back(std::thread([&context, &out, &token, client_sleep_time, worker_sleep_time, &m, sw, &ex_ptr]()
+        v.push_back(std::thread([&out, &token, client_sleep_time, worker_sleep_time, sw, &ex_ptr]()
         {
             try
             {
@@ -212,7 +210,7 @@ AWT_TEST(Cancellation_JThread)
         std::mutex mutex;
         std::unique_lock lock(mutex);
 
-        awl::condition_variable_any().wait(lock, stoken, [&stoken] { return false; });
+        awl::condition_variable_any().wait(lock, stoken, [] { return false; });
 
         if (stoken.stop_requested())
         {

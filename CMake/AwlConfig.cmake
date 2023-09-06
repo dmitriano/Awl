@@ -25,6 +25,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID
     #AppleClang and Android Clang do not have std::jthread.
     set(AWL_JTHREAD_EXTRAS ON)
     add_definitions("-Wall -Wextra -pedantic")
+    # Unused operators in local namespaces defined by AWL_MEMBERWISE_EQUATABLE
+    add_definitions("-Wno-unused-function")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions("-Wall -Wextra -pedantic")
     #add_definitions("-Wall -Wextra -pedantic -pthread")
