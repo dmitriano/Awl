@@ -35,12 +35,171 @@ namespace awl
         using pointer = value_type*;
         using const_pointer = const value_type*;
 
+    private:
+
+        // The right keys are in the map and left keys are in the values.
+        struct RightValue
+        {
+            Key leftKey;
+            T value;
+        };
+
+        using RightAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<std::pair<const Key, RightValue>>;
+
+        using RightMap = std::map<Key, RightValue, Compare, RightAllocator>;
+
+        template <class Container, class Iterator, class Value>
+        class MyIterator
+        {
+        public:
+
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = std::pair<const Key, Value&>;
+            using difference_type = std::ptrdiff_t;
+            using reference = value_type&;
+            using pointer = value_type*;
+
+            MyIterator() = default;
+
+            MyIterator(const MyIterator& other) = default;
+            MyIterator(MyIterator&& other) = default;
+
+            MyIterator& operator = (const MyIterator& other) = default;
+            MyIterator& operator = (MyIterator&& other) = default;
+
+            value_type operator* () const
+            {
+                return value_type
+                {
+                    m_i->second.leftKey + m_offset,
+                    m_i->second.value
+                };
+            }
+
+            MyIterator& operator++ ()
+            {
+                move_next();
+
+                return *this;
+            }
+
+            MyIterator operator++ (int)
+            {
+                MyIterator tmp = *this;
+
+                move_next();
+
+                return tmp;
+            }
+
+            MyIterator& operator-- ()
+            {
+                move_prev();
+
+                return *this;
+            }
+
+            MyIterator operator-- (int)
+            {
+                MyIterator tmp = *this;
+
+                move_prev();
+
+                return tmp;
+            }
+
+            bool operator == (const MyIterator& other) const
+            {
+                return as_tie() == other.as_tie();
+            }
+
+            bool operator != (const MyIterator& other)  const
+            {
+                return !(*this == other);
+            }
+
+            bool operator < (const MyIterator& other) const
+            {
+                return as_tie() < other.as_tie();
+            }
+
+            // Conversion to const_iterator
+            operator MyIterator<const Container, const Iterator, const Value>() const
+            {
+                return MyIterator<const Container, const Iterator, const Value>(m_pMap, m_i, m_offset);
+            }
+
+        private:
+
+            MyIterator(Container* p_map, Iterator i, Key offset = 0) :
+                m_pMap(p_map), m_i(i), m_offset(offset)
+            {
+            }
+
+            void move_next()
+            {
+                assert(m_i != container().m_map.end());
+                
+                Key length = m_i->first - m_i->second.leftKey;
+                assert(container().less_or_equal(m_offset, length));
+
+                if (container().equal(m_offset, length))
+                {
+                    m_i = std::next(m_i);
+                    m_offset = 0;
+                }
+                else
+                {
+                    m_offset = next_key(m_offset);
+                }
+            }
+
+            void move_prev()
+            {
+                throw std::runtime_error("Not implemented.");
+            }
+
+            const interval_map& container() const
+            {
+                return *m_pMap;
+            }
+
+            auto as_tie() const
+            {
+                return std::tie(m_i, m_offset);
+            }
+
+            Container* m_pMap;
+
+            Iterator m_i;
+
+            Key m_offset;
+
+            friend interval_map;
+        };
+
     public:
 
-        //using iterator = ring_iterator<T>;
-        //using const_iterator = ring_iterator<const T>;
-        //using reverse_iterator = std::reverse_iterator<iterator>;
-        //using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        using iterator = MyIterator<interval_map, typename RightMap::iterator, T>;
+        using const_iterator = MyIterator<const interval_map, const typename RightMap::iterator, const T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        iterator begin() { return iterator(this, m_map.begin()); }
+        const_iterator begin() const { return cbegin(); }
+        const_iterator cbegin() const { return iterator(this, m_map.begin()); }
+
+        iterator end() { return iterator(this, m_map.end()); }
+        const_iterator end() const { return cend(); }
+        const_iterator cend() const { return iterator(this, m_map.end());}
+
+        //reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
+        //const_reverse_iterator rbegin() const { return crbegin(); }
+        //const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cend()); }
+
+        //reverse_iterator rend() { return std::make_reverse_iterator(begin()); }
+        //const_reverse_iterator rend() const { return crend(); }
+        //const_reverse_iterator crend() const { return std::make_reverse_iterator(cbegin()); }
 
         const T& at(const Key& key) const
         {
@@ -79,7 +238,7 @@ namespace awl
                 typename RightMap::iterator remove_end;
 
                 {
-                    auto a_i = m_map.lower_bound(b);
+                    auto a_i = m_map.lower_bound(a);
 
                     if (a_i != m_map.end())
                     {
@@ -111,10 +270,11 @@ namespace awl
                     }
                     else
                     {
-                        remove_begin = m_map.begin();
+                        remove_begin = m_map.end();
                     }
                 }
 
+                if (remove_begin != m_map.end())
                 {
                     auto b_i = m_map.lower_bound(b);
 
@@ -149,9 +309,9 @@ namespace awl
                     {
                         remove_end = m_map.end();
                     }
-                }
 
-                m_map.erase(remove_begin, remove_end);
+                    m_map.erase(remove_begin, remove_end);
+                }
 
                 auto [new_i, inserted] = m_map.emplace(std::forward<Key>(b), RightValue{ std::forward<Key>(a), std::forward<T>(value)});
 
@@ -196,13 +356,6 @@ namespace awl
             return !less(left, right);
         }
 
-        // The right keys are in the map and left keys are in the values.
-        struct RightValue
-        {
-            Key leftKey;
-            T value;
-        };
-
         // Returns the interval the key belongs.
         const RightValue* find_interval(const Key& key) const
         {
@@ -231,7 +384,7 @@ namespace awl
         }
 
         template <class KeyU>
-        Key next_key(KeyU&& key)
+        static Key next_key(KeyU&& key)
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
@@ -246,7 +399,7 @@ namespace awl
         }
 
         template <class KeyU>
-        Key previous_key(KeyU&& key)
+        static Key previous_key(KeyU&& key)
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
@@ -260,10 +413,9 @@ namespace awl
             return prev;
         }
 
-        using RightAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<std::pair<const Key, RightValue>>;
-
-        using RightMap = std::map<Key, RightValue, Compare, RightAllocator>;
-
         RightMap m_map;
+
+        template <class E>
+        friend class ring_iterator;
     };
 }
