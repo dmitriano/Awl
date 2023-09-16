@@ -13,11 +13,12 @@
 #include <queue>
 #include <ranges>
 
-static_assert(std::ranges::range<awl::interval_map<int, std::string>>);
-
 using Map = std::map<int, std::string>;
 
 using IntervalMap = awl::interval_map<int, std::string>;
+
+static_assert(std::ranges::range<Map>);
+static_assert(std::ranges::range<IntervalMap>);
 
 AWT_TEST(IntervalMapIterator)
 {
@@ -88,5 +89,30 @@ AWT_TEST(IntervalMap)
         }
     };
 
+    auto assert_equal = [&actual_map, &expected_map]()
+    {
+        // They are of a different types.
+        auto pred = [](const IntervalMap::value_type& actual_pair, const Map::value_type& expected_pair) -> bool
+        {
+            return actual_pair.first == expected_pair.first && actual_pair.second == expected_pair.second;
+        };
+
+        AWT_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
+    };
+
     assign(1, 5, "a");
+
+    assert_equal();
+
+    assign(5, 6, "b");
+
+    assert_equal();
+
+    assign(3, 3, "c");
+
+    assert_equal();
+
+    assign(0, 10, "d");
+
+    assert_equal();
 }
