@@ -48,7 +48,7 @@ namespace awl
 
             if (right_value != nullptr)
             {
-                if (before_right(key, *right_value))
+                if (after_left(key, *right_value))
                 {
                     return right_value->value;
                 }
@@ -61,7 +61,7 @@ namespace awl
         {
             auto* right_value = find_interval(key);
 
-            return right_value != nullptr && before_right(key, *right_value);
+            return right_value != nullptr && after_left(key, *right_value);
         }
 
         T& at(const Key& key)
@@ -79,32 +79,70 @@ namespace awl
                 typename RightMap::iterator remove_end;
 
                 {
-                    auto b_i = m_map.lower_bound(b);
+                    auto a_i = m_map.lower_bound(b);
 
-                    if (b_i != m_map.end())
+                    if (a_i != m_map.end())
                     {
-                        RightValue& b_right_value = b_i->second;
+                        RightValue& a_right_value = a_i->second;
 
-                        if (b_right_value.rightKey == b)
+                        if (less(a_right_value.leftKey, a))
                         {
-                            // remove the interval
-                            remove_end = std::next(b_i);
-                        }
-                        else
-                        {
-                            // trim the interval by offsetting its left bound to the right
-                            RightValue saved_right_value = std::move(b_right_value);
+                            // trim the interval by offsetting its right bound to the left
+                            RightValue saved_right_value = std::move(a_right_value);
 
-                            m_map.erase(b_i);
+                            m_map.erase(a_i);
 
-                            auto [new_i, inserted] = m_map.emplace(next_key(std::forward<Key>(b)), std::move(saved_right_value));
+                            Key new_right_key = previous_key(std::forward<Key>(a));
+                            
+                            auto [new_i, inserted] = m_map.emplace(new_right_key, std::move(saved_right_value));
 
                             if (!inserted)
                             {
                                 throw std::runtime_error("Internal error: duplicate interval 1.");
                             }
 
-                            remove_end = new_i;
+                            remove_begin = std::next(new_i);
+                        }
+                        else
+                        {
+                            // remove the interval
+                            remove_begin = a_i;
+                        }
+                    }
+                    else
+                    {
+                        remove_begin = m_map.begin();
+                    }
+                }
+
+                {
+                    auto b_i = m_map.lower_bound(b);
+
+                    if (b_i != m_map.end())
+                    {
+                        RightValue& b_right_value = b_i->second;
+
+                        if (less_or_equal(b_right_value.leftKey, b))
+                        {
+                            // trim the interval by offsetting its left bound to the right
+                            Key new_left_key = next_key(std::forward<Key>(b));
+
+                            if (less(new_left_key, b_i->first))
+                            {
+                                b_right_value.leftKey = new_left_key;
+
+                                remove_end = b_i;
+                            }
+                            else
+                            {
+                                // interval is empty so remove it
+                                remove_end = std::next(b_i);
+                            }
+                        }
+                        else
+                        {
+                            // remove all before this interval
+                            remove_end = b_i;
                         }
                     }
                     else
@@ -113,35 +151,9 @@ namespace awl
                     }
                 }
 
-                {
-                    auto a_i = m_map.lower_bound(a);
-
-                    if (a_i != m_map.end())
-                    {
-                        if (a_i->first == a)
-                        {
-                            // remove the interval
-                            remove_begin = a_i;
-                        }
-                        else
-                        {
-                            // trim the interval by offsetting its right bound to the left
-                            RightValue& a_right_value = a_i->second;
-
-                            a_right_value.rightKey = previous_key(std::forward<Key>(a));
-
-                            remove_begin = std::next(a_i);
-                        }
-                    }
-                    else
-                    {
-                        remove_begin = m_map.end();
-                    }
-                }
-
                 m_map.erase(remove_begin, remove_end);
 
-                auto [new_i, inserted] = m_map.emplace(std::forward<Key>(a), RightValue{ std::forward<Key>(b), std::forward<T>(value)});
+                auto [new_i, inserted] = m_map.emplace(std::forward<Key>(b), RightValue{ std::forward<Key>(a), std::forward<T>(value)});
 
                 if (!inserted)
                 {
@@ -164,26 +176,30 @@ namespace awl
             return key_comp()(left, right);
         }
 
+        bool greater(const Key& left, const Key& right) const
+        {
+            return less(right, left);
+        }
+
         bool equal(const Key& left, const Key& right) const
         {
-            return !less(left, right) && !less(right, left);
+            return !less(left, right) && !greater(left, right);
         }
 
         bool less_or_equal(const Key& left, const Key& right) const
         {
-            const bool saved_less = less(left, right);
-            
-            return saved_less || (!saved_less && !less(right, left));
+            return !greater(left, right);
         }
 
-        bool greater(const Key& left, const Key& right) const
+        bool greater_or_equal(const Key& left, const Key& right) const
         {
-            return !less_or_equal(left, right);
+            return !less(left, right);
         }
 
+        // The right keys are in the map and left keys are in the values.
         struct RightValue
         {
-            Key rightKey;
+            Key leftKey;
             T value;
         };
 
@@ -206,12 +222,12 @@ namespace awl
             return const_cast<RightValue&>(const_cast<const interval_map*>(this)->find_interval(key));
         }
 
-        bool before_right(const Key& key, const RightValue& right_value) const
+        bool after_left(const Key& key, const RightValue& right_value) const
         {
-            const Key& right_key = right_value.rightKey;
+            const Key& left_key = right_value.leftKey;
 
             // right_key can be max int.
-            return less_or_equal(key, right_key);
+            return greater_or_equal(key, left_key);
         }
 
         template <class KeyU>
