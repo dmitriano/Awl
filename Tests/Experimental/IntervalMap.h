@@ -34,7 +34,6 @@ namespace awl
         using const_reference = const value_type&;
         using pointer = value_type*;
         using const_pointer = const value_type*;
-        using key_compare = Compare;
 
     public:
 
@@ -151,12 +150,14 @@ namespace awl
             }
         }
 
+    private:
+
+        using key_compare = Compare;
+
         key_compare key_comp() const
         {
             return m_map.key_comp();
         }
-
-    private:
 
         bool less(const Key& left, const Key& right) const
         {
