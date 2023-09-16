@@ -76,16 +76,14 @@ AWT_TEST(IntervalMap)
 
     auto assign = [&expected_map, &actual_map](int a, int b, std::string value)
     {
-        const std::string saved_value = value;
-        
         // value is moved here
         actual_map.assign(a, b, value);
 
-        for (int i = a; i != b; ++i)
+        for (int i = a; i <= b; ++i)
         {
-            AWT_ASSERT(actual_map.at(i) == saved_value);
+            AWT_ASSERT(actual_map.at(i) == value);
 
-            expected_map.emplace(i, saved_value);
+            expected_map[i] = value;
         }
     };
 

@@ -234,7 +234,7 @@ namespace awl
         template <class KeyA, class KeyB, class U>
         void assign(KeyA&& a, KeyB&& b, U&& value)
         {
-            if (less(a, b))
+            if (less_or_equal(a, b))
             {
                 typename RightMap::iterator remove_begin;
                 typename RightMap::iterator remove_end;
@@ -253,7 +253,7 @@ namespace awl
 
                             m_map.erase(a_i);
 
-                            Key new_right_key = previous_key(std::forward<Key>(a));
+                            Key new_right_key = previous_key(std::forward<KeyA>(a));
                             
                             auto [new_i, inserted] = m_map.emplace(new_right_key, std::move(saved_right_value));
 
@@ -287,7 +287,7 @@ namespace awl
                         if (less_or_equal(b_right_value.leftKey, b))
                         {
                             // trim the interval by offsetting its left bound to the right
-                            Key new_left_key = next_key(std::forward<Key>(b));
+                            Key new_left_key = next_key(std::forward<KeyB>(b));
 
                             if (less(new_left_key, b_i->first))
                             {
@@ -315,7 +315,7 @@ namespace awl
                     m_map.erase(remove_begin, remove_end);
                 }
 
-                auto [new_i, inserted] = m_map.emplace(std::forward<Key>(b), RightValue{ std::forward<Key>(a), std::forward<T>(value)});
+                auto [new_i, inserted] = m_map.emplace(std::forward<KeyA>(b), RightValue{ std::forward<KeyB>(a), std::forward<U>(value)});
 
                 if (!inserted)
                 {
@@ -390,7 +390,7 @@ namespace awl
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
-            Key next = std::forward<Key>(key) + 1;
+            Key next = std::forward<KeyU>(key) + 1;
 
             if (next < key)
             {
@@ -405,7 +405,7 @@ namespace awl
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
-            Key prev = std::forward<Key>(key) - 1;
+            Key prev = std::forward<KeyU>(key) - 1;
 
             if (prev > key)
             {
