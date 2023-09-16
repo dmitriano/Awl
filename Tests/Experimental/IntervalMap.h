@@ -251,6 +251,8 @@ namespace awl
                             // trim the interval by offsetting its right bound to the left
                             RightValue saved_right_value = std::move(a_right_value);
 
+                            Key saved_right_key = a_i->first;
+
                             m_map.erase(a_i);
 
                             Key new_right_key = previous_key(std::forward<KeyA>(a));
@@ -262,7 +264,23 @@ namespace awl
                                 throw std::runtime_error("Internal error: duplicate interval 1.");
                             }
 
-                            remove_begin = std::next(new_i);
+                            if (less(b, saved_right_key))
+                            {
+                                // [a, b] inside the current interval, insert the tail with the same value.
+                                auto [tail_i, tail_inserted] = m_map.emplace(saved_right_key, RightValue{ next_key(b), new_i->second.value });
+
+                                if (!tail_inserted)
+                                {
+                                    throw std::runtime_error("Internal error: duplicate interval 3.");
+                                }
+
+                                // b is already handled.
+                                remove_begin = m_map.end();
+                            }
+                            else
+                            {
+                                remove_begin = std::next(new_i);
+                            }
                         }
                         else
                         {
@@ -319,7 +337,7 @@ namespace awl
 
                 if (!inserted)
                 {
-                    throw std::runtime_error("Internal error: duplicate interval 2.");
+                    throw std::runtime_error("Internal error: duplicate interval 3.");
                 }
             }
         }
