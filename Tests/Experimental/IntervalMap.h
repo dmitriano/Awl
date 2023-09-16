@@ -339,6 +339,34 @@ namespace awl
                 {
                     throw std::runtime_error("Internal error: duplicate interval 3.");
                 }
+
+                //Merge adjacent intervals with the same value.
+
+                {
+                    if (new_i != m_map.begin())
+                    {
+                        auto prev_i = std::prev(new_i);
+
+                        if (new_i->second.value == prev_i->second.value)
+                        {
+                            new_i->second.leftKey = prev_i->second.leftKey;
+
+                            m_map.erase(prev_i);
+                        }
+                    }
+
+                    {
+                        auto next_i = std::next(new_i);
+
+                        if (next_i != m_map.end() && new_i->second.value == next_i->second.value)
+                        {
+                            next_i->second.leftKey = new_i->second.leftKey;
+
+                            m_map.erase(new_i);
+                        }
+                    }
+                }
+
             }
         }
 
