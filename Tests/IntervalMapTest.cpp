@@ -124,6 +124,8 @@ AWT_TEST(IntervalMap)
 
     assign(12, 13, "f");
 
+    assign(3, 5, "g");
+
     std::uniform_int_distribution<int> a_dist(0, range);
 
     for (size_t i = 0; i < iteration_count; ++i)

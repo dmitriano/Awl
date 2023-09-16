@@ -307,7 +307,7 @@ namespace awl
                             // trim the interval by offsetting its left bound to the right
                             Key new_left_key = next_key(std::forward<KeyB>(b));
 
-                            if (less(new_left_key, b_i->first))
+                            if (less_or_equal(new_left_key, b_i->first))
                             {
                                 b_right_value.leftKey = new_left_key;
 
