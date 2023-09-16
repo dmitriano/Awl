@@ -88,7 +88,7 @@ AWT_TEST(IntervalMap)
 
     auto assign = [&context, &expected_map, &actual_map, &assert_equal](int a, int b, std::string value)
     {
-        context.out << _T("Assigning: [") << a << _T(", ") << b << "] = " << awl::FromAString(value) << std::endl;
+        //context.out << _T("Assigning: [") << a << _T(", ") << b << "] = " << awl::FromAString(value) << std::endl;
         
         // value is moved here
         actual_map.assign(a, b, value);
@@ -100,12 +100,12 @@ AWT_TEST(IntervalMap)
             expected_map[i] = value;
         }
 
-        size_t index = 0;
+        //size_t index = 0;
         
-        for (auto [key, val] : actual_map)
-        {
-            context.out << _T("#") << index++ << _T("\t") << key << _T(" => ") << awl::FromAString(val) << std::endl;
-        }
+        //for (auto [key, val] : actual_map)
+        //{
+        //    context.out << _T("#") << index++ << _T("\t") << key << _T(" => ") << awl::FromAString(val) << std::endl;
+        //}
 
         assert_equal();
     };
