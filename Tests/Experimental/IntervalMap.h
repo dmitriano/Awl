@@ -435,12 +435,11 @@ namespace awl
             return greater_or_equal(key, left_key);
         }
 
-        template <class KeyU>
-        static Key next_key(KeyU&& key)
+        static Key next_key(const Key& key)
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
-            Key next = std::forward<KeyU>(key) + 1;
+            Key next = key + 1;
 
             if (next < key)
             {
@@ -450,12 +449,11 @@ namespace awl
             return next;
         }
 
-        template <class KeyU>
-        static Key previous_key(KeyU&& key)
+        static Key previous_key(const Key& key)
         {
             // implemented assuming Key is an integral type
             static_assert(std::is_integral_v<Key>);
-            Key prev = std::forward<KeyU>(key) - 1;
+            Key prev = key - 1;
 
             if (prev > key)
             {
