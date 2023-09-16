@@ -5,7 +5,7 @@
 
 #include "Tests/Experimental/IntervalMap.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/StringFormat.h"
+#include "Awl/Random.h"
 
 #include "Helpers/NonCopyable.h"
 
@@ -68,24 +68,12 @@ AWT_TEST(IntervalMap)
 {
     AWT_UNUSED_CONTEXT;
     
-    //AWT_ATTRIBUTE(int, range, 10);
+    AWT_ATTRIBUTE(int, range, 1000);
+    AWT_ATTRIBUTE(size_t, iteration_count, 100);
 
     Map expected_map;
 
     IntervalMap actual_map;
-
-    auto assign = [&expected_map, &actual_map](int a, int b, std::string value)
-    {
-        // value is moved here
-        actual_map.assign(a, b, value);
-
-        for (int i = a; i <= b; ++i)
-        {
-            AWT_ASSERT(actual_map.at(i) == value);
-
-            expected_map[i] = value;
-        }
-    };
 
     auto assert_equal = [&actual_map, &expected_map]()
     {
@@ -98,29 +86,58 @@ AWT_TEST(IntervalMap)
         AWT_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
     };
 
+    auto assign = [&context, &expected_map, &actual_map, &assert_equal](int a, int b, std::string value)
+    {
+        context.out << _T("Assigning: [") << a << _T(", ") << b << "] = " << awl::FromAString(value) << std::endl;
+        
+        // value is moved here
+        actual_map.assign(a, b, value);
+
+        for (int i = a; i <= b; ++i)
+        {
+            AWT_ASSERT(actual_map.at(i) == value);
+
+            expected_map[i] = value;
+        }
+
+        size_t index = 0;
+        
+        for (auto [key, val] : actual_map)
+        {
+            context.out << _T("#") << index++ << _T("\t") << key << _T(" => ") << awl::FromAString(val) << std::endl;
+        }
+
+        assert_equal();
+    };
+
     assert_equal();
 
     assign(1, 5, "a");
 
-    assert_equal();
-
     assign(5, 6, "b");
-
-    assert_equal();
 
     assign(3, 3, "c");
 
-    assert_equal();
-
     assign(0, 10, "d");
-
-    assert_equal();
 
     assign(5, 6, "e");
 
-    assert_equal();
-
     assign(12, 13, "f");
 
-    assert_equal();
+    std::uniform_int_distribution<int> a_dist(0, range);
+
+    for (size_t i = 0; i < iteration_count; ++i)
+    {
+        const int a = a_dist(awl::random());
+
+        std::uniform_int_distribution<int> len_dist(0, range - a);
+
+        const int len = len_dist(awl::random());
+
+        const char ch = 'A' + (i % ('Z' - 'A'));
+
+        std::string val(1, ch);
+
+        assign(a, a + len, val);
+    }
 }
