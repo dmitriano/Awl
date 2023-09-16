@@ -110,6 +110,8 @@ namespace awl
 
             bool operator == (const MyIterator& other) const
             {
+                assert(m_pMap == other.m_pMap);
+                
                 return as_tie() == other.as_tie();
             }
 
@@ -414,8 +416,5 @@ namespace awl
         }
 
         RightMap m_map;
-
-        template <class E>
-        friend class ring_iterator;
     };
 }
