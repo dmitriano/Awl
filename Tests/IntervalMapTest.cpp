@@ -98,6 +98,8 @@ AWT_TEST(IntervalMap)
         AWT_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
     };
 
+    assert_equal();
+
     assign(1, 5, "a");
 
     assert_equal();
@@ -111,6 +113,14 @@ AWT_TEST(IntervalMap)
     assert_equal();
 
     assign(0, 10, "d");
+
+    assert_equal();
+
+    assign(5, 6, "e");
+
+    assert_equal();
+
+    assign(12, 13, "f");
 
     assert_equal();
 }
