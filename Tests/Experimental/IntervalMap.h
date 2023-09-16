@@ -193,13 +193,13 @@ namespace awl
         const_iterator end() const { return cend(); }
         const_iterator cend() const { return iterator(this, m_map.end());}
 
-        //reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
-        //const_reverse_iterator rbegin() const { return crbegin(); }
-        //const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cend()); }
+        reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
+        const_reverse_iterator rbegin() const { return crbegin(); }
+        const_reverse_iterator crbegin() const { return std::make_reverse_iterator(cend()); }
 
-        //reverse_iterator rend() { return std::make_reverse_iterator(begin()); }
-        //const_reverse_iterator rend() const { return crend(); }
-        //const_reverse_iterator crend() const { return std::make_reverse_iterator(cbegin()); }
+        reverse_iterator rend() { return std::make_reverse_iterator(begin()); }
+        const_reverse_iterator rend() const { return crend(); }
+        const_reverse_iterator crend() const { return std::make_reverse_iterator(cbegin()); }
 
         const T& at(const Key& key) const
         {
