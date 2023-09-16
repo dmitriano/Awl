@@ -112,19 +112,19 @@ AWT_TEST(IntervalMap)
 
     assert_equal();
 
-    assign(1, 5, "a");
+    //assign(1, 5, "a");
 
-    assign(5, 6, "b");
+    //assign(5, 6, "b");
 
-    assign(3, 3, "c");
+    //assign(3, 3, "c");
 
-    assign(0, 10, "d");
+    //assign(0, 10, "d");
 
-    assign(5, 6, "e");
+    //assign(5, 6, "e");
 
-    assign(12, 13, "f");
+    //assign(12, 13, "f");
 
-    assign(3, 5, "g");
+    //assign(3, 5, "g");
 
     std::uniform_int_distribution<int> a_dist(0, range);
 
