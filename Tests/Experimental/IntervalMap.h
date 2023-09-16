@@ -366,8 +366,12 @@ namespace awl
                         }
                     }
                 }
-
             }
+        }
+
+        void clear()
+        {
+            m_map.clear();
         }
 
     private:

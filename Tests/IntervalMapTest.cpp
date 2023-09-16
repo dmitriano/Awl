@@ -70,6 +70,7 @@ AWT_TEST(IntervalMap)
     
     AWT_ATTRIBUTE(int, range, 1000);
     AWT_ATTRIBUTE(size_t, iteration_count, 100);
+    AWT_ATTRIBUTE(size_t, clear_count, 50);
 
     Map expected_map;
 
@@ -110,6 +111,14 @@ AWT_TEST(IntervalMap)
         assert_equal();
     };
 
+    auto clear = [&expected_map, &actual_map, &assert_equal]()
+    {
+        actual_map.clear();
+        expected_map.clear();
+
+        assert_equal();
+    };
+
     assert_equal();
 
     //assign(1, 5, "a");
@@ -130,6 +139,11 @@ AWT_TEST(IntervalMap)
 
     for (size_t i = 0; i < iteration_count; ++i)
     {
+        if (iteration_count % clear_count == 0)
+        {
+            clear();
+        }
+
         const int a = a_dist(awl::random());
 
         std::uniform_int_distribution<int> len_dist(0, range - a);
