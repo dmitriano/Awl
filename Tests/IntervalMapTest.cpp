@@ -19,9 +19,24 @@ AWT_TEST(IntervalMap)
     
     //AWT_ATTRIBUTE(int, range, 10);
 
-    awl::interval_map<int, std::string> im;
+    std::map<int, std::string> expected_map;
 
-    im.assign(5, 9, std::string("a"));
+    awl::interval_map<int, std::string> actual_map;
 
-    AWT_ASSERT(im.at(7) == "a");
+    auto assign = [&expected_map, &actual_map](int a, int b, std::string value)
+    {
+        const std::string saved_value = value;
+        
+        // value is moved here
+        actual_map.assign(a, b, value);
+
+        for (int i = a; i != b; ++i)
+        {
+            AWT_ASSERT(actual_map.at(i) == saved_value);
+
+            expected_map.emplace(i, saved_value);
+        }
+    };
+
+    assign(1, 5, "a");
 }
