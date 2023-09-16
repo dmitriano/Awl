@@ -126,9 +126,9 @@ namespace awl
             }
 
             // Conversion to const_iterator
-            operator MyIterator<const Container, const Iterator, const Value>() const
+            operator MyIterator<const Container, typename RightMap::const_iterator, const Value>() const
             {
-                return MyIterator<const Container, const Iterator, const Value>(m_pMap, m_i, m_offset);
+                return MyIterator<const Container, typename RightMap::const_iterator, const Value>(m_pMap, m_i, m_offset);
             }
 
         private:
@@ -183,7 +183,7 @@ namespace awl
     public:
 
         using iterator = MyIterator<interval_map, typename RightMap::iterator, T>;
-        using const_iterator = MyIterator<const interval_map, const typename RightMap::iterator, const T>;
+        using const_iterator = MyIterator<const interval_map, typename RightMap::const_iterator, const T>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 

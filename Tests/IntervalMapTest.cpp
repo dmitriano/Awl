@@ -43,7 +43,7 @@ AWT_TEST(IntervalMapIterator)
 
         AWT_ASSERT(begin != end);
 
-        auto i = begin;
+        IntervalMap::const_iterator i = begin;
 
         //auto val = (*i).first;
         //auto val = (*i++).first;
