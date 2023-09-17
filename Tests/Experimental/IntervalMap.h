@@ -271,7 +271,7 @@ namespace awl
 
                                 if (!tail_inserted)
                                 {
-                                    throw std::runtime_error("Internal error: duplicate interval 3.");
+                                    throw std::runtime_error("Internal error: duplicate interval 2.");
                                 }
 
                                 // b is already handled.
@@ -340,7 +340,8 @@ namespace awl
                     throw std::runtime_error("Internal error: duplicate interval 3.");
                 }
 
-                //Merge adjacent intervals with the same value.
+                // Merge adjacent intervals with the same value.
+                // TODO: to this before new interval is inserted and use equality comarer to check if the values are equal.
 
                 {
                     if (new_i != m_map.begin())
