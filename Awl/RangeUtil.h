@@ -13,8 +13,9 @@ namespace awl
     concept range_over = std::ranges::range<R> &&
         std::same_as<std::ranges::range_value_t<R>, Value>;
 
+    //with 'const R& r' we will get error: no viable conversion from 'const_iterator' ... in CLang
     template <std::ranges::range R, class Compare>
-    bool position_changed(const R& r, const Compare& comp, const std::ranges::iterator_t<R>& old_iter)
+    bool position_changed(R& r, const Compare& comp, const std::ranges::iterator_t<R>& old_iter)
     {
         bool pos_changed = false;
 
