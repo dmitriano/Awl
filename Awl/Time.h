@@ -145,3 +145,18 @@ namespace std
     }
 }
 #endif
+
+#if defined(__GNUC__) && defined(__clang__)
+namespace std
+{
+    template<class C, class Rep, class Period>
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const std::chrono::duration<Rep, Period>& d)
+    {
+        using namespace awl;
+
+        format_duration(out, d, default_duration_part_count);
+
+        return out;
+    }
+}
+#endif
