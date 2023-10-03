@@ -184,9 +184,10 @@ AWT_TEST(TupleMakeValue)
 
     static_assert(std::is_same_v<UniversalTuple, std::tuple<std::string&, const std::string&, int>>);
 
-    //Why doesn't CLang compile this?
-#if !defined(__clang__)
     // Wow... we can convert and compare them.
+
+    //GCC and CLang do not compile this.
+#if defined(_MSC_VER)
     UniversalTuple universal_t1 = t;
 
     AWT_ASSERT(universal_t1 == t);
