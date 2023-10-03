@@ -100,8 +100,7 @@ namespace awl
         {
             ensure_convertable<Args...>();
 
-            // Do not use std::forward here, see make_universal_tuple implementation.
-            return make_universal_tuple(args...);
+            return make_universal_tuple(std::forward<Args>(args)...);
         }
 
         constexpr bool operator()(const T& left, const T& right) const
