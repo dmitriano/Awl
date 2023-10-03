@@ -27,6 +27,10 @@ namespace
     using ACompare = awl::FieldCompare<X, int, &X::a>;
     using BCompare = awl::FieldCompare<X, std::string, &X::b>;
 
+    static_assert(std::is_same_v<ACompare::key_type, const int&>);
+    static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
+    static_assert(std::is_same_v<decltype(MakeKey({})), std::tuple<int, std::string>>);
+
     X x1a{ 1, "a" };
     X x1b{ 1, "b" };
     X x2a{ 2, "a" };
@@ -54,7 +58,7 @@ AWT_TEST(CompositeCompare)
     AWT_ASSERT(!comp(x3a, x2a));
 }
 
-AWT_TEST(TransparentCompositeCompare)
+AWT_TEST(TransparentCompositeCompareTrivialStructure)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -119,17 +123,15 @@ namespace
     using WalletAccountCompare = awl::FieldCompare<data::Wallet, data::AccountType, &data::Wallet::accountType>;
     using WalletAssetCompare = awl::FieldCompare<data::Wallet, std::string, &data::Wallet::asset>;
     using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
-    using WalletKey = WalletPrimaryCompare::key_type;
-
-    static_assert(std::is_same_v<WalletKey, std::tuple<const data::AccountType&, const std::string&>>);
-
-    using IntRef = int&;
-    static_assert(std::is_same_v<IntRef, IntRef&>);
 }
 
-AWT_TEST(TransparentCompositeCompare2)
+AWT_TEST(TransparentCompositeCompareInheritedKey)
 {
     AWT_UNUSED_CONTEXT;
+
+    using InheritedWalletKey = WalletPrimaryCompare::key_type;
+
+    static_assert(std::is_same_v<InheritedWalletKey, std::tuple<const data::AccountType&, const std::string&>>);
 
     const std::string asset = "BTC";
 
@@ -140,9 +142,9 @@ AWT_TEST(TransparentCompositeCompare2)
 
     const data::AccountType im_account = data::AccountType::IsolatedMargin;
 
-    const WalletKey spot_key(spot_account /*data::AccountType::Spot*/, asset);
+    const InheritedWalletKey spot_key(spot_account /*data::AccountType::Spot*/, asset);
 
-    const WalletKey im_key(im_account /*data::AccountType::IsolatedMargin*/, asset);
+    const InheritedWalletKey im_key(im_account /*data::AccountType::IsolatedMargin*/, asset);
 
     const data::Wallet spot_wallet = { data::AccountType::Spot, asset, free, locked, 5 };
 
@@ -155,8 +157,30 @@ AWT_TEST(TransparentCompositeCompare2)
     AWT_ASSERT(!comp(im_key, im_wallet));
     AWT_ASSERT(!comp(im_key, spot_wallet));
 
-    //AWT_ASSERT(!comp(WalletKey(data::AccountType::Spot, "BTC"), spot_wallet));
-    //AWT_ASSERT(comp(WalletKey(data::AccountType::Spot, "BTC"), im_wallet));
-    //AWT_ASSERT(!comp(WalletKey(data::AccountType::IsolatedMargin, "BTC"), im_wallet));
-    //AWT_ASSERT(!comp(WalletKey(data::AccountType::IsolatedMargin, "BTC"), spot_wallet));
+    // Check if it converts.
+
+    const InheritedWalletKey inherited_key = WalletPrimaryCompare::make_key(data::AccountType::Spot, std::string("BTC"));
+    AWT_ASSERT(inherited_key == WalletPrimaryCompare::make_key(data::AccountType::Spot, std::string("BTC")));
+}
+
+AWT_TEST(TransparentCompositeCompareUniversalKey)
+{
+    AWT_UNUSED_CONTEXT;
+
+    const std::string asset = "BTC";
+
+    const double free = 5;
+    const double locked = 7;
+
+    const data::Wallet spot_wallet = { data::AccountType::Spot, asset, free, locked, 5 };
+    const data::Wallet im_wallet = { data::AccountType::IsolatedMargin, asset, free, locked, 10 };
+
+    WalletPrimaryCompare comp;
+
+    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, std::string("BTC")), spot_wallet));
+    AWT_ASSERT(comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, asset), im_wallet));
+    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), im_wallet));
+    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), spot_wallet));
+    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH")), spot_wallet));
+    AWT_ASSERT(comp(spot_wallet, WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH"))));
 }

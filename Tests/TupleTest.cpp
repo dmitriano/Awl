@@ -163,3 +163,38 @@ AWT_TEST(TupleMapT2V)
         AWT_ASSERT(a == result);
     }
 }
+
+AWT_TEST(TupleMakeValue)
+{
+    AWT_UNUSED_CONTEXT;
+
+    std::string a("a");
+
+    const std::string b("b");
+
+    auto t = std::make_tuple(a, b, 1);
+
+    auto universal_t = awl::make_universal_tuple(a, b, 1);
+
+    using Tuple = decltype(t);
+
+    using UniversalTuple = decltype(universal_t);
+    
+    static_assert(std::is_same_v<Tuple, std::tuple<std::string, std::string, int>>);
+
+    static_assert(std::is_same_v<UniversalTuple, std::tuple<std::string&, const std::string&, int>>);
+
+    //Why doesn't CLang compile this?
+#if !defined(__clang__)
+    // Wow... we can convert and compare them.
+    UniversalTuple universal_t1 = t;
+
+    AWT_ASSERT(universal_t1 == t);
+#endif
+
+    using ConstRefTuple = std::tuple<const std::string&, const std::string&, const int&>;
+
+    ConstRefTuple const_t = t;
+
+    AWT_ASSERT(const_t == t);
+}

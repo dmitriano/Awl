@@ -250,4 +250,12 @@ namespace awl
     }
 
     static_assert(sizeof_tuple(std::tuple<int, bool>{}) == sizeof(int) + sizeof(bool), "it is not 5!");
+
+    // Makes a tuple consisting of both references and values.
+    template <typename... Args>
+    constexpr auto make_universal_tuple(Args&&... args)
+    {
+        // In the case you pass a std::string lvalue then T will deduce to std::string& or const std::string&, for rvalues it will deduce to std::string.
+        return std::tuple<Args...>(args...);
+    }
 }
