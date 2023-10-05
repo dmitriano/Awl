@@ -159,7 +159,7 @@ AWT_TEST(TransparentCompositeCompareInheritedKey)
 
     // Ensure that universal key converts to inherited key.
 
-    const auto universal_key = WalletPrimaryCompare::make_key(data::AccountType::Spot, std::string("BTC"));
+    const auto universal_key = WalletPrimaryCompare::make_key(data::AccountType::Spot, "BTC");
     using UniversalKey = decltype(universal_key);
     static_assert(std::is_same_v<UniversalKey, const std::tuple<data::AccountType, std::string>>);
 
@@ -181,7 +181,7 @@ AWT_TEST(TransparentCompositeCompareUniversalKey)
 
     WalletPrimaryCompare comp;
 
-    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, std::string("BTC")), spot_wallet));
+    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, "BTC"), spot_wallet));
     AWT_ASSERT(comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, asset), im_wallet));
     AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), im_wallet));
     AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), spot_wallet));

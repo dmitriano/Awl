@@ -83,24 +83,14 @@ namespace awl
         {
         }
 
-        // Allows the user to check if his key is of a valid type.
-        template <typename... Args>
-        static constexpr void ensure_convertable()
-        {
-            using ArgKey = std::tuple<Args...>;
-
-            static_assert(std::tuple_size_v<key_type> == std::tuple_size_v<ArgKey>);
-
-            static_assert(std::is_convertible_v<ArgKey, key_type>);
-        }
-
         // Makes a mixed key for heterogeneous lookup from both references and values.
         template <typename... Args>
         static constexpr auto make_key(Args&&... args)
         {
-            ensure_convertable<Args...>();
+            // The same elements as in key_type type but without const.
+            using variable_key_type = std::tuple<std::remove_cv_t<std::decay_t<typename std::decay_t<Cs>::key_type>>&...>;
 
-            return make_universal_tuple(std::forward<Args>(args)...);
+            return make_similar_tuple<variable_key_type>(std::forward<Args>(args)...);
         }
 
         constexpr bool operator()(const T& left, const T& right) const
