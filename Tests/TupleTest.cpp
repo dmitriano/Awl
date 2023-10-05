@@ -221,26 +221,36 @@ AWT_TEST(TupleMakeSimilar)
         AWT_ASSERT(t == std::make_tuple(std::string("a"), i));
     }
 
-    std::string s;
-    const int j = 5;
-    static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>(std::string{}, j)),
-        std::tuple<std::string, const int&>
-    >);
-    static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>(s, int{})),
-        std::tuple<std::string&, int>
-    >);
-    static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>(s, int8_t{})),
-        std::tuple<std::string&, int>
-    >);
-    static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>("b", int8_t{})),
-        std::tuple<std::string, int>
-    >);
-    static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>(std::as_const(s), int{})),
-        std::tuple<const std::string&, int>
-    >);
+    std::string s = "b";
+    
+    {
+        const int j = 5;
+        auto t = awl::make_similar_tuple<Tuple>(std::string{}, j);
+        static_assert(std::is_same_v<decltype(t), std::tuple<std::string, const int&>>);
+        AWT_ASSERT(t == std::make_tuple(std::string{}, j));
+    }
+
+    {
+        auto t = awl::make_similar_tuple<Tuple>(s, int{});
+        static_assert(std::is_same_v<decltype(t), std::tuple<std::string&, int>>);
+        AWT_ASSERT(t == std::make_tuple(s, int{}));
+    }
+
+    {
+        auto t = awl::make_similar_tuple<Tuple>(s, int8_t{});
+        static_assert(std::is_same_v<decltype(t), std::tuple<std::string&, int>>);
+        AWT_ASSERT(t == std::make_tuple(s, int{}));
+    }
+    
+    {
+        auto t = awl::make_similar_tuple<Tuple>("c", int8_t{});
+        static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int>>);
+        AWT_ASSERT(t == std::make_tuple(std::string("c"), int{}));
+    }
+
+    {
+        auto t = awl::make_similar_tuple<Tuple>(std::as_const(s), int{});
+        static_assert(std::is_same_v<decltype(t), std::tuple<const std::string&, int>>);
+        AWT_ASSERT(t == std::make_tuple(s, int{}));
+    }
 }
