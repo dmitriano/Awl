@@ -17,13 +17,13 @@ namespace
     constexpr bool is_specialization_v = is_specialization<Test, Ref>::value;
 
     template <typename... Args, typename Func, std::size_t... index>
-    constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    constexpr void for_each(const std::tuple<Args...>& t, const Func& f, std::index_sequence<index...>)
     {
         (f(std::get<index>(t)), ...);
     }
 
     template <typename... Args, typename Func>
-    constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
+    constexpr void for_each(const std::tuple<Args...>& t, const Func& f)
     {
         for_each(t, f, std::index_sequence_for<Args...>{});
     }
@@ -39,6 +39,8 @@ namespace
             {
                 for_each(val, [this](auto& field)
                 {
+                    //Warining with Android CLang 17.0.2 from NDK 26.0.10792818:
+                    //lambda capture 'this' is not used [-Wunused-lambda-capture]
                     ReadV(field);
                 });
             }
