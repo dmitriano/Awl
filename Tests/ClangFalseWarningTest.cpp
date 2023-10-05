@@ -3,22 +3,41 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Stringizable.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 namespace
 {
+    template<typename Test, template<typename...> class Ref>
+    struct is_specialization : std::false_type {};
+
+    template<template<typename...> class Ref, typename... Args>
+    struct is_specialization<Ref<Args...>, Ref> : std::true_type {};
+
+    template<typename Test, template<typename...> class Ref>
+    constexpr bool is_specialization_v = is_specialization<Test, Ref>::value;
+
+    template <typename... Args, typename Func, std::size_t... index>
+    constexpr void for_each(const std::tuple<Args...>& t, Func&& f, std::index_sequence<index...>)
+    {
+        (f(std::get<index>(t)), ...);
+    }
+
+    template <typename... Args, typename Func>
+    constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
+    {
+        for_each(t, f, std::index_sequence_for<Args...>{});
+    }
+
     class TestReader
     {
     public:
 
         template<class Struct>
-        void ReadV(Struct & val) const
+        void ReadV(Struct& val) const
         {
-            if constexpr (awl::is_tuplizable_v<Struct>)
+            if constexpr (is_specialization_v<Struct, std::tuple>)
             {
-                awl::for_each(awl::object_as_tuple(val), [this](auto& field)
+                for_each(val, [this](auto& field)
                 {
                     ReadV(field);
                 });
@@ -29,13 +48,6 @@ namespace
             }
         }
     };
-
-    struct A
-    {
-        int x;
-
-        AWL_STRINGIZABLE(x)
-    };
 }
 
 AWT_TEST(CLangFalseWarning)
@@ -44,6 +56,6 @@ AWT_TEST(CLangFalseWarning)
 
     TestReader reader;
 
-    A a;
+    std::tuple<int> a(1);
     reader.ReadV(a);
 }
