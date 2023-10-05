@@ -9,12 +9,6 @@
 
 namespace
 {
-    template <class T>
-    void Read(T& val)
-    {
-        static_cast<void>(val);
-    }
-
     class TestReader
     {
     public:
@@ -24,14 +18,14 @@ namespace
         {
             if constexpr (awl::is_tuplizable_v<Struct>)
             {
-                awl::for_each(awl::object_as_tuple(val), [this, &val](auto& field)
+                awl::for_each(awl::object_as_tuple(val), [this](auto& field)
                 {
                     ReadV(field);
                 });
             }
             else
             {
-                Read(val);
+                static_cast<void>(val);
             }
         }
     };
