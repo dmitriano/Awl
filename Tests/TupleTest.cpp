@@ -214,15 +214,18 @@ AWT_TEST(TupleMakeSimilar)
 
     using Tuple = std::tuple<std::string, int>;
 
-    int i = 10;
-    auto t = awl::make_similar_tuple<Tuple>("a", i);
-    static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int&>>);
-    AWT_ASSERT(t == std::make_tuple(std::string("a"), i));
+    {
+        int i = 10;
+        auto t = awl::make_similar_tuple<Tuple>("a", i);
+        static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int&>>);
+        AWT_ASSERT(t == std::make_tuple(std::string("a"), i));
+    }
 
     std::string s;
+    const int j = 5;
     static_assert(std::is_same_v<
-        decltype(awl::make_similar_tuple<Tuple>(std::string{}, i)),
-        std::tuple<std::string, int&>
+        decltype(awl::make_similar_tuple<Tuple>(std::string{}, j)),
+        std::tuple<std::string, const int&>
     >);
     static_assert(std::is_same_v<
         decltype(awl::make_similar_tuple<Tuple>(s, int{})),
