@@ -207,3 +207,37 @@ AWT_TEST(TupleMakeUniversal)
         static_assert(std::is_same_v<UniversalTuple, std::tuple<std::string, int>>);
     }
 }
+
+AWT_TEST(TupleMakeSimilar)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Tuple = std::tuple<std::string, int>;
+
+    int i = 10;
+    auto t = awl::make_similar_tuple<Tuple>("a", i);
+    static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int&>>);
+    assert(t == std::make_tuple(std::string("a"), 10));
+
+    std::string s;
+    static_assert(std::is_same_v<
+        decltype(awl::make_similar_tuple<Tuple>(std::string{}, i)),
+        std::tuple<std::string, int&>
+    >);
+    static_assert(std::is_same_v<
+        decltype(awl::make_similar_tuple<Tuple>(s, int{})),
+        std::tuple<std::string&, int>
+    >);
+    static_assert(std::is_same_v<
+        decltype(awl::make_similar_tuple<Tuple>(s, int8_t{})),
+        std::tuple<std::string&, int>
+    >);
+    static_assert(std::is_same_v<
+        decltype(awl::make_similar_tuple<Tuple>("b", int8_t{})),
+        std::tuple<std::string, int>
+    >);
+    static_assert(std::is_same_v<
+        decltype(awl::make_similar_tuple<Tuple>(std::as_const(s), int{})),
+        std::tuple<const std::string&, int>
+    >);
+}

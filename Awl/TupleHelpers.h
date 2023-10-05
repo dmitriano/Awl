@@ -258,4 +258,17 @@ namespace awl
         // In the case you pass a std::string lvalue then T will deduce to std::string& or const std::string&, for rvalues it will deduce to std::string.
         return std::tuple<Args...>(args...);
     }
+
+    template <typename Tuple, typename... Args>
+    constexpr auto make_similar_tuple(Args&&... args)
+    {
+        static_assert(std::tuple_size_v<Tuple> == sizeof...(Args));
+
+        auto impl_func = [&]<size_t... Is>(std::index_sequence<Is...>)
+        {
+            return std::tuple<std::common_reference_t<std::tuple_element_t<Is, Tuple>&, Args>...>(std::forward<Args>(args)...);
+        };
+
+        return impl_func(std::index_sequence_for<Args...>{});
+    }
 }
