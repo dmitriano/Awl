@@ -259,6 +259,7 @@ namespace awl
         return std::tuple<Args...>(args...);
     }
 
+    // Casts its arguments to a given tuple element types preserving CV qualifiers and references and returns a tuple of that arguments.
     template <typename Tuple, typename... Args>
     constexpr auto make_similar_tuple(Args&&... args)
     {
