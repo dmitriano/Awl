@@ -22,9 +22,7 @@ namespace awl
         CompositeCompare() = default;
 
         //A template parameter pack cannot have a default argument.
-        CompositeCompare(Cs... comp) : m_comps(std::move(comp) ...)
-        {
-        }
+        CompositeCompare(Cs... comp) : m_comps(std::move(comp) ...) {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {

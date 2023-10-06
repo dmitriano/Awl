@@ -50,7 +50,7 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return compositeComare.template Compare<0u>(left, right);
+            return compositeComare(left, right);
         }
 
         constexpr bool operator()(const T& val, const key_type& id) const
