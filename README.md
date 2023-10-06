@@ -122,4 +122,4 @@ or with a single command:
 
 or
 
-adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter Composite.*"
+adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter .*CompositeCompare.*"
