@@ -63,6 +63,9 @@ namespace awl
         }
 
         Tuple m_comps;
+
+        template <class T1, class ... Cs1>
+        friend class TransparentCompositeCompare;
     };
 
     template <class T, class ... Cs>

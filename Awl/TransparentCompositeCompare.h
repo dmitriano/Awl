@@ -8,12 +8,18 @@
 #include <tuple>
 
 #include "Awl/TupleHelpers.h"
+#include "Awl/CompositeCompare.h"
 
 namespace awl
 {
+    // Requires the composing comparers to have key_type.
     template <class T, class ... Cs>
     class TransparentCompositeCompare
     {
+    private:
+
+        using InternalCompositeCompare = CompositeCompare<T, Cs...>;
+
     public:
 
         using value_type = T;
@@ -25,9 +31,7 @@ namespace awl
         TransparentCompositeCompare() = default;
         
         // A template parameter pack cannot have a default argument.
-        TransparentCompositeCompare(Cs... comp) : m_comps(std::move(comp) ...)
-        {
-        }
+        TransparentCompositeCompare(Cs... comp) : compositeComare(std::move(comp) ...) {}
 
         // Makes a mixed key for heterogeneous lookup from both references and values.
         template <typename... Args>
@@ -46,7 +50,7 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return Compare<0u>(left, right);
+            return compositeComare.template Compare<0u>(left, right);
         }
 
         constexpr bool operator()(const T& val, const key_type& id) const
@@ -63,34 +67,7 @@ namespace awl
 
     private:
 
-        using Tuple = std::tuple<std::decay_t<Cs>...>;
-
-        template <std::size_t Index>
-        bool Compare(const T& left, const T& right) const
-        {
-            if constexpr (Index == std::tuple_size_v<Tuple>)
-            {
-                static_cast<void>(left);
-                static_cast<void>(right);
-                return false;
-            }
-            else
-            {
-                auto& comp = std::get<Index>(m_comps);
-
-                if (comp(left, right))
-                {
-                    return true;
-                }
-
-                if (comp(right, left))
-                {
-                    return false;
-                }
-
-                return Compare<Index + 1>(left, right);
-            }
-        }
+        using Tuple = typename InternalCompositeCompare::Tuple;
 
         template <std::size_t Index>
         bool Compare(const T& left, const key_type& right_key) const
@@ -103,7 +80,7 @@ namespace awl
             }
             else
             {
-                auto& comp = std::get<Index>(m_comps);
+                auto& comp = std::get<Index>(compositeComare.m_comps);
 
                 auto& right = std::get<Index>(right_key);
 
@@ -132,7 +109,7 @@ namespace awl
             }
             else
             {
-                auto& comp = std::get<Index>(m_comps);
+                auto& comp = std::get<Index>(compositeComare.m_comps);
 
                 auto& left = std::get<Index>(left_key);
 
@@ -150,7 +127,7 @@ namespace awl
             }
         }
 
-        Tuple m_comps;
+        InternalCompositeCompare compositeComare;
     };
 
     template <class T, class ... Cs>
