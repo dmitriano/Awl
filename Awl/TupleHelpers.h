@@ -18,6 +18,16 @@
 
 namespace awl
 {
+    // In C++17 for_each and for_each_index methods can be rewritten with
+    //
+    // std::apply([&](auto&... args) { (f(args), ...); }, t);
+    //
+    // std::size_t i = 0;
+    // std::apply([&](auto&... args) { (f(args, i++), ...); }, t);
+    //
+    // also std::apply can be used directly in ReadEach and WriteEach.
+    // But it is not clear what we gain by doing so.
+
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
@@ -35,7 +45,6 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
     {
-        // In C++17 can be rewritten as std::apply([&](auto&&... args){ (f(args), ...)}, t);
         for_each(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
