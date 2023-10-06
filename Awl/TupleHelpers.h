@@ -18,9 +18,6 @@
 
 namespace awl
 {
-//In VS2017 the value of __cplusplus is still 199711L even with enabled /std:c++17 option,
-//but with C++ 17 it should be 201402L, so we cannot use it.
-
     template <typename ... Ts>
     constexpr std::size_t sizeof_tuple(std::tuple<Ts...> const &)
     {
@@ -38,7 +35,8 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr void for_each(const std::tuple<Args...>& t, Func&& f)
     {
-        for_each(t, f, std::index_sequence_for<Args...>{});
+        // In C++17 can be rewritten as std::apply([&](auto&&... args){ (f(args), ...)}, t);
+        for_each(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
@@ -50,7 +48,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr void for_each_index(const std::tuple<Args...>& t, Func&& f)
     {
-        for_each_index(t, f, std::index_sequence_for<Args...>{});
+        for_each_index(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     //Non const for_each overloads for iterating over std::tuple<Args ...>.
@@ -64,7 +62,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr void for_each(std::tuple<Args...>& t, Func&& f)
     {
-        for_each(t, f, std::index_sequence_for<Args...>{});
+        for_each(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
@@ -76,7 +74,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr void for_each_index(std::tuple<Args...>& t, Func&& f)
     {
-        for_each_index(t, f, std::index_sequence_for<Args...>{});
+        for_each_index(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
@@ -88,7 +86,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr auto transform_tuple(const std::tuple<Args...>& t, Func&& f)
     {
-        return transform_tuple(t, f, std::index_sequence_for<Args...>{});
+        return transform_tuple(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     template <typename... Args, typename Func, std::size_t... index>
@@ -100,7 +98,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr auto transform_tuple(std::tuple<Args...>& t, Func&& f)
     {
-        return transform_tuple(t, f, std::index_sequence_for<Args...>{});
+        return transform_tuple(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     template <template <class> class T, class Tuple, std::size_t... index>
@@ -196,7 +194,7 @@ namespace awl
     template <typename... Args, typename Func>
     constexpr auto tuple_to_array(std::tuple<Args...>& t, Func&& f)
     {
-        return tuple_to_array(t, f, std::index_sequence_for<Args...>{});
+        return tuple_to_array(t, std::forward<Func>(f), std::index_sequence_for<Args...>{});
     }
 
     //Get the index of the single unique match for an arbitrary type in something tuple-like:
