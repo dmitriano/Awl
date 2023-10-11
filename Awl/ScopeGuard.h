@@ -6,6 +6,7 @@
 #pragma once
 
 #include <utility>
+#include <functional>
 
 namespace awl
 {
@@ -69,5 +70,17 @@ namespace awl
         }
 
         return make_scope_guard(std::move(free), engaged);
+    }
+
+    using virtual_guard = scope_guard<std::function<void()>>;
+
+    inline virtual_guard make_virtual_guard(std::function<void()> free)
+    {
+        return awl::make_scope_guard(free);
+    }
+
+    inline virtual_guard make_fake_guard()
+    {
+        return awl::make_virtual_guard([]() {});
     }
 }
