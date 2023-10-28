@@ -5,177 +5,19 @@
 
 #pragma once
 
-#include "Awl/Prototype.h"
-#include "Awl/Io/ReadWrite.h"
+#include "Awl/Io/BasicReader.h"
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Stringizable.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/IntRange.h"
 #include "Awl/Io/IoException.h"
-#include "Awl/Io/MpHelpers.h"
-#include "Awl/Io/TypeName.h"
-#include "Awl/Io/Metadata.h"
 
 #include <cassert>
-#include <unordered_map>
 #include <optional>
+#include <vector>
 
 namespace awl::io
 {
-    template <class V>
-    class Serializer
-    {
-    public:
-
-        using Variant = V;
-
-    protected:
-
-        using Split = helpers::split_variant<V, is_stringizable>;
-
-        using StructV = typename Split::matching;
-        using FieldV = typename Split::non_matching;
-
-        using StructIndexType = uint16_t;
-
-        template <class S>
-        static constexpr size_t StructIndex = find_variant_type_v<S, StructV>;
-
-        template <class Struct>
-        using MyAttachedPrototype = AttachedPrototype<FieldV, Struct>;
-
-        using NewPrototypeTuple = decltype(transform_v2t<StructV, MyAttachedPrototype>());
-        using NewPrototypeArray = std::array<Prototype *, std::variant_size_v<StructV>>;
-
-        NewPrototypeTuple newPrototypesTuple;
-        NewPrototypeArray newPrototypes;
-
-        using I2nMap = TypeNameVector;
-        using N2iMap = std::unordered_map<std::string, size_t>;
-
-        class TypeMapBuilder
-        {
-        private:
-
-            static constexpr size_t typeCount = std::variant_size_v<FieldV>;
-
-            static constexpr auto MakeSequence()
-            {
-                return std::make_index_sequence<typeCount>();
-            }
-
-            template <std::size_t index>
-            static std::string MakeName()
-            {
-                return make_type_name<std::variant_alternative_t<index, FieldV>>();
-            }
-
-            template <std::size_t... index>
-            static I2nMap BuildI2nMap(std::index_sequence<index...>)
-            {
-                I2nMap tm;
-                (tm.push_back(MakeName<index>()), ...);
-                return tm;
-            }
-
-            template <std::size_t... index>
-            static N2iMap BuildN2iMap(std::index_sequence<index...>)
-            {
-                N2iMap tm;
-                (tm.emplace(MakeName<index>(), index), ...);
-                return tm;
-            }
-
-        public:
-
-            static I2nMap BuildI2nMap()
-            {
-                return BuildI2nMap(MakeSequence());
-            }
-
-            static N2iMap BuildN2iMap()
-            {
-                return BuildN2iMap(MakeSequence());
-            }
-        };
-
-        Serializer() :
-            newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
-            newPrototypes(tuple_cast<Prototype>(newPrototypesTuple))
-        {
-        }
-
-    public:
-
-        //It contains the addresses of its members.
-        Serializer(const Serializer&) = delete;
-        Serializer(Serializer&&) = delete;
-        Serializer& operator = (const Serializer&) = delete;
-        Serializer& operator = (Serializer&&) = delete;
-
-        template <class S>
-        const AttachedPrototype<FieldV, S> & FindNewPrototype() const
-        {
-            constexpr size_t index = StructIndex<S>;
-            return std::get<index>(newPrototypesTuple);
-        }
-    };
-
-    template <class V, class IStream = SequentialInputStream>
-    class BasicReader : public Serializer<V>
-    {
-    private:
-
-        using Base = Serializer<V>;
-
-    public:
-
-        using InputStream = IStream;
-
-    protected:
-
-        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
-        {
-            typename Base::StructIndexType index;
-            Read(s, index);
-            return index;
-        }
-    };
-
-    template <class V, class IStream = SequentialInputStream>
-    class PlainReader : public BasicReader<V, IStream>
-    {
-    private:
-
-        using Base = BasicReader<V, IStream>;
-
-    public:
-
-        using InputStream = IStream;
-
-        //Reads entire object tree assuming all the prototypes are equal.
-        template<class Struct>
-        void ReadV(InputStream & s, Struct & val) const
-        {
-            if constexpr (is_stringizable_v<Struct>)
-            {
-                this->ReadStructIndex(s);
-            }
-
-            if constexpr (is_tuplizable_v<Struct>)
-            {
-                for_each(object_as_tuple(val), [this, &s](auto& field)
-                {
-                    this->ReadV(s, field);
-                });
-            }
-            else
-            {
-                Read(s, val, *this);
-            }
-        }
-    };
-
     template <class V, class IStream = SequentialInputStream>
     class Reader : public BasicReader<V, IStream>
     {
@@ -638,67 +480,5 @@ namespace awl::io
         mutable std::vector<std::optional<ProtoMap>> protoMaps;
 
         typename Base::I2nMap typeMap;
-    };
-
-    template <class V, class OStream = SequentialOutputStream>
-    class Writer : public Serializer<V>
-    {
-    private:
-
-        using Base = Serializer<V>;
-
-    public:
-
-        using OutputStream = OStream;
-
-        template <class Stream>
-        void WriteNewPrototypes(Stream & s) const
-        {
-            //Write type map
-            typename Base::I2nMap tm = Base::TypeMapBuilder::BuildI2nMap();
-            Write(s, tm);
-
-            //Write std::array.
-            Write(s, this->newPrototypes.size());
-
-            for (Prototype * p : this->newPrototypes)
-            {
-                const size_t count = p->GetCount();
-                Write(s, count);
-
-                for (size_t i = 0; i < count; ++i)
-                {
-                    Field f = p->GetField(i);
-                    //Write name as string_view but read as string.
-                    const size_t len = f.name.length();
-                    Write(s, len);
-                    s.Write(reinterpret_cast<const uint8_t *>(f.name.data()), len * sizeof(char));
-                    Write(s, f.type);
-                }
-            }
-        }
-
-        //Writes the object tree and adds indices to the structures.
-        template<class Struct>
-        void WriteV(OutputStream & s, const Struct & val) const
-        {
-            if constexpr (is_stringizable_v<Struct>)
-            {
-                const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
-                Write(s, index);
-            }
-
-            if constexpr (is_tuplizable_v<Struct>)
-            {
-                for_each(object_as_tuple(val), [this, &s](auto& field)
-                {
-                    this->WriteV(s, field);
-                });
-            }
-            else
-            {
-                Write(s, val, *this);
-            }
-        }
     };
 }
