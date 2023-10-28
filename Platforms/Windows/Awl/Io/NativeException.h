@@ -20,7 +20,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return format() << _T("Fatal Win32 exception. Error code: ") << dwError << _T(" .");
         }

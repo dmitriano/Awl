@@ -13,7 +13,7 @@ using namespace awl::io;
 
 static void Print(const TestContext & context, const awl::Exception & e)
 {
-    context.out << e.GetClassName() << _T(" ") << e.GetMessage() << std::endl;
+    context.out << e.GetClassName() << _T(" ") << e.What() << std::endl;
 }
 
 static void EncodeDecode(const TestContext &, const std::wstring sample)

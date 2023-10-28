@@ -22,7 +22,7 @@ int _tmain(int argc, awl::Char * argv[])
     }
     catch (const awl::testing::TestException& e)
     {
-        awl::cout() << e.GetMessage() << std::endl;
+        awl::cout() << e.What() << std::endl;
     }
 }
 

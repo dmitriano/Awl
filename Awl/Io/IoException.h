@@ -23,7 +23,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(" .");
         }
@@ -42,7 +42,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             format out;
 
@@ -86,7 +86,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return theMessage;
         }
@@ -100,7 +100,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return format() << _T("Field '") << FromAString(fieldName) << _T("' not found.") << _T(" .");
         }
@@ -119,7 +119,7 @@ namespace awl::io
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return format() << _T("Expected '") << FromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
         }

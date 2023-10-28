@@ -122,7 +122,7 @@ namespace awl::testing
         {
             context.out << std::endl << test_map->GetLastOutput();
 
-            context.out << std::endl << _T("***************** The tests failed: ") << e.GetMessage() << std::endl;
+            context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }
 
         awl::testing::Shutdown();
@@ -138,7 +138,7 @@ namespace awl::testing
         }
         catch (const TestException& e)
         {
-            cout() << _T("The following error has occurred: ") << e.GetMessage() << std::endl;
+            cout() << _T("The following error has occurred: ") << e.What() << std::endl;
         }
 
         return 2;

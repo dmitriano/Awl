@@ -21,7 +21,7 @@ namespace awl
             return FromACString(what());
         }
         
-        virtual String GetMessage() const
+        virtual String What() const
         {
             return GetClassName();
         }
@@ -48,7 +48,7 @@ namespace awl
         {
         }
 
-        String GetMessage() const override
+        String What() const override
         {
             return theMessage;
         }
