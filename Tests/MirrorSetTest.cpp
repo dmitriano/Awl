@@ -20,7 +20,7 @@ namespace
         size_t key2;
         size_t value;
 
-        AWL_SERIALIZABLE(key1, key2, value)
+        AWL_TUPLIZABLE(key1, key2, value)
     };
 
     AWL_MEMBERWISE_EQUATABLE(A)

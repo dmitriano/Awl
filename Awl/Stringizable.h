@@ -183,7 +183,7 @@ namespace awl
 }
 
 #define AWL_STRINGIZABLE(...) \
-    AWL_SERIALIZABLE(__VA_ARGS__) \
+    AWL_TUPLIZABLE(__VA_ARGS__) \
     static const awl::helpers::MemberList & get_member_names() \
     { \
         static const char va[] = #__VA_ARGS__; \

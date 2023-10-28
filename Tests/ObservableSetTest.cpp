@@ -38,7 +38,7 @@ namespace
         }
 
         //for testing
-        AWL_SERIALIZABLE(key)
+        AWL_TUPLIZABLE(key)
     };
 }
 

@@ -22,7 +22,7 @@ namespace awl::io
         TypeNameVector typeNames;
         PrototypeVector prototypes;
 
-        AWL_SERIALIZABLE(typeNames, prototypes)
+        AWL_TUPLIZABLE(typeNames, prototypes)
     };
 
     AWL_MEMBERWISE_EQUATABLE(Metadata)

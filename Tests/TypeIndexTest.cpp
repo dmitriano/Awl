@@ -18,7 +18,7 @@ namespace
         bool x;
         int y;
 
-        AWL_SERIALIZABLE(x, y)
+        AWL_TUPLIZABLE(x, y)
     };
 
     struct B
@@ -26,7 +26,7 @@ namespace
         A a;
         double z;
 
-        AWL_SERIALIZABLE(a, z)
+        AWL_TUPLIZABLE(a, z)
     };
 
     struct C
@@ -36,7 +36,7 @@ namespace
         A a;
         std::vector<std::string> e;
 
-        AWL_SERIALIZABLE(d, b, a, e)
+        AWL_TUPLIZABLE(d, b, a, e)
     };
 
     struct D
@@ -45,7 +45,7 @@ namespace
         B b;
         A a;
 
-        AWL_SERIALIZABLE(c, b, a)
+        AWL_TUPLIZABLE(c, b, a)
     };
 
     static_assert(countof_fields<A>() == 2);

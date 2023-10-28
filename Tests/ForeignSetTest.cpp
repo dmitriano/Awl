@@ -22,7 +22,7 @@ namespace
         int pk;
         int fk;
 
-        AWL_SERIALIZABLE(pk, fk)
+        AWL_TUPLIZABLE(pk, fk)
     };
     
     AWL_MEMBERWISE_EQUATABLE(A)

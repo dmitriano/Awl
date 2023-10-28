@@ -56,7 +56,7 @@ namespace
     //Another option is to derive our class from A and make the derived class serializable.
     struct AWrapper : A
     {
-        AWL_SERIALIZABLE(x, y)
+        AWL_TUPLIZABLE(x, y)
     };
 
     AWL_MEMBERWISE_EQUATABLE(AWrapper)
@@ -66,7 +66,7 @@ namespace
     {
     public:
 
-        AWL_SERIALIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b, m_dec)
+        AWL_TUPLIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b, m_dec)
 
     private:
 

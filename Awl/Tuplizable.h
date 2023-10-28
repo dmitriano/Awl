@@ -81,7 +81,7 @@ namespace awl
 
 //Used inside of a class definition for defining as_tuple() member functions.
 //Theoretically all the as_tuple() overloads can be constexpr, but GCC 4.9 does not compile it.
-#define AWL_SERIALIZABLE(...) \
+#define AWL_TUPLIZABLE(...) \
     constexpr auto as_const_tuple() const \
     { \
         return std::tie(__VA_ARGS__); \

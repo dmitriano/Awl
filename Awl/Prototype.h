@@ -22,7 +22,7 @@ namespace awl
         std::string_view name;
         size_t type;
 
-        AWL_SERIALIZABLE(name, type)
+        AWL_TUPLIZABLE(name, type)
     };
 
     AWL_MEMBERWISE_EQUATABLE(Field)
@@ -112,7 +112,7 @@ namespace awl
             std::string name;
             size_t type;
 
-            AWL_SERIALIZABLE(name, type)
+            AWL_TUPLIZABLE(name, type)
         };
 
         DetachedPrototype() = default;
@@ -153,7 +153,7 @@ namespace awl
             m_fields[index].type = type;
         }
 
-        AWL_SERIALIZABLE(m_fields)
+        AWL_TUPLIZABLE(m_fields)
 
     private:
 

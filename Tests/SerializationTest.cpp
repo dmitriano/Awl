@@ -121,7 +121,7 @@ namespace awl
             bool x;
             int y;
 
-            AWL_SERIALIZABLE(x, y)
+            AWL_TUPLIZABLE(x, y)
         };
 
         struct B
@@ -131,7 +131,7 @@ namespace awl
             //std::string x;
             double z;
 
-            AWL_SERIALIZABLE(a, z)
+            AWL_TUPLIZABLE(a, z)
         };
 
         struct C
@@ -139,7 +139,7 @@ namespace awl
             A a;
             int * p;
 
-            AWL_SERIALIZABLE(a, p)
+            AWL_TUPLIZABLE(a, p)
         };
 
         static_assert(is_tuplizable_v<A>);

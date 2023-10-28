@@ -447,7 +447,7 @@ namespace
         }
 
         //for testing
-        AWL_SERIALIZABLE(key)
+        AWL_TUPLIZABLE(key)
     };
 
     //for testing
@@ -630,7 +630,7 @@ namespace
         }
 
         //for testing
-        AWL_SERIALIZABLE(key)
+        AWL_TUPLIZABLE(key)
 
     private:
 
