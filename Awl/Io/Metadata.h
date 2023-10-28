@@ -6,7 +6,7 @@
 #pragma once
 
 #include  "Awl/Prototype.h"
-#include  "Awl/Serializable.h"
+#include  "Awl/Tuplizable.h"
 
 #include <cassert>
 #include <vector>

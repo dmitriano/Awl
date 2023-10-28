@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Awl/Serializable.h"
+#include "Awl/Tuplizable.h"
 
 #include <tuple> 
 #include <utility> 

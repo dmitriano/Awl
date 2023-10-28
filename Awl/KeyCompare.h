@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/FunctionTraits.h"
-#include "Awl/Serializable.h"
+#include "Awl/Tuplizable.h"
 #include "Awl/TypeTraits.h"
 
 #include <type_traits>
