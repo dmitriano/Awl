@@ -56,6 +56,8 @@ AWT_TEST(ExceptionTryCatch)
     }
     catch (const std::exception & e)
     {
+        AWT_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
+
         context.out << awl::FromACString(e.what()) << std::endl;
 
         auto * p_awl_e = dynamic_cast<const awl::Exception *>(&e);
