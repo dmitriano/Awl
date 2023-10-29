@@ -66,3 +66,18 @@ AWT_TEST(ExceptionTryCatch)
         }
     }
 }
+
+AWT_TEST(ExceptionClassName)
+{
+    {
+        EndOfFileException e(5, 3);
+        Print(context, e);
+        AWT_ASSERT(strcmp(e.what(), typeid(EndOfFileException).name()) == 0);
+    }
+
+    {
+        TestException e(_T("abc"));
+        Print(context, e);
+        AWT_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
+    }
+}
