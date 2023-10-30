@@ -24,6 +24,7 @@ namespace
 {
     awl::Char master_name[] = _T("atomic_storage.dat");
     awl::Char backup_name[] = _T("atomic_storage.bak");
+    awl::Char temp_name[] = _T("atomic_storage.tmp");
 
     void RemoveFiles()
     {
@@ -51,6 +52,21 @@ namespace
         ++bad;
         s.Write(&bad, 1);
         s.Flush();
+    }
+
+    void SwapFiles()
+    {
+        fs::rename(master_name, temp_name);
+        fs::rename(backup_name, master_name);
+        fs::rename(temp_name, backup_name);
+
+        //awl::io::UniqueStream s = awl::io::CreateUniqueFile(master_name);
+    }
+
+    void DuplicateMaserFile()
+    {
+        fs::remove(backup_name);
+        fs::copy(master_name, backup_name);
     }
 
     using Hash = awl::crypto::Crc64;
@@ -101,6 +117,7 @@ AWT_TEST(AtomicStoragePlain)
         storage.Save(hashed_val);
     }
 
+    auto load = [&logger]()
     {
         v2::B b;
         Value val(b);
@@ -108,7 +125,18 @@ AWT_TEST(AtomicStoragePlain)
         awl::io::AtomicStorage storage(logger);
         AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
         AWT_ASSERT(b == v2::b_expected);
-    }
+    };
+
+    load();
+
+    SwapFiles();
+
+    load();
+
+    DuplicateMaserFile();
+    CorruptFile(master_name);
+
+    load();
 }
 
 AWT_TEST(AtomicStorageVts)
@@ -166,6 +194,7 @@ AWT_TEST(AtomicStorageVts)
         storage.Save(hashed_val);
     }
 
+    auto load = [&logger]()
     {
         v2::B b;
         Value2 val(b);
@@ -173,5 +202,16 @@ AWT_TEST(AtomicStorageVts)
         awl::io::AtomicStorage storage(logger);
         AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
         AWT_ASSERT(b == v2::b_expected);
-    }
+    };
+
+    load();
+
+    SwapFiles();
+
+    load();
+
+    DuplicateMaserFile();
+    CorruptFile(master_name);
+
+    load();
 }
