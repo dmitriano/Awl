@@ -34,7 +34,7 @@ namespace awl::io
             }
         }
 
-        void Write(OStream& s) const
+        void Write(OStream& s) const override
         {
             awl::io::Write(s, m_val);
         }
