@@ -8,16 +8,13 @@
 
 using namespace awl::io;
 
-bool AtomicStorage::Load(Value& val, const awl::String& file_name, const awl::String& backup_name)
+bool AtomicStorage::Load(Value& val)
 {
-    bool backup_success;
-    std::tie(m_backup, backup_success) = LoadFromFile(val, backup_name, LogLevel::Debug);
+    bool backup_success = LoadFromFile(val, m_backup, LogLevel::Debug);
 
     if (backup_success)
     {
-        m_logger.warning(format() << _T("The settings have been loaded from backup file '") << backup_name << _T("'."));
-
-        m_s = awl::io::CreateUniqueFile(file_name);
+        m_logger.warning(format() << _T("The settings have been loaded from backup file '") << m_backup.GetFileName() << _T("'."));
 
         WriteToStream(m_s, val);
     }
@@ -31,8 +28,7 @@ bool AtomicStorage::Load(Value& val, const awl::String& file_name, const awl::St
 
     //No need to reset the data after unsuccessful read because Serializable::Read should do std::mvoe in its implementation.
 
-    bool master_success;
-    std::tie(m_s, master_success) = LoadFromFile(val, file_name, LogLevel::Warning);
+    bool master_success = LoadFromFile(val, m_s, LogLevel::Warning);
 
     return master_success;
 }
@@ -46,16 +42,12 @@ void AtomicStorage::Save(const Value& val)
     ClearBackup();
 }
 
-std::tuple<awl::io::UniqueStream, bool> AtomicStorage::LoadFromFile(Value& val, const awl::String& file_name, LogLevel level)
+bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, LogLevel level)
 {
     bool success = false;
 
-    awl::io::UniqueStream s;
-
     try
     {
-        s = awl::io::CreateUniqueFile(file_name);
-
         ReadFromStream(s, val);
         
         if (s.End())
@@ -69,22 +61,22 @@ std::tuple<awl::io::UniqueStream, bool> AtomicStorage::LoadFromFile(Value& val, 
     }
     catch (const awl::io::CorruptionException&)
     {
-        m_logger.log(level, (format() << _T("Corrupted settings file '") << file_name << _T("'.")));
+        m_logger.log(level, (format() << _T("Corrupted settings file '") << s.GetFileName() << _T("'.")));
     }
     catch (const awl::io::EndOfFileException&)
     {
-        m_logger.log(level, (format() << _T("Unexpected end of settings file '") << file_name << _T("'.")));
+        m_logger.log(level, (format() << _T("Unexpected end of settings file '") << s.GetFileName() << _T("'.")));
     }
     catch (const awl::io::TypeMismatchException& e)
     {
-        m_logger.log(level, (format() << _T("Type mismatch error ") << e.What() << _T(" in the settings file '") << file_name <<
+        m_logger.log(level, (format() << _T("Type mismatch error ") << e.What() << _T(" in the settings file '") << s.GetFileName() <<
             _T("' Did you include all the types including those that were removed ? .")));
     }
     catch (const awl::io::IoException& e)
     {
-        m_logger.log(level, (format() << _T("General IO exception in '") << file_name <<
+        m_logger.log(level, (format() << _T("General IO exception in '") << s.GetFileName() <<
             _T("': ") << e.What()));
     }
 
-    return std::make_tuple(std::move(s), success);
+    return success;
 }

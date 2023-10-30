@@ -213,33 +213,42 @@ AWT_TEST(AtomicStorageVts)
     load();
 }
 
+namespace
+{
+    awl::io::AtomicStorage MakeStorage(awl::Logger& logger)
+    {
+        awl::io::AtomicStorage storage(logger);
+
+        storage.Open(master_name, backup_name);
+
+        return storage;
+    }
+}
+
 AWT_TEST(AtomicStorageMove)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
     awl::ConsoleLogger logger(context.out);
 
-    awl::io::AtomicStorage storage(logger);
+    awl::io::AtomicStorage storage = MakeStorage(logger);
 
-    awl::io::AtomicStorage storage1 = std::move(storage);
-
-    //storage1 = std::move(storage);
-
-    /*
     {
         v1::B b = v1::b_expected;
         Value1 val(b);
         HashingSerializable hashed_val(val);
-        AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(!storage.Load(hashed_val));
         AWT_ASSERT(b == v1::b_expected);
         storage.Save(hashed_val);
     }
+
+    awl::io::AtomicStorage storage1 = std::move(storage);
 
     {
         v2::B b;
         Value2 val(b);
         HashingSerializable hashed_val(val);
+        storage1.Load(hashed_val);
         AWT_ASSERT(b == v2::b_expected);
     }
-    */
 }

@@ -27,8 +27,19 @@ namespace awl::io
         AtomicStorage& operator = (const AtomicStorage&) = delete;
         AtomicStorage& operator = (AtomicStorage&&) = delete;
 
-        // TODO: Separate Open and Load and make Storage::UpdateStream return opened AtomicStorage.
-        bool Load(Value& val, const awl::String& file_name, const awl::String& backup_name);
+        void Open(const awl::String& file_name, const awl::String& backup_name)
+        {
+            m_s = awl::io::CreateUniqueFile(file_name);
+            m_backup = awl::io::CreateUniqueFile(backup_name);
+        }
+
+        bool Load(Value& val);
+
+        bool Load(Value& val, const awl::String& file_name, const awl::String& backup_name)
+        {
+            Open(file_name, backup_name);
+            return Load(val);
+        }
 
         void Save(const Value& val);
 
@@ -36,6 +47,8 @@ namespace awl::io
 
         static void ReadFromStream(UniqueStream& s, Value& val)
         {
+            s.Seek(0);
+
             val.Read(s);
         }
 
@@ -49,7 +62,7 @@ namespace awl::io
             s.Flush();
         }
 
-        std::tuple<awl::io::UniqueStream, bool> LoadFromFile(Value& val, const awl::String& file_name, LogLevel level);
+        bool LoadFromFile(Value& val, awl::io::UniqueStream& s, LogLevel level);
 
         void ClearBackup()
         {
