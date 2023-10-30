@@ -66,7 +66,38 @@ AWT_TEST(AtomicStoragePlain)
 
     awl::ConsoleLogger logger(context.out);
 
-    using Value = awl::io::PlainSerializable<v2::B, awl::io::UniqueStream, awl::io::UniqueStream>;
+    using Value = awl::io::PlainSerializable<v2::B, HashInputStream, HashOutputStream>;
+
+    {
+        v2::B b = v2::b_expected;
+        Value val(b);
+        HashingSerializable hashed_val(val);
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v2::b_expected);
+        storage.Save(hashed_val);
+    }
+
+    {
+        v2::B b;
+        Value val(b);
+        HashingSerializable hashed_val(val);
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v2::b_expected);
+    }
+
+    CorruptFile(master_name);
+
+    {
+        v2::B b;
+        const v2::B saved_b = b;
+        Value val(b);
+        HashingSerializable hashed_val(val);
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == saved_b);
+    }
 }
 
 AWT_TEST(AtomicStorageVts)
@@ -104,12 +135,9 @@ AWT_TEST(AtomicStorageVts)
         v2::B b;
         Value2 val(b);
         HashingSerializable hashed_val(val);
-
-        {
-            awl::io::AtomicStorage storage(logger);
-            AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
-            AWT_ASSERT(b == v2::b_expected);
-        }
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v2::b_expected);
     }
 
     CorruptFile(master_name);
@@ -119,11 +147,8 @@ AWT_TEST(AtomicStorageVts)
         const v2::B saved_b = b;
         Value2 val(b);
         HashingSerializable hashed_val(val);
-
-        {
-            awl::io::AtomicStorage storage(logger);
-            AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
-            AWT_ASSERT(b == saved_b);
-        }
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == saved_b);
     }
 }

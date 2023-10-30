@@ -10,7 +10,7 @@
 
 namespace awl::io
 {
-    template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
+    template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream, bool atomic = true>
     class PlainSerializable : public Serializable<IStream, OStream>
     {
     public:
@@ -19,7 +19,19 @@ namespace awl::io
 
         void Read(IStream& s) override
         {
-            awl::io::Read(s, m_val);
+            if constexpr (atomic)
+            {
+                T val;
+
+                awl::io::Read(s, val);
+
+                //If Read throws m_val does not change.
+                m_val = std::move(val);
+            }
+            else
+            {
+                awl::io::Read(s, m_val);
+            }
         }
 
         void Write(OStream& s) const
