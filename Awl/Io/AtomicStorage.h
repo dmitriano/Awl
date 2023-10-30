@@ -42,7 +42,7 @@ namespace awl::io
             s.Flush();
         }
 
-        std::tuple<awl::io::UniqueStream, bool> LoadFromFile(Value& val, const awl::String& file_name, Logger::Level level);
+        std::tuple<awl::io::UniqueStream, bool> LoadFromFile(Value& val, const awl::String& file_name, LogLevel level);
 
         void ClearBackup()
         {

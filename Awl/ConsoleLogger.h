@@ -19,7 +19,7 @@ namespace awl
 
         ConsoleLogger(awl::ostream& out = awl::cout()) : m_out(out) {}
 
-        void log(Level level, String message) override
+        void log(LogLevel level, String message) override
         {
             m_out << std::chrono::system_clock::now() << _T('\t') <<
                 awl::FromAString(enum_to_string(level)) << _T('\t') << message << std::endl;

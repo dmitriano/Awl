@@ -10,47 +10,50 @@
 
 namespace awl
 {
+    AWL_SEQUENTIAL_ENUM(LogLevel,
+        Debug,
+        Trace,
+        Info,
+        Warning,
+        Error
+    )
+}
+
+AWL_ENUM_TRAITS(awl, LogLevel)
+
+namespace awl
+{
     class Logger
     {
     public:
 
-        AWL_SEQUENTIAL_ENUM(Level,
-            Debug,
-            Trace,
-            Info,
-            Warning,
-            Error
-        );
-
         virtual ~Logger() = default;
 
-        virtual void log(Level level, String message) = 0;
+        virtual void log(LogLevel level, String message) = 0;
 
         void debug(String message)
         {
-            log(Level::Debug, message);
+            log(LogLevel::Debug, message);
         }
 
         void trace(String message)
         {
-            log(Level::Trace, message);
+            log(LogLevel::Trace, message);
         }
 
         void info(String message)
         {
-            log(Level::Info, message);
+            log(LogLevel::Info, message);
         }
         
         void warning(String message)
         {
-            log(Level::Warning, message);
+            log(LogLevel::Warning, message);
         }
 
         void error(String message)
         {
-            log(Level::Error, message);
+            log(LogLevel::Error, message);
         }
     };
-
-    AWL_ENUM_TRAITS(Logger, Level)
 }

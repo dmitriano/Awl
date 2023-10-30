@@ -11,7 +11,7 @@ using namespace awl::io;
 bool AtomicStorage::Load(Value& val, const awl::String& file_name, const awl::String& backup_name)
 {
     bool backup_success;
-    std::tie(m_backup, backup_success) = LoadFromFile(val, backup_name, Logger::Level::Debug);
+    std::tie(m_backup, backup_success) = LoadFromFile(val, backup_name, LogLevel::Debug);
 
     if (backup_success)
     {
@@ -32,7 +32,7 @@ bool AtomicStorage::Load(Value& val, const awl::String& file_name, const awl::St
     //No need to reset the data after unsuccessful read because Serializable::Read should do std::mvoe in its implementation.
 
     bool master_success;
-    std::tie(m_s, master_success) = LoadFromFile(val, file_name, Logger::Level::Warning);
+    std::tie(m_s, master_success) = LoadFromFile(val, file_name, LogLevel::Warning);
 
     return master_success;
 }
@@ -46,7 +46,7 @@ void AtomicStorage::Save(const Value& val)
     ClearBackup();
 }
 
-std::tuple<awl::io::UniqueStream, bool> AtomicStorage::LoadFromFile(Value& val, const awl::String& file_name, Logger::Level level)
+std::tuple<awl::io::UniqueStream, bool> AtomicStorage::LoadFromFile(Value& val, const awl::String& file_name, LogLevel level)
 {
     bool success = false;
 
