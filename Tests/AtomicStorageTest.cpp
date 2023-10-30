@@ -37,21 +37,20 @@ namespace
 
         auto len = s.GetLength();
 
-        if (len != 0)
-        {
-            std::uniform_int_distribution<size_t> dist(1, len - 1);
+        AWT_ASSERT(len != 0);
 
-            const size_t i = dist(awl::random());
+        std::uniform_int_distribution<size_t> dist(1, len - 1);
 
-            s.Seek(i);
-            uint8_t bad;
-            s.Read(&bad, 1);
+        const size_t i = dist(awl::random());
 
-            s.Seek(i);
-            ++bad;
-            s.Write(&bad, 1);
-            s.Flush();
-        }
+        s.Seek(i);
+        uint8_t bad;
+        s.Read(&bad, 1);
+
+        s.Seek(i);
+        ++bad;
+        s.Write(&bad, 1);
+        s.Flush();
     }
 
     using Hash = awl::crypto::Crc64;
