@@ -59,8 +59,6 @@ namespace
         fs::rename(master_name, temp_name);
         fs::rename(backup_name, master_name);
         fs::rename(temp_name, backup_name);
-
-        //awl::io::UniqueStream s = awl::io::CreateUniqueFile(master_name);
     }
 
     void DuplicateMaserFile()
