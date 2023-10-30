@@ -54,9 +54,7 @@ namespace awl::io
 
             if (::WriteFile(m_hFile, buffer, nNumberOfBytesToWrite, &NumberOfBytesWritten, NULL) == FALSE)
             {
-                throw IoError(format()
-                    << _T("::WriteFile failed. This may indicate that the disk is full. Win32 Error: ")
-                    << ::GetLastError());
+                throw Win32Exception(_T("::WriteFile failed. This may indicate that the disk is full. Win32 Error: "));
             }
 
             if (nNumberOfBytesToWrite != NumberOfBytesWritten)
@@ -157,9 +155,7 @@ namespace awl::io
 
         if (hFile == INVALID_HANDLE_VALUE)
         {
-            DWORD dw_err = ::GetLastError();
-
-            throw IoError(format() << _T("Cannot open file ')" << file_name << "' for updating, error = " << dw_err));
+            throw Win32Exception(format() << _T("Cannot open file ')") << file_name << _T("' for updating"));
         }
 
         return hFile;
@@ -185,9 +181,7 @@ namespace awl::io
 
         if (hFile == INVALID_HANDLE_VALUE)
         {
-            DWORD dw_err = ::GetLastError();
-
-            throw IoError(format() << _T("Cannot open file ')" << file_name << "' for reading, error = " << dw_err));
+            throw Win32Exception(format() << _T("Cannot open file ')") << file_name << _T("' for reading."));
         }
 
         return hFile;
