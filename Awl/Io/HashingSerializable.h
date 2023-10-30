@@ -16,10 +16,10 @@ namespace awl::io
     {
     private:
 
-        using HashInputStream = HashInputStream<Hash, IStream>;
-        using HashOutputStream = HashOutputStream<Hash, OStream>;
+        using HashIStream = HashInputStream<Hash, IStream>;
+        using HashOStream = HashOutputStream<Hash, OStream>;
 
-        using Value = Serializable<HashInputStream, HashOutputStream>;
+        using Value = Serializable<HashIStream, HashOStream>;
 
     public:
 
@@ -31,14 +31,14 @@ namespace awl::io
 
         void Read(IStream& s) override
         {
-            HashInputStream in(s, m_blockSize, m_hash);
+            HashIStream in(s, m_blockSize, m_hash);
 
             m_val.Read(in);
         }
 
         void Write(OStream& s) const override
         {
-            HashOutputStream out(s, m_blockSize, m_hash);
+            HashOStream out(s, m_blockSize, m_hash);
 
             m_val.Write(out);
         }
