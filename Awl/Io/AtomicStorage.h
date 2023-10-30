@@ -35,12 +35,6 @@ namespace awl::io
 
         bool Load(Value& val);
 
-        bool Load(Value& val, const awl::String& file_name, const awl::String& backup_name)
-        {
-            Open(file_name, backup_name);
-            return Load(val);
-        }
-
         void Save(const Value& val);
 
     private:
