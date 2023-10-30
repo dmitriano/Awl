@@ -9,7 +9,11 @@
 #include "Awl/Io/VersionTolerantSerializable.h"
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/ConsoleLogger.h"
+#include "Awl/ScopeGuard.h"
 #include "VtsData.h"
+
+#include <filesystem>
+namespace fs = std::filesystem;
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
@@ -18,11 +22,19 @@ namespace
 {
     awl::Char master_name[] = _T("atomic_storage.dat");
     awl::Char backup_name[] = _T("atomic_storage.bak");
+
+    void RemoveFiles()
+    {
+        fs::remove(master_name);
+        fs::remove(backup_name);
+    }
 }
 
 AWT_TEST(AtomicStorage)
 {
     AWT_UNUSED_CONTEXT;
+
+    auto guard = awl::make_scope_guard(RemoveFiles);
     
     awl::ConsoleLogger logger;
 
@@ -48,7 +60,7 @@ AWT_TEST(AtomicStorage)
     }
 
     {
-        v2::B b = v2::b_expected;
+        v2::B b;
         awl::io::VersionTolerantSerializable<v2::B, V2, awl::io::UniqueStream, awl::io::UniqueStream> val(b);
 
         {
