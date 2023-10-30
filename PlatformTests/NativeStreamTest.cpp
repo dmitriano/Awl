@@ -7,6 +7,7 @@
 #include "Awl/Io/BufferedStream.h"
 
 #include "Awl/String.h"
+#include "Awl/ScopeGuard.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -15,11 +16,19 @@
 
 using namespace awl::testing;
 
-AWT_TEST(NativeStream)
+namespace
 {
     const awl::Char file_name[] = _T("native.dat");
 
-    std::filesystem::remove(file_name);
+    void RemoveFile()
+    {
+        std::filesystem::remove(file_name);
+    }
+}
+
+AWT_TEST(NativeStream)
+{
+    auto guard = awl::make_scope_guard(RemoveFile);
 
     const std::vector<uint8_t> sample = {'A', 'B', 'C', 'D'};
 
@@ -81,4 +90,13 @@ AWT_TEST(NativeStream)
 
         AWT_ASSERT(std::ranges::equal(sample | std::ranges::views::take(pos), actual));
     }
+}
+
+AWT_TEST(NativeStreamFileName)
+{
+    auto guard = awl::make_scope_guard(RemoveFile);
+
+    awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
+
+    context.out << s.GetFileName() << std::endl;
 }

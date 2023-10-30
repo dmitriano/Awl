@@ -219,8 +219,6 @@ AWT_TEST(AtomicStorageMove)
 
     awl::ConsoleLogger logger(context.out);
 
-    using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
-
     awl::io::AtomicStorage storage(logger);
 
     awl::io::AtomicStorage storage1 = std::move(storage);

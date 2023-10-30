@@ -97,6 +97,20 @@ namespace awl::io
             Check(::SetEndOfFile(m_hFile) != FALSE);
         }
 
+        String GetFileName() const
+        {
+            TCHAR buf[MAX_PATH];
+            // It is not clear what is the difference with FILE_NAME_NORMALIZED.
+            const DWORD len = GetFinalPathNameByHandle(m_hFile, buf, MAX_PATH, FILE_NAME_OPENED);
+
+            if (len > MAX_PATH)
+            {
+                return _T("<Too long path>");
+            }
+
+            return buf;
+        }
+
     private:
 
         void Check(bool success)

@@ -12,6 +12,9 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/NativeException.h"
 
+// #include <linux/limits.h>
+// #include <fcntl.h>
+
 namespace awl::io
 {
     template <class FileHandle>
@@ -95,6 +98,19 @@ namespace awl::io
             Check(pos);
 
             Check(::ftruncate(m_hFile, pos));
+        }
+
+        String GetFileName() const
+        {
+            /*
+            char buf[PATH_MAX];
+            if (fcntl(m_hFile, F_GETPATH, buf) != -1)
+            {
+                return buf;
+            }
+            */
+
+            return _T("<unknown path>");
         }
 
     private:
