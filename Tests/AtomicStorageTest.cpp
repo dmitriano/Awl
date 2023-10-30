@@ -71,6 +71,9 @@ namespace
     using HashInputStream = awl::io::HashInputStream<Hash, awl::io::UniqueStream>;
     using HashOutputStream = awl::io::HashOutputStream<Hash, awl::io::UniqueStream>;
     using HashingSerializable = awl::io::HashingSerializable<awl::io::UniqueStream, awl::io::UniqueStream, Hash>;
+
+    using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
+    using Value2 = awl::io::VersionTolerantSerializable<v2::B, V2, HashInputStream, HashOutputStream>;
 }
 
 AWT_TEST(AtomicStoragePlain)
@@ -143,8 +146,6 @@ AWT_TEST(AtomicStorageVts)
 
     awl::ConsoleLogger logger(context.out);
 
-    using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
-
     {
         {
             v1::B b = v1::b_expected;
@@ -165,8 +166,6 @@ AWT_TEST(AtomicStorageVts)
             AWT_ASSERT(b == v1::b_expected);
         }
     }
-
-    using Value2 = awl::io::VersionTolerantSerializable<v2::B, V2, HashInputStream, HashOutputStream>;
 
     {
         v2::B b;
@@ -212,4 +211,37 @@ AWT_TEST(AtomicStorageVts)
     CorruptFile(master_name);
 
     load();
+}
+
+AWT_TEST(AtomicStorageMove)
+{
+    auto guard = awl::make_scope_guard(RemoveFiles);
+
+    awl::ConsoleLogger logger(context.out);
+
+    using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
+
+    awl::io::AtomicStorage storage(logger);
+
+    awl::io::AtomicStorage storage1 = std::move(storage);
+
+    //storage1 = std::move(storage);
+
+    /*
+    {
+        v1::B b = v1::b_expected;
+        Value1 val(b);
+        HashingSerializable hashed_val(val);
+        AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v1::b_expected);
+        storage.Save(hashed_val);
+    }
+
+    {
+        v2::B b;
+        Value2 val(b);
+        HashingSerializable hashed_val(val);
+        AWT_ASSERT(b == v2::b_expected);
+    }
+    */
 }

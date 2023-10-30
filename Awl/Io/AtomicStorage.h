@@ -21,6 +21,13 @@ namespace awl::io
 
         AtomicStorage(Logger& logger) : m_logger(logger) {}
 
+        AtomicStorage(const AtomicStorage&) = delete;
+        AtomicStorage(AtomicStorage&&) = default;
+
+        AtomicStorage& operator = (const AtomicStorage&) = delete;
+        AtomicStorage& operator = (AtomicStorage&&) = delete;
+
+        // TODO: Separate Open and Load and make Storage::UpdateStream return opened AtomicStorage.
         bool Load(Value& val, const awl::String& file_name, const awl::String& backup_name);
 
         void Save(const Value& val);
