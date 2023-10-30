@@ -33,7 +33,10 @@ namespace awl::io
         AtomicStorage& operator = (const AtomicStorage&) = delete;
         AtomicStorage& operator = (AtomicStorage&&) = delete;
 
-        // TODO: Implement IsOpened().
+        bool IsOpened() const
+        {
+            return m_s != UniqueStream{};
+        }
 
         void Open(const awl::String& file_name, const awl::String& backup_name)
         {

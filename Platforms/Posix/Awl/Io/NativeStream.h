@@ -28,6 +28,11 @@ namespace awl::io
         {
         }
 
+        bool operator == (const PosixStream& other) const
+        {
+            return m_hFile == other.m_hFile;
+        }
+
         size_t GetLength() override
         {
             struct stat sb;

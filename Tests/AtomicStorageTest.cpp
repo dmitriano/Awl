@@ -159,7 +159,9 @@ AWT_TEST(AtomicStorageVts)
             Value1 val(b);
             HashingSerializable hashed_val(val);
             awl::io::AtomicStorage storage(logger);
+            AWT_ASSERT(!storage.IsOpened());
             AWT_ASSERT(!LoadValue(storage, hashed_val));
+            AWT_ASSERT(storage.IsOpened());
             AWT_ASSERT(b == v1::b_expected);
             storage.Save(hashed_val);
         }

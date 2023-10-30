@@ -52,6 +52,8 @@ namespace awl::io
             return *this;
         }
 
+        bool operator == (const UniqueHandle& other) const = default;
+
         operator HANDLE() const
         {
             return m_h;
