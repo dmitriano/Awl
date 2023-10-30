@@ -224,11 +224,7 @@ namespace
 {
     awl::io::AtomicStorage MakeStorage(awl::Logger& logger)
     {
-        awl::io::AtomicStorage storage(logger);
-
-        storage.Open(master_name, backup_name);
-
-        return storage;
+        return awl::io::AtomicStorage(logger, master_name, backup_name);
     }
 }
 

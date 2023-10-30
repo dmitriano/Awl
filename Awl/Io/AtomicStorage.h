@@ -21,11 +21,19 @@ namespace awl::io
 
         AtomicStorage(Logger& logger) : m_logger(logger) {}
 
+        AtomicStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
+            AtomicStorage(logger)
+        {
+            Open(file_name, backup_name);
+        }
+
         AtomicStorage(const AtomicStorage&) = delete;
         AtomicStorage(AtomicStorage&&) = default;
 
         AtomicStorage& operator = (const AtomicStorage&) = delete;
         AtomicStorage& operator = (AtomicStorage&&) = delete;
+
+        // TODO: Implement IsOpened().
 
         void Open(const awl::String& file_name, const awl::String& backup_name)
         {
