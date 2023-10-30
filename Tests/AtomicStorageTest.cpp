@@ -8,8 +8,10 @@
 #include "Awl/Io/PlainSerializable.h"
 #include "Awl/Io/VersionTolerantSerializable.h"
 #include "Awl/Io/AtomicStorage.h"
+#include "Awl/Io/NativeStream.h"
 #include "Awl/ConsoleLogger.h"
 #include "Awl/ScopeGuard.h"
+#include "Awl/Random.h"
 #include "VtsData.h"
 
 #include <filesystem>
@@ -27,6 +29,29 @@ namespace
     {
         fs::remove(master_name);
         fs::remove(backup_name);
+    }
+
+    void CorruptFile(awl::Char* file_name)
+    {
+        awl::io::UniqueStream s = awl::io::CreateUniqueFile(file_name);
+
+        auto len = s.GetLength();
+
+        if (len != 0)
+        {
+            std::uniform_int_distribution<size_t> dist(1, len - 1);
+
+            const size_t i = dist(awl::random());
+
+            s.Seek(i);
+            uint8_t bad;
+            s.Read(&bad, 1);
+
+            s.Seek(i);
+            ++bad;
+            s.Write(&bad, 1);
+            s.Flush();
+        }
     }
 
     using Hash = awl::crypto::Crc64;
@@ -84,6 +109,21 @@ AWT_TEST(AtomicStorageVts)
             awl::io::AtomicStorage storage(logger);
             AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
             AWT_ASSERT(b == v2::b_expected);
+        }
+    }
+
+    CorruptFile(master_name);
+
+    {
+        v2::B b;
+        const v2::B saved_b = b;
+        Value2 val(b);
+        HashingSerializable hashed_val(val);
+
+        {
+            awl::io::AtomicStorage storage(logger);
+            AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
+            AWT_ASSERT(b == saved_b);
         }
     }
 }
