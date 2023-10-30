@@ -97,6 +97,18 @@ AWT_TEST(AtomicStoragePlain)
         awl::io::AtomicStorage storage(logger);
         AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
         AWT_ASSERT(b == saved_b);
+
+        b = v2::b_expected;
+        storage.Save(hashed_val);
+    }
+
+    {
+        v2::B b;
+        Value val(b);
+        HashingSerializable hashed_val(val);
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v2::b_expected);
     }
 }
 
@@ -150,5 +162,17 @@ AWT_TEST(AtomicStorageVts)
         awl::io::AtomicStorage storage(logger);
         AWT_ASSERT(!storage.Load(hashed_val, master_name, backup_name));
         AWT_ASSERT(b == saved_b);
+
+        b = v2::b_expected;
+        storage.Save(hashed_val);
+    }
+
+    {
+        v2::B b;
+        Value2 val(b);
+        HashingSerializable hashed_val(val);
+        awl::io::AtomicStorage storage(logger);
+        AWT_ASSERT(storage.Load(hashed_val, master_name, backup_name));
+        AWT_ASSERT(b == v2::b_expected);
     }
 }
