@@ -1,3 +1,8 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include "Awl/Io/Serializable.h"
@@ -28,20 +33,20 @@ namespace awl::io
         {
             HashInputStream in(s, m_blockSize, m_hash);
 
-            val.Read(in);
+            m_val.Read(in);
         }
 
         void Write(OStream& s) const override
         {
             HashOutputStream out(s, m_blockSize, m_hash);
 
-            val.Write(out);
+            m_val.Write(out);
         }
 
     private:
 
         Value& m_val;
-        size_t m_blockSize
+        size_t m_blockSize;
         Hash m_hash;
     };
 }
