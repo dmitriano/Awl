@@ -32,7 +32,13 @@ namespace awl::io
         AtomicStorage(AtomicStorage&&) = default;
 
         AtomicStorage& operator = (const AtomicStorage&) = delete;
-        AtomicStorage& operator = (AtomicStorage&&) = delete;
+
+        AtomicStorage& operator = (AtomicStorage&& other) noexcept
+        {
+            m_s = std::move(other.m_s);
+            m_backup = std::move(other.m_backup);
+            return *this;
+        }
 
         bool IsEmpty() const
         {
