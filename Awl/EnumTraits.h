@@ -18,18 +18,33 @@ namespace awl
     constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
 
     template <class T>
-    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
+    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, size_t> enum_to_index(T val)
     {
-        auto& names = awl::EnumTraits<T>::names();
-
         const size_t int_val = static_cast<size_t>(val);
 
-        if (int_val >= names.size())
+        if (int_val >= awl::EnumTraits<T>::count())
         {
             throw std::runtime_error("Wrong enum index.");
         }
 
-        return names[int_val];
+        return int_val;
+    }
+
+    template <class T>
+    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, T> enum_from_index(size_t int_val)
+    {
+        if (int_val >= awl::EnumTraits<T>::count())
+        {
+            throw std::runtime_error("Wrong enum index.");
+        }
+
+        return static_cast<T>(int_val);
+    }
+
+    template <class T>
+    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
+    {
+        return awl::EnumTraits<T>::names()[enum_to_index(val)];
     }
 
     template <class T>
