@@ -66,6 +66,12 @@ namespace awl::io
 
         void Save(const Value& val);
 
+        void Close()
+        {
+            m_s = {};
+            m_backup = {};
+        }
+
     private:
 
         static void ReadFromStream(UniqueStream& s, Value& val)

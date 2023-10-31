@@ -30,6 +30,11 @@ namespace awl::io
             return m_hFile == other.m_hFile;
         }
 
+        bool operator != (const WinStream& other) const
+        {
+            return !operator == (other);
+        }
+
         size_t GetLength() const override
         {
             return static_cast<size_t>(GetFileSizeHelper());

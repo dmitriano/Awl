@@ -52,7 +52,18 @@ namespace awl::io
             return *this;
         }
 
-        bool operator == (const UniqueHandle& other) const = default;
+        // defaulting comparison operators requires at least '/std:c++20'
+        // bool operator == (const UniqueHandle& other) const = default;
+
+        bool operator == (const UniqueHandle& other) const
+        {
+            return m_h == other.m_h;
+        }
+
+        bool operator != (const UniqueHandle& other) const
+        {
+            return !operator == (other);
+        }
 
         operator HANDLE() const
         {
