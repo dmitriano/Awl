@@ -8,6 +8,7 @@
 #include "Awl/Logger.h"
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
+#include <cassert>
 
 namespace awl::io
 {
@@ -32,6 +33,12 @@ namespace awl::io
 
         AtomicStorage& operator = (const AtomicStorage&) = delete;
         AtomicStorage& operator = (AtomicStorage&&) = delete;
+
+        bool IsEmpty() const
+        {
+            assert(IsOpened());
+            return m_s.GetLength() == 0 && m_backup.GetLength() == 0;
+        }
 
         bool IsOpened() const
         {

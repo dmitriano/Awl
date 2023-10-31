@@ -30,12 +30,12 @@ namespace awl::io
             return m_hFile == other.m_hFile;
         }
 
-        size_t GetLength() override
+        size_t GetLength() const override
         {
             return static_cast<size_t>(GetFileSizeHelper());
         }
 
-        size_t GetPosition() override
+        size_t GetPosition() const override
         {
             return static_cast<size_t>(GetFilePointerHelper());
         }
@@ -118,7 +118,7 @@ namespace awl::io
 
     private:
 
-        void Check(bool success)
+        static void Check(bool success)
         {
             if (!success)
             {
@@ -126,7 +126,7 @@ namespace awl::io
             }
         }
         
-        LONGLONG GetFileSizeHelper()
+        LONGLONG GetFileSizeHelper() const
         {
             LARGE_INTEGER li;
 
@@ -137,7 +137,7 @@ namespace awl::io
             return li.QuadPart;
         }
 
-        LONGLONG GetFilePointerHelper()
+        LONGLONG GetFilePointerHelper() const
         {
             LARGE_INTEGER liOfs = { 0 };
             LARGE_INTEGER liNew = { 0 };

@@ -33,7 +33,7 @@ namespace awl::io
             return m_hFile == other.m_hFile;
         }
 
-        size_t GetLength() override
+        size_t GetLength() const override
         {
             struct stat sb;
 
@@ -42,7 +42,7 @@ namespace awl::io
             return static_cast<size_t>(sb.st_size);
         }
 
-        size_t GetPosition() override
+        size_t GetPosition() const override
         {
             const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
 
@@ -121,7 +121,7 @@ namespace awl::io
     private:
 
         template <class T>
-        void Check(T val)
+        static void Check(T val)
         {
             if (val == static_cast<T>(-1))
             {

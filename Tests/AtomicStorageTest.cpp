@@ -265,15 +265,18 @@ AWT_TEST(AtomicStorageSave)
     awl::ConsoleLogger logger(context.out);
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
+    AWT_ASSERT(storage.IsEmpty());
 
     {
         v1::B b = v1::b_expected;
         Value1 val(b);
         HashingSerializable hashed_val(val);
         storage.Save(hashed_val);
+        AWT_ASSERT(!storage.IsEmpty());
     }
 
     awl::io::AtomicStorage storage1 = std::move(storage);
+    AWT_ASSERT(!storage1.IsEmpty());
 
     {
         v2::B b;
