@@ -134,10 +134,15 @@ namespace awl::io
 
     using UniqueStream = PosixStream<UniqueFileHandle>;
     
-    //using SharedStream = PosixStream<SharedFileHandle>;
+    // using SharedStream = PosixStream<SharedFileHandle>;
+
+    inline thread_local bool openedExisting;
 
     inline UniqueFileHandle CreateUniqueFile(const String& file_name)
     {
+        // I did not find a better way in POSIX.
+        openedExisting = access(file_name.c_str(), F_OK) != -1;
+        
         // user readable and writable
         HANDLE hFile = ::open(file_name.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
@@ -147,6 +152,11 @@ namespace awl::io
         }
 
         return hFile;
+    }
+
+    inline bool OpenedExisting()
+    {
+        return openedExisting;
     }
 
     inline UniqueFileHandle OpenUniqueFile(const String& file_name)
