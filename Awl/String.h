@@ -270,6 +270,16 @@ namespace awl
     {
         return StringConvertor<Char>::Encode(src.c_str());
     }
+
+    inline std::wostream& operator << (std::wostream& out, const std::string& val)
+    {
+        return out << FromAString(val);
+    }
+
+    inline std::wostream& operator << (std::wostream& out, const char* val)
+    {
+        return out << FromACString(val);
+    }
 }
 
 #ifdef AWL_BOOST
