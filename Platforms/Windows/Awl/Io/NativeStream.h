@@ -180,6 +180,11 @@ namespace awl::io
         return hFile;
     }
 
+    inline bool OpenedExisting()
+    {
+        return ::GetLastError() == ERROR_ALREADY_EXISTS;
+    }
+
     inline UniqueFileHandle OpenUniqueFile(const String& file_name)
     {
         //CREATEFILE2_EXTENDED_PARAMETERS extendedParams = { 0 };

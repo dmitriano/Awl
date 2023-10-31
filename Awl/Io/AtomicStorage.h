@@ -45,10 +45,15 @@ namespace awl::io
             return m_s != UniqueStream{};
         }
 
-        void Open(const awl::String& file_name, const awl::String& backup_name)
+        bool Open(const awl::String& file_name, const awl::String& backup_name)
         {
             m_s = awl::io::CreateUniqueFile(file_name);
+            const bool master_existed = OpenedExisting();
+
             m_backup = awl::io::CreateUniqueFile(backup_name);
+            const bool backup_existed = OpenedExisting();
+
+            return master_existed || backup_existed;
         }
 
         bool Load(Value& val);

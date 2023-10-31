@@ -76,9 +76,9 @@ namespace
     using Value2 = awl::io::VersionTolerantSerializable<v2::B, V2, HashInputStream, HashOutputStream>;
 
     template <class Value>
-    bool LoadValue(awl::io::AtomicStorage& storage, Value& val)
+    bool LoadValue(awl::io::AtomicStorage& storage, Value& val, bool existed = true)
     {
-        storage.Open(master_name, backup_name);
+        AWT_ASSERT(storage.Open(master_name, backup_name) == existed);
         return storage.Load(val);
     }
 }
@@ -96,7 +96,7 @@ AWT_TEST(AtomicStoragePlain)
         Value val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(!LoadValue(storage, hashed_val));
+        AWT_ASSERT(!LoadValue(storage, hashed_val, false));
         AWT_ASSERT(b == v2::b_expected);
         storage.Save(hashed_val);
     }
@@ -160,7 +160,7 @@ AWT_TEST(AtomicStorageVts)
             HashingSerializable hashed_val(val);
             awl::io::AtomicStorage storage(logger);
             AWT_ASSERT(!storage.IsOpened());
-            AWT_ASSERT(!LoadValue(storage, hashed_val));
+            AWT_ASSERT(!LoadValue(storage, hashed_val, false));
             AWT_ASSERT(storage.IsOpened());
             AWT_ASSERT(b == v1::b_expected);
             storage.Save(hashed_val);
