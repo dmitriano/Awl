@@ -337,37 +337,6 @@ namespace awl
         return out << val.toStdWString();
     }
 
-    // Make the Logger compatible with QDebug.
-    using LogString = QString;
-
-#else
-
-    class LogString
-    {
-    public:
-
-        LogString(const char* m) : m_message(awl::FromACString(m)) {}
-        
-        LogString(std::string message) : m_message(awl::FromAString(message)) {}
-
-        LogString(std::wstring message) : m_message(awl::FromWString(message)) {}
-
-        const String& str() const
-        {
-            return m_message;
-        }
-
-    private:
-
-        awl::String m_message;
-    };
-
-    template<typename Char>
-    std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& out, const LogString& val)
-    {
-        return out << val.str();
-    }
-
 #endif //AWL_QT
 }
 

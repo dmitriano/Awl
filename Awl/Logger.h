@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Awl/String.h"
-#include "Awl/EnumTraits.h"
 #include "Awl/LogLevel.h"
+#include "Awl/LogString.h"
 
 namespace awl
 {

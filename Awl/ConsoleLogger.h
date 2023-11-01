@@ -22,7 +22,7 @@ namespace awl
         void log(LogLevel level, LogString message) override
         {
             m_out << std::chrono::system_clock::now() << _T('\t') <<
-                awl::FromAString(enum_to_string(level)) << _T('\t') << message << std::endl;
+                awl::FromAString(enum_to_string(level)) << _T('\t') << message.str() << std::endl;
         }
 
     private:

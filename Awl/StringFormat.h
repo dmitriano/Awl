@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/String.h"
+#include "Awl/LogString.h"
 
 #include <type_traits>
 
@@ -45,14 +46,12 @@ namespace awl
             }
         }
 
-#else
+#endif
 
         operator LogString() const
         {
             return str();
         }
-
-#endif
 
         // std::endl flushes the output buffer but '\n' doesn't.
         static constexpr C endl = static_cast<C>('\n');
