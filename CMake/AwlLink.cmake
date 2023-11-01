@@ -12,10 +12,6 @@ if (AWL_JTHREAD_EXTRAS)
     add_definitions(-DAWL_JTHREAD_EXTRAS)
 endif()
 
-if (AWL_COMPILE_MAIN)
-    add_definitions(-DAWL_COMPILE_MAIN)
-endif()
-
 message("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 
 if (WIN32)
@@ -77,4 +73,9 @@ endif()
 if (AWL_COMPILE_TESTS)
     file(GLOB_RECURSE AWL_CPP_TEST_FILES ${AWL_ROOT_DIR}/Tests/*.h ${AWL_ROOT_DIR}/Tests/*.cpp)
     target_sources(${PROJECT_NAME} PRIVATE ${AWL_CPP_TEST_FILES})
+endif()
+
+if (AWL_COMPILE_MAIN)
+    file(GLOB_RECURSE AWL_CPP_MAIN_FILES ${AWL_ROOT_DIR}/Main/*.h ${AWL_ROOT_DIR}/Main/*.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE ${AWL_CPP_MAIN_FILES})
 endif()
