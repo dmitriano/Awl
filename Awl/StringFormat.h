@@ -45,10 +45,17 @@ namespace awl
             }
         }
 
-        // std::endl flushes the output buffer but '\n' doesn't.
-        static constexpr C endl = static_cast<C>('\n');
+#else
+
+        operator LogString() const
+        {
+            return str();
+        }
 
 #endif
+
+        // std::endl flushes the output buffer but '\n' doesn't.
+        static constexpr C endl = static_cast<C>('\n');
 
     private:
         

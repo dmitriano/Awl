@@ -247,7 +247,19 @@ namespace awl
             }
         }
 
-        static std::string Encode(const Ch * p_src)
+        static std::basic_string<Ch> Encode(const wchar_t* p_src)
+        {
+            if constexpr (std::is_same_v<Ch, wchar_t>)
+            {
+                return p_src;
+            }
+            else
+            {
+                return EncodeString(p_src);
+            }
+        }
+
+        static std::string EncodeToA(const Ch * p_src)
         {
             if constexpr (std::is_same_v<Ch, char>)
             {
@@ -271,6 +283,16 @@ namespace awl
     }
 
     inline std::string ToAString(const String & src)
+    {
+        return StringConvertor<Char>::EncodeToA(src.c_str());
+    }
+
+    inline String FromWCString(const wchar_t* p_src)
+    {
+        return StringConvertor<Char>::Encode(p_src);
+    }
+
+    inline String FromWString(const std::wstring& src)
     {
         return StringConvertor<Char>::Encode(src.c_str());
     }
@@ -312,6 +334,37 @@ namespace awl
     inline std::wostream& operator << (std::wostream& out, const QString& val)
     {
         return out << val.toStdWString();
+    }
+
+    // Make the Logger compatible with QDebug.
+    using LogString = QString;
+
+#else
+
+    class LogString
+    {
+    public:
+
+        LogString(const char* m) : m_message(awl::FromACString(m)) {}
+        
+        LogString(std::string message) : m_message(awl::FromAString(message)) {}
+
+        LogString(std::wstring message) : m_message(awl::FromWString(message)) {}
+
+        const String& str() const
+        {
+            return m_message;
+        }
+
+    private:
+
+        awl::String m_message;
+    };
+
+    template<typename Char>
+    std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& out, const LogString& val)
+    {
+        return out << val.str();
     }
 
 #endif //AWL_QT

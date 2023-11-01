@@ -7,19 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/EnumTraits.h"
-
-namespace awl
-{
-    AWL_SEQUENTIAL_ENUM(LogLevel,
-        Debug,
-        Trace,
-        Info,
-        Warning,
-        Error
-    )
-}
-
-AWL_ENUM_TRAITS(awl, LogLevel)
+#include "Awl/LogLevel.h"
 
 namespace awl
 {
@@ -29,29 +17,29 @@ namespace awl
 
         virtual ~Logger() = default;
 
-        virtual void log(LogLevel level, String message) = 0;
+        virtual void log(LogLevel level, LogString message) = 0;
 
-        void debug(String message)
+        void debug(LogString message)
         {
             log(LogLevel::Debug, message);
         }
 
-        void trace(String message)
+        void trace(LogString message)
         {
             log(LogLevel::Trace, message);
         }
 
-        void info(String message)
+        void info(LogString message)
         {
             log(LogLevel::Info, message);
         }
         
-        void warning(String message)
+        void warning(LogString message)
         {
             log(LogLevel::Warning, message);
         }
 
-        void error(String message)
+        void error(LogString message)
         {
             log(LogLevel::Error, message);
         }

@@ -18,6 +18,12 @@ namespace awl
     constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
 
     template <class T>
+    constexpr std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> enum_to_underlying(T val)
+    {
+        return static_cast<std::underlying_type_t<T>>(val);
+    }
+
+    template <class T>
     std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, size_t> enum_to_index(T val)
     {
         const size_t int_val = static_cast<size_t>(val);
