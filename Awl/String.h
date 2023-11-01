@@ -27,6 +27,7 @@
 #include <wchar.h>
 #include <cassert>
 #include <iterator>
+#include <optional>
 
 #ifdef _MSC_VER
 
