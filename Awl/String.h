@@ -273,12 +273,12 @@ namespace awl
 
     inline std::wostream& operator << (std::wostream& out, const std::string& val)
     {
-        return out << FromAString(val);
+        return out << DecodeString(val.c_str());
     }
 
     inline std::wostream& operator << (std::wostream& out, const char* val)
     {
-        return out << FromACString(val);
+        return out << DecodeString(val);
     }
 }
 
