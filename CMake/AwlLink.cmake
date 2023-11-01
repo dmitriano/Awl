@@ -59,6 +59,7 @@ if(Qt6_FOUND)
         $<$<CXX_COMPILER_ID:MSVC>:/Zi>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-g>
     )
+    add_definitions(-DAWL_QT)
 endif()
 
 find_package(Threads)

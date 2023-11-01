@@ -8,6 +8,10 @@
 #include "Awl/FixedString.h"
 #include "Awl/CppStd/StringView.h"
 
+#ifdef AWL_QT
+    #include <QString>
+#endif //AWL_QT
+
 #ifdef AWL_BOOST
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #endif
@@ -280,6 +284,37 @@ namespace awl
     {
         return out << DecodeString(val);
     }
+
+    template<typename Char, class T>
+    std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& out, const std::optional<T>& val)
+    {
+        if (val)
+        {
+            using awl::operator <<;
+
+            out << *val;
+        }
+        else
+        {
+            out << "empty";
+        }
+
+        return out;
+    }
+
+#ifdef AWL_QT
+
+    inline std::ostream& operator << (std::ostream& out, const QString& val)
+    {
+        return out << val.toStdString();
+    }
+
+    inline std::wostream& operator << (std::wostream& out, const QString& val)
+    {
+        return out << val.toStdWString();
+    }
+
+#endif //AWL_QT
 }
 
 #ifdef AWL_BOOST
