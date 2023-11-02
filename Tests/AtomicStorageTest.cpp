@@ -7,6 +7,7 @@
 #include "Awl/Io/HashingSerializable.h"
 #include "Awl/Io/PlainSerializable.h"
 #include "Awl/Io/VersionTolerantSerializable.h"
+#include "Awl/Io/EuphoricallySerializable.h"
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/ConsoleLogger.h"
@@ -283,6 +284,31 @@ AWT_TEST(AtomicStorageSave)
         Value2 val(b);
         HashingSerializable hashed_val(val);
         storage1.Load(hashed_val);
+        AWT_ASSERT(b == v2::b_expected);
+    }
+}
+
+AWT_TEST(AtomicStorageEuphorical)
+{
+    auto guard = awl::make_scope_guard(RemoveFiles);
+
+    awl::ConsoleLogger logger(context.out);
+
+    awl::io::AtomicStorage storage = MakeStorage(logger);
+    AWT_ASSERT(storage.IsEmpty());
+
+    using Value = awl::io::EuphoricallySerializable<v2::B, V2, awl::io::UniqueStream, awl::io::UniqueStream>;
+
+    {
+        v2::B b = v2::b_expected;
+        Value val(b);
+        storage.Save(val);
+    }
+
+    {
+        v2::B b;
+        Value val(b);
+        storage.Load(val);
         AWT_ASSERT(b == v2::b_expected);
     }
 }
