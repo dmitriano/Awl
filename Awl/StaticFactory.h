@@ -19,7 +19,7 @@ namespace awl
     using FactoryFuncPtr = std::add_pointer_t<T(Args... args)>;
 
     template <class T, typename... Args>
-    T create(const awl::Char* name, Args&&... args)
+    T create(const char* name, Args&&... args)
     {
         using FuncPtr = awl::FactoryFuncPtr<T, Args...>;
 
@@ -50,13 +50,13 @@ namespace awl
 // Factory with parameters (signature is unknown).
 #define AWL_FACTORY_FUNC_NAME(name) name##_FactoryFunc
 #define AWL_REGISTER_FACTORY(func, name) \
-    static typename awl::factory_traits<decltype(func)>::Link name##_FactoryLink(_T(#name), &func);
+    static typename awl::factory_traits<decltype(func)>::Link name##_FactoryLink(#name, &func);
 
 // Parameterless factory.
 #define AWL_FACTORY_FUNC_SIGNATURE(T, name) T AWL_FACTORY_FUNC_NAME(name)()
 #define AWL_FACTORY(T, name) \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name); \
-    static awl::StaticLink<awl::FactoryFuncPtr<T>> name##_FactoryLink(_T(#name), &AWL_FACTORY_FUNC_NAME(name)); \
+    static awl::StaticLink<awl::FactoryFuncPtr<T>> name##_FactoryLink(#name, &AWL_FACTORY_FUNC_NAME(name)); \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name)
 
 #define AWT_DISABLED_FACTORY(T, name) \

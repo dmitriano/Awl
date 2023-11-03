@@ -13,9 +13,9 @@ namespace
 {
     using X = int;
 
-    awl::StaticLink<X> x1(_T("0"), 0);
-    awl::StaticLink<X> x2(_T("1"), 1);
-    awl::StaticLink<X> x3(_T("2"), 2);
+    awl::StaticLink<X> x1("0", 0);
+    awl::StaticLink<X> x2("1", 1);
+    awl::StaticLink<X> x3("2", 2);
 }
 
 AWT_TEST(StaticChainInt)
@@ -24,7 +24,7 @@ AWT_TEST(StaticChainInt)
 
     for (X val = 0; val < 3; ++val)
     {
-        auto i = awl::static_chain<X>().find(awl::format() << val);
+        auto i = awl::static_chain<X>().find(awl::aformat() << val);
         
         AWT_ASSERT(i != awl::static_chain<X>().end());
         AWT_ASSERT(i->value() == val);
@@ -35,13 +35,13 @@ AWT_TEST(StaticChainFactoryParameterless)
 {
     AWT_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::create<std::string>(_T("a")) == "a");
-    AWT_ASSERT(awl::create<std::string>(_T("b")) == "b");
-    AWT_ASSERT(awl::create<std::string>(_T("c")) == "c");
+    AWT_ASSERT(awl::create<std::string>("a") == "a");
+    AWT_ASSERT(awl::create<std::string>("b") == "b");
+    AWT_ASSERT(awl::create<std::string>("c") == "c");
 
     awl::testing::Assert::Throws<awl::FactoryException>([]()
     {
-        awl::create<std::string>(_T("d"));
+        awl::create<std::string>("d");
     });
 }
 
@@ -49,13 +49,13 @@ AWT_TEST(StaticChainFactoryArgs)
 {
     AWT_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::create<std::string>(_T("a1"), 5) == "A5");
-    AWT_ASSERT(awl::create<std::string>(_T("b1"), 7) == "B7");
+    AWT_ASSERT(awl::create<std::string>("a1", 5) == "A5");
+    AWT_ASSERT(awl::create<std::string>("b1", 7) == "B7");
 
     awl::testing::Assert::Throws<awl::FactoryException>([]()
     {
         // c is of different type.
-        awl::create<std::string>(_T("c"), 7);
+        awl::create<std::string>("c", 7);
     });
 }
 
@@ -92,5 +92,5 @@ namespace
     }
 
     AWL_REGISTER_FACTORY(CreateA, a1)
-        AWL_REGISTER_FACTORY(CreateB, b1)
+    AWL_REGISTER_FACTORY(CreateB, b1)
 }

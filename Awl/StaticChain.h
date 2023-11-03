@@ -19,9 +19,9 @@ namespace awl
     public:
 
         template <typename... Args>
-        StaticLink(const Char* p_name, Args&&... args);
+        StaticLink(const char* p_name, Args&&... args);
 
-        const Char* name() const
+        const char* name() const
         {
             return pName;
         }
@@ -33,7 +33,7 @@ namespace awl
 
     private:
 
-        const Char* const pName;
+        const char* const pName;
 
         // TODO: Get rid of mutable here.
         mutable T m_val;
@@ -53,7 +53,7 @@ namespace awl
         Iterator begin() const { return m_list.begin(); }
         Iterator end() const { return m_list.end(); }
 
-        Iterator find(const Char* name) const
+        Iterator find(const char* name) const
         {
             return std::find_if(begin(), end(),
                 [name](const Link* link) -> bool
@@ -62,7 +62,7 @@ namespace awl
                 });
         }
 
-        Iterator find(const String& name) const { return find(name.c_str()); }
+        Iterator find(const std::string& name) const { return find(name.c_str()); }
 
     private:
 
@@ -80,7 +80,7 @@ namespace awl
 
     template <class T>
     template <typename... Args>
-    StaticLink<T>::StaticLink(const Char* p_name, Args&&... args):
+    StaticLink<T>::StaticLink(const char* p_name, Args&&... args):
         pName(p_name),
         m_val(std::forward<Args>(args)...)
     {
