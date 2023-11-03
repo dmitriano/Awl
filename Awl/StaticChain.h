@@ -35,6 +35,7 @@ namespace awl
 
         const Char* const pName;
 
+        // TODO: Get rid of mutable here.
         mutable T m_val;
     };
 
