@@ -11,6 +11,8 @@ namespace awl::testing::helpers
     {
     public:
 
+        using value_type = int;
+
         explicit NonCopyable(int a) : m_a(a)
         {
             ++count;
@@ -46,6 +48,16 @@ namespace awl::testing::helpers
         bool operator != (const NonCopyable & other) const
         {
             return !operator==(other);
+        }
+
+        bool operator == (int a) const
+        {
+            return m_a == a;
+        }
+
+        bool operator != (int a) const
+        {
+            return !operator==(a);
         }
 
         bool operator < (const NonCopyable & other) const
