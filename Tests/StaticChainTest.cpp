@@ -31,22 +31,7 @@ AWT_TEST(StaticChainInt)
     }
 }
 
-AWL_FACTORY(std::string, a)
-{
-    return "a";
-}
-
-AWL_FACTORY(std::string, b)
-{
-    return "b";
-}
-
-AWL_FACTORY(std::string, c)
-{
-    return "c";
-}
-
-AWT_TEST(StaticChainFactory)
+AWT_TEST(StaticChainFactoryParameterless)
 {
     AWT_UNUSED_CONTEXT;
 
@@ -58,4 +43,54 @@ AWT_TEST(StaticChainFactory)
     {
         awl::create<std::string>(_T("d"));
     });
+}
+
+AWT_TEST(StaticChainFactoryArgs)
+{
+    AWT_UNUSED_CONTEXT;
+
+    AWT_ASSERT(awl::create<std::string>(_T("a1"), 5) == "A5");
+    AWT_ASSERT(awl::create<std::string>(_T("b1"), 7) == "B7");
+
+    awl::testing::Assert::Throws<awl::FactoryException>([]()
+    {
+        // c is of different type.
+        awl::create<std::string>(_T("c"), 7);
+    });
+}
+
+// Parameterless factory
+
+AWL_FACTORY(std::string, a)
+{
+    return "a";
+}
+
+AWL_FACTORY(std::string, b)
+{
+    return "b";
+}
+
+static std::string CreateC()
+{
+    return "c";
+}
+
+AWL_REGISTER_FACTORY(CreateC, c)
+
+// Factory with parameters
+namespace
+{
+    std::string CreateA(int val)
+    {
+        return awl::aformat() << "A" << val;
+    }
+
+    std::string CreateB(int val)
+    {
+        return awl::aformat() << "B" << val;
+    }
+
+    AWL_REGISTER_FACTORY(CreateA, a1)
+        AWL_REGISTER_FACTORY(CreateB, b1)
 }

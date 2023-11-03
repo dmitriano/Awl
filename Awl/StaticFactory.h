@@ -15,13 +15,13 @@ namespace awl
 {
     AWL_DEFINE_EXCEPTION(FactoryException)
 
-    template <class T>
-    using FactoryFuncPtr = std::add_pointer_t<T()>;
+    template <class T, typename... Args>
+    using FactoryFuncPtr = std::add_pointer_t<T(Args... args)>;
 
-    template <class T>
-    T create(const awl::Char* name)
+    template <class T, typename... Args>
+    T create(const awl::Char* name, Args&&... args)
     {
-        using FuncPtr = awl::FactoryFuncPtr<T>;
+        using FuncPtr = awl::FactoryFuncPtr<T, Args...>;
 
         auto& chain = static_chain<FuncPtr>();
         
@@ -34,14 +34,26 @@ namespace awl
 
         FuncPtr func = i->value();
 
-        return func();
+        return func(std::forward<Args>(args)...);
     }
+
+    template <typename Func>
+    struct factory_traits;
+
+    template <class T, typename... Args>
+    struct factory_traits<T(Args...)>
+    {
+        using Link = awl::StaticLink<awl::FactoryFuncPtr<T, Args...>>;
+    };
 }
 
-// Parameterless factory.
+// Factory with parameters (signature is unknown).
 #define AWL_FACTORY_FUNC_NAME(name) name##_FactoryFunc
-#define AWL_FACTORY_FUNC_SIGNATURE(T, name) T AWL_FACTORY_FUNC_NAME(name)()
+#define AWL_REGISTER_FACTORY(func, name) \
+    static typename awl::factory_traits<decltype(func)>::Link name##_FactoryLink(_T(#name), &func);
 
+// Parameterless factory.
+#define AWL_FACTORY_FUNC_SIGNATURE(T, name) T AWL_FACTORY_FUNC_NAME(name)()
 #define AWL_FACTORY(T, name) \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name); \
     static awl::StaticLink<awl::FactoryFuncPtr<T>> name##_FactoryLink(_T(#name), &AWL_FACTORY_FUNC_NAME(name)); \
