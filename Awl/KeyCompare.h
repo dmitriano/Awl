@@ -169,6 +169,7 @@ namespace awl
         Compare m_comp;
     };
 
+    // TODO: move T::*field_ptr into constructor.
     template <class T, class Field, Field T::*field_ptr>
     struct FieldGetter
     {
