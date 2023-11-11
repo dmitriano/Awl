@@ -107,7 +107,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        constexpr KeyCompare(GetKey && get_key) : getKey(std::move(get_key))
+        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 

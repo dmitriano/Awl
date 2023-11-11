@@ -151,7 +151,6 @@ AWT_TEST(ForeignSetConstructor)
     AWT_ASSERT_EQUAL(ps.size(), count);
 }
 
-/*
 AWT_TEST(ForeignSetShared)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
@@ -272,4 +271,3 @@ AWT_TEST(ForeignSetPlainPointer)
 
     AWT_ASSERT(fs.empty());
 }
-*/
