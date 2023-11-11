@@ -32,7 +32,11 @@ namespace awl
         {
         public:
 
-            bool operator()(const ValueSet & left, const ValueSet & right) const
+            ValueSetCompare() = default;
+            
+            constexpr ValueSetCompare(ForeignKeyGetter getter) : foreignKeyGetter(std::move(getter)) {}
+
+            constexpr bool operator()(const ValueSet & left, const ValueSet & right) const
             {
                 return GetForeignKey(left) < GetForeignKey(right);
             }
@@ -49,7 +53,7 @@ namespace awl
 
         private:
 
-            ForeignKey GetForeignKey(const ValueSet & vs) const
+            constexpr ForeignKey GetForeignKey(const ValueSet & vs) const
             {
                 assert(!vs.empty());
                 return foreignKeyGetter(*vs.front());
@@ -64,9 +68,10 @@ namespace awl
     public:
 
         foreign_set(PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
-            primaryKeyGetter(pk_getter), foreignKeyGetter(fk_getter)
-        {
-        }
+            m_set(fk_getter),
+            primaryKeyGetter(pk_getter),
+            foreignKeyGetter(fk_getter)
+        {}
 
         //TODO: Make it deduce template arguments.
         template <class SrcSet>
@@ -180,7 +185,7 @@ namespace awl
             }
             else
             {
-                ValueSet vs;
+                ValueSet vs{ PrimaryCompare{primaryKeyGetter} };
                 vs.insert(ValueToPointer(val));
                 const bool is_new = m_set.insert(std::move(vs)).second;
                 assert(is_new);

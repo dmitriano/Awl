@@ -347,9 +347,9 @@ AWT_TEST(VectorSetRValue)
 }
 
 template <class Key, class T = Key, class Compare = std::less<>>
-static awl::vector_set<T, Compare> GenerateIntSet(size_t insert_count, Key range)
+static awl::vector_set<T, Compare> GenerateIntSet(size_t insert_count, Key range, Compare comp = {})
 {
-    awl::vector_set<T, Compare> sample;
+    awl::vector_set<T, Compare> sample{comp};
 
     std::uniform_int_distribution<Key> dist(1, range);
 
@@ -454,12 +454,12 @@ namespace
     AWL_MEMBERWISE_EQUATABLE(A)
 
     template <class Compare>
-    void TestComparer(const TestContext & context)
+    void TestComparer(const TestContext& context, Compare comp = {})
     {
         AWT_ATTRIBUTE(size_t, insert_count, 1000u);
         AWT_ATTRIBUTE(size_t, range, 1000u);
 
-        auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range);
+        auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range, comp);
 
         size_t index = 0;
 
@@ -492,7 +492,7 @@ namespace
     }
 
     template <class Compare>
-    void TestPointerComparer(const TestContext & context)
+    void TestPointerComparer(const TestContext & context, Compare comp)
     {
         AWT_ATTRIBUTE(size_t, insert_count, 1000u);
         AWT_ATTRIBUTE(size_t, range, 1000u);
@@ -507,10 +507,10 @@ namespace
             v.push_back(val);
         }
 
-        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
+        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t>(&A::key));
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
-        awl::vector_set<const A *, Compare> set;
+        awl::vector_set<const A *, Compare> set(comp);
 
         for (const A & val : v)
         {
@@ -541,7 +541,7 @@ namespace
     }
 
     template <class Compare>
-    void TestSmartPointerComparer(const TestContext & context)
+    void TestSmartPointerComparer(const TestContext & context, Compare comp)
     {
         AWT_ATTRIBUTE(size_t, insert_count, 1000u);
         AWT_ATTRIBUTE(size_t, range, 1000u);
@@ -550,7 +550,7 @@ namespace
         using A = typename Pointer::element_type;
 
         std::vector<A> v;
-        awl::vector_set<Pointer, Compare> set;
+        awl::vector_set<Pointer, Compare> set(comp);
 
         std::uniform_int_distribution<size_t> dist(1u, range);
 
@@ -561,7 +561,7 @@ namespace
             set.insert(Pointer(new A(val)));
         }
 
-        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t, &A::key>());
+        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t>{&A::key });
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         for (size_t index = 0; index < v.size(); ++index)
@@ -590,25 +590,25 @@ namespace
 
 AWT_TEST(VectorSetComparer)
 {
-    TestComparer<awl::FieldCompare<A, size_t, &A::key>>(context);
-    TestComparer<awl::FuncCompare<A, size_t, &A::GetKey>>(context);
-    TestComparer<awl::FuncCompare<A, const size_t &, &A::GetKeyRef>>(context);
-    TestComparer<awl::TuplizableCompare<A, 0>>(context);
+    TestComparer(context, awl::FieldCompare<A, size_t>(&A::key));
+    TestComparer(context, awl::FuncCompare<A, size_t>{&A::GetKey});
+    TestComparer(context, awl::FuncCompare<A, const size_t&>{&A::GetKeyRef});
+    TestComparer(context, awl::TuplizableCompare<A, 0>{});
 
-    TestPointerComparer<awl::FieldCompare<A *, size_t, &A::key>>(context);
-    TestPointerComparer<awl::FuncCompare<A *, size_t, &A::GetKey>>(context);
-    TestPointerComparer<awl::FuncCompare<A *, const size_t &, &A::GetKeyRef>>(context);
-    TestPointerComparer<awl::TuplizableCompare<A *, 0>>(context);
+    TestPointerComparer(context, awl::FieldCompare<A*, size_t>{&A::key});
+    TestPointerComparer(context, awl::FuncCompare<A*, size_t>{&A::GetKey});
+    TestPointerComparer(context, awl::FuncCompare<A*, const size_t&>{&A::GetKeyRef});
+    TestPointerComparer(context, awl::TuplizableCompare<A*, 0>{});
 
-    TestSmartPointerComparer<awl::FieldCompare<std::shared_ptr<A>, size_t, &A::key>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, size_t, &A::GetKey>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::shared_ptr<A>, const size_t &, &A::GetKeyRef>>(context);
-    TestSmartPointerComparer<awl::TuplizableCompare<std::shared_ptr<A>, 0>>(context);
+    TestSmartPointerComparer(context, awl::FieldCompare<std::shared_ptr<A>, size_t>{&A::key});
+    TestSmartPointerComparer(context, awl::FuncCompare<std::shared_ptr<A>, size_t>{&A::GetKey});
+    TestSmartPointerComparer(context, awl::FuncCompare<std::shared_ptr<A>, const size_t&>{&A::GetKeyRef});
+    TestSmartPointerComparer(context, awl::TuplizableCompare<std::shared_ptr<A>, 0>{});
 
-    TestSmartPointerComparer<awl::FieldCompare<std::unique_ptr<A>, size_t, &A::key>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::unique_ptr<A>, size_t, &A::GetKey>>(context);
-    TestSmartPointerComparer<awl::FuncCompare<std::unique_ptr<A>, const size_t &, &A::GetKeyRef>>(context);
-    TestSmartPointerComparer<awl::TuplizableCompare<std::unique_ptr<A>, 0>>(context);
+    TestSmartPointerComparer(context, awl::FieldCompare<std::unique_ptr<A>, size_t>{&A::key});
+    TestSmartPointerComparer(context, awl::FuncCompare<std::unique_ptr<A>, size_t>{&A::GetKey});
+    TestSmartPointerComparer(context, awl::FuncCompare<std::unique_ptr<A>, const size_t&>{&A::GetKeyRef});
+    TestSmartPointerComparer(context, awl::TuplizableCompare<std::unique_ptr<A>, 0>{});
 }
 
 namespace
@@ -641,9 +641,9 @@ namespace
     AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(B)
 
     template <class Compare>
-    void TestBComparer(size_t insert_count, int range)
+    void TestBComparer(size_t insert_count, int range, Compare comp)
     {
-        auto set = GenerateIntSet<int, B, Compare>(insert_count, range);
+        auto set = GenerateIntSet<int, B, Compare>(insert_count, range, comp);
 
         size_t index = 0;
 
@@ -712,8 +712,8 @@ AWT_TEST(VectorSetNonCopyableElement)
         AWT_ASSERT(set1.find(B(found_key)) != set1.end());
     }
 
-    TestBComparer<awl::FuncCompare<B, int, &B::GetKey>>(insert_count, range);
-    TestBComparer<awl::TuplizableCompare<B, 0>>(insert_count, range);
+    TestBComparer(insert_count, range, awl::FuncCompare<B, int>{&B::GetKey});
+    TestBComparer(insert_count, range, awl::TuplizableCompare<B, 0>{});
 }
 
 template <class I1, class I2>

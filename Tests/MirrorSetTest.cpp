@@ -25,15 +25,15 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A)
 
-    using Compare1 = awl::FieldCompare<A, size_t, &A::key1>;
-    using Compare2 = awl::FieldCompare<A, size_t, &A::key2>;
+    using Compare1 = awl::FieldCompare<A, size_t>; // &A::key1
+    using Compare2 = awl::FieldCompare<A, size_t>; //&A::key2
     
     using Set = awl::observable_set<A, Compare1>;
     using MirrorSet = awl::mirror_set<A, Compare2>;
 
     void AssertEqual(const Set& s, const MirrorSet& ms)
     {
-        Set s1;
+        Set s1{ Compare1 {&A::key1} };
 
         for (auto& a : ms)
         {
@@ -54,11 +54,11 @@ AWT_TEST(MirrorSet)
 {
     AWT_UNUSED_CONTEXT;
 
-    Set s;
+    Set s{ Compare1 {&A::key1} };
 
-    MirrorSet mirror1;
+    MirrorSet mirror1{ Compare2{&A::key2} };
 
-    MirrorSet mirror2;
+    MirrorSet mirror2{ Compare2{&A::key2} };
 
     auto assert_equal = [&s, &mirror1, &mirror2]
     {
@@ -98,7 +98,7 @@ AWT_TEST(MirrorSet)
     s.insert({ 3, 4, 101 });
 
     //Move assignment unsubscribes.
-    s = {};
+    s = Set{ Compare1 {&A::key1} };
 
     s.insert({ 5, 6, 102 });
 

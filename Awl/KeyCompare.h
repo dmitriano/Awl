@@ -8,6 +8,7 @@
 #include "Awl/FunctionTraits.h"
 #include "Awl/Tuplizable.h"
 #include "Awl/TypeTraits.h"
+#include "Awl/Getters.h"
 
 #include <type_traits>
 #include <memory>
@@ -30,7 +31,7 @@ namespace awl
 
         KeyCompare() = default;
         
-        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
+        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -69,7 +70,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
+        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -106,7 +107,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey && get_key) : getKey(std::move(get_key))
+        constexpr KeyCompare(GetKey && get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -143,7 +144,7 @@ namespace awl
 
         KeyCompare() = default;
 
-        KeyCompare(GetKey get_key) : getKey(std::move(get_key))
+        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
         {
         }
 
@@ -169,31 +170,11 @@ namespace awl
         Compare m_comp;
     };
 
-    // TODO: move T::*field_ptr into constructor.
-    template <class T, class Field, Field T::*field_ptr>
-    struct FieldGetter
-    {
-        const Field & operator() (const T & val) const
-        {
-            return val.*field_ptr;
-        }
-    };
-    
-    template <class T, class Field, Field remove_pointer_t<T>::*field_ptr, class Compare = std::less<void>>
-    using FieldCompare = KeyCompare<T, FieldGetter<remove_pointer_t<T>, Field, field_ptr>, Compare>;
+    template <class T, class Field, class Compare = std::less<void>>
+    using FieldCompare = KeyCompare<T, field_getter<remove_pointer_t<T>, Field>, Compare>;
 
-    //A function that returns something like std::tie(x, y, z).
-    template <class T, class Field, Field (T::*func_ptr)() const>
-    struct FuncGetter
-    {
-        Field operator() (const T & val) const
-        {
-            return (val.*func_ptr)();
-        }
-    };
-
-    template <class T, class Field, Field (remove_pointer_t<T>::*func_ptr)() const, class Compare = std::less<void>>
-    using FuncCompare = KeyCompare<T, FuncGetter<remove_pointer_t<T>, Field, func_ptr>, Compare>;
+    template <class T, class Field, class Compare = std::less<void>>
+    using FuncCompare = KeyCompare<T, func_getter<remove_pointer_t<T>, Field>, Compare>;
 
     template <class T, size_t index>
     struct TuplizableGetter

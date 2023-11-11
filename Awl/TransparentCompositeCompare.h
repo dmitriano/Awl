@@ -31,7 +31,7 @@ namespace awl
         TransparentCompositeCompare() = default;
         
         // A template parameter pack cannot have a default argument.
-        TransparentCompositeCompare(Cs... comp) : compositeComare(std::move(comp) ...) {}
+        constexpr TransparentCompositeCompare(Cs... comp) : compositeComare(std::move(comp) ...) {}
 
         // Makes a mixed key for heterogeneous lookup from both references and values.
         template <typename... Args>

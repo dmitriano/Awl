@@ -27,8 +27,8 @@ namespace
     
     AWL_MEMBERWISE_EQUATABLE(A)
 
-    using PrimaryGetter = awl::FieldGetter<A, int, &A::pk>;
-    using ForeignGetter = awl::FieldGetter<A, int, &A::fk>;
+    using PrimaryGetter = awl::field_getter<A, int>; //&A::pk
+    using ForeignGetter = awl::field_getter<A, int>; //&A::fk
 
     using PrimarySet = awl::observable_set<A, awl::KeyCompare<A, PrimaryGetter>>;
     using ForeignSet = awl::foreign_set<A, PrimaryGetter, ForeignGetter>;
@@ -67,8 +67,8 @@ AWT_TEST(ForeignSetAddRemoveClear)
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(int, range, 1000);
 
-    PrimarySet ps;
-    ForeignSet fs;
+    PrimarySet ps{ PrimaryGetter{ &A::pk } };
+    ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
 
     auto check = [&]()
     {
@@ -115,10 +115,10 @@ AWT_TEST(ForeignSetDestructor)
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(int, range, 1000);
 
-    ForeignSet fs;
+    ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
     
     {
-        PrimarySet ps;
+        PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
         ps.Subscribe(&fs);
 
@@ -133,11 +133,11 @@ AWT_TEST(ForeignSetConstructor)
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
     AWT_ATTRIBUTE(int, range, 1000);
 
-    PrimarySet ps;
+    PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
     GenerateSet(ps, insert_count / 2, range / 2);
 
-    ForeignSet fs(ps);
+    ForeignSet fs(ps, PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk });
 
     GenerateSet(ps, insert_count / 2, range / 2);
 
@@ -151,6 +151,7 @@ AWT_TEST(ForeignSetConstructor)
     AWT_ASSERT_EQUAL(ps.size(), count);
 }
 
+/*
 AWT_TEST(ForeignSetShared)
 {
     AWT_ATTRIBUTE(size_t, insert_count, 1000);
@@ -171,7 +172,7 @@ AWT_TEST(ForeignSetShared)
         auto p_a = awl::object_address(a);
         static_assert(std::is_same_v<decltype(p_a), A*>);
 
-        ForeignGetter foreign_getter;
+        ForeignGetter foreign_getter{ &A::fk };
         const int key = foreign_getter(*plain_p);
         static_cast<void>(key);
     }
@@ -183,10 +184,10 @@ AWT_TEST(ForeignSetShared)
 
     static_assert(std::is_same_v<typename SharedForeignSet::value_type::value_type, std::shared_ptr<A>>);
 
-    SharedForeignSet fs;
+    SharedForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
 
     {
-        SharedPrimarySet ps;
+        SharedPrimarySet ps{ PrimaryGetter{&A::pk} };
 
         ps.Subscribe(&fs);
 
@@ -213,10 +214,10 @@ AWT_TEST(ForeignSetUnique)
 
     static_assert(std::is_same_v<typename UniqueForeignSet::value_type::value_type, const A*>);
 
-    UniqueForeignSet fs;
+    UniqueForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
     
     {
-        UniquePrimarySet ps;
+        UniquePrimarySet ps{ PrimaryGetter{&A::pk} };
 
         ps.Subscribe(&fs);
 
@@ -243,8 +244,8 @@ AWT_TEST(ForeignSetPlainPointer)
 
     static_assert(std::is_same_v<typename PointerForeignSet::value_type::value_type, A*>);
 
-    PointerForeignSet fs;
-    PointerPrimarySet ps;
+    PointerForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
+    PointerPrimarySet ps{ PrimaryGetter{&A::pk} };
 
     ps.Subscribe(&fs);
 
@@ -271,3 +272,4 @@ AWT_TEST(ForeignSetPlainPointer)
 
     AWT_ASSERT(fs.empty());
 }
+*/

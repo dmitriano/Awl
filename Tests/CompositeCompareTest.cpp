@@ -25,8 +25,8 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
-    using ACompare = awl::FieldCompare<X, int, &X::a>;
-    using BCompare = awl::FieldCompare<X, std::string, &X::b>;
+    using ACompare = awl::FieldCompare<X, int>;
+    using BCompare = awl::FieldCompare<X, std::string>;
 
     static_assert(std::is_same_v<ACompare::key_type, const int&>);
     static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
@@ -45,7 +45,7 @@ AWT_TEST(CompositeCompare)
     AWT_UNUSED_CONTEXT;
 
     //auto comp = awl::CompositeCompare<X, ACompare, BCompare>(ACompare(), BCompare());
-    auto comp = awl::compose_comparers<X>(ACompare(), BCompare());
+    auto comp = awl::compose_comparers<X>(ACompare(&X::a), BCompare(&X::b));
 
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
@@ -63,7 +63,7 @@ AWT_TEST(TransparentCompositeCompareTrivialStructure)
 {
     AWT_UNUSED_CONTEXT;
 
-    auto comp = awl::compose_transparent_comparers<X>(ACompare(), BCompare());
+    auto comp = awl::compose_transparent_comparers<X>(ACompare(&X::a), BCompare(&X::b));
 
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
@@ -121,9 +121,14 @@ AWL_ENUM_TRAITS(data, AccountType)
 
 namespace
 {
-    using WalletAccountCompare = awl::FieldCompare<data::Wallet, data::AccountType, &data::Wallet::accountType>;
-    using WalletAssetCompare = awl::FieldCompare<data::Wallet, std::string, &data::Wallet::asset>;
+    using WalletAccountCompare = awl::FieldCompare<data::Wallet, data::AccountType>; // &data::Wallet::accountType
+    using WalletAssetCompare = awl::FieldCompare<data::Wallet, std::string>; // &data::Wallet::asset
     using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
+
+    constexpr WalletPrimaryCompare MakeComp()
+    {
+        return { WalletAccountCompare{ &data::Wallet::accountType }, WalletAssetCompare{ &data::Wallet::asset } };
+    }
 }
 
 AWT_TEST(TransparentCompositeCompareInheritedKey)
@@ -151,7 +156,7 @@ AWT_TEST(TransparentCompositeCompareInheritedKey)
 
     const data::Wallet im_wallet = { data::AccountType::IsolatedMargin, asset, free, locked, 10 };
 
-    WalletPrimaryCompare comp;
+    WalletPrimaryCompare comp = MakeComp();
 
     AWT_ASSERT(!comp(spot_key, spot_wallet));
     AWT_ASSERT(comp(spot_key, im_wallet));
@@ -180,7 +185,7 @@ AWT_TEST(TransparentCompositeCompareUniversalKey)
     const data::Wallet spot_wallet = { data::AccountType::Spot, asset, free, locked, 5 };
     const data::Wallet im_wallet = { data::AccountType::IsolatedMargin, asset, free, locked, 10 };
 
-    WalletPrimaryCompare comp;
+    WalletPrimaryCompare comp = MakeComp();
 
     AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, "BTC"), spot_wallet));
     AWT_ASSERT(comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, asset), im_wallet));
