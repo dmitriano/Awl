@@ -27,13 +27,16 @@ namespace awl
     };
     
     template <class T, class ReturnType>
+    using FuncPtr = ReturnType(T::*)() const;
+
+    template <class T, class ReturnType>
     class func_getter
     {
     public:
 
-        typedef ReturnType(T::*FuncPtr)() const;
+        using MyFuncPtr = FuncPtr<T, ReturnType>;
 
-        constexpr func_getter(FuncPtr p) : m_p(p) {}
+        constexpr func_getter(MyFuncPtr p) : m_p(p) {}
 
         constexpr ReturnType operator() (const T& val) const
         {
@@ -42,6 +45,6 @@ namespace awl
 
     private:
 
-        FuncPtr m_p;
+        MyFuncPtr m_p;
     };
 }

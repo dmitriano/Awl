@@ -18,6 +18,11 @@ namespace
     {
         int a;
         std::string b;
+
+        int GetA() const
+        {
+            return a;
+        }
     };
 
     inline auto MakeKey(const X& x)
@@ -25,13 +30,13 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
-    inline constexpr auto a_comp = awl::make_field_compare(&X::a);
+    inline constexpr auto a_comp = awl::make_func_compare(&X::GetA);
     inline constexpr auto b_comp = awl::make_field_compare(&X::b);
 
     using ACompare = decltype(a_comp);
     using BCompare = decltype(b_comp);
 
-    static_assert(std::is_same_v<ACompare::key_type, const int&>);
+    static_assert(std::is_same_v<ACompare::key_type, int>);
     static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
     static_assert(std::is_same_v<decltype(MakeKey({})), std::tuple<int, std::string>>);
 

@@ -187,7 +187,7 @@ namespace awl
     using FuncCompare = KeyCompare<T, func_getter<remove_pointer_t<T>, Field>, Compare>;
 
     template <class T, class ReturnType, class Compare = std::less<void>>
-    constexpr auto make_func_compare(typename func_getter<T, ReturnType>::FuncPtr p, Compare comp = {})
+    constexpr auto make_func_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
         return FuncCompare<T, ReturnType, Compare>(p, comp);
     }
