@@ -131,7 +131,7 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    TransparentCompositeCompare<T, Cs ...> compose_transparent_comparers(Cs... comp)
+    constexpr TransparentCompositeCompare<T, Cs ...> compose_transparent_comparers(Cs... comp)
     {
         return TransparentCompositeCompare<T, Cs ...>(std::move(comp) ...);
     }

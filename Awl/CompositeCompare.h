@@ -67,7 +67,7 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    CompositeCompare<T, Cs ...> compose_comparers(Cs... comp)
+    constexpr CompositeCompare<T, Cs ...> compose_comparers(Cs... comp)
     {
         return CompositeCompare<T, Cs ...>(std::move(comp) ...);
     }
