@@ -192,6 +192,12 @@ namespace awl
         return FuncCompare<T, ReturnType, Compare>(p, comp);
     }
 
+    template <class T, class ReturnType, class Compare = std::less<void>>
+    constexpr auto make_shared_func_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
+    {
+        return FuncCompare<std::shared_ptr<T>, ReturnType, Compare>(p, comp);
+    }
+
     template <class T, size_t index>
     struct TuplizableGetter
     {
