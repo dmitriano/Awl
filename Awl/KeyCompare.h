@@ -31,9 +31,10 @@ namespace awl
 
         KeyCompare() = default;
         
-        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
-        {
-        }
+        constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
+            getKey(std::move(get_key)),
+            m_comp(std::move(comp))
+        {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {
@@ -70,9 +71,10 @@ namespace awl
 
         KeyCompare() = default;
 
-        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
-        {
-        }
+        constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
+            getKey(std::move(get_key)),
+            m_comp(std::move(comp))
+        {}
 
         constexpr bool operator()(const T * left, const T * right) const
         {
@@ -107,9 +109,10 @@ namespace awl
 
         KeyCompare() = default;
 
-        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
-        {
-        }
+        constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
+            getKey(std::move(get_key)),
+            m_comp(std::move(comp))
+        {}
 
         constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
         {
@@ -144,9 +147,10 @@ namespace awl
 
         KeyCompare() = default;
 
-        constexpr KeyCompare(GetKey get_key) : getKey(std::move(get_key))
-        {
-        }
+        constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
+            getKey(std::move(get_key)),
+            m_comp(std::move(comp))
+        {}
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & left, const std::unique_ptr<T, Deleter> & right) const
         {
@@ -174,7 +178,19 @@ namespace awl
     using FieldCompare = KeyCompare<T, field_getter<remove_pointer_t<T>, Field>, Compare>;
 
     template <class T, class Field, class Compare = std::less<void>>
+    constexpr auto make_field_compare(Field T::* p, Compare comp = {})
+    {
+        return FieldCompare<T, Field, Compare>(p, comp);
+    }
+
+    template <class T, class Field, class Compare = std::less<void>>
     using FuncCompare = KeyCompare<T, func_getter<remove_pointer_t<T>, Field>, Compare>;
+
+    template <class T, class ReturnType, class Compare = std::less<void>>
+    constexpr auto make_func_compare(typename func_getter<T, ReturnType>::FuncPtr p, Compare comp = {})
+    {
+        return FuncCompare<T, ReturnType, Compare>(p, comp);
+    }
 
     template <class T, size_t index>
     struct TuplizableGetter

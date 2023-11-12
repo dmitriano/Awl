@@ -25,8 +25,11 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
-    using ACompare = awl::FieldCompare<X, int>;
-    using BCompare = awl::FieldCompare<X, std::string>;
+    inline constexpr auto a_comp = awl::make_field_compare(&X::a);
+    inline constexpr auto b_comp = awl::make_field_compare(&X::b);
+
+    using ACompare = decltype(a_comp);
+    using BCompare = decltype(b_comp);
 
     static_assert(std::is_same_v<ACompare::key_type, const int&>);
     static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
@@ -45,7 +48,7 @@ AWT_TEST(CompositeCompare)
     AWT_UNUSED_CONTEXT;
 
     //auto comp = awl::CompositeCompare<X, ACompare, BCompare>(ACompare(), BCompare());
-    auto comp = awl::compose_comparers<X>(ACompare(&X::a), BCompare(&X::b));
+    auto comp = awl::compose_comparers<X>(a_comp, b_comp);
 
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
@@ -63,7 +66,7 @@ AWT_TEST(TransparentCompositeCompareTrivialStructure)
 {
     AWT_UNUSED_CONTEXT;
 
-    auto comp = awl::compose_transparent_comparers<X>(ACompare(&X::a), BCompare(&X::b));
+    auto comp = awl::compose_transparent_comparers<X>(a_comp, b_comp);
 
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
