@@ -32,6 +32,15 @@ namespace
         }
     };
 
+    using AGetter1 = awl::getter<&X::a>;
+    using BGetter1 = awl::getter<&X::b>;
+
+    using MemberCompareA = awl::member_compare<&X::a>;
+    using MemberCompareB = awl::member_compare<&X::b>;
+
+    using PointerCompareA = awl::pointer_compare<std::shared_ptr<X>, &X::a>;
+    using PointerCompareB = awl::pointer_compare<std::shared_ptr<X>, &X::b>;
+
     inline auto MakeKey(const X& x)
     {
         return std::make_tuple(x.a, x.b);
@@ -51,9 +60,6 @@ namespace
 
     inline constexpr auto a_getter = awl::func_getter(&X::GetA);
     using AGetter = std::remove_const_t<decltype(a_getter)>;
-
-    using StatelessAGetter1 = awl::stateless_getter<AGetter, a_getter>;
-    using StatelessAGetter2 = awl::stateless_getter<decltype(a_getter), a_getter>;
 
     static_assert(std::is_copy_constructible_v<AGetter>);
     static_assert(std::is_copy_assignable_v<AGetter>);

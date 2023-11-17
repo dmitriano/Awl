@@ -19,17 +19,12 @@ namespace awl
 
         constexpr field_getter(Field T::* p) : m_p(p) {}
 
-        //field_getter(const field_getter&) = default;
-        //field_getter(field_getter&&) = default;
-        //field_getter& operator = (const field_getter&) = default;
-        //field_getter& operator = (field_getter&&) = default;
-
         constexpr const Field& operator() (const T & val) const
         {
             return val.*m_p;
         }
     
-    // private:
+    private:
 
         Field T::* m_p;
     };
@@ -49,33 +44,46 @@ namespace awl
 
         constexpr func_getter(MyFuncPtr p) : m_p(p) {}
 
-        //func_getter(const func_getter&) = default;
-        //func_getter(func_getter&&) = default;
-        //func_getter& operator = (const func_getter&) = default;
-        //func_getter& operator = (func_getter&&) = default;
-
         constexpr ReturnType operator() (const T& val) const
         {
             return (val.*m_p)();
         }
 
-    // private:
+    private:
 
         MyFuncPtr m_p;
     };
 
-    template <class Getter, Getter state>
-    class stateless_getter
+    // Stateless geters:
+
+    template <auto value>
+    class getter;
+
+    template <class T, class ReturnType, ReturnType(T::* func_ptr)() const>
+    class getter<func_ptr>
     {
     public:
 
-        constexpr typename Getter::value_type operator() (const typename Getter::object_type& object) const
+        using object_type = T;
+        using value_type = ReturnType;
+
+        constexpr ReturnType operator() (const T& val) const
         {
-            return m_getter(object);
+            return (val.*func_ptr)();
         }
+    };
 
-    private:
+    template <class T, class Field, Field T::* field_ptr>
+    class getter<field_ptr>
+    {
+    public:
 
-        static inline constexpr Getter m_getter = state;
+        using object_type = T;
+        using value_type = Field;
+
+        constexpr const Field& operator() (const T& val) const
+        {
+            return val.*field_ptr;
+        }
     };
 }
