@@ -590,12 +590,12 @@ namespace
 
 AWT_TEST(VectorSetComparer)
 {
-    TestComparer(context, awl::FieldCompare<A, size_t>(&A::key));
+    TestComparer(context, awl::member_compare<&A::key>());
     TestComparer(context, awl::FuncCompare<A, size_t>{&A::GetKey});
     TestComparer(context, awl::FuncCompare<A, const size_t&>{&A::GetKeyRef});
     TestComparer(context, awl::TuplizableCompare<A, 0>{});
 
-    TestPointerComparer(context, awl::FieldCompare<A*, size_t>{&A::key});
+    TestPointerComparer(context, awl::pointer_compare<A*, &A::key>());
     TestPointerComparer(context, awl::FuncCompare<A*, size_t>{&A::GetKey});
     TestPointerComparer(context, awl::FuncCompare<A*, const size_t&>{&A::GetKeyRef});
     TestPointerComparer(context, awl::TuplizableCompare<A*, 0>{});

@@ -229,5 +229,5 @@ namespace awl
     using member_compare = KeyCompare<typename getter<value>::object_type, getter<value>, Compare>;
 
     template <class Pointer, auto value, class Compare = std::less<void>>
-    using pointer_compare = KeyCompare<remove_pointer_t<Pointer>, getter<value>, Compare>;
+    using pointer_compare = KeyCompare<Pointer, getter<value>, Compare>;
 }
