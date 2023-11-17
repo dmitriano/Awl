@@ -46,15 +46,15 @@ AWT_TEST(ObservableSetAssignment)
 {
     AWT_UNUSED_CONTEXT;
 
-    using Compare = awl::FieldCompare<A, size_t>;
+    using Compare = awl::member_compare<&A::key>;
     using Set = awl::observable_set<A, Compare>;
 
     //Check if it satisfies the concept std::ranges::range.
     static_assert(std::ranges::range<Set>);
 
-    Set s{ Compare{&A::key} };
-    s = Set{ Compare{&A::key} };
+    Set s;
+    s = {};
     s.insert(A(1));
-    s = Set{ Compare{&A::key} };
+    s = {};
     s.insert(A(1));
 }

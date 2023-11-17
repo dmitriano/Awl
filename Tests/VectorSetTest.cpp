@@ -507,7 +507,7 @@ namespace
             v.push_back(val);
         }
 
-        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t>(&A::key));
+        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         awl::vector_set<const A *, Compare> set(comp);
@@ -561,7 +561,7 @@ namespace
             set.insert(Pointer(new A(val)));
         }
 
-        std::sort(v.begin(), v.end(), awl::FieldCompare<A, size_t>{&A::key });
+        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         for (size_t index = 0; index < v.size(); ++index)
