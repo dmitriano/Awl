@@ -69,6 +69,6 @@ namespace awl
     template <class T, class ... Cs>
     constexpr CompositeCompare<T, Cs ...> compose_comparers(Cs... comp)
     {
-        return CompositeCompare<T, Cs ...>(std::move(comp) ...);
+        return CompositeCompare<T, std::remove_const_t<std::decay_t<Cs>>...>(std::move(comp) ...);
     }
 }

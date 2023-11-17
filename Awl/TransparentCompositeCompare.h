@@ -133,6 +133,6 @@ namespace awl
     template <class T, class ... Cs>
     constexpr TransparentCompositeCompare<T, Cs ...> compose_transparent_comparers(Cs... comp)
     {
-        return TransparentCompositeCompare<T, Cs ...>(std::move(comp) ...);
+        return TransparentCompositeCompare<T, std::remove_const_t<std::decay_t<Cs>>...>(std::move(comp) ...);
     }
 }

@@ -195,7 +195,7 @@ namespace awl
     template <class T, class Field, class Compare = std::less<void>>
     constexpr auto make_field_compare(Field T::* p, Compare comp = {})
     {
-        return FieldCompare<T, Field, Compare>(p, comp);
+        return FieldCompare<T, Field, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, class Field, class Compare = std::less<void>>
@@ -204,13 +204,13 @@ namespace awl
     template <class T, class ReturnType, class Compare = std::less<void>>
     constexpr auto make_func_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
-        return FuncCompare<T, ReturnType, Compare>(p, comp);
+        return FuncCompare<T, ReturnType, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, class ReturnType, class Compare = std::less<void>>
     constexpr auto make_shared_func_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
-        return FuncCompare<std::shared_ptr<T>, ReturnType, Compare>(p, comp);
+        return FuncCompare<std::shared_ptr<T>, ReturnType, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, size_t index>
