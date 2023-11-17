@@ -595,17 +595,17 @@ AWT_TEST(VectorSetComparer)
     TestComparer(context, awl::FuncCompare<A, const size_t&>{&A::GetKeyRef});
     TestComparer(context, awl::TuplizableCompare<A, 0>{});
 
-    TestPointerComparer(context, awl::pointer_compare<A*, &A::key>());
+    TestPointerComparer(context, awl::pointer_compare<&A::key>());
     TestPointerComparer(context, awl::FuncCompare<A*, size_t>{&A::GetKey});
     TestPointerComparer(context, awl::FuncCompare<A*, const size_t&>{&A::GetKeyRef});
     TestPointerComparer(context, awl::TuplizableCompare<A*, 0>{});
 
-    TestSmartPointerComparer(context, awl::FieldCompare<std::shared_ptr<A>, size_t>{&A::key});
+    TestSmartPointerComparer(context, awl::shared_compare<&A::key>());
     TestSmartPointerComparer(context, awl::FuncCompare<std::shared_ptr<A>, size_t>{&A::GetKey});
     TestSmartPointerComparer(context, awl::FuncCompare<std::shared_ptr<A>, const size_t&>{&A::GetKeyRef});
     TestSmartPointerComparer(context, awl::TuplizableCompare<std::shared_ptr<A>, 0>{});
 
-    TestSmartPointerComparer(context, awl::FieldCompare<std::unique_ptr<A>, size_t>{&A::key});
+    TestSmartPointerComparer(context, awl::unique_compare<&A::key>());
     TestSmartPointerComparer(context, awl::FuncCompare<std::unique_ptr<A>, size_t>{&A::GetKey});
     TestSmartPointerComparer(context, awl::FuncCompare<std::unique_ptr<A>, const size_t&>{&A::GetKeyRef});
     TestSmartPointerComparer(context, awl::TuplizableCompare<std::unique_ptr<A>, 0>{});

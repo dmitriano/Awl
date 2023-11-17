@@ -38,8 +38,8 @@ namespace
     using MemberCompareA = awl::member_compare<&X::a>;
     using MemberCompareB = awl::member_compare<&X::b>;
 
-    using PointerCompareA = awl::pointer_compare<std::shared_ptr<X>, &X::a>;
-    using PointerCompareB = awl::pointer_compare<std::shared_ptr<X>, &X::b>;
+    using PointerCompareA = awl::pointer_compare<&X::a>;
+    using PointerCompareB = awl::pointer_compare<&X::b>;
 
     inline auto MakeKey(const X& x)
     {

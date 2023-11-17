@@ -228,6 +228,12 @@ namespace awl
     template <auto value, class Compare = std::less<void>>
     using member_compare = KeyCompare<typename getter<value>::object_type, getter<value>, Compare>;
 
-    template <class Pointer, auto value, class Compare = std::less<void>>
-    using pointer_compare = KeyCompare<Pointer, getter<value>, Compare>;
+    template <auto value, class Compare = std::less<void>>
+    using pointer_compare = KeyCompare<typename getter<value>::object_type*, getter<value>, Compare>;
+
+    template <auto value, class Compare = std::less<void>>
+    using shared_compare = KeyCompare<std::shared_ptr<typename getter<value>::object_type>, getter<value>, Compare>;
+
+    template <auto value, class Compare = std::less<void>>
+    using unique_compare = KeyCompare<std::unique_ptr<typename getter<value>::object_type>, getter<value>, Compare>;
 }
