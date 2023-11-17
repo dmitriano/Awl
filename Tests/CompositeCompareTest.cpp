@@ -35,12 +35,42 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
+    using GetAPtr = awl::FuncPtr<X, int>;
+
+    static_assert(std::is_copy_constructible_v<GetAPtr>);
+    static_assert(std::is_copy_assignable_v<GetAPtr>);
+    static_assert(std::is_move_constructible_v<GetAPtr>);
+    static_assert(std::is_move_assignable_v<GetAPtr>);
+
+    static_assert(std::is_copy_constructible_v<X>);
+    static_assert(std::is_copy_assignable_v<X>);
+    static_assert(std::is_move_constructible_v<X>);
+    static_assert(std::is_move_assignable_v<X>);
+
+    inline constexpr auto a_getter = awl::func_getter(&X::GetA);
+    using AGetter = std::remove_const_t<decltype(a_getter)>;
+
+    static_assert(std::is_copy_constructible_v<AGetter>);
+    static_assert(std::is_copy_assignable_v<AGetter>);
+    static_assert(std::is_move_constructible_v<AGetter>);
+    static_assert(std::is_move_assignable_v<AGetter>);
+
     inline constexpr auto a_comp = awl::make_func_compare(&X::GetA);
     inline constexpr auto a1_comp = awl::make_func_compare(&X::GetA1);
     inline constexpr auto b_comp = awl::make_field_compare(&X::b);
 
-    using ACompare = decltype(a_comp);
-    using BCompare = decltype(b_comp);
+    using ACompare = std::remove_const_t<decltype(a_comp)>;
+    using BCompare = std::remove_const_t<decltype(b_comp)>;
+
+    static_assert(std::is_copy_constructible_v<ACompare>);
+    static_assert(std::is_copy_assignable_v<ACompare>);
+    static_assert(std::is_move_constructible_v<ACompare>);
+    static_assert(std::is_move_assignable_v<ACompare>);
+
+    static_assert(std::is_copy_constructible_v<BCompare>);
+    static_assert(std::is_copy_assignable_v<BCompare>);
+    static_assert(std::is_move_constructible_v<BCompare>);
+    static_assert(std::is_move_assignable_v<BCompare>);
 
     static_assert(std::is_same_v<ACompare::key_type, int>);
     static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
@@ -90,6 +120,13 @@ AWT_TEST(CompositeCompare)
     //auto comp = awl::CompositeCompare<X, ACompare, BCompare>(ACompare(), BCompare());
     auto comp = awl::compose_comparers<X>(a_comp, b_comp);
 
+    using Compare = decltype(comp);
+
+    static_assert(std::is_copy_constructible_v<Compare>);
+    static_assert(std::is_copy_assignable_v<Compare>);
+    static_assert(std::is_move_constructible_v<Compare>);
+    static_assert(std::is_move_assignable_v<Compare>);
+
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
     AWT_ASSERT(!comp(x2a, x2a));
@@ -107,6 +144,13 @@ AWT_TEST(TransparentCompositeCompareTrivialStructure)
     AWT_UNUSED_CONTEXT;
 
     auto comp = awl::compose_transparent_comparers<X>(a_comp, b_comp);
+
+    using Compare = decltype(comp);
+
+    static_assert(std::is_copy_constructible_v<Compare>);
+    static_assert(std::is_copy_assignable_v<Compare>);
+    static_assert(std::is_move_constructible_v<Compare>);
+    static_assert(std::is_move_assignable_v<Compare>);
 
     AWT_ASSERT(!comp(x1a, x1a));
     AWT_ASSERT(!comp(x1b, x1b));
