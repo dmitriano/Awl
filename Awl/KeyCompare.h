@@ -192,19 +192,19 @@ namespace awl
     template <class T, class Field, class Compare = std::less<void>>
     constexpr auto make_compare(Field T::* p, Compare comp = {})
     {
-        return KeyCompare<T, field_getter<remove_pointer_t<T>, Field>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
+        return KeyCompare<T, field_getter<T, Field>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, class ReturnType, class Compare = std::less<void>>
     constexpr auto make_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
-        return KeyCompare<T, func_getter<remove_pointer_t<T>, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
+        return KeyCompare<T, func_getter<T, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, class ReturnType, class Compare = std::less<void>>
     constexpr auto make_shared_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
-        return KeyCompare<std::shared_ptr<T>, func_getter<remove_pointer_t<T>, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
+        return KeyCompare<std::shared_ptr<T>, func_getter<T>, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, size_t index>
