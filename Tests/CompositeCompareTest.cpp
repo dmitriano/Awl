@@ -57,9 +57,9 @@ namespace
     static_assert(std::is_move_constructible_v<AGetter>);
     static_assert(std::is_move_assignable_v<AGetter>);
 
-    inline constexpr auto a_comp = awl::make_func_compare(&X::GetA);
-    inline constexpr auto a1_comp = awl::make_func_compare(&X::GetA1);
-    inline constexpr auto b_comp = awl::make_field_compare(&X::b);
+    inline constexpr auto a_comp = awl::make_compare(&X::GetA);
+    inline constexpr auto a1_comp = awl::make_compare(&X::GetA1);
+    inline constexpr auto b_comp = awl::make_compare(&X::b);
 
     using ACompare = std::remove_const_t<decltype(a_comp)>;
     using BCompare = std::remove_const_t<decltype(b_comp)>;
