@@ -14,6 +14,9 @@ namespace awl
     {
     public:
 
+        using object_type = T;
+        using value_type = Field;
+
         constexpr field_getter(Field T::* p) : m_p(p) {}
 
         //field_getter(const field_getter&) = default;
@@ -26,7 +29,7 @@ namespace awl
             return val.*m_p;
         }
     
-    private:
+    // private:
 
         Field T::* m_p;
     };
@@ -38,6 +41,9 @@ namespace awl
     class func_getter
     {
     public:
+
+        using object_type = T;
+        using value_type = ReturnType;
 
         using MyFuncPtr = FuncPtr<T, ReturnType>;
 
@@ -53,8 +59,23 @@ namespace awl
             return (val.*m_p)();
         }
 
-    private:
+    // private:
 
         MyFuncPtr m_p;
+    };
+
+    template <class Getter, Getter state>
+    class stateless_getter
+    {
+    public:
+
+        constexpr typename Getter::value_type operator() (const typename Getter::object_type& object) const
+        {
+            return m_getter(object);
+        }
+
+    private:
+
+        static inline constexpr Getter m_getter = state;
     };
 }

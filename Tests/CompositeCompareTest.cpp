@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include <array>
+
 namespace
 {
     struct X
@@ -49,6 +51,9 @@ namespace
 
     inline constexpr auto a_getter = awl::func_getter(&X::GetA);
     using AGetter = std::remove_const_t<decltype(a_getter)>;
+
+    using StatelessAGetter1 = awl::stateless_getter<AGetter, a_getter>;
+    using StatelessAGetter2 = awl::stateless_getter<decltype(a_getter), a_getter>;
 
     static_assert(std::is_copy_constructible_v<AGetter>);
     static_assert(std::is_copy_assignable_v<AGetter>);
