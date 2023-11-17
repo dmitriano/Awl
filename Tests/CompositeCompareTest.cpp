@@ -23,6 +23,11 @@ namespace
         {
             return a;
         }
+
+        int GetA1() const
+        {
+            return a;
+        }
     };
 
     inline auto MakeKey(const X& x)
@@ -31,6 +36,7 @@ namespace
     }
 
     inline constexpr auto a_comp = awl::make_func_compare(&X::GetA);
+    inline constexpr auto a1_comp = awl::make_func_compare(&X::GetA1);
     inline constexpr auto b_comp = awl::make_field_compare(&X::b);
 
     using ACompare = decltype(a_comp);
@@ -47,6 +53,35 @@ namespace
 }
 
 using namespace awl::testing;
+
+AWT_TEST(CompositeCompareMoveAssign)
+{
+    AWT_UNUSED_CONTEXT;
+
+    {
+        auto comp1 = a_comp;
+        auto comp2 = a1_comp;
+
+        comp1 = std::move(comp2);
+        comp2 = comp1;
+    }
+
+    {
+        auto comp1 = awl::compose_comparers<X>(a_comp, b_comp);
+        auto comp2 = awl::compose_comparers<X>(a1_comp, b_comp);
+
+        comp1 = std::move(comp2);
+        comp2 = comp1;
+    }
+
+    {
+        auto comp1 = awl::compose_transparent_comparers<X>(a_comp, b_comp);
+        auto comp2 = awl::compose_transparent_comparers<X>(a1_comp, b_comp);
+
+        comp1 = std::move(comp2);
+        comp2 = comp1;
+    }
+}
 
 AWT_TEST(CompositeCompare)
 {
