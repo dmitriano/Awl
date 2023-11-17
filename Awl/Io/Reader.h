@@ -67,6 +67,7 @@ namespace awl::io
 
             void SkipField(const Reader & context, InputStream & in) const override
             {
+                // It is the only place where Field type is required to be default constructable.
                 Field val;
                 context.ReadV(in, val);
             }
