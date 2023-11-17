@@ -17,8 +17,6 @@ namespace awl::testing
     {
     public:
 
-        TimeQueue() : m_tasks(Compare(&Task::targetTime)) {}
-
         void push(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
         {
             m_tasks.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
@@ -51,7 +49,7 @@ namespace awl::testing
             std::coroutine_handle<> handle;
         };
 
-        using Compare = FieldCompare<Task, std::chrono::steady_clock::time_point>;
+        using Compare = member_compare<&Task::targetTime>;
 
         std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
     };

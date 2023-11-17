@@ -32,15 +32,6 @@ namespace
         }
     };
 
-    using AGetter1 = awl::getter<&X::a>;
-    using BGetter1 = awl::getter<&X::b>;
-
-    using MemberCompareA = awl::member_compare<&X::a>;
-    using MemberCompareB = awl::member_compare<&X::b>;
-
-    using PointerCompareA = awl::pointer_compare<&X::a>;
-    using PointerCompareB = awl::pointer_compare<&X::b>;
-
     inline auto MakeKey(const X& x)
     {
         return std::make_tuple(x.a, x.b);
