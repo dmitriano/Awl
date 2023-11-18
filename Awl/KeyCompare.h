@@ -204,7 +204,7 @@ namespace awl
     template <class T, class ReturnType, class Compare = std::less<void>>
     constexpr auto make_shared_compare(FuncPtr<T, ReturnType> p, Compare comp = {})
     {
-        return KeyCompare<std::shared_ptr<T>, func_getter<T>, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
+        return KeyCompare<std::shared_ptr<T>, func_getter<T, ReturnType>, std::remove_const_t<std::decay_t<Compare>>>(p, comp);
     }
 
     template <class T, size_t index>
