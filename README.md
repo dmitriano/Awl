@@ -26,10 +26,10 @@ To leave the author a message fill the [form on his website](https://developerno
 
 ## Compiling on Windows with CMake and MSVC 2022:
 
-    ```
-    cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
-    cmake --build . --target AwlTest --config Release
-    ```
+```
+cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
+cmake --build . --target AwlTest --config Release
+```
 
 or
 
