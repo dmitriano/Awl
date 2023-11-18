@@ -14,7 +14,7 @@ AWL is a small cross-platform C++ library that includes:
 9. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 10. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with MSVC 2022 comiler 19.30.30709+ and GCC 11, but not with CLang yet.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with MSVC 2022 comiler 19.37.32825, GCC 12.3.0 and Android CLang 17.0.2.
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -26,23 +26,31 @@ To leave the author a message fill the [form on his website](https://developerno
 
 ## Compiling on Windows with CMake and MSVC 2022:
 
+    ```
     cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
     cmake --build . --target AwlTest --config Release
+    ```
 
 or
 
+    ```
     msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
+    ```
 
 It also builds for x86 using the following command:
 
+    ```
     cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
+    ```
 
 but with couple warnings related to std::streamsize that are not fixed yet.
 
 ## Compiling on Linux with CMake and GCC:
 
+    ```
     cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
     cmake --build . --parallel
+    ```
 
 or
 
