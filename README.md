@@ -93,7 +93,7 @@ To enable GCC sanitizer uncomment corresponding lines in `CMake\AwlConfig.cmake`
 
 ## Running the tests on Windows and Linux
 
-Remove "./" prefix on Windows and do not forget quotes on Linux:
+Remove `./` prefix on Windows and do not forget quotes on Linux:
 
 ```bash
 ./AwlTest
