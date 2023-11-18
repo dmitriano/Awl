@@ -81,7 +81,7 @@ cmake ../../repos/Awl/ -G Ninja
 cmake --build . --parallel --target AwlTest --config RelWithDebInfo
 ```
 
-Compiling a separate source file (by example of VtsTest.cpp):
+Compiling a separate source file (by example of `VtsTest.cpp`):
 
 ```bash
 cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
@@ -89,7 +89,7 @@ cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 
 ## Using GCC sanitizer
 
-To enable GCC sanitizer uncomment corresponding lines in CMake\AwlConfig.cmake.
+To enable GCC sanitizer uncomment corresponding lines in `CMake\AwlConfig.cmake`.
 
 ## Running the tests on Windows and Linux
 
@@ -133,7 +133,7 @@ they potentially can format your hard drive.
 
 ## Running the tests on Android device
 
-Built AWL for Android with -DAWL_STATIC_RUNTIME:BOOL=ON CMake option, upload the executable file to the device:
+Built AWL for Android with `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option, upload the executable file to the device:
 
 ```bash
 adb push AwlTest /data/local/tmp
