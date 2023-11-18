@@ -33,51 +33,59 @@ cmake --build . --target AwlTest --config Release
 
 or
 
-    ```
-    msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
-    ```
+```bat
+msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
+```
 
 It also builds for x86 using the following command:
 
-    ```
-    cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
-    ```
+```bat
+cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
+```
 
 but with couple warnings related to std::streamsize that are not fixed yet.
 
 ## Compiling on Linux with CMake and GCC:
 
-    ```
-    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
-    cmake --build . --parallel
-    ```
+```bash
+cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel
+```
 
 or
 
-    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
-    cmake --build . --parallel
+```bash
+cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
+cmake --build . --parallel
+```
 
 ## Compiling on Ubuntu 22.04:
 
-    sudo apt install build-essential
-    sudo apt install cmake
+```bash
+sudo apt install build-essential
+sudo apt install cmake
 
-    mkdir repos
-    cd repos
-    git clone https://github.com/dmitriano/Awl
-    mkdir -p build/awl
-    cd build/awl
-    cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
-    cmake --build . --parallel
+mkdir repos
+cd repos
+git clone https://github.com/dmitriano/Awl
+mkdir -p build/awl
+cd build/awl
+cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel
+```
 
 ## Compiling with Ninja generator
 
-    cmake ../../repos/Awl/ -G Ninja
-    cmake --build . --parallel --target AwlTest --config RelWithDebInfo
+```bash
+cmake ../../repos/Awl/ -G Ninja
+cmake --build . --parallel --target AwlTest --config RelWithDebInfo
+```
 
 Compiling a separate source file (by example of VtsTest.cpp):
 
-    cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
+```bash
+cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
+```
 
 ## Using GCC sanitizer
 
@@ -87,27 +95,39 @@ To enable GCC sanitizer uncomment corresponding lines in CMake\AwlConfig.cmake.
 
 Remove "./" prefix on Windows and do not forget quotes on Linux:
 
-    ./AwlTest
+```bash
+./AwlTest
+```
 
 of
 
-    ./AwlTest --filter ".*_Test"
+```bash
+./AwlTest --filter ".*_Test"
+```
 
 Running the benchmarks:
 
-    ./AwlTest --filter ".*_Benchmark" --output all
+```bash
+./AwlTest --filter ".*_Benchmark" --output all
+```
 
 Running the examples:
 
-    ./AwlTest --filter ".*_Example" --output all
+```bash
+./AwlTest --filter ".*_Example" --output all
+```
 
 Do not run the commands below:
 
-    ./AwlTest --filter ".*_Unstable"
+```bash
+./AwlTest --filter ".*_Unstable"
+```
 
 or
 
-    ./AwlTest --filter ".*"
+```bash
+./AwlTest --filter ".*"
+```
 
 they potentially can format your hard drive.
 
@@ -115,19 +135,27 @@ they potentially can format your hard drive.
 
 Built AWL for Android with -DAWL_STATIC_RUNTIME:BOOL=ON CMake option, upload the executable file to the device:
 
-    adb push AwlTest /data/local/tmp
+```bash
+adb push AwlTest /data/local/tmp
+```
 
 and run it with the same options as on Linux:
 
-    adb shell
-    cd /data/local/tmp
-    chmod a+x AwlTest
-    ./AwlTest
+```bash
+adb shell
+cd /data/local/tmp
+chmod a+x AwlTest
+./AwlTest
+```
 
 or with a single command:
 
-    adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest"
+```bash
+adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest"
+```
 
 or
 
+```bash
 adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter .*CompositeCompare.*"
+```
