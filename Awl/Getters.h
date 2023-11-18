@@ -7,6 +7,10 @@
 
 #include <type_traits>
 
+#if defined(__GNUC__)
+#include <functional>
+#endif
+
 namespace awl
 {
     template <class T, class Field>
@@ -59,6 +63,25 @@ namespace awl
     template <auto value>
     class getter;
 
+// GCC12 BUG: Field T::* is less specialized than ReturnType(T::* func_ptr)() const
+#if defined(__GNUC__)
+
+    template <class T, class Field, Field T::* field_ptr>
+    class getter<field_ptr>
+    {
+    public:
+
+        using object_type = T;
+        using value_type = Field;
+
+        constexpr decltype(auto) operator() (const T& val) const
+        {
+            return std::invoke(field_ptr, val);
+        }
+    };
+
+#else
+
     template <class T, class ReturnType, ReturnType(T::* func_ptr)() const>
     class getter<func_ptr>
     {
@@ -86,4 +109,6 @@ namespace awl
             return val.*field_ptr;
         }
     };
+
+#endif
 }
