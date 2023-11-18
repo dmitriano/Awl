@@ -230,4 +230,8 @@ namespace awl
 
     template <auto value, class Compare = std::less<void>>
     using unique_compare = KeyCompare<std::unique_ptr<typename getter<value>::object_type>, getter<value>, Compare>;
+
+    // When we have a pointer type declared as using ObjectPtr = std::shared_ptr<T>, for example.
+    template <class T, auto value, class Compare = std::less<void>>
+    using smart_compare = KeyCompare<T, getter<value>, Compare>;
 }
