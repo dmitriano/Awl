@@ -11,6 +11,11 @@
 
 namespace awl
 {
+    // There are two ways to make type T tuplizable:
+    // 1. Define T::as_tuple (if T is a user's class or struct).
+    // 2. Define object_as_const_tuple and object_as_tuple and specialize is_tuplizable<T>.
+    // see RwHelpersTest.cpp for an example.
+
     template <class T>
     constexpr auto object_as_tuple(T & val)
     {
@@ -51,31 +56,16 @@ namespace awl
     struct is_tuplizable : std::false_type {};
 
     template <class T>
-    struct is_tuplizable<T, std::void_t<decltype(T{}.as_const_tuple())>> : std::true_type {};
+    struct is_tuplizable<T, std::void_t<decltype(std::declval<T>().as_const_tuple())>> : std::true_type {};
 
     template <class T>
     inline constexpr bool is_tuplizable_v = is_tuplizable<T>::value;
 
     template <class T>
-    class tuplizable_traits
+    struct tuplizable_traits
     {
-    private:
-
-        //decltype(object_as_tuple(T{})) produces a const Tie,
-        //so we need to declare a variable of type T.
-        struct Helper
-        {
-            static auto GetTie()
-            {
-                T val;
-                return object_as_tuple(val);
-            }
-        };
-
-    public:
-
-        using ConstTie = decltype(object_as_const_tuple(T{}));
-        using Tie = decltype(Helper::GetTie());
+        using ConstTie = decltype(object_as_const_tuple(std::declval<const T&>()));
+        using Tie = decltype(object_as_tuple(std::declval<T&>()));
     };
 }
 

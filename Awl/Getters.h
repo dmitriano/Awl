@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Tuplizable.h"
+
 #include <type_traits>
 
 #if defined(__GNUC__)
@@ -73,9 +75,9 @@ namespace awl
     template <class T, size_t index>
     struct tuplizable_getter
     {
-        const auto& operator() (const T& val) const
+        std::tuple_element_t<index, typename tuplizable_traits<T>::ConstTie> operator() (const T& val) const
         {
-            return std::get<index>(val.as_const_tuple());
+            return std::get<index>(object_as_const_tuple(val));
         }
     };
 

@@ -45,7 +45,7 @@ namespace awl
     }
 
     template <>
-    constexpr bool is_tuplizable_v<A> = true;
+    struct is_tuplizable<A> : std::true_type{};
 }
 
 namespace
