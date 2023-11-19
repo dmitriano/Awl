@@ -593,22 +593,22 @@ AWT_TEST(VectorSetComparer)
     TestComparer(context, awl::member_compare<&A::key>());
     TestComparer(context, awl::member_compare<&A::GetKey>());
     TestComparer(context, awl::member_compare<&A::GetKeyRef>());
-    TestComparer(context, awl::TuplizableCompare<A, 0>{});
+    TestComparer(context, awl::tuplizable_compare<A, 0>{});
 
     TestPointerComparer(context, awl::pointer_compare<&A::key>());
     TestPointerComparer(context, awl::pointer_compare<&A::GetKey>());
     TestPointerComparer(context, awl::pointer_compare<&A::GetKeyRef>());
-    TestPointerComparer(context, awl::TuplizableCompare<A*, 0>{});
+    TestPointerComparer(context, awl::tuplizable_compare<A*, 0>{});
 
     TestSmartPointerComparer(context, awl::shared_compare<&A::key>());
     TestSmartPointerComparer(context, awl::shared_compare<&A::GetKey>());
     TestSmartPointerComparer(context, awl::shared_compare<&A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::TuplizableCompare<std::shared_ptr<A>, 0>{});
+    TestSmartPointerComparer(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
 
     TestSmartPointerComparer(context, awl::unique_compare<&A::key>());
     TestSmartPointerComparer(context, awl::unique_compare<&A::GetKey>());
     TestSmartPointerComparer(context, awl::unique_compare<&A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::TuplizableCompare<std::unique_ptr<A>, 0>{});
+    TestSmartPointerComparer(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
 }
 
 namespace
@@ -713,7 +713,7 @@ AWT_TEST(VectorSetNonCopyableElement)
     }
 
     TestBComparer(insert_count, range, awl::make_compare(&B::GetKey));
-    TestBComparer(insert_count, range, awl::TuplizableCompare<B, 0>{});
+    TestBComparer(insert_count, range, awl::tuplizable_compare<B, 0>{});
 }
 
 template <class I1, class I2>

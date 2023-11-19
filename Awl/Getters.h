@@ -58,6 +58,27 @@ namespace awl
         MyFuncPtr m_p;
     };
 
+    template <class T, class Field>
+    field_getter<T, Field> make_getter(Field T::* p)
+    {
+        return field_getter<T, Field>{ p };
+    }
+
+    template <class T, class ReturnType>
+    func_getter<T, ReturnType> make_getter(FuncPtr<T, ReturnType> p)
+    {
+        return func_getter<T, ReturnType>{ p };
+    }
+
+    template <class T, size_t index>
+    struct tuplizable_getter
+    {
+        const auto& operator() (const T& val) const
+        {
+            return std::get<index>(val.as_const_tuple());
+        }
+    };
+
     // Stateless geters:
 
     template <auto value>

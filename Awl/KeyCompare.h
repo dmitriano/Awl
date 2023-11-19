@@ -208,16 +208,7 @@ namespace awl
     }
 
     template <class T, size_t index>
-    struct TuplizableGetter
-    {
-        const auto & operator() (const T & val) const
-        {
-            return std::get<index>(val.as_const_tuple());
-        }
-    };
-
-    template <class T, size_t index>
-    using TuplizableCompare = KeyCompare<T, TuplizableGetter<remove_pointer_t<T>, index>>;
+    using tuplizable_compare = KeyCompare<T, tuplizable_getter<remove_pointer_t<T>, index>>;
 
     template <auto value, class Compare = std::less<void>>
     using member_compare = KeyCompare<typename getter<value>::object_type, getter<value>, Compare>;
