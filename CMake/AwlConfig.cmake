@@ -15,14 +15,6 @@ option(AWL_NO_DEPRECATED "Disable deprecated warnings in C++.")
 option(AWL_STATIC_RUNTIME "Linking statically against libgcc and libstdc++.")
 option(AWL_FIND_QT "Use QString if the project is built with QT." ON)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    message("Enabling 128 bit integer support.")
-    add_compile_definitions(AWL_INT_128)
-    if (AWL_NO_DEPRECATED)
-        add_definitions("-Wno-deprecated -Wno-deprecated-declarations")
-    endif()
-endif()
-
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     #AppleClang and Android Clang do not have std::jthread.
     set(AWL_JTHREAD_EXTRAS ON)

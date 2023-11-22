@@ -1,3 +1,15 @@
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # won't work before project()!    
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # 64 bits
+        message("Enabling 128 bit integer support.")
+        add_compile_definitions(AWL_INT_128)
+    endif()
+    if (AWL_NO_DEPRECATED)
+        add_definitions("-Wno-deprecated -Wno-deprecated-declarations")
+    endif()
+endif()
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
 
 if (AWL_STATIC_RUNTIME)
