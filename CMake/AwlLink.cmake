@@ -1,4 +1,6 @@
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+set(AWL_COMPILER_GNU_OR_CLANG ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" 
+    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+if (${AWL_COMPILER_GNU_OR_CLANG})
     # won't work before project()!    
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
@@ -13,7 +15,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
 
 if (AWL_STATIC_RUNTIME)
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    if (${AWL_COMPILER_GNU_OR_CLANG})
         target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
 endif()
@@ -47,17 +49,19 @@ if (DEFINED AWL_PLATFORM_DIR)
     endif()
 endif()
 
-#header-only libraries have no designated component
-find_package(Boost)
+if (AWL_BOOST_EXTRAS)
+    #header-only libraries have no designated component
+    find_package(Boost)
 
-if(Boost_FOUND)
-    message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS}")
-    target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Boost)
-    add_definitions(-DAWL_BOOST)
-    file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${AWL_ROOT_DIR}/Extras/Boost/*.cpp)
-    target_sources(${PROJECT_NAME} PRIVATE ${BOOST_FILES})
-else()
-    message("BOOST not found, AWL will compile without BOOST.")
+    if(Boost_FOUND)
+        message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS}")
+        target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Boost)
+        add_definitions(-DAWL_BOOST)
+        file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${AWL_ROOT_DIR}/Extras/Boost/*.cpp)
+        target_sources(${PROJECT_NAME} PRIVATE ${BOOST_FILES})
+    else()
+        message("BOOST not found, AWL will compile without BOOST.")
+    endif()
 endif()
 
 if (AWL_FIND_QT)

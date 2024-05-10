@@ -7,6 +7,7 @@ else()
 endif()
 
 option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
+option(AWL_BOOST_EXTRAS "Use boost::multiprecision.")
 option(AWL_COMPILE_SOURCES "Compile AWL sources." ON)
 option(AWL_COMPILE_TESTS "Compile AWL tests.")
 option(AWL_COMPILE_EXPERIMENTAL "Compile experimental AWL code.")
@@ -34,6 +35,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(AWL_BOOST_EXTRAS ON)
     # using Visual Studio C++
     # add_compile_options("/std:c++latest")
     add_compile_options("/W4" "/Zc:__cplusplus")
