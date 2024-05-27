@@ -16,6 +16,8 @@
 #include "Awl/Io/Rw/VariantReadWrite.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
 #include "Awl/Io/Rw/DecimalReadWrite.h"
+#include "Awl/Io/Rw/PointerReadWrite.h"
+#include "Awl/Io/Rw/EnumReadWrite.h"
 
 #ifdef AWL_BOOST
 #include "BoostExtras/Io/Rw/MultiprecisionReadWrite.h"

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <deque>
 #include <set>
 #include <map>
 #include <unordered_set>
@@ -40,6 +41,23 @@ namespace awl::io
         }
     }
 
+    template <class Stream, class T, class Alloc, class Context = FakeContext>
+    void ReadCollection(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
+    {
+        size_t count;
+
+        Read(s, count, ctx);
+
+        for (size_t i = 0; i < count; ++i)
+        {
+            T elem;
+
+            Read(s, elem, ctx);
+
+            coll.push_back(elem);
+        }
+    }
+
     //There is a separate function for reading a map because the first pair type is const (std::pair<const Key, T>):
     template <class Stream, typename Coll, class Context = FakeContext>
     void ReadMap(Stream & s, Coll & coll, const Context & ctx = {})
@@ -71,6 +89,18 @@ namespace awl::io
         {
             Write(s, elem, ctx);
         }
+    }
+
+    template <class Stream, class T, class Alloc, class Context = FakeContext>
+    void Read(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
+    {
+        ReadCollection(s, coll, ctx);
+    }
+
+    template <class Stream, class T, class Alloc, class Context = FakeContext>
+    void Write(Stream& s, const std::deque<T, Alloc>& coll, const Context& ctx = {})
+    {
+        WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>

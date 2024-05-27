@@ -28,6 +28,7 @@
 #include <utility> 
 #include <optional>
 #include <variant>
+#include <memory>
 
 namespace awl::io
 {
@@ -233,4 +234,51 @@ namespace awl::io
     };
 
     static_assert(make_type_name<decimal<uint64_t, 5>>() == fixed_string{ "decimal<int64_t, 5>" });
+
+    // Pointers can be implemented in the same was as std::optional.
+
+    namespace helpers
+    {
+        template <class T>
+        constexpr auto make_pointer_type_name()
+        {
+            return fixed_string("pointer<") + make_type_name<T>() + fixed_string(">");
+        }
+    }
+
+    template <class T>
+    struct type_descriptor<std::shared_ptr<T>>
+    {
+        static constexpr auto name()
+        {
+            return helpers::make_pointer_type_name<T>();
+        }
+    };
+
+    template <class T>
+    struct type_descriptor<std::unique_ptr<T>>
+    {
+        static constexpr auto name()
+        {
+            return helpers::make_pointer_type_name<T>();
+        }
+    };
+
+    template <class T>
+    struct type_descriptor<T *>
+    {
+        static constexpr auto name()
+        {
+            return helpers::make_pointer_type_name<T>();
+        }
+    };
+
+    template <class T> requires std::is_enum_v<T>
+    struct type_descriptor<T>
+    {
+        static constexpr auto name()
+        {
+            return make_type_name<std::underlying_type_t<T>>();
+        }
+    };
 }

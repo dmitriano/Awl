@@ -22,6 +22,8 @@ namespace
 {
     using Decimal64 = awl::decimal<uint64_t, 4>;
 
+    enum class TestEnum { A, B, C };
+
     //An example of a third-party structure that we cannot change, but need to serialize.
     struct A
     {
@@ -184,6 +186,14 @@ AWT_TEST(IoStdReadWrite)
     //This test is not correct, because it passes a tuple of values by value, 
     //but if std::tuple is a member of a class the tuple of references is passed by value.
     //helpers::TestReadWrite(context, std::make_tuple(5, 7.0, std::set<std::string>{"a", "b", "c"}));
+
+    helpers::TestReadWrite(context, std::shared_ptr<std::string>{});
+    helpers::TestReadWrite(context, std::make_shared<std::string>("abc"));
+
+    helpers::TestReadWrite(context, std::unique_ptr<std::string>{});
+    helpers::TestReadWrite(context, std::make_unique<std::string>("abc"));
+
+    helpers::TestReadWrite(context, TestEnum::B);
 }
 
 AWT_TEST(IoObjectReadWrite)

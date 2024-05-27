@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Awl/TypeTraits.h"
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Testing/UnitTest.h"
@@ -36,7 +37,15 @@ namespace awl::testing::helpers
 
             Read(in, result);
 
-            AWT_ASSERT(sample == result);
+            if constexpr (is_pointer_v<T>)
+            {
+                AWT_ASSERT((sample == nullptr && result == nullptr) ||
+                    (sample != nullptr && result != nullptr && *sample == *result));
+            }
+            else
+            {
+                AWT_ASSERT(sample == result);
+            }
         }
 
         AWT_ASSERT(in.End());
