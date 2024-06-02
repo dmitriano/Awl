@@ -5,58 +5,61 @@
 
 #pragma once
 
+#include "Awl/TypeTraits.h"
 #include "Awl/Stringizable.h"
+#include "Awl/StringFormat.h"
 
 namespace awl
 {
     template <class T> class EnumTraits;
 
-    template<typename T, typename = void>
-    constexpr bool is_defined_v = false;
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    [[noreturn]]
+    void raise_wrong_enum_index(std::underlying_type_t<T> int_val)
+    {
+        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << " enum index: " << int_val);
+    }
 
-    template<typename T>
-    constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
-
-    template <class T>
-    constexpr std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> enum_to_underlying(T val)
+    template <class T> requires std::is_enum_v<T>
+    constexpr std::underlying_type_t<T> enum_to_underlying(T val)
     {
         return static_cast<std::underlying_type_t<T>>(val);
     }
 
-    template <class T>
-    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, size_t> enum_to_index(T val)
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    std::underlying_type_t<T> enum_to_index(T val)
     {
-        const size_t int_val = static_cast<size_t>(val);
+        const auto int_val = enum_to_underlying(val);
 
-        if (int_val >= awl::EnumTraits<T>::count())
+        if (int_val >= EnumTraits<T>::count())
         {
-            throw std::runtime_error("Wrong enum index.");
+            raise_wrong_enum_index<T>(int_val);
         }
 
         return int_val;
     }
 
-    template <class T>
-    std::enable_if_t<std::is_enum_v<T>&& is_defined_v<awl::EnumTraits<T>>, T> enum_from_index(size_t int_val)
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    T enum_from_index(std::underlying_type_t<T> int_val)
     {
-        if (int_val >= awl::EnumTraits<T>::count())
+        if (int_val >= EnumTraits<T>::count())
         {
-            throw std::runtime_error("Wrong enum index.");
+            raise_wrong_enum_index<T>(int_val);
         }
 
         return static_cast<T>(int_val);
     }
 
-    template <class T>
-    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, std::string> enum_to_string(T val)
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    std::string enum_to_string(T val)
     {
-        return awl::EnumTraits<T>::names()[enum_to_index(val)];
+        return EnumTraits<T>::names()[enum_to_index(val)];
     }
 
-    template <class T>
-    std::enable_if_t<std::is_enum_v<T> && is_defined_v<awl::EnumTraits<T>>, T> enum_from_string(const std::string& s)
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    T enum_from_string(const std::string& s)
     {
-        auto& names = awl::EnumTraits<T>::names();
+        auto& names = EnumTraits<T>::names();
 
         std::underlying_type_t<T> index = 0;
 
@@ -70,26 +73,28 @@ namespace awl
             ++index;
         }
 
-        throw std::runtime_error("Wrong enum value.");
+        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
+    }
+
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    [[noreturn]]
+    void raise_wrong_enum_value(T val)
+    {
+        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << " enum value: " << enum_to_underlying(val));
+    }
+
+    // We cast a enum value from some int and then validate it.
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    void validate_enum(T val)
+    {
+        auto int_val = enum_to_underlying(val);
+
+        if (int_val >= EnumTraits<T>::count())
+        {
+            raise_wrong_enum_value(val);
+        }
     }
 }
-
-/*
-#define AWL_SEQUENTIAL_ENUM(EnumName, ...) \
-    enum class EnumName { __VA_ARGS__ }; \
-    template<> \
-    struct awl::EnumTraits<EnumName> \
-    { \
-    private: \
-        enum { __VA_ARGS__ }; \
-    public: \
-        static constexpr std::size_t count() \
-        { \
-            auto values = { __VA_ARGS__ }; \
-            return static_cast<std::size_t>(values.end() - values.begin()); \
-        } \
-    };
-*/
 
 //We cannot specialize awl::EnumTraits<EnumName> inside a class or a namespace, so we define EnumName##Traits,
 //also EnumName##Traits cannot be private, because if it is a template parameter of a public member.
@@ -102,6 +107,7 @@ namespace awl
     private: \
         enum : size_type { __VA_ARGS__, Last }; \
     public: \
+        static constexpr char EnumName[] = #EnumName; \
         static constexpr size_type Count = Last; \
         /*I was unable to make std::vector constexpr even in MSVC 19.29.30133, probably we need to wait a bit.*/ \
         static inline const awl::helpers::MemberList m_ml{#__VA_ARGS__}; \
@@ -113,6 +119,11 @@ namespace awl
     class awl::EnumTraits<ns::EnumName> \
     { \
     public: \
+        using size_type = ns::EnumName##Traits::size_type; \
+        static constexpr const char * enum_name() \
+        { \
+            return ns::EnumName##Traits::EnumName; \
+        } \
         static constexpr ns::EnumName##Traits::size_type count() \
         { \
             return ns::EnumName##Traits::Count; \

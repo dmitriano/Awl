@@ -96,4 +96,10 @@ namespace awl
     //        return val;
     //    }
     //}
+
+    template<typename T, typename = void>
+    constexpr bool is_defined_v = false;
+
+    template<typename T>
+    constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
 }
