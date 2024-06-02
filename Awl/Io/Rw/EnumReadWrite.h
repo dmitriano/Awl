@@ -7,6 +7,7 @@
 
 #include "Awl/Io/Rw/ArithmeticReadWrite.h"
 #include "Awl/EnumTraits.h"
+#include "Awl/StringFormat.h"
 
 #include <type_traits>
 
@@ -46,18 +47,29 @@ namespace awl::io
         WriteEnum(s, val, ctx);
     }
 
+    template <class T> requires std::is_enum_v<T>&& is_defined_v<EnumTraits<T>>
+    void ValidateEnum(T val)
+    {
+        auto int_val = enum_to_underlying(val);
+
+        if (int_val >= EnumTraits<T>::count())
+        {
+            throw IoError(format() << _T("Wrong ") << FromACString(EnumTraits<T>::enum_name()) << _T(" enum index: ") << int_val);
+        }
+    }
+
     template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
     void Read(Stream& s, T& val, const Context& ctx = {})
     {
         ReadEnum(s, val, ctx);
 
-        validate_enum(val);
+        ValidateEnum(val);
     }
 
     template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
     void Write(Stream& s, T val, const Context& ctx = {})
     {
-        validate_enum(val);
+        ValidateEnum(val);
 
         WriteEnum(s, val, ctx);
     }
