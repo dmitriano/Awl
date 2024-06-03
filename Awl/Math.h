@@ -59,4 +59,10 @@ namespace awl::math
     {
         clamp(v, lo, hi, std::less<>());
     }
+
+    template <typename T>
+    int sign(T val)
+    {
+        return (static_cast<T>(0) < val) - (val < static_cast<T>(0));
+    }
 }
