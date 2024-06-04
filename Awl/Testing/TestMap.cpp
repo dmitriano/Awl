@@ -134,7 +134,7 @@ namespace awl::testing
                         //TODO: Casting to std::chrono::nanoseconds is a workround. It does not compile with milliseconds.
                         format_duration(context.out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
 
-                        context.out << _T("ms has elapsed, requesting the test to stop...");
+                        context.out << _T("ms has elapsed, requesting the test to stop...") << std::endl;
                     });
 
                 test_token = watch_dog->get_token();
