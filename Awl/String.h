@@ -132,6 +132,34 @@ namespace awl
         }
     };
 
+    template <typename Ch>
+    struct StringEqual
+    {
+        bool operator()(const std::basic_string<Ch>& str1, const std::basic_string<Ch>& str2) const
+        {
+            return str1 == str2;
+        }
+    };
+
+    template <typename Ch>
+    struct CharInsensitiveEqual
+    {
+        bool operator() (Ch c1, Ch c2) const
+        {
+            return std::tolower(c1) == std::tolower(c2);
+        }
+    };
+
+    template <typename Ch>
+    struct StringInsensitiveEqual
+    {
+        bool operator()(const std::basic_string<Ch>& str1, const std::basic_string<Ch>& str2) const
+        {
+            return ((str1.size() == str2.size()) &&
+                std::equal(str1.begin(), str1.end(), str2.begin(), CharInsensitiveEqual<Ch>()));
+        }
+    };
+
 #ifdef _MSC_VER
 
     class string_encoding_error : public std::exception

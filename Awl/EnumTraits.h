@@ -62,24 +62,39 @@ namespace awl
         return EnumTraits<T>::names()[enum_to_index(val)];
     }
 
+    namespace helpers
+    {
+        template <class T, class Pred> requires std::is_enum_v<T>&& is_defined_v<EnumTraits<T>>
+        T enum_from_string_impl(const std::string& s, Pred&& equal)
+        {
+            auto& names = EnumTraits<T>::names();
+
+            std::underlying_type_t<T> index = 0;
+
+            for (const auto& name : names)
+            {
+                if (equal(name, s))
+                {
+                    return static_cast<T>(index);
+                }
+
+                ++index;
+            }
+
+            throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
+        }
+    }
+
     template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
     T enum_from_string(const std::string& s)
     {
-        auto& names = EnumTraits<T>::names();
+        return helpers::enum_from_string_impl<T>(s, StringEqual<char>());
+    }
 
-        std::underlying_type_t<T> index = 0;
-
-        for (const auto& name : names)
-        {
-            if (name == s)
-            {
-                return static_cast<T>(index);
-            }
-
-            ++index;
-        }
-
-        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
+    template <class T> requires std::is_enum_v<T>&& is_defined_v<EnumTraits<T>>
+    T enum_from_string_i(const std::string& s)
+    {
+        return helpers::enum_from_string_impl<T>(s, StringInsensitiveEqual<char>());
     }
 
     template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
