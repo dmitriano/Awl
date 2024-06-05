@@ -39,13 +39,19 @@ namespace awl
         return int_val;
     }
 
-    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
-    T enum_from_index(std::underlying_type_t<T> int_val)
+    template <class T> requires std::is_enum_v<T>&& is_defined_v<EnumTraits<T>>
+    void validate_enum_index(std::underlying_type_t<T> int_val)
     {
         if (int_val >= EnumTraits<T>::count())
         {
             raise_wrong_enum_index<T>(int_val);
         }
+    }
+
+    template <class T> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    T enum_from_index(std::underlying_type_t<T> int_val)
+    {
+        validate_enum_index<T>(int_val);
 
         return static_cast<T>(int_val);
     }
