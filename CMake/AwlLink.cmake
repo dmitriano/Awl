@@ -78,6 +78,11 @@ if (AWL_FIND_QT)
         )
         add_definitions(-DAWL_QT)
 
+        # QT compiles withour QT_NO_EXCEPTIONS for Apple
+        if (NOT APPLE)
+            add_definitions(-DQT_NO_EXCEPTIONS=1)
+        endif()
+
         target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
     endif()
 endif()
