@@ -35,19 +35,19 @@ namespace awl::io
         Write(s, int_val, ctx);
     }
 
-    template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && !is_defined_v<EnumTraits<T>>
+    template <class Stream, typename T, class Context = FakeContext> requires (std::is_enum_v<T> && !is_defined_v<EnumTraits<T>>)
     void Read(Stream & s, T& val, const Context & ctx = {})
     {
         ReadEnum(s, val, ctx);
     }
 
-    template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && !is_defined_v<EnumTraits<T>>
+    template <class Stream, typename T, class Context = FakeContext> requires (std::is_enum_v<T> && !is_defined_v<EnumTraits<T>>)
     void Write(Stream & s, T val, const Context & ctx = {})
     {
         WriteEnum(s, val, ctx);
     }
 
-    template <class T> requires std::is_enum_v<T>&& is_defined_v<EnumTraits<T>>
+    template <class T> requires (std::is_enum_v<T> && is_defined_v<EnumTraits<T>>)
     void ValidateEnum(T val)
     {
         auto int_val = enum_to_underlying(val);
@@ -58,7 +58,7 @@ namespace awl::io
         }
     }
 
-    template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    template <class Stream, typename T, class Context = FakeContext> requires (std::is_enum_v<T> && is_defined_v<EnumTraits<T>>)
     void Read(Stream& s, T& val, const Context& ctx = {})
     {
         ReadEnum(s, val, ctx);
@@ -66,7 +66,7 @@ namespace awl::io
         ValidateEnum(val);
     }
 
-    template <class Stream, typename T, class Context = FakeContext> requires std::is_enum_v<T> && is_defined_v<EnumTraits<T>>
+    template <class Stream, typename T, class Context = FakeContext> requires (std::is_enum_v<T> && is_defined_v<EnumTraits<T>>)
     void Write(Stream& s, T val, const Context& ctx = {})
     {
         ValidateEnum(val);
