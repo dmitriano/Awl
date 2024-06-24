@@ -10,6 +10,7 @@
 #include "Awl/Io/EuphoricallySerializable.h"
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/Io/NativeStream.h"
+#include "Awl/Io/FieldMap.h"
 #include "Awl/ConsoleLogger.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/Random.h"
@@ -358,9 +359,33 @@ namespace
             return std::tie(boardType, GridSize, ColorCount, NewCount, LineLength, Prompting);
         }
     };
+}
 
+namespace awl::io
+{
+    template <>
+    class FieldMap<GameParamsV2>
+    {
+    public:
+
+        static std::string_view GetNewName(std::string_view old_name)
+        {
+            using namespace std::literals;
+
+            if (old_name == "Type"sv)
+            {
+                return "boardType"sv;
+            }
+
+            return old_name;
+        }
+    };
+}
+
+namespace
+{
     template <class Value1, class Value2>
-    void TestDefaultFields(const awl::testing::TestContext& context)
+    void TestRenameAndDefaultFields(const awl::testing::TestContext& context)
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
@@ -369,8 +394,8 @@ namespace
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWT_ASSERT(storage.IsEmpty());
 
-        const GameParamsV1 gp1_sample = { BoardType::Square, 1, 2, 3, 4, true };
-        const GameParamsV2 gp2_sample = { BoardType::Square, ClusterType::Line, 1, 2, 3, 4, true };
+        const GameParamsV1 gp1_sample = { BoardType::Hexagonal, 1, 2, 3, 4, true };
+        const GameParamsV2 gp2_sample = { BoardType::Hexagonal, ClusterType::Line, 1, 2, 3, 4, true };
 
         {
             GameParamsV1 gp1 = gp1_sample;
@@ -394,7 +419,7 @@ namespace
 
 AWT_TEST(AtomicStorageVts2)
 {
-    TestDefaultFields<
+    TestRenameAndDefaultFields<
         awl::io::VersionTolerantSerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>,
             awl::io::UniqueStream, awl::io::UniqueStream>,
         awl::io::VersionTolerantSerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>,
@@ -404,7 +429,7 @@ AWT_TEST(AtomicStorageVts2)
 
 AWT_TEST(AtomicStorageEuphorical2)
 {
-    TestDefaultFields<
+    TestRenameAndDefaultFields<
         awl::io::EuphoricallySerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>,
             awl::io::UniqueStream, awl::io::UniqueStream>,
         awl::io::EuphoricallySerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>,

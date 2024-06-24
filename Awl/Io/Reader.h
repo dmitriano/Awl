@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/Io/BasicReader.h"
+#include "Awl/Io/FieldMap.h"
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Stringizable.h"
 #include "Awl/TupleHelpers.h"
@@ -383,16 +384,18 @@ namespace awl::io
             pm = ProtoMap{};
             assert(pm.has_value());
             pm->newStructIndex = new_index;
-            pm->fieldMap = MakeProtoMap(old_struct_index, new_index);
+            pm->fieldMap = MakeProtoMap<Struct>(old_struct_index, new_index);
 
             return pm->fieldMap;
         }
 
+        template<class Struct>
         std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
         {
-            return MapPrototypes(oldPrototypes[old_struct_index], *(this->newPrototypes[new_struct_index]));
+            return MapPrototypes<Struct>(oldPrototypes[old_struct_index], *(this->newPrototypes[new_struct_index]));
         }
 
+        template<class Struct>
         std::vector<size_t> MapPrototypes(const Prototype & left, const Prototype & right) const
         {
             std::vector<size_t> v;
@@ -408,7 +411,10 @@ namespace awl::io
                 {
                     const auto new_field = right.GetField(new_index);
 
-                    if (new_field.name == old_field.name)
+                    // The user renamed a field and specialized FieldMap template class.
+                    const std::string_view probably_renamed = FieldMap<Struct>::GetNewName(old_field.name);
+
+                    if (new_field.name == probably_renamed)
                     {
                         //Check if the types are correct.
                         CheckTypesCompatible(old_field.type, new_field.type);
