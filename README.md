@@ -102,7 +102,12 @@ cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 
 ## Using GCC sanitizer
 
-To enable GCC sanitizer uncomment corresponding lines in `CMake\AwlConfig.cmake`.
+Add -DAWL_SANITIZE_ADDRESS=1 or -DAWL_SANITIZE_UNDEFINED=1 or -DAWL_SANITIZE_THREAD=1 to CMake command, for example:
+
+```bash
+cmake ../../repos/Awl/ -G Ninja -DAWL_SANITIZE_ADDRESS=1
+cmake --build . --parallel --target AwlTest --config RelWithDebInfo
+```
 
 ## Running the tests on Windows and Linux
 
