@@ -14,7 +14,7 @@ AWL is a small cross-platform C++ library that includes:
 9. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 10. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.37.32825`, `GCC 12.3.0`, `Android CLang 17.0.2` and `Apple Clang 15.0.0`.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.39.33523`, `GCC 13.1.0`, `Android CLang 17.0.2` and `Apple Clang 15.0.0`.
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -59,11 +59,24 @@ cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
 cmake --build . --parallel
 ```
 
-## Compiling on Ubuntu 22.04:
+## Compiling on Ubuntu 22.04 with GCC13.1 (I am not sure if build-essential is really needed):
 
 ```bash
 sudo apt install build-essential
 sudo apt install cmake
+
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update
+sudo apt install gcc-13 g++-13
+ll /usr/bin/gcc-13
+ll /usr/bin/g++-13
+update-alternatives --display gcc
+ll /etc/alternatives/g*
+sudo update-alternatives --remove-all gcc
+sudo update-alternatives --remove-all g++
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 10 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+g++ --version
+gcc --version
 
 mkdir repos
 cd repos
