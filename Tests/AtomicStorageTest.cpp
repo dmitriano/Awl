@@ -288,7 +288,7 @@ AWT_TEST(AtomicStorageSave)
     }
 }
 
-AWT_TEST(AtomicStorageEuphorical)
+AWT_TEST(AtomicStorageEuphorical1)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
@@ -310,5 +310,89 @@ AWT_TEST(AtomicStorageEuphorical)
         Value val(b);
         storage.Load(val);
         AWT_ASSERT(b == v2::b_expected);
+    }
+}
+
+namespace
+{
+    AWL_SEQUENTIAL_ENUM(BoardType, Square, Hexagonal)
+    AWL_SEQUENTIAL_ENUM(ClusterType, Line, Loop)
+}
+
+AWL_ENUM_TRAITS(, BoardType)
+AWL_ENUM_TRAITS(, ClusterType)
+
+namespace
+{
+    class GameParamsV1
+    {
+    public:
+
+        BoardType Type;
+        int GridSize;
+        int ColorCount;
+        int NewCount;
+        int LineLength;
+        bool Prompting;
+
+        AWL_STRINGIZABLE(Type, GridSize, ColorCount, NewCount, LineLength, Prompting)
+    };
+
+    // Type was renamed with boardType and clusterType was added.
+    class GameParamsV2
+    {
+    public:
+
+        BoardType boardType;
+        ClusterType clusterType;
+        int GridSize;
+        int ColorCount;
+        int NewCount;
+        int LineLength;
+        bool Prompting;
+
+        AWL_STRINGIZABLE(boardType, clusterType, GridSize, ColorCount, NewCount, LineLength, Prompting)
+
+        auto as_v1_tuple() const
+        {
+            return std::tie(boardType, GridSize, ColorCount, NewCount, LineLength, Prompting);
+        }
+    };
+}
+
+AWT_TEST(AtomicStorageEuphorical2)
+{
+    auto guard = awl::make_scope_guard(RemoveFiles);
+
+    awl::ConsoleLogger logger(context.out);
+
+    awl::io::AtomicStorage storage = MakeStorage(logger);
+    AWT_ASSERT(storage.IsEmpty());
+
+    const GameParamsV1 gp1_sample = {BoardType::Hexagonal, 1, 2, 3, 4, true};
+    const GameParamsV2 gp2_sample = { BoardType::Hexagonal, ClusterType::Line, 1, 2, 3, 4, true };
+
+    {
+        using Value = awl::io::EuphoricallySerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>,
+            awl::io::UniqueStream, awl::io::UniqueStream>;
+
+        GameParamsV1 gp1 = gp1_sample;
+
+        Value val(gp1);
+        storage.Save(val);
+    }
+
+    {
+        using Value = awl::io::EuphoricallySerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>,
+            awl::io::UniqueStream, awl::io::UniqueStream>;
+
+        GameParamsV2 gp2;
+
+        Value val(gp2);
+        storage.Load(val);
+
+        // Ensure clusterType is initialized into its default value.
+        AWT_ASSERT(gp2.clusterType == ClusterType::Line);
+        AWT_ASSERT(gp2.as_v1_tuple() == gp1_sample.as_tuple());
     }
 }

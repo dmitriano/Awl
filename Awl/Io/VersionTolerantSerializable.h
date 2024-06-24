@@ -27,7 +27,8 @@ namespace awl::io
         {
             if constexpr (atomic)
             {
-                T val;
+                // Initialize newly added fields with default values.
+                T val = {};
 
                 Read(in, val);
 
