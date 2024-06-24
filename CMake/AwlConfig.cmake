@@ -28,6 +28,20 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions("-Wall -Wextra -pedantic")
     #add_definitions("-Wall -Wextra -pedantic -pthread")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    # using Intel C++
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(AWL_BOOST_EXTRAS ON)
+    # using Visual Studio C++
+    # add_compile_options("/std:c++latest")
+    add_compile_options("/W4" "/Zc:__cplusplus")
+    add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+    if (AWL_NO_DEPRECATED)
+        add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
+    endif()
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     if (AWL_SANITIZE_THREAD)
         message("Using Thread Sanitizer.")
         add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
@@ -44,17 +58,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         link_libraries("-fsanitize=address")
     endif()
     #set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=gold")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(AWL_BOOST_EXTRAS ON)
-    # using Visual Studio C++
-    # add_compile_options("/std:c++latest")
-    add_compile_options("/W4" "/Zc:__cplusplus")
-    add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
-    if (AWL_NO_DEPRECATED)
-        add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
-    endif()
 endif()
 
 set(AWL_DIR ${AWL_ROOT_DIR}/Awl)
