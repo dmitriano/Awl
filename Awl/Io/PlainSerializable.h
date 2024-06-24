@@ -21,8 +21,9 @@ namespace awl::io
         {
             if constexpr (atomic)
             {
-                // Initialize newly added fields with default values.
-                T val = {};
+                // There can't be newly added fields so we leave val uninitialized.
+                // All the fields should be read.
+                T val;
 
                 awl::io::Read(s, val);
 
