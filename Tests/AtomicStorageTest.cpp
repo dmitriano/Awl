@@ -395,7 +395,6 @@ namespace
         AWT_ASSERT(storage.IsEmpty());
 
         const GameParamsV1 gp1_sample = { BoardType::Hexagonal, 1, 2, 3, 4, true };
-        const GameParamsV2 gp2_sample = { BoardType::Hexagonal, ClusterType::Line, 1, 2, 3, 4, true };
 
         {
             GameParamsV1 gp1 = gp1_sample;

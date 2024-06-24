@@ -46,16 +46,17 @@ namespace awl
     {
         using namespace std::chrono;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || (defined(__GNUC__) && !defined(__clang__))
 
         static_cast<void>(part_count);
 
-        //GCC12 does not have this.
+        //GCC13 have this.
         std::chrono::hh_mm_ss formatted{ val };
 
         out << formatted;
 
-#elif defined(__GNUC__) && !defined(__clang__)
+// TODO: Check if CLang support std::chrono::hh_mm_ss.
+#elif !defined(__clang__)
 
         awl::basic_separator<C> sep(':');
 
@@ -134,7 +135,7 @@ namespace awl
 }
 
 // Looks like both __GNUC__ and __clang__ are defined in Apple Clang.
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(__APPLE__)
+#if (defined(__GNUC__) && defined(__clang__)) && !defined(__APPLE__)
 namespace std
 {
     template <class C, class Clock, class Duration = typename Clock::duration>
