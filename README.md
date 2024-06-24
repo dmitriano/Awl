@@ -14,7 +14,7 @@ AWL is a small cross-platform C++ library that includes:
 9. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 10. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.39.33523`, `GCC 13.1.0`, `Android CLang 17.0.2` and `Apple Clang 15.0.0`.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.39.33523`, `GCC 13.1.0`, `Android CLang 17.0.2 (from NDK 26)` and `Apple Clang 15.0.0 (on MacOS Sonoma with Xcode 15.3)`.
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -87,7 +87,7 @@ cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
 ```
 
-## Compiling with Ninja generator
+## Compiling with Ninja generator (Used these commands on MacOS):
 
 ```bash
 cmake ../../repos/Awl/ -G Ninja
