@@ -115,7 +115,7 @@ AWT_TEST(AtomicStoragePlain)
     CorruptFile(master_name);
 
     {
-        v2::B b;
+        v2::B b = {};
         const v2::B saved_b = b;
         Value val(b);
         HashingSerializable hashed_val(val);
@@ -190,7 +190,7 @@ AWT_TEST(AtomicStorageVts)
     CorruptFile(master_name);
 
     {
-        v2::B b;
+        v2::B b = {};
         const v2::B saved_b = b;
         Value2 val(b);
         HashingSerializable hashed_val(val);
