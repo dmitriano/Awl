@@ -63,7 +63,7 @@ namespace awl
     }
 
     template <class T> requires is_sequential_enum<T>
-    std::string enum_to_string(T val)
+    const std::string& enum_to_string(T val)
     {
         return EnumTraits<T>::names()[enum_to_index(val)];
     }
