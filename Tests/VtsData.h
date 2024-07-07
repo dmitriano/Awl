@@ -58,6 +58,16 @@ namespace awl::testing::helpers
 
         inline const A a_expected = { 1, true, "abc", 2.0 };
 
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<int>()), std::tuple<>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<A>()), std::tuple<A>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<int>>()), std::tuple<>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::string>()), std::tuple<>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::map<int, std::string>>()), std::tuple<>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<A>>()), std::tuple<A>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<std::vector<A>>>()), std::tuple<A>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::map<std::string, A>>()), std::tuple<A>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types< std::vector<std::map<std::string, A>>>()), std::tuple<A>>);
+
         static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::io::helpers::variant_from_struct<A>>);
 
         struct C
@@ -93,7 +103,7 @@ namespace awl::testing::helpers
 
         inline const B b_expected = { a_expected, a_expected, 1, true, Vector<A>{ a_expected, a_expected, a_expected }, { c_expected } };
         
-        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>, std::set<C>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, int, bool, String, double, Vector<A>, std::set<C>, C>, awl::io::helpers::variant_from_struct<B>>);
     }
 
     namespace v2
@@ -149,15 +159,12 @@ namespace awl::testing::helpers
 
         inline const B b_expected = { v2::a_expected, Vector<int>{ 1, 2, 3 },  v1::b_expected.x, "xyz", Vector<A>{ a_expected, a_expected, a_expected }, { c_expected }, {}};
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>>, awl::io::helpers::variant_from_struct<B>>);
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, C, Vector<C>>, awl::io::helpers::variant_from_struct<B>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, C, Vector<C>, float>, awl::io::helpers::variant_from_structs<B, float>>);
 
-        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, Vector<C>, C, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
+        static_assert(std::is_same_v<std::variant<B, A, bool, double, int, String, Vector<int>, Vector<A>, std::set<C>, C, Vector<C>, float>, awl::io::helpers::variant_from_structs<B, C, float>>);
     }
 
-    //using V1 = std::variant<v1::A, v1::B, bool, char, int, float, double, String>;
-    //using V2 = std::variant<v2::A, v2::B, bool, char, int, float, double, String, v2::C, Vector<int>>;
-
-    using V1 = awl::io::helpers::variant_from_structs<v1::B, v1::C>;
-    using V2 = awl::io::helpers::variant_from_structs<v2::B, v2::C>;
+    using V1 = awl::io::helpers::variant_from_structs<v1::B>;
+    using V2 = awl::io::helpers::variant_from_structs<v2::B>;
 }

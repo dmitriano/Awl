@@ -114,6 +114,38 @@ namespace awl::io::helpers
     
     //GV construction
 
+    // A quick solution for extracting tuplizable types from a container.
+    template <class Coll>
+    constexpr auto extract_element_types()
+    {
+        if constexpr (std::ranges::range<Coll>)
+        {
+            using T = std::ranges::range_value_t<Coll>;
+
+            if constexpr (awl::is_specialization_v<T, std::pair>)
+            {
+                return std::tuple_cat(
+                    extract_element_types<std::decay_t<typename T::first_type>>(),
+                    extract_element_types<std::decay_t<typename T::second_type>>());
+            }
+            else
+            {
+                return extract_element_types<T>();
+            }
+        }
+        else
+        {
+            if constexpr (is_tuplizable_v<Coll>)
+            {
+                return std::tuple<Coll>{};
+            }
+            else
+            {
+                return std::tuple<>{};
+            }
+        }
+    }
+
     //We pass tuple of references by value.
     template <class... Ts>
     constexpr auto flatten_tuple(std::tuple<Ts...> t);
@@ -129,7 +161,7 @@ namespace awl::io::helpers
         }
         else
         {
-            return val_tuple;
+            return std::tuple_cat(val_tuple, extract_element_types<T>());
         }
     }
 
@@ -154,6 +186,19 @@ namespace awl::io::helpers
 
     template <class T>
     using recursive_tuple = decltype(flatten_struct<T>());
+
+    namespace tests
+    {
+        struct A
+        {
+            int x;
+            bool y;
+
+            AWL_TUPLIZABLE(x, y)
+        };
+
+        static_assert(std::is_same_v<recursive_tuple<tests::A>, std::tuple<tests::A, int, bool>>);
+    }
 
     template <class T>
     using variant_from_struct = tuple_to_variant<recursive_tuple<T>>;
