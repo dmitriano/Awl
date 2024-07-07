@@ -32,14 +32,14 @@ namespace awl::io
     };
 
     template <class T>
-    concept sequential_input_stream = requires(T t)
+    concept sequential_input_stream = requires(T& t)
     {
         { t.End() } -> std::same_as<bool>;
         { t.Read(std::declval<uint8_t*>(), std::declval<size_t>()) } -> std::convertible_to<size_t>;
     };
 
     template <class T>
-    concept sequential_output_stream = requires(T t)
+    concept sequential_output_stream = requires(T& t)
     {
         { t.Write(std::declval<const uint8_t*>(), std::declval<size_t>()) } -> std::same_as<void>;
     };
