@@ -13,6 +13,7 @@
 namespace awl::io
 {
     template <class Stream, typename T, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::optional<T>& opt_val, const Context & ctx = {})
     {
         bool has_value;
@@ -30,6 +31,7 @@ namespace awl::io
     }
 
     template <class Stream, typename T, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::optional<T>& opt_val, const Context & ctx = {})
     {
         const bool has_value = opt_val.has_value();

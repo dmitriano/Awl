@@ -18,6 +18,7 @@
 namespace awl::io
 {
     template <class Stream, class First, class Second, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::pair<First, Second> & val, const Context & ctx = {})
     {
         Write(s, val.first, ctx);
@@ -25,6 +26,7 @@ namespace awl::io
     }
 
     template <class Stream, typename Coll, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void ReadCollection(Stream & s, Coll & coll, const Context & ctx = {})
     {
         size_t count;
@@ -42,6 +44,7 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void ReadCollection(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
     {
         size_t count;
@@ -60,6 +63,7 @@ namespace awl::io
 
     //There is a separate function for reading a map because the first pair type is const (std::pair<const Key, T>):
     template <class Stream, typename Coll, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void ReadMap(Stream & s, Coll & coll, const Context & ctx = {})
     {
         size_t count;
@@ -79,6 +83,7 @@ namespace awl::io
     }
 
     template <class Stream, typename Coll, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void WriteCollection(Stream & s, const Coll & coll, const Context & ctx = {})
     {
         size_t count = coll.size();
@@ -92,84 +97,98 @@ namespace awl::io
     }
 
     template <class Stream, class T, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream& s, const std::deque<T, Alloc>& coll, const Context& ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, vector_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const vector_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, observable_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::unordered_set<T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template<class Stream, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::unordered_set<T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template <class Stream, class Key, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::map<Key, T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadMap(s, coll, ctx);
     }
 
     template <class Stream, class Key, class T, class Compare, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::map<Key, T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }
 
     template<class Stream, class Key, class T, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::unordered_map<Key, T, Hash, KeyEqual, Allocator> & coll, const Context & ctx = {})
     {
         ReadMap(s, coll, ctx);
     }
 
     template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);

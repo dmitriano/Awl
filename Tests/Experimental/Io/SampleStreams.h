@@ -87,6 +87,8 @@ namespace awl::io
         uint8_t * m_p;
     };
 
+    static_assert(sequential_output_stream<SwitchMemoryOutputStream>);
+
     class VirtualMemoryOutputStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -130,6 +132,8 @@ namespace awl::io
         uint8_t * m_p;
     };
 
+    static_assert(sequential_output_stream<VirtualMemoryOutputStream>);
+
     class VirtualMeasureStream : public awl::io::SequentialOutputStream
     {
     public:
@@ -153,6 +157,8 @@ namespace awl::io
         volatile size_t m_pos = 0;
     };
 
+    static_assert(sequential_output_stream<VirtualMeasureStream>);
+
     class InlineMeasureStream
     {
     public:
@@ -175,6 +181,8 @@ namespace awl::io
         //prevent the optimization
         volatile size_t m_pos = 0;
     };
+
+    static_assert(sequential_output_stream<InlineMeasureStream>);
 
     std::unique_ptr<SequentialOutputStream> CreateFakeStream();
 

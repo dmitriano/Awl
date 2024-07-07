@@ -105,6 +105,7 @@ namespace awl::io
     }
     
     template <class Stream, typename... Ts, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void Read(Stream & s, std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
@@ -113,6 +114,7 @@ namespace awl::io
     }
 
     template <class Stream, typename... Ts, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
