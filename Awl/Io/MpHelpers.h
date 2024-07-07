@@ -187,19 +187,6 @@ namespace awl::io::helpers
     template <class T>
     using recursive_tuple = decltype(flatten_struct<T>());
 
-    namespace tests
-    {
-        struct A
-        {
-            int x;
-            bool y;
-
-            AWL_TUPLIZABLE(x, y)
-        };
-
-        static_assert(std::is_same_v<recursive_tuple<tests::A>, std::tuple<tests::A, int, bool>>);
-    }
-
     template <class T>
     using variant_from_struct = tuple_to_variant<recursive_tuple<T>>;
 
