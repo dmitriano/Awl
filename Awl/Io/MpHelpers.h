@@ -12,6 +12,7 @@
 #include <array>
 #include <algorithm>
 #include <type_traits>
+#include <ranges>
 
 namespace awl::io::helpers
 {
