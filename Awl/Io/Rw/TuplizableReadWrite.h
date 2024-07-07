@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/Tuplizable.h"
+#include "Awl/Io/SequentialStream.h"
 
 #include <tuple> 
 #include <utility> 

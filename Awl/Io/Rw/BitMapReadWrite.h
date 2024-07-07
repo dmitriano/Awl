@@ -7,9 +7,9 @@
 
 #include "Awl/Io/Rw/ReadRaw.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
-
-#include "Awl/BitMap.h"
 #include "Awl/Io/Rw/RwAdapters.h"
+#include "Awl/Io/SequentialStream.h"
+#include "Awl/BitMap.h"
 
 #include <bitset>
 #include <type_traits>

@@ -14,6 +14,7 @@
 
 #include "Awl/VectorSet.h"
 #include "Awl/ObservableSet.h"
+#include "Awl/Io/Rw/RwAdapters.h"
 
 namespace awl::io
 {
