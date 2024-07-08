@@ -151,7 +151,7 @@ they potentially can format your hard drive.
 
 ## Running the tests on Android device
 
-Built AWL for Android with `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option, upload the executable file to the device:
+Built AWL for Android with `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option and if you use QT Creator do not forget to set `-DAWL_FIND_QT:BOOL=OFF`, upload the executable file to the device:
 
 ```bash
 adb push AwlTest /data/local/tmp

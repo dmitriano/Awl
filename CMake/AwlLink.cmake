@@ -16,6 +16,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
 
 if (AWL_STATIC_RUNTIME)
     if (${AWL_COMPILER_GNU_OR_CLANG})
+        message("Building with static runtime.")
         target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
 endif()
