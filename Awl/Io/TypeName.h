@@ -8,7 +8,7 @@
 #include "Awl/FixedString.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/TypeTraits.h"
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/Decimal.h"
 #include "Awl/VectorSet.h"
 

@@ -200,7 +200,7 @@ namespace data
         double lockedBalance;
         int updateTime;
 
-        AWL_STRINGIZABLE(accountType, asset, freeBalance, lockedBalance, updateTime);
+        AWL_REFLECT(accountType, asset, freeBalance, lockedBalance, updateTime);
     };
 
     AWL_MEMBERWISE_EQUATABLE(Wallet)

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/Hashable.h"
 
 #include <vector>

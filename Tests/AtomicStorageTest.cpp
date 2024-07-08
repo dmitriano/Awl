@@ -336,7 +336,7 @@ namespace
         int LineLength;
         bool Prompting;
 
-        AWL_STRINGIZABLE(Type, GridSize, ColorCount, NewCount, LineLength, Prompting)
+        AWL_REFLECT(Type, GridSize, ColorCount, NewCount, LineLength, Prompting)
     };
 
     // Type was renamed with boardType and clusterType was added.
@@ -352,7 +352,7 @@ namespace
         int LineLength;
         bool Prompting;
 
-        AWL_STRINGIZABLE(boardType, clusterType, GridSize, ColorCount, NewCount, LineLength, Prompting)
+        AWL_REFLECT(boardType, clusterType, GridSize, ColorCount, NewCount, LineLength, Prompting)
 
         auto as_v1_tuple() const
         {

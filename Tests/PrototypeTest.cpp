@@ -22,7 +22,7 @@ namespace
         double y;
         std::string z;
 
-        AWL_STRINGIZABLE(x, y, z)
+        AWL_REFLECT(x, y, z)
     };
 
     AWL_MEMBERWISE_EQUATABLE(A)
@@ -35,7 +35,7 @@ namespace
         A a2;
         std::string z;
 
-        AWL_STRINGIZABLE(x, a1, y, a2, z)
+        AWL_REFLECT(x, a1, y, a2, z)
     };
 
     AWL_MEMBERWISE_EQUATABLE(B)

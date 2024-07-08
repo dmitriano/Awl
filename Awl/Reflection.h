@@ -182,7 +182,7 @@ namespace awl
     };
 }
 
-#define AWL_STRINGIZABLE(...) \
+#define AWL_REFLECT(...) \
     AWL_TUPLIZABLE(__VA_ARGS__) \
     static const awl::helpers::MemberList & get_member_names() \
     { \

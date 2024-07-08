@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <string>
@@ -22,7 +22,7 @@ namespace
         double y;
         std::string z;
 
-        AWL_STRINGIZABLE(x, y, z)
+        AWL_REFLECT(x, y, z)
     };
 
     AWL_MEMBERWISE_EQUATABLE(A)
@@ -33,7 +33,7 @@ namespace
         double y;
         std::string z;
 
-        AWL_STRINGIZABLE(
+        AWL_REFLECT(
             x,
             y,
             z)

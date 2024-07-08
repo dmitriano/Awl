@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/Io/MpHelpers.h"
 
 #include <chrono>
@@ -37,7 +37,7 @@ namespace awl::testing::helpers
         double b;
         String c;
 
-        AWL_STRINGIZABLE(a, b, c)
+        AWL_REFLECT(a, b, c)
     };
     */
 
@@ -51,7 +51,7 @@ namespace awl::testing::helpers
             String c;
             double d;
 
-            AWL_STRINGIZABLE(a, b, c, d)
+            AWL_REFLECT(a, b, c, d)
         };
 
         AWL_MEMBERWISE_EQUATABLE(A)
@@ -75,7 +75,7 @@ namespace awl::testing::helpers
             int x;
             A a;
 
-            AWL_STRINGIZABLE(x, a)
+            AWL_REFLECT(x, a)
         };
 
         AWL_MEMBERWISE_EQUATABLE(C)
@@ -96,7 +96,7 @@ namespace awl::testing::helpers
             Vector<A> v;
             std::set<C> v1;
 
-            AWL_STRINGIZABLE(a, b, x, y, v, v1)
+            AWL_REFLECT(a, b, x, y, v, v1)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)
@@ -116,7 +116,7 @@ namespace awl::testing::helpers
             String f = "xyz";
             String c;
 
-            AWL_STRINGIZABLE(b, d, e, f, c)
+            AWL_REFLECT(b, d, e, f, c)
         };
 
         AWL_MEMBERWISE_EQUATABLE(A)
@@ -130,7 +130,7 @@ namespace awl::testing::helpers
             int x;
             A a;
 
-            AWL_STRINGIZABLE(x, a)
+            AWL_REFLECT(x, a)
         };
 
         AWL_MEMBERWISE_EQUATABLE(C)
@@ -152,7 +152,7 @@ namespace awl::testing::helpers
             std::set<C> v1;
             Vector<C> v2;
 
-            AWL_STRINGIZABLE(a, x, z, w, v, v1, v2)
+            AWL_REFLECT(a, x, z, w, v, v1, v2)
         };
 
         AWL_MEMBERWISE_EQUATABLE(B)

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/TypeTraits.h"
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/StringFormat.h"
 
 namespace awl

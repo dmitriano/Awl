@@ -7,7 +7,7 @@
 
 #include "Awl/Io/BasicReader.h"
 #include "Awl/Io/SequentialStream.h"
-#include "Awl/Stringizable.h"
+#include "Awl/Reflection.h"
 #include "Awl/TupleHelpers.h"
 
 namespace awl::io
