@@ -13,64 +13,58 @@ namespace awl
 {
     // There are two ways to make type T tuplizable:
     // 1. Define T::as_tuple (if T is a user's class or struct).
-    // 2. Define object_as_const_tuple and object_as_tuple and specialize is_tuplizable<T>.
+    // 2. Define object_as_const_tuple and object_as_tuple.
     // see RwHelpersTest.cpp for an example.
 
     template <class T>
+    concept self_tuplizable = requires(T & t)
+    {
+        t.as_const_tuple();
+        t.as_tuple;
+    };
+
+    template <class T> requires self_tuplizable<T>
     constexpr auto object_as_tuple(T & val)
     {
         return val.as_tuple();
     }
 
-    template <class T>
+    template <class T> requires self_tuplizable<T>
     constexpr auto object_as_const_tuple(const T & val)
     {
         return val.as_const_tuple();
     }
 
-    template <class T>
+    template <class T> requires self_tuplizable<T>
     constexpr auto object_as_tuple(const T & val)
     {
         return object_as_const_tuple(val);
     }
 
     template <class T>
+    concept tuplizable = requires(T & t)
+    {
+        object_as_const_tuple(t);
+        object_as_tuple(t);
+    };
+
+    template <class T> requires tuplizable<T>
     constexpr bool objects_equal(const T & left, const T & right)
     {
         return object_as_tuple(left) == object_as_tuple(right);
     }
 
-    template <class T>
+    template <class T> requires tuplizable<T>
     constexpr bool objects_less(const T & left, const T & right)
     {
         return object_as_tuple(left) < object_as_tuple(right);
     }
 
-    template <class T>
+    template <class T> requires tuplizable<T>
     constexpr bool objects_greater(const T & left, const T & right)
     {
         return object_as_tuple(left) > object_as_tuple(right);
     }
-
-    // It can be a concept, but we can't specialize it for custom types
-    // we do with inline variables.
-    /*
-    template <class T>
-    concept tuplizable = requires(T & t)
-    {
-        t.as_const_tuple();
-        t.as_tuple;
-    };
-    */
-
-    template <class T, typename = void>
-    struct is_tuplizable : std::false_type {};
-
-    template <class T>
-    struct is_tuplizable<T, std::void_t<decltype(std::declval<T>().as_const_tuple())>> : std::true_type {};
-
-    template <class T>
-    inline constexpr bool is_tuplizable_v = is_tuplizable<T>::value;
 
     template <class T>
     struct tuplizable_traits
