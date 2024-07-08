@@ -147,17 +147,17 @@ namespace awl
     }
 
     template <typename T, typename = void>
-    struct is_stringizable_impl : std::false_type {};
+    struct is_reflectable_impl : std::false_type {};
 
     template <typename T>
-    struct is_stringizable_impl<T, std::void_t<decltype(std::declval<T>().get_member_names())>> : std::true_type {};
+    struct is_reflectable_impl<T, std::void_t<decltype(std::declval<T>().get_member_names())>> : std::true_type {};
 
     // Hide an extra template parameter.
     template <typename T>
-    struct is_stringizable : is_stringizable_impl<T> {};
+    struct is_reflectable : is_reflectable_impl<T> {};
 
     template <typename T>
-    inline constexpr bool is_stringizable_v = is_stringizable<T>::value;
+    inline constexpr bool is_reflectable_v = is_reflectable<T>::value;
 
     struct EmptyStringizable
     {

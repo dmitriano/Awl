@@ -45,7 +45,7 @@ namespace awl::io
             {
                 auto & field_val = std::get<index>(val.as_tuple());
 
-                if constexpr (is_stringizable_v<std::remove_reference_t<decltype(field_val)>>)
+                if constexpr (is_reflectable_v<std::remove_reference_t<decltype(field_val)>>)
                 {
                     context.ReadV(in, field_val);
                 }
@@ -227,7 +227,7 @@ namespace awl::io
         template<class Struct>
         void ReadV(InputStream & s, Struct & val) const
         {
-            if constexpr (is_stringizable_v<Struct>)
+            if constexpr (is_reflectable_v<Struct>)
             {
                 typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
 

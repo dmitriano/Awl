@@ -27,7 +27,7 @@ namespace awl::io
         template<class Struct>
         void ReadV(InputStream & s, Struct & val) const
         {
-            if constexpr (is_stringizable_v<Struct>)
+            if constexpr (is_reflectable_v<Struct>)
             {
                 this->ReadStructIndex(s);
             }

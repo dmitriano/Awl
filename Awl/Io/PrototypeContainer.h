@@ -27,7 +27,7 @@ namespace awl::io
 
     protected:
 
-        using Split = helpers::split_variant<V, is_stringizable>;
+        using Split = helpers::split_variant<V, is_reflectable>;
 
         using StructV = typename Split::matching;
         using FieldV = typename Split::non_matching;

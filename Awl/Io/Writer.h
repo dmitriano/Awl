@@ -56,7 +56,7 @@ namespace awl::io
         template<class Struct>
         void WriteV(OutputStream & s, const Struct & val) const
         {
-            if constexpr (is_stringizable_v<Struct>)
+            if constexpr (is_reflectable_v<Struct>)
             {
                 const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
                 Write(s, index);

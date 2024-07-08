@@ -197,7 +197,7 @@ namespace awl::io
     static_assert(make_type_name<std::array<uint8_t, 5>>() == fixed_string{ "array<int8_t, 5>" });
 
     template <class T>
-    struct type_descriptor<T, std::enable_if_t<is_stringizable_v<T>>>
+    struct type_descriptor<T, std::enable_if_t<is_reflectable_v<T>>>
     {
         static constexpr auto name()
         {
