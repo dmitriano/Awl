@@ -52,6 +52,17 @@ namespace awl
         return object_as_tuple(left) > object_as_tuple(right);
     }
 
+    // It can be a concept, but we can't specialize it for custom types
+    // we do with inline variables.
+    /*
+    template <class T>
+    concept tuplizable = requires(T & t)
+    {
+        t.as_const_tuple();
+        t.as_tuple;
+    };
+    */
+
     template <class T, typename = void>
     struct is_tuplizable : std::false_type {};
 
