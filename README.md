@@ -3,7 +3,7 @@ AWL - A Working Library
 
 AWL is a small cross-platform C++ library that includes:
 
-1. A simple binary [serialization framework](https://developernote.com/2020/02/a-simple-cpp-serialization-framework/).
+1. A simple binary [serialization framework](https://developernote.com/2024/07/version-tolerant-serialization-in-c/).
 2. Memory stream, buffered stream, hashing stream.
 3. A [set](https://github.com/dmitriano/Awl/blob/master/Awl/VectorSet.h) that finds an element by both key and index with O(logN) time.
 4. A [doubly linked list](https://github.com/dmitriano/Awl/blob/master/Awl/QuickList.h) with static insert and erase methods.

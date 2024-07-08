@@ -163,8 +163,8 @@ namespace awl::io
 
     static_assert(make_type_name<std::map<int32_t, int64_t>>() == fixed_string{ "map<int32_t, int64_t>" });
 
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<is_specialization_v<T, std::chrono::time_point>>>
+    template <class Clock, class Duration>
+    struct type_descriptor<std::chrono::time_point<Clock, Duration>>
     {
         static constexpr auto name()
         {
@@ -175,11 +175,11 @@ namespace awl::io
     static_assert(make_type_name<std::chrono::system_clock::time_point>() == fixed_string{ "int64_t" });
 
     template <class T>
-    struct type_descriptor<T, std::enable_if_t<is_specialization_v<T, std::optional>>>
+    struct type_descriptor<std::optional<T>>
     {
         static constexpr auto name()
         {
-            return fixed_string("optional<") + make_type_name<typename T::value_type>() + fixed_string(">");
+            return fixed_string("optional<") + make_type_name<T>() + fixed_string(">");
         }
     };
 
