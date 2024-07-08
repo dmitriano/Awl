@@ -62,7 +62,7 @@ namespace awl::io
                 Write(s, index);
             }
 
-            if constexpr (is_tuplizable_v<Struct>)
+            if constexpr (tuplizable<Struct>)
             {
                 for_each(object_as_tuple(val), [this, &s](auto& field)
                 {

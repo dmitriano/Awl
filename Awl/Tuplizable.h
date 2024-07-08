@@ -17,9 +17,9 @@ namespace awl
     // see RwHelpersTest.cpp for an example.
 
     template <class T>
-    concept self_tuplizable = requires(T & t)
+    concept self_tuplizable = requires(T& t)
     {
-        t.as_const_tuple();
+        std::as_const(t).as_const_tuple();
         t.as_tuple;
     };
 
@@ -42,9 +42,9 @@ namespace awl
     }
 
     template <class T>
-    concept tuplizable = requires(T & t)
+    concept tuplizable = requires(T& t)
     {
-        object_as_const_tuple(t);
+        object_as_const_tuple(std::as_const(t));
         object_as_tuple(t);
     };
 
@@ -117,7 +117,7 @@ namespace awl
 #define AWL_BINARY_OPERATOR(ClassName, OP) \
     inline bool operator OP (const ClassName & left, const ClassName & right) \
     { \
-        return awl::object_as_tuple(left) OP awl::object_as_tuple(right); \
+        return awl::object_as_const_tuple(left) OP awl::object_as_const_tuple(right); \
     }
 
 #define AWL_MEMBERWISE_EQUATABLE(ClassName) \

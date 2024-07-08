@@ -279,7 +279,7 @@ namespace awl::io
                     }
                 }
             }
-            else if constexpr (is_tuplizable_v<Struct>)
+            else if constexpr (tuplizable<Struct>)
             {
                 ReadTuplizable(s, val);
             }

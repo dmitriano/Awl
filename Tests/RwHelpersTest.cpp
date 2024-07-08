@@ -47,6 +47,8 @@ namespace awl
 
 namespace
 {
+    static_assert(awl::tuplizable<A>);
+
     //At this point class A is already serializable, but the test code below requires it to be equatable and comparable.
     AWL_MEMBERWISE_EQUATABLE_AND_COMPARABLE(A)
 

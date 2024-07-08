@@ -25,13 +25,13 @@ namespace awl
     template <class T, typename Func>
     inline constexpr void for_each_member(const T & val, const Func & f)
     {
-        static_assert(std::is_arithmetic<T>::value || is_tuplizable_v<T>);
+        static_assert(std::is_arithmetic<T>::value || tuplizable<T>);
 
         if constexpr (std::is_arithmetic<T>::value)
         {
             f(val);
         }
-        else if constexpr (is_tuplizable_v<T>)
+        else if constexpr (tuplizable<T>)
         {
             for_each(object_as_tuple(val), f);
         }
@@ -51,13 +51,13 @@ namespace awl
     template <class T>
     constexpr std::size_t sizeof_object(const T & val)
     {
-        static_assert(std::is_arithmetic<T>::value || is_tuplizable_v<T>);
+        static_assert(std::is_arithmetic<T>::value || tuplizable<T>);
 
         if constexpr (std::is_arithmetic<T>::value)
         {
             return sizeof(val);
         }
-        else if constexpr (is_tuplizable_v<T>)
+        else if constexpr (tuplizable<T>)
         {
             std::size_t size = 0;
 
@@ -87,7 +87,7 @@ namespace awl
             static_cast<void>(val);
             return true;
         }
-        else if constexpr (is_tuplizable_v<T>)
+        else if constexpr (tuplizable<T>)
         {
             bool all = true;
 
@@ -142,7 +142,7 @@ namespace awl
             AWL_TUPLIZABLE(a, p)
         };
 
-        static_assert(is_tuplizable_v<A>);
+        static_assert(tuplizable<A>);
 
         static_assert(sizeof_class<A>() == sizeof(bool) + sizeof(int));
         static_assert(sizeof_class<B>() == sizeof_class<A>() + sizeof(double));

@@ -136,7 +136,7 @@ namespace awl::io::helpers
         }
         else
         {
-            if constexpr (is_tuplizable_v<Coll>)
+            if constexpr (tuplizable<Coll>)
             {
                 return std::tuple<Coll>{};
             }
@@ -156,7 +156,7 @@ namespace awl::io::helpers
     {
         auto val_tuple = std::make_tuple(static_cast<T>(val));
 
-        if constexpr (is_tuplizable_v<T>)
+        if constexpr (tuplizable<T>)
         {
             return std::tuple_cat(val_tuple, flatten_tuple(object_as_tuple(val)));
         }

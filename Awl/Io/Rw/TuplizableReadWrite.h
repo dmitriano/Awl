@@ -53,7 +53,7 @@ namespace awl::io
     }
 
     template <class Stream, typename T, class Context = FakeContext>
-        requires (sequential_input_stream<Stream> && is_tuplizable_v<T>)
+        requires (sequential_input_stream<Stream> && tuplizable<T>)
     void Read(Stream & s, T & val, const Context & ctx = {})
     {
         if constexpr (std::is_same_v<Context, FakeContext>)
@@ -67,7 +67,7 @@ namespace awl::io
     }
 
     template <class Stream, typename T, class Context = FakeContext>
-        requires (sequential_output_stream<Stream> && is_tuplizable_v<T>)
+        requires (sequential_output_stream<Stream> && tuplizable<T>)
     void Write(Stream & s, const T & val, const Context & ctx = {})
     {
         if constexpr (std::is_same_v<Context, FakeContext>)
