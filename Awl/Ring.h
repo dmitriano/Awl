@@ -10,6 +10,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <algorithm>
+#include <ranges>
 
 namespace awl
 {
@@ -225,6 +226,11 @@ namespace awl
             }
 
             return *this;
+        }
+
+        bool operator == (const ring& other) const noexcept
+        {
+            return std::ranges::equal(*this, other);
         }
 
         ~ring()

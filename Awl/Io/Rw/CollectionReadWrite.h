@@ -5,16 +5,17 @@
 
 #pragma once
 
+#include "Awl/VectorSet.h"
+#include "Awl/ObservableSet.h"
+#include "Awl/Ring.h"
+#include "Awl/Io/Rw/RwAdapters.h"
+
 #include <deque>
 #include <set>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
 #include <type_traits>
-
-#include "Awl/VectorSet.h"
-#include "Awl/ObservableSet.h"
-#include "Awl/Io/Rw/RwAdapters.h"
 
 namespace awl::io
 {
@@ -44,9 +45,9 @@ namespace awl::io
         }
     }
 
-    template <class Stream, class T, class Alloc, class Context = FakeContext>
+    template <class Stream, typename Coll, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void ReadCollection(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
+    void ReadDeque(Stream& s, Coll& coll, const Context& ctx = {})
     {
         size_t count;
 
@@ -54,7 +55,7 @@ namespace awl::io
 
         for (size_t i = 0; i < count; ++i)
         {
-            T elem;
+            typename Coll::value_type elem;
 
             Read(s, elem, ctx);
 
@@ -101,7 +102,7 @@ namespace awl::io
         requires sequential_input_stream<Stream>
     void Read(Stream& s, std::deque<T, Alloc>& coll, const Context& ctx = {})
     {
-        ReadCollection(s, coll, ctx);
+        ReadDeque(s, coll, ctx);
     }
 
     template <class Stream, class T, class Alloc, class Context = FakeContext>
@@ -191,6 +192,21 @@ namespace awl::io
     template<class Stream, class T, class Key, class Hash, class KeyEqual, class Allocator, class Context = FakeContext>
         requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::unordered_map<Key, T, Hash, KeyEqual, Allocator> &coll, const Context & ctx = {})
+    {
+        WriteCollection(s, coll, ctx);
+    }
+
+    // awl::ring should be initilized with a limit before it is read.
+    template <class Stream, class T, class Alloc, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
+    void Read(Stream& s, awl::ring<T, Alloc>& coll, const Context& ctx = {})
+    {
+        ReadDeque(s, coll, ctx);
+    }
+
+    template <class Stream, class T, class Alloc, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
+    void Write(Stream& s, const awl::ring<T, Alloc>& coll, const Context& ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }

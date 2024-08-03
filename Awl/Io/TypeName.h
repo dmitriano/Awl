@@ -11,6 +11,7 @@
 #include "Awl/Reflection.h"
 #include "Awl/Decimal.h"
 #include "Awl/VectorSet.h"
+#include "Awl/Ring.h"
 
 #include <string>
 #include <vector>
@@ -136,7 +137,8 @@ namespace awl::io
         is_specialization_v<T, std::list> ||
         is_specialization_v<T, std::set> ||
         is_specialization_v<T, std::unordered_set> ||
-        is_specialization_v<T, awl::vector_set>>>
+        is_specialization_v<T, awl::vector_set> ||
+        is_specialization_v<T, awl::ring>>>
     {
         static constexpr auto name()
         {
