@@ -56,6 +56,16 @@ namespace awl::io
 
     protected:
 
+        void WriteSnapshotImpl(OStream& out, const std::vector<uint8_t>& v) const
+        {
+            HashOStream hashing_out = MakeHashingOutputStream(out);
+
+            WriteHeader(hashing_out);
+
+            // Write vector without leading 8 bytes containing its size.
+            hashing_out.Write(v.data(), v.size());
+        }
+
         virtual bool ReadHeader(HashIStream&) { return true; }
 
         virtual void WriteHeader(HashOStream&) const {}

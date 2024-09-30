@@ -6,8 +6,10 @@
 #pragma once
 
 #include "Awl/Logger.h"
+#include "Awl/OptionalMutex.h"
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
+#include "Awl/Io/Snapshotable.h"
 #include <cassert>
 
 namespace awl::io
@@ -64,7 +66,7 @@ namespace awl::io
 
         bool Load(Value& val);
 
-        void Save(const Value& val);
+        void Save(const Value& val, IMutex* p_mutex = nullptr);
 
         void Close()
         {
@@ -81,14 +83,25 @@ namespace awl::io
             val.Read(s);
         }
 
-        static void WriteToStream(UniqueStream& s, const Value& val)
+        template <class Func>
+        static void WriteToStreamFunc(UniqueStream& s, Func&& func)
         {
             s.Seek(0);
 
-            val.Write(s);
+            func(s);
 
             s.Truncate();
             s.Flush();
+        }
+
+        static void WriteToStream(UniqueStream& s, const Value& val)
+        {
+            WriteToStreamFunc(s, [&val](UniqueStream& s) { val.Write(s); });
+        }
+
+        static void WriteSnapshot(UniqueStream& s, const awl::io::Snapshotable<UniqueStream>& snapshotable, const std::vector<uint8_t>& v)
+        {
+            WriteToStreamFunc(s, [&snapshotable, &v](UniqueStream& s) { snapshotable.WriteSnapshot(s, v); });
         }
 
         bool LoadFromFile(Value& val, awl::io::UniqueStream& s, LogLevel level);

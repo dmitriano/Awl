@@ -19,7 +19,7 @@ namespace awl::io
 
         virtual Snapshot MakeShanshot() const = 0;
 
-        virtual void WriteSnapshot(OStream& out, const Snapshot& v) = 0;
+        virtual void WriteSnapshot(OStream& out, const Snapshot& v) const = 0;
 
         virtual ~Snapshotable() = default;
     };

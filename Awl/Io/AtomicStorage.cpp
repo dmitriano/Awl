@@ -6,6 +6,8 @@
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/StringFormat.h"
 
+#include <mutex>
+
 using namespace awl::io;
 
 bool AtomicStorage::Load(Value& val)
@@ -33,11 +35,28 @@ bool AtomicStorage::Load(Value& val)
     return master_success;
 }
 
-void AtomicStorage::Save(const Value& val)
+void AtomicStorage::Save(const Value& val, IMutex* p_mutex)
 {
-    WriteToStream(m_backup, val);
+    if (p_mutex == nullptr)
+    {
+        WriteToStream(m_backup, val);
 
-    WriteToStream(m_s, val);
+        WriteToStream(m_s, val);
+    }
+    else
+    {
+        std::unique_lock lock(*p_mutex);
+
+        const awl::io::Snapshotable<UniqueStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<UniqueStream>&>(val);
+
+        auto v = snapshotable.MakeShanshot();
+
+        lock.unlock();
+
+        WriteSnapshot(m_backup, snapshotable, v);
+
+        WriteSnapshot(m_s, snapshotable, v);
+    }
     
     ClearBackup();
 }
