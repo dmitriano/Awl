@@ -9,6 +9,7 @@
 #include "Awl/Io/VersionTolerantSerializable.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/MeasureStream.h"
+#include "Awl/Io/Snapshotable.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
 
 #include <vector>
@@ -35,7 +36,8 @@ namespace awl::io
         class Hash = awl::crypto::Crc64>
     class EuphoricallySerializable :
         private helpers::VtsOwner<T, V, IStream, OStream, Hash>,
-        public HashingSerializable<IStream, OStream, Hash>
+        public HashingSerializable<IStream, OStream, Hash>,
+        public Snapshotable<OStream>
     {
     private:
 
@@ -51,7 +53,7 @@ namespace awl::io
             measure_vts(val)
         {}
 
-        std::vector<uint8_t> MakeShanshot() const
+        std::vector<uint8_t> MakeShanshot() const override
         {
             const size_t len = MeasureValue();
 
@@ -70,7 +72,7 @@ namespace awl::io
             return v;
         }
 
-        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v)
+        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v) override
         {
             typename BaseHashing::HashOStream hashing_out = BaseHashing::MakeHashingOutputStream(out);
 
