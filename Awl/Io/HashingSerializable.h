@@ -7,7 +7,11 @@
 
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/HashStream.h"
+#include "Awl/Io/Rw/VectorReadWrite.h"
 #include "Awl/Crypto/Crc64.h"
+
+#include <vector>
+#include <cstdint>
 
 namespace awl::io
 {
@@ -41,6 +45,14 @@ namespace awl::io
             HashOStream out(s, m_blockSize, m_hash);
 
             m_val.Write(out);
+        }
+
+        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v)
+        {
+            HashOStream hashing_out(out, m_blockSize, m_hash);
+
+            // Write vector without leading 8 bytes containing its size.
+            hashing_out.Write(v.data(), v.size());
         }
 
     private:

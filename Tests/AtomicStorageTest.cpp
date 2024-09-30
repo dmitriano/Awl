@@ -435,3 +435,35 @@ AWT_TEST(AtomicStorageEuphorical2)
             awl::io::UniqueStream, awl::io::UniqueStream>>
     (context);
 }
+
+AWT_TEST(ShapshotTest)
+{
+    using Value = awl::io::EuphoricallySerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>;
+
+    v2::B b = v2::b_expected;
+    Value val(b);
+
+    std::vector<uint8_t> expected_v;
+
+    {
+        awl::io::VectorOutputStream out(expected_v);
+
+        val.Write(out);
+    }
+
+    auto snapshot = val.MakeShanshot();
+
+    std::vector<uint8_t> actual_v;
+
+    {
+        awl::io::VectorOutputStream out(actual_v);
+
+        val.WriteSnapshot(out, snapshot);
+    }
+
+    AWT_ASSERT(actual_v == expected_v);
+
+    context.out << _T("Snapshot size: ") << snapshot.size() << _T(" bytes") << std::endl;
+    context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
+    context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
+}
