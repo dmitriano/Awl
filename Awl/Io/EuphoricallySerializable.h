@@ -27,10 +27,7 @@ namespace awl::io
 
             VtsOwner(T& val) : m_vts(val) {}
 
-            using HashIStream = HashInputStream<Hash, IStream>;
-            using HashOStream = HashOutputStream<Hash, OStream>;
-
-            VersionTolerantSerializable<T, V, HashIStream, HashOStream> m_vts;
+            VersionTolerantSerializable<T, V, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>> m_vts;
         };
     }
 
@@ -75,7 +72,9 @@ namespace awl::io
 
         void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v)
         {
-            typename BaseVts::HashOStream hashing_out = BaseHashing::MakeHashingOutputStream(out);
+            typename BaseHashing::HashOStream hashing_out = BaseHashing::MakeHashingOutputStream(out);
+
+            BaseHashing::WriteHeader(hashing_out);
 
             // Write vector without leading 8 bytes containing its size.
             hashing_out.Write(v.data(), v.size());

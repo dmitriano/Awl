@@ -18,10 +18,12 @@ namespace awl::io
     template <class IStream = SequentialInputStream, class OStream = SequentialOutputStream, class Hash = awl::crypto::Crc64>
     class HashingSerializable : public Serializable<IStream, OStream>
     {
-    private:
+    protected:
 
         using HashIStream = HashInputStream<Hash, IStream>;
         using HashOStream = HashOutputStream<Hash, OStream>;
+
+    private:
 
         using Value = Serializable<HashIStream, HashOStream>;
 
@@ -37,17 +39,26 @@ namespace awl::io
         {
             HashIStream in(s, m_blockSize, m_hash);
 
-            m_val.Read(in);
+            if (ReadHeader(in))
+            {
+                m_val.Read(in);
+            }
         }
 
         void Write(OStream& s) const override
         {
             HashOStream out = MakeHashingOutputStream(s);
 
+            WriteHeader(out);
+
             m_val.Write(out);
         }
 
     protected:
+
+        virtual bool ReadHeader(HashIStream&) { return true; }
+
+        virtual void WriteHeader(HashOStream&) const {}
 
         HashOStream MakeHashingOutputStream(OStream& out) const
         {
