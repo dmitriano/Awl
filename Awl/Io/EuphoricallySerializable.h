@@ -73,6 +73,14 @@ namespace awl::io
             return v;
         }
 
+        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v)
+        {
+            typename BaseVts::HashOStream hashing_out = BaseHashing::MakeHashingOutputStream(out);
+
+            // Write vector without leading 8 bytes containing its size.
+            hashing_out.Write(v.data(), v.size());
+        }
+
     private:
 
         size_t MeasureValue() const

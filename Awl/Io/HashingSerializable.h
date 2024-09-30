@@ -42,17 +42,16 @@ namespace awl::io
 
         void Write(OStream& s) const override
         {
-            HashOStream out(s, m_blockSize, m_hash);
+            HashOStream out = MakeHashingOutputStream(s);
 
             m_val.Write(out);
         }
 
-        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v)
-        {
-            HashOStream hashing_out(out, m_blockSize, m_hash);
+    protected:
 
-            // Write vector without leading 8 bytes containing its size.
-            hashing_out.Write(v.data(), v.size());
+        HashOStream MakeHashingOutputStream(OStream& out) const
+        {
+            return { out, m_blockSize, m_hash };
         }
 
     private:
