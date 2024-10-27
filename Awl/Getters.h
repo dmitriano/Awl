@@ -15,6 +15,13 @@
 
 namespace awl
 {
+    // field_getter and func_getter can't be declared via std::mem_fn,
+    // becuase second template parameter of std::mem_fn is not a type,
+    // but a pointer to member value, so we can't do somethig like this:
+    //
+    // template <class T, class Field>
+    // using field_getter = decltype(std::mem_fn(&T::Field));
+
     template <class T, class Field>
     class field_getter
     {
