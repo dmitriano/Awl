@@ -25,6 +25,14 @@ namespace awl::io
             m_storage(logger)
         {}
 
+        bool load(const awl::String& file_name, bool allow_default = true)
+        {
+            const awl::String master_name = file_name + _T(".dat");
+            const awl::String backup_name = file_name + _T(".bak");
+
+            return helpers::LoadFromStorage(m_serializable, m_storage, m_logger, master_name, backup_name, allow_default);
+        }
+
         bool load(const awl::String& file_name, const awl::String& backup_name, bool allow_default = true)
         {
             return helpers::LoadFromStorage(m_serializable, m_storage, m_logger, file_name, backup_name, allow_default);
@@ -35,37 +43,37 @@ namespace awl::io
             m_storage.Save(m_serializable);
         }
 
-        const T& value() const
+        const T& value() const noexcept
         {
             return m_val;
         }
 
-        T& value()
+        T& value() noexcept
         {
             return m_val;
         }
 
-        bool has_value() const
+        bool has_value() const noexcept
         {
             return m_storage.IsOpened();
         }
 
-        const T& operator * () const
+        const T& operator * () const noexcept
         {
             return m_val;
         }
 
-        const T* operator -> () const
+        T& operator * () noexcept
+        {
+            return m_val;
+        }
+
+        const T* operator -> () const noexcept
         {
             return &m_val;
         }
 
-        T& operator * ()
-        {
-            return m_val;
-        }
-
-        T* operator -> ()
+        T* operator -> () noexcept
         {
             return &m_val;
         }
@@ -76,7 +84,7 @@ namespace awl::io
 
         T m_val;
 
-        HeaderedSerializable<T, V, Hash> m_serializable;
+        HeaderedSerializable<T, V, SequentialInputStream, SequentialOutputStream, Hash> m_serializable;
 
         AtomicStorage m_storage;
     };
