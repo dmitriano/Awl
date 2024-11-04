@@ -18,7 +18,10 @@ namespace awl::io
     {
     private:
 
-        using Value = Serializable<UniqueStream, UniqueStream>;
+        // We open files as UniqueStream, but use them as basic SequentialInputStream, SequentialOutputStream.
+        // Virtual functions will not add a significant overhead, because higher-level streams (like hashing stream)
+        // read/write into their underlying streams by blocks.
+        using Value = Serializable<>;
 
     public:
 
@@ -99,7 +102,7 @@ namespace awl::io
             WriteToStreamFunc(s, [&val](UniqueStream& s) { val.Write(s); });
         }
 
-        static void WriteSnapshot(UniqueStream& s, const awl::io::Snapshotable<UniqueStream>& snapshotable, const std::vector<uint8_t>& v)
+        static void WriteSnapshot(UniqueStream& s, const awl::io::Snapshotable<SequentialOutputStream>& snapshotable, const std::vector<uint8_t>& v)
         {
             WriteToStreamFunc(s, [&snapshotable, &v](UniqueStream& s) { snapshotable.WriteSnapshot(s, v); });
         }

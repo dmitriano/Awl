@@ -71,9 +71,9 @@ namespace
     }
 
     using Hash = awl::crypto::Crc64;
-    using HashInputStream = awl::io::HashInputStream<Hash, awl::io::UniqueStream>;
-    using HashOutputStream = awl::io::HashOutputStream<Hash, awl::io::UniqueStream>;
-    using HashingSerializable = awl::io::HashingSerializable<awl::io::UniqueStream, awl::io::UniqueStream, Hash>;
+    using HashInputStream = awl::io::HashInputStream<Hash>;
+    using HashOutputStream = awl::io::HashOutputStream<Hash>;
+    using HashingSerializable = awl::io::HashingSerializable<>;
 
     using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
     using Value2 = awl::io::VersionTolerantSerializable<v2::B, V2, HashInputStream, HashOutputStream>;
@@ -290,29 +290,42 @@ AWT_TEST(AtomicStorageSave)
     }
 }
 
+namespace
+{
+    void EuphoricalLoadSaveTest(const awl::testing::TestContext& context, awl::IMutex* p_mutex)
+    {
+        auto guard = awl::make_scope_guard(RemoveFiles);
+
+        awl::ConsoleLogger logger(context.out);
+
+        awl::io::AtomicStorage storage = MakeStorage(logger);
+        AWT_ASSERT(storage.IsEmpty());
+
+        using Value = awl::io::EuphoricallySerializable<v2::B, V2>;
+
+        {
+            v2::B b = v2::b_expected;
+            Value val(b);
+            storage.Save(val, p_mutex);
+        }
+
+        {
+            v2::B b;
+            Value val(b);
+            storage.Load(val);
+            AWT_ASSERT(b == v2::b_expected);
+        }
+    }
+}
+
 AWT_TEST(AtomicStorageEuphorical1)
 {
-    auto guard = awl::make_scope_guard(RemoveFiles);
+    EuphoricalLoadSaveTest(context, nullptr);
 
-    awl::ConsoleLogger logger(context.out);
+    std::mutex mutex;
+    awl::MutexWrapper wrapper(mutex);
 
-    awl::io::AtomicStorage storage = MakeStorage(logger);
-    AWT_ASSERT(storage.IsEmpty());
-
-    using Value = awl::io::EuphoricallySerializable<v2::B, V2, awl::io::UniqueStream, awl::io::UniqueStream>;
-
-    {
-        v2::B b = v2::b_expected;
-        Value val(b);
-        storage.Save(val);
-    }
-
-    {
-        v2::B b;
-        Value val(b);
-        storage.Load(val);
-        AWT_ASSERT(b == v2::b_expected);
-    }
+    EuphoricalLoadSaveTest(context, &wrapper);
 }
 
 namespace
@@ -420,20 +433,16 @@ namespace
 AWT_TEST(AtomicStorageVts2)
 {
     TestRenameAndDefaultFields<
-        awl::io::VersionTolerantSerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>,
-            awl::io::UniqueStream, awl::io::UniqueStream>,
-        awl::io::VersionTolerantSerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>,
-            awl::io::UniqueStream, awl::io::UniqueStream>>
+        awl::io::VersionTolerantSerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>>,
+        awl::io::VersionTolerantSerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>>>
     (context);
 }
 
 AWT_TEST(AtomicStorageEuphorical2)
 {
     TestRenameAndDefaultFields<
-        awl::io::EuphoricallySerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>,
-            awl::io::UniqueStream, awl::io::UniqueStream>,
-        awl::io::EuphoricallySerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>,
-            awl::io::UniqueStream, awl::io::UniqueStream>>
+        awl::io::EuphoricallySerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>>,
+        awl::io::EuphoricallySerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>>>
     (context);
 }
 

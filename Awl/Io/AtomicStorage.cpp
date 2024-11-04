@@ -47,7 +47,7 @@ void AtomicStorage::Save(const Value& val, IMutex* p_mutex)
     {
         std::unique_lock lock(*p_mutex);
 
-        const awl::io::Snapshotable<UniqueStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<UniqueStream>&>(val);
+        const awl::io::Snapshotable<SequentialOutputStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<SequentialOutputStream>&>(val);
 
         auto v = snapshotable.MakeShanshot();
 
