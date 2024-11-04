@@ -25,9 +25,12 @@ namespace awl::io
 
     public:
 
-        HeaderedSerializable(Header header, T& val, size_t block_size = defaultBlockSize, Hash hash = {}) :
+        HeaderedSerializable(Header header, T& val, size_t block_size = defaultBlockSize, 
+            Hash hash = {}, size_t format_name_limit = 64u)
+        :
             Base(val, block_size, std::move(hash)),
-            expectedHeader(std::move(header))
+            expectedHeader(std::move(header)),
+            formatNameLimit(format_name_limit)
         {}
 
     protected:
@@ -73,10 +76,6 @@ namespace awl::io
 
         Header expectedHeader;
 
-        static constexpr size_t formatNameLimit = 64u;
-
-        static constexpr Hash hashVal = Hash(127);
-
-        static constexpr size_t blockSize = 1024 * 64;
+        const size_t formatNameLimit;
     };
 }

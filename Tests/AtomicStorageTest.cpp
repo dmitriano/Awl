@@ -563,4 +563,26 @@ AWT_TEST(HeaderedSerializable)
         // Check we fall back to the old version.
         AWT_ASSERT(val.oldVersion == current_header.version);
     }
+
+    // Exceed format name limit.
+
+    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    {
+        awl::io::VectorInputStream in(v);
+
+        v2::B b;
+        Value val(current_header, b, awl::io::defaultBlockSize, {}, 5u);
+        val.Read(in);
+    });
+
+    v.clear();
+
+    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    {
+        awl::io::VectorOutputStream out(v);
+
+        v2::B b = v2::b_expected;
+        Value val(current_header, b, awl::io::defaultBlockSize, {}, 5u);
+        val.Write(out);
+    });
 }
