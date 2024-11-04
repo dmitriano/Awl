@@ -1,16 +1,10 @@
-#include "DataModel.h"
-
-#include "Qtil/VersionableAtomicObject.h"
-
-#include "Qtil/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 
 #include "Awl/Io/PersistentObject.h"
-#include "Awl/Io/VectorStream.h"
 #include "Awl/Decimal.h"
+#include "Awl/ConsoleLogger.h"
 
 #include <map>
-
-using namespace tradeclient;
 
 namespace
 {
@@ -40,21 +34,17 @@ namespace
         using BotSettingsMap = std::unordered_map<String, BotSettings<String>>;
         BotSettingsMap botSettings;
 
-        data::decimal volatilityFactor;
-
         bool dumpMode;
 
         bool operator == (const Settings&) const = default;
 
-        AWL_REFLECT(displayAsset, crossAsset, soundVolume, lockAllMarkets, traceSignals, botSettings, volatilityFactor,
+        AWL_REFLECT(displayAsset, crossAsset, soundVolume, lockAllMarkets, traceSignals, botSettings,
             dumpMode)
     };
 
     template <class String>
     Settings<String> MakeSettings()
     {
-        using namespace qtil::literals;
-
         typename Settings<String>::BotSettingsMap map{ { String("BTCUSDT"), BotSettings<String>{ String("GridBot"), true } } };
 
         return Settings<String>
@@ -65,7 +55,6 @@ namespace
             true,
             false,
             map,
-            "2"_d,
             false
         };
     }
@@ -85,9 +74,11 @@ namespace
     const awl::String settings_file_name = awl::text("test-settings");
 
     template <class String>
-    void WriteStorage(const qtil::testing::TestContext& context)
+    void WriteStorage(const awl::testing::TestContext& context)
     {
-        Storage<String> storage(context.logger);
+        awl::ConsoleLogger logger(context.out);
+
+        Storage<String> storage(logger);
 
         storage.persistentObject.load(settings_file_name);
 
@@ -97,9 +88,11 @@ namespace
     }
 
     template <class String>
-    void ReadStorage(const qtil::testing::TestContext& context)
+    void ReadStorage(const awl::testing::TestContext& context)
     {
-        Storage<String> storage(context.logger);
+        awl::ConsoleLogger logger(context.out);
+
+        Storage<String> storage(logger);
 
         storage.persistentObject.load(settings_file_name);
 
@@ -107,9 +100,13 @@ namespace
     }
 }
 
-QTIL_UNIT_TEST(Settings)
+AWT_TEST(PersistentObject)
 {
     WriteStorage<std::string>(context);
 
+#ifdef AWL_QT
     ReadStorage<QString>(context);
+#else
+    ReadStorage<std::string>(context);
+#endif
 }
