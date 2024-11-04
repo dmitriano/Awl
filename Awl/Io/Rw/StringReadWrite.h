@@ -6,12 +6,31 @@
 #pragma once
 
 #include "Awl/Io/Rw/ReadRaw.h"
+#include "Awl/Io/IoException.h"
+#include "Awl/StringFormat.h"
 
 #include <string>
 #include <type_traits>
 
 namespace awl::io
 {
+    inline void CheckStringLimit(size_t actual_len, size_t expected_len)
+    {
+        if (actual_len > expected_len)
+        {
+            throw IoError(format() << _T("The length of a string exceeds the limit of " << expected_len << " bytes. Actual length: " << actual_len << "."));
+        }
+    }
+
+    template <class Context>
+    void CheckStringLimit(const Context& ctx, size_t string_length)
+    {
+        if constexpr (limited_context<Context>)
+        {
+            CheckStringLimit(string_length, ctx.max_length());
+        }
+    }
+
     template<
         class Stream,
         class Char,
@@ -26,10 +45,14 @@ namespace awl::io
 
         Read(s, len, ctx);
 
+        const size_t string_length = len * sizeof(Char);
+
+        CheckStringLimit(ctx, string_length);
+
         val.resize(len);
 
         //There is non-const version of data() since C++ 17.
-        ReadRaw(s, reinterpret_cast<uint8_t *>(val.data()), len * sizeof(Char));
+        ReadRaw(s, reinterpret_cast<uint8_t *>(val.data()), string_length);
 
         *(val.data() + len) = 0;
     }
@@ -46,8 +69,12 @@ namespace awl::io
     {
         typename std::basic_string<Char>::size_type len = val.length();
 
+        const size_t string_length = len * sizeof(Char);
+
+        CheckStringLimit(ctx, string_length);
+
         Write(s, len, ctx);
 
-        s.Write(reinterpret_cast<const uint8_t *>(val.data()), len * sizeof(Char));
+        s.Write(reinterpret_cast<const uint8_t *>(val.data()), string_length);
     }
 }

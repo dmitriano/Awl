@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/Io/IoException.h"
-#include "Awl/Io/Rw/FakeContext.h"
+#include "Awl/Io/SerializationContext.h"
 #include "Awl/Io/SequentialStream.h"
 
 #include <cstdint>

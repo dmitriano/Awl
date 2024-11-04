@@ -56,13 +56,13 @@ namespace awl::io
         requires (sequential_input_stream<Stream> && is_tuplizable_v<T>)
     void Read(Stream & s, T & val, const Context & ctx = {})
     {
-        if constexpr (std::is_same_v<Context, FakeContext>)
+        if constexpr (vts_read_context<Context, Stream, T>)
         {
-            Read(s, object_as_tuple(val), ctx);
+            ctx.ReadV(s, val);
         }
         else
         {
-            ctx.ReadV(s, val);
+            Read(s, object_as_tuple(val), ctx);
         }
     }
 
@@ -70,13 +70,13 @@ namespace awl::io
         requires (sequential_output_stream<Stream> && is_tuplizable_v<T>)
     void Write(Stream & s, const T & val, const Context & ctx = {})
     {
-        if constexpr (std::is_same_v<Context, FakeContext>)
+        if constexpr (vts_write_context<Context, Stream, T>)
         {
-            Write(s, object_as_tuple(val), ctx);
+            ctx.WriteV(s, val);
         }
         else
         {
-            ctx.WriteV(s, val);
+            Write(s, object_as_tuple(val), ctx);
         }
     }
 }

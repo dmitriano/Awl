@@ -8,6 +8,7 @@
 #include "Awl/Io/PlainSerializable.h"
 #include "Awl/Io/VersionTolerantSerializable.h"
 #include "Awl/Io/EuphoricallySerializable.h"
+#include "Awl/Io/HeaderedSerializable.h"
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/FieldMap.h"
@@ -436,7 +437,7 @@ AWT_TEST(AtomicStorageEuphorical2)
     (context);
 }
 
-AWT_TEST(ShapshotTest)
+AWT_TEST(Shapshot)
 {
     using Value = awl::io::EuphoricallySerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>;
 
@@ -466,4 +467,100 @@ AWT_TEST(ShapshotTest)
     context.out << _T("Snapshot size: ") << snapshot.size() << _T(" bytes") << std::endl;
     context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
     context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
+}
+
+namespace
+{
+    class HeaderedValue : public awl::io::HeaderedSerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>
+    {
+    private:
+
+        using Base = awl::io::HeaderedSerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>;
+
+    public:
+
+        using Base::Base;
+
+        virtual void ReadOldVersion(size_t version)
+        {
+            oldVersion = version;
+        }
+
+        static constexpr size_t NoVersion = std::numeric_limits<size_t>::max();
+
+        size_t oldVersion = NoVersion;
+    };
+}
+
+AWT_TEST(HeaderedSerializable)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using Value = HeaderedValue;
+
+    // A header from the current version of the software.
+    const awl::io::Header current_header{ "SAMPLE FORMAT", 2u };
+
+    std::vector<uint8_t> v;
+
+    {
+        awl::io::VectorOutputStream out(v);
+
+        v2::B b = v2::b_expected;
+        Value val(current_header, b);
+        val.Write(out);
+    }
+
+    {
+        awl::io::VectorInputStream in(v);
+
+        v2::B b;
+        Value val(current_header, b);
+        val.Read(in);
+        AWT_ASSERT(b == v2::b_expected);
+        // Check the versions match.
+        AWT_ASSERT(val.oldVersion == HeaderedValue::NoVersion);
+    }
+
+    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    {
+        const awl::io::Header wrong_header{ "WRONG FORMAT", current_header.version };
+
+        awl::io::VectorInputStream in(v);
+
+        v2::B b;
+        Value val(wrong_header, b);
+        val.Read(in);
+        AWT_ASSERT(b == v2::b_expected);
+    });
+
+    // Read an older version from a newer stream.
+    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    {
+        const size_t old_version = 1u;
+
+        const awl::io::Header old_header{ current_header.format, old_version };
+
+        awl::io::VectorInputStream in(v);
+
+        v2::B b;
+        Value val(old_header, b);
+        val.Read(in);
+    });
+
+    // Read a newer version from an older stream.
+    {
+        const size_t new_version = 3u;
+
+        const awl::io::Header new_header{ current_header.format, new_version };
+
+        awl::io::VectorInputStream in(v);
+
+        v2::B b;
+        Value val(new_header, b);
+        val.Read(in);
+
+        // Check we fall back to the old version.
+        AWT_ASSERT(val.oldVersion == current_header.version);
+    }
 }

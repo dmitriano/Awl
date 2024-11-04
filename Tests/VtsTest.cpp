@@ -47,13 +47,25 @@ namespace
     using OldVirtualWriter = OldWriter<awl::io::SequentialOutputStream>;
     using NewVirtualReader = NewReader<awl::io::SequentialInputStream>;
 
+    static_assert(awl::io::vts_read_context<OldVirtualReader, awl::io::SequentialInputStream, v1::B>);
+    static_assert(awl::io::vts_write_context<OldVirtualWriter, awl::io::SequentialOutputStream, v1::B>);
+    static_assert(awl::io::vts_read_context<NewVirtualReader, awl::io::SequentialInputStream, v2::B>);
+
     using OldVectorReader = OldReader<awl::io::VectorInputStream>;
     using OldVectorWriter = OldWriter<awl::io::VectorOutputStream>;
     using NewVectorReader = NewReader<awl::io::VectorInputStream>;
 
+    static_assert(awl::io::vts_read_context<OldVectorReader, awl::io::VectorInputStream, v1::B>);
+    static_assert(awl::io::vts_write_context<OldVectorWriter, awl::io::VectorOutputStream, v1::B>);
+    static_assert(awl::io::vts_read_context<NewVectorReader, awl::io::VectorInputStream, v2::B>);
+
     using OldTrivialReader = OldReader<awl::io::TrivialMemoryStream>;
     using OldTrivialWriter = OldWriter<awl::io::TrivialMemoryStream>;
     using NewTrivialReader = NewReader<awl::io::TrivialMemoryStream>;
+
+    static_assert(awl::io::vts_read_context<OldTrivialReader, awl::io::TrivialMemoryStream, v1::B>);
+    static_assert(awl::io::vts_write_context<OldTrivialWriter, awl::io::TrivialMemoryStream, v1::B>);
+    static_assert(awl::io::vts_read_context<NewTrivialReader, awl::io::TrivialMemoryStream, v2::B>);
 
     constexpr size_t defaultElementCount = 1000;
 }
