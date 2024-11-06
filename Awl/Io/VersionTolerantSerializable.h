@@ -30,7 +30,7 @@ namespace awl::io
         {
             if constexpr (atomic)
             {
-                if constexpr (std::is_move_constructible_v<T>)
+                if constexpr (std::is_move_assignable_v<T>)
                 {
                     // Initialize newly added fields with default values.
                     T val = {};
@@ -55,11 +55,7 @@ namespace awl::io
                     }
 
                     // Save old value with a plain serialization.
-                    {
-                        VectorOutputStream v_out(v);
-
-                        io::Write(v_out, m_val);
-                    }
+                    WriteSnapshot(v);
 
                     try
                     {
@@ -68,10 +64,7 @@ namespace awl::io
                     catch (const IoException&)
                     {
                         // Restore old value.
-
-                        VectorInputStream v_in(v);
-
-                        io::Read(v_in, m_val);
+                        ReadSnapshot(v);
 
                         throw;
                     }
@@ -92,6 +85,20 @@ namespace awl::io
         }
 
     protected:
+
+        void WriteSnapshot(std::vector<uint8_t>& v) noexcept
+        {
+            VectorOutputStream v_out(v);
+
+            io::Write(v_out, m_val);
+        }
+
+        void ReadSnapshot(const std::vector<uint8_t>& v) noexcept
+        {
+            VectorInputStream v_in(v);
+
+            io::Read(v_in, m_val);
+        }
 
         void Read(IStream& in, T& val)
         {
