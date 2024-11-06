@@ -10,6 +10,8 @@
 
 #include "Awl/Testing/UnitTest.h"
 
+#include "Helpers/NonCopyable.h"
+
 using namespace awl::testing;
 
 namespace
@@ -253,4 +255,19 @@ AWT_TEST(TupleMakeSimilar)
         static_assert(std::is_same_v<decltype(t), std::tuple<const std::string&, int>>);
         AWT_ASSERT(t == std::make_tuple(s, int{}));
     }
+}
+
+AWT_TEST(TupleNonCopyable)
+{
+    AWT_UNUSED_CONTEXT;
+
+    // With MSVC I'll get 'no overloaded function could convert all the argument types'.
+    // This is why the serilaization uses tuples of refereces, but not values.
+    // using A = std::atomic<int>;
+
+    using A = awl::testing::helpers::NonCopyable;
+
+    A a(5);
+
+    std::tuple<A> t(std::move(a));
 }
