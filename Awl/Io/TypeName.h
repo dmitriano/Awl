@@ -193,11 +193,11 @@ namespace awl::io
     {
         static constexpr auto name()
         {
-            return fixed_string("atomic<") + make_type_name<T>() + fixed_string(">");
+            return make_type_name<T>();
         }
     };
 
-    static_assert(make_type_name<std::atomic<std::string>>() == fixed_string("atomic<sequence<int8_t>>"));
+    static_assert(make_type_name<std::atomic<std::string>>() == fixed_string("sequence<int8_t>"));
 
     template<class T, std::size_t N>
     struct type_descriptor<std::array<T, N>>
