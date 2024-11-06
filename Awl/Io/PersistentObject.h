@@ -26,6 +26,11 @@ namespace awl::io
             m_storage(logger)
         {}
 
+        ~PersistentObject()
+        {
+            close();
+        }
+
         bool load(const awl::String& file_name, bool allow_default = true)
         {
             const awl::String master_name = file_name + _T(".dat");
@@ -44,6 +49,16 @@ namespace awl::io
             if (m_storage.IsOpened())
             {
                 m_storage.Save(m_serializable);
+            }
+        }
+
+        void close()
+        {
+            if (m_storage.IsOpened())
+            {
+                m_storage.Save(m_serializable);
+
+                m_storage.Close();
             }
         }
 
