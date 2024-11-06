@@ -66,7 +66,7 @@ namespace awl::testing::helpers
         static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<A>>()), std::tuple<A>>);
         static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<std::vector<A>>>()), std::tuple<A>>);
         static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::map<std::string, A>>()), std::tuple<A>>);
-        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types< std::vector<std::map<std::string, A>>>()), std::tuple<A>>);
+        static_assert(std::is_same_v<decltype(awl::io::helpers::extract_element_types<std::vector<std::map<std::string, A>>>()), std::tuple<A>>);
 
         static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::io::helpers::variant_from_struct<A>>);
 
