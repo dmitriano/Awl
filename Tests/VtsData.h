@@ -9,6 +9,8 @@
 #include <chrono>
 #include <vector>
 #include <set>
+#include <map>
+#include <string>
 
 namespace awl::testing::helpers
 {
@@ -57,16 +59,6 @@ namespace awl::testing::helpers
         AWL_MEMBERWISE_EQUATABLE(A)
 
         inline const A a_expected = { 1, true, "abc", 2.0 };
-
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<int>()), std::tuple<>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<A>()), std::tuple<A>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::vector<int>>()), std::tuple<>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::string>()), std::tuple<>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::map<int, std::string>>()), std::tuple<>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::vector<A>>()), std::tuple<A>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::vector<std::vector<A>>>()), std::tuple<A>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::map<std::string, A>>()), std::tuple<A>>);
-        static_assert(std::is_same_v<decltype(awl::mp::extract_element_types<std::vector<std::map<std::string, A>>>()), std::tuple<A>>);
 
         static_assert(std::is_same_v<std::variant<A, int, bool, String, double>, awl::mp::variant_from_struct<A>>);
 

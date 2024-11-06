@@ -7,6 +7,9 @@
 
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/Vts.h"
+#include "Awl/Io/VectorStream.h"
+#include "Awl/Io/MeasureStream.h"
+#include "Awl/Io/IoException.h"
 #include "Awl/Mp/Mp.h"
 
 namespace awl::io
@@ -27,13 +30,52 @@ namespace awl::io
         {
             if constexpr (atomic)
             {
-                // Initialize newly added fields with default values.
-                T val = {};
+                if constexpr (std::is_move_constructible_v<T>)
+                {
+                    // Initialize newly added fields with default values.
+                    T val = {};
 
-                Read(in, val);
+                    Read(in, val);
 
-                //If Read throws m_val does not change.
-                m_val = std::move(val);
+                    //If Read throws m_val does not change.
+                    m_val = std::move(val);
+                }
+                else
+                {
+                    // For example, structures containing std::atomic are not copyable or movable.
+
+                    std::vector<uint8_t> v;
+
+                    {
+                        MeasureStream measure_out;
+
+                        io::Write(measure_out, m_val);
+
+                        v.reserve(measure_out.GetLength());
+                    }
+
+                    // Save old value with a plain serialization.
+                    {
+                        VectorOutputStream v_out(v);
+
+                        io::Write(v_out, m_val);
+                    }
+
+                    try
+                    {
+                        Read(in, m_val);
+                    }
+                    catch (const IoException&)
+                    {
+                        // Restore old value.
+
+                        VectorInputStream v_in(v);
+
+                        io::Read(v_in, m_val);
+
+                        throw;
+                    }
+                }
             }
             else
             {

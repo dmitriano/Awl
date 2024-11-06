@@ -6,25 +6,13 @@
 #pragma once
 
 #include "Awl/Mp/TupleToVariant.h"
-#include "Awl/Mp/FlattenTuple.h"
-
-#include "Awl/Tuplizable.h"
+#include "Awl/Mp/TypeCollector.h"
 
 namespace awl::mp
 {
     template <class T>
-    using recursive_tuple = decltype(flatten_struct<T>());
-
-    template <class T>
-    using variant_from_struct = tuple_to_variant<recursive_tuple<T>>;
+    using variant_from_struct = tuple_to_variant<typename type_collector<T>::Tuple>;
 
     template <class... Ts>
-    auto variant_from_structs_func()
-    {
-        std::tuple<Ts...> t;
-        return flatten_tuple(t);
-    }
-
-    template <class... Ts>
-    using variant_from_structs = tuple_to_variant<decltype(variant_from_structs_func<Ts...>())>;
+    using variant_from_structs = tuple_to_variant<tuple_cat_t<typename type_collector<Ts>::Tuple ...>>;
 }

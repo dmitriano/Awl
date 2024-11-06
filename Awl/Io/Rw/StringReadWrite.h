@@ -38,7 +38,7 @@ namespace awl::io
         class Allocator = std::allocator<Char>,
         class Context = FakeContext
     >
-        requires sequential_input_stream<Stream>
+        requires (sequential_input_stream<Stream> && std::is_arithmetic_v<Char>)
     void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len;
@@ -64,7 +64,7 @@ namespace awl::io
         class Allocator = std::allocator<Char>,
         class Context = FakeContext
     >
-        requires sequential_output_stream<Stream>
+        requires (sequential_output_stream<Stream> && std::is_arithmetic_v<Char>)
     void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len = val.length();
