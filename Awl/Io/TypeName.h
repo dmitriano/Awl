@@ -28,6 +28,7 @@
 #include <tuple>
 #include <utility> 
 #include <optional>
+#include <atomic>
 #include <variant>
 #include <memory>
 
@@ -186,6 +187,17 @@ namespace awl::io
     };
 
     static_assert(make_type_name<std::optional<std::string>>() == fixed_string("optional<sequence<int8_t>>"));
+
+    template <class T>
+    struct type_descriptor<std::atomic<T>>
+    {
+        static constexpr auto name()
+        {
+            return fixed_string("atomic<") + make_type_name<T>() + fixed_string(">");
+        }
+    };
+
+    static_assert(make_type_name<std::atomic<std::string>>() == fixed_string("atomic<sequence<int8_t>>"));
 
     template<class T, std::size_t N>
     struct type_descriptor<std::array<T, N>>
