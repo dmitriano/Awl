@@ -66,7 +66,7 @@ namespace
             persistentObject(logger, awl::io::Header{ "Test Settings", 1u })
         {}
 
-        using V = awl::io::helpers::variant_from_structs<Settings<String>, BotSettings<String>>;
+        using V = awl::mp::variant_from_structs<Settings<String>, BotSettings<String>>;
 
         awl::io::PersistentObject<Settings<String>, V> persistentObject;
     };

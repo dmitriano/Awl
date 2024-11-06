@@ -5,6 +5,7 @@
 
 #include <string>
 #include <sstream>
+#include <atomic>
 
 #include "Awl/TupleHelpers.h"
 
@@ -260,6 +261,12 @@ AWT_TEST(TupleMakeSimilar)
 AWT_TEST(TupleNonCopyable)
 {
     AWT_UNUSED_CONTEXT;
+
+    awl::tuple_cat_t<std::tuple<std::atomic<int>>, std::tuple<bool>> t1;
+    static_cast<void>(t1);
+
+    awl::tuple_make_t<std::atomic<int>, bool> t2;
+    static_cast<void>(t2);
 
     // With MSVC I'll get 'no overloaded function could convert all the argument types'.
     // This is why the serilaization uses tuples of refereces, but not values.

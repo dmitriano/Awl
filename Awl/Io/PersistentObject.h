@@ -2,7 +2,7 @@
 
 #include "Awl/Io/HeaderedSerializable.h"
 #include "Awl/Io/AtomicStorage.h"
-#include "Awl/Io/MpHelpers.h"
+#include "Awl/Mp/Mp.h"
 #include "Awl/Logger.h"
 
 namespace awl::io
@@ -13,7 +13,7 @@ namespace awl::io
             const awl::String& file_name, const awl::String& backup_name, bool allow_default);
     }
 
-    template <class T, class V = helpers::variant_from_struct<T>, class Hash = awl::crypto::Crc64>
+    template <class T, class V = mp::variant_from_structs<T>, class Hash = awl::crypto::Crc64>
     class PersistentObject
     {
     public:

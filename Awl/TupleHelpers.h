@@ -279,4 +279,11 @@ namespace awl
 
         return impl_func(std::index_sequence_for<Args...>{});
     }
+
+    // Determine tuple type without making it.
+    template<typename ... input_t>
+    using tuple_make_t = decltype(std::make_tuple(std::declval<input_t>()...));
+
+    template<typename ... input_t>
+    using tuple_cat_t = decltype(std::tuple_cat(std::declval<input_t>()...));
 }

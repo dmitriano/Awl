@@ -433,16 +433,16 @@ namespace
 AWT_TEST(AtomicStorageVts2)
 {
     TestRenameAndDefaultFields<
-        awl::io::VersionTolerantSerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>>,
-        awl::io::VersionTolerantSerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>>>
+        awl::io::VersionTolerantSerializable<GameParamsV1, awl::mp::variant_from_structs<GameParamsV1>>,
+        awl::io::VersionTolerantSerializable<GameParamsV2, awl::mp::variant_from_structs<GameParamsV2>>>
     (context);
 }
 
 AWT_TEST(AtomicStorageEuphorical2)
 {
     TestRenameAndDefaultFields<
-        awl::io::EuphoricallySerializable<GameParamsV1, awl::io::helpers::variant_from_structs<GameParamsV1>>,
-        awl::io::EuphoricallySerializable<GameParamsV2, awl::io::helpers::variant_from_structs<GameParamsV2>>>
+        awl::io::EuphoricallySerializable<GameParamsV1, awl::mp::variant_from_structs<GameParamsV1>>,
+        awl::io::EuphoricallySerializable<GameParamsV2, awl::mp::variant_from_structs<GameParamsV2>>>
     (context);
 }
 
