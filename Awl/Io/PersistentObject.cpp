@@ -1,6 +1,7 @@
 #include "PersistentObject.h"
 
 #include "Awl/StringFormat.h"
+#include "Awl/Io/IoException.h"
 
 namespace awl::io::helpers
 {
@@ -8,10 +9,21 @@ namespace awl::io::helpers
     {
         bool loaded = false;
 
-        // Throws if can't create files.
-        if (storage.Open(file_name, backup_name))
+        try
         {
-            loaded = storage.Load(val);
+            // Throws if can't create files.
+            if (storage.Open(file_name, backup_name))
+            {
+                loaded = storage.Load(val);
+            }
+        }
+        catch (const IoException&)
+        {
+            if (!allow_default)
+            {
+                std::throw_with_nested(IoError(awl::format() << _T("Failed to open settings files '") <<
+                    file_name << _T("' and '") << backup_name << "'"));
+            }
         }
 
         if (!loaded)

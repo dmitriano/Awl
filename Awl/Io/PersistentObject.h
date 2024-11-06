@@ -41,7 +41,10 @@ namespace awl::io
 
         void save()
         {
-            m_storage.Save(m_serializable);
+            if (m_storage.IsOpened())
+            {
+                m_storage.Save(m_serializable);
+            }
         }
 
         const T& value() const noexcept
