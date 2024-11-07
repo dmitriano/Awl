@@ -7,7 +7,7 @@
 #include "Awl/FixedString.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/ReadWrite.h"
-#include "Awl/Io/TypeName.h"
+#include "Awl/Io/TypeDescriptor.h"
 #include "Awl/Io/TypeHash.h"
 #include "Awl/Io/TypeIndex.h"
 

@@ -9,7 +9,7 @@
 #include "Awl/Mp/Mp.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/Io/Metadata.h"
-#include "Awl/Io/TypeName.h"
+#include "Awl/Io/TypeDescriptor.h"
 
 #include <cassert>
 #include <unordered_map>

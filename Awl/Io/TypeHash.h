@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Awl/Crypto/IntHash.h"
-#include "Awl/Io/TypeName.h"
+#include "Awl/Io/TypeDescriptor.h"
 
 namespace awl::io
 {

@@ -91,8 +91,8 @@ namespace awl::io
         }
     }
 
-    template <class T, class Enable = void>
-    struct type_descriptor {};
+    template <class T>
+    struct type_descriptor;
     
     template <class T>
     constexpr auto make_type_name()
@@ -100,9 +100,11 @@ namespace awl::io
         return type_descriptor<T>::name();
     }
     
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<std::is_arithmetic_v<T>>>
+    template <class T> requires std::is_arithmetic_v<T>
+    struct type_descriptor<T>
     {
+        using inner_tuple = std::tuple<>;
+
         static constexpr auto name()
         {
             auto suffix = helpers::GetArithmeticSize<T>() + fixed_string{ "_t" };
@@ -110,13 +112,13 @@ namespace awl::io
             if constexpr (std::is_integral_v<T>)
             {
                 //Both signed and unsigned are 'int'.
-                return fixed_string{ "int" } +suffix;
+                return fixed_string{ "int" } + suffix;
             }
             else
             {
                 if constexpr (std::is_floating_point_v<T>)
                 {
-                    return fixed_string{ "float" } +suffix;
+                    return fixed_string{ "float" } + suffix;
                 }
                 else
                 {
@@ -130,20 +132,14 @@ namespace awl::io
     static_assert(make_type_name<uint16_t>() == fixed_string{ "int16_t" });
     static_assert(make_type_name<float>() == fixed_string{ "float32_t" });
 
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<
-        is_specialization_v<T, std::basic_string> ||
-        is_specialization_v<T, std::vector> ||
-        is_specialization_v<T, std::deque> ||
-        is_specialization_v<T, std::list> ||
-        is_specialization_v<T, std::set> ||
-        is_specialization_v<T, std::unordered_set> ||
-        is_specialization_v<T, awl::vector_set> ||
-        is_specialization_v<T, awl::ring>>>
+    template <std::ranges::range Coll>
+    struct type_descriptor<Coll>
     {
+        using inner_tuple = std::tuple<std::ranges::range_value_t<Coll>>;
+
         static constexpr auto name()
         {
-            return fixed_string("sequence<") + make_type_name<typename T::value_type>() + fixed_string(">");
+            return fixed_string("sequence<") + make_type_name<std::ranges::range_value_t<Coll>>() + fixed_string(">");
         }
     };
 
@@ -153,22 +149,24 @@ namespace awl::io
     static_assert(make_type_name<std::vector<int32_t>>() == fixed_string{ "sequence<int32_t>" });
     static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == fixed_string{ "sequence<sequence<int64_t>>" });
 
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<
-        is_specialization_v<T, std::map> ||
-        is_specialization_v<T, std::unordered_map>>>
+    template <class First, class Second>
+    struct type_descriptor<std::pair<First, Second>>
     {
+        using inner_tuple = std::tuple<std::decay_t<First>, std::decay_t<Second>>;
+
         static constexpr auto name()
         {
-            return fixed_string("map<") + make_type_name<typename T::key_type>() + fixed_string(", ") + make_type_name<typename T::mapped_type>() + fixed_string(">");
+            return fixed_string("pair<") + make_type_name<std::decay_t<First>>() + fixed_string(", ") + make_type_name<std::decay_t<Second>>() + fixed_string(">");
         }
     };
-
-    static_assert(make_type_name<std::map<int32_t, int64_t>>() == fixed_string{ "map<int32_t, int64_t>" });
+        
+    static_assert(make_type_name<std::map<int32_t, int64_t>>() == fixed_string{ "sequence<pair<int32_t, int64_t>>" });
 
     template <class Clock, class Duration>
     struct type_descriptor<std::chrono::time_point<Clock, Duration>>
     {
+        using inner_tuple = std::tuple<int64_t>;
+
         static constexpr auto name()
         {
             return make_type_name<int64_t>();
@@ -180,6 +178,8 @@ namespace awl::io
     template <class T>
     struct type_descriptor<std::optional<T>>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return fixed_string("optional<") + make_type_name<T>() + fixed_string(">");
@@ -191,17 +191,21 @@ namespace awl::io
     template <class T>
     struct type_descriptor<std::atomic<T>>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return make_type_name<T>();
         }
     };
 
-    static_assert(make_type_name<std::atomic<std::string>>() == fixed_string("sequence<int8_t>"));
+    static_assert(make_type_name<std::atomic<int8_t>>() == fixed_string("int8_t"));
 
     template<class T, std::size_t N>
     struct type_descriptor<std::array<T, N>>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return fixed_string("array<") + make_type_name<T>() + fixed_string(", ") + helpers::FormatNumber<N>() + fixed_string(">");
@@ -210,9 +214,11 @@ namespace awl::io
 
     static_assert(make_type_name<std::array<uint8_t, 5>>() == fixed_string{ "array<int8_t, 5>" });
 
-    template <class T>
-    struct type_descriptor<T, std::enable_if_t<is_reflectable_v<T>>>
+    template <class T> requires is_reflectable_v<T>
+    struct type_descriptor<T>
     {
+        using inner_tuple = typename tuplizable_traits<T>::Tie;
+
         static constexpr auto name()
         {
             return fixed_string("struct");
@@ -222,6 +228,8 @@ namespace awl::io
     template <class... Ts>
     struct type_descriptor<std::variant<Ts...>>
     {
+        using inner_tuple = std::tuple<Ts...>;
+
         static constexpr auto name()
         {
             return fixed_string("variant<") + ((make_type_name<Ts>() + fixed_string(", ")) + ...) + fixed_string(">");
@@ -233,6 +241,8 @@ namespace awl::io
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     struct type_descriptor<decimal<UInt, exp_len, DataTemplate>>
     {
+        using inner_tuple = std::tuple<>;
+
         static constexpr auto name()
         {
             if constexpr (std::is_same_v<UInt, uint64_t> && exp_len == 4)
@@ -263,6 +273,8 @@ namespace awl::io
     template <class T>
     struct type_descriptor<std::shared_ptr<T>>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return helpers::make_pointer_type_name<T>();
@@ -272,6 +284,8 @@ namespace awl::io
     template <class T>
     struct type_descriptor<std::unique_ptr<T>>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return helpers::make_pointer_type_name<T>();
@@ -281,6 +295,8 @@ namespace awl::io
     template <class T>
     struct type_descriptor<T *>
     {
+        using inner_tuple = std::tuple<T>;
+
         static constexpr auto name()
         {
             return helpers::make_pointer_type_name<T>();
@@ -290,6 +306,8 @@ namespace awl::io
     template <class T> requires std::is_enum_v<T>
     struct type_descriptor<T>
     {
+        using inner_tuple = std::tuple<>;
+
         static constexpr auto name()
         {
             return make_type_name<std::underlying_type_t<T>>();

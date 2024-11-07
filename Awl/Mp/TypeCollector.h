@@ -7,6 +7,7 @@
 
 #include "Awl/Tuplizable.h"
 #include "Awl/TupleHelpers.h"
+#include "Awl/Io/TypeDescriptor.h"
 
 #include <tuple>
 #include <type_traits>
@@ -20,39 +21,26 @@ namespace awl::mp
     template <typename T>
     struct type_collector
     {
-        using Tuple = std::tuple<T>;
+        using Tuple = awl::tuple_cat_t<
+            std::tuple<T>,
+            typename type_collector<typename awl::io::type_descriptor<T>::inner_tuple>::Tuple>;
     };
 
-    template <std::ranges::range Coll>
-    struct type_collector<Coll>
+    // Remove references and CV from tuple elments.
+    template <typename ... Ts>
+    struct type_collector<std::tuple<Ts ...>>
     {
         using Tuple = awl::tuple_cat_t<
-            std::tuple<Coll>,
-            typename type_collector<std::ranges::range_value_t<Coll>>::Tuple>;
+            typename type_collector<std::decay_t<Ts>>::Tuple ...>;
     };
 
+    // Prevent std::pair from being included.
     template <class First, class Second>
     struct type_collector<std::pair<First, Second>>
     {
         using Tuple = awl::tuple_cat_t<
             typename type_collector<std::decay_t<First>>::Tuple,
             typename type_collector<std::decay_t<Second>>::Tuple>;
-    };
-
-    // Remove references and CV from tuple elments.
-    template <typename ... Ts>
-    struct type_collector<std::tuple<Ts& ...>>
-    {
-        using Tuple = awl::tuple_cat_t<
-            typename type_collector<std::decay_t<Ts>>::Tuple ...>;
-    };
-
-    template <typename T> requires is_tuplizable_v<T>
-    struct type_collector<T>
-    {
-        using Tuple = awl::tuple_cat_t <
-            std::tuple<T>,
-            typename type_collector<typename tuplizable_traits<T>::Tie>::Tuple>;
     };
 
     // Make std::string a final type, do not add char.
