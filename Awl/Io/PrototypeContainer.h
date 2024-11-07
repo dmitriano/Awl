@@ -9,7 +9,7 @@
 #include "Awl/Mp/Mp.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/Io/Metadata.h"
-#include "Awl/Io/TypeDescriptor.h"
+#include "Awl/Mp/TypeDescriptor.h"
 
 #include <cassert>
 #include <unordered_map>
@@ -63,7 +63,7 @@ namespace awl::io
             template <std::size_t index>
             static std::string MakeName()
             {
-                return make_type_name<std::variant_alternative_t<index, FieldV>>();
+                return mp::make_type_name<std::variant_alternative_t<index, FieldV>>();
             }
 
             template <std::size_t... index>

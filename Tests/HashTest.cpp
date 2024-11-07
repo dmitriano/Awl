@@ -23,7 +23,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 
-#include "Awl/Io/TypeHash.h"
+#include "Awl/Crypto/IntHash.h"
 
 #include "Helpers/BenchmarkHelpers.h"
 #include "Helpers/FormattingHelpers.h"

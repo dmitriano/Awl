@@ -6,9 +6,9 @@
 #pragma once
 
 #include "Awl/Crypto/IntHash.h"
-#include "Awl/Io/TypeDescriptor.h"
+#include "Awl/Mp/TypeDescriptor.h"
 
-namespace awl::io
+namespace awl::mp
 {
     template <size_t N>
     constexpr uint64_t calc_type_hash(const fixed_string<char, N> & name)

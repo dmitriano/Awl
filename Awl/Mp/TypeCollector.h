@@ -7,7 +7,7 @@
 
 #include "Awl/Tuplizable.h"
 #include "Awl/TupleHelpers.h"
-#include "Awl/Io/TypeDescriptor.h"
+#include "Awl/Mp/TypeDescriptor.h"
 
 #include <tuple>
 #include <type_traits>
@@ -23,7 +23,7 @@ namespace awl::mp
     {
         using Tuple = awl::tuple_cat_t<
             std::tuple<T>,
-            typename type_collector<typename awl::io::type_descriptor<T>::inner_tuple>::Tuple>;
+            typename type_collector<typename type_descriptor<T>::inner_tuple>::Tuple>;
     };
 
     // Remove references and CV from tuple elments.
