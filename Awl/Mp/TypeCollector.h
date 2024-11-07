@@ -69,6 +69,7 @@ namespace awl::mp
         using Tuple = std::tuple<std::vector<T, Allocator>>;
     };
 
+    // TODO: atd::array is not a sequence. type_descriptor <=> type_collector.
     // Make arithmetic array a final type.
     template<typename T, std::size_t N> requires std::is_arithmetic_v<T>
     struct type_collector<std::array<T, N>>
