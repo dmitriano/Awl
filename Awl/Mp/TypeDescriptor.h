@@ -10,23 +10,12 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/Reflection.h"
 #include "Awl/Decimal.h"
-#include "Awl/VectorSet.h"
-#include "Awl/Ring.h"
 
-#include <string>
-#include <vector>
-#include <deque>
-#include <array>
-#include <list>
-#include <bitset>
-#include <set>
-#include <map>
-#include <unordered_set>
-#include <unordered_map>
-#include <chrono>
 #include <type_traits>
 #include <tuple>
 #include <utility> 
+#include <array>
+#include <chrono>
 #include <optional>
 #include <atomic>
 #include <variant>
@@ -143,12 +132,6 @@ namespace awl::mp
         }
     };
 
-    static_assert(make_type_name<std::string>() == fixed_string{ "sequence<int8_t>" });
-    //wstring is int32_t in GCC and uint16_t in MSVC
-    //static_assert(make_type_name<std::wstring>() == fixed_string{ "sequence<int16_t>" });
-    static_assert(make_type_name<std::vector<int32_t>>() == fixed_string{ "sequence<int32_t>" });
-    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == fixed_string{ "sequence<sequence<int64_t>>" });
-
     template <class First, class Second>
     struct type_descriptor<std::pair<First, Second>>
     {
@@ -160,8 +143,6 @@ namespace awl::mp
         }
     };
         
-    static_assert(make_type_name<std::map<int32_t, int64_t>>() == fixed_string{ "sequence<pair<int32_t, int64_t>>" });
-
     template <class Clock, class Duration>
     struct type_descriptor<std::chrono::time_point<Clock, Duration>>
     {
@@ -185,8 +166,6 @@ namespace awl::mp
             return fixed_string("optional<") + make_type_name<T>() + fixed_string(">");
         }
     };
-
-    static_assert(make_type_name<std::optional<std::string>>() == fixed_string("optional<sequence<int8_t>>"));
 
     template <class T>
     struct type_descriptor<std::atomic<T>>
