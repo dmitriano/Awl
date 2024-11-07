@@ -21,27 +21,27 @@ namespace awl::io
     namespace helpers
     {
         // A trink to initialize VersionTolerantSerializable before HashingSerializable.
-        template <class T, class V, class IStream, class OStream, class Hash>
+        template <class T, class IStream, class OStream, class Hash, class V>
         class VtsOwner
         {
         protected:
 
             VtsOwner(T& val) : m_vts(val) {}
 
-            VersionTolerantSerializable<T, V, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>> m_vts;
+            VersionTolerantSerializable<T, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>, true, V> m_vts;
         };
     }
 
-    template <class T, class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
-        class Hash = awl::crypto::Crc64>
+    template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
+        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
     class EuphoricallySerializable :
-        private helpers::VtsOwner<T, V, IStream, OStream, Hash>,
+        private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
         public HashingSerializable<IStream, OStream, Hash>,
         public Snapshotable<OStream>
     {
     private:
 
-        using BaseVts = helpers::VtsOwner<T, V, IStream, OStream, Hash>;
+        using BaseVts = helpers::VtsOwner<T, IStream, OStream, Hash, V>;
         using BaseHashing = HashingSerializable<IStream, OStream, Hash>;
 
     public:
@@ -88,7 +88,7 @@ namespace awl::io
             return out.GetLength();
         }
 
-        VersionTolerantSerializable<T, V, VectorInputStream, VectorOutputStream> vector_vts;
-        VersionTolerantSerializable<T, V, SequentialInputStream, MeasureStream> measure_vts;
+        VersionTolerantSerializable<T, VectorInputStream, VectorOutputStream, true, V> vector_vts;
+        VersionTolerantSerializable<T, SequentialInputStream, MeasureStream, true, V> measure_vts;
     };
 }

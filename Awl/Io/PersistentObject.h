@@ -13,7 +13,7 @@ namespace awl::io
             const awl::String& file_name, const awl::String& backup_name, bool allow_default);
     }
 
-    template <class T, class V = mp::variant_from_structs<T>, class Hash = awl::crypto::Crc64>
+    template <class T, class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
     class PersistentObject
     {
     public:
@@ -103,7 +103,7 @@ namespace awl::io
 
         T m_val;
 
-        HeaderedSerializable<T, V, SequentialInputStream, SequentialOutputStream, Hash> m_serializable;
+        HeaderedSerializable<T, SequentialInputStream, SequentialOutputStream, Hash, V> m_serializable;
 
         AtomicStorage m_storage;
     };

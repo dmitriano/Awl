@@ -14,7 +14,8 @@
 
 namespace awl::io
 {
-    template <class T, class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream, bool atomic = true>
+    template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
+        bool atomic = true, class V = mp::variant_from_struct<T>>
     class VersionTolerantSerializable : public Serializable<IStream, OStream>
     {
     private:

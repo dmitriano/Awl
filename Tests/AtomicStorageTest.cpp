@@ -75,8 +75,8 @@ namespace
     using HashOutputStream = awl::io::HashOutputStream<Hash>;
     using HashingSerializable = awl::io::HashingSerializable<>;
 
-    using Value1 = awl::io::VersionTolerantSerializable<v1::B, V1, HashInputStream, HashOutputStream>;
-    using Value2 = awl::io::VersionTolerantSerializable<v2::B, V2, HashInputStream, HashOutputStream>;
+    using Value1 = awl::io::VersionTolerantSerializable<v1::B, HashInputStream, HashOutputStream, true, V1>;
+    using Value2 = awl::io::VersionTolerantSerializable<v2::B, HashInputStream, HashOutputStream, true, V2>;
 
     template <class Value>
     bool LoadValue(awl::io::AtomicStorage& storage, Value& val, bool existed = true)
@@ -301,7 +301,7 @@ namespace
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWT_ASSERT(storage.IsEmpty());
 
-        using Value = awl::io::EuphoricallySerializable<v2::B, V2>;
+        using Value = awl::io::EuphoricallySerializable<v2::B>; //, V2
 
         {
             v2::B b = v2::b_expected;
@@ -433,22 +433,22 @@ namespace
 AWT_TEST(AtomicStorageVts2)
 {
     TestRenameAndDefaultFields<
-        awl::io::VersionTolerantSerializable<GameParamsV1, awl::mp::variant_from_structs<GameParamsV1>>,
-        awl::io::VersionTolerantSerializable<GameParamsV2, awl::mp::variant_from_structs<GameParamsV2>>>
+        awl::io::VersionTolerantSerializable<GameParamsV1>, //, awl::mp::variant_from_structs<GameParamsV1>
+        awl::io::VersionTolerantSerializable<GameParamsV2>> //, awl::mp::variant_from_structs<GameParamsV2>
     (context);
 }
 
 AWT_TEST(AtomicStorageEuphorical2)
 {
     TestRenameAndDefaultFields<
-        awl::io::EuphoricallySerializable<GameParamsV1, awl::mp::variant_from_structs<GameParamsV1>>,
-        awl::io::EuphoricallySerializable<GameParamsV2, awl::mp::variant_from_structs<GameParamsV2>>>
+        awl::io::EuphoricallySerializable<GameParamsV1>, //, awl::mp::variant_from_structs<GameParamsV1>
+        awl::io::EuphoricallySerializable<GameParamsV2>> //, awl::mp::variant_from_structs<GameParamsV2>
     (context);
 }
 
 AWT_TEST(Shapshot)
 {
-    using Value = awl::io::EuphoricallySerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>;
+    using Value = awl::io::EuphoricallySerializable<v2::B, awl::io::VectorInputStream, awl::io::VectorOutputStream>; //, V2
 
     v2::B b = v2::b_expected;
     Value val(b);
@@ -480,11 +480,11 @@ AWT_TEST(Shapshot)
 
 namespace
 {
-    class HeaderedValue : public awl::io::HeaderedSerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>
+    class HeaderedValue : public awl::io::HeaderedSerializable<v2::B, awl::io::VectorInputStream, awl::io::VectorOutputStream> //, V2
     {
     private:
 
-        using Base = awl::io::HeaderedSerializable<v2::B, V2, awl::io::VectorInputStream, awl::io::VectorOutputStream>;
+        using Base = awl::io::HeaderedSerializable<v2::B, awl::io::VectorInputStream, awl::io::VectorOutputStream>;//, V2
 
     public:
 

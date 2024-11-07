@@ -15,13 +15,13 @@ namespace awl::io
         AWL_REFLECT(format, version);
     };
 
-    template <class T, class V, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
-        class Hash = awl::crypto::Crc64>
-    class HeaderedSerializable : public EuphoricallySerializable<T, V, IStream, OStream, Hash>
+    template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
+        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
+    class HeaderedSerializable : public EuphoricallySerializable<T, IStream, OStream, Hash, V>
     {
     private:
 
-        using Base = EuphoricallySerializable<T, V, IStream, OStream, Hash>;
+        using Base = EuphoricallySerializable<T, IStream, OStream, Hash, V>;
 
     public:
 
