@@ -601,6 +601,52 @@ AWT_TEST(VtsWriteMemoryStreamMemmove)
     TestWrite<awl::io::VirtualMemoryOutputStream>(context);
 }
 
+namespace
+{
+    struct DataWithArray1
+    {
+        std::array<v1::B, 2> a1;
+        std::array<int, 2> a2;
+
+        AWL_REFLECT(a1, a2)
+    };
+
+    struct DataWithArray2
+    {
+        std::array<v1::B, 3> a1;
+        std::array<int, 3> a2;
+
+        AWL_REFLECT(a1, a2)
+    };
+}
+
+AWT_TEST(VtsArray)
+{
+    AWT_UNUSED_CONTEXT;
+
+    DataWithArray1 d1 = { { v1::b_expected, v1::b_expected }, {1, 2} };
+
+    std::vector<uint8_t> v;
+
+    {
+        awl::io::VectorOutputStream out(v);
+
+        awl::io::WriteV(out, d1);
+    }
+
+    {
+        DataWithArray2 d2;
+
+        awl::io::VectorInputStream in(v);
+
+        awl::io::ReadV(in, d2);
+
+        AWT_ASSERT(d2.a1[0] == d1.a1[0] && d2.a1[1] == d1.a1[1] && d2.a1[2] == v1::B{});
+
+        AWT_ASSERT(d2.a2[0] == d1.a2[0] && d2.a2[1] == d1.a2[1] && d2.a2[2] == 0);
+    }
+}
+
 //store to/load of misaligned address
 AWT_UNSTABLE_TEST(VtsWriteMemoryStreamSwitch)
 {

@@ -6,6 +6,8 @@
 #pragma once
 
 #include "Awl/Io/Rw/ReadRaw.h"
+#include "Awl/Io/IoException.h"
+#include "Awl/StringFormat.h"
 
 #include <array>
 #include <vector>
@@ -120,6 +122,19 @@ namespace awl::io
         requires sequential_input_stream<Stream>
     void Read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
     {
+        if constexpr (vts_read_context<Context, Stream, T>)
+        {
+            // Allow to resize std::array in future versions.
+            typename std::array<T, N>::size_type size;
+
+            Read(s, size, ctx);
+
+            if (size > N)
+            {
+                throw IoError(format() << _T("Read array size ") << size << _T(" is greater than the actual size ") << N << _T("."));
+            }
+        }
+
         ReadVector(s, v, ctx);
     }
 
@@ -127,6 +142,11 @@ namespace awl::io
         requires sequential_output_stream<Stream>
     void Write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
     {
+        if constexpr (vts_write_context<Context, Stream, T>)
+        {
+            Write(s, N, ctx);
+        }
+
         WriteVector(s, v, ctx);
     }
 }
