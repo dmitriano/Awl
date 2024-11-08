@@ -622,31 +622,29 @@ namespace
     };
 }
 
+namespace awl::mp
+{
+    template <>
+    struct type_converter<E2>
+    {
+        // Make the serialization engine aware of deleted type std::string.
+        using extra_tuple = std::tuple<std::string>;
+    };
+}
+
 AWT_TEST(VtsDeletedType)
 {
     AWT_UNUSED_CONTEXT;
 
     E1 e1 = { "abc", { 1, 2, 3} };
 
-    std::vector<uint8_t> v;
+    E2 e2 = { { 1, 2, 3}, 1 };
 
-    {
-        awl::io::VectorOutputStream out(v);
+    awl::io::CopyV(e1, e2);
 
-        awl::io::WriteV(out, e1);
-    }
+    AWT_ASSERT(e2.b == e1.b);
 
-    {
-        E2 e2 = { { 1, 2, 3}, 1};
-
-        awl::io::VectorInputStream in(v);
-
-        awl::io::ReadV(in, e2);
-
-        AWT_ASSERT(e2.b == e1.b);
-
-        AWT_ASSERT(e2.c == 0);
-    }
+    AWT_ASSERT(e2.c == 1);
 }
 
 //store to/load of misaligned address

@@ -8,6 +8,7 @@
 #include "Awl/Tuplizable.h"
 #include "Awl/TupleHelpers.h"
 #include "Awl/Mp/TypeDescriptor.h"
+#include "Awl/Mp/TypeConverter.h"
 
 #include <tuple>
 #include <type_traits>
@@ -24,6 +25,17 @@ namespace awl::mp
         using Tuple = awl::tuple_cat_t<
             std::tuple<T>,
             typename type_collector<typename type_descriptor<T>::inner_tuple>::Tuple>;
+    };
+
+    // Add extra_tuple to reflectable types.
+    // Used to add the types of deleted fiels, for example.
+    template <class T> requires is_reflectable_v<T>
+    struct type_collector<T>
+    {
+        using Tuple = awl::tuple_cat_t<
+            std::tuple<T>,
+            typename type_collector<typename type_descriptor<T>::inner_tuple>::Tuple,
+            typename type_converter<T>::extra_tuple>;
     };
 
     // Remove references and CV from tuple elments.
