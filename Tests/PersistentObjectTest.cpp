@@ -54,7 +54,7 @@ namespace
             0.5,
             true,
             false,
-            map,
+            std::move(map),
             false
         };
     }
@@ -102,9 +102,5 @@ AWT_TEST(PersistentObject)
 {
     WriteStorage<std::string>(context);
 
-#ifdef AWL_QT
-    ReadStorage<QString>(context);
-#else
     ReadStorage<std::string>(context);
-#endif
 }
