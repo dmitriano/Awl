@@ -32,11 +32,16 @@ namespace awl::io
         OptionalStorage(OptionalStorage&&) = default;
 
         OptionalStorage& operator = (const OptionalStorage&) = delete;
-        OptionalStorage& operator = (OptionalStorage&& other) = default;
+
+        OptionalStorage& operator = (OptionalStorage&& other)
+        {
+            m_storage = std::move(other.m_storage);
+            return *this;
+        }
 
         bool IsEmpty() const
         {
-            m_storage.IsEmpty();
+            return m_storage.IsEmpty();
         }
 
         bool IsOpened() const
