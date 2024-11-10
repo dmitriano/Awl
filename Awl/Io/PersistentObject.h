@@ -6,6 +6,8 @@
 #include "Awl/Mp/Mp.h"
 #include "Awl/Logger.h"
 
+#include <filesystem>
+
 namespace awl::io
 {
     template <class T, class Storage = AtomicStorage, class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
@@ -22,8 +24,7 @@ namespace awl::io
 
         bool open(const awl::String& file_name)
         {
-            const awl::String master_name = file_name + _T(".dat");
-            const awl::String backup_name = file_name + _T(".bak");
+            auto [master_name, backup_name] = append_extensions(file_name);
 
             return m_storage.Open(master_name, backup_name);
         }
@@ -41,6 +42,18 @@ namespace awl::io
         void close()
         {
             m_storage.Close();
+        }
+
+        void remove(const awl::String& file_name)
+        {
+            close();
+
+            auto [master_name, backup_name] = append_extensions(file_name);
+
+            namespace fs = std::filesystem;
+
+            fs::remove(master_name);
+            fs::remove(backup_name);
         }
 
         const T& value() const noexcept
@@ -79,6 +92,14 @@ namespace awl::io
         }
 
     private:
+
+        auto append_extensions(const awl::String& file_name)
+        {
+            const awl::String master_name = file_name + _T(".dat");
+            const awl::String backup_name = file_name + _T(".bak");
+
+            return std::make_tuple(master_name, backup_name);
+        }
 
         T m_val;
 
