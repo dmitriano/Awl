@@ -59,48 +59,56 @@ namespace
         };
     }
 
-    template <class String>
-    struct Storage
+    template <class Storage, class String>
+    struct Container
     {
-        Storage(awl::Logger& logger) :
+        Container(awl::Logger& logger) :
             persistentObject(logger, awl::io::Header{ "Test Settings", 1u })
         {}
 
-        awl::io::PersistentObject<Settings<String>> persistentObject;
+        awl::io::PersistentObject<Settings<String>, Storage> persistentObject;
     };
 
     const awl::String settings_file_name = awl::text("test-settings");
 
-    template <class String>
+    template <class Storage, class String>
     void WriteStorage(const awl::testing::TestContext& context)
     {
         awl::ConsoleLogger logger(context.out);
 
-        Storage<String> storage(logger);
+        Container<Storage, String> container(logger);
 
-        storage.persistentObject.load(settings_file_name);
+        container.persistentObject.open(settings_file_name);
 
-        storage.persistentObject.value() = MakeSettings<String>();
+        container.persistentObject.load();
 
-        storage.persistentObject.save();
+        container.persistentObject.value() = MakeSettings<String>();
+
+        container.persistentObject.save();
     }
 
-    template <class String>
+    template <class Storage, class String>
     void ReadStorage(const awl::testing::TestContext& context)
     {
         awl::ConsoleLogger logger(context.out);
 
-        Storage<String> storage(logger);
+        Container<Storage, String> container(logger);
 
-        storage.persistentObject.load(settings_file_name);
+        container.persistentObject.open(settings_file_name);
 
-        AWT_ASSERT(storage.persistentObject.value() == MakeSettings<String>());
+        container.persistentObject.load();
+
+        AWT_ASSERT(container.persistentObject.value() == MakeSettings<String>());
     }
 }
 
 AWT_TEST(PersistentObject)
 {
-    WriteStorage<std::string>(context);
+    WriteStorage<awl::io::AtomicStorage, std::string>(context);
 
-    ReadStorage<std::string>(context);
+    ReadStorage<awl::io::AtomicStorage, std::string>(context);
+
+    WriteStorage<awl::io::OptionalStorage, std::string>(context);
+
+    ReadStorage<awl::io::OptionalStorage, std::string>(context);
 }
