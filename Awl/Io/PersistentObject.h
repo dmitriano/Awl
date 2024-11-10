@@ -56,8 +56,6 @@ namespace awl::io
         {
             if (m_storage.IsOpened())
             {
-                m_storage.Save(m_serializable);
-
                 m_storage.Close();
             }
         }
