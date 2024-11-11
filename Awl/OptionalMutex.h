@@ -59,4 +59,10 @@ namespace awl
 
         mutex* pMutex;
     };
+
+    struct fake_mutex
+    {
+        virtual void lock() {}
+        virtual void unlock() {}
+    };
 }
