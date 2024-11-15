@@ -3,6 +3,8 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Helpers/BenchmarkHelpers.h"
+
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/HashingSerializable.h"
 #include "Awl/Io/PlainSerializable.h"
@@ -17,8 +19,10 @@
 #include "Awl/Random.h"
 #include "VtsData.h"
 
+#include <memory>
 #include <filesystem>
 namespace fs = std::filesystem;
+
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
@@ -594,4 +598,126 @@ AWT_TEST(HeaderedSerializable)
         Value val(current_header, b, awl::io::defaultBlockSize, {}, 5u);
         val.Write(out);
     });
+}
+
+namespace
+{
+    struct SomeState
+    {
+        size_t count;
+
+        std::vector<v2::B> b;
+
+        AWL_REFLECT(count, b)
+    };
+}
+
+AWT_BENCHMARK(AtomicStorageVtsWrite)
+{
+    using signed_size_t = std::make_signed_t<size_t>;
+
+    AWT_ATTRIBUTE(size_t, write_count, 100u);
+    AWT_FLAG(fake_hash); // To ensure that hash does not take a significant time.
+    AWT_FLAG(vector_stream); // For comparing with writing to a file.
+    AWT_ATTRIBUTE(size_t, element_count, 1);
+    AWT_ATTRIBUTE(signed_size_t, z_size, -1);
+    AWT_ATTRIBUTE(signed_size_t, v_size, -1);
+    AWT_ATTRIBUTE(signed_size_t, v2_size, -1);
+
+    auto guard = awl::make_scope_guard(RemoveFiles);
+
+    awl::ConsoleLogger logger(context.out);
+
+    SomeState state{ 0u, {} };
+
+    v2::B b = v2::b_expected;
+
+    if (z_size != -1)
+    {
+        b.z.resize(static_cast<size_t>(z_size));
+    }
+
+    if (v_size != -1)
+    {
+        b.z.resize(static_cast<size_t>(v_size));
+    }
+
+    if (v2_size != -1)
+    {
+        b.z.resize(static_cast<size_t>(v2_size));
+    }
+
+    state.b.resize(element_count, b);
+
+    awl::io::Header header{ "SAMPLE FORMAT", 1u };
+
+    std::unique_ptr<awl::io::Serializable<>> p_val;
+
+    if (fake_hash)
+    {
+        p_val = std::make_unique<awl::io::HeaderedSerializable<SomeState, awl::io::SequentialInputStream, awl::io::SequentialOutputStream,
+            awl::crypto::FakeHash>>(std::move(header), state);
+    }
+    else
+    {
+        p_val = std::make_unique<awl::io::HeaderedSerializable<SomeState>>(std::move(header), state);
+    }
+
+    size_t stream_size;
+
+    {
+        awl::io::MeasureStream measure_out;
+
+        p_val->Write(measure_out);
+
+        stream_size = measure_out.GetLength();
+
+        context.out << "Stream Size: " << stream_size << " bytes." << std::endl;
+    }
+
+    if (vector_stream)
+    {
+        std::vector<uint8_t> v;
+        v.resize(stream_size);
+
+        awl::io::VectorOutputStream out(v);
+
+        awl::StopWatch w;
+
+        for (size_t i : awl::make_count(write_count))
+        {
+            state.count = i;
+
+            awl::io::WriteV(out, state);
+        }
+
+        helpers::ReportCount(context, w, write_count);
+    }
+    else
+    {
+        {
+            awl::io::AtomicStorage storage(logger);
+            storage.Open(master_name, backup_name);
+
+            storage.Load(*p_val);
+
+            awl::StopWatch w;
+
+            for (size_t i : awl::make_count(write_count))
+            {
+                state.count = i;
+
+                storage.Save(*p_val);
+            }
+
+            helpers::ReportCount(context, w, write_count);
+
+            storage.Load(*p_val);
+
+            AWT_ASSERT(state.count == write_count - 1);
+        }
+
+        // File Size should be equal to Stream Size printed above.
+        context.out << "File Size: " << fs::file_size(master_name) << " bytes." << std::endl;
+    }
 }

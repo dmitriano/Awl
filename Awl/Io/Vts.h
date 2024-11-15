@@ -9,6 +9,7 @@
 #include "Awl/Io/Writer.h"
 #include "Awl/Io/MeasureStream.h"
 #include "Awl/Io/VectorStream.h"
+#include "Awl/Io/MeasureStream.h"
 
 namespace awl::io
 {
@@ -34,18 +35,22 @@ namespace awl::io
         ctx.WriteV(out, val);
     }
 
+    template <class T, class V = awl::mp::variant_from_struct<T>>
+    size_t MeasureV(const T& val)
+    {
+        MeasureStream measure_out;
+
+        awl::io::WriteV(measure_out, val);
+
+        return measure_out.GetLength();
+    }
+
     template <class From, class To>
     void CopyV(const From& from_val, To& to_val)
     {
         std::vector<uint8_t> v;
 
-        {
-            MeasureStream measure_out;
-
-            awl::io::WriteV(measure_out, from_val);
-
-            v.reserve(measure_out.GetLength());
-        }
+        v.reserve(MeasureV(from_val));
 
         {
             awl::io::VectorOutputStream out(v);
