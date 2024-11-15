@@ -712,6 +712,8 @@ AWT_BENCHMARK(AtomicStorageVtsWrite)
 
             helpers::ReportCount(context, w, write_count);
 
+            context.out << std::endl;
+
             storage.Load(*p_val);
 
             AWT_ASSERT(state.count == write_count - 1);
