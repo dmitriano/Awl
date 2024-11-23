@@ -80,6 +80,15 @@ namespace awl
     }
 
     template <class T, size_t index>
+    struct tuple_element_getter
+    {
+        std::tuple_element_t<index, T> operator() (const T& val) const
+        {
+            return std::get<index>(val);
+        }
+    };
+
+    template <class T, size_t index>
     struct tuplizable_getter
     {
         std::tuple_element_t<index, typename tuplizable_traits<T>::ConstTie> operator() (const T& val) const
