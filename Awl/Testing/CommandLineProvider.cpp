@@ -55,7 +55,7 @@ namespace awl::testing
         }
     }
 
-    CommandLineProvider::~CommandLineProvider()
+    void CommandLineProvider::PrintUnusedOptions()
     {
         for (const auto& p : allOptions)
         {

@@ -21,7 +21,7 @@ namespace awl
 
             CommandLineProvider(int argc, Char * argv[]);
 
-            ~CommandLineProvider();
+            void PrintUnusedOptions();
 
             template <class T>
             bool TryGet(const char* name, T& val)
