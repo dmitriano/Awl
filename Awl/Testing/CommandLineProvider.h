@@ -11,62 +11,61 @@
 
 #include <unordered_map>
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    class CommandLineProvider
     {
-        class CommandLineProvider
+    public:
+
+        CommandLineProvider(int argc, Char* argv[]);
+
+        void PrintUnusedOptions();
+
+        template <class T>
+        bool TryGet(const char* name, T& val)
         {
-        public:
+            String s;
 
-            CommandLineProvider(int argc, Char * argv[]);
-
-            void PrintUnusedOptions();
-
-            template <class T>
-            bool TryGet(const char* name, T& val)
+            if (TryFind(name, s))
             {
-                String s;
+                val = Formatter<T>::FromString(s);
 
-                if (TryFind(name, s))
-                {
-                    val = Formatter<T>::FromString(s);
-
-                    return true;
-                }
-
-                return false;
+                return true;
             }
 
-        private:
+            return false;
+        }
 
-            bool TryFind(const char* name, String& val) const;
+    private:
 
-            struct Option
+        bool TryFind(const char* name, String& val) const;
+
+        struct Option
+        {
+            Option() : val(nullptr), usage(0)
             {
-                Option() : val(nullptr), usage(0)
-                {
-                }
+            }
 
-                Option(const Char * v) : Option()
-                {
-                    val = v;
-                }
+            Option(const Char* v) : Option()
+            {
+                val = v;
+            }
 
-                //A flag is an option that does not have a value.
-                bool IsFlag() const
-                {
-                    return val != nullptr;
-                }
+            //A flag is an option that does not have a value.
+            bool IsFlag() const
+            {
+                return val != nullptr;
+            }
 
-                const Char * val;
+            const Char* val;
 
-                mutable size_t usage;
-            };
-
-            using OptionsMap = std::unordered_map<std::string, Option>;
-
-            OptionsMap allOptions;
+            mutable size_t usage;
         };
-    }
+
+        using OptionsMap = std::unordered_map<std::string, Option>;
+
+        OptionsMap allOptions;
+    };
+
+    static_assert(attribute_provider<CommandLineProvider>);
 }

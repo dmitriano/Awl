@@ -12,11 +12,9 @@ namespace awl::testing
     template <class T, class Provider>
     T GetAttributeValue(Provider& provider, const char* name, T default_val)
     {
-        ProviderAdapter<T, Provider> adapter{ provider };
-
         T val;
 
-        if (!adapter.TryGet(name, val))
+        if (!provider.TryGet(name, val))
         {
             return default_val;
         }

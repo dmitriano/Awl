@@ -5,32 +5,24 @@
 
 #pragma once
 
-#include "Awl/String.h"
+#include <string>
 
 namespace awl::testing
 {
-    template <class T>
-    class AttributeProvider
+    // We can't do this
+    //
+    // template <class P>
+    // concept attribute_provider = requires(P& p)
+    // {
+    //     { template <class T> p.TryGet(std::declval<const char*>(), std::declval<T&>()) } -> std::same_as<bool>;
+    // };
+
+    // But we can check particular types at least.
+    template <class P>
+    concept attribute_provider = requires(P& p)
     {
-    public:
-
-        virtual bool TryGet(const char* name, T& val) = 0;
-    };
-
-    template <class T, class ProviderImpl>
-    class ProviderAdapter : public AttributeProvider<T>
-    {
-    public:
-
-        ProviderAdapter(ProviderImpl& impl) : m_impl(impl) {}
-
-        bool TryGet(const char* name, T& val) override
-        {
-            return m_impl.TryGet(name, val);
-        }
-
-    private:
-
-        ProviderImpl& m_impl;
+        { p.template TryGet(std::declval<const char*>(), std::declval<int&>()) } -> std::same_as<bool>;
+        { p.template TryGet(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
+        { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
     };
 }

@@ -7,9 +7,11 @@
 
 #include <tuple>
 
+#include "Awl/Testing/AttributeProvider.h"
+
 namespace awl::testing
 {
-    template <class ... Ps>
+    template <attribute_provider... Ps>
     class CompositeProvider
     {
     public:
