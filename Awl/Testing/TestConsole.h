@@ -10,6 +10,7 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/CompositeProvider.h"
 
+#include "Awl/ConsoleLogger.h"
 #include "Awl/Sleep.h"
 
 #include <map>
@@ -41,6 +42,8 @@ namespace awl::testing
         std::stop_source m_source;
 
         std::function<bool(const String& s)> CreateFilter(const String filter);
+
+        ConsoleLogger m_logger;
 
         CompositeProvider<CommandLineProvider>& m_ap;
 

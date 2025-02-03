@@ -13,6 +13,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
 #include "Awl/WatchDog.h"
+#include "Awl/ConsoleLogger.h"
 
 #include <set>
 #include <regex>
@@ -143,8 +144,10 @@ namespace awl::testing
             {
                 test_token = context.stopToken;
             }
+
+            ConsoleLogger logger(*p_out);
             
-            const TestContext temp_context{ *p_out, test_token, context.ap };
+            const TestContext temp_context{ *p_out, logger, test_token, context.ap };
 
             awl::StopWatch sw;
 

@@ -94,7 +94,7 @@ AWT_TEST(AtomicStoragePlain)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    awl::ConsoleLogger logger(context.out);
+    auto& logger = context.logger;
 
     using Value = awl::io::PlainSerializable<v2::B, HashInputStream, HashOutputStream>;
 
@@ -158,7 +158,7 @@ AWT_TEST(AtomicStorageVts)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    awl::ConsoleLogger logger(context.out);
+    auto& logger = context.logger;
 
     {
         {
@@ -241,7 +241,7 @@ AWT_TEST(AtomicStorageMove)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    awl::ConsoleLogger logger(context.out);
+    auto& logger = context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
 
@@ -269,7 +269,7 @@ AWT_TEST(AtomicStorageSave)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    awl::ConsoleLogger logger(context.out);
+    auto& logger = context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
     AWT_ASSERT(storage.IsEmpty());
@@ -300,7 +300,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        awl::ConsoleLogger logger(context.out);
+        auto& logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWT_ASSERT(storage.IsEmpty());
@@ -407,7 +407,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        awl::ConsoleLogger logger(context.out);
+        auto& logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWT_ASSERT(storage.IsEmpty());
@@ -626,7 +626,7 @@ AWT_BENCHMARK(AtomicStorageVtsWrite)
 
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    awl::ConsoleLogger logger(context.out);
+    auto& logger = context.logger;
 
     SomeState state{ 0u, {} };
 

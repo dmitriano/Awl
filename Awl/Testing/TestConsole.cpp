@@ -11,33 +11,33 @@
 
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
+#include "Awl/ScopeGuard.h"
 
 #include <set>
 #include <regex>
 
 namespace awl::testing
 {
-    int Run()
-    {
-        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(0, nullptr));
-
-        TestConsole console(ap);
-
-        return console.Run();
-    }
-
     int Run(int argc, Char* argv[])
     {
         CompositeProvider<CommandLineProvider> ap(CommandLineProvider(argc, argv));
 
         TestConsole console(ap);
 
+        // TODO: call PrintUnusedOptions()
+        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
+
         return console.Run();
+    }
+
+    int Run()
+    {
+        return Run(0, nullptr);
     }
 
     TestConsole::TestConsole(CompositeProvider<CommandLineProvider>& ap) :
         m_ap(ap),
-        m_context{ awl::cout(), m_source.get_token(), m_ap }
+        m_context{ awl::cout(), m_logger, m_source.get_token(), m_ap }
     {
     }
 
