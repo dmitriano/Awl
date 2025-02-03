@@ -19,7 +19,7 @@ namespace awl::testing
 {
     int Run()
     {
-        CommandLineProvider ap(0, nullptr);
+        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(0, nullptr));
 
         TestConsole console(ap);
 
@@ -28,14 +28,14 @@ namespace awl::testing
 
     int Run(int argc, Char* argv[])
     {
-        CommandLineProvider ap(argc, argv);
+        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(argc, argv));
 
         TestConsole console(ap);
 
         return console.Run();
     }
 
-    TestConsole::TestConsole(CommandLineProvider& ap) :
+    TestConsole::TestConsole(CompositeProvider<CommandLineProvider>& ap) :
         m_ap(ap),
         m_context{ awl::cout(), m_source.get_token(), m_ap }
     {

@@ -8,6 +8,7 @@
 #include "Awl/String.h"
 #include "Awl/Testing/TestContext.h"
 #include "Awl/Testing/CommandLineProvider.h"
+#include "Awl/Testing/CompositeProvider.h"
 
 #include "Awl/Sleep.h"
 
@@ -24,7 +25,7 @@ namespace awl::testing
     {
     public:
 
-        TestConsole(CommandLineProvider& ap);
+        TestConsole(CompositeProvider<CommandLineProvider>& ap);
 
         int Run();
 
@@ -41,7 +42,7 @@ namespace awl::testing
 
         std::function<bool(const String& s)> CreateFilter(const String filter);
 
-        CommandLineProvider& m_ap;
+        CompositeProvider<CommandLineProvider>& m_ap;
 
         TestContext m_context;
     };

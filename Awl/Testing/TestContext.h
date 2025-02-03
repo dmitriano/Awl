@@ -8,23 +8,24 @@
 #include "Awl/String.h"
 #include "Awl/Sleep.h"
 #include "Awl/Testing/CommandLineProvider.h"
+#include "Awl/Testing/CompositeProvider.h"
 
 #include <atomic>
 #include <condition_variable>
 #include <chrono>
 
-namespace awl 
+namespace awl::testing
 {
-    namespace testing 
+    template <class ... Ps>
+    struct CompositeTestContext
     {
-        struct TestContext
-        {
-            //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
-            awl::ostream& out;
+        //A mutex can be used for synchronizing output operations in multithreaded tests, for example.
+        awl::ostream& out;
 
-            std::stop_token stopToken;
+        std::stop_token stopToken;
 
-            CommandLineProvider& ap;
-        };
-    }
+        CompositeProvider<Ps...>& ap;
+    };
+
+    using TestContext = CompositeTestContext<CommandLineProvider>;
 }
