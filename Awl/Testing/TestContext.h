@@ -7,7 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Sleep.h"
-#include "Awl/Testing/AttributeProvider.h"
+#include "Awl/Testing/CommandLineProvider.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -24,7 +24,7 @@ namespace awl
 
             std::stop_token stopToken;
 
-            AttributeProvider& ap;
+            CommandLineProvider& ap;
         };
     }
 }

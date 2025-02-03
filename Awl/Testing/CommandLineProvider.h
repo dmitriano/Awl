@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/String.h"
+#include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/AttributeProvider.h"
 
 #include <unordered_map>
@@ -14,7 +15,7 @@ namespace awl
 {
     namespace testing
     {
-        class CommandLineProvider : public AttributeProvider
+        class CommandLineProvider
         {
         public:
 
@@ -22,9 +23,24 @@ namespace awl
 
             ~CommandLineProvider();
 
-            bool TryFind(const String & name, String & val) const override;
+            template <class T>
+            bool TryGet(const String& name, T& val)
+            {
+                String s;
+
+                if (TryFind(name, s))
+                {
+                    val = Formatter<T>::FromString(s);
+
+                    return true;
+                }
+
+                return false;
+            }
 
         private:
+
+            bool TryFind(const String& name, String& val) const;
 
             struct Option
             {

@@ -19,7 +19,7 @@ namespace awl::testing
 {
     int Run()
     {
-        AttributeProvider ap;
+        CommandLineProvider ap(0, nullptr);
 
         TestConsole console(ap);
 
@@ -35,7 +35,7 @@ namespace awl::testing
         return console.Run();
     }
 
-    TestConsole::TestConsole(AttributeProvider& ap) :
+    TestConsole::TestConsole(CommandLineProvider& ap) :
         m_ap(ap),
         m_context{ awl::cout(), m_source.get_token(), m_ap }
     {

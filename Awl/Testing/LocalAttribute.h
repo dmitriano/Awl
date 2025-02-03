@@ -6,65 +6,26 @@
 #pragma once
 
 #include "Awl/Testing/AttributeProvider.h"
-#include "Awl/Testing/Formatter.h"
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    template <class T, class Provider>
+    T GetAttributeValue(Provider& provider, const Char* type, const Char* name, T default_val)
     {
-        template <class T>
-        class LocalAttribute : public AttributeParser
+        static_cast<void>(type);
+
+        T val;
+
+        if (!provider.TryGet(name, val))
         {
-        public:
+            return default_val;
+        }
 
-            LocalAttribute(const AttributeProvider & provider, const Char * type, const Char * name, T default_val) : AttributeParser(name), myType(type), defaultVal(default_val)
-            {
-                if (!provider.TryGet(*this))
-                {
-                    myVal = defaultVal;
-                }
-            }
-
-            T & GetValue()
-            {
-                return myVal;
-            }
-
-            bool Parse(const String & s) override
-            {
-                try
-                {
-                    myVal = Formatter<T>::FromString(s);
-                }
-                catch (const std::exception &)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-
-            String GetDefaultValue() const override
-            {
-                return Formatter<T>::ToString(myVal);
-            }
-
-            String GetTypeName() const override
-            {
-                return myType;
-            }
-
-        protected:
-
-            const Char * myType;
-
-            T myVal;
-            
-            T defaultVal;
-        };
+        return val;
     }
 }
 
-#define AWT_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name(awl::testing::LocalAttribute<attribute_type>(context.ap, _T(#attribute_type), _T(#attribute_name), default_val).GetValue())
+#define AWT_ATTRIBUTE(attribute_type, attribute_name, default_val) const attribute_type attribute_name(awl::testing::GetAttributeValue<attribute_type>( \
+    context.ap, _T(#attribute_type), _T(#attribute_name), default_val))
 
 #define AWT_FLAG(attribute_name) AWT_ATTRIBUTE(bool, attribute_name, false)

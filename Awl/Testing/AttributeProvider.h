@@ -7,56 +7,30 @@
 
 #include "Awl/String.h"
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    template <class T>
+    class AttributeProvider
     {
-        class AttributeParser
+    public:
+
+        virtual bool TryGet(const String& name, T& val) = 0;
+    };
+
+    template <class T, class ProviderImpl>
+    class ProviderAdapter : public AttributeProvider<T>
+    {
+    public:
+
+        ProviderAdapter(ProviderImpl& impl) : m_impl(impl) {}
+
+        bool TryGet(const String& name, T& val) override
         {
-        public:
+            return m_impl.TryGet(name, val);
+        }
 
-            AttributeParser(const Char * name) : myName(name)
-            {
-            }
+    private:
 
-            const Char * GetName() const
-            {
-                return myName;
-            }
-
-            virtual ~AttributeParser() = default;
-
-            virtual bool Parse(const String & s) = 0;
-
-            virtual String GetDefaultValue() const = 0;
-
-            virtual String GetTypeName() const = 0;
-
-        private:
-
-            const Char * myName;
-        };
-
-        class AttributeProvider
-        {
-        public:
-
-            bool TryGet(AttributeParser & parser) const
-            {
-                String s;
-                
-                if (TryFind(parser.GetName(), s))
-                {
-                    return parser.Parse(s);
-                }
-
-                return false;
-            }
-
-            virtual bool TryFind(const String &, String &) const
-            {
-                return false;
-            }
-        };
-    }
+        ProviderImpl& m_impl;
+    };
 }
