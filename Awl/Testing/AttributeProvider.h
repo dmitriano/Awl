@@ -14,7 +14,7 @@ namespace awl::testing
     {
     public:
 
-        virtual bool TryGet(const String& name, T& val) = 0;
+        virtual bool TryGet(const char* name, T& val) = 0;
     };
 
     template <class T, class ProviderImpl>
@@ -24,7 +24,7 @@ namespace awl::testing
 
         ProviderAdapter(ProviderImpl& impl) : m_impl(impl) {}
 
-        bool TryGet(const String& name, T& val) override
+        bool TryGet(const char* name, T& val) override
         {
             return m_impl.TryGet(name, val);
         }

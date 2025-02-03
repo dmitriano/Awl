@@ -24,7 +24,7 @@ namespace awl
             ~CommandLineProvider();
 
             template <class T>
-            bool TryGet(const String& name, T& val)
+            bool TryGet(const char* name, T& val)
             {
                 String s;
 
@@ -40,7 +40,7 @@ namespace awl
 
         private:
 
-            bool TryFind(const String& name, String& val) const;
+            bool TryFind(const char* name, String& val) const;
 
             struct Option
             {
@@ -64,7 +64,7 @@ namespace awl
                 mutable size_t usage;
             };
 
-            using OptionsMap = std::unordered_map<String, Option>;
+            using OptionsMap = std::unordered_map<std::string, Option>;
 
             OptionsMap allOptions;
         };
