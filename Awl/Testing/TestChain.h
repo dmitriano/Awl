@@ -10,9 +10,11 @@
 #include "Awl/StaticChain.h"
 #include "Awl/Testing/TestContext.h"
 
+#include <type_traits>
+
 namespace awl::testing
 {
-    using TestFunc = void(*)(const TestContext& context);
+    using TestFunc = std::add_pointer_t<void(const TestContext& context)>;
 
     //The objects of this class are static, they are not supposed to be created on the heap or on the stack.
     //There is no safe_exclude() in the destructor, because the order of static objects destruction in undefined,
@@ -22,7 +24,7 @@ namespace awl::testing
 }
 
 #define AWT_LINK_FUNC_NAME(test_name) test_name##_TestFunc
-#define AWT_LINK_FUNC_SIGNATURE(test_name) static void AWT_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext & context)
+#define AWT_LINK_FUNC_SIGNATURE(test_name) static void AWT_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext& context)
 
 //A test is simply a static function.
 #define AWT_LINK(test_name, suffix) \
