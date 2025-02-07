@@ -21,9 +21,10 @@
 
 namespace awl::testing
 {
-    TestMap::TestMap() :
+    TestMap::TestMap(ostringstream& last_output, const std::string& filter) :
         nullOutput(&nullBuffer),
-        testMap(make_static_map<TestFunc>())
+        lastOutput(last_output),
+        testMap(make_static_map<TestFunc>(filter))
     {}
 
     void TestMap::Run(const TestContext& context, const char* name)
@@ -35,36 +36,28 @@ namespace awl::testing
             throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
         }
 
-        InternalRun(i->second, context);
+        RunLink(i->second, context);
     }
 
-    void TestMap::RunAll(const TestContext& context, const std::function<bool(const std::string&)>& filter)
+    void TestMap::RunAll(const TestContext& context)
+    {
+        for (auto& p : testMap)
+        {
+            RunLink(p.second, context);
+        }
+    }
+
+    void TestMap::PrintNames(awl::ostream& out) const
     {
         for (auto& p : testMap)
         {
             const auto& test_name = p.first;
 
-            if (filter(test_name))
-            {
-                InternalRun(p.second, context);
-            }
+            out << test_name << std::endl;
         }
     }
 
-    void TestMap::PrintNames(awl::ostream& out, const std::function<bool(const std::string&)>& filter) const
-    {
-        for (auto& p : testMap)
-        {
-            const auto& test_name = p.first;
-
-            if (filter(test_name))
-            {
-                out << test_name << std::endl;
-            }
-        }
-    }
-
-    void TestMap::InternalRun(const TestLink* p_test_link, const TestContext& context)
+    void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
         AWT_ATTRIBUTE(String, output, _T("failed"));
         AWT_ATTRIBUTE(size_t, loop, 0);

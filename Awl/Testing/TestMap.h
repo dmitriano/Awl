@@ -23,13 +23,13 @@ namespace awl
         {
         public:
 
-            TestMap();
+            TestMap(ostringstream& last_output, const std::string& filter);
 
             void Run(const TestContext& context, const char * name);
             
-            void RunAll(const TestContext& context, const std::function<bool (const std::string&)> & filter);
+            void RunAll(const TestContext& context);
 
-            void PrintNames(awl::ostream& out, const std::function<bool(const std::string&)> & filter) const;
+            void PrintNames(awl::ostream& out) const;
 
             String GetLastOutput() const
             {
@@ -41,14 +41,14 @@ namespace awl
                 return testMap.size();
             }
 
-            size_t GetCount(const std::function<bool(const std::string&)>& filter) const
+            size_t GetCount() const
             {
-                return std::count_if(testMap.begin(), testMap.end(), [&filter](const std::pair<const char*, const TestLink*> & p) { return filter(p.first); });
+                return testMap.size();
             }
 
         private:
 
-            void InternalRun(const TestLink * p_test_link, const TestContext & context);
+            void RunLink(const TestLink* p_test_link, const TestContext& context);
 
             class NullBuffer : public std::basic_streambuf<Char>
             {
@@ -59,7 +59,7 @@ namespace awl
             NullBuffer nullBuffer;
             std::basic_ostream<Char> nullOutput;
 
-            ostringstream lastOutput;
+            ostringstream& lastOutput;
             
             StaticMap<TestFunc> testMap;
         };

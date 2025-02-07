@@ -71,17 +71,17 @@ namespace awl::testing
         
         AWT_FLAG(list);
 
-        TestMap test_map;
+        ostringstream last_output;
 
         if (list)
         {
             AWT_ATTRIBUTE(std::string, filter, {});
 
-            auto f = CreateFilter(filter);
+            TestMap test_map(last_output, filter);
 
-            test_map.PrintNames(awl::cout(), f);
+            test_map.PrintNames(awl::cout());
 
-            awl::cout() << _T("Total ") << test_map.GetCount(f) << _T(" tests.") << std::endl;
+            awl::cout() << _T("Total ") << test_map.GetCount() << _T(" tests.") << std::endl;
 
             return 0;
         }
@@ -89,21 +89,23 @@ namespace awl::testing
         AWT_ATTRIBUTE(std::set<String>, run, {});
 
         bool passed = false;
-        
+
         try
         {
             if (run.empty())
             {
                 AWT_ATTRIBUTE(std::string, filter, ".*_Test");
 
-                auto f = CreateFilter(filter);
+                TestMap test_map(last_output, filter);
 
-                context.out << std::endl << _T("***************** Running ") << test_map.GetCount(f) << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << test_map.GetCount() << _T(" tests *****************") << std::endl;
 
-                test_map.RunAll(context, f);
+                test_map.RunAll(context);
             }
             else
             {
+                TestMap test_map(last_output, "");
+
                 context.out << std::endl << _T("***************** Running ") << run.size() << _T(" tests *****************") << std::endl;
 
                 for (auto& test : run)
@@ -118,7 +120,7 @@ namespace awl::testing
         }
         catch (const awl::testing::TestException& e)
         {
-            context.out << std::endl << test_map.GetLastOutput();
+            context.out << std::endl << last_output.str();
 
             context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }
