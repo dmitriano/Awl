@@ -102,6 +102,11 @@ namespace awl
         List m_list;
     };
 
+    // It is not clear what can be the usage of variable_static_chain()
+    // in the real-life code, but I left it here just in case.
+    // Declaring a StaticLink as const and then using variable_static_chain()
+    // means accessing a const value via non-const pointer,
+    // see StaticLink constructor.
     template <class T>
     StaticChain<T>& variable_static_chain()
     {
