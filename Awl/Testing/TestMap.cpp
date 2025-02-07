@@ -47,16 +47,6 @@ namespace awl::testing
         }
     }
 
-    void TestMap::PrintNames(awl::ostream& out) const
-    {
-        for (auto& p : testMap)
-        {
-            const auto& test_name = p.first;
-
-            out << test_name << std::endl;
-        }
-    }
-
     void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
         AWT_ATTRIBUTE(String, output, _T("failed"));

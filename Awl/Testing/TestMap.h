@@ -29,16 +29,9 @@ namespace awl
             
             void RunAll(const TestContext& context);
 
-            void PrintNames(awl::ostream& out) const;
-
             String GetLastOutput() const
             {
                 return lastOutput.str();
-            }
-
-            size_t GetTestCount() const
-            {
-                return testMap.size();
             }
 
             size_t GetCount() const

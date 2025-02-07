@@ -71,17 +71,20 @@ namespace awl::testing
         
         AWT_FLAG(list);
 
-        ostringstream last_output;
-
         if (list)
         {
             AWT_ATTRIBUTE(std::string, filter, {});
 
-            TestMap test_map(last_output, filter);
+            auto test_map = make_static_map<TestFunc>(filter);
 
-            test_map.PrintNames(awl::cout());
+            for (auto& p : test_map)
+            {
+                const auto& test_name = p.first;
 
-            awl::cout() << _T("Total ") << test_map.GetCount() << _T(" tests.") << std::endl;
+                awl::cout() << test_name << std::endl;
+            }
+
+            awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
 
             return 0;
         }
@@ -89,6 +92,8 @@ namespace awl::testing
         AWT_ATTRIBUTE(std::set<String>, run, {});
 
         bool passed = false;
+
+        ostringstream last_output;
 
         try
         {
