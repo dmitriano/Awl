@@ -26,7 +26,12 @@ namespace awl
             return pName;
         }
 
-        T& value() const
+        const T& value() const
+        {
+            return m_val;
+        }
+
+        T& value()
         {
             return m_val;
         }
@@ -35,8 +40,7 @@ namespace awl
 
         const char* const pName;
 
-        // TODO: Get rid of mutable here.
-        mutable T m_val;
+        T m_val;
     };
 
     template <class T>
