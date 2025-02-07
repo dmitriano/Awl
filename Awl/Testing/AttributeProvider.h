@@ -5,58 +5,24 @@
 
 #pragma once
 
-#include "Awl/String.h"
+#include <string>
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    // We can't do this
+    //
+    // template <class P>
+    // concept attribute_provider = requires(P& p)
+    // {
+    //     { template <class T> p.TryGet(std::declval<const char*>(), std::declval<T&>()) } -> std::same_as<bool>;
+    // };
+
+    // But we can check particular types at least.
+    template <class P>
+    concept attribute_provider = requires(P& p)
     {
-        class AttributeParser
-        {
-        public:
-
-            AttributeParser(const Char * name) : myName(name)
-            {
-            }
-
-            const Char * GetName() const
-            {
-                return myName;
-            }
-
-            virtual ~AttributeParser() = default;
-
-            virtual bool Parse(const String & s) = 0;
-
-            virtual String GetDefaultValue() const = 0;
-
-            virtual String GetTypeName() const = 0;
-
-        private:
-
-            const Char * myName;
-        };
-
-        class AttributeProvider
-        {
-        public:
-
-            bool TryGet(AttributeParser & parser) const
-            {
-                String s;
-                
-                if (TryFind(parser.GetName(), s))
-                {
-                    return parser.Parse(s);
-                }
-
-                return false;
-            }
-
-            virtual bool TryFind(const String &, String &) const
-            {
-                return false;
-            }
-        };
-    }
+        { p.template TryGet(std::declval<const char*>(), std::declval<int&>()) } -> std::same_as<bool>;
+        { p.template TryGet(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
+        { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
+    };
 }

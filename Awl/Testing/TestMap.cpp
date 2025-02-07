@@ -13,6 +13,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
 #include "Awl/WatchDog.h"
+#include "Awl/ConsoleLogger.h"
 
 #include <set>
 #include <regex>
@@ -20,18 +21,13 @@
 
 namespace awl::testing
 {
-    TestMap::TestMap() : nullOutput(&nullBuffer)
-    {
-        for (TestLink* p_link : GetTestChain())
-        {
-            if (!testMap.emplace(p_link->GetName(), p_link).second)
-            {
-                throw TestException(format() << _T("The test '" << p_link->GetName() << _T(" already exists.")));
-            }
-        }
-    }
+    TestMap::TestMap(ostringstream& last_output, const std::string& filter) :
+        nullOutput(&nullBuffer),
+        lastOutput(last_output),
+        testMap(make_static_map<TestFunc>(filter))
+    {}
 
-    void TestMap::Run(const TestContext& context, const Char* name)
+    void TestMap::Run(const TestContext& context, const char* name)
     {
         auto i = testMap.find(name);
 
@@ -40,42 +36,24 @@ namespace awl::testing
             throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
         }
 
-        InternalRun(i->second, context);
+        RunLink(i->second, context);
     }
 
-    void TestMap::RunAll(const TestContext& context, const std::function<bool(const String&)>& filter)
+    void TestMap::RunAll(const TestContext& context)
     {
         for (auto& p : testMap)
         {
-            const auto& test_name = p.first;
-
-            if (filter(test_name))
-            {
-                InternalRun(p.second, context);
-            }
+            RunLink(p.second, context);
         }
     }
 
-    void TestMap::PrintNames(awl::ostream& out, const std::function<bool(const String&)>& filter) const
-    {
-        for (auto& p : testMap)
-        {
-            const auto& test_name = p.first;
-
-            if (filter(test_name))
-            {
-                out << test_name << std::endl;
-            }
-        }
-    }
-
-    void TestMap::InternalRun(TestLink* p_test_link, const TestContext& context)
+    void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
         AWT_ATTRIBUTE(String, output, _T("failed"));
         AWT_ATTRIBUTE(size_t, loop, 0);
         AWT_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
-        context.out << p_test_link->GetName();
+        context.out << FromACString(p_test_link->name());
 
         size_t loop_count = loop;
 
@@ -143,12 +121,14 @@ namespace awl::testing
             {
                 test_token = context.stopToken;
             }
+
+            ConsoleLogger logger(*p_out);
             
-            const TestContext temp_context{ *p_out, test_token, context.ap };
+            const TestContext temp_context{ *p_out, logger, test_token, context.ap };
 
             awl::StopWatch sw;
 
-            p_test_link->Run(temp_context);
+            p_test_link->value()(temp_context);
 
             if (p_out == &lastOutput)
             {

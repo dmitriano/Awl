@@ -16,18 +16,31 @@ namespace
     awl::StaticLink<X> x1("0", 0);
     awl::StaticLink<X> x2("1", 1);
     awl::StaticLink<X> x3("2", 2);
+
+    // Declaring StaticChain as const and then doing ++i->value() in StaticChainInt test is UB.
+    // const awl::StaticLink<X> x3("2", 2);
 }
 
 AWT_TEST(StaticChainInt)
 {
     AWT_UNUSED_CONTEXT;
 
+    // Test variable_static_chain()
+    for (X val = 0; val < 3; ++val)
+    {
+        auto i = awl::variable_static_chain<X>().find(awl::aformat() << val);
+
+        AWT_ASSERT(i != awl::variable_static_chain<X>().end());
+        AWT_ASSERT(i->value() == val);
+        ++i->value();
+    }
+
     for (X val = 0; val < 3; ++val)
     {
         auto i = awl::static_chain<X>().find(awl::aformat() << val);
-        
+
         AWT_ASSERT(i != awl::static_chain<X>().end());
-        AWT_ASSERT(i->value() == val);
+        AWT_ASSERT(i->value() == val + 1);
     }
 }
 

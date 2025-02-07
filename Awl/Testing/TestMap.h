@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Awl/Testing/TestChain.h"
+#include "Awl/StaticMap.h"
 
-#include <map>
 #include <memory>
 #include <iostream>
 #include <functional>
@@ -23,32 +23,25 @@ namespace awl
         {
         public:
 
-            TestMap();
+            TestMap(ostringstream& last_output, const std::string& filter);
 
-            void Run(const TestContext & context, const Char * name);
+            void Run(const TestContext& context, const char * name);
             
-            void RunAll(const TestContext & context, const std::function<bool (const String&)> & filter);
-
-            void PrintNames(awl::ostream & out, const std::function<bool(const String&)> & filter) const;
+            void RunAll(const TestContext& context);
 
             String GetLastOutput() const
             {
                 return lastOutput.str();
             }
 
-            size_t GetTestCount() const
+            size_t GetCount() const
             {
                 return testMap.size();
             }
 
-            size_t GetCount(const std::function<bool(const String&)> & filter) const
-            {
-                return std::count_if(testMap.begin(), testMap.end(), [&filter](const std::pair<String, TestLink *> & p) { return filter(p.first); });
-            }
-
         private:
 
-            void InternalRun(TestLink * p_test_link, const TestContext & context);
+            void RunLink(const TestLink* p_test_link, const TestContext& context);
 
             class NullBuffer : public std::basic_streambuf<Char>
             {
@@ -59,16 +52,9 @@ namespace awl
             NullBuffer nullBuffer;
             std::basic_ostream<Char> nullOutput;
 
-            ostringstream lastOutput;
+            ostringstream& lastOutput;
             
-            using Map = std::map<const Char *, TestLink *, CStringLess<Char>>;
-
-            Map testMap;
+            StaticMap<TestFunc> testMap;
         };
-
-        inline std::shared_ptr<TestMap> CreateTestMap()
-        {
-            return std::make_shared<TestMap>();
-        }
     }
 }

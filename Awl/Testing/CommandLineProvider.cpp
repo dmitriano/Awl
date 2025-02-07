@@ -10,87 +10,84 @@
 
 #include <regex>
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    CommandLineProvider::CommandLineProvider(int argc, Char* argv[])
     {
-        CommandLineProvider::CommandLineProvider(int argc, Char * argv[])
+        std::basic_regex<Char> option_regex(_T("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
+
+        std::match_results<const Char*> match;
+
+        OptionsMap::iterator current_option = allOptions.end();
+
+        int i = 1;
+
+        while (i < argc)
         {
-            std::basic_regex<Char> option_regex(_T("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
+            const Char* val = argv[i++];
 
-            std::match_results<const Char *> match;
-
-            OptionsMap::iterator current_option = allOptions.end();
-
-            int i = 1;
-
-            while (i < argc)
+            if (std::regex_match(val, match, option_regex) && match.size() == 2)
             {
-                const Char * val = argv[i++];
+                String name = match[1].str();
 
-                if (std::regex_match(val, match, option_regex) && match.size() == 2)
+                auto result = allOptions.emplace(ToAString(name), Option{});
+
+                if (!result.second)
                 {
-                    String name = match[1].str();
+                    throw TestException(format() << _T("Duplicated option '" << name << _T("'.")));
+                }
 
-                    auto result = allOptions.emplace(name, Option{});
+                current_option = result.first;
+            }
+            else
+            {
+                if (current_option != allOptions.end())
+                {
+                    current_option->second = val;
 
-                    if (!result.second)
-                    {
-                        throw TestException(format() << _T("Duplicated option '" << name << _T("'.")));
-                    }
-
-                    current_option = result.first;
+                    current_option = allOptions.end();
                 }
                 else
                 {
-                    if (current_option != allOptions.end())
-                    {
-                        current_option->second = val;
-
-                        current_option = allOptions.end();
-                    }
-                    else
-                    {
-                        throw TestException(format() << _T("An option name starting with '--' expected near ") << val);
-                    }
+                    throw TestException(format() << _T("An option name starting with '--' expected near ") << val);
                 }
             }
         }
+    }
 
-        CommandLineProvider::~CommandLineProvider()
+    void CommandLineProvider::PrintUnusedOptions()
+    {
+        for (const auto& p : allOptions)
         {
-            for (const auto & p : allOptions)
+            if (p.second.usage == 0)
             {
-                if (p.second.usage == 0)
-                {
-                    cout() << _T("Unused option '" << p.first << _T("'")) << std::endl;
-                }
+                cout() << _T("Unused option '" << p.first << _T("'")) << std::endl;
             }
         }
+    }
 
-        bool CommandLineProvider::TryFind(const String & name, String & val) const
+    bool CommandLineProvider::TryFind(const char* name, String& val) const
+    {
+        auto i = allOptions.find(name);
+
+        if (i != allOptions.end())
         {
-            auto i = allOptions.find(name);
+            ++(i->second.usage);
 
-            if (i != allOptions.end())
+            const Char* raw_val = i->second.val;
+
+            if (raw_val == nullptr)
             {
-                ++(i->second.usage);
-
-                const Char * raw_val = i->second.val;
-
-                if (raw_val == nullptr)
-                {
-                    val.clear();
-                }
-                else
-                {
-                    val = i->second.val;
-                }
-
-                return true;
+                val.clear();
+            }
+            else
+            {
+                val = i->second.val;
             }
 
-            return false;
+            return true;
         }
+
+        return false;
     }
 }

@@ -11,58 +11,34 @@
 
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
+#include "Awl/ScopeGuard.h"
 
 #include <set>
 #include <regex>
 
 namespace awl::testing
 {
-    int Run()
-    {
-        AttributeProvider ap;
-
-        TestConsole console(ap);
-
-        return console.Run();
-    }
-
     int Run(int argc, Char* argv[])
     {
-        CommandLineProvider ap(argc, argv);
+        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(argc, argv));
 
         TestConsole console(ap);
+
+        // TODO: call PrintUnusedOptions()
+        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
 
         return console.Run();
     }
 
-    TestConsole::TestConsole(AttributeProvider& ap) :
-        m_ap(ap),
-        m_context{ awl::cout(), m_source.get_token(), m_ap }
+    int Run()
     {
+        return Run(0, nullptr);
     }
 
-    std::function<bool(const String& s)> TestConsole::CreateFilter(const String filter)
+    TestConsole::TestConsole(CompositeProvider<CommandLineProvider>& ap) :
+        m_ap(ap),
+        m_context{ awl::cout(), m_logger, m_source.get_token(), m_ap }
     {
-        if (filter.empty())
-        {
-            return [](const String&) { return true; };
-        }
-
-        return [filter](const String& test_name)
-        {
-            try
-            {
-                std::basic_regex<Char> test_name_regex(filter);
-
-                std::match_results<String::const_iterator> match;
-
-                return std::regex_match(test_name, match, test_name_regex);
-            }
-            catch (const std::regex_error&)
-            {
-                throw TestException(format() << _T("Not a valid regular expression '") << filter << _T("'."));
-            }
-        };
     }
 
     bool TestConsole::RunTests()
@@ -73,44 +49,49 @@ namespace awl::testing
 
         if (list)
         {
-            auto test_map = awl::testing::CreateTestMap();
+            AWT_ATTRIBUTE(std::string, filter, {});
 
-            AWT_ATTRIBUTE(String, filter, {});
+            auto test_map = make_static_map<TestFunc>(filter);
 
-            auto f = CreateFilter(filter);
+            for (auto& p : test_map)
+            {
+                const auto& test_name = p.first;
 
-            test_map->PrintNames(awl::cout(), f);
+                awl::cout() << test_name << std::endl;
+            }
 
-            awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
+            awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
 
             return 0;
         }
 
-        auto test_map = awl::testing::CreateTestMap();
-
         AWT_ATTRIBUTE(std::set<String>, run, {});
 
         bool passed = false;
-        
+
+        ostringstream last_output;
+
         try
         {
             if (run.empty())
             {
-                AWT_ATTRIBUTE(String, filter, _T(".*_Test"));
+                AWT_ATTRIBUTE(std::string, filter, ".*_Test");
 
-                auto f = CreateFilter(filter);
+                TestMap test_map(last_output, filter);
 
-                context.out << std::endl << _T("***************** Running ") << test_map->GetCount(f) << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << test_map.GetCount() << _T(" tests *****************") << std::endl;
 
-                test_map->RunAll(context, f);
+                test_map.RunAll(context);
             }
             else
             {
+                TestMap test_map(last_output, "");
+
                 context.out << std::endl << _T("***************** Running ") << run.size() << _T(" tests *****************") << std::endl;
 
                 for (auto& test : run)
                 {
-                    test_map->Run(context, test.c_str());
+                    test_map.Run(context, ToAString(test).c_str());
                 }
             }
 
@@ -120,12 +101,12 @@ namespace awl::testing
         }
         catch (const awl::testing::TestException& e)
         {
-            context.out << std::endl << test_map->GetLastOutput();
+            context.out << std::endl << last_output.str();
 
             context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }
 
-        awl::testing::Shutdown();
+        // awl::static_chain<TestFunc>().clear();
 
         return passed;
     }

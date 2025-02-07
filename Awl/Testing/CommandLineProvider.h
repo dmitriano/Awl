@@ -6,51 +6,66 @@
 #pragma once
 
 #include "Awl/String.h"
+#include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/AttributeProvider.h"
 
 #include <unordered_map>
 
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    class CommandLineProvider
     {
-        class CommandLineProvider : public AttributeProvider
+    public:
+
+        CommandLineProvider(int argc, Char* argv[]);
+
+        void PrintUnusedOptions();
+
+        template <class T>
+        bool TryGet(const char* name, T& val)
         {
-        public:
+            String s;
 
-            CommandLineProvider(int argc, Char * argv[]);
-
-            ~CommandLineProvider();
-
-            bool TryFind(const String & name, String & val) const override;
-
-        private:
-
-            struct Option
+            if (TryFind(name, s))
             {
-                Option() : val(nullptr), usage(0)
-                {
-                }
+                val = Formatter<T>::FromString(s);
 
-                Option(const Char * v) : Option()
-                {
-                    val = v;
-                }
+                return true;
+            }
 
-                //A flag is an option that does not have a value.
-                bool IsFlag() const
-                {
-                    return val != nullptr;
-                }
+            return false;
+        }
 
-                const Char * val;
+    private:
 
-                mutable size_t usage;
-            };
+        bool TryFind(const char* name, String& val) const;
 
-            using OptionsMap = std::unordered_map<String, Option>;
+        struct Option
+        {
+            Option() : val(nullptr), usage(0)
+            {
+            }
 
-            OptionsMap allOptions;
+            Option(const Char* v) : Option()
+            {
+                val = v;
+            }
+
+            //A flag is an option that does not have a value.
+            bool IsFlag() const
+            {
+                return val != nullptr;
+            }
+
+            const Char* val;
+
+            mutable size_t usage;
         };
-    }
+
+        using OptionsMap = std::unordered_map<std::string, Option>;
+
+        OptionsMap allOptions;
+    };
+
+    static_assert(attribute_provider<CommandLineProvider>);
 }
