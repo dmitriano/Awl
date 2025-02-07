@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Awl/Testing/TestChain.h"
+#include "Awl/StaticMap.h"
 
-#include <map>
 #include <memory>
 #include <iostream>
 #include <functional>
@@ -61,9 +61,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            using Map = std::map<const char *, const TestLink *, CStringLess<char>>;
-
-            Map testMap;
+            StaticMap<TestFunc> testMap;
         };
 
         inline std::shared_ptr<TestMap> CreateTestMap()

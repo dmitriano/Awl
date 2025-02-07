@@ -21,16 +21,10 @@
 
 namespace awl::testing
 {
-    TestMap::TestMap() : nullOutput(&nullBuffer)
-    {
-        for (const TestLink* p_link : awl::static_chain<TestFunc>())
-        {
-            if (!testMap.emplace(p_link->name(), p_link).second)
-            {
-                throw TestException(format() << _T("The test '" << p_link->name() << _T(" already exists.")));
-            }
-        }
-    }
+    TestMap::TestMap() :
+        nullOutput(&nullBuffer),
+        testMap(make_static_map<TestFunc>())
+    {}
 
     void TestMap::Run(const TestContext& context, const char* name)
     {
