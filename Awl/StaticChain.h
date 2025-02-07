@@ -31,6 +31,8 @@ namespace awl
             return m_val;
         }
 
+        // It is not clear enough how do we access non-const value,
+        // because StaticChain instance and the iterator are const.
         T& value()
         {
             return m_val;
