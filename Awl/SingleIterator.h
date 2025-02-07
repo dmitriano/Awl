@@ -58,10 +58,10 @@ namespace awl
             return this->link() == r.link();
         }
 
-        bool operator != (const single_iterator& r)  const
-        {
-            return !(*this == r);
-        }
+        //bool operator != (const single_iterator& r)  const
+        //{
+        //    return !(*this == r);
+        //}
 
         //Construction of const_iterator from iterator
         operator single_iterator<const T, const Link>() const

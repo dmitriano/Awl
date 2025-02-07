@@ -82,10 +82,10 @@ namespace awl
             return this->m_p == r.m_p;
         }
 
-        bool operator != (const double_iterator & r)  const
-        {
-            return !(*this == r);
-        }
+        //bool operator != (const double_iterator & r)  const
+        //{
+        //    return !(*this == r);
+        //}
 
         //Construction of const_iterator from iterator
         operator ConstIterator () const

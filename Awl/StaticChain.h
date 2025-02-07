@@ -31,8 +31,7 @@ namespace awl
             return m_val;
         }
 
-        // It is not clear enough how do we access non-const value,
-        // because StaticChain instance and the iterator are const.
+        // Use variable_static_chain() to access non-const value,
         T& value()
         {
             return m_val;
@@ -52,14 +51,18 @@ namespace awl
 
         using Link = StaticLink<T>;
         using List = single_list<Link>;
-        using Iterator = typename List::const_iterator;
+        using Iterator = typename List::iterator;
+        using ConstIterator = typename List::const_iterator;
 
     public:
 
-        Iterator begin() const { return m_list.begin(); }
-        Iterator end() const { return m_list.end(); }
+        ConstIterator begin() const { return m_list.begin(); }
+        ConstIterator end() const { return m_list.end(); }
 
-        Iterator find(const char* name) const
+        Iterator begin() { return m_list.begin(); }
+        Iterator end() { return m_list.end(); }
+
+        Iterator find(const char* name)
         {
             return std::find_if(begin(), end(),
                 [name](const Link* link) -> bool
@@ -68,7 +71,20 @@ namespace awl
                 });
         }
 
-        Iterator find(const std::string& name) const { return find(name.c_str()); }
+        ConstIterator find(const char* name) const
+        {
+            return const_cast<StaticChain*>(this)->find(name);
+        }
+
+        Iterator find(const std::string& name)
+        {
+            return find(name.c_str());
+        }
+
+        ConstIterator find(const std::string& name) const
+        {
+            return const_cast<StaticChain*>(this)->find(name);
+        }
 
         void clear()
         {
@@ -87,9 +103,15 @@ namespace awl
     };
 
     template <class T>
-    const StaticChain<T>& static_chain()
+    StaticChain<T>& variable_static_chain()
     {
         return static_singleton<StaticChain<T>>();
+    }
+
+    template <class T>
+    const StaticChain<T>& static_chain()
+    {
+        return variable_static_chain<T>();
     }
 
     template <class T>
@@ -99,6 +121,6 @@ namespace awl
         m_val(std::forward<Args>(args)...)
     {
         // Access non-const singleton.
-        static_singleton<StaticChain<T>>().m_list.push_front(this);
+        variable_static_chain<T>().m_list.push_front(this);
     }
 }
