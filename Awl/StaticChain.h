@@ -120,7 +120,14 @@ namespace awl
         pName(p_name),
         m_val(std::forward<Args>(args)...)
     {
-        // Access non-const singleton.
+        // We circumvent const-correctness here.
+        // Declaring StaticChain as const can potentially lead to UB.
+        // Somewhere in the code StaticChain can be accessed as the list element and changed.
+        // 
+        // From C++ standard:
+        // const and volatile semantics (7.1.6.1) are not applied on an object under construction.
+        // They come into effect when the constructor for the most derived object (1.8) ends.
+
         variable_static_chain<T>().m_list.push_front(this);
     }
 }

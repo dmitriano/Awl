@@ -16,6 +16,9 @@ namespace
     awl::StaticLink<X> x1("0", 0);
     awl::StaticLink<X> x2("1", 1);
     awl::StaticLink<X> x3("2", 2);
+
+    // Declaring StaticChain as const and then doing ++i->value() in StaticChainInt test is UB.
+    // const awl::StaticLink<X> x3("2", 2);
 }
 
 AWT_TEST(StaticChainInt)
