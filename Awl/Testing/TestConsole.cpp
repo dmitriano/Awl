@@ -41,30 +41,6 @@ namespace awl::testing
     {
     }
 
-    std::function<bool(const std::string& s)> TestConsole::CreateFilter(const std::string& filter)
-    {
-        if (filter.empty())
-        {
-            return [](const std::string&) { return true; };
-        }
-
-        return [filter](const std::string& test_name)
-        {
-            try
-            {
-                std::basic_regex<char> test_name_regex(filter);
-
-                std::match_results<std::string::const_iterator> match;
-
-                return std::regex_match(test_name, match, test_name_regex);
-            }
-            catch (const std::regex_error&)
-            {
-                throw TestException(format() << _T("Not a valid regular expression '") << filter << _T("'."));
-            }
-        };
-    }
-
     bool TestConsole::RunTests()
     {
         TestContext& context = m_context;
