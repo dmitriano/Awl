@@ -64,6 +64,14 @@ namespace awl
 
         Iterator find(const std::string& name) const { return find(name.c_str()); }
 
+        void clear()
+        {
+            while (!m_list.empty())
+            {
+                m_list.pop_front();
+            }
+        }
+
     private:
 
         template <class T1>

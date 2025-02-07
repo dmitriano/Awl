@@ -41,20 +41,20 @@ namespace awl::testing
     {
     }
 
-    std::function<bool(const String& s)> TestConsole::CreateFilter(const String filter)
+    std::function<bool(const std::string& s)> TestConsole::CreateFilter(const std::string& filter)
     {
         if (filter.empty())
         {
-            return [](const String&) { return true; };
+            return [](const std::string&) { return true; };
         }
 
-        return [filter](const String& test_name)
+        return [filter](const std::string& test_name)
         {
             try
             {
-                std::basic_regex<Char> test_name_regex(filter);
+                std::basic_regex<char> test_name_regex(filter);
 
-                std::match_results<String::const_iterator> match;
+                std::match_results<std::string::const_iterator> match;
 
                 return std::regex_match(test_name, match, test_name_regex);
             }
@@ -75,7 +75,7 @@ namespace awl::testing
         {
             auto test_map = awl::testing::CreateTestMap();
 
-            AWT_ATTRIBUTE(String, filter, {});
+            AWT_ATTRIBUTE(std::string, filter, {});
 
             auto f = CreateFilter(filter);
 
@@ -96,7 +96,7 @@ namespace awl::testing
         {
             if (run.empty())
             {
-                AWT_ATTRIBUTE(String, filter, _T(".*_Test"));
+                AWT_ATTRIBUTE(std::string, filter, ".*_Test");
 
                 auto f = CreateFilter(filter);
 
@@ -110,7 +110,7 @@ namespace awl::testing
 
                 for (auto& test : run)
                 {
-                    test_map->Run(context, test.c_str());
+                    test_map->Run(context, ToAString(test).c_str());
                 }
             }
 
@@ -125,7 +125,7 @@ namespace awl::testing
             context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }
 
-        awl::testing::Shutdown();
+        // awl::static_chain<TestFunc>().clear();
 
         return passed;
     }

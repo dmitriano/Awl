@@ -41,7 +41,7 @@ namespace awl::testing
             
         std::stop_source m_source;
 
-        std::function<bool(const String& s)> CreateFilter(const String filter);
+        std::function<bool(const std::string& s)> CreateFilter(const std::string& filter);
 
         ConsoleLogger m_logger;
 

@@ -25,11 +25,11 @@ namespace awl
 
             TestMap();
 
-            void Run(const TestContext & context, const Char * name);
+            void Run(const TestContext& context, const char * name);
             
-            void RunAll(const TestContext & context, const std::function<bool (const String&)> & filter);
+            void RunAll(const TestContext& context, const std::function<bool (const std::string&)> & filter);
 
-            void PrintNames(awl::ostream & out, const std::function<bool(const String&)> & filter) const;
+            void PrintNames(awl::ostream& out, const std::function<bool(const std::string&)> & filter) const;
 
             String GetLastOutput() const
             {
@@ -41,14 +41,14 @@ namespace awl
                 return testMap.size();
             }
 
-            size_t GetCount(const std::function<bool(const String&)> & filter) const
+            size_t GetCount(const std::function<bool(const std::string&)>& filter) const
             {
-                return std::count_if(testMap.begin(), testMap.end(), [&filter](const std::pair<String, TestLink *> & p) { return filter(p.first); });
+                return std::count_if(testMap.begin(), testMap.end(), [&filter](const std::pair<const char*, const TestLink*> & p) { return filter(p.first); });
             }
 
         private:
 
-            void InternalRun(TestLink * p_test_link, const TestContext & context);
+            void InternalRun(const TestLink * p_test_link, const TestContext & context);
 
             class NullBuffer : public std::basic_streambuf<Char>
             {
@@ -61,7 +61,7 @@ namespace awl
 
             ostringstream lastOutput;
             
-            using Map = std::map<const Char *, TestLink *, CStringLess<Char>>;
+            using Map = std::map<const char *, const TestLink *, CStringLess<char>>;
 
             Map testMap;
         };
