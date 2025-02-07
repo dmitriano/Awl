@@ -63,10 +63,5 @@ namespace awl
             
             StaticMap<TestFunc> testMap;
         };
-
-        inline std::shared_ptr<TestMap> CreateTestMap()
-        {
-            return std::make_shared<TestMap>();
-        }
     }
 }

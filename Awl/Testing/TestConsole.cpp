@@ -71,22 +71,20 @@ namespace awl::testing
         
         AWT_FLAG(list);
 
+        TestMap test_map;
+
         if (list)
         {
-            auto test_map = awl::testing::CreateTestMap();
-
             AWT_ATTRIBUTE(std::string, filter, {});
 
             auto f = CreateFilter(filter);
 
-            test_map->PrintNames(awl::cout(), f);
+            test_map.PrintNames(awl::cout(), f);
 
-            awl::cout() << _T("Total ") << test_map->GetCount(f) << _T(" tests.") << std::endl;
+            awl::cout() << _T("Total ") << test_map.GetCount(f) << _T(" tests.") << std::endl;
 
             return 0;
         }
-
-        auto test_map = awl::testing::CreateTestMap();
 
         AWT_ATTRIBUTE(std::set<String>, run, {});
 
@@ -100,9 +98,9 @@ namespace awl::testing
 
                 auto f = CreateFilter(filter);
 
-                context.out << std::endl << _T("***************** Running ") << test_map->GetCount(f) << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << test_map.GetCount(f) << _T(" tests *****************") << std::endl;
 
-                test_map->RunAll(context, f);
+                test_map.RunAll(context, f);
             }
             else
             {
@@ -110,7 +108,7 @@ namespace awl::testing
 
                 for (auto& test : run)
                 {
-                    test_map->Run(context, ToAString(test).c_str());
+                    test_map.Run(context, ToAString(test).c_str());
                 }
             }
 
@@ -120,7 +118,7 @@ namespace awl::testing
         }
         catch (const awl::testing::TestException& e)
         {
-            context.out << std::endl << test_map->GetLastOutput();
+            context.out << std::endl << test_map.GetLastOutput();
 
             context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }

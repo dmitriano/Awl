@@ -14,7 +14,7 @@
 
 namespace awl::testing
 {
-    using TestFunc = std::add_pointer_t<void(const TestContext& context)>;
+    using TestFunc = const std::add_pointer_t<void(const TestContext& context)>;
 
     //The objects of this class are static, they are not supposed to be created on the heap or on the stack.
     //There is no safe_exclude() in the destructor, because the order of static objects destruction in undefined,
