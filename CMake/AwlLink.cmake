@@ -56,8 +56,8 @@ if (AWL_BOOST_EXTRAS)
 
     if(Boost_FOUND)
         message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS}")
-        target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Boost)
         add_definitions(-DAWL_BOOST)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Boost)
         file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${AWL_ROOT_DIR}/Extras/Boost/*.cpp)
         target_sources(${PROJECT_NAME} PRIVATE ${BOOST_FILES})
     else()
@@ -70,7 +70,7 @@ if (AWL_FIND_QT)
     find_package(Qt6 COMPONENTS Core)
 
     if(Qt6_FOUND)
-        message("Applying the workaround for QT Creator.")
+        message("Using QT6. Include path: ${Qt6_INCLUDE_DIRS}. Applying the workaround for QT Creator.")
         # Sometimes QT Creator requires the configuration to be exactly Debug or Release and not RelWithDebInfo,
         # so we make Release to be RelWithDebinfo with O3.
         target_compile_options(${PROJECT_NAME} PRIVATE
@@ -79,11 +79,14 @@ if (AWL_FIND_QT)
         )
         add_definitions(-DAWL_QT)
 
-        # QT compiles withour QT_NO_EXCEPTIONS for Apple
+        # QT compiles without QT_NO_EXCEPTIONS for Apple
         if (NOT APPLE)
             add_definitions(-DQT_NO_EXCEPTIONS=1)
         endif()
 
+        target_include_directories(${PROJECT_NAME} PRIVATE ${Qt6_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Qt)
+        file(GLOB_RECURSE QT_EXTTRAS_FILES ${CMAKE_SOURCE_DIR}/Extras/Qt/*.h ${AWL_ROOT_DIR}/Extras/Qt/*.cpp)
+        target_sources(${PROJECT_NAME} PRIVATE ${QT_EXTTRAS_FILES})
         target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)
     endif()
 endif()
