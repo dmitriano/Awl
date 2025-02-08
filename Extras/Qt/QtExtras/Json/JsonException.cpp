@@ -16,7 +16,7 @@ String JsonException::What() const
     f << "Path: ";
 
     {
-        separator sep(_T("/"));
+        separator sep(_T("->"));
 
         for (const std::string& key : m_path | std::views::reverse | std::views::transform(std::mem_fn(&ValueInfo::key)))
         {

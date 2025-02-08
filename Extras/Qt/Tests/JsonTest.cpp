@@ -132,11 +132,11 @@ AWT_TEST(JsonReflectableB)
 }
 
 // Expected output:
-// Path: a / b
+// Path: a->b
 // Message : 'Expected value type: Bool actul value type: String'
 // Details :
 //     [a] (Object / struct)
-//     [b](String / int8_t)
+//     [b] (String / int8_t)
 AWT_TEST(JsonReflectableExceptionTypeMismatch)
 {
     using namespace awl::testing::helpers::v1;
@@ -164,11 +164,11 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
 }
 
 // Expected output:
-// Path: a / b
+// Path: a->b
 // Message : 'Expected value type: Bool actul value type: Null'
 // Details :
 //     [a] (Object / struct)
-//     [b](Null / int8_t)
+//     [b] (Null / int8_t)
 AWT_TEST(JsonReflectableExceptionNull)
 {
     using namespace awl::testing::helpers::v1;
