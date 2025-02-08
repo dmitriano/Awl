@@ -15,15 +15,32 @@ String JsonException::What() const
 
     f << "Path: ";
 
-    separator sep(_T("->"));
+    {
+        separator sep(_T("/"));
+
+        for (const std::string& key : m_path | std::views::reverse | std::views::transform(std::mem_fn(&ValueInfo::key)))
+        {
+            f << sep << key;
+        }
+    }
+
+    f << "\n";
+
+    f << "Message: '" << theMessage << "'";
+
+    f << "\n";
+
+    f << "Details: ";
+
+    f << "\n";
+
+    separator sep(_T("\n"));
 
     for (auto& info : m_path | std::views::reverse)
     {
         f << sep << "[" << info.key << "] (" << TypeToString(info.jsonType) << "/" << info.cppType << ")";
     }
 
-    f << ". Message: '" << theMessage << "'";
-    
     return f.str();
 }
 
