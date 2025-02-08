@@ -169,7 +169,7 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
 // Details :
 //     [a] (Object / struct)
 //     [b](Null / int8_t)
-AWT_TEST(JsonReflectableExceptionDoesNotExist)
+AWT_TEST(JsonReflectableExceptionNull)
 {
     using namespace awl::testing::helpers::v1;
 
