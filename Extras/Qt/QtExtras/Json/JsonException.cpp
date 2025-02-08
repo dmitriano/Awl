@@ -49,13 +49,6 @@ JsonException::JsonException(String message, ValueInfo info) : GeneralException(
     m_path.push_back(std::move(info));
 }
 
-JsonException::JsonException(JsonException& inner, ValueInfo info) :
-    GeneralException(std::move(inner.What())),
-    m_path(std::move(inner.m_path))
-{
-    m_path.push_back(std::move(info));
-}
-
 void JsonException::append(ValueInfo info)
 {
     m_path.push_back(std::move(info));

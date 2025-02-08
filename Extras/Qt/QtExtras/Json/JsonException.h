@@ -24,8 +24,6 @@ namespace awl
 
         JsonException(String message, ValueInfo info);
 
-        JsonException(JsonException& inner, ValueInfo info);
-
         void append(ValueInfo info);
 
         String What() const override;
