@@ -125,7 +125,7 @@ namespace awl
     };
 
     template <class Container>
-    concept back_insertable_sequence = std::ranges::range<Container> && !insertable_map<Container> &&
+    concept back_insertable_sequence = std::ranges::range<Container> &&
         requires(Container& container)
     {
         { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
