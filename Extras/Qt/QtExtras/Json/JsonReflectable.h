@@ -4,6 +4,7 @@
 #include "QtExtras/Json/JsonException.h"
 
 #include "Awl/Reflection.h"
+#include "Awl/Mp/TypeDescriptor.h"
 
 namespace awl
 {
@@ -20,7 +21,9 @@ namespace awl
             awl::for_each_index(obj.as_tuple(), [&obj, &jo](auto & field_val, size_t index)
             {
                 //Remove reference and const.
-                JsonSerializer<std::decay_t<decltype(field_val)>> formatter;
+                using FieldType = std::decay_t<decltype(field_val)>;
+
+                JsonSerializer<FieldType> formatter;
 
                 const std::string& cpp_key = obj.get_member_names()[index];
 
@@ -34,7 +37,7 @@ namespace awl
                 }
                 catch (JsonException& e)
                 {
-                    e.append({ key_jv.type(), "reflectable", cpp_key});
+                    e.append({ key_jv.type(), mp::make_type_name<FieldType>(), cpp_key});
 
                     throw e;
                 }

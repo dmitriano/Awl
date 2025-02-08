@@ -68,22 +68,52 @@ AWT_TEST(JsonBinanceErrorParsing)
     }
 }
 
+namespace
+{
+    QJsonObject makeAJson()
+    {
+        QJsonObject jo;
+
+        jo["a"] = 1;
+        jo["b"] = true;
+        jo["c"] = "abc";
+        jo["d"] = 2.0;
+
+        return jo;
+    }
+}
+
 AWT_TEST(JsonReflectable)
 {
     AWT_UNUSED_CONTEXT;
 
     using namespace awl::testing::helpers::v1;
 
-    QJsonObject jo;
+    A a;
 
-    jo["a"] = 1;
-    jo["b"] = true;
-    jo["c"] = "abc";
-    jo["d"] = 2.0;
+    awl::FromJson(makeAJson(), a);
+
+    AWT_ASSERT(a == a_expected);
+}
+
+AWT_TEST(JsonReflectableException)
+{
+    using namespace awl::testing::helpers::v1;
+
+    QJsonObject jo = makeAJson();
+
+    jo["b"] = "d";
 
     A a;
 
-    awl::FromJson(jo, a);
+    try
+    {
+        awl::FromJson(jo, a);
 
-    AWT_ASSERT(a == a_expected);
+        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+    }
+    catch (const awl::JsonException& e)
+    {
+        context.logger.debug(e.What());
+    }
 }
