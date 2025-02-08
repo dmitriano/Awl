@@ -7,6 +7,8 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/VectorSet.h"
 #include "Awl/ObservableSet.h"
+#include "Awl/StringFormat.h"
+#include "Awl/Mp/TypeDescriptor.h"
 
 #include <map>
 #include <unordered_map>
@@ -99,11 +101,26 @@ namespace awl
 
             v.clear();
 
+            size_t index = 0;
+
             for (auto j_elem : ja)
             {
                 T val;
-                formatter.FromJson(j_elem, val);
+
+                try
+                {
+                    formatter.FromJson(j_elem, val);
+                }
+                catch (JsonException& e)
+                {
+                    e.append({ j_elem.type(), mp::make_type_name<T>(), awl::aformat() << index });
+
+                    throw e;
+                }
+
                 v.push_back(val);
+
+                ++index;
             }
         }
 
@@ -145,11 +162,26 @@ namespace awl
 
             v.clear();
 
+            size_t index = 0;
+
             for (auto j_elem : ja)
             {
                 T val;
-                formatter.FromJson(j_elem, val);
+
+                try
+                {
+                    formatter.FromJson(j_elem, val);
+                }
+                catch (JsonException& e)
+                {
+                    e.append({ j_elem.type(), mp::make_type_name<T>(), awl::aformat() << index });
+
+                    throw e;
+                }
+
                 v.insert(std::move(val));
+
+                ++index;
             }
         }
 

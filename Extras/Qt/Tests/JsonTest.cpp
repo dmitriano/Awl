@@ -131,7 +131,6 @@ AWT_TEST(JsonReflectableB)
     AWT_ASSERT(b == b_expected);
 }
 
-// Expected output:
 // Path: a->b
 // Message : 'Expected value type: Bool, actul value type: String'
 // Details :
@@ -139,8 +138,6 @@ AWT_TEST(JsonReflectableB)
 //     [b] (String / int8_t)
 AWT_TEST(JsonReflectableExceptionTypeMismatch)
 {
-    using namespace awl::testing::helpers::v1;
-
     QJsonObject b_jo = makeBJson();
 
     QJsonObject a_jo = makeAJson();
@@ -163,7 +160,6 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
     }
 }
 
-// Expected output:
 // Path: a->b
 // Message : 'Expected value type: Bool, actul value type: Null'
 // Details :
@@ -171,8 +167,6 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
 //     [b] (Null / int8_t)
 AWT_TEST(JsonReflectableExceptionNull)
 {
-    using namespace awl::testing::helpers::v1;
-
     QJsonObject b_jo = makeBJson();
 
     QJsonObject a_jo = makeAJson();
@@ -195,10 +189,14 @@ AWT_TEST(JsonReflectableExceptionNull)
     }
 }
 
-AWT_TEST(JsonReflectableExceptionArray)
+// Path: v->1->b
+// Message: 'Expected value type: Bool, actul value type: Null'
+// Details:
+//  [v] (Array/sequence<struct>)
+//  [1] (Object/struct)
+//  [b] (Null/int8_t)
+AWT_TEST(JsonReflectableExceptionVector)
 {
-    using namespace awl::testing::helpers::v1;
-
     QJsonObject b_jo = makeBJson();
 
     QJsonObject a_jo = makeAJson();
@@ -206,6 +204,41 @@ AWT_TEST(JsonReflectableExceptionArray)
     a_jo.erase(a_jo.find("b"));
 
     b_jo["v"] = QJsonArray{ makeAJson(), a_jo, makeAJson() };
+
+    B b;
+
+    try
+    {
+        awl::FromJson(b_jo, b);
+
+        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+    }
+    catch (const awl::JsonException& e)
+    {
+        context.logger.debug(e.What());
+    }
+}
+
+// Path: v1->1->a->b
+// Message: 'Expected value type: Bool, actul value type: String'
+// Details:
+//  [v1] (Array/sequence<struct>)
+//  [1] (Object/struct)
+//  [a] (Object/struct)
+//  [b] (Null/int8_t)
+AWT_TEST(JsonReflectableExceptionSet)
+{
+    QJsonObject b_jo = makeBJson();
+
+    QJsonObject c_jo = makeCJson();
+
+    QJsonObject a_jo = makeAJson();
+
+    a_jo["b"] = "text";
+
+    c_jo["a"] = a_jo;
+
+    b_jo["v1"] = QJsonArray{ makeCJson(), c_jo, makeCJson() };
 
     B b;
 
