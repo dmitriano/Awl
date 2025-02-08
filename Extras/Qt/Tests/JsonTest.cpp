@@ -253,3 +253,49 @@ AWT_TEST(JsonReflectableExceptionSet)
         context.logger.debug(e.What());
     }
 }
+
+namespace
+{
+    template <class Map>
+    void TestMap(const awl::testing::TestContext& context)
+    {
+        Map expected_map{ {"a", 0}, {"b", 1}, {"c", 2} };
+
+        QJsonValue jv = awl::ToJson(expected_map);
+
+        {
+            Map map;
+
+            awl::FromJson(jv, map);
+
+            AWT_ASSERT(map == expected_map);
+        }
+
+        QJsonObject jo = jv.toObject();
+
+        jo["b"] = "text";
+
+        {
+            Map map;
+
+            try
+            {
+                awl::FromJson(jo, map);
+
+                AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+            }
+            catch (const awl::JsonException& e)
+            {
+                context.logger.debug(e.What());
+            }
+        }
+    }
+}
+
+AWT_TEST(JsonMap)
+{
+    TestMap<std::map<QString, int>>(context);
+    TestMap<std::map<std::string, int>>(context);
+    TestMap<std::unordered_map<QString, int>>(context);
+    TestMap<std::unordered_map<std::string, int>>(context);
+}

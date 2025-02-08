@@ -7,6 +7,8 @@
 
 #include <type_traits>
 #include <memory>
+#include <concepts>
+#include <utility>
 
 namespace awl
 {
@@ -102,4 +104,30 @@ namespace awl
 
     template<typename T>
     constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
+
+    // Standard container concepts.
+
+    template <class Container>
+    concept insertable_map = std::ranges::range<Container> &&
+        requires(Container& container)
+    {
+        typename Container::key_type;
+        typename Container::mapped_type;
+        // { declval<std::pair<const typename Container::key_type, typename Container::mapped_type>>() } -> std::same_as<std::ranges::range_value_t<Container>>;
+        { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
+    };
+
+    template <class Container>
+    concept insertable_sequence = std::ranges::range<Container> && !insertable_map<Container> &&
+        requires(Container& container)
+    {
+        { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
+    };
+
+    template <class Container>
+    concept back_insertable_sequence = std::ranges::range<Container> && !insertable_map<Container> &&
+        requires(Container& container)
+    {
+        { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
+    };
 }

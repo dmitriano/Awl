@@ -6,6 +6,7 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Mp/TypeDescriptor.h"
+#include "Awl/TypeTraits.h"
 
 #include <type_traits>
 #include <ranges>
@@ -14,20 +15,6 @@ namespace awl
 {
     namespace helpers
     {
-        template <class Container>
-        concept insertable_sequence = std::ranges::range<Container> &&
-            requires(Container& container)
-        {
-            { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
-        };
-
-        template <class Container>
-        concept back_insertable_sequence = std::ranges::range<Container> &&
-            requires(Container & container)
-        {
-            { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
-        };
-
         template <class Container>
         struct inserter : std::false_type {};
 

@@ -6,16 +6,15 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Mp/TypeDescriptor.h"
+#include "Awl/TypeTraits.h"
 
-#include <map>
-#include <unordered_map>
+#include <ranges>
 
 namespace awl
 {
-    template <class Container>
-    class JsonSerializer<Container, std::enable_if_t<
-        (std::is_same_v<typename Container::key_type, std::string> || std::is_same_v<typename Container::key_type, QString>) &&
-        (awl::is_specialization_v<Container, std::unordered_map> || awl::is_specialization_v<Container, std::map>)>>
+    template <class Container> requires insertable_map<Container> &&
+        (std::is_same_v<typename Container::key_type, std::string> || std::is_same_v<typename Container::key_type, QString>)
+    class JsonSerializer<Container>
     {
     private:
 
@@ -26,7 +25,7 @@ namespace awl
 
     public:
 
-        void FromJson(const QJsonValue & jv, value_type & map)
+        void FromJson(const QJsonValue& jv, value_type& map)
         {
             EnsureType(jv, QJsonValue::Object);
             QJsonObject jo = jv.toObject();
@@ -38,7 +37,17 @@ namespace awl
             {
                 T val;
                 const QJsonValue & jvv = i.value();
-                formatter.FromJson(jvv, val);
+
+                try
+                {
+                    formatter.FromJson(jvv, val);
+                }
+                catch (JsonException& e)
+                {
+                    e.append({ jvv.type(), mp::make_type_name<T>(), i.key().toLatin1().data() });
+
+                    throw e;
+                }
 
                 using MapKey = typename Container::key_type;
                 MapKey map_key;
