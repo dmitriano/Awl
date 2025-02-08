@@ -259,6 +259,8 @@ namespace
     template <class Map>
     void TestMap(const awl::testing::TestContext& context)
     {
+        static_assert(awl::insertable_map<Map>);
+
         Map expected_map{ {"a", 0}, {"b", 1}, {"c", 2} };
 
         QJsonValue jv = awl::ToJson(expected_map);

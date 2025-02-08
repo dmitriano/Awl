@@ -113,7 +113,7 @@ namespace awl
     {
         typename Container::key_type;
         typename Container::mapped_type;
-        // { declval<std::pair<const typename Container::key_type, typename Container::mapped_type>>() } -> std::same_as<std::ranges::range_value_t<Container>>;
+        std::is_same_v<std::pair<const typename Container::key_type, typename Container::mapped_type>, std::ranges::range_value_t<Container>>;
         { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
     };
 
