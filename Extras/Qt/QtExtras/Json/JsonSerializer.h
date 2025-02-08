@@ -2,6 +2,6 @@
 
 namespace awl
 {
-    template <class T, typename Enable = void>
+    template <class T>
     class JsonSerializer;
 }

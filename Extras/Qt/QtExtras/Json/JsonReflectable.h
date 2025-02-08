@@ -8,8 +8,8 @@
 
 namespace awl
 {
-    template <class T>
-    class JsonSerializer<T, std::enable_if_t<std::is_class_v<T> && awl::is_reflectable_v<T>>>
+    template <class T> requires std::is_class_v<T>&& awl::is_reflectable_v<T>
+    class JsonSerializer<T>
     {
     public:
 

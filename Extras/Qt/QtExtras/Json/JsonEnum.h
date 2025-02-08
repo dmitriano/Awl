@@ -6,8 +6,8 @@
 
 namespace awl
 {
-    template <class T>
-    class JsonSerializer<T, std::enable_if_t<std::is_enum_v<T>>>
+    template <class T> requires std::is_enum_v<T>
+    class JsonSerializer<T>
     {
     private:
 

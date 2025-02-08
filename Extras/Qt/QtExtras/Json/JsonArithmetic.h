@@ -24,8 +24,8 @@ namespace awl
         }
     };
 
-    template <class T>
-    class JsonSerializer<T, std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>>>
+    template <class T> requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+    class JsonSerializer<T>
     {
     public:
 
