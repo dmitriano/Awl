@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
-namespace qtil
+namespace awl
 {
     template <>
     class JsonSerializer<QString>

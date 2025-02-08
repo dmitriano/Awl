@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Qtil/Jsonable.h"
-#include "Qtil/Json/Json.h"
+#include "QtExtras/Json/Jsonable.h"
+#include "QtExtras/Json/Json.h"
 
-namespace qtil
+namespace awl
 {
     template <class T>
     class JsonableObject : public Jsonable
@@ -17,7 +17,7 @@ namespace qtil
             T val;
 
             //If it throws m_val does not change.
-            qtil::FromJson(jv, val);
+            awl::FromJson(jv, val);
 
             m_val = std::move(val);
         }
@@ -26,7 +26,7 @@ namespace qtil
         {
             QJsonValue jv;
 
-            qtil::ToJson(m_val, jv);
+            awl::ToJson(m_val, jv);
 
             return jv;
         }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include "Awl/Reflection.h"
 
-namespace qtil
+namespace awl
 {
     template <class T>
     class JsonSerializer<T, std::enable_if_t<std::is_class_v<T> && awl::is_reflectable_v<T>>>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Qtil/DecimalType.h"
-#include "Qtil/StringConversion.h"
+#include "Awl/Decimal.h"
+#include "QtExtras/StringConversion.h"
 
 #include "Awl/EnumTraits.h"
 #include "Awl/Crypto/IntHash.h"
@@ -19,7 +19,7 @@
 #include <functional>
 #include <concepts>
 
-namespace qtil
+namespace awl
 {
     using FixedHash = awl::crypto::FixedHash<awl::crypto::Int64Hash>;
 
@@ -33,7 +33,8 @@ namespace qtil
 
     void removeTrailingZeros(QString & s);
 
-    inline QString toString(const qtil::decimal& d)
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltinDecimalData>
+    QString toString(const awl::decimal<UInt, exp_len, DataTemplate> & d)
     {
         std::ostringstream out;
 

@@ -2,8 +2,8 @@
 
 #include "Awl/Exception.h"
 
-#include "Qtil/Format.h"
-#include "Qtil/Json/JsonUtil.h"
+#include "Awl/StringFormat.h"
+#include "QtExtras/Json/JsonUtil.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -11,7 +11,7 @@
 #include <QJsonValue>
 #include <QFile>
 
-namespace qtil
+namespace awl
 {
     inline QJsonDocument loadDocumentFromFile(QString file_name)
     {
@@ -19,7 +19,7 @@ namespace qtil
 
         if (!file.open(QFile::ReadOnly))
         {
-            throw awl::GeneralException(qtil::Format() << _T("Cannot open input file '") << file.fileName() << "'.");
+            throw awl::GeneralException(awl::format() << _T("Cannot open input file '") << file.fileName() << "'.");
         }
 
         QByteArray content = file.readAll();
@@ -35,7 +35,7 @@ namespace qtil
 
         if (!document.isArray())
         {
-            throw awl::GeneralException(qtil::Format() << _T("JSON array expected in file '") << file_name << "'.");
+            throw awl::GeneralException(awl::format() << _T("JSON array expected in file '") << file_name << "'.");
         }
 
         QJsonArray ja = document.array();
@@ -49,7 +49,7 @@ namespace qtil
 
         if (!document.isObject())
         {
-            throw awl::GeneralException(qtil::Format() << _T("JSON object expected in file '") << file_name << "'.");
+            throw awl::GeneralException(awl::format() << _T("JSON object expected in file '") << file_name << "'.");
         }
 
         QJsonObject jo = document.object();
@@ -71,7 +71,7 @@ namespace qtil
 
         if (!file.open(QFile::WriteOnly))
         {
-            throw awl::GeneralException(qtil::Format() << _T("Cannot open file '") << file.fileName() << "' for writing.");
+            throw awl::GeneralException(awl::format() << _T("Cannot open file '") << file.fileName() << "' for writing.");
         }
 
         file.write(document.toJson());
@@ -106,7 +106,7 @@ namespace qtil
         case QJsonValue::Undefined:
             break;
         default:
-            throw JsonException(qtil::Format() << "Can't create a document form json value of type " << TypeToString(jv.type()));
+            throw JsonException(awl::format() << "Can't create a document form json value of type " << TypeToString(jv.type()));
         }
 
         saveDocumentToFile(file_name, jdoc);

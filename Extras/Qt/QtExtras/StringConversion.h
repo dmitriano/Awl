@@ -7,7 +7,7 @@
 
 #include <QString>
 
-namespace qtil
+namespace awl
 {
     inline void ConvertString(std::wstring& to, const QString& from)
     {

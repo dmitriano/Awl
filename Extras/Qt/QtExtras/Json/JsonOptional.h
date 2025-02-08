@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include <optional>
 
-namespace qtil
+namespace awl
 {
     template <class T>
     class JsonSerializer<std::optional<T>>

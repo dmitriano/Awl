@@ -2,7 +2,7 @@
 
 #include <QJsonValue>
 
-namespace qtil
+namespace awl
 {
     class Jsonable
     {

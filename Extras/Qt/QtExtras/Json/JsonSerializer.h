@@ -7,7 +7,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 
-namespace qtil
+namespace awl
 {
     AWL_DEFINE_EXCEPTION(JsonException)
 

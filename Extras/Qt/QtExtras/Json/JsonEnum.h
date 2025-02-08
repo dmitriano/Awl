@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include "Awl/EnumTraits.h"
 
-namespace qtil
+namespace awl
 {
     template <class T>
     class JsonSerializer<T, std::enable_if_t<std::is_enum_v<T>>>

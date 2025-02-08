@@ -1,4 +1,4 @@
-#include "Qtil/StringConversion.h"
+#include "QtExtras/StringConversion.h"
 
 #include <Awl/Testing/UnitTest.h>
 
@@ -40,7 +40,7 @@ namespace
 
                 QJsonValue jmsg = jobj["msg"];
 
-                context.out << "Code: " << jcode.toInt() << ", msg: " << qtil::FromQString(jmsg.toString()) << std::endl;
+                context.out << "Code: " << jcode.toInt() << ", msg: " << awl::FromQString(jmsg.toString()) << std::endl;
                 
                 return true;
             }

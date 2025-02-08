@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
-#include "Qtil/Format.h"
-#include "Qtil/DecimalType.h"
+#include "QtExtras/Json/JsonSerializer.h"
+#include "Awl/StringFormat.h"
 
-namespace qtil
+namespace awl
 {
     template <>
     class JsonSerializer<bool>
@@ -68,67 +67,6 @@ namespace qtil
             {
                 jv = QJsonValue(static_cast<double>(val));
             }
-        }
-    };
-
-    template <>
-    class JsonSerializer<qtil::decimal>
-    {
-    public:
-
-        void FromJson(const QJsonValue& jv, qtil::decimal& val)
-        {
-            switch (jv.type())
-            {
-                case QJsonValue::String:
-                {
-                    const std::string text = jv.toString().toStdString();
-
-                    try
-                    {
-                        val = qtil::decimal::from_string(std::string_view(text));
-                    }
-                    catch (const std::runtime_error&)
-                    {
-                        throw JsonException(qtil::Format() << "Can't convert '" << text << "' to decimal.");
-                    }
-
-                    break;
-                }
-                case QJsonValue::Double:
-                {
-                    const double d_val = jv.toDouble();
-
-                    const int64_t int_val = static_cast<int64_t>(d_val);
-
-                    if (d_val == int_val)
-                    {
-                        val = qtil::decimal(int_val, 0);
-                    }
-                    else
-                    {
-                        val = qtil::decimal::make_decimal(d_val, qtil::decimal::max_exponent());
-
-                        val.normalize();
-                    }
-                    
-                    break;
-                }
-                default:
-
-                    throw JsonException(awl::format() << _T("Can't convert value of type: ") << TypeToString(jv.type()) << _T(" to decimal."));
-
-                    break;
-            }
-        }
-
-        void ToJson(const qtil::decimal& val, QJsonValue& jv)
-        {
-            std::ostringstream out;
-
-            out << val;
-            
-            jv = QString::fromStdString(out.str());
         }
     };
 }

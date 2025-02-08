@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include <QJsonArray>
 #include <QJsonObject>
@@ -8,7 +8,7 @@
 
 #include <ranges>
 
-namespace qtil
+namespace awl
 {
     template <std::ranges::range Range>
     QJsonArray RangeToJson(const Range& r)

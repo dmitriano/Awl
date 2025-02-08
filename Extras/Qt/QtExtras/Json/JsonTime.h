@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include <chrono>
 
-namespace qtil
+namespace awl
 {
     template <class Clock, class Duration>
     class JsonSerializer<std::chrono::time_point<Clock, Duration>>

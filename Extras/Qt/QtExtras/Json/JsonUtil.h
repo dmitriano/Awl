@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
-#include "Qtil/Json/JsonRange.h"
+#include "QtExtras/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonRange.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 
-namespace qtil
+namespace awl
 {
     template <class T>
     void FromJson(const QJsonValue & jv, T & val)

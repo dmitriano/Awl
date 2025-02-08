@@ -18,6 +18,10 @@ if (AWL_STATIC_RUNTIME)
     if (${AWL_COMPILER_GNU_OR_CLANG})
         message("Building with static runtime.")
         target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            $<$<CONFIG:Debug>:/MTd>
+            $<$<NOT:$<CONFIG:Debug>>:/MT>)
     endif()
 endif()
 

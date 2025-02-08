@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
-#include "Qtil/StringConversion.h"
+#include "QtExtras/StringConversion.h"
 
 #include "Awl/TypeTraits.h"
 #include "Awl/VectorSet.h"
@@ -16,7 +16,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace qtil
+namespace awl
 {
     template <class Container>
     class JsonSerializer<Container, std::enable_if_t<
@@ -49,7 +49,7 @@ namespace qtil
                 using MapKey = typename Container::key_type;
                 MapKey map_key;
                 
-                qtil::ConvertString(map_key, i.key());
+                awl::ConvertString(map_key, i.key());
                 
                 const bool new_key = map.insert(pair(map_key, val)).second;
                 
@@ -70,7 +70,7 @@ namespace qtil
                 QJsonValue jv_val;
                 formatter.ToJson(p.second, jv_val);
 
-                QString key = qtil::ToQString(p.first);
+                QString key = awl::ToQString(p.first);
                 
                 jo[key] = jv_val;
             }

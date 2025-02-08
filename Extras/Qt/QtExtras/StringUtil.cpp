@@ -1,6 +1,6 @@
 #include "StringUtil.h"
 
-namespace qtil
+namespace awl
 {
     void removeTrailingZeros(QString & s)
     {

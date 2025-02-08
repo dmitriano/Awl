@@ -100,6 +100,28 @@ Compiling a separate source file (by example of `VtsTest.cpp`):
 cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 ```
 
+## Compiling with QT and Boost on Windows
+
+Use `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option if QT is compiled with static runtime:
+
+```set MY_DRIVE=C:
+
+%MY_DRIVE%
+cd \dev\build\awl
+
+set MY_CMAKE_EXE=%MY_DRIVE%\dev\tools\cmake-3.24.2-windows-x86_64\bin\cmake.exe
+set MY_QT_DIR=%MY_DRIVE%\dev\libs\Qt6\windows
+set MY_BOOST_DIR=%MY_DRIVE%\dev\libs\boost_1_80_0
+set MY_VS_GENERATOR="Visual Studio 17 2022"
+
+set OPENSSL_ROOT_DIR=%MY_DRIVE%/dev/libs/OpenSSL
+set OPENSSL_USE_STATIC_LIBS=ON
+
+%MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -D CMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -D AWL_NO_DEPRECATED=ON -DAWL_STATIC_RUNTIME:BOOL=ON
+msbuild Awl.sln /p:Configuration=Debug /p:Platform=x64
+msbuild Awl.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
+```
+
 ## Using GCC sanitizer
 
 Add `-DAWL_SANITIZE_ADDRESS=1` or `-DAWL_SANITIZE_UNDEFINED=1` or `-DAWL_SANITIZE_THREAD=1` to CMake command, for example:

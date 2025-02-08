@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
-namespace qtil
+namespace awl
 {
     //Can be used like std::vector<QJsonValue>.
     template <>

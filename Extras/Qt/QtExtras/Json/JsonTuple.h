@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Qtil/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonSerializer.h"
 
 #include "Awl/TupleHelpers.h"
 
-namespace qtil
+namespace awl
 {
     template <typename... Args>
     class JsonSerializer<std::tuple<Args...>>
