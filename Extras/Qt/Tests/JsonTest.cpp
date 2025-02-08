@@ -131,7 +131,7 @@ AWT_TEST(JsonReflectableB)
     AWT_ASSERT(b == b_expected);
 }
 
-AWT_TEST(JsonReflectableException)
+AWT_TEST(JsonReflectableExceptionTypeMismatch)
 {
     using namespace awl::testing::helpers::v1;
 
@@ -140,6 +140,32 @@ AWT_TEST(JsonReflectableException)
     QJsonObject a_jo = makeAJson();
 
     a_jo["b"] = "d";
+
+    b_jo["a"] = a_jo;
+
+    B b;
+
+    try
+    {
+        awl::FromJson(b_jo, b);
+
+        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+    }
+    catch (const awl::JsonException& e)
+    {
+        context.logger.debug(e.What());
+    }
+}
+
+AWT_TEST(JsonReflectableExceptionDoesNotExist)
+{
+    using namespace awl::testing::helpers::v1;
+
+    QJsonObject b_jo = makeBJson();
+
+    QJsonObject a_jo = makeAJson();
+
+    a_jo.erase(a_jo.find("b"));
 
     b_jo["a"] = a_jo;
 
