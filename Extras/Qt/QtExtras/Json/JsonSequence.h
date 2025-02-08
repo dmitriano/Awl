@@ -4,29 +4,35 @@
 #include "QtExtras/StringConversion.h"
 
 #include "Awl/TypeTraits.h"
-#include "Awl/VectorSet.h"
-#include "Awl/ObservableSet.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Mp/TypeDescriptor.h"
 
-#include <vector>
-#include <deque>
-#include <list>
-#include <set>
-#include <unordered_set>
 #include <type_traits>
+#include <ranges>
 
 namespace awl
 {
     namespace helpers
     {
         template <class Container>
+        concept insertable_sequence = std::ranges::range<Container> &&
+            requires(Container& container)
+        {
+            { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
+        };
+
+        template <class Container>
+        concept back_insertable_sequence = std::ranges::range<Container> &&
+            requires(Container & container)
+        {
+            { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
+        };
+
+        template <class Container>
         struct inserter : std::false_type {};
 
-        template <class Container> requires (
-            awl::is_specialization_v<Container, std::vector> ||
-            awl::is_specialization_v<Container, std::deque> ||
-            awl::is_specialization_v<Container, std::list>)
+        template <std::ranges::range Container>
+            requires back_insertable_sequence<Container>
         struct inserter<Container> : std::true_type
         {
             static void reserve(Container& v, size_t n)
@@ -40,13 +46,8 @@ namespace awl
             }
         };
 
-        template <class Container> requires (
-            awl::is_specialization_v<Container, awl::vector_set> ||
-            awl::is_specialization_v<Container, awl::observable_set> ||
-            awl::is_specialization_v<Container, std::set> ||
-            awl::is_specialization_v<Container, std::multiset> ||
-            awl::is_specialization_v<Container, std::unordered_set> ||
-            awl::is_specialization_v<Container, std::unordered_multiset>)
+        template <class Container>
+            requires insertable_sequence<Container>
         struct inserter<Container> : std::true_type
         {
             static void reserve(Container& set, size_t n)
