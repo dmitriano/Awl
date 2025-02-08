@@ -30,7 +30,7 @@ namespace awl
     {
         if (jv.type() != t)
         {
-            throw JsonException(format() << _T("Expected value type: ") << TypeToString(t) << _T(" actul value type: ") << TypeToString(jv.type()));
+            throw JsonException(format() << _T("Expected value type: ") << TypeToString(t) << _T(", actul value type: ") << TypeToString(jv.type()));
         }
     }
     

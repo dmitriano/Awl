@@ -133,7 +133,7 @@ AWT_TEST(JsonReflectableB)
 
 // Expected output:
 // Path: a->b
-// Message : 'Expected value type: Bool actul value type: String'
+// Message : 'Expected value type: Bool, actul value type: String'
 // Details :
 //     [a] (Object / struct)
 //     [b] (String / int8_t)
@@ -165,7 +165,7 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
 
 // Expected output:
 // Path: a->b
-// Message : 'Expected value type: Bool actul value type: Null'
+// Message : 'Expected value type: Bool, actul value type: Null'
 // Details :
 //     [a] (Object / struct)
 //     [b] (Null / int8_t)
@@ -180,6 +180,32 @@ AWT_TEST(JsonReflectableExceptionNull)
     a_jo.erase(a_jo.find("b"));
 
     b_jo["a"] = a_jo;
+
+    B b;
+
+    try
+    {
+        awl::FromJson(b_jo, b);
+
+        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+    }
+    catch (const awl::JsonException& e)
+    {
+        context.logger.debug(e.What());
+    }
+}
+
+AWT_TEST(JsonReflectableExceptionArray)
+{
+    using namespace awl::testing::helpers::v1;
+
+    QJsonObject b_jo = makeBJson();
+
+    QJsonObject a_jo = makeAJson();
+
+    a_jo.erase(a_jo.find("b"));
+
+    b_jo["v"] = QJsonArray{ makeAJson(), a_jo, makeAJson() };
 
     B b;
 
