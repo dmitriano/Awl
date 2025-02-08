@@ -1,6 +1,9 @@
 #include "QtExtras/StringConversion.h"
+#include "QtExtras/Json/JsonUtil.h"
 
-#include <Awl/Testing/UnitTest.h>
+#include "Tests/VtsData.h"
+
+#include "Awl/Testing/UnitTest.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -63,4 +66,24 @@ AWT_TEST(JsonBinanceErrorParsing)
 
         AWT_ASSERT(!IsBinanceError(context, other_answer));
     }
+}
+
+AWT_TEST(JsonReflectable)
+{
+    AWT_UNUSED_CONTEXT;
+
+    using namespace awl::testing::helpers::v1;
+
+    QJsonObject jo;
+
+    jo["a"] = 1;
+    jo["b"] = true;
+    jo["c"] = "abc";
+    jo["d"] = 2.0;
+
+    A a;
+
+    awl::FromJson(jo, a);
+
+    AWT_ASSERT(a == a_expected);
 }

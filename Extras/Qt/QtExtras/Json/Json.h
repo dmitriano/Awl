@@ -5,7 +5,7 @@
 #include "JsonContainers.h"
 #include "JsonOptional.h"
 #include "JsonString.h"
-#include "JsonStringizable.h"
+#include "JsonReflectable.h"
 #include "JsonTime.h"
 #include "JsonEnum.h"
 #include "JsonUtil.h"

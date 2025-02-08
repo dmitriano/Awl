@@ -1,6 +1,7 @@
 #pragma once
 
-#include "QtExtras/Json/JsonSerializer.h"
+#include "QtExtras/Json/Json.h"
+#include "QtExtras/Json/JsonException.h"
 #include "QtExtras/Json/JsonRange.h"
 
 #include <QJsonDocument>

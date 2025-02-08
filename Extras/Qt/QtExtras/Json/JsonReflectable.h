@@ -1,6 +1,7 @@
 #pragma once
 
 #include "QtExtras/Json/JsonSerializer.h"
+#include "QtExtras/Json/JsonException.h"
 
 #include "Awl/Reflection.h"
 
@@ -21,8 +22,22 @@ namespace awl
                 //Remove reference and const.
                 JsonSerializer<std::decay_t<decltype(field_val)>> formatter;
 
-                QLatin1String key(obj.get_member_names()[index].c_str());
-                formatter.FromJson(jo[key], field_val);
+                const std::string& cpp_key = obj.get_member_names()[index];
+
+                QLatin1String key(cpp_key.c_str());
+
+                const QJsonValue& key_jv = jo[key];
+
+                try
+                {
+                    formatter.FromJson(key_jv, field_val);
+                }
+                catch (JsonException& e)
+                {
+                    e.append({ key_jv.type(), "reflectable", cpp_key});
+
+                    throw e;
+                }
             });
         }
 
