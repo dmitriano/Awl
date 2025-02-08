@@ -68,26 +68,50 @@ AWT_TEST(JsonBinanceErrorParsing)
     }
 }
 
+using namespace awl::testing::helpers::v1;
+
 namespace
 {
     QJsonObject makeAJson()
     {
         QJsonObject jo;
 
-        jo["a"] = 1;
-        jo["b"] = true;
-        jo["c"] = "abc";
-        jo["d"] = 2.0;
+        jo["a"] = a_expected.a;
+        jo["b"] = a_expected.b;
+        jo["c"] = awl::ToQString(a_expected.c);
+        jo["d"] = a_expected.d;
+
+        return jo;
+    }
+
+    QJsonObject makeCJson()
+    {
+        QJsonObject jo;
+
+        jo["x"] = c_expected.x;
+        jo["a"] = makeAJson();
+
+        return jo;
+    }
+
+    QJsonObject makeBJson()
+    {
+        QJsonObject jo;
+
+        jo["a"] = makeAJson();
+        jo["b"] = makeAJson();
+        jo["x"] = b_expected.x;
+        jo["y"] = b_expected.y;
+        jo["v"] = QJsonArray{ makeAJson(), makeAJson(), makeAJson() };
+        jo["v1"] = QJsonArray{ makeCJson() };
 
         return jo;
     }
 }
 
-AWT_TEST(JsonReflectable)
+AWT_TEST(JsonReflectableA)
 {
     AWT_UNUSED_CONTEXT;
-
-    using namespace awl::testing::helpers::v1;
 
     A a;
 
@@ -96,19 +120,34 @@ AWT_TEST(JsonReflectable)
     AWT_ASSERT(a == a_expected);
 }
 
+AWT_TEST(JsonReflectableB)
+{
+    AWT_UNUSED_CONTEXT;
+
+    B b;
+
+    awl::FromJson(makeBJson(), b);
+
+    AWT_ASSERT(b == b_expected);
+}
+
 AWT_TEST(JsonReflectableException)
 {
     using namespace awl::testing::helpers::v1;
 
-    QJsonObject jo = makeAJson();
+    QJsonObject b_jo = makeBJson();
 
-    jo["b"] = "d";
+    QJsonObject a_jo = makeAJson();
 
-    A a;
+    a_jo["b"] = "d";
+
+    b_jo["a"] = a_jo;
+
+    B b;
 
     try
     {
-        awl::FromJson(jo, a);
+        awl::FromJson(b_jo, b);
 
         AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
     }
