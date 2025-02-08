@@ -9,6 +9,7 @@
 #include <memory>
 #include <concepts>
 #include <utility>
+#include <ranges>
 
 namespace awl
 {
