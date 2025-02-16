@@ -12,13 +12,13 @@
 namespace awl
 {
     template <class T>
-    void FromJson(const QJsonValue & jv, T & val)
+    void FromJson(const QJsonValue& jv, T& val)
     {
         JsonSerializer<T>().FromJson(jv, val);
     }
 
     template <class T>
-    void ToJson(const T & val, QJsonValue & jv)
+    void ToJson(const T& val, QJsonValue& jv)
     {
         JsonSerializer<T>().ToJson(val, jv);
     }
@@ -57,7 +57,7 @@ namespace awl
     }
 
     template <class Struct>
-    void StructFromString(const QString &message, Struct & val)
+    void StructFromString(const QString& message, Struct& val)
     {
         QJsonDocument jdoc = QJsonDocument::fromJson(message.toUtf8());
 

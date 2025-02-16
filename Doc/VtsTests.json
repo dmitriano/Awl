@@ -1,0 +1,6 @@
+{
+  "run": [
+    "VtsReadWriteVectorStream_Test",
+    "VtsDeletedType_Test"
+  ]
+}

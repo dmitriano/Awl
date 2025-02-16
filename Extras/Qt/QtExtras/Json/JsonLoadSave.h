@@ -4,6 +4,7 @@
 
 #include "Awl/StringFormat.h"
 #include "QtExtras/Json/JsonUtil.h"
+#include "QtExtras/Json/JsonException.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -19,7 +20,7 @@ namespace awl
 
         if (!file.open(QFile::ReadOnly))
         {
-            throw awl::GeneralException(awl::format() << _T("Cannot open input file '") << file.fileName() << "'.");
+            throw JsonException(awl::format() << _T("Cannot open input file '") << file.fileName() << "'.");
         }
 
         QByteArray content = file.readAll();
@@ -35,7 +36,7 @@ namespace awl
 
         if (!document.isArray())
         {
-            throw awl::GeneralException(awl::format() << _T("JSON array expected in file '") << file_name << "'.");
+            throw JsonException(awl::format() << _T("JSON array expected in file '") << file_name << "'.");
         }
 
         QJsonArray ja = document.array();
@@ -49,7 +50,7 @@ namespace awl
 
         if (!document.isObject())
         {
-            throw awl::GeneralException(awl::format() << _T("JSON object expected in file '") << file_name << "'.");
+            throw JsonException(awl::format() << _T("JSON object expected in file '") << file_name << "'.");
         }
 
         QJsonObject jo = document.object();
@@ -71,7 +72,7 @@ namespace awl
 
         if (!file.open(QFile::WriteOnly))
         {
-            throw awl::GeneralException(awl::format() << _T("Cannot open file '") << file.fileName() << "' for writing.");
+            throw JsonException(awl::format() << _T("Cannot open file '") << file.fileName() << "' for writing.");
         }
 
         file.write(document.toJson());

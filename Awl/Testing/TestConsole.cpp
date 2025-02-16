@@ -3,6 +3,9 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "QtExtras/Json/JsonLoadSave.h"
+#include "QtExtras/StringConversion.h"
+
 #include "Awl/Testing/TestConsole.h"
 #include "Awl/Testing/TestMap.h"
 #include "Awl/Testing/TestAssert.h"
@@ -12,6 +15,7 @@
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
+#include "Awl/StdConsole.h"
 
 #include <set>
 #include <regex>
@@ -119,7 +123,23 @@ namespace awl::testing
 
         QJsonObject jo;
 
-        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+        String json_file;
+
+        if (cl.TryGet("json", json_file))
+        {
+            try
+            {
+                jo = loadObjectFromFile(ToQString(json_file));
+            }
+            catch (const JsonException& e)
+            {
+                awl::cout() << e.What() << std::endl;
+
+                return 3;
+            }
+        }
+
+        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(std::move(jo)));
 
 #else
 
