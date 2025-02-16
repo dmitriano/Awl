@@ -34,27 +34,7 @@ namespace awl::testing
     {
         TestContext& context = m_context;
         
-        AWT_FLAG(list);
-
-        if (list)
-        {
-            AWT_ATTRIBUTE(std::string, filter, {});
-
-            auto test_map = make_static_map<TestFunc>(filter);
-
-            for (auto& p : test_map)
-            {
-                const auto& test_name = p.first;
-
-                awl::cout() << test_name << std::endl;
-            }
-
-            awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
-
-            return 0;
-        }
-
-        AWT_ATTRIBUTE(std::set<String>, run, {});
+        AWT_ATTRIBUTE(std::string, run, {});
 
         bool passed = false;
 
@@ -76,12 +56,9 @@ namespace awl::testing
             {
                 TestMap test_map(last_output, "");
 
-                context.out << std::endl << _T("***************** Running ") << run.size() << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << 1 << _T(" tests *****************") << std::endl;
 
-                for (auto& test : run)
-                {
-                    test_map.Run(context, ToAString(test).c_str());
-                }
+                test_map.Run(context, run.c_str());
             }
 
             context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
@@ -118,6 +95,31 @@ namespace awl::testing
     int Run(int argc, Char* argv[])
     {
         CommandLineProvider cl(argc, argv);
+
+        // list command runs without TestMap
+        {
+            ProviderContext<CommandLineProvider> context{ cl };
+
+            AWT_FLAG(list);
+
+            if (list)
+            {
+                AWT_ATTRIBUTE(std::string, filter, {});
+
+                auto test_map = make_static_map<TestFunc>(filter);
+
+                for (auto& p : test_map)
+                {
+                    const auto& test_name = p.first;
+
+                    awl::cout() << test_name << std::endl;
+                }
+
+                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+
+                return 0;
+            }
+        }
 
 #ifdef AWL_QT
 

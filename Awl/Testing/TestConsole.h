@@ -49,6 +49,13 @@ namespace awl::testing
         TestContext m_context;
     };
 
+    // For acessing Command Line attributes without creating TestContext.
+    template <attribute_provider Provider>
+    struct ProviderContext
+    {
+        Provider& ap;
+    };
+
     int Run();
 
     int Run(int argc, Char* argv[]);

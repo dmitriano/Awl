@@ -1,0 +1,5 @@
+{
+  "run": "VtsReadWriteVectorStream_Test",
+  "element_count": 1000,
+  "output": "all"
+}
