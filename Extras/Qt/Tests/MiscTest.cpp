@@ -6,7 +6,7 @@
 //Ensure we did not mix release/debug builds.
 AWT_TEST(QtMixReleaseDebug)
 {
-    //AWT_ATTRIBUTE(QString, qstr, QString("QT6"));
+    //AWL_ATTRIBUTE(QString, qstr, QString("QT6"));
     AWT_UNUSED_CONTEXT;
 
     const QString qstr = "QT6";

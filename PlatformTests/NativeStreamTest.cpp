@@ -69,7 +69,7 @@ AWT_TEST(NativeStream)
         AWT_ASSERT(s.GetLength() == sample.size());
         AWT_ASSERT(s.GetPosition() == 0);
 
-        AWT_ATTRIBUTE(std::size_t, pos, 3);
+        AWL_ATTRIBUTE(std::size_t, pos, 3);
 
         s.Seek(pos);
         AWT_ASSERT(s.GetPosition() == pos);

@@ -247,7 +247,7 @@ AWT_TEST(IoVariantReadWrite)
 template <class T>
 static void TestVector(const TestContext & context, std::vector<T> sample)
 {
-    AWT_ATTRIBUTE(size_t, iteration_count, 10);
+    AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
     std::vector<uint8_t> v;
 

@@ -256,9 +256,9 @@ namespace
 
 AWT_TEST(VtsReadWriteVectorStream)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWT_ATTRIBUTE(size_t, write_count, 1);
-    AWT_ATTRIBUTE(size_t, read_count, 1);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, write_count, 1);
+    AWL_ATTRIBUTE(size_t, read_count, 1);
 
     AWT_ASSERT(write_count >= 1);
 
@@ -354,9 +354,9 @@ AWT_TEST(VtsReadWriteVectorStream)
 //store to/load of misaligned address
 AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWT_ATTRIBUTE(size_t, write_count, 1);
-    AWT_ATTRIBUTE(size_t, read_count, 1);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, write_count, 1);
+    AWL_ATTRIBUTE(size_t, read_count, 1);
 
     AWT_ASSERT(write_count >= 1);
 
@@ -453,7 +453,7 @@ AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 
 AWT_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     using OldMeasureWriter = OldWriter<awl::io::VirtualMeasureStream>;
 
@@ -472,7 +472,7 @@ AWT_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 
 AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     auto p_out = awl::io::CreateMeasureStream();
 
@@ -491,7 +491,7 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
 AWT_BENCHMARK(VtsMeasureSerializationFake)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     const size_t mem_size = MeasureStreamSize(context, element_count, false);
 
@@ -508,7 +508,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
 
 AWT_BENCHMARK(VtsMemSetMove)
 {
-    AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
+    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
     std::unique_ptr<uint8_t[]> p(new uint8_t[element_count]);
 
@@ -562,8 +562,8 @@ namespace
     template <class OutputStream>
     void TestWrite(const TestContext & context)
     {
-        AWT_ATTRIBUTE(size_t, element_count, defaultElementCount);
-        AWT_ATTRIBUTE(size_t, iteration_count, 1);
+        AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
+        AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
         using Writer = OldWriter<OutputStream>;
 

@@ -23,10 +23,10 @@ namespace
     template <class T>
     void Insert(const TestContext& context, const awl::Char* type_name)
     {
-        AWT_ATTRIBUTE(size_t, key_range, 1000000);
-        AWT_ATTRIBUTE(size_t, value_range, 1000000);
-        AWT_ATTRIBUTE(size_t, element_count, 100);
-        AWT_ATTRIBUTE(size_t, iteration_count, 10000);
+        AWL_ATTRIBUTE(size_t, key_range, 1000000);
+        AWL_ATTRIBUTE(size_t, value_range, 1000000);
+        AWL_ATTRIBUTE(size_t, element_count, 100);
+        AWL_ATTRIBUTE(size_t, iteration_count, 10000);
 
         awl::StopWatch w;
 
@@ -120,8 +120,8 @@ AWT_BENCHMARK(FlatMap)
 
 AWT_BENCHMARK(MemoryRead)
 {
-    AWT_ATTRIBUTE(size_t, element_count, 1024*1024);
-    AWT_ATTRIBUTE(size_t, read_count, 1000000);
+    AWL_ATTRIBUTE(size_t, element_count, 1024*1024);
+    AWL_ATTRIBUTE(size_t, read_count, 1000000);
 
     using T = uint64_t;
 

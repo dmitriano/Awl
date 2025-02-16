@@ -18,7 +18,7 @@ namespace awl::testing::helpers
     template <class T>
     void TestReadWrite(const TestContext& context, const T& sample)
     {
-        AWT_ATTRIBUTE(size_t, iteration_count, 10);
+        AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
         std::vector<uint8_t> reusable_v;
 

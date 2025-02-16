@@ -68,9 +68,9 @@ AWT_TEST(IntervalMap)
 {
     AWT_UNUSED_CONTEXT;
     
-    AWT_ATTRIBUTE(int, range, 1000);
-    AWT_ATTRIBUTE(size_t, iteration_count, 100);
-    AWT_ATTRIBUTE(size_t, clear_count, 50);
+    AWL_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, iteration_count, 100);
+    AWL_ATTRIBUTE(size_t, clear_count, 50);
 
     Map expected_map;
 

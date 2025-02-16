@@ -48,12 +48,12 @@ AWT_EXAMPLE(MultiprecisionDecimalConstants)
 
 AWT_EXAMPLE(MultiprecisionDecFloat)
 {
-    AWT_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
-    AWT_ATTRIBUTE(size_t, iter_count, 1000000u);
-    AWT_ATTRIBUTE(size_t, div_count, 50);
-    AWT_FLAG(no_square);
-    AWT_ATTRIBUTE(size_t, square_count, 5);
-    AWT_FLAG(no_div);
+    AWL_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
+    AWL_ATTRIBUTE(size_t, iter_count, 1000000u);
+    AWL_ATTRIBUTE(size_t, div_count, 50);
+    AWL_FLAG(no_square);
+    AWL_ATTRIBUTE(size_t, square_count, 5);
+    AWL_FLAG(no_div);
 
     //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
     //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
@@ -136,7 +136,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
 
 //AWT_EXAMPLE(MultiprecisionDecBackend)
 //{
-//    AWT_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
+//    AWL_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
 //
 //    constexpr unsigned lenght = 30;
 //
@@ -221,8 +221,8 @@ namespace
     template <class Int>
     void TestMultiprecisionIntImportExportBits(const awl::testing::TestContext& context)
     {
-        AWT_ATTRIBUTE(std::string, number, "max");
-        AWT_FLAG(negate);
+        AWL_ATTRIBUTE(std::string, number, "max");
+        AWL_FLAG(negate);
 
         Int i;
 
@@ -364,7 +364,7 @@ AWT_TEST(MultiprecisionReadWrite)
 
 AWT_EXAMPLE(MultiprecisionContainer)
 {
-    AWT_ATTRIBUTE(std::string, number, "max");
+    AWL_ATTRIBUTE(std::string, number, "max");
 
     using Int = bmp::uint128_t;
 

@@ -90,8 +90,8 @@ namespace
     {
         void operator()(const TestContext& context, const awl::Char* type_name)
         {
-            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-            AWT_ATTRIBUTE(size_t, iteration_count, 1);
+            AWL_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
             std::unique_ptr<T[]> p_buffer(new T[vector_size]);
 
@@ -159,8 +159,8 @@ namespace
     {
         void operator()(const TestContext& context, const awl::Char* type_name)
         {
-            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-            AWT_ATTRIBUTE(size_t, iteration_count, 1);
+            AWL_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
             context.out << _T("std::vector<") << type_name << _T(">\t");
 
@@ -248,10 +248,10 @@ namespace
     {
         void operator()(const TestContext& context, const awl::Char* type_name)
         {
-            AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-            AWT_ATTRIBUTE(size_t, iteration_count, 1);
-            AWT_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
-            AWT_FLAG(show_result);
+            AWL_ATTRIBUTE(size_t, vector_size, 1000000);
+            AWL_ATTRIBUTE(size_t, iteration_count, 1);
+            AWL_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
+            AWL_FLAG(show_result);
 
             context.out << _T("std::vector<") << type_name << _T(">\t");
 

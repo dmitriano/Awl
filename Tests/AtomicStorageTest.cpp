@@ -616,13 +616,13 @@ AWT_BENCHMARK(AtomicStorageVtsWrite)
 {
     using signed_size_t = std::make_signed_t<size_t>;
 
-    AWT_ATTRIBUTE(size_t, write_count, 100u);
-    AWT_FLAG(fake_hash); // To ensure that hash does not take a significant time.
-    AWT_FLAG(vector_stream); // For comparing with writing to a file.
-    AWT_ATTRIBUTE(size_t, element_count, 1);
-    AWT_ATTRIBUTE(signed_size_t, z_size, -1);
-    AWT_ATTRIBUTE(signed_size_t, v_size, -1);
-    AWT_ATTRIBUTE(signed_size_t, v2_size, -1);
+    AWL_ATTRIBUTE(size_t, write_count, 100u);
+    AWL_FLAG(fake_hash); // To ensure that hash does not take a significant time.
+    AWL_FLAG(vector_stream); // For comparing with writing to a file.
+    AWL_ATTRIBUTE(size_t, element_count, 1);
+    AWL_ATTRIBUTE(signed_size_t, z_size, -1);
+    AWL_ATTRIBUTE(signed_size_t, v_size, -1);
+    AWL_ATTRIBUTE(signed_size_t, v2_size, -1);
 
     auto guard = awl::make_scope_guard(RemoveFiles);
 

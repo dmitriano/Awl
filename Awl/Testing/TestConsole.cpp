@@ -34,7 +34,7 @@ namespace awl::testing
     {
         TestContext& context = m_context;
         
-        AWT_ATTRIBUTE(std::string, run, {});
+        AWL_ATTRIBUTE(std::string, run, {});
 
         bool passed = false;
 
@@ -44,7 +44,7 @@ namespace awl::testing
         {
             if (run.empty())
             {
-                AWT_ATTRIBUTE(std::string, filter, ".*_Test");
+                AWL_ATTRIBUTE(std::string, filter, ".*_Test");
 
                 TestMap test_map(last_output, filter);
 
@@ -100,11 +100,11 @@ namespace awl::testing
         {
             ProviderContext<CommandLineProvider> context{ cl };
 
-            AWT_FLAG(list);
+            AWL_FLAG(list);
 
             if (list)
             {
-                AWT_ATTRIBUTE(std::string, filter, {});
+                AWL_ATTRIBUTE(std::string, filter, {});
 
                 auto test_map = make_static_map<TestFunc>(filter);
 

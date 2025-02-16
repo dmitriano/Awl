@@ -101,8 +101,8 @@ namespace
 
 AWT_TEST(RingInt)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     auto r = awl::make_int_range<int>(0, range);
 
@@ -140,8 +140,8 @@ AWT_TEST(RingInt)
 
 AWT_TEST(RingMove)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     {
         auto r = awl::make_int_range<int>(0, range);
@@ -167,8 +167,8 @@ AWT_TEST(RingMove)
 
 AWT_TEST(RingAlgo)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     {
         awl::ring<A> ring(capacity);
@@ -207,8 +207,8 @@ AWT_TEST(RingAlgo)
 
 AWT_TEST(RingDestruction)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     {
         A a1(1);
@@ -242,8 +242,8 @@ AWT_TEST(RingDestruction)
 
 AWT_TEST(RingQueue)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     {
         awl::ring<A> ring(capacity);
@@ -273,8 +273,8 @@ AWT_TEST(RingQueue)
 
 AWT_TEST(RingPushFront)
 {
-    AWT_ATTRIBUTE(int, range, 10);
-    AWT_ATTRIBUTE(size_t, capacity, 5);
+    AWL_ATTRIBUTE(int, range, 10);
+    AWL_ATTRIBUTE(size_t, capacity, 5);
 
     awl::ring<A> ring(capacity);
 

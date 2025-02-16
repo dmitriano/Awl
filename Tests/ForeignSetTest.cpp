@@ -64,8 +64,8 @@ namespace
 
 AWT_TEST(ForeignSetAddRemoveClear)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     PrimarySet ps{ PrimaryGetter{ &A::pk } };
     ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
@@ -112,8 +112,8 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
 AWT_TEST(ForeignSetDestructor)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
     
@@ -130,8 +130,8 @@ AWT_TEST(ForeignSetDestructor)
 
 AWT_TEST(ForeignSetConstructor)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
@@ -153,8 +153,8 @@ AWT_TEST(ForeignSetConstructor)
 
 AWT_TEST(ForeignSetShared)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     {
         A a;
@@ -203,8 +203,8 @@ AWT_TEST(ForeignSetShared)
 
 AWT_TEST(ForeignSetUnique)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     //Check if it compiles.
 
@@ -233,8 +233,8 @@ AWT_TEST(ForeignSetUnique)
 
 AWT_TEST(ForeignSetPlainPointer)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     //Check if it compiles.
 

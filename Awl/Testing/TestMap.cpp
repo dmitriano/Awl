@@ -49,9 +49,9 @@ namespace awl::testing
 
     void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
-        AWT_ATTRIBUTE(String, output, _T("failed"));
-        AWT_ATTRIBUTE(size_t, loop, 0);
-        AWT_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
+        AWL_ATTRIBUTE(String, output, _T("failed"));
+        AWL_ATTRIBUTE(size_t, loop, 0);
+        AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
         context.out << FromACString(p_test_link->name());
 

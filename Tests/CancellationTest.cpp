@@ -39,9 +39,9 @@ using Duration = std::chrono::milliseconds;
 //./AwlTest --filter Cancellation_InterruptibleSleep.* --output failed --loop 100 --thread_count 10
 AWT_TEST(Cancellation_InterruptibleSleep)
 {
-    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
-    AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
-    AWT_ATTRIBUTE(size_t, thread_count, 3);
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWL_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
+    AWL_ATTRIBUTE(size_t, thread_count, 3);
     
     std::mutex m;
 
@@ -171,7 +171,7 @@ AWT_TEST(Cancellation_InterruptibleSleep)
 
 AWT_TEST(Cancellation_SimpleSleep)
 {
-    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
     awl::StopWatch w;
 
@@ -231,7 +231,7 @@ AWT_TEST(Cancellation_JThread)
 
 AWT_TEST(Cancellation_WatchDogThread1)
 {
-    AWT_ATTRIBUTE(int, timeout, 1);
+    AWL_ATTRIBUTE(int, timeout, 1);
 
     std::jthread watch_dog_thread([timeout](std::stop_token token)
     {
@@ -253,7 +253,7 @@ AWT_TEST(Cancellation_WatchDogThread1)
 
 AWT_TEST(Cancellation_WatchDogThread2)
 {
-    AWT_ATTRIBUTE(int, timeout, 5);
+    AWL_ATTRIBUTE(int, timeout, 5);
 
     awl::StopWatch sw;
 
