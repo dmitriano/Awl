@@ -7,10 +7,10 @@
 
 #include "QtExtras/Json/JsonSerializer.h"
 #include "QtExtras/StringConversion.h"
+#include "QtExtras/Json/TypeHint.h"
 
 #include "Awl/TypeTraits.h"
 #include "Awl/StringFormat.h"
-#include "Awl/Mp/TypeDescriptor.h"
 #include "Awl/Inserter.h"
 
 #include <type_traits>
@@ -48,7 +48,7 @@ namespace awl
                 }
                 catch (JsonException& e)
                 {
-                    e.append({ j_elem.type(), mp::make_type_name<T>(), awl::aformat() << index });
+                    e.append({ j_elem.type(), type_hint<T>(), awl::aformat() << index });
 
                     throw e;
                 }

@@ -6,12 +6,11 @@
 #pragma once
 
 #include "QtExtras/Json/JsonSerializer.h"
+#include "QtExtras/Json/TypeHint.h"
 #include "QtExtras/StringConversion.h"
 
 #include "Awl/TypeTraits.h"
 #include "Awl/StringFormat.h"
-#include "Awl/Mp/TypeDescriptor.h"
-#include "Awl/TypeTraits.h"
 
 #include <ranges>
 
@@ -49,7 +48,7 @@ namespace awl
                 }
                 catch (JsonException& e)
                 {
-                    e.append({ jvv.type(), mp::make_type_name<T>(), i.key().toLatin1().data() });
+                    e.append({ jvv.type(), type_hint<T>(), i.key().toLatin1().data() });
 
                     throw e;
                 }

@@ -7,9 +7,9 @@
 
 #include "QtExtras/Json/JsonSerializer.h"
 #include "QtExtras/Json/JsonException.h"
+#include "QtExtras/Json/TypeHint.h"
 
 #include "Awl/Reflection.h"
-#include "Awl/Mp/TypeDescriptor.h"
 
 namespace awl
 {
@@ -42,7 +42,7 @@ namespace awl
                 }
                 catch (JsonException& e)
                 {
-                    e.append({ key_jv.type(), mp::make_type_name<FieldType>(), cpp_key});
+                    e.append({ key_jv.type(), type_hint<FieldType>(), cpp_key});
 
                     throw e;
                 }

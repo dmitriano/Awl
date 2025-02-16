@@ -7,15 +7,6 @@
 
 #include "QtExtras/Json/JsonSerializer.h"
 
-#include "Awl/Mp/TypeDescriptor.h"
-
-DEFINE_TRIVIAL_TYPE_DESRIPTOR(QJsonValue)
-DEFINE_TRIVIAL_TYPE_DESRIPTOR(QJsonObject)
-DEFINE_TRIVIAL_TYPE_DESRIPTOR(QJsonArray)
-
-// TODO: Where is it used?
-DEFINE_TRIVIAL_TYPE_DESRIPTOR(QChar)
-
 namespace awl
 {
     //Can be used like std::vector<QJsonValue>.
