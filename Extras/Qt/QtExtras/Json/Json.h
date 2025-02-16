@@ -18,3 +18,4 @@
 #include "QtExtras/Json/JsonReferenceWrapper.h"
 #include "QtExtras/Json/JsonJson.h"
 #include "QtExtras/Json/JsonTuple.h"
+#include "QtExtras/Json/JsonDecimal.h"

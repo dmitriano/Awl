@@ -8,6 +8,7 @@
 
 #include "Tests/VtsData.h"
 
+#include "Awl/Decimal128.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <QJsonDocument>
@@ -306,3 +307,50 @@ AWL_TEST(JsonMap)
     TestMap<std::unordered_map<QString, int>>(context);
     TestMap<std::unordered_map<std::string, int>>(context);
 }
+
+#ifdef AWL_DECIMAL_128
+
+AWL_TEST(JsonDecimal)
+{
+    const char* sample = "12345.6789999";
+    
+    using Decimal = awl::decimal128<4>;
+
+    {
+        QJsonValue jv = QString(sample);
+
+        Decimal d;
+
+        awl::FromJson(jv, d);
+
+        AWL_ASSERT(d == Decimal(sample));
+    }
+
+    {
+        Decimal d(sample);
+
+        QJsonValue jv = awl::ToJson(d);
+
+        AWL_ASSERT(jv.type() == QJsonValue::String);
+        AWL_ASSERT(jv.toString() == sample);
+    }
+
+    {
+        try
+        {
+            QJsonValue jv = QString("bad.value");
+
+            Decimal d;
+
+            awl::FromJson(jv, d);
+
+            AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        }
+        catch (const awl::JsonException& e)
+        {
+            context.logger.debug(e.What());
+        }
+    }
+}
+
+#endif

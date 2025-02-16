@@ -184,7 +184,7 @@ namespace awl
         {
             if (!m_set.insert(val).second)
             {
-                throw std::logic_error("Duplicate add notification.");
+                throw std::runtime_error("Duplicate add notification.");
             }
         }
 
@@ -192,7 +192,7 @@ namespace awl
         {
             if (m_set.erase(val) == 0)
             {
-                throw std::logic_error("False remove notification.");
+                throw std::runtime_error("False remove notification.");
             }
         }
 

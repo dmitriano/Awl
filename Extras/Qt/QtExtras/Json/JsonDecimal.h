@@ -16,7 +16,7 @@ namespace awl
     {
     public:
 
-        using Decimal = Decimal<UInt, exp_len, DataTemplate>;
+        using Decimal = awl::decimal<UInt, exp_len, DataTemplate>;
 
         void FromJson(const QJsonValue& jv, Decimal& val)
         {
