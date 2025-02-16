@@ -86,9 +86,9 @@ namespace
 
 using namespace awl::testing;
 
-AWT_TEST(CompositeCompareMoveAssign)
+AWL_TEST(CompositeCompareMoveAssign)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         auto comp1 = a_comp;
@@ -115,9 +115,9 @@ AWT_TEST(CompositeCompareMoveAssign)
     }
 }
 
-AWT_TEST(CompositeCompare)
+AWL_TEST(CompositeCompare)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     //auto comp = awl::CompositeCompare<X, ACompare, BCompare>(ACompare(), BCompare());
     auto comp = awl::compose_comparers<X>(a_comp, b_comp);
@@ -129,21 +129,21 @@ AWT_TEST(CompositeCompare)
     static_assert(std::is_move_constructible_v<Compare>);
     static_assert(std::is_move_assignable_v<Compare>);
 
-    AWT_ASSERT(!comp(x1a, x1a));
-    AWT_ASSERT(!comp(x1b, x1b));
-    AWT_ASSERT(!comp(x2a, x2a));
-    AWT_ASSERT(!comp(x3a, x3a));
+    AWL_ASSERT(!comp(x1a, x1a));
+    AWL_ASSERT(!comp(x1b, x1b));
+    AWL_ASSERT(!comp(x2a, x2a));
+    AWL_ASSERT(!comp(x3a, x3a));
 
-    AWT_ASSERT(comp(x1a, x1b));
-    AWT_ASSERT(!comp(x1b, x1a));
+    AWL_ASSERT(comp(x1a, x1b));
+    AWL_ASSERT(!comp(x1b, x1a));
 
-    AWT_ASSERT(comp(x2a, x3a));
-    AWT_ASSERT(!comp(x3a, x2a));
+    AWL_ASSERT(comp(x2a, x3a));
+    AWL_ASSERT(!comp(x3a, x2a));
 }
 
-AWT_TEST(TransparentCompositeCompareTrivialStructure)
+AWL_TEST(TransparentCompositeCompareTrivialStructure)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     auto comp = awl::compose_transparent_comparers<X>(a_comp, b_comp);
 
@@ -154,38 +154,38 @@ AWT_TEST(TransparentCompositeCompareTrivialStructure)
     static_assert(std::is_move_constructible_v<Compare>);
     static_assert(std::is_move_assignable_v<Compare>);
 
-    AWT_ASSERT(!comp(x1a, x1a));
-    AWT_ASSERT(!comp(x1b, x1b));
-    AWT_ASSERT(!comp(x2a, x2a));
-    AWT_ASSERT(!comp(x3a, x3a));
+    AWL_ASSERT(!comp(x1a, x1a));
+    AWL_ASSERT(!comp(x1b, x1b));
+    AWL_ASSERT(!comp(x2a, x2a));
+    AWL_ASSERT(!comp(x3a, x3a));
 
-    AWT_ASSERT(comp(x1a, x1b));
-    AWT_ASSERT(!comp(x1b, x1a));
+    AWL_ASSERT(comp(x1a, x1b));
+    AWL_ASSERT(!comp(x1b, x1a));
 
-    AWT_ASSERT(comp(x2a, x3a));
-    AWT_ASSERT(!comp(x3a, x2a));
+    AWL_ASSERT(comp(x2a, x3a));
+    AWL_ASSERT(!comp(x3a, x2a));
 
-    AWT_ASSERT(!comp(x1a, MakeKey(x1a)));
-    AWT_ASSERT(!comp(x1b, MakeKey(x1b)));
-    AWT_ASSERT(!comp(x2a, MakeKey(x2a)));
-    AWT_ASSERT(!comp(x3a, MakeKey(x3a)));
+    AWL_ASSERT(!comp(x1a, MakeKey(x1a)));
+    AWL_ASSERT(!comp(x1b, MakeKey(x1b)));
+    AWL_ASSERT(!comp(x2a, MakeKey(x2a)));
+    AWL_ASSERT(!comp(x3a, MakeKey(x3a)));
 
-    AWT_ASSERT(comp(x1a, MakeKey(x1b)));
-    AWT_ASSERT(!comp(x1b, MakeKey(x1a)));
+    AWL_ASSERT(comp(x1a, MakeKey(x1b)));
+    AWL_ASSERT(!comp(x1b, MakeKey(x1a)));
 
-    AWT_ASSERT(comp(x2a, MakeKey(x3a)));
-    AWT_ASSERT(!comp(x3a, MakeKey(x2a)));
+    AWL_ASSERT(comp(x2a, MakeKey(x3a)));
+    AWL_ASSERT(!comp(x3a, MakeKey(x2a)));
 
-    AWT_ASSERT(!comp(MakeKey(x1a), x1a));
-    AWT_ASSERT(!comp(MakeKey(x1b), x1b));
-    AWT_ASSERT(!comp(MakeKey(x2a), x2a));
-    AWT_ASSERT(!comp(MakeKey(x3a), x3a));
+    AWL_ASSERT(!comp(MakeKey(x1a), x1a));
+    AWL_ASSERT(!comp(MakeKey(x1b), x1b));
+    AWL_ASSERT(!comp(MakeKey(x2a), x2a));
+    AWL_ASSERT(!comp(MakeKey(x3a), x3a));
 
-    AWT_ASSERT(comp(MakeKey(x1a), x1b));
-    AWT_ASSERT(!comp(MakeKey(x1b), x1a));
+    AWL_ASSERT(comp(MakeKey(x1a), x1b));
+    AWL_ASSERT(!comp(MakeKey(x1b), x1a));
 
-    AWT_ASSERT(comp(MakeKey(x2a), x3a));
-    AWT_ASSERT(!comp(MakeKey(x3a), x2a));
+    AWL_ASSERT(comp(MakeKey(x2a), x3a));
+    AWL_ASSERT(!comp(MakeKey(x3a), x2a));
 }
 
 namespace data
@@ -220,9 +220,9 @@ namespace
     }
 }
 
-AWT_TEST(TransparentCompositeCompareInheritedKey)
+AWL_TEST(TransparentCompositeCompareInheritedKey)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using InheritedWalletKey = WalletPrimaryCompare::key_type;
 
@@ -247,10 +247,10 @@ AWT_TEST(TransparentCompositeCompareInheritedKey)
 
     WalletPrimaryCompare comp = MakeComp();
 
-    AWT_ASSERT(!comp(spot_key, spot_wallet));
-    AWT_ASSERT(comp(spot_key, im_wallet));
-    AWT_ASSERT(!comp(im_key, im_wallet));
-    AWT_ASSERT(!comp(im_key, spot_wallet));
+    AWL_ASSERT(!comp(spot_key, spot_wallet));
+    AWL_ASSERT(comp(spot_key, im_wallet));
+    AWL_ASSERT(!comp(im_key, im_wallet));
+    AWL_ASSERT(!comp(im_key, spot_wallet));
 
     // Ensure that universal key converts to inherited key.
 
@@ -259,12 +259,12 @@ AWT_TEST(TransparentCompositeCompareInheritedKey)
     static_assert(std::is_same_v<UniversalKey, const std::tuple<data::AccountType, std::string>>);
 
     const InheritedWalletKey inherited_key = universal_key;
-    AWT_ASSERT(inherited_key == universal_key);
+    AWL_ASSERT(inherited_key == universal_key);
 }
 
-AWT_TEST(TransparentCompositeCompareUniversalKey)
+AWL_TEST(TransparentCompositeCompareUniversalKey)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     const std::string asset = "BTC";
 
@@ -276,10 +276,10 @@ AWT_TEST(TransparentCompositeCompareUniversalKey)
 
     WalletPrimaryCompare comp = MakeComp();
 
-    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, "BTC"), spot_wallet));
-    AWT_ASSERT(comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, asset), im_wallet));
-    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), im_wallet));
-    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), spot_wallet));
-    AWT_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH")), spot_wallet));
-    AWT_ASSERT(comp(spot_wallet, WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH"))));
+    AWL_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, "BTC"), spot_wallet));
+    AWL_ASSERT(comp(WalletPrimaryCompare::make_key(data::AccountType::Spot, asset), im_wallet));
+    AWL_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), im_wallet));
+    AWL_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, asset), spot_wallet));
+    AWL_ASSERT(!comp(WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH")), spot_wallet));
+    AWL_ASSERT(comp(spot_wallet, WalletPrimaryCompare::make_key(data::AccountType::IsolatedMargin, std::string("ETH"))));
 }

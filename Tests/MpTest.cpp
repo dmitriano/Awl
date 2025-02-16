@@ -81,7 +81,7 @@ namespace awl::mp
         >>);
 }
 
-AWT_TEST(TypeCollector)
+AWL_TEST(TypeCollector)
 {
     context.out << awl::FromAString(typeid(awl::mp::type_collector<std::pair<const std::string, int>>::Tuple).name()) << std::endl << std::endl;
 
@@ -111,7 +111,7 @@ AWT_TEST(TypeCollector)
     // double>
 }
 
-AWT_TEST(VariantFromStructs)
+AWL_TEST(VariantFromStructs)
 {
     context.out << awl::FromAString(typeid(awl::mp::variant_from_struct<v1::A>).name());
 }

@@ -23,33 +23,33 @@ namespace awl::testing
     using TestChain = StaticChain<TestFunc>;
 }
 
-#define AWT_LINK_FUNC_NAME(test_name) test_name##_TestFunc
-#define AWT_LINK_FUNC_SIGNATURE(test_name) static void AWT_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext& context)
+#define AWL_LINK_FUNC_NAME(test_name) test_name##_TestFunc
+#define AWL_LINK_FUNC_SIGNATURE(test_name) static void AWL_LINK_FUNC_NAME(test_name)(const awl::testing::TestContext& context)
 
 //A test is simply a static function.
-#define AWT_LINK(test_name, suffix) \
-    AWT_LINK_FUNC_SIGNATURE(test_name); \
-    static awl::testing::TestLink test_name##_##suffix_TestLink(#test_name "_" #suffix, &AWT_LINK_FUNC_NAME(test_name)); \
-    AWT_LINK_FUNC_SIGNATURE(test_name)
+#define AWL_LINK(test_name, suffix) \
+    AWL_LINK_FUNC_SIGNATURE(test_name); \
+    static awl::testing::TestLink test_name##_##suffix_TestLink(#test_name "_" #suffix, &AWL_LINK_FUNC_NAME(test_name)); \
+    AWL_LINK_FUNC_SIGNATURE(test_name)
 
-#define AWT_DISABLED_FUNC(test_name) \
-    AWT_LINK_FUNC_SIGNATURE(test_name)
+#define AWL_DISABLED_FUNC(test_name) \
+    AWL_LINK_FUNC_SIGNATURE(test_name)
 
-#define AWT_DISABLED_TEST(test_name) \
-    AWT_DISABLED_FUNC(test_name)
+#define AWL_DISABLED_TEST(test_name) \
+    AWL_DISABLED_FUNC(test_name)
 
-#define AWT_DISABLED_BENCHMARK(test_name) \
-    AWT_DISABLED_FUNC(test_name)
+#define AWL_DISABLED_BENCHMARK(test_name) \
+    AWL_DISABLED_FUNC(test_name)
 
-#define AWT_DISABLED_EXAMPLE(test_name) \
-    AWT_DISABLED_FUNC(test_name)
+#define AWL_DISABLED_EXAMPLE(test_name) \
+    AWL_DISABLED_FUNC(test_name)
 
-#define AWT_TEST(test_name) AWT_LINK(test_name, Test)
-#define AWT_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark)
-#define AWT_EXAMPLE(test_name) AWT_LINK(test_name, Example)
+#define AWL_TEST(test_name) AWL_LINK(test_name, Test)
+#define AWL_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark)
+#define AWL_EXAMPLE(test_name) AWL_LINK(test_name, Example)
 
-#define AWT_UNSTABLE_TEST(test_name) AWT_LINK(test_name, Test_Unstable)
-#define AWT_UNSTABLE_BENCHMARK(test_name) AWT_LINK(test_name, Benchmark_Unstable)
-#define AWT_UNSTABLE_EXAMPLE(test_name) AWT_LINK(test_name, Example_Unstable)
+#define AWL_UNSTABLE_TEST(test_name) AWL_LINK(test_name, Test_Unstable)
+#define AWL_UNSTABLE_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark_Unstable)
+#define AWL_UNSTABLE_EXAMPLE(test_name) AWL_LINK(test_name, Example_Unstable)
 
-#define AWT_UNUSED_CONTEXT static_cast<void>(context)
+#define AWL_UNUSED_CONTEXT static_cast<void>(context)

@@ -11,9 +11,9 @@
 
 using namespace awl::testing;
 
-AWT_TEST(ScopeGuard)
+AWL_TEST(ScopeGuard)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     int usage = 1;
 
@@ -22,28 +22,28 @@ AWT_TEST(ScopeGuard)
 
         guard.release();
 
-        AWT_ASSERT_EQUAL(usage, 1);
+        AWL_ASSERT_EQUAL(usage, 1);
     }
 
-    AWT_ASSERT_EQUAL(usage, 1);
+    AWL_ASSERT_EQUAL(usage, 1);
 
     {
         auto guard = awl::make_scope_guard([&usage]() { --usage; });
 
-        AWT_ASSERT_EQUAL(usage, 1);
+        AWL_ASSERT_EQUAL(usage, 1);
     }
 
-    AWT_ASSERT_EQUAL(usage, 0);
+    AWL_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
             [&usage]() { ++usage; },
             [&usage]() { --usage; });
 
-        AWT_ASSERT_EQUAL(usage, 1);
+        AWL_ASSERT_EQUAL(usage, 1);
     }
 
-    AWT_ASSERT_EQUAL(usage, 0);
+    AWL_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
@@ -52,10 +52,10 @@ AWT_TEST(ScopeGuard)
 
         guard.release();
 
-        AWT_ASSERT_EQUAL(usage, 1);
+        AWL_ASSERT_EQUAL(usage, 1);
     }
 
-    AWT_ASSERT_EQUAL(usage, 1);
+    AWL_ASSERT_EQUAL(usage, 1);
 
     usage = 0;
 
@@ -64,10 +64,10 @@ AWT_TEST(ScopeGuard)
     {
         auto guard = awl::make_scope_guard([&usage]() { --usage; }, false);
 
-        AWT_ASSERT_EQUAL(usage, 0);
+        AWL_ASSERT_EQUAL(usage, 0);
     }
 
-    AWT_ASSERT_EQUAL(usage, 0);
+    AWL_ASSERT_EQUAL(usage, 0);
 
     {
         auto guard = awl::make_scope_guard(
@@ -75,10 +75,10 @@ AWT_TEST(ScopeGuard)
             [&usage]() { --usage; },
             false);
 
-        AWT_ASSERT_EQUAL(usage, 0);
+        AWL_ASSERT_EQUAL(usage, 0);
     }
 
-    AWT_ASSERT_EQUAL(usage, 0);
+    AWL_ASSERT_EQUAL(usage, 0);
 
     {
         auto init = [&usage]() { ++usage; };
@@ -87,5 +87,5 @@ AWT_TEST(ScopeGuard)
         auto guard = awl::make_scope_guard(init, free, true);
     }
 
-    AWT_ASSERT_EQUAL(usage, 0);
+    AWL_ASSERT_EQUAL(usage, 0);
 }

@@ -28,7 +28,7 @@ namespace bmp = boost::multiprecision;
 
 static_assert(awl::helpers::DecimalConstants<bmp::uint128_t, 4, 16>::man_len == 59u + 64u);
 
-AWT_EXAMPLE(MultiprecisionSize)
+AWL_EXAMPLE(MultiprecisionSize)
 {
     auto max = std::numeric_limits<bmp::uint128_t>::max();
 
@@ -39,14 +39,14 @@ AWT_EXAMPLE(MultiprecisionSize)
         _T("size: ") << size << std::endl;
 }
 
-AWT_EXAMPLE(MultiprecisionDecimalConstants)
+AWL_EXAMPLE(MultiprecisionDecimalConstants)
 {
     using Constants = awl::helpers::DecimalConstants<bmp::uint128_t, 4, 16>;
 
     context.out << "man_len: " << Constants::man_len;
 }
 
-AWT_EXAMPLE(MultiprecisionDecFloat)
+AWL_EXAMPLE(MultiprecisionDecFloat)
 {
     AWL_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
     AWL_ATTRIBUTE(size_t, iter_count, 1000000u);
@@ -96,7 +96,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
         "double sum: " << b_sum << std::endl <<
         "double product: " << b_product << std::endl;
 
-    AWT_ASSERT(a_sum == a_product);
+    AWL_ASSERT(a_sum == a_product);
 
     if (!no_div)
     {
@@ -134,7 +134,7 @@ AWT_EXAMPLE(MultiprecisionDecFloat)
     }
 }
 
-//AWT_EXAMPLE(MultiprecisionDecBackend)
+//AWL_EXAMPLE(MultiprecisionDecBackend)
 //{
 //    AWL_ATTRIBUTE(std::string, number, "92233720368.54775807"); //LUNA max position
 //
@@ -165,7 +165,7 @@ namespace
     static_assert(Data(true, 0, 15).exp() == 0);
 }
 
-AWT_EXAMPLE(MultiprecisionDecimalData)
+AWL_EXAMPLE(MultiprecisionDecimalData)
 {
     using UInt = bmp::uint128_t;
     
@@ -252,51 +252,51 @@ namespace
             j.backend().negate();
         }
 
-        AWT_ASSERT(i == j);
+        AWL_ASSERT(i == j);
     }
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsInt128)
+AWL_EXAMPLE(MultiprecisionImportExportBitsInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::int128_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsUInt128)
+AWL_EXAMPLE(MultiprecisionImportExportBitsUInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint128_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsInt256)
+AWL_EXAMPLE(MultiprecisionImportExportBitsInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::int256_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsUInt256)
+AWL_EXAMPLE(MultiprecisionImportExportBitsUInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint256_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsInt512)
+AWL_EXAMPLE(MultiprecisionImportExportBitsInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::int512_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsUInt512)
+AWL_EXAMPLE(MultiprecisionImportExportBitsUInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint512_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsInt1024)
+AWL_EXAMPLE(MultiprecisionImportExportBitsInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::int1024_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionImportExportBitsUInt1024)
+AWL_EXAMPLE(MultiprecisionImportExportBitsUInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint1024_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionFloatImportExportBits)
+AWL_EXAMPLE(MultiprecisionFloatImportExportBits)
 {
     //using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
     //Decimal i("33.3");
@@ -321,7 +321,7 @@ AWT_EXAMPLE(MultiprecisionFloatImportExportBits)
     cpp_bin_float_100 g(i);
     g.backend().exponent() = e;
     
-    AWT_ASSERT(f == g);
+    AWL_ASSERT(f == g);
 }
 
 namespace
@@ -349,7 +349,7 @@ namespace
     }
 }
 
-AWT_TEST(MultiprecisionReadWrite)
+AWL_TEST(MultiprecisionReadWrite)
 {
     TestInt<bmp::uint128_t>(context);
     TestInt<bmp::uint256_t>(context);
@@ -362,7 +362,7 @@ AWT_TEST(MultiprecisionReadWrite)
     //TestInt<bmp::int1024_t>(context);
 }
 
-AWT_EXAMPLE(MultiprecisionContainer)
+AWL_EXAMPLE(MultiprecisionContainer)
 {
     AWL_ATTRIBUTE(std::string, number, "max");
 
@@ -381,7 +381,7 @@ AWT_EXAMPLE(MultiprecisionContainer)
         {
             export_bits(i, std::back_inserter(v), 8);
 
-            AWT_FAILM("static_vector did not throw.");
+            AWL_FAILM("static_vector did not throw.");
         }
         catch (boost::container::bad_alloc&)
         {
@@ -400,6 +400,6 @@ AWT_EXAMPLE(MultiprecisionContainer)
         Int j;
         import_bits(j, v.begin(), v.end());
     
-        AWT_ASSERT(i == j);
+        AWL_ASSERT(i == j);
     }
 }

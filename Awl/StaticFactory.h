@@ -59,5 +59,5 @@ namespace awl
     static awl::StaticLink<awl::FactoryFuncPtr<T>> name##_FactoryLink(#name, &AWL_FACTORY_FUNC_NAME(name)); \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name)
 
-#define AWT_DISABLED_FACTORY(T, name) \
+#define AWL_DISABLED_FACTORY(T, name) \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name)

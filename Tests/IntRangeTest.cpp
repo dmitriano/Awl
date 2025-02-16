@@ -16,18 +16,18 @@
 
 using namespace awl::testing;
 
-AWT_TEST(IntRangeInt)
+AWL_TEST(IntRangeInt)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     int n = 0;
     
     for (auto i : awl::make_count(10))
     {
-        AWT_ASSERT_EQUAL(n++, i);
+        AWL_ASSERT_EQUAL(n++, i);
     }
 
-    AWT_ASSERT_EQUAL(n, 10);
+    AWL_ASSERT_EQUAL(n, 10);
 
     const std::vector<int> sample{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
@@ -35,12 +35,12 @@ AWT_TEST(IntRangeInt)
     
     const std::vector<int> v(range.begin(), range.end());
 
-    AWT_ASSERT(v == sample);
+    AWL_ASSERT(v == sample);
 }
 
-AWT_TEST(IntRangeSizeT)
+AWL_TEST(IntRangeSizeT)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     size_t n = 0;
 
@@ -48,8 +48,8 @@ AWT_TEST(IntRangeSizeT)
 
     for (auto i : awl::make_count(N))
     {
-        AWT_ASSERT_EQUAL(n++, i);
+        AWL_ASSERT_EQUAL(n++, i);
     }
 
-    AWT_ASSERT_EQUAL(n, N);
+    AWL_ASSERT_EQUAL(n, N);
 }

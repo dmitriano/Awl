@@ -22,10 +22,10 @@ static void EncodeDecode(const TestContext &, const std::wstring sample)
 
     const std::wstring decoded = awl::DecodeString(encoded.c_str());
 
-    AWT_ASSERT(decoded == sample);
+    AWL_ASSERT(decoded == sample);
 }
 
-AWT_TEST(DecodeString)
+AWL_TEST(DecodeString)
 {
     setlocale(LC_ALL, "ru_RU.utf8");
 
@@ -38,7 +38,7 @@ AWT_TEST(DecodeString)
     EncodeDecode(context, L"");
 }
 
-AWT_TEST(ExceptionMessage)
+AWL_TEST(ExceptionMessage)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
@@ -46,7 +46,7 @@ AWT_TEST(ExceptionMessage)
     Print(context, TestException(_T("Test message.")));
 }
 
-AWT_TEST(ExceptionTryCatch)
+AWL_TEST(ExceptionTryCatch)
 {
     setlocale(LC_ALL, "en_US.utf8");
 
@@ -56,7 +56,7 @@ AWT_TEST(ExceptionTryCatch)
     }
     catch (const std::exception & e)
     {
-        AWT_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
+        AWL_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
 
         context.out << awl::FromACString(e.what()) << std::endl;
 
@@ -69,17 +69,17 @@ AWT_TEST(ExceptionTryCatch)
     }
 }
 
-AWT_TEST(ExceptionClassName)
+AWL_TEST(ExceptionClassName)
 {
     {
         EndOfFileException e(5, 3);
         Print(context, e);
-        AWT_ASSERT(strcmp(e.what(), typeid(EndOfFileException).name()) == 0);
+        AWL_ASSERT(strcmp(e.what(), typeid(EndOfFileException).name()) == 0);
     }
 
     {
         TestException e(_T("abc"));
         Print(context, e);
-        AWT_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
+        AWL_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
     }
 }

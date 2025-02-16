@@ -22,13 +22,13 @@ namespace SeparatorTest
 
         auto result = out.str();
         
-        AWT_ASSERT(result == awl::StringConvertor<C>::ConvertFrom(", , "));
+        AWL_ASSERT(result == awl::StringConvertor<C>::ConvertFrom(", , "));
     }
 }
 
-AWT_TEST(Separator)
+AWL_TEST(Separator)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     SeparatorTest::Test<char>();
     SeparatorTest::Test<wchar_t>();

@@ -40,7 +40,7 @@ namespace
             s1.insert(a);
         }
 
-        AWT_ASSERT(s == s1);
+        AWL_ASSERT(s == s1);
     }
 
     void AssertEqual(const Set& s, const MirrorSet& ms1, const MirrorSet& ms2)
@@ -50,9 +50,9 @@ namespace
     }
 }
 
-AWT_TEST(MirrorSet)
+AWL_TEST(MirrorSet)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     Set s;
 
@@ -103,6 +103,6 @@ AWT_TEST(MirrorSet)
     s.insert({ 5, 6, 102 });
 
     //We stopped to receive the notifications.
-    AWT_ASSERT_EQUAL(0u, mirror1.size());
-    AWT_ASSERT_EQUAL(0u, mirror2.size());
+    AWL_ASSERT_EQUAL(0u, mirror1.size());
+    AWL_ASSERT_EQUAL(0u, mirror2.size());
 }

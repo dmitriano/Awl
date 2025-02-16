@@ -48,7 +48,7 @@ namespace
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)
-AWT_EXAMPLE(CoroTimer)
+AWL_EXAMPLE(CoroTimer)
 {
     auto result = test(context);
 
@@ -58,7 +58,7 @@ AWT_EXAMPLE(CoroTimer)
     context.out << "result: " << result.get() << std::endl;
 }
 
-AWT_EXAMPLE(CoroTimer0)
+AWL_EXAMPLE(CoroTimer0)
 {
     auto result = wait_0(context);
 

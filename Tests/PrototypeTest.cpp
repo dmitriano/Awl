@@ -43,9 +43,9 @@ namespace
 
 using V = std::variant<bool, char, int, float, double, std::string>;
 
-AWT_TEST(Prototype_TypeMap)
+AWL_TEST(Prototype_TypeMap)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     awl::AttachedPrototype<V, A> ap;
 
@@ -53,7 +53,7 @@ AWT_TEST(Prototype_TypeMap)
 
     awl::DetachedPrototype result(std::vector<awl::DetachedPrototype::FieldContainer>{ {"x", 2u}, { "y", 4u }, { "z", 5u } });
 
-    AWT_ASSERT(dp == result);
+    AWL_ASSERT(dp == result);
 }
 
 namespace awl
@@ -128,9 +128,9 @@ namespace awl
     };
 }
 
-AWT_TEST(Prototype_RuntimeIndex)
+AWL_TEST(Prototype_RuntimeIndex)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Variant = std::variant<bool, char, int, float, double, std::string>;
     using Tuple = std::tuple<char, int, int, double, std::string>;
@@ -138,35 +138,35 @@ AWT_TEST(Prototype_RuntimeIndex)
     using namespace std::string_literals;
     Tuple t = std::make_tuple('a', 2, 3, 5.0, "abc");
     Variant v = awl::helpers::runtime_get<Variant>(t, 1);
-    AWT_ASSERT(std::get<int>(v) == 2);
+    AWL_ASSERT(std::get<int>(v) == 2);
     awl::helpers::runtime_set(t, 4, Variant("xyz"s));
-    AWT_ASSERT(std::get<4>(t) == std::string("xyz"));
+    AWL_ASSERT(std::get<4>(t) == std::string("xyz"));
 }
 
-AWT_TEST(Prototype_GetSetPlain)
+AWL_TEST(Prototype_GetSetPlain)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     awl::Accessor<V, A> ap;
 
     A a = { 1, 5.0, "abc" };
 
-    AWT_ASSERT(ap.Get(a, 0) == V(a.x));
-    AWT_ASSERT(ap.Get(a, 1) == V(a.y));
-    AWT_ASSERT(ap.Get(a, 2) == V(a.z));
+    AWL_ASSERT(ap.Get(a, 0) == V(a.x));
+    AWL_ASSERT(ap.Get(a, 1) == V(a.y));
+    AWL_ASSERT(ap.Get(a, 2) == V(a.z));
 
     ap.Set(a, 0, 3);
     ap.Set(a, 1, 7.0);
     ap.Set(a, 2, std::string("xyz"));
 
-    AWT_ASSERT(ap.Get(a, 0) == V(3));
-    AWT_ASSERT(ap.Get(a, 1) == V(7.0));
-    AWT_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
+    AWL_ASSERT(ap.Get(a, 0) == V(3));
+    AWL_ASSERT(ap.Get(a, 1) == V(7.0));
+    AWL_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
 }
 
-AWT_TEST(Prototype_GetSetRecursive)
+AWL_TEST(Prototype_GetSetRecursive)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     //awl::Accessor<V, B> bp;
 
@@ -174,16 +174,16 @@ AWT_TEST(Prototype_GetSetRecursive)
     B b = { 1, a, 5.0, a, "abc"};
 
     /*
-    AWT_ASSERT(ap.Get(a, 0) == V(a.x));
-    AWT_ASSERT(ap.Get(a, 1) == V(a.y));
-    AWT_ASSERT(ap.Get(a, 2) == V(a.z));
+    AWL_ASSERT(ap.Get(a, 0) == V(a.x));
+    AWL_ASSERT(ap.Get(a, 1) == V(a.y));
+    AWL_ASSERT(ap.Get(a, 2) == V(a.z));
 
     ap.Set(a, 0, 3);
     ap.Set(a, 1, 7.0);
     ap.Set(a, 2, std::string("xyz"));
 
-    AWT_ASSERT(ap.Get(a, 0) == V(3));
-    AWT_ASSERT(ap.Get(a, 1) == V(7.0));
-    AWT_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
+    AWL_ASSERT(ap.Get(a, 0) == V(3));
+    AWL_ASSERT(ap.Get(a, 1) == V(7.0));
+    AWL_ASSERT(ap.Get(a, 2) == V(std::string("xyz")));
     */
 }

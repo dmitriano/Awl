@@ -21,9 +21,9 @@ namespace
     template <class A, class B>
     void CompareContainers(A & a, B & b)
     {
-        AWT_ASSERT(a.size() == b.size());
+        AWL_ASSERT(a.size() == b.size());
 
-        AWT_ASSERT(a.empty() == b.empty());
+        AWL_ASSERT(a.empty() == b.empty());
 
         if (!a.empty())
         {
@@ -31,16 +31,16 @@ namespace
 
             for (size_t i = 0; i != size; ++i)
             {
-                AWT_ASSERT(a[i] == b[i]);
-                AWT_ASSERT(a.at(i) == b.at(i));
+                AWL_ASSERT(a[i] == b[i]);
+                AWL_ASSERT(a.at(i) == b.at(i));
             }
 
-            AWT_ASSERT(a.front() == b.front());
-            AWT_ASSERT(a.back() == b.back());
+            AWL_ASSERT(a.front() == b.front());
+            AWL_ASSERT(a.back() == b.back());
         }
 
-        AWT_ASSERT(std::equal(a.begin(), a.end(), b.begin(), b.end()));
-        AWT_ASSERT(std::equal(a.rbegin(), a.rend(), b.rbegin(), b.rend()));
+        AWL_ASSERT(std::equal(a.begin(), a.end(), b.begin(), b.end()));
+        AWL_ASSERT(std::equal(a.rbegin(), a.rend(), b.rbegin(), b.rend()));
     }
 
     template <class T>
@@ -48,15 +48,15 @@ namespace
     {
         awl::ring<T> r(cap);
 
-        AWT_ASSERT(r.capacity() == cap);
-        AWT_ASSERT(r.size() == 0);
+        AWL_ASSERT(r.capacity() == cap);
+        AWL_ASSERT(r.size() == 0);
 
         for (const T & val : v)
         {
             r.push_back(val);
         }
 
-        AWT_ASSERT_EQUAL(std::min(v.size(), cap), r.size());
+        AWL_ASSERT_EQUAL(std::min(v.size(), cap), r.size());
 
         return r;
     }
@@ -99,7 +99,7 @@ namespace
     using A = awl::testing::helpers::NonCopyable;
 }
 
-AWT_TEST(RingInt)
+AWL_TEST(RingInt)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -138,7 +138,7 @@ AWT_TEST(RingInt)
     }
 }
 
-AWT_TEST(RingMove)
+AWL_TEST(RingMove)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -162,10 +162,10 @@ AWT_TEST(RingMove)
         test.RunAll();
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingAlgo)
+AWL_TEST(RingAlgo)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -180,32 +180,32 @@ AWT_TEST(RingAlgo)
 
         const int first = std::max(0, range - static_cast<int>(capacity));
 
-        AWT_ASSERT(ring.front() == A(first));
+        AWL_ASSERT(ring.front() == A(first));
 
         for (int i : awl::make_count(static_cast<int>(ring.size())))
         {
             {
                 const auto iter = std::find(ring.begin(), ring.end(), A(first + i));
 
-                AWT_ASSERT(iter != ring.end());
+                AWL_ASSERT(iter != ring.end());
 
-                AWT_ASSERT(iter - ring.begin() == i);
+                AWL_ASSERT(iter - ring.begin() == i);
             }
 
             {
                 const auto iter = std::lower_bound(ring.begin(), ring.end(), A(first + i));
 
-                AWT_ASSERT(iter != ring.end());
+                AWL_ASSERT(iter != ring.end());
 
-                AWT_ASSERT(iter - ring.begin() == i);
+                AWL_ASSERT(iter - ring.begin() == i);
             }
         }
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingDestruction)
+AWL_TEST(RingDestruction)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -216,7 +216,7 @@ AWT_TEST(RingDestruction)
         A a2 = std::move(a1);
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 
     awl::ring<A> ring(capacity);
 
@@ -227,20 +227,20 @@ AWT_TEST(RingDestruction)
         //context.out << _T("A::count = ") << A::count << std::endl;
     }
 
-    AWT_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), static_cast<int>(ring.size()));
-    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+    AWL_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), static_cast<int>(ring.size()));
+    AWL_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
 
     const size_t new_cap = std::max(static_cast<std::size_t>(1u), ring.size() / 2u);
     ring.reserve(new_cap);
 
-    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+    AWL_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
 
     ring.clear();
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingQueue)
+AWL_TEST(RingQueue)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -255,23 +255,23 @@ AWT_TEST(RingQueue)
             q.push(A(i));
         }
 
-        AWT_ASSERT(q.size() == std::min(static_cast<std::size_t>(range), capacity));
+        AWL_ASSERT(q.size() == std::min(static_cast<std::size_t>(range), capacity));
 
-        AWT_ASSERT(q.back() == A(range - 1));
+        AWL_ASSERT(q.back() == A(range - 1));
 
         int i = range - static_cast<int>(q.size());
         
         while (!q.empty())
         {
-            AWT_ASSERT(q.front() == A(i++));
+            AWL_ASSERT(q.front() == A(i++));
             q.pop();
         }
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(RingPushFront)
+AWL_TEST(RingPushFront)
 {
     AWL_ATTRIBUTE(int, range, 10);
     AWL_ATTRIBUTE(size_t, capacity, 5);
@@ -283,18 +283,18 @@ AWT_TEST(RingPushFront)
         ring.push_front(A(i));
     }
 
-    AWT_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), static_cast<int>(ring.size()));
-    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+    AWL_ASSERT_EQUAL(std::min(range, static_cast<int>(capacity)), static_cast<int>(ring.size()));
+    AWL_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
 
     const size_t new_cap = std::max(static_cast<std::size_t>(1u), ring.size() / 2u);
     ring.reserve(new_cap);
 
-    AWT_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
+    AWL_ASSERT_EQUAL(static_cast<int>(ring.size()), A::count);
 
     while (!ring.empty())
     {
         ring.pop_back();
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }

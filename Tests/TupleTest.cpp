@@ -66,9 +66,9 @@ namespace
     };
 }
 
-AWT_TEST(TupleTransform)
+AWL_TEST(TupleTransform)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     const auto t = std::make_tuple(1, 2.0, std::string("abc"));
 
@@ -85,7 +85,7 @@ AWT_TEST(TupleTransform)
 
     std::string result = out.str();
     
-    AWT_ASSERT(result == "1 2 abc ");
+    AWL_ASSERT(result == "1 2 abc ");
 
     std::remove_const_t<decltype(t)> t1{};
 
@@ -100,12 +100,12 @@ AWT_TEST(TupleTransform)
         p_reader->Read(in);
     }
 
-    AWT_ASSERT(t1 == t);
+    AWL_ASSERT(t1 == t);
 }
 
-AWT_TEST(TupleMapT2T)
+AWL_TEST(TupleMapT2T)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using T1 = std::tuple<bool, char, int, float, double, std::string>;
     const auto result = std::array<size_t, 7>{1, 2, 2, 4, 5, 2, 4};
@@ -119,7 +119,7 @@ AWT_TEST(TupleMapT2T)
 
         auto a = awl::map_types_t2t<T2, T1>();
 
-        AWT_ASSERT(a == result);
+        AWL_ASSERT(a == result);
     }
 
     {
@@ -131,13 +131,13 @@ AWT_TEST(TupleMapT2T)
 
         auto a = awl::map_types_t2t<T2, T1>();
 
-        AWT_ASSERT(a == result);
+        AWL_ASSERT(a == result);
     }
 }
 
-AWT_TEST(TupleMapT2V)
+AWL_TEST(TupleMapT2V)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using T1 = std::variant<bool, char, int, float, double, std::string>;
     const auto result = std::array<size_t, 7>{1, 2, 2, 4, 5, 2, 4};
@@ -151,7 +151,7 @@ AWT_TEST(TupleMapT2V)
 
         auto a = awl::map_types_t2v<T2, T1>();
 
-        AWT_ASSERT(a == result);
+        AWL_ASSERT(a == result);
     }
 
     {
@@ -163,13 +163,13 @@ AWT_TEST(TupleMapT2V)
 
         auto a = awl::map_types_t2v<T2, T1>();
 
-        AWT_ASSERT(a == result);
+        AWL_ASSERT(a == result);
     }
 }
 
-AWT_TEST(TupleMakeUniversal)
+AWL_TEST(TupleMakeUniversal)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         std::string a("a");
@@ -194,14 +194,14 @@ AWT_TEST(TupleMakeUniversal)
 #if defined(_MSC_VER)
         UniversalTuple universal_t1 = t;
 
-        AWT_ASSERT(universal_t1 == t);
+        AWL_ASSERT(universal_t1 == t);
 #endif
 
         using ConstRefTuple = std::tuple<const std::string&, const std::string&, const int&>;
 
         ConstRefTuple const_t = t;
 
-        AWT_ASSERT(const_t == t);
+        AWL_ASSERT(const_t == t);
     }
 
     {
@@ -211,9 +211,9 @@ AWT_TEST(TupleMakeUniversal)
     }
 }
 
-AWT_TEST(TupleMakeSimilar)
+AWL_TEST(TupleMakeSimilar)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Tuple = std::tuple<std::string, int>;
 
@@ -221,7 +221,7 @@ AWT_TEST(TupleMakeSimilar)
         int i = 10;
         auto t = awl::make_similar_tuple<Tuple>("a", i);
         static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int&>>);
-        AWT_ASSERT(t == std::make_tuple(std::string("a"), i));
+        AWL_ASSERT(t == std::make_tuple(std::string("a"), i));
     }
 
     std::string s = "b";
@@ -230,37 +230,37 @@ AWT_TEST(TupleMakeSimilar)
         const int j = 5;
         auto t = awl::make_similar_tuple<Tuple>(std::string{}, j);
         static_assert(std::is_same_v<decltype(t), std::tuple<std::string, const int&>>);
-        AWT_ASSERT(t == std::make_tuple(std::string{}, j));
+        AWL_ASSERT(t == std::make_tuple(std::string{}, j));
     }
 
     {
         auto t = awl::make_similar_tuple<Tuple>(s, int{});
         static_assert(std::is_same_v<decltype(t), std::tuple<std::string&, int>>);
-        AWT_ASSERT(t == std::make_tuple(s, int{}));
+        AWL_ASSERT(t == std::make_tuple(s, int{}));
     }
 
     {
         auto t = awl::make_similar_tuple<Tuple>(s, int8_t{});
         static_assert(std::is_same_v<decltype(t), std::tuple<std::string&, int>>);
-        AWT_ASSERT(t == std::make_tuple(s, int{}));
+        AWL_ASSERT(t == std::make_tuple(s, int{}));
     }
     
     {
         auto t = awl::make_similar_tuple<Tuple>("c", int8_t{});
         static_assert(std::is_same_v<decltype(t), std::tuple<std::string, int>>);
-        AWT_ASSERT(t == std::make_tuple(std::string("c"), int{}));
+        AWL_ASSERT(t == std::make_tuple(std::string("c"), int{}));
     }
 
     {
         auto t = awl::make_similar_tuple<Tuple>(std::as_const(s), int{});
         static_assert(std::is_same_v<decltype(t), std::tuple<const std::string&, int>>);
-        AWT_ASSERT(t == std::make_tuple(s, int{}));
+        AWL_ASSERT(t == std::make_tuple(s, int{}));
     }
 }
 
-AWT_TEST(TupleNonCopyable)
+AWL_TEST(TupleNonCopyable)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     awl::tuple_cat_t<std::tuple<std::atomic<int>>, std::tuple<bool>> t1;
     static_cast<void>(t1);

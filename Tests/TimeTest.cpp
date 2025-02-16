@@ -36,17 +36,17 @@ static void CheckResult(std::chrono::time_point<Clock, Duration> tp)
     tm utm;
     //gmtime_s(&utm, &t);
     localtime_s(&utm, &t);
-    AWT_ASSERT(utm.tm_year + 1900 == 2019);
-    AWT_ASSERT(utm.tm_mon == 7);
-    AWT_ASSERT(utm.tm_mday == 17);
-    AWT_ASSERT(utm.tm_hour == 16);
-    AWT_ASSERT(utm.tm_min == 31);
-    AWT_ASSERT(utm.tm_sec == 13);
+    AWL_ASSERT(utm.tm_year + 1900 == 2019);
+    AWL_ASSERT(utm.tm_mon == 7);
+    AWL_ASSERT(utm.tm_mday == 17);
+    AWL_ASSERT(utm.tm_hour == 16);
+    AWL_ASSERT(utm.tm_min == 31);
+    AWL_ASSERT(utm.tm_sec == 13);
 }
 
-AWT_TEST(MakeTime)
+AWL_TEST(MakeTime)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     constexpr std::size_t ns_count = 100200300u;
     
@@ -57,10 +57,10 @@ AWT_TEST(MakeTime)
     CheckResult(tp);
 
     auto d = duration_cast<Clock::duration>(nanoseconds(ns_count));
-    AWT_ASSERT(tp_with_ns - tp == d);
+    AWL_ASSERT(tp_with_ns - tp == d);
 
     auto d_ns = tp_with_ns - time_point_cast<nanoseconds>(tp);
-    AWT_ASSERT(d_ns == nanoseconds(ns_count));
+    AWL_ASSERT(d_ns == nanoseconds(ns_count));
 }
 
 #endif

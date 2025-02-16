@@ -7,7 +7,7 @@
 
 using namespace awl::testing;
 
-AWT_EXAMPLE(CppVersion)
+AWL_EXAMPLE(CppVersion)
 {
     auto& out = context.out;
 

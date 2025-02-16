@@ -28,56 +28,56 @@ namespace
                 auto left = text("");
                 auto right = text("");
 
-                AWT_ASSERT(!less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(!less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("abc");
                 auto right = text("ABC");
 
-                AWT_ASSERT(!less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(!less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("");
                 auto right = text("a");
 
-                AWT_ASSERT(less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("ABC");
                 auto right = text("abc1");
 
-                AWT_ASSERT(less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("ABC1");
                 auto right = text("abc2");
 
-                AWT_ASSERT(less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("abc1");
                 auto right = text("ABC2");
 
-                AWT_ASSERT(less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
 
             {
                 auto left = text("abc");
                 auto right = text("ABC1");
 
-                AWT_ASSERT(less(left.c_str(), right.c_str()));
-                AWT_ASSERT(!less(right.c_str(), left.c_str()));
+                AWL_ASSERT(less(left.c_str(), right.c_str()));
+                AWL_ASSERT(!less(right.c_str(), left.c_str()));
             }
         }
 
@@ -95,7 +95,7 @@ namespace
 
             const std::basic_string<C> last_digit_text = text("3");
 
-            AWT_ASSERT(val_text == max_text + last_digit_text);
+            AWL_ASSERT(val_text == max_text + last_digit_text);
 
             // Test a negative value.
 
@@ -105,7 +105,7 @@ namespace
 
             const std::basic_string<C> minus_text = text("-");
 
-            AWT_ASSERT(negative_val_text == minus_text + val_text);
+            AWL_ASSERT(negative_val_text == minus_text + val_text);
 
             // Test zero values.
 
@@ -126,7 +126,7 @@ namespace
 
             const std::basic_string<C> prefix_text = text("0");
 
-            AWT_ASSERT(val_text_with_prefix == prefix_text + val_text);
+            AWL_ASSERT(val_text_with_prefix == prefix_text + val_text);
         }
 
 #endif //AWL_INT_128
@@ -150,7 +150,7 @@ namespace
         {
             std::basic_string<C> val_text = FormatInt(val);
 
-            AWT_ASSERT(val_text == expected_text);
+            AWL_ASSERT(val_text == expected_text);
         }
         
         template <std::size_t N>
@@ -161,9 +161,9 @@ namespace
     };
 }
 
-AWT_TEST(StringCompare)
+AWL_TEST(StringCompare)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     StringTest<char>::TestStringCompare();
     StringTest<wchar_t>::TestStringCompare();
@@ -171,9 +171,9 @@ AWT_TEST(StringCompare)
 
 #ifdef AWL_INT_128
 
-AWT_TEST(StringInt128)
+AWL_TEST(StringInt128)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     StringTest<char>::TestInt128Format();
     StringTest<wchar_t>::TestInt128Format();

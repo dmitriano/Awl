@@ -81,10 +81,10 @@ namespace
 
         {
             auto & a1_proto = ctx.template FindNewPrototype<v1::A>();
-            AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
+            AWL_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
 
             auto & b1_proto = ctx.template FindNewPrototype<v1::B>();
-            AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
+            AWL_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
         }
 
         if (with_metadata)
@@ -124,14 +124,14 @@ namespace
 
             v1::A a1;
             ctx.ReadV(in, a1);
-            AWT_ASSERT(a1 == v1::a_expected);
+            AWL_ASSERT(a1 == v1::a_expected);
 
             v1::B b1;
             ctx.ReadV(in, b1);
-            AWT_ASSERT(b1 == v1::b_expected);
+            AWL_ASSERT(b1 == v1::b_expected);
         }
 
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.End());
 
         return w;
     }
@@ -150,14 +150,14 @@ namespace
 
             v1::A a1;
             ctx.ReadV(in, a1);
-            AWT_ASSERT(a1 == v1::a_expected);
+            AWL_ASSERT(a1 == v1::a_expected);
 
             v1::B b1;
             ctx.ReadV(in, b1);
-            AWT_ASSERT(b1 == v1::b_expected);
+            AWL_ASSERT(b1 == v1::b_expected);
         }
 
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.End());
 
         return w;
     }
@@ -170,16 +170,16 @@ namespace
 
         {
             auto & a2_proto = ctx.template FindNewPrototype<v2::A>();
-            AWT_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::A>::Tie>);
+            AWL_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::A>::Tie>);
 
             auto & b2_proto = ctx.template FindNewPrototype<v2::B>();
-            AWT_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::B>::Tie>);
+            AWL_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v2::B>::Tie>);
 
             //auto & a1_proto = ctx.template FindOldPrototype<v2::A>();
-            //AWT_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
+            //AWL_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::A>::Tie>);
 
             //auto & b1_proto = ctx.template FindOldPrototype<v2::B>();
-            //AWT_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
+            //AWL_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<v1::B>::Tie>);
         }
 
         awl::StopWatch w;
@@ -190,23 +190,23 @@ namespace
 
             v2::A a2;
             ctx.ReadV(in, a2);
-            AWT_ASSERT(a2 == v2::a_expected);
+            AWL_ASSERT(a2 == v2::a_expected);
 
             //Version 1 data has v2::B so the condition is true.
             v2::B b2;
             ctx.ReadV(in, b2);
-            AWT_ASSERT(b2 == v2::b_expected);
+            AWL_ASSERT(b2 == v2::b_expected);
 
             //An example of how to read data that may not exist in a previous version.
             if (false)
             {
                 v2::C c2;
                 ctx.ReadV(in, c2);
-                AWT_ASSERT(c2 == v2::c_expected);
+                AWL_ASSERT(c2 == v2::c_expected);
             }
         }
 
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.End());
 
         return w;
     }
@@ -254,13 +254,13 @@ namespace
     //}
 }
 
-AWT_TEST(VtsReadWriteVectorStream)
+AWL_TEST(VtsReadWriteVectorStream)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWL_ATTRIBUTE(size_t, write_count, 1);
     AWL_ATTRIBUTE(size_t, read_count, 1);
 
-    AWT_ASSERT(write_count >= 1);
+    AWL_ASSERT(write_count >= 1);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -290,8 +290,8 @@ AWT_TEST(VtsReadWriteVectorStream)
         context.out << std::endl;
     }
 
-    AWT_ASSERT_EQUAL(mem_size, v.size());
-    AWT_ASSERT_EQUAL(mem_size, v.capacity());
+    AWL_ASSERT_EQUAL(mem_size, v.size());
+    AWL_ASSERT_EQUAL(mem_size, v.capacity());
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
@@ -352,13 +352,13 @@ AWT_TEST(VtsReadWriteVectorStream)
 }
 
 //store to/load of misaligned address
-AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
+AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWL_ATTRIBUTE(size_t, write_count, 1);
     AWL_ATTRIBUTE(size_t, read_count, 1);
 
-    AWT_ASSERT(write_count >= 1);
+    AWL_ASSERT(write_count >= 1);
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
@@ -369,7 +369,7 @@ AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
     awl::io::TrivialMemoryStream in(mem_size);
     awl::io::TrivialMemoryStream & out = in;
 
-    AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
+    AWL_ASSERT_EQUAL(mem_size, out.GetCapacity());
 
     {
         std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
@@ -380,8 +380,8 @@ AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 
             total_d += WriteDataV1<OldTrivialWriter>(out, element_count, true);
 
-            AWT_ASSERT_EQUAL(mem_size, out.GetLength());
-            AWT_ASSERT(in.End());
+            AWL_ASSERT_EQUAL(mem_size, out.GetLength());
+            AWL_ASSERT(in.End());
 
             out.Reset();
         }
@@ -451,7 +451,7 @@ AWT_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
     }
 }
 
-AWT_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
+AWL_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
@@ -467,10 +467,10 @@ AWT_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 
     context.out << std::endl;
 
-    AWT_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), out.GetLength());
+    AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), out.GetLength());
 }
 
-AWT_BENCHMARK(VtsMeasureSerializationVirtual)
+AWL_BENCHMARK(VtsMeasureSerializationVirtual)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
@@ -486,10 +486,10 @@ AWT_BENCHMARK(VtsMeasureSerializationVirtual)
 
     context.out << std::endl;
 
-    AWT_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), len);
+    AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), len);
 }
 
-AWT_BENCHMARK(VtsMeasureSerializationFake)
+AWL_BENCHMARK(VtsMeasureSerializationFake)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
@@ -506,7 +506,7 @@ AWT_BENCHMARK(VtsMeasureSerializationFake)
     context.out << std::endl;
 }
 
-AWT_BENCHMARK(VtsMemSetMove)
+AWL_BENCHMARK(VtsMemSetMove)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
 
@@ -543,13 +543,13 @@ AWT_BENCHMARK(VtsMemSetMove)
 
         std::vector<uint8_t> v;
         v.reserve(element_count);
-        AWT_ASSERT_EQUAL(element_count, v.capacity());
+        AWL_ASSERT_EQUAL(element_count, v.capacity());
 
         awl::StopWatch w;
 
         v.insert(v.end(), p.get(), p.get() + element_count);
-        AWT_ASSERT_EQUAL(element_count, v.capacity());
-        AWT_ASSERT_EQUAL(element_count, v.size());
+        AWL_ASSERT_EQUAL(element_count, v.capacity());
+        AWL_ASSERT_EQUAL(element_count, v.size());
 
         helpers::ReportSpeed(context, w, element_count);
 
@@ -580,8 +580,8 @@ namespace
 
                 total_d += WriteDataV1<Writer>(out, element_count, false);
 
-                AWT_ASSERT_EQUAL(mem_size, out.GetCapacity());
-                AWT_ASSERT_EQUAL(mem_size, out.GetLength());
+                AWL_ASSERT_EQUAL(mem_size, out.GetCapacity());
+                AWL_ASSERT_EQUAL(mem_size, out.GetLength());
 
                 out.Reset();
             }
@@ -596,7 +596,7 @@ namespace
     }
 }
 
-AWT_TEST(VtsWriteMemoryStreamMemmove)
+AWL_TEST(VtsWriteMemoryStreamMemmove)
 {
     TestWrite<awl::io::VirtualMemoryOutputStream>(context);
 }
@@ -632,9 +632,9 @@ namespace awl::mp
     };
 }
 
-AWT_TEST(VtsDeletedType)
+AWL_TEST(VtsDeletedType)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     E1 e1 = { "abc", { 1, 2, 3} };
 
@@ -642,19 +642,19 @@ AWT_TEST(VtsDeletedType)
 
     awl::io::CopyV(e1, e2);
 
-    AWT_ASSERT(e2.b == e1.b);
+    AWL_ASSERT(e2.b == e1.b);
 
-    AWT_ASSERT(e2.c == 1);
+    AWL_ASSERT(e2.c == 1);
 }
 
 //store to/load of misaligned address
-AWT_UNSTABLE_TEST(VtsWriteMemoryStreamSwitch)
+AWL_UNSTABLE_TEST(VtsWriteMemoryStreamSwitch)
 {
     TestWrite<awl::io::SwitchMemoryOutputStream>(context);
 }
 
 //store to/load of misaligned address
-AWT_UNSTABLE_TEST(VtsWriteMemoryStreamConstexpr)
+AWL_UNSTABLE_TEST(VtsWriteMemoryStreamConstexpr)
 {
     TestWrite<awl::io::TrivialMemoryStream>(context);
 }

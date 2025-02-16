@@ -52,7 +52,7 @@ namespace
     }
 }
 
-AWT_EXAMPLE(CoroGeneratorFibonacci)
+AWL_EXAMPLE(CoroGeneratorFibonacci)
 {
     context.out << "Short Fibonacci sequence: " << std::endl;
     

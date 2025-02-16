@@ -15,9 +15,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-AWT_TEST(JsonArray)
+AWL_TEST(JsonArray)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     QString message = "[1, 2, 3]";
     
@@ -26,7 +26,7 @@ AWT_TEST(JsonArray)
 
     const int n = a.size();
 
-    AWT_ASSERT(n == 3);
+    AWL_ASSERT(n == 3);
 }
 
 namespace
@@ -58,18 +58,18 @@ namespace
     }
 }
 
-AWT_TEST(JsonBinanceErrorParsing)
+AWL_TEST(JsonBinanceErrorParsing)
 {
     {
         QString err_answer = "{\"code\":-1003,\"msg\":\"Too much request weight used; current limit is 1200 request weight per 1 MINUTE. Please use the websocket for live updates to avoid polling the API.\"}";
 
-        AWT_ASSERT(IsBinanceError(context, err_answer));
+        AWL_ASSERT(IsBinanceError(context, err_answer));
     }
 
     {
         QString other_answer = "{\"id\":-1003}";
 
-        AWT_ASSERT(!IsBinanceError(context, other_answer));
+        AWL_ASSERT(!IsBinanceError(context, other_answer));
     }
 }
 
@@ -114,26 +114,26 @@ namespace
     }
 }
 
-AWT_TEST(JsonReflectableA)
+AWL_TEST(JsonReflectableA)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     A a;
 
     awl::FromJson(makeAJson(), a);
 
-    AWT_ASSERT(a == a_expected);
+    AWL_ASSERT(a == a_expected);
 }
 
-AWT_TEST(JsonReflectableB)
+AWL_TEST(JsonReflectableB)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     B b;
 
     awl::FromJson(makeBJson(), b);
 
-    AWT_ASSERT(b == b_expected);
+    AWL_ASSERT(b == b_expected);
 }
 
 // Path: a->b
@@ -141,7 +141,7 @@ AWT_TEST(JsonReflectableB)
 // Details :
 //     [a] (Object / struct)
 //     [b] (String / int8_t)
-AWT_TEST(JsonReflectableExceptionTypeMismatch)
+AWL_TEST(JsonReflectableExceptionTypeMismatch)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -157,7 +157,7 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
     {
         awl::FromJson(b_jo, b);
 
-        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
     }
     catch (const awl::JsonException& e)
     {
@@ -170,7 +170,7 @@ AWT_TEST(JsonReflectableExceptionTypeMismatch)
 // Details :
 //     [a] (Object / struct)
 //     [b] (Null / int8_t)
-AWT_TEST(JsonReflectableExceptionNull)
+AWL_TEST(JsonReflectableExceptionNull)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -186,7 +186,7 @@ AWT_TEST(JsonReflectableExceptionNull)
     {
         awl::FromJson(b_jo, b);
 
-        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
     }
     catch (const awl::JsonException& e)
     {
@@ -200,7 +200,7 @@ AWT_TEST(JsonReflectableExceptionNull)
 //  [v] (Array/sequence<struct>)
 //  [1] (Object/struct)
 //  [b] (Null/int8_t)
-AWT_TEST(JsonReflectableExceptionVector)
+AWL_TEST(JsonReflectableExceptionVector)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -216,7 +216,7 @@ AWT_TEST(JsonReflectableExceptionVector)
     {
         awl::FromJson(b_jo, b);
 
-        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
     }
     catch (const awl::JsonException& e)
     {
@@ -231,7 +231,7 @@ AWT_TEST(JsonReflectableExceptionVector)
 //  [1] (Object/struct)
 //  [a] (Object/struct)
 //  [b] (Null/int8_t)
-AWT_TEST(JsonReflectableExceptionSet)
+AWL_TEST(JsonReflectableExceptionSet)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -251,7 +251,7 @@ AWT_TEST(JsonReflectableExceptionSet)
     {
         awl::FromJson(b_jo, b);
 
-        AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
     }
     catch (const awl::JsonException& e)
     {
@@ -275,7 +275,7 @@ namespace
 
             awl::FromJson(jv, map);
 
-            AWT_ASSERT(map == expected_map);
+            AWL_ASSERT(map == expected_map);
         }
 
         QJsonObject jo = jv.toObject();
@@ -289,7 +289,7 @@ namespace
             {
                 awl::FromJson(jo, map);
 
-                AWT_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+                AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
             }
             catch (const awl::JsonException& e)
             {
@@ -299,7 +299,7 @@ namespace
     }
 }
 
-AWT_TEST(JsonMap)
+AWL_TEST(JsonMap)
 {
     TestMap<std::map<QString, int>>(context);
     TestMap<std::map<std::string, int>>(context);

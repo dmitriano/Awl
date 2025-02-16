@@ -39,15 +39,15 @@ namespace awl::testing::helpers
 
             if constexpr (is_pointer_v<T>)
             {
-                AWT_ASSERT((sample == nullptr && result == nullptr) ||
+                AWL_ASSERT((sample == nullptr && result == nullptr) ||
                     (sample != nullptr && result != nullptr && *sample == *result));
             }
             else
             {
-                AWT_ASSERT(sample == result);
+                AWL_ASSERT(sample == result);
             }
         }
 
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.End());
     }
 }

@@ -9,10 +9,10 @@
 #include <QDebug>
 
 //Ensure we did not mix release/debug builds.
-AWT_TEST(QtMixReleaseDebug)
+AWL_TEST(QtMixReleaseDebug)
 {
     //AWL_ATTRIBUTE(QString, qstr, QString("QT6"));
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     const QString qstr = "QT6";
     const std::string val = qstr.toStdString();

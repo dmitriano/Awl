@@ -40,7 +40,7 @@ namespace
 
         if (param == 2)
         {
-            AWT_ASSERT(val == _T("temporary"));
+            AWL_ASSERT(val == _T("temporary"));
         }
 
         changeHandled = true;
@@ -63,7 +63,7 @@ namespace
             //Here val_copy is not temporary.
             Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
 
-            AWT_ASSERT(val_copy == val);
+            AWL_ASSERT(val_copy == val);
         }
 
         void SetIt2(int it)
@@ -76,12 +76,12 @@ namespace
     };
 }
 
-AWT_TEST(Observable_Events)
+AWL_TEST(Observable_Events)
 {
     Something something;
 
-    AWT_ASSERT_EQUAL(0U, something.size());
-    AWT_ASSERT(something.empty());
+    AWL_ASSERT_EQUAL(0U, something.size());
+    AWL_ASSERT(something.empty());
 
     {
         ChangeHandler handler1(context);
@@ -92,29 +92,29 @@ AWT_TEST(Observable_Events)
         something.Subscribe(&handler2);
         something.Subscribe(&handler3);
 
-        AWT_ASSERT_EQUAL(3u, something.size());
+        AWL_ASSERT_EQUAL(3u, something.size());
 
         something.SetIt(1);
         something.SetIt2(2);
 
-        AWT_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
-        AWT_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
-        AWT_ASSERTM_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
+        AWL_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+        AWL_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
+        AWL_ASSERTM_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
 
         handler1.UnsubscribeSelf();
-        AWT_ASSERT_EQUAL(2u, something.size());
+        AWL_ASSERT_EQUAL(2u, something.size());
 
         something.Unsubscribe(&handler2);
-        AWT_ASSERT_EQUAL(1u, something.size());
+        AWL_ASSERT_EQUAL(1u, something.size());
 
-        AWT_ASSERT(!something.empty());
+        AWL_ASSERT(!something.empty());
     }
 
-    AWT_ASSERT_EQUAL(0U, something.size());
-    AWT_ASSERT(something.empty());
+    AWL_ASSERT_EQUAL(0U, something.size());
+    AWL_ASSERT(something.empty());
 }
 
-AWT_TEST(Observable_Move)
+AWL_TEST(Observable_Move)
 {
     Something something1;
 
@@ -128,8 +128,8 @@ AWT_TEST(Observable_Move)
 
     something2.SetIt(5);
 
-    AWT_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
-    AWT_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
+    AWL_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+    AWL_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
 
     handler1.changeHandled = false;
     handler2.changeHandled = false;
@@ -140,11 +140,11 @@ AWT_TEST(Observable_Move)
 
     something3.SetIt(7);
 
-    AWT_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
-    AWT_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
+    AWL_ASSERTM_TRUE(handler1.changeHandled, _T("The observer has not been notified"));
+    AWL_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
 }
 
-AWT_TEST(Observer_Move)
+AWL_TEST(Observer_Move)
 {
     Something something1;
 
@@ -161,15 +161,15 @@ AWT_TEST(Observer_Move)
     
     something1.SetIt(5);
 
-    AWT_ASSERTM_FALSE(handler1.included(), _T("Observer #1 is included"));
-    AWT_ASSERTM_FALSE(handler2.included(), _T("Observer #2 is included"));
-    AWT_ASSERTM_FALSE(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
-    AWT_ASSERTM_FALSE(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+    AWL_ASSERTM_FALSE(handler1.included(), _T("Observer #1 is included"));
+    AWL_ASSERTM_FALSE(handler2.included(), _T("Observer #2 is included"));
+    AWL_ASSERTM_FALSE(handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    AWL_ASSERTM_FALSE(handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
-    AWT_ASSERTM_TRUE(handler1_copy.included(), _T("Observer #1 is not included"));
-    AWT_ASSERTM_TRUE(handler2_copy.included(), _T("Observer #2 is not included"));
-    AWT_ASSERTM_TRUE(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
-    AWT_ASSERTM_TRUE(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWL_ASSERTM_TRUE(handler1_copy.included(), _T("Observer #1 is not included"));
+    AWL_ASSERTM_TRUE(handler2_copy.included(), _T("Observer #2 is not included"));
+    AWL_ASSERTM_TRUE(handler1_copy.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWL_ASSERTM_TRUE(handler2_copy.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace
@@ -201,31 +201,31 @@ namespace
     };
 }
 
-AWT_TEST(Observable_ModelMove)
+AWL_TEST(Observable_ModelMove)
 {
     Model m;
     m.SetContext(context);
     m.something.SetIt(5);
 
-    AWT_ASSERTM_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
-    AWT_ASSERTM_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
-    AWT_ASSERTM_FALSE(m.handler3.included(), _T("Observer #3 is included"));
-    AWT_ASSERTM_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
-    AWT_ASSERTM_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWL_ASSERTM_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
+    AWL_ASSERTM_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
+    AWL_ASSERTM_FALSE(m.handler3.included(), _T("Observer #3 is included"));
+    AWL_ASSERTM_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWL_ASSERTM_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 
     m = {};
     m.SetContext(context);
 
-    AWT_ASSERTM_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
-    AWT_ASSERTM_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
-    AWT_ASSERTM_FALSE(m.handler3.included(), _T("Observer #3 is included"));
-    AWT_ASSERTM_FALSE(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
-    AWT_ASSERTM_FALSE(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
+    AWL_ASSERTM_TRUE(m.handler1.included(), _T("Observer #1 is not included"));
+    AWL_ASSERTM_TRUE(m.handler2.included(), _T("Observer #2 is not included"));
+    AWL_ASSERTM_FALSE(m.handler3.included(), _T("Observer #3 is included"));
+    AWL_ASSERTM_FALSE(m.handler1.changeHandled, _T("Observer #1 has been notified by a mistake."));
+    AWL_ASSERTM_FALSE(m.handler2.changeHandled, _T("Observer #2 has been notified by a mistake"));
 
     m.something.SetIt(7);
 
-    AWT_ASSERTM_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
-    AWT_ASSERTM_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
+    AWL_ASSERTM_TRUE(m.handler1.changeHandled, _T("Observer copy #1 has not been notified"));
+    AWL_ASSERTM_TRUE(m.handler2.changeHandled, _T("Observer copy #2 has not been notified"));
 }
 
 namespace
@@ -261,7 +261,7 @@ namespace
     }
 }
 
-AWT_TEST(Observable_ForwardArgs)
+AWL_TEST(Observable_ForwardArgs)
 {
     awl::String val = _T("String Value 1");
 
@@ -287,13 +287,13 @@ namespace
     };
 }
 
-AWT_TEST(Observable_ConstMove)
+AWL_TEST(Observable_ConstMove)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     const X x1;
     X x2 = std::move(x1);
 
-    AWT_ASSERT(x1.called == "");
-    AWT_ASSERT(x2.called == "copy");
+    AWL_ASSERT(x1.called == "");
+    AWL_ASSERT(x2.called == "copy");
 }

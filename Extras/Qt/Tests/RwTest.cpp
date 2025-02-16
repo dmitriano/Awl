@@ -30,13 +30,13 @@ namespace
 
         awl::io::Read(in, val);
 
-        AWT_ASSERT(val == expected);
+        AWL_ASSERT(val == expected);
     }
 }
 
-AWT_TEST(RwQtString)
+AWL_TEST(RwQtString)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         std::vector<uint8_t> v;

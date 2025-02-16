@@ -62,7 +62,7 @@ namespace
     }
 }
 
-AWT_TEST(ForeignSetAddRemoveClear)
+AWL_TEST(ForeignSetAddRemoveClear)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -80,15 +80,15 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
             if (f_count != 0)
             {
-                AWT_ASSERT(i != fs.end());
+                AWL_ASSERT(i != fs.end());
 
                 const auto & vs = *i;
                 
-                AWT_ASSERT_EQUAL(f_count, vs.size());
+                AWL_ASSERT_EQUAL(f_count, vs.size());
             }
             else
             {
-                AWT_ASSERT(i == fs.end());
+                AWL_ASSERT(i == fs.end());
             }
         }
     };
@@ -107,10 +107,10 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
     check();
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetDestructor)
+AWL_TEST(ForeignSetDestructor)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -125,10 +125,10 @@ AWT_TEST(ForeignSetDestructor)
         GenerateSet(ps, insert_count, range);
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetConstructor)
+AWL_TEST(ForeignSetConstructor)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -148,10 +148,10 @@ AWT_TEST(ForeignSetConstructor)
         count += set.size();
     }
 
-    AWT_ASSERT_EQUAL(ps.size(), count);
+    AWL_ASSERT_EQUAL(ps.size(), count);
 }
 
-AWT_TEST(ForeignSetShared)
+AWL_TEST(ForeignSetShared)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -198,10 +198,10 @@ AWT_TEST(ForeignSetShared)
         }
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetUnique)
+AWL_TEST(ForeignSetUnique)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -228,10 +228,10 @@ AWT_TEST(ForeignSetUnique)
         }
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetPlainPointer)
+AWL_TEST(ForeignSetPlainPointer)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
@@ -269,5 +269,5 @@ AWT_TEST(ForeignSetPlainPointer)
         delete p;
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }

@@ -102,7 +102,7 @@ namespace
 
             std::vector<T> v;
             v.reserve(vector_size);
-            AWT_ASSERT_EQUAL(vector_size, v.capacity());
+            AWL_ASSERT_EQUAL(vector_size, v.capacity());
 
             context.out << _T("std::vector<") << type_name << _T(">\t");
 
@@ -118,8 +118,8 @@ namespace
                     std::copy(p_buffer.get(), p_buffer.get() + vector_size, std::back_inserter(v));
 
                     //Ensure the vector was not resized.
-                    AWT_ASSERT_EQUAL(vector_size, v.capacity());
-                    AWT_ASSERT_EQUAL(vector_size, v.size());
+                    AWL_ASSERT_EQUAL(vector_size, v.capacity());
+                    AWL_ASSERT_EQUAL(vector_size, v.size());
                     v.resize(0);
                 }
 
@@ -138,8 +138,8 @@ namespace
                     v.insert(v.end(), p_buffer.get(), p_buffer.get() + vector_size);
 
                     //Ensure the vector was not resized.
-                    AWT_ASSERT_EQUAL(vector_size, v.capacity());
-                    AWT_ASSERT_EQUAL(vector_size, v.size());
+                    AWL_ASSERT_EQUAL(vector_size, v.capacity());
+                    AWL_ASSERT_EQUAL(vector_size, v.size());
                     v.resize(0);
                 }
 
@@ -186,7 +186,7 @@ namespace
                 FromInt(p_buffer[i], i);
             }
 
-            AWT_ASSERT_EQUAL(vector_size, v.size());
+            AWL_ASSERT_EQUAL(vector_size, v.size());
 
             auto copy = [&](size_t begin, size_t end)
             {
@@ -363,19 +363,19 @@ namespace
     }
 }
 
-AWT_BENCHMARK(VectorCopy)
+AWL_BENCHMARK(VectorCopy)
 {
     CopyVectors<CopyVector>(context);
 }
 
-AWT_BENCHMARK(VectorCopyAsync)
+AWL_BENCHMARK(VectorCopyAsync)
 {
     context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
 
     CopyVectors<CopyVectorAsync>(context);
 }
 
-AWT_BENCHMARK(VectorSum)
+AWL_BENCHMARK(VectorSum)
 {
     context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
 

@@ -23,24 +23,24 @@ static void TestIntContainer(const C * sample)
 
     V v = F::FromString(s_sample);
 
-    AWT_ASSERT((v == V { 10, -3, 50 }));
+    AWL_ASSERT((v == V { 10, -3, 50 }));
 
     TString s_result = F::ToString(v);
 
-    AWT_ASSERT(s_sample == s_result);
+    AWL_ASSERT(s_sample == s_result);
 }
 
-AWT_TEST(Formatter_IntContainer)
+AWL_TEST(Formatter_IntContainer)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     TestIntContainer("10 -3 50");
     TestIntContainer(_T("10 -3 50"));
 }
 
-AWT_TEST(Formatter_StringContainer)
+AWL_TEST(Formatter_StringContainer)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using V = std::set<awl::String>;
     using F = Formatter<V>;
@@ -49,16 +49,16 @@ AWT_TEST(Formatter_StringContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT((v == V { _T("a"), _T("b"), _T("cde") }));
+    AWL_ASSERT((v == V { _T("a"), _T("b"), _T("cde") }));
 
     String s_result = F::ToString(v);
 
-    AWT_ASSERT(s_sample == s_result);
+    AWL_ASSERT(s_sample == s_result);
 }
 
-AWT_TEST(Formatter_BoolContainer)
+AWL_TEST(Formatter_BoolContainer)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using V = std::vector<bool>;
     using F = Formatter<V>;
@@ -67,16 +67,16 @@ AWT_TEST(Formatter_BoolContainer)
 
     auto v = F::FromString(s_sample);
 
-    AWT_ASSERT((v == V { true, false, false }));
+    AWL_ASSERT((v == V { true, false, false }));
 
     String s_result = F::ToString(v);
 
-    AWT_ASSERT(s_sample == s_result);
+    AWL_ASSERT(s_sample == s_result);
 }
 
-AWT_TEST(Formatter_String)
+AWL_TEST(Formatter_String)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using F = Formatter<String>;
 
@@ -84,16 +84,16 @@ AWT_TEST(Formatter_String)
 
     auto from_result = F::FromString(sample);
 
-    AWT_ASSERT(from_result == sample);
+    AWL_ASSERT(from_result == sample);
 
     String to_result = F::ToString(sample);
 
-    AWT_ASSERT(to_result == sample);
+    AWL_ASSERT(to_result == sample);
 }
 
-AWT_TEST(Formatter_Arithmetic)
+AWL_TEST(Formatter_Arithmetic)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     Formatter<bool>();
     Formatter<int>();

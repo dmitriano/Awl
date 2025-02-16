@@ -70,7 +70,7 @@ namespace
         {
             co_await print(context, 10);
 
-            AWT_FAILM(_T("AsyncGenerator did not throw."));
+            AWL_FAILM(_T("AsyncGenerator did not throw."));
         }
         catch (const std::exception& ex)
         {
@@ -78,12 +78,12 @@ namespace
         }
         catch (...)
         {
-            AWT_FAILM(_T("AsyncGenerator thrown a wrong exception."));
+            AWL_FAILM(_T("AsyncGenerator thrown a wrong exception."));
         }
     }
 }
 
-AWT_TEST(CoroAsyncGenerator)
+AWL_TEST(CoroAsyncGenerator)
 {
     awl::UpdateTask task = test(context);
 

@@ -45,7 +45,7 @@ namespace
 
         auto len = s.GetLength();
 
-        AWT_ASSERT(len != 0);
+        AWL_ASSERT(len != 0);
 
         std::uniform_int_distribution<size_t> dist(1, len - 1);
 
@@ -85,12 +85,12 @@ namespace
     template <class Value>
     bool LoadValue(awl::io::AtomicStorage& storage, Value& val, bool existed = true)
     {
-        AWT_ASSERT(storage.Open(master_name, backup_name) == existed);
+        AWL_ASSERT(storage.Open(master_name, backup_name) == existed);
         return storage.Load(val);
     }
 }
 
-AWT_TEST(AtomicStoragePlain)
+AWL_TEST(AtomicStoragePlain)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
@@ -103,8 +103,8 @@ AWT_TEST(AtomicStoragePlain)
         Value val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(!LoadValue(storage, hashed_val, false));
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(!LoadValue(storage, hashed_val, false));
+        AWL_ASSERT(b == v2::b_expected);
         storage.Save(hashed_val);
     }
 
@@ -113,8 +113,8 @@ AWT_TEST(AtomicStoragePlain)
         Value val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == v2::b_expected);
     }
 
     CorruptFile(master_name);
@@ -125,8 +125,8 @@ AWT_TEST(AtomicStoragePlain)
         Value val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(!LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == saved_b);
+        AWL_ASSERT(!LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == saved_b);
 
         b = v2::b_expected;
         storage.Save(hashed_val);
@@ -138,8 +138,8 @@ AWT_TEST(AtomicStoragePlain)
         Value val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == v2::b_expected);
     };
 
     load();
@@ -154,7 +154,7 @@ AWT_TEST(AtomicStoragePlain)
     load();
 }
 
-AWT_TEST(AtomicStorageVts)
+AWL_TEST(AtomicStorageVts)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
@@ -166,10 +166,10 @@ AWT_TEST(AtomicStorageVts)
             Value1 val(b);
             HashingSerializable hashed_val(val);
             awl::io::AtomicStorage storage(logger);
-            AWT_ASSERT(!storage.IsOpened());
-            AWT_ASSERT(!LoadValue(storage, hashed_val, false));
-            AWT_ASSERT(storage.IsOpened());
-            AWT_ASSERT(b == v1::b_expected);
+            AWL_ASSERT(!storage.IsOpened());
+            AWL_ASSERT(!LoadValue(storage, hashed_val, false));
+            AWL_ASSERT(storage.IsOpened());
+            AWL_ASSERT(b == v1::b_expected);
             storage.Save(hashed_val);
         }
 
@@ -178,8 +178,8 @@ AWT_TEST(AtomicStorageVts)
             Value1 val(b);
             HashingSerializable hashed_val(val);
             awl::io::AtomicStorage storage(logger);
-            AWT_ASSERT(LoadValue(storage, hashed_val));
-            AWT_ASSERT(b == v1::b_expected);
+            AWL_ASSERT(LoadValue(storage, hashed_val));
+            AWL_ASSERT(b == v1::b_expected);
         }
     }
 
@@ -188,8 +188,8 @@ AWT_TEST(AtomicStorageVts)
         Value2 val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == v2::b_expected);
     }
 
     CorruptFile(master_name);
@@ -200,8 +200,8 @@ AWT_TEST(AtomicStorageVts)
         Value2 val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(!LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == saved_b);
+        AWL_ASSERT(!LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == saved_b);
 
         b = v2::b_expected;
         storage.Save(hashed_val);
@@ -213,8 +213,8 @@ AWT_TEST(AtomicStorageVts)
         Value2 val(b);
         HashingSerializable hashed_val(val);
         awl::io::AtomicStorage storage(logger);
-        AWT_ASSERT(LoadValue(storage, hashed_val));
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(LoadValue(storage, hashed_val));
+        AWL_ASSERT(b == v2::b_expected);
     };
 
     load();
@@ -237,7 +237,7 @@ namespace
     }
 }
 
-AWT_TEST(AtomicStorageMove)
+AWL_TEST(AtomicStorageMove)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
@@ -249,8 +249,8 @@ AWT_TEST(AtomicStorageMove)
         v1::B b = v1::b_expected;
         Value1 val(b);
         HashingSerializable hashed_val(val);
-        AWT_ASSERT(!storage.Load(hashed_val));
-        AWT_ASSERT(b == v1::b_expected);
+        AWL_ASSERT(!storage.Load(hashed_val));
+        AWL_ASSERT(b == v1::b_expected);
         storage.Save(hashed_val);
     }
 
@@ -261,36 +261,36 @@ AWT_TEST(AtomicStorageMove)
         Value2 val(b);
         HashingSerializable hashed_val(val);
         storage1.Load(hashed_val);
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(b == v2::b_expected);
     }
 }
 
-AWT_TEST(AtomicStorageSave)
+AWL_TEST(AtomicStorageSave)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
     auto& logger = context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
-    AWT_ASSERT(storage.IsEmpty());
+    AWL_ASSERT(storage.IsEmpty());
 
     {
         v1::B b = v1::b_expected;
         Value1 val(b);
         HashingSerializable hashed_val(val);
         storage.Save(hashed_val);
-        AWT_ASSERT(!storage.IsEmpty());
+        AWL_ASSERT(!storage.IsEmpty());
     }
 
     awl::io::AtomicStorage storage1 = std::move(storage);
-    AWT_ASSERT(!storage1.IsEmpty());
+    AWL_ASSERT(!storage1.IsEmpty());
 
     {
         v2::B b;
         Value2 val(b);
         HashingSerializable hashed_val(val);
         storage1.Load(hashed_val);
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(b == v2::b_expected);
     }
 }
 
@@ -303,7 +303,7 @@ namespace
         auto& logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
-        AWT_ASSERT(storage.IsEmpty());
+        AWL_ASSERT(storage.IsEmpty());
 
         using Value = awl::io::EuphoricallySerializable<v2::B>; //, V2
 
@@ -317,12 +317,12 @@ namespace
             v2::B b;
             Value val(b);
             storage.Load(val);
-            AWT_ASSERT(b == v2::b_expected);
+            AWL_ASSERT(b == v2::b_expected);
         }
     }
 }
 
-AWT_TEST(AtomicStorageEuphorical1)
+AWL_TEST(AtomicStorageEuphorical1)
 {
     EuphoricalLoadSaveTest(context, nullptr);
 
@@ -410,7 +410,7 @@ namespace
         auto& logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
-        AWT_ASSERT(storage.IsEmpty());
+        AWL_ASSERT(storage.IsEmpty());
 
         const GameParamsV1 gp1_sample = { BoardType::Hexagonal, 1, 2, 3, 4, true };
 
@@ -428,13 +428,13 @@ namespace
             storage.Load(val);
 
             // Ensure clusterType is initialized into its default value.
-            AWT_ASSERT(gp2.clusterType == ClusterType::Line);
-            AWT_ASSERT(gp2.as_v1_tuple() == gp1_sample.as_tuple());
+            AWL_ASSERT(gp2.clusterType == ClusterType::Line);
+            AWL_ASSERT(gp2.as_v1_tuple() == gp1_sample.as_tuple());
         }
     }
 }
 
-AWT_TEST(AtomicStorageVts2)
+AWL_TEST(AtomicStorageVts2)
 {
     TestRenameAndDefaultFields<
         awl::io::VersionTolerantSerializable<GameParamsV1>, //, awl::mp::variant_from_structs<GameParamsV1>
@@ -442,7 +442,7 @@ AWT_TEST(AtomicStorageVts2)
     (context);
 }
 
-AWT_TEST(AtomicStorageEuphorical2)
+AWL_TEST(AtomicStorageEuphorical2)
 {
     TestRenameAndDefaultFields<
         awl::io::EuphoricallySerializable<GameParamsV1>, //, awl::mp::variant_from_structs<GameParamsV1>
@@ -450,7 +450,7 @@ AWT_TEST(AtomicStorageEuphorical2)
     (context);
 }
 
-AWT_TEST(Shapshot)
+AWL_TEST(Shapshot)
 {
     using Value = awl::io::EuphoricallySerializable<v2::B, awl::io::VectorInputStream, awl::io::VectorOutputStream>; //, V2
 
@@ -475,7 +475,7 @@ AWT_TEST(Shapshot)
         val.WriteSnapshot(out, snapshot);
     }
 
-    AWT_ASSERT(actual_v == expected_v);
+    AWL_ASSERT(actual_v == expected_v);
 
     context.out << _T("Snapshot size: ") << snapshot.size() << _T(" bytes") << std::endl;
     context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
@@ -505,9 +505,9 @@ namespace
     };
 }
 
-AWT_TEST(HeaderedSerializable)
+AWL_TEST(HeaderedSerializable)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Value = HeaderedValue;
 
@@ -530,9 +530,9 @@ AWT_TEST(HeaderedSerializable)
         v2::B b;
         Value val(current_header, b);
         val.Read(in);
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(b == v2::b_expected);
         // Check the versions match.
-        AWT_ASSERT(val.oldVersion == HeaderedValue::NoVersion);
+        AWL_ASSERT(val.oldVersion == HeaderedValue::NoVersion);
     }
 
     awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
@@ -544,7 +544,7 @@ AWT_TEST(HeaderedSerializable)
         v2::B b;
         Value val(wrong_header, b);
         val.Read(in);
-        AWT_ASSERT(b == v2::b_expected);
+        AWL_ASSERT(b == v2::b_expected);
     });
 
     // Read an older version from a newer stream.
@@ -574,7 +574,7 @@ AWT_TEST(HeaderedSerializable)
         val.Read(in);
 
         // Check we fall back to the old version.
-        AWT_ASSERT(val.oldVersion == current_header.version);
+        AWL_ASSERT(val.oldVersion == current_header.version);
     }
 
     // Exceed format name limit.
@@ -612,7 +612,7 @@ namespace
     };
 }
 
-AWT_BENCHMARK(AtomicStorageVtsWrite)
+AWL_BENCHMARK(AtomicStorageVtsWrite)
 {
     using signed_size_t = std::make_signed_t<size_t>;
 
@@ -716,7 +716,7 @@ AWT_BENCHMARK(AtomicStorageVtsWrite)
 
             storage.Load(*p_val);
 
-            AWT_ASSERT(state.count == write_count - 1);
+            AWL_ASSERT(state.count == write_count - 1);
         }
 
         // File Size should be equal to Stream Size printed above.

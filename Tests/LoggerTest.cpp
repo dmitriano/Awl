@@ -8,7 +8,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 
-AWT_TEST(Logger)
+AWL_TEST(Logger)
 {
     awl::ConsoleLogger logger(context.out);
 

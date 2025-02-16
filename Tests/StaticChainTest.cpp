@@ -21,17 +21,17 @@ namespace
     // const awl::StaticLink<X> x3("2", 2);
 }
 
-AWT_TEST(StaticChainInt)
+AWL_TEST(StaticChainInt)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     // Test variable_static_chain()
     for (X val = 0; val < 3; ++val)
     {
         auto i = awl::variable_static_chain<X>().find(awl::aformat() << val);
 
-        AWT_ASSERT(i != awl::variable_static_chain<X>().end());
-        AWT_ASSERT(i->value() == val);
+        AWL_ASSERT(i != awl::variable_static_chain<X>().end());
+        AWL_ASSERT(i->value() == val);
         ++i->value();
     }
 
@@ -39,18 +39,18 @@ AWT_TEST(StaticChainInt)
     {
         auto i = awl::static_chain<X>().find(awl::aformat() << val);
 
-        AWT_ASSERT(i != awl::static_chain<X>().end());
-        AWT_ASSERT(i->value() == val + 1);
+        AWL_ASSERT(i != awl::static_chain<X>().end());
+        AWL_ASSERT(i->value() == val + 1);
     }
 }
 
-AWT_TEST(StaticChainFactoryParameterless)
+AWL_TEST(StaticChainFactoryParameterless)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::create<std::string>("a") == "a");
-    AWT_ASSERT(awl::create<std::string>("b") == "b");
-    AWT_ASSERT(awl::create<std::string>("c") == "c");
+    AWL_ASSERT(awl::create<std::string>("a") == "a");
+    AWL_ASSERT(awl::create<std::string>("b") == "b");
+    AWL_ASSERT(awl::create<std::string>("c") == "c");
 
     awl::testing::Assert::Throws<awl::FactoryException>([]()
     {
@@ -58,12 +58,12 @@ AWT_TEST(StaticChainFactoryParameterless)
     });
 }
 
-AWT_TEST(StaticChainFactoryArgs)
+AWL_TEST(StaticChainFactoryArgs)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
-    AWT_ASSERT(awl::create<std::string>("a1", 5) == "A5");
-    AWT_ASSERT(awl::create<std::string>("b1", 7) == "B7");
+    AWL_ASSERT(awl::create<std::string>("a1", 5) == "A5");
+    AWL_ASSERT(awl::create<std::string>("b1", 7) == "B7");
 
     awl::testing::Assert::Throws<awl::FactoryException>([]()
     {

@@ -91,7 +91,7 @@ namespace
     };
 }
 
-AWT_DISABLED_TEST(FlatMapOrder)
+AWL_DISABLED_TEST(FlatMapOrder)
 {
     static_cast<void>(context);
     
@@ -103,22 +103,22 @@ AWT_DISABLED_TEST(FlatMapOrder)
     m.insert(std::make_pair(30, 0));
     m.insert(std::make_pair(10, 2));
 
-    AWT_ASSERT_EQUAL(m.m_v.size(), static_cast<size_t>(5));
+    AWL_ASSERT_EQUAL(m.m_v.size(), static_cast<size_t>(5));
     
     for (size_t i = 0; i < m.m_v.size(); ++i)
     {
-        AWT_ASSERT_EQUAL(m.m_v[i].second, i);
+        AWL_ASSERT_EQUAL(m.m_v[i].second, i);
     }
 }
 
-AWT_BENCHMARK(FlatMap)
+AWL_BENCHMARK(FlatMap)
 {
     Insert<std::map<size_t, size_t>>(context, _T("map"));
     Insert<std::unordered_map<size_t, size_t>>(context, _T("unordered_map"));
     //Insert<flat_map>(context, _T("vector"));
 }
 
-AWT_BENCHMARK(MemoryRead)
+AWL_BENCHMARK(MemoryRead)
 {
     AWL_ATTRIBUTE(size_t, element_count, 1024*1024);
     AWL_ATTRIBUTE(size_t, read_count, 1000000);

@@ -52,9 +52,9 @@ namespace
     };
 }
 
-AWT_TEST(CLangFalseWarning)
+AWL_TEST(CLangFalseWarning)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     TestReader reader;
 

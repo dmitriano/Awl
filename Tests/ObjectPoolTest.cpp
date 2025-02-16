@@ -42,9 +42,9 @@ namespace
     int A::elementCount = 0;
 }
 
-AWT_TEST(ObjectPool)
+AWL_TEST(ObjectPool)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         awl::object_pool<A> pool;
@@ -53,75 +53,75 @@ AWT_TEST(ObjectPool)
             std::shared_ptr<A> p = pool.make();
         }
 
-        AWT_ASSERT_EQUAL(1, A::elementCount);
+        AWL_ASSERT_EQUAL(1, A::elementCount);
 
         {
             std::shared_ptr<A> p = pool.make();
         }
 
-        AWT_ASSERT_EQUAL(1, A::elementCount);
+        AWL_ASSERT_EQUAL(1, A::elementCount);
 
         {
             std::shared_ptr<A> p1 = pool.make();
             std::shared_ptr<A> p2 = pool.make();
         }
 
-        AWT_ASSERT_EQUAL(2, A::elementCount);
+        AWL_ASSERT_EQUAL(2, A::elementCount);
 
         {
             std::shared_ptr<A> p = pool.make();
             std::weak_ptr<A> w = p;
-            AWT_ASSERT(w.lock() != nullptr);
+            AWL_ASSERT(w.lock() != nullptr);
             p = nullptr;
-            AWT_ASSERT(!w.lock());
+            AWL_ASSERT(!w.lock());
         }
 
-        AWT_ASSERT_EQUAL(2, A::elementCount);
+        AWL_ASSERT_EQUAL(2, A::elementCount);
     }
 
-    AWT_ASSERT_EQUAL(0, A::elementCount);
+    AWL_ASSERT_EQUAL(0, A::elementCount);
 }
 
-AWT_TEST(ObjectPoolSingleton)
+AWL_TEST(ObjectPoolSingleton)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         {
             std::shared_ptr<A> p = awl::make_pooled<A>();
         }
 
-        AWT_ASSERT_EQUAL(1, A::elementCount);
+        AWL_ASSERT_EQUAL(1, A::elementCount);
 
         {
             std::shared_ptr<A> p = awl::make_pooled<A>();
         }
 
-        AWT_ASSERT_EQUAL(1, A::elementCount);
+        AWL_ASSERT_EQUAL(1, A::elementCount);
 
         {
             std::shared_ptr<A> p1 = awl::make_pooled<A>();
             std::shared_ptr<A> p2 = awl::make_pooled<A>();
         }
 
-        AWT_ASSERT_EQUAL(2, A::elementCount);
+        AWL_ASSERT_EQUAL(2, A::elementCount);
 
         {
             std::shared_ptr<A> p = awl::make_pooled<A>();
             std::weak_ptr<A> w = p;
-            AWT_ASSERT(w.lock() != nullptr);
+            AWL_ASSERT(w.lock() != nullptr);
             p = nullptr;
-            AWT_ASSERT(!w.lock());
+            AWL_ASSERT(!w.lock());
         }
 
-        AWT_ASSERT_EQUAL(2, A::elementCount);
+        AWL_ASSERT_EQUAL(2, A::elementCount);
     }
 
-    AWT_ASSERT_EQUAL(2, A::elementCount);
+    AWL_ASSERT_EQUAL(2, A::elementCount);
 
     awl::clear_pool<A>();
 
-    AWT_ASSERT_EQUAL(0, A::elementCount);
+    AWL_ASSERT_EQUAL(0, A::elementCount);
 }
 
 namespace
@@ -148,9 +148,9 @@ namespace
     int B::elementCount = 0;
 }
 
-AWT_TEST(ObjectPoolSharedFromThis)
+AWL_TEST(ObjectPoolSharedFromThis)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     {
         awl::object_pool<B> pool;
@@ -160,31 +160,31 @@ AWT_TEST(ObjectPoolSharedFromThis)
         {
             std::shared_ptr<B> p1 = pool.add(raw_p);
 
-            AWT_ASSERT_EQUAL(1, B::elementCount);
+            AWL_ASSERT_EQUAL(1, B::elementCount);
 
             std::shared_ptr<B> p2 = raw_p->shared_from_this();
 
-            AWT_ASSERT(p1 == p2);
+            AWL_ASSERT(p1 == p2);
         }
 
-        AWT_ASSERT_EQUAL(1, B::elementCount);
+        AWL_ASSERT_EQUAL(1, B::elementCount);
 
         {
             std::shared_ptr<B> p1 = pool.make();
 
             B* p_instance = p1.get();
 
-            AWT_ASSERT_EQUAL(1, B::elementCount);
+            AWL_ASSERT_EQUAL(1, B::elementCount);
 
-            AWT_ASSERT_EQUAL(raw_p, p1.get());
+            AWL_ASSERT_EQUAL(raw_p, p1.get());
 
             std::shared_ptr<B> p2 = p_instance->shared_from_this();
 
-            AWT_ASSERT(p1 == p2);
+            AWL_ASSERT(p1 == p2);
         }
 
-        AWT_ASSERT_EQUAL(1, B::elementCount);
+        AWL_ASSERT_EQUAL(1, B::elementCount);
     }
 
-    AWT_ASSERT_EQUAL(0, B::elementCount);
+    AWL_ASSERT_EQUAL(0, B::elementCount);
 }

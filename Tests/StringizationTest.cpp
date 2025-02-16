@@ -45,11 +45,11 @@ namespace
 
     void AssertMemberListEqual(const awl::helpers::MemberList ml, const Vector & v)
     {
-        AWT_ASSERT(v.size() == ml.size());
+        AWL_ASSERT(v.size() == ml.size());
 
         for (size_t i = 0; i != v.size(); ++i)
         {
-            AWT_ASSERT(v[i] == ml[i]);
+            AWL_ASSERT(v[i] == ml[i]);
         }
     }
 
@@ -85,9 +85,9 @@ namespace
     }
 }
 
-AWT_TEST(Stringizable_MemberList)
+AWL_TEST(Stringizable_MemberList)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
     
     TestMemberList({ });
     TestMemberList({ "a" });
@@ -98,9 +98,9 @@ AWT_TEST(Stringizable_MemberList)
     AssertMemberListEqual(B::get_member_names(), Vector{ "x", "y", "z" });
 }
 
-AWT_TEST(Stringizable_ForEach)
+AWL_TEST(Stringizable_ForEach)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     A a1 = { 1, 5.0, "abc" };
 
@@ -111,7 +111,7 @@ AWT_TEST(Stringizable_ForEach)
         map.emplace(a1.get_member_names()[index], val);
     });
 
-    AWT_ASSERT(map.size() == 3);
+    AWL_ASSERT(map.size() == 3);
 
     A a2 = {};
 
@@ -120,5 +120,5 @@ AWT_TEST(Stringizable_ForEach)
         val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.get_member_names()[index]]);
     });
 
-    AWT_ASSERT(a1 == a2);
+    AWL_ASSERT(a1 == a2);
 }
