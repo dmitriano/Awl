@@ -16,11 +16,11 @@ namespace awl
 {
     namespace testing
     {
-        template <typename C, typename T, typename Enable = void>
+        template <typename C, typename T>
         class BasicFormatter;
 
-        template <typename C, typename T>
-        class BasicFormatter<C, T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
+        template <typename C, typename T> requires std::is_arithmetic_v<T>
+        class BasicFormatter<C, T>
         {
         public:
 
@@ -41,8 +41,8 @@ namespace awl
             }
         };
 
-        template <typename C, typename T>
-        class BasicFormatter<C, T, std::enable_if_t<is_specialization_v<T, std::basic_string>>>
+        template <typename C, typename T> requires is_specialization_v<T, std::basic_string>
+        class BasicFormatter<C, T>
         {
         public:
 
@@ -59,9 +59,9 @@ namespace awl
             }
         };
 
-        template <typename C, typename T>
-        class BasicFormatter<C, T, typename std::enable_if<is_collection<T>::value &&
-            (std::is_arithmetic<typename T::value_type>::value || is_string<C, typename T::value_type>::value)>::type>
+        template <typename C, typename T> requires is_collection<T>::value &&
+            (std::is_arithmetic<typename T::value_type>::value || is_string<C, typename T::value_type>::value)
+        class BasicFormatter<C, T>
         {
         public:
 
