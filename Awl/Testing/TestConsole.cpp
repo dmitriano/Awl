@@ -18,30 +18,15 @@
 
 namespace awl::testing
 {
-    int Run(int argc, Char* argv[])
-    {
-        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(argc, argv));
-
-        TestConsole console(ap);
-
-        // TODO: call PrintUnusedOptions()
-        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
-
-        return console.Run();
-    }
-
-    int Run()
-    {
-        return Run(0, nullptr);
-    }
-
-    TestConsole::TestConsole(CompositeProvider<CommandLineProvider>& ap) :
+    template <attribute_provider Provider>
+    TestConsole<Provider>::TestConsole(Provider& ap) :
         m_ap(ap),
         m_context{ awl::cout(), m_logger, m_source.get_token(), m_ap }
     {
     }
 
-    bool TestConsole::RunTests()
+    template <attribute_provider Provider>
+    bool TestConsole<Provider>::RunTests()
     {
         TestContext& context = m_context;
         
@@ -111,7 +96,8 @@ namespace awl::testing
         return passed;
     }
 
-    int TestConsole::Run()
+    template <attribute_provider Provider>
+    int TestConsole<Provider>::Run()
     {
         try
         {
@@ -123,5 +109,34 @@ namespace awl::testing
         }
 
         return 2;
+    }
+
+    int Run(int argc, Char* argv[])
+    {
+        CommandLineProvider cl(argc, argv);
+
+#ifdef AWL_QT
+
+        QJsonObject jo;
+
+        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+
+#else
+
+        CompositeProvider<CommandLineProvider> ap(std::move(cl));
+
+#endif
+
+        TestConsole console(ap);
+
+        // TODO: call PrintUnusedOptions()
+        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
+
+        return console.Run();
+    }
+
+    int Run()
+    {
+        return Run(0, nullptr);
     }
 }

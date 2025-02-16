@@ -22,11 +22,12 @@
 
 namespace awl::testing
 {
+    template <attribute_provider Provider>
     class TestConsole
     {
     public:
 
-        TestConsole(CompositeProvider<CommandLineProvider>& ap);
+        explicit TestConsole(Provider& ap);
 
         int Run();
 
@@ -43,7 +44,7 @@ namespace awl::testing
 
         ConsoleLogger m_logger;
 
-        CompositeProvider<CommandLineProvider>& m_ap;
+        Provider& m_ap;
 
         TestContext m_context;
     };

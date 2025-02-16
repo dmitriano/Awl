@@ -10,6 +10,11 @@
 #include "Awl/Logger.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"
+
+#ifdef AWL_QT
+    #include "Awl/Testing/JsonProvider.h"
+#endif
+
 #include "Awl/Testing/CompositeProvider.h"
 
 namespace awl::testing
@@ -25,10 +30,16 @@ namespace awl::testing
 
         std::stop_token stopToken;
 
-        CompositeProvider<Ps...>& ap;
+        using Provider = CompositeProvider<Ps...>;
+
+        Provider& ap;
     };
 
-    using CommandLineContext = CompositeTestContext<CommandLineProvider>;
+#ifdef AWL_QT
+    using TestContext = CompositeTestContext<CommandLineProvider, JsonProvider>;
+#else
+    using TestContext = CompositeTestContext<CommandLineProvider>;
+#endif
 
-    using TestContext = CommandLineContext;
+    static_assert(attribute_provider<TestContext::Provider>);
 }
