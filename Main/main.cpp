@@ -12,7 +12,11 @@
 #define _tmain main
 #endif
 
+#ifdef AWL_ANSI_CMD_CHAR
+int main(int argc, char* argv[])
+#else
 int _tmain(int argc, awl::Char * argv[])
+#endif
 {
     try
     {

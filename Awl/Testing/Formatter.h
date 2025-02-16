@@ -50,34 +50,12 @@ namespace awl
 
             static String ToString(T val)
             {
-                if constexpr (std::is_same_v<typename T::value_type, C>)
-                {
-                    return val;
-                }
-                else if constexpr (std::is_same_v<typename T::value_type, char>)
-                {
-                    return FromAString(val);
-                }
-                else
-                {
-                    static_assert(dependent_false_v<T>, "Unknown char type");
-                }
+                return StringConvertor<typename String::value_type>::ConvertFrom(val.c_str());
             }
 
             static T FromString(String s)
             {
-                if constexpr (std::is_same_v<typename T::value_type, C>)
-                {
-                    return s;
-                }
-                else if constexpr (std::is_same_v<typename T::value_type, char>)
-                {
-                    return ToAString(s);
-                }
-                else
-                {
-                    static_assert(dependent_false_v<T>, "Unknown char type");
-                }
+                return StringConvertor<typename T::value_type>::ConvertFrom(s.c_str());
             }
         };
 

@@ -113,3 +113,7 @@ if (AWL_COMPILE_MAIN)
     file(GLOB_RECURSE AWL_CPP_MAIN_FILES ${AWL_ROOT_DIR}/Main/*.h ${AWL_ROOT_DIR}/Main/*.cpp)
     target_sources(${PROJECT_NAME} PRIVATE ${AWL_CPP_MAIN_FILES})
 endif()
+
+if (AWL_ANSI_CMD_CHAR)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_ANSI_CMD_CHAR)
+endif()

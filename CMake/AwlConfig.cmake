@@ -18,6 +18,7 @@ option(AWL_FIND_QT "Use QString if the project is built with QT." ON)
 option(AWL_SANITIZE_THREAD "Use Thread Sanitizer.")
 option(AWL_SANITIZE_UNDEFINED "Use Undefined Behavior Sanitizer.")
 option(AWL_SANITIZE_ADDRESS "Use Address Sanitizer.")
+option(AWL_ANSI_CMD_CHAR "Define CommandLineProvider with char, but not with awl::Char.")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # AppleClang and Android Clang do not have std::jthread.

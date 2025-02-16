@@ -51,10 +51,16 @@ namespace awl
 {
     using Char = TCHAR;
 
+    template<typename CharT, std::size_t N>
+    auto text_literal(const char(&arr)[N])
+    {
+        return fixed_string<CharT, N - 1>::from_ascii(arr);
+    }
+
     template<std::size_t N>
     auto text(const char(&arr)[N])
     {
-        return fixed_string<Char, N - 1>::from_ascii(arr);
+        return text_literal<Char>(arr);
     }
 
     template<typename CharT, std::size_t N>
@@ -264,7 +270,7 @@ namespace awl
     template <class Ch>
     struct StringConvertor
     {
-        static std::basic_string<Ch> Decode(const char * p_src)
+        static std::basic_string<Ch> ConvertFrom(const char * p_src)
         {
             if constexpr (std::is_same_v<Ch, char>)
             {
@@ -276,21 +282,9 @@ namespace awl
             }
         }
 
-        static std::basic_string<Ch> Encode(const wchar_t* p_src)
+        static std::basic_string<Ch> ConvertFrom(const wchar_t* p_src)
         {
             if constexpr (std::is_same_v<Ch, wchar_t>)
-            {
-                return p_src;
-            }
-            else
-            {
-                return EncodeString(p_src);
-            }
-        }
-
-        static std::string EncodeToA(const Ch * p_src)
-        {
-            if constexpr (std::is_same_v<Ch, char>)
             {
                 return p_src;
             }
@@ -303,27 +297,32 @@ namespace awl
     
     inline String FromACString(const char * p_src)
     {
-        return StringConvertor<Char>::Decode(p_src);
+        return StringConvertor<Char>::ConvertFrom(p_src);
     }
 
     inline String FromAString(const std::string & src)
     {
-        return StringConvertor<Char>::Decode(src.c_str());
+        return StringConvertor<Char>::ConvertFrom(src.c_str());
     }
 
     inline std::string ToAString(const String & src)
     {
-        return StringConvertor<Char>::EncodeToA(src.c_str());
+        return StringConvertor<char>::ConvertFrom(src.c_str());
+    }
+
+    inline std::wstring ToWString(const String& src)
+    {
+        return StringConvertor<wchar_t>::ConvertFrom(src.c_str());
     }
 
     inline String FromWCString(const wchar_t* p_src)
     {
-        return StringConvertor<Char>::Encode(p_src);
+        return StringConvertor<Char>::ConvertFrom(p_src);
     }
 
     inline String FromWString(const std::wstring& src)
     {
-        return StringConvertor<Char>::Encode(src.c_str());
+        return StringConvertor<Char>::ConvertFrom(src.c_str());
     }
 
     inline std::wostream& operator << (std::wostream& out, const std::string& val)

@@ -58,5 +58,5 @@ namespace awl::testing
 
     int Run();
 
-    int Run(int argc, Char* argv[]);
+    int Run(int argc, CmdChar* argv[]);
 }

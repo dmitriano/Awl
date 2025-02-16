@@ -12,11 +12,11 @@
 
 namespace awl::testing
 {
-    CommandLineProvider::CommandLineProvider(int argc, Char* argv[])
+    CommandLineProvider::CommandLineProvider(int argc, CmdChar* argv[])
     {
-        std::basic_regex<Char> option_regex(_T("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
+        std::basic_regex<CmdChar> option_regex(StringConvertor<CmdChar>::ConvertFrom("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
 
-        std::match_results<const Char*> match;
+        std::match_results<const CmdChar*> match;
 
         OptionsMap::iterator current_option = allOptions.end();
 
@@ -24,13 +24,13 @@ namespace awl::testing
 
         while (i < argc)
         {
-            const Char* val = argv[i++];
+            const CmdChar* val = argv[i++];
 
             if (std::regex_match(val, match, option_regex) && match.size() == 2)
             {
-                String name = match[1].str();
+                CmdString name = match[1].str();
 
-                auto result = allOptions.emplace(ToAString(name), Option{});
+                auto result = allOptions.emplace(StringConvertor<CmdChar>::ConvertFrom(name.c_str()), Option{});
 
                 if (!result.second)
                 {
@@ -55,7 +55,7 @@ namespace awl::testing
         }
     }
 
-    bool CommandLineProvider::TryFind(const char* name, String& val) const
+    bool CommandLineProvider::TryFind(const char* name, CmdString& val) const
     {
         auto i = allOptions.find(name);
 
@@ -63,7 +63,7 @@ namespace awl::testing
         {
             ++(i->second.usage);
 
-            const Char* raw_val = i->second.val;
+            const CmdChar* raw_val = i->second.val;
 
             if (raw_val == nullptr)
             {

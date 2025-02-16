@@ -92,7 +92,7 @@ namespace awl::testing
         return 2;
     }
 
-    int Run(int argc, Char* argv[])
+    int Run(int argc, CmdChar* argv[])
     {
         CommandLineProvider cl(argc, argv);
 
@@ -125,7 +125,7 @@ namespace awl::testing
 
         QJsonObject jo;
 
-        String json_file;
+        CmdString json_file;
 
         if (cl.TryGet("json", json_file))
         {

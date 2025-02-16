@@ -14,11 +14,20 @@
 
 namespace awl::testing
 {
+
+#ifdef AWL_ANSI_CMD_CHAR
+    using CmdChar = char;
+#else
+    using CmdChar = Char;
+#endif;
+
+    using CmdString = std::basic_string<CmdChar>;
+
     class CommandLineProvider
     {
     public:
 
-        CommandLineProvider(int argc, Char* argv[]);
+        CommandLineProvider(int argc, CmdChar* argv[]);
 
         auto GetUnusedOptions() const
         {
@@ -29,11 +38,11 @@ namespace awl::testing
         template <class T>
         bool TryGet(const char* name, T& val)
         {
-            String s;
+            CmdString s;
 
             if (TryFind(name, s))
             {
-                val = Formatter<T>::FromString(s);
+                val = BasicFormatter<CmdChar, T>::FromString(s);
 
                 return true;
             }
@@ -43,7 +52,7 @@ namespace awl::testing
 
     private:
 
-        bool TryFind(const char* name, String& val) const;
+        bool TryFind(const char* name, CmdString& val) const;
 
         struct Option
         {
@@ -51,7 +60,7 @@ namespace awl::testing
             {
             }
 
-            Option(const Char* v) : Option()
+            Option(const CmdChar* v) : Option()
             {
                 val = v;
             }
@@ -62,7 +71,7 @@ namespace awl::testing
                 return val != nullptr;
             }
 
-            const Char* val;
+            const CmdChar* val;
 
             mutable size_t usage;
         };
