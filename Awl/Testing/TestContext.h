@@ -13,6 +13,7 @@
 
 #ifdef AWL_QT
     #include "Awl/Testing/JsonProvider.h"
+    #include <QObject>
 #endif
 
 #include "Awl/Testing/CompositeProvider.h"
@@ -28,7 +29,7 @@ namespace awl::testing
 
         Logger& logger;
 
-        std::stop_token stopToken;
+        const std::stop_token stopToken;
 
         using Provider = CompositeProvider<Ps...>;
 
@@ -36,9 +37,17 @@ namespace awl::testing
     };
 
 #ifdef AWL_QT
-    using TestContext = CompositeTestContext<CommandLineProvider, JsonProvider>;
+
+    struct TestContext : public CompositeTestContext<CommandLineProvider, JsonProvider>
+    {
+        // For handling QT signals inside the tests.
+        QObject* worker;
+    };
+
 #else
+
     using TestContext = CompositeTestContext<CommandLineProvider>;
+
 #endif
 
     static_assert(attribute_provider<TestContext::Provider>);
