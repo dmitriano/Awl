@@ -6,11 +6,8 @@
 #pragma once
 
 #include "Awl/Testing/ScalarFormatter.h"
-#include "Awl/Testing/TestTypeTraits.h"
-
 #include "Awl/TypeTraits.h"
-
-#include <iterator>
+#include "Awl/Inserter.h"
 
 namespace awl
 {
@@ -59,8 +56,8 @@ namespace awl
             }
         };
 
-        template <typename C, typename T> requires is_collection<T>::value &&
-            (std::is_arithmetic<typename T::value_type>::value || is_string<C, typename T::value_type>::value)
+        template <typename C, typename T> requires inserter_defined<T> &&
+            (std::is_arithmetic<typename T::value_type>::value || is_specialization_v<typename T::value_type, std::basic_string>)
         class BasicFormatter<C, T>
         {
         public:

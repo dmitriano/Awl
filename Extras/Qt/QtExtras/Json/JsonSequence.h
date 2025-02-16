@@ -6,52 +6,15 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Mp/TypeDescriptor.h"
-#include "Awl/TypeTraits.h"
+#include "Awl/Inserter.h"
 
 #include <type_traits>
 #include <ranges>
 
 namespace awl
 {
-    namespace helpers
-    {
-        template <class Container>
-        struct inserter : std::false_type {};
-
-        template <std::ranges::range Container>
-            requires back_insertable_sequence<Container>
-        struct inserter<Container> : std::true_type
-        {
-            static void reserve(Container& v, size_t n)
-            {
-                v.reserve(n);
-            }
-
-            static void insert(Container& v, typename Container::value_type&& val)
-            {
-                v.push_back(std::move(val));
-            }
-        };
-
-        template <class Container>
-            requires insertable_sequence<Container>
-        struct inserter<Container> : std::true_type
-        {
-            static void reserve(Container& set, size_t n)
-            {
-                static_cast<void>(set);
-                static_cast<void>(n);
-            }
-
-            static void insert(Container& set, typename Container::value_type&& val)
-            {
-                set.insert(std::move(val));
-            }
-        };
-    }
-
     template <class Container>
-        requires helpers::inserter<Container>::value
+        requires inserter_defined<Container>
     class JsonSerializer<Container>
     {
     public:
@@ -63,7 +26,7 @@ namespace awl
         {
             EnsureType(jv, QJsonValue::Array);
             QJsonArray ja = jv.toArray();
-            helpers::inserter<Container>::reserve(v, static_cast<size_t>(ja.size()));
+            inserter<Container>::reserve(v, static_cast<size_t>(ja.size()));
             JsonSerializer<T> formatter;
 
             v.clear();
@@ -85,7 +48,7 @@ namespace awl
                     throw e;
                 }
 
-                helpers::inserter<Container>::insert(v, std::move(val));
+                inserter<Container>::insert(v, std::move(val));
 
                 ++index;
             }

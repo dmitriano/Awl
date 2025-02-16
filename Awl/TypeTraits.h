@@ -9,6 +9,7 @@
 #include <memory>
 #include <concepts>
 #include <utility>
+#include <string>
 #include <ranges>
 
 namespace awl
@@ -125,8 +126,9 @@ namespace awl
         { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
     };
 
+    // std::basic_string has push_back method.
     template <class Container>
-    concept back_insertable_sequence = std::ranges::range<Container> &&
+    concept back_insertable_sequence = std::ranges::range<Container> && !is_specialization_v<Container, std::basic_string> &&
         requires(Container& container)
     {
         { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
