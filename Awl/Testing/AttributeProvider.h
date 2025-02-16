@@ -25,4 +25,17 @@ namespace awl::testing
         { p.template TryGet(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
         { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
     };
+
+    template <class T, attribute_provider Provider>
+    T GetAttributeValue(Provider& provider, const char* name, T default_val)
+    {
+        T val;
+
+        if (!provider.TryGet(name, val))
+        {
+            return default_val;
+        }
+
+        return val;
+    }
 }
