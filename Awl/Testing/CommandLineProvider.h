@@ -10,6 +10,7 @@
 #include "Awl/Testing/AttributeProvider.h"
 
 #include <unordered_map>
+#include <ranges>
 
 namespace awl::testing
 {
@@ -19,7 +20,11 @@ namespace awl::testing
 
         CommandLineProvider(int argc, Char* argv[]);
 
-        void PrintUnusedOptions();
+        auto GetUnusedOptions() const
+        {
+            return allOptions | std::views::filter([](const std::pair<const std::string, Option>& pair) -> bool { return pair.second.usage == 0; }) |
+                std::views::keys;
+        }
 
         template <class T>
         bool TryGet(const char* name, T& val)

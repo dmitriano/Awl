@@ -96,7 +96,7 @@ namespace awl::testing
     {
         CommandLineProvider cl(argc, argv);
 
-        // list command runs without TestMap
+        // "list" command runs without TestMap
         {
             ProviderContext<CommandLineProvider> context{ cl };
 
@@ -151,8 +151,15 @@ namespace awl::testing
 
         TestConsole console(ap);
 
-        // TODO: call PrintUnusedOptions()
-        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
+        auto guard = make_scope_guard([&ap]
+        {
+            auto names = ap.get_provider<0>().GetUnusedOptions();
+
+            for (const std::string& name : names)
+            {
+                cout() << _T("Unused option '" << name << _T("'")) << std::endl;
+            }
+        });
 
         return console.Run();
     }

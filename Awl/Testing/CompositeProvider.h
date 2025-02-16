@@ -28,6 +28,12 @@ namespace awl::testing
             return TryGetAt<T, 0u>(name, val);
         }
 
+        template<std::size_t I>
+        auto& get_provider() const
+        {
+            return std::get<I>(m_providers);
+        }
+
     private:
 
         using Tuple = std::tuple<std::decay_t<Ps>...>;
