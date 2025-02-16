@@ -217,6 +217,19 @@ namespace awl::mp
 
     static_assert(make_type_name<std::variant<int32_t, int64_t>>() == fixed_string{ "variant<int32_t, int64_t, >" });
 
+    template <class... Ts>
+    struct type_descriptor<std::tuple<Ts...>>
+    {
+        using inner_tuple = std::tuple<Ts...>;
+
+        static constexpr auto name()
+        {
+            return fixed_string("tuple<") + ((make_type_name<Ts>() + fixed_string(", ")) + ...) + fixed_string(">");
+        }
+    };
+
+    static_assert(make_type_name<std::tuple<int32_t, int64_t>>() == fixed_string{ "tuple<int32_t, int64_t, >" });
+
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     struct type_descriptor<decimal<UInt, exp_len, DataTemplate>>
     {
@@ -292,4 +305,17 @@ namespace awl::mp
             return make_type_name<std::underlying_type_t<T>>();
         }
     };
+}
+
+#define DEFINE_TRIVIAL_TYPE_DESRIPTOR(type_name) \
+namespace awl::mp \
+{\
+    template <> \
+    struct type_descriptor<type_name> \
+    { \
+        static constexpr auto name() \
+        { \
+            return #type_name; \
+        } \
+    }; \
 }

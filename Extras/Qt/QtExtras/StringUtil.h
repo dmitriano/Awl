@@ -26,10 +26,10 @@
 
 namespace awl
 {
-    using FixedHash = awl::crypto::FixedHash<awl::crypto::Int64Hash>;
+    using FixedHash64 = awl::crypto::FixedHash<awl::crypto::Int64Hash>;
 
     template <class Hash>
-    FixedHash::value_type hashString(const Hash& hash, const QString& s)
+    FixedHash64::value_type hashString(const Hash& hash, const QString& s)
     {
         const auto range = s | std::views::transform(std::mem_fn(&QChar::toLatin1));
 
