@@ -76,6 +76,66 @@ namespace
             }
         }
 
+        static void TestEqual()
+        {
+            awl::CStringInsensitiveEqual<C> equal;
+
+            {
+                auto left = text("");
+                auto right = text("");
+
+                AWL_ASSERT(equal(left.c_str(), right.c_str()));
+            }
+
+            {
+                auto left = text("abc");
+                auto right = text("ABC");
+
+                AWL_ASSERT(equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(equal(right.c_str(), left.c_str()));
+            }
+
+            {
+                auto left = text("");
+                auto right = text("a");
+
+                AWL_ASSERT(!equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(!equal(right.c_str(), left.c_str()));
+            }
+
+            {
+                auto left = text("ABC");
+                auto right = text("abc1");
+
+                AWL_ASSERT(!equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(!equal(right.c_str(), left.c_str()));
+            }
+
+            {
+                auto left = text("ABC1");
+                auto right = text("abc2");
+
+                AWL_ASSERT(!equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(!equal(right.c_str(), left.c_str()));
+            }
+
+            {
+                auto left = text("abc1");
+                auto right = text("ABC2");
+
+                AWL_ASSERT(!equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(!equal(right.c_str(), left.c_str()));
+            }
+
+            {
+                auto left = text("abc");
+                auto right = text("ABC1");
+
+                AWL_ASSERT(!equal(left.c_str(), right.c_str()));
+                AWL_ASSERT(!equal(right.c_str(), left.c_str()));
+            }
+        }
+
 #ifdef AWL_INT_128
 
         static void TestInt128Format()
@@ -156,12 +216,20 @@ namespace
     };
 }
 
-AWL_TEST(StringCompare)
+AWL_TEST(StringLess)
 {
     AWL_UNUSED_CONTEXT;
 
     StringTest<char>::TestLess();
     StringTest<wchar_t>::TestLess();
+}
+
+AWL_TEST(StringEqual)
+{
+    AWL_UNUSED_CONTEXT;
+
+    StringTest<char>::TestEqual();
+    StringTest<wchar_t>::TestEqual();
 }
 
 #ifdef AWL_INT_128
