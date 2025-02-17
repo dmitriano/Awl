@@ -12,6 +12,10 @@
 #include <string>
 #include <ranges>
 
+#ifdef AWL_QT
+#include <QString>
+#endif //AWL_QT
+
 namespace awl
 {
     //is_specialization implementation
@@ -107,6 +111,13 @@ namespace awl
     template<typename T>
     constexpr bool is_defined_v<T, decltype(typeid(T), void())> = true;
 
+    template <class T>
+    concept is_string = is_specialization_v<T, std::basic_string>
+#ifdef AWL_QT
+        || std::is_same_v<T, QString>
+#endif
+    ;
+
     // Standard container concepts.
 
     template <class Container>
@@ -126,9 +137,9 @@ namespace awl
         { container.insert(std::declval<std::ranges::range_value_t<Container>&&>()) };
     };
 
-    // std::basic_string has push_back method.
+    // std::basic_string and QString have push_back method.
     template <class Container>
-    concept back_insertable_sequence = std::ranges::range<Container> && !is_specialization_v<Container, std::basic_string> &&
+    concept back_insertable_sequence = std::ranges::range<Container> && !is_string<Container> &&
         requires(Container& container)
     {
         { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };

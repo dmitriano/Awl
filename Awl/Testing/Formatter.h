@@ -59,7 +59,7 @@ namespace awl::testing
     };
 
     template <typename C, typename T> requires inserter_defined<T> &&
-        (std::is_arithmetic<typename T::value_type>::value || is_specialization_v<typename T::value_type, std::basic_string>)
+        (std::is_arithmetic<typename T::value_type>::value || is_string<typename T::value_type>)
         class BasicFormatter<C, T> : public std::true_type
     {
     public:

@@ -81,26 +81,26 @@ namespace awl
 
     template <class T>
     using ostream_iterator = std::ostream_iterator<T, Char>;
-    
+
     using ostringstream = std::basic_ostringstream<Char>;
     using istringstream = std::basic_istringstream<Char>;
 
-    inline auto StrLen(const char * s)
+    inline auto StrLen(const char* s)
     {
         return std::strlen(s);
     }
 
-    inline auto StrLen(const wchar_t * s)
+    inline auto StrLen(const wchar_t* s)
     {
         return std::wcslen(s);
     }
 
-    inline auto StrCmp(const char * left, const char * right)
+    inline auto StrCmp(const char* left, const char* right)
     {
         return std::strcmp(left, right);
     }
 
-    inline auto StrCmp(const wchar_t * left, const wchar_t * right)
+    inline auto StrCmp(const wchar_t* left, const wchar_t* right)
     {
         return std::wcscmp(left, right);
     }
@@ -109,7 +109,7 @@ namespace awl
     template <typename Ch>
     struct CStringLess
     {
-        bool operator()(const Ch * left, const Ch * right) const
+        bool operator()(const Ch* left, const Ch* right) const
         {
             //Returns negative value if left appears before right in lexicographical order.
             return StrCmp(left, right) < 0;
@@ -176,7 +176,7 @@ namespace awl
         {
         }
 
-        const char * what() const throw() override
+        const char* what() const throw() override
         {
             return typeid(*this).name();
         }
@@ -190,7 +190,7 @@ namespace awl
 
         const size_t error;
     };
-    
+
     inline std::string EncodeString(const wchar_t* wstr)
     {
         std::mbstate_t state = std::mbstate_t();
@@ -219,11 +219,11 @@ namespace awl
     inline std::wstring DecodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
-        
+
         //The length includes the teminating zero.
         size_t len;
         size_t error = mbsrtowcs_s(&len, nullptr, 0, &mbstr, 0, &state);
-        
+
         if (error != 0)
         {
             throw string_encoding_error(error);
@@ -231,8 +231,8 @@ namespace awl
 
         std::wstring wstr(len - 1, ' ');
         size_t ret_val;
-        error = mbsrtowcs_s(&ret_val, &wstr[0], wstr.size() + 1,  &mbstr, len, &state);
-        
+        error = mbsrtowcs_s(&ret_val, &wstr[0], wstr.size() + 1, &mbstr, len, &state);
+
         if (error != 0 || ret_val != len)
         {
             throw string_encoding_error(error);
@@ -270,7 +270,7 @@ namespace awl
     template <class Ch>
     struct StringConvertor
     {
-        static std::basic_string<Ch> ConvertFrom(const char * p_src)
+        static std::basic_string<Ch> ConvertFrom(const char* p_src)
         {
             if constexpr (std::is_same_v<Ch, char>)
             {
@@ -294,18 +294,18 @@ namespace awl
             }
         }
     };
-    
-    inline String FromACString(const char * p_src)
+
+    inline String FromACString(const char* p_src)
     {
         return StringConvertor<Char>::ConvertFrom(p_src);
     }
 
-    inline String FromAString(const std::string & src)
+    inline String FromAString(const std::string& src)
     {
         return StringConvertor<Char>::ConvertFrom(src.c_str());
     }
 
-    inline std::string ToAString(const String & src)
+    inline std::string ToAString(const String& src)
     {
         return StringConvertor<char>::ConvertFrom(src.c_str());
     }
@@ -351,21 +351,43 @@ namespace awl
 
         return out;
     }
+}
 
 #ifdef AWL_QT
 
-    inline std::ostream& operator << (std::ostream& out, const QString& val)
-    {
-        return out << val.toStdString();
-    }
+inline std::ostream& operator << (std::ostream& out, const QString& val)
+{
+    return out << val.toStdString();
+}
 
-    inline std::wostream& operator << (std::wostream& out, const QString& val)
-    {
-        return out << val.toStdWString();
-    }
+inline std::wostream& operator << (std::wostream& out, const QString& val)
+{
+    return out << val.toStdWString();
+}
+
+inline std::istream& operator >> (std::istream& in, QString& val)
+{
+    std::string std_str;
+
+    in >> std_str;
+
+    val = QString::fromStdString(std_str);
+
+    return in;
+}
+
+inline std::wistream& operator >> (std::wistream& in, QString& val)
+{
+    std::wstring std_str;
+
+    in >> std_str;
+
+    val = QString::fromStdWString(std_str);
+
+    return in;
+}
 
 #endif //AWL_QT
-}
 
 #ifdef AWL_BOOST
 
