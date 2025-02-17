@@ -84,20 +84,24 @@ namespace awl
                 });
             }
 
-            std::sort(links.begin(), links.end(), LinkCompare());
+            std::sort(links.begin(), links.end(), less_comp());
 
             return StaticMap<T>(links);
         }
+
+        using equal_comp_type = StringInsensitiveEqual<char>;
+        using less_comp_type = awl::pointer_compare<&StaticLink<T>::name, awl::CStringInsensitiveLess<char>>;
+
+        static equal_comp_type equal_comp() { return {}; }
+        static less_comp_type less_comp() { return {}; }
 
     private:
 
         static const StaticLink<T>* internal_find(const LinkVector& links, const char* name)
         {
-            auto i = std::lower_bound(links.begin(), links.end(), name, LinkCompare());
+            auto i = std::lower_bound(links.begin(), links.end(), name, less_comp());
 
-            StringInsensitiveEqual<char> equal;
-
-            if (i == links.end() || !equal((*i)->name(), name))
+            if (i == links.end() || !equal_comp()((*i)->name(), name))
             {
                 return nullptr;
             }
@@ -106,8 +110,6 @@ namespace awl
         }
 
         explicit StaticMap(LinkVector links) : m_links(std::move(links)) {}
-
-        using LinkCompare = awl::pointer_compare<&StaticLink<T>::name, awl::CStringInsensitiveLess<char>>;
 
         const LinkVector m_links;
     };
