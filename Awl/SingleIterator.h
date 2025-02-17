@@ -31,6 +31,8 @@ namespace awl
 
         using reference = value_type&;
 
+        single_iterator() : single_iterator(nullptr) {}
+
         single_iterator(Link* p) : pCur(p) {}
 
         T* operator-> () const { return cur(); }

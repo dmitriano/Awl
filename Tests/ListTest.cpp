@@ -8,8 +8,10 @@
 #include "Awl/QuickList.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/RangeUtil.h"
+#include "Awl/String.h"
 
 #include <ranges>
+#include <functional>
 
 using namespace awl::testing;
 
@@ -479,4 +481,55 @@ AWL_TEST(List_SingleList)
     AWL_ASSERT_EQUAL(list.size(), (size_t)0);
 
     delete first;
+}
+
+namespace
+{
+    struct SingleElement : public awl::single_link
+    {
+        SingleElement(std::string name, int val) :
+            m_name(std::move(name)),
+            m_val(val)
+        {}
+
+        const char* name() const { return m_name.c_str(); }
+
+        int value() const { return m_val; }
+
+        std::string m_name;
+
+        int m_val;
+    };
+
+    using SingleList = awl::single_list<SingleElement>;
+
+    static_assert(std::default_initializable<SingleList::iterator>);
+}
+
+AWL_TEST(List_FindIf)
+{
+    AWL_UNUSED_CONTEXT;
+
+    SingleElement a{ "a", 1 };
+    SingleElement b{ "B", 1 };
+    SingleElement c{ "c", 1 };
+
+    SingleList list;
+
+    auto pred = std::bind(awl::CStringInsensitiveEqual<char>(), "b", std::placeholders::_1);
+
+    list.push_front(&c);
+
+    auto i = std::ranges::find_if(list.begin(), list.end(), pred, std::mem_fn(&SingleElement::name));
+
+    AWL_ASSERT(i == list.end());
+
+    list.push_front(&b);
+    list.push_front(&a);
+
+    i = std::ranges::find_if(list.begin(), list.end(), pred, std::mem_fn(&SingleElement::name));
+
+    AWL_ASSERT(i != list.end());
+
+    AWL_ASSERT(*i == &b);
 }
