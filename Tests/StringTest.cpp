@@ -15,14 +15,9 @@ namespace
     {
     public:
         
-        static void TestStringCompare()
+        static void TestLess()
         {
             awl::CStringInsensitiveLess<C> less;
-
-            auto text = []<std::size_t N>(const char(&arr)[N])
-            {
-                return awl::fixed_string<C, N - 1>::from_ascii(arr);
-            };
 
             {
                 auto left = text("");
@@ -165,8 +160,8 @@ AWL_TEST(StringCompare)
 {
     AWL_UNUSED_CONTEXT;
 
-    StringTest<char>::TestStringCompare();
-    StringTest<wchar_t>::TestStringCompare();
+    StringTest<char>::TestLess();
+    StringTest<wchar_t>::TestLess();
 }
 
 #ifdef AWL_INT_128
