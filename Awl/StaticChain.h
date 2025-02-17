@@ -71,16 +71,9 @@ namespace awl
         template <class Pred = CStringInsensitiveEqual<char>>
         const Link* find(const char* name, Pred&& pred = {}) const
         {
-            // list can't do this.
-            //auto i = std::ranges::find_if(begin(), end(),
-            //    std::bind(pred, name, std::placeholders::_1),
-            //    std::mem_fn(&Link::name));
-
-            auto i = std::find_if(begin(), end(),
-                [&pred, name](const Link* link) -> bool
-                {
-                    return pred(link->name(), name);
-                });
+            auto i = std::ranges::find_if(begin(), end(),
+                std::bind(pred, name, std::placeholders::_1),
+                std::mem_fn(&Link::name));
 
             if (i != end())
             {
