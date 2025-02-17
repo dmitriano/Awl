@@ -79,7 +79,7 @@ namespace awl
             auto i = std::find_if(begin(), end(),
                 [&pred, name](const Link* link) -> bool
                 {
-                    return StrCmp(link->name(), name) == 0;
+                    return pred(link->name(), name);
                 });
 
             if (i != end())
