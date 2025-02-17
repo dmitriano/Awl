@@ -263,7 +263,7 @@ AWL_TEST(JsonReflectableExceptionSet)
 namespace
 {
     template <class Map>
-    void TestMap(const awl::testing::TestContext& context)
+    void TestRunner(const awl::testing::TestContext& context)
     {
         static_assert(awl::insertable_map<Map>);
 
@@ -302,10 +302,10 @@ namespace
 
 AWL_TEST(JsonMap)
 {
-    TestMap<std::map<QString, int>>(context);
-    TestMap<std::map<std::string, int>>(context);
-    TestMap<std::unordered_map<QString, int>>(context);
-    TestMap<std::unordered_map<std::string, int>>(context);
+    TestRunner<std::map<QString, int>>(context);
+    TestRunner<std::map<std::string, int>>(context);
+    TestRunner<std::unordered_map<QString, int>>(context);
+    TestRunner<std::unordered_map<std::string, int>>(context);
 }
 
 #ifdef AWL_DECIMAL_128

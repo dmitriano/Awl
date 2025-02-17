@@ -19,11 +19,11 @@ namespace awl
     namespace testing 
     {
         //TODO: Implement QueryTests(filter) with std::ranges and move all output related code to TestConsole.
-        class TestMap
+        class TestRunner
         {
         public:
 
-            TestMap(ostringstream& last_output, const std::string& filter);
+            TestRunner(ostringstream& last_output, const std::string& filter);
 
             void Run(const TestContext& context, const char * name);
             

@@ -7,7 +7,7 @@
 #include "QtExtras/StringConversion.h"
 
 #include "Awl/Testing/TestConsole.h"
-#include "Awl/Testing/TestMap.h"
+#include "Awl/Testing/TestRunner.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
@@ -46,7 +46,7 @@ namespace awl::testing
             {
                 AWL_ATTRIBUTE(std::string, filter, ".*_Test");
 
-                TestMap test_map(last_output, filter);
+                TestRunner test_map(last_output, filter);
 
                 context.out << std::endl << _T("***************** Running ") << test_map.GetCount() << _T(" tests *****************") << std::endl;
 
@@ -54,7 +54,7 @@ namespace awl::testing
             }
             else
             {
-                TestMap test_map(last_output, "");
+                TestRunner test_map(last_output, "");
 
                 context.out << std::endl << _T("***************** Running ") << 1 << _T(" tests *****************") << std::endl;
 
@@ -96,7 +96,7 @@ namespace awl::testing
     {
         CommandLineProvider cl(argc, argv);
 
-        // "list" command runs without TestMap
+        // "list" command runs without TestRunner
         {
             ProviderContext<CommandLineProvider> context{ cl };
 

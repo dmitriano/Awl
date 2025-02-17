@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Testing/TestMap.h"
+#include "Awl/Testing/TestRunner.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
@@ -21,13 +21,13 @@
 
 namespace awl::testing
 {
-    TestMap::TestMap(ostringstream& last_output, const std::string& filter) :
+    TestRunner::TestRunner(ostringstream& last_output, const std::string& filter) :
         nullOutput(&nullBuffer),
         lastOutput(last_output),
         testMap(StaticMap<TestFunc>::fill(filter))
     {}
 
-    void TestMap::Run(const TestContext& context, const char* name)
+    void TestRunner::Run(const TestContext& context, const char* name)
     {
         const TestLink* p_link = testMap.find(name);
 
@@ -39,7 +39,7 @@ namespace awl::testing
         RunLink(p_link, context);
     }
 
-    void TestMap::RunAll(const TestContext& context)
+    void TestRunner::RunAll(const TestContext& context)
     {
         for (const TestLink* p_link : testMap)
         {
@@ -47,7 +47,7 @@ namespace awl::testing
         }
     }
 
-    void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
+    void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
         AWL_ATTRIBUTE(size_t, loop, 0);
