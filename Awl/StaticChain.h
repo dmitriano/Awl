@@ -62,42 +62,14 @@ namespace awl
         Iterator begin() { return m_list.begin(); }
         Iterator end() { return m_list.end(); }
 
-        Iterator find_iter(const char* name)
+        template <class Pred = CStringInsensitiveEqual<char>>
+        Link* find(const char* name, Pred&& pred = {})
         {
-            ConstIterator i = const_cast<const StaticChain*>(this)->find_iter(name);
-
-            const Link* p_link = *i;
-
-            return Iterator(const_cast<Link*>(p_link));
-        }
-
-        ConstIterator find_iter(const char* name) const
-        {
-            return std::find_if(begin(), end(),
-                [name](const Link* link) -> bool
-                {
-                    return StrCmp(link->name(), name) == 0;
-                });
-        }
-
-        Iterator find_iter(const std::string& name)
-        {
-            return find_iter(name.c_str());
-        }
-
-        ConstIterator find_iter(const std::string& name) const
-        {
-            return find_iter(name.c_str());
+            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find(name, pred));
         }
 
         template <class Pred = CStringInsensitiveEqual<char>>
-        Link* find_ptr(const char* name, Pred&& pred = {})
-        {
-            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find_ptr(name, pred));
-        }
-
-        template <class Pred = CStringInsensitiveEqual<char>>
-        const Link* find_ptr(const char* name, Pred&& pred = {}) const
+        const Link* find(const char* name, Pred&& pred = {}) const
         {
             // list can't do this.
             //auto i = std::ranges::find_if(begin(), end(),
@@ -119,15 +91,15 @@ namespace awl
         }
 
         template <class Pred = CStringInsensitiveEqual<char>>
-        Link* find_ptr(const std::string& name, Pred&& pred = {})
+        Link* find(const std::string& name, Pred&& pred = {})
         {
-            return find_ptr(name.c_str(), pred);
+            return find(name.c_str(), pred);
         }
 
         template <class Pred = CStringInsensitiveEqual<char>>
-        const Link* find_ptr(const std::string& name, Pred&& pred = {}) const
+        const Link* find(const std::string& name, Pred&& pred = {}) const
         {
-            return find_ptr(name.c_str(), pred);
+            return find(name.c_str(), pred);
         }
 
         void clear()

@@ -61,7 +61,7 @@ namespace awl::testing
             {
                 context.out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
 
-                const TestLink* p_link = static_chain<TestFunc>().find_ptr(run.c_str());
+                const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
                 if (p_link == nullptr)
                 {

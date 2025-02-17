@@ -25,7 +25,7 @@ namespace awl
 
         auto& chain = static_chain<FuncPtr>();
         
-        const StaticLink<FuncPtr>* p_link = chain.find_ptr(name);
+        const StaticLink<FuncPtr>* p_link = chain.find(name);
 
         if (p_link == nullptr)
         {
