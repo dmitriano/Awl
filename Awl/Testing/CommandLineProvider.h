@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/AttributeProvider.h"
 
@@ -42,9 +43,17 @@ namespace awl::testing
 
             if (TryFind(name, s))
             {
-                val = BasicFormatter<CmdChar, T>::FromString(s);
+                if constexpr (BasicFormatter<CmdChar, T>::value)
+                {
+                    val = BasicFormatter<CmdChar, T>::FromString(s);
 
-                return true;
+                    return true;
+                }
+                else
+                {
+                    // The attribute is found, but we can't parse it.
+                    throw GeneralException(awl::format() << "Attribute '" << name << "' is not supported by CommandLineProvider.");
+                }
             }
 
             return false;
