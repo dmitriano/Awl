@@ -26,6 +26,13 @@ namespace awl::testing
         { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
     };
 
+    // For acessing Command Line attributes without creating TestContext.
+    template <attribute_provider Provider>
+    struct ProviderContext
+    {
+        Provider& ap;
+    };
+
     template <class T, attribute_provider Provider>
     T GetAttributeValue(Provider& provider, const char* name, T default_val)
     {
