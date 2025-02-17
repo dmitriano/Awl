@@ -28,19 +28,19 @@ AWL_TEST(StaticChainInt)
     // Test variable_static_chain()
     for (X val = 0; val < 3; ++val)
     {
-        auto i = awl::variable_static_chain<X>().find(awl::aformat() << val);
+        awl::StaticLink<X>* p_link = awl::variable_static_chain<X>().find_ptr(awl::aformat() << val);
 
-        AWL_ASSERT(i != awl::variable_static_chain<X>().end());
-        AWL_ASSERT(i->value() == val);
-        ++i->value();
+        AWL_ASSERT(p_link != nullptr);
+        AWL_ASSERT(p_link->value() == val);
+        ++p_link->value();
     }
 
     for (X val = 0; val < 3; ++val)
     {
-        auto i = awl::static_chain<X>().find(awl::aformat() << val);
+        const awl::StaticLink<X>* p_link = awl::static_chain<X>().find_ptr(awl::aformat() << val);
 
-        AWL_ASSERT(i != awl::static_chain<X>().end());
-        AWL_ASSERT(i->value() == val + 1);
+        AWL_ASSERT(p_link != nullptr);
+        AWL_ASSERT(p_link->value() == val + 1);
     }
 }
 

@@ -61,23 +61,14 @@ namespace awl::testing
             {
                 context.out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
 
-                /*
-                const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
+                const TestLink* p_link = static_chain<TestFunc>().find_ptr(run.c_str());
 
                 if (p_link == nullptr)
-                {
-                  throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
-                }
-                */
-
-                auto i = static_chain<TestFunc>().find(run.c_str());
-
-                if (i == static_chain<TestFunc>().end())
                 {
                     throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
                 }
 
-                runner.RunLink(*i, context);
+                runner.RunLink(p_link, context);
             }
 
             context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
