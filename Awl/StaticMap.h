@@ -27,6 +27,8 @@ namespace awl
 
     public:
 
+        StaticMap() = default;
+
         typename LinkVector::const_iterator begin() const
         {
             return m_links.begin();
@@ -40,6 +42,11 @@ namespace awl
         typename std::size_t size() const
         {
             return m_links.size();
+        }
+
+        bool empty() const
+        {
+            return m_links.empty();
         }
 
         const StaticLink<T>* find(const char* name) const
@@ -111,6 +118,6 @@ namespace awl
 
         explicit StaticMap(LinkVector links) : m_links(std::move(links)) {}
 
-        const LinkVector m_links;
+        LinkVector m_links;
     };
 }
