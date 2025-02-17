@@ -106,13 +106,11 @@ namespace awl::testing
             {
                 AWL_ATTRIBUTE(std::string, filter, {});
 
-                auto test_map = make_static_map<TestFunc>(filter);
+                auto test_map = StaticMap<TestFunc>::fill(filter);
 
-                for (auto& p : test_map)
+                for (auto& p_link : test_map)
                 {
-                    const auto& test_name = p.first;
-
-                    awl::cout() << test_name << std::endl;
+                    awl::cout() << p_link->name() << std::endl;
                 }
 
                 awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;

@@ -24,26 +24,26 @@ namespace awl::testing
     TestMap::TestMap(ostringstream& last_output, const std::string& filter) :
         nullOutput(&nullBuffer),
         lastOutput(last_output),
-        testMap(make_static_map<TestFunc>(filter))
+        testMap(StaticMap<TestFunc>::fill(filter))
     {}
 
     void TestMap::Run(const TestContext& context, const char* name)
     {
-        auto i = testMap.find(name);
+        const TestLink* p_link = testMap.find(name);
 
-        if (i == testMap.end())
+        if (p_link == nullptr)
         {
             throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
         }
 
-        RunLink(i->second, context);
+        RunLink(p_link, context);
     }
 
     void TestMap::RunAll(const TestContext& context)
     {
-        for (auto& p : testMap)
+        for (const TestLink* p_link : testMap)
         {
-            RunLink(p.second, context);
+            RunLink(p_link, context);
         }
     }
 

@@ -144,4 +144,10 @@ namespace awl
     {
         { container.push_back(std::declval<std::ranges::range_value_t<Container>&&>()) };
     };
+
+    template <class T>
+    struct true_predicate
+    {
+        bool operator() (const T&) const { return true; }
+    };
 }
