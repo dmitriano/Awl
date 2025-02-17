@@ -511,8 +511,8 @@ AWL_TEST(List_FindIf)
     AWL_UNUSED_CONTEXT;
 
     SingleElement a{ "a", 1 };
-    SingleElement b{ "B", 1 };
-    SingleElement c{ "c", 1 };
+    SingleElement b{ "B", 2 };
+    SingleElement c{ "c", 3 };
 
     SingleList list;
 
@@ -532,4 +532,18 @@ AWL_TEST(List_FindIf)
     AWL_ASSERT(i != list.end());
 
     AWL_ASSERT(*i == &b);
+
+    auto less = std::bind(awl::CStringInsensitiveLess<char>(), std::placeholders::_1, "b");
+
+    auto range = list | std::views::filter([](auto* elem) { return elem->value() < 3; }) |
+        std::views::transform(std::mem_fn(&SingleElement::name)) |
+        std::views::filter(less);
+
+    const std::size_t count = std::ranges::distance(range);
+
+    AWL_ASSERT_EQUAL(1u, count);
+
+    const char* name = *range.begin();
+
+    AWL_ASSERT(awl::StrCmp("a", name) == 0);
 }
