@@ -6,13 +6,8 @@
 #pragma once
 
 #include "Awl/Testing/TestChain.h"
-#include "Awl/StaticMap.h"
 
-#include <memory>
 #include <iostream>
-#include <functional>
-#include <algorithm>
-#include <assert.h>
 
 namespace awl 
 {
@@ -23,25 +18,16 @@ namespace awl
         {
         public:
 
-            TestRunner(ostringstream& last_output, const std::string& filter);
-
-            void Run(const TestContext& context, const char * name);
-            
-            void RunAll(const TestContext& context);
+            TestRunner(ostringstream& last_output);
 
             String GetLastOutput() const
             {
                 return lastOutput.str();
             }
 
-            size_t GetCount() const
-            {
-                return testMap.size();
-            }
+            void RunLink(const TestLink* p_test_link, const TestContext& context);
 
         private:
-
-            void RunLink(const TestLink* p_test_link, const TestContext& context);
 
             class NullBuffer : public std::basic_streambuf<Char>
             {
@@ -53,8 +39,6 @@ namespace awl
             std::basic_ostream<Char> nullOutput;
 
             ostringstream& lastOutput;
-            
-            StaticMap<TestFunc> testMap;
         };
     }
 }

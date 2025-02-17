@@ -9,7 +9,7 @@
 #include "Awl/String.h"
 #include "Awl/StaticSingleton.h"
 
-#include <algorithm>
+#include <ranges>
 
 namespace awl
 {
@@ -64,16 +64,20 @@ namespace awl
 
         Iterator find(const char* name)
         {
+            ConstIterator i = const_cast<const StaticChain*>(this)->find(name);
+
+            const Link* p_link = *i;
+
+            return Iterator(const_cast<Link*>(p_link));
+        }
+
+        ConstIterator find(const char* name) const
+        {
             return std::find_if(begin(), end(),
                 [name](const Link* link) -> bool
                 {
                     return StrCmp(link->name(), name) == 0;
                 });
-        }
-
-        ConstIterator find(const char* name) const
-        {
-            return const_cast<StaticChain*>(this)->find(name);
         }
 
         Iterator find(const std::string& name)
@@ -83,8 +87,50 @@ namespace awl
 
         ConstIterator find(const std::string& name) const
         {
-            return const_cast<StaticChain*>(this)->find(name);
+            return find(name.c_str());
         }
+
+        /*
+        template <class Pred = CStringInsensitiveEqual<char>>
+        Link* find(const char* name, Pred&& pred = {})
+        {
+            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find(name, pred));
+        }
+
+        template <class Pred = CStringInsensitiveEqual<char>>
+        const Link* find(const char* name, Pred&& pred = {}) const
+        {
+            // list can't do this.
+            //auto i = std::ranges::find_if(begin(), end(),
+            //    std::bind(pred, name, std::placeholders::_1),
+            //    std::mem_fn(&Link::name));
+
+            auto i = std::find_if(begin(), end(),
+                [&pred, name](const Link* link) -> bool
+                {
+                    return StrCmp(link->name(), name) == 0;
+                });
+
+            if (i != end())
+            {
+                return *i;
+            }
+
+            return nullptr;
+        }
+
+        template <class Pred = CStringInsensitiveEqual<char>>
+        Iterator find(const std::string& name, Pred&& pred = {})
+        {
+            return find(name.c_str(), pred);
+        }
+
+        template <class Pred = CStringInsensitiveEqual<char>>
+        ConstIterator find(const std::string& name, Pred&& pred = {}) const
+        {
+            return find(name.c_str(), pred);
+        }
+        */
 
         void clear()
         {

@@ -15,7 +15,7 @@
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
-#include "Awl/StdConsole.h"
+#include "Awl/StaticMap.h"
 
 #include <set>
 #include <regex>
@@ -42,23 +42,42 @@ namespace awl::testing
 
         try
         {
+            TestRunner runner(last_output);
+
             if (run.empty())
             {
                 AWL_ATTRIBUTE(std::string, filter, ".*_Test");
 
-                TestRunner test_map(last_output, filter);
+                StaticMap<TestFunc> test_map{ StaticMap<TestFunc>::fill(filter) };
 
-                context.out << std::endl << _T("***************** Running ") << test_map.GetCount() << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
 
-                test_map.RunAll(context);
+                for (const TestLink* p_link : test_map)
+                {
+                    runner.RunLink(p_link, context);
+                }
             }
             else
             {
-                TestRunner test_map(last_output, "");
+                context.out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
 
-                context.out << std::endl << _T("***************** Running ") << 1 << _T(" tests *****************") << std::endl;
+                /*
+                const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
-                test_map.Run(context, run.c_str());
+                if (p_link == nullptr)
+                {
+                  throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
+                }
+                */
+
+                auto i = static_chain<TestFunc>().find(run.c_str());
+
+                if (i == static_chain<TestFunc>().end())
+                {
+                    throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
+                }
+
+                runner.RunLink(*i, context);
             }
 
             context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;

@@ -117,24 +117,53 @@ namespace awl
     };
 
     template <typename Ch>
+    struct CStringEqual
+    {
+        bool operator()(const Ch* left, const Ch* right) const
+        {
+            return StrCmp(left, right) == 0;
+        }
+    };
+
+    template <typename Ch>
+    int StrCmpI(const Ch* left, const Ch* right)
+    {
+        const Ch* l = left;
+        const Ch* r = right;
+
+        while (*l != 0 && *r != 0)
+        {
+            auto diff = std::tolower(*l++) - std::tolower(*r++);
+
+            if (diff != 0)
+            {
+                return diff;
+            }
+        }
+
+        if (*l == 0 && *r == 0)
+        {
+            return 0;
+        }
+
+        return *r != 0 ? -1 : 1;
+    }
+
+    template <typename Ch>
     struct CStringInsensitiveLess
     {
         bool operator()(const Ch* left, const Ch* right) const
         {
-            const Ch* l = left;
-            const Ch* r = right;
+            return StrCmpI(left, right) < 0;
+        }
+    };
 
-            while (*l != 0 && *r != 0)
-            {
-                auto diff = std::tolower(*l++) - std::tolower(*r++);
-
-                if (diff != 0)
-                {
-                    return diff < 0;
-                }
-            }
-
-            return *r != 0;
+    template <typename Ch>
+    struct CStringInsensitiveEqual
+    {
+        bool operator()(const Ch* left, const Ch* right) const
+        {
+            return StrCmpI(left, right) == 0;
         }
     };
 

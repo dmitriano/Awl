@@ -15,37 +15,17 @@
 #include "Awl/WatchDog.h"
 #include "Awl/ConsoleLogger.h"
 
-#include <set>
-#include <regex>
 #include <thread>
+#include <functional>
+#include <algorithm>
+#include <cassert>
 
 namespace awl::testing
 {
-    TestRunner::TestRunner(ostringstream& last_output, const std::string& filter) :
+    TestRunner::TestRunner(ostringstream& last_output) :
         nullOutput(&nullBuffer),
-        lastOutput(last_output),
-        testMap(StaticMap<TestFunc>::fill(filter))
+        lastOutput(last_output)
     {}
-
-    void TestRunner::Run(const TestContext& context, const char* name)
-    {
-        const TestLink* p_link = testMap.find(name);
-
-        if (p_link == nullptr)
-        {
-            throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
-        }
-
-        RunLink(p_link, context);
-    }
-
-    void TestRunner::RunAll(const TestContext& context)
-    {
-        for (const TestLink* p_link : testMap)
-        {
-            RunLink(p_link, context);
-        }
-    }
 
     void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
