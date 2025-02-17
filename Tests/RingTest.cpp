@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 #include "Awl/IntRange.h"
+#include "Awl/RangeUtil.h"
 
 #include "Helpers/NonCopyable.h"
 
@@ -14,7 +15,7 @@
 #include <queue>
 #include <ranges>
 
-static_assert(std::ranges::range<awl::ring<int>>);
+static_assert(awl::range_over<awl::ring<int>, int>);
 
 namespace
 {

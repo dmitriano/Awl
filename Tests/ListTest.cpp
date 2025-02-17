@@ -7,6 +7,7 @@
 
 #include "Awl/QuickList.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/RangeUtil.h"
 
 #include <ranges>
 
@@ -63,7 +64,7 @@ namespace
         using ELEMENT_LIST = awl::quick_list<Element, DLink>;
 
         //Check if it satisfies the concept std::ranges::range.
-        static_assert(std::ranges::range<ELEMENT_LIST>);
+        static_assert(awl::range_over<ELEMENT_LIST, Element*>);
 
         ELEMENT_LIST list;
 
