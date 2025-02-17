@@ -14,7 +14,8 @@ namespace awl::testing
 {
     CommandLineProvider::CommandLineProvider(int argc, CmdChar* argv[])
     {
-        std::basic_regex<CmdChar> option_regex(StringConvertor<CmdChar>::ConvertFrom("--([[:alpha:]][_[:alpha:][:digit:]]+)"));
+        std::basic_regex<CmdChar> option_regex(StringConvertor<CmdChar>::ConvertFrom("--([[:alpha:]][_[:alpha:][:digit:]]+)"),
+            std::regex_constants::icase);
 
         std::match_results<const CmdChar*> match;
 

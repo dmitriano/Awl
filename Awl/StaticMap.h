@@ -74,7 +74,7 @@ namespace awl
             }
             else
             {
-                std::basic_regex<char> name_regex(name_filter);
+                std::basic_regex<char> name_regex(name_filter, std::regex_constants::icase);
 
                 insert_links([&name_regex](const char* name) -> bool
                 {
