@@ -546,4 +546,6 @@ AWL_TEST(List_FindIf)
     const char* name = *range.begin();
 
     AWL_ASSERT(awl::StrCmp("a", name) == 0);
+
+    AWL_ASSERT_EQUAL(a.name(), name);
 }
