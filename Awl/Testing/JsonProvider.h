@@ -45,11 +45,20 @@ namespace awl::testing
             serializer.ToJson(val, jv);
 
             m_jo[name] = jv;
+
+            m_dirty = true;
+        }
+
+        bool IsDirty() const
+        {
+            return m_dirty;
         }
 
     private:
 
         QJsonObject& m_jo;
+
+        bool m_dirty = false;
     };
 
     static_assert(attribute_provider<JsonProvider>);
