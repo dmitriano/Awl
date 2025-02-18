@@ -43,4 +43,81 @@ namespace awl
     {
         return jv.isUndefined() || jv.isNull();
     }
+
+    inline QJsonObject asObject(const QJsonValue& jv)
+    {
+        awl::EnsureType(jv, QJsonValue::Object);
+
+        return jv.toObject();
+    }
+
+    inline QJsonArray asArray(const QJsonValue& jv)
+    {
+        awl::EnsureType(jv, QJsonValue::Array);
+
+        return jv.toArray();
+    }
+
+    inline QString asString(const QJsonValue& jv)
+    {
+        awl::EnsureType(jv, QJsonValue::String);
+
+        return jv.toString();
+    }
+
+    // TODO: Define template function.
+    // template <typename String>
+    inline QJsonObject asObject(const QJsonObject& jo, const char* name)
+    {
+        QJsonValue jv = jo[name];
+
+        try
+        {
+            awl::EnsureType(jv, QJsonValue::Object);
+
+            return jv.toObject();
+        }
+        catch (JsonException& e)
+        {
+            e.append(JsonException::ValueInfo{ jv.type(), "", name });
+
+            throw;
+        }
+    }
+
+    inline QJsonArray asArray(const QJsonObject& jo, const char* name)
+    {
+        QJsonValue jv = jo[name];
+
+        try
+        {
+            awl::EnsureType(jv, QJsonValue::Array);
+
+            return jv.toArray();
+        }
+        catch (JsonException& e)
+        {
+            e.append(JsonException::ValueInfo{ jv.type(), "", name });
+
+            throw;
+        }
+    }
+
+    inline QString asString(const QJsonObject& jo, const char* name)
+    {
+        QJsonValue jv = jo[name];
+
+        try
+        {
+            awl::EnsureType(jv, QJsonValue::String);
+
+            return jv.toString();
+        }
+        catch (JsonException& e)
+        {
+            e.append(JsonException::ValueInfo{ jv.type(), "", name });
+
+            throw;
+        }
+    }
 }

@@ -54,6 +54,11 @@ namespace awl
             return internal_find(m_links, name);
         }
 
+        const StaticLink<T>* find(const std::string& name) const
+        {
+            return find(name.c_str());
+        }
+
         template <class Pred = true_predicate<T>>
         static StaticMap fill(const std::string& name_filter = {}, Pred&& value_filter = {})
         {
