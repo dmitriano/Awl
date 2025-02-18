@@ -59,6 +59,13 @@ namespace awl::testing
             return false;
         }
 
+        template <class T>
+        void Set(const char* name, const T& val)
+        {
+            static_cast<void>(name);
+            static_cast<void>(val);
+        }
+
     private:
 
         bool TryFind(const char* name, CmdString& val) const;

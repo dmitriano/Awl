@@ -1,8 +1,9 @@
 #pragma once
 
-#include "QtExtras/Json//Json.h"
+#include "QtExtras/Json/Json.h"
 
 #include "Awl/Testing/AttributeProvider.h"
+#include "Awl/StringFormat.h"
 
 namespace awl::testing
 {
@@ -27,6 +28,23 @@ namespace awl::testing
             }
 
             return false;
+        }
+
+        template <class T>
+        void Set(const char* name, const T& val)
+        {
+            if (m_jo.contains(name))
+            {
+                throw JsonException(awl::format() << "Attribute '" << name << "' is already set.");
+            }
+
+            JsonSerializer<T> serializer;
+
+            QJsonValue jv;
+
+            serializer.ToJson(val, jv);
+
+            m_jo[name] = jv;
         }
 
     private:
