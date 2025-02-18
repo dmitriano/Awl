@@ -11,7 +11,7 @@ namespace awl::testing
     {
     public:
 
-        JsonProvider(const QJsonObject& jo) : m_jo(jo) {}
+        JsonProvider(QJsonObject& jo) : m_jo(jo) {}
 
         template <class T>
         bool TryGet(const char* name, T& val)
@@ -49,7 +49,7 @@ namespace awl::testing
 
     private:
 
-        const QJsonObject& m_jo;
+        QJsonObject& m_jo;
     };
 
     static_assert(attribute_provider<JsonProvider>);

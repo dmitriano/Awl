@@ -231,11 +231,11 @@ AWL_TEST(Cancellation_JThread)
 
 AWL_TEST(Cancellation_WatchDogThread1)
 {
-    AWL_ATTRIBUTE(int, timeout, 1);
+    AWL_ATTRIBUTE(int, sleep_time, 1);
 
-    std::jthread watch_dog_thread([timeout](std::stop_token token)
+    std::jthread watch_dog_thread([sleep_time](std::stop_token token)
     {
-        awl::sleep_for(std::chrono::milliseconds(timeout), token);
+        awl::sleep_for(std::chrono::milliseconds(sleep_time), token);
     });
 
     std::stop_token token = watch_dog_thread.get_stop_token();
@@ -253,14 +253,15 @@ AWL_TEST(Cancellation_WatchDogThread1)
 
 AWL_TEST(Cancellation_WatchDogThread2)
 {
-    AWL_ATTRIBUTE(int, timeout, 5);
+    // `sleep_time` attribute is reserved for testing framework.
+    AWL_ATTRIBUTE(int, sleep_time, 5);
 
     awl::StopWatch sw;
 
     {
-        std::jthread watch_dog_thread([timeout](std::stop_token token)
+        std::jthread watch_dog_thread([sleep_time](std::stop_token token)
         {
-            awl::sleep_for(std::chrono::seconds(timeout), token);
+            awl::sleep_for(std::chrono::seconds(sleep_time), token);
         });
 
         watch_dog_thread.request_stop();
@@ -268,5 +269,7 @@ AWL_TEST(Cancellation_WatchDogThread2)
         watch_dog_thread.join();
     }
 
-    AWL_ASSERT(!sw.HasElapsed(std::chrono::seconds(timeout)));
+    context.logger.debug(awl::format() << "Elapsed: " << sw);
+
+    AWL_ASSERT(!sw.HasElapsed(std::chrono::seconds(sleep_time)));
 }
