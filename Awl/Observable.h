@@ -26,6 +26,8 @@ namespace awl
 
         Observer& operator = (Observer&& other) = default;
 
+        ~Observer() = default;
+
         bool IsSubscribed() const
         {
             return observer_link::included();
@@ -42,11 +44,6 @@ namespace awl
             {
                 UnsubscribeSelf();
             }
-        }
-
-        ~Observer()
-        {
-            observer_link::safe_exclude();
         }
     };
 

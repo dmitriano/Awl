@@ -156,7 +156,10 @@ namespace awl
             return *this;
         }
 
-        ~basic_quick_link() = default;
+        ~basic_quick_link()
+        {
+            safe_exclude();
+        }
 
     private:
 

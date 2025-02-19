@@ -53,10 +53,6 @@ namespace
 
         ~Element()
         {
-            LinkA::safe_exclude();
-            LinkB::safe_exclude();
-            awl::quick_link::safe_exclude();
-
             --elementCount;
         }
 
