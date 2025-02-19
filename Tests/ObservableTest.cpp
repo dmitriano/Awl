@@ -34,6 +34,9 @@ namespace
         const TestContext * pContext = nullptr;
     };
 
+    static_assert(std::is_move_assignable_v<ChangeHandler>);
+    static_assert(std::is_move_constructible_v<ChangeHandler>);
+
     void ChangeHandler::ItChanged(int param, awl::String val)
     {
         pContext->out << _T("It has changed ") << param << _T(" ") << val << std::endl;

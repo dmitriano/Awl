@@ -35,6 +35,9 @@ namespace
         using Base::Base;
     };
 
+    static_assert(std::is_move_assignable_v<LinkA>);
+    static_assert(std::is_move_constructible_v<LinkA>);
+
     class Element : public LinkA, public LinkB, public awl::quick_link
     {
     public:
@@ -423,10 +426,36 @@ namespace
         AWL_ASSERT_EQUAL(0, Element::elementCount);
     }
 
-    struct EleMent : awl::single_link
+    struct SingleElement : public awl::single_link
     {
-        int a = 25;
+        SingleElement(std::string name, int val) :
+            m_name(std::move(name)),
+            m_val(val)
+        {
+        }
+
+        const char* name() const { return m_name.c_str(); }
+
+        int value() const { return m_val; }
+
+        std::string m_name;
+
+        int m_val;
     };
+
+    using SingleList = awl::single_list<SingleElement>;
+
+    struct SimpleElement : SingleElement
+    {
+        SimpleElement() : SingleElement(awl::aformat() << m_count, m_count)
+        {
+            ++m_count;
+        }
+
+        static inline int m_count = 0;
+    };
+
+    static_assert(std::default_initializable<SingleList::iterator>);
 }
 
 AWL_TEST(List)
@@ -440,21 +469,21 @@ AWL_TEST(List_SingleList)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::single_list<EleMent> list;
+    awl::single_list<SimpleElement> list;
 
     size_t count = 0;
 
     AWL_ASSERT_EQUAL(list.size(), count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
     AWL_ASSERT_EQUAL(list.size(), ++count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
     AWL_ASSERT_EQUAL(list.size(), ++count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
     AWL_ASSERT_EQUAL(list.size(), ++count);
 
@@ -470,7 +499,7 @@ AWL_TEST(List_SingleList)
 
     AWL_ASSERT_EQUAL(list.size(), --count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
     AWL_ASSERT_EQUAL(list.size(), ++count);
 
@@ -481,29 +510,6 @@ AWL_TEST(List_SingleList)
     AWL_ASSERT_EQUAL(list.size(), (size_t)0);
 
     delete first;
-}
-
-namespace
-{
-    struct SingleElement : public awl::single_link
-    {
-        SingleElement(std::string name, int val) :
-            m_name(std::move(name)),
-            m_val(val)
-        {}
-
-        const char* name() const { return m_name.c_str(); }
-
-        int value() const { return m_val; }
-
-        std::string m_name;
-
-        int m_val;
-    };
-
-    using SingleList = awl::single_list<SingleElement>;
-
-    static_assert(std::default_initializable<SingleList::iterator>);
 }
 
 AWL_TEST(List_FindIf)

@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include "Awl/SingleLink.h"
+#include "Awl/SingleList.h"
 
 namespace awl
 {
