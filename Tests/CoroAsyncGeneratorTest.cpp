@@ -88,7 +88,15 @@ AWL_TEST(CoroAsyncGeneratorOwned)
 {
     awl::UpdateTask task = test(context);
 
+    AWL_ASSERT(!task.done());
+
+    awl::testing::timeQueue.loop(3);
+
+    AWL_ASSERT(!task.done());
+
     awl::testing::timeQueue.loop();
+
+    AWL_ASSERT(task.done());
 }
 
 AWL_TEST(CoroAsyncGeneratorCancel)
