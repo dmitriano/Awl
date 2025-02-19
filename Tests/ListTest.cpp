@@ -585,8 +585,63 @@ AWL_TEST(List_FindIf)
     AWL_ASSERT_EQUAL(a.name(), name);
 }
 
-AWL_TEST(List_Destructor)
+AWL_TEST(List_Destructor1)
 {
     AWL_UNUSED_CONTEXT;
 
+    {
+        Element a(1);
+
+        {
+            Element b(2);
+
+            {
+                awl::quick_list<Element, LinkA> list;
+
+                list.push_back(&a);
+                list.push_back(&b);
+
+                AWL_ASSERT_EQUAL(2u, list.size());
+            }
+
+            AWL_ASSERT(a.LinkA::included());
+            AWL_ASSERT(b.LinkA::included());
+
+            AWL_ASSERT(a.LinkA::predecessor() == static_cast<LinkA*>(&b));
+            AWL_ASSERT(a.LinkA::successor() == static_cast<LinkA*>(&b));
+        }
+
+        AWL_ASSERT(a.LinkA::included());
+
+        AWL_ASSERT(a.LinkA::predecessor() == static_cast<LinkA*>(&a));
+        AWL_ASSERT(a.LinkA::successor() == static_cast<LinkA*>(&a));
+    }
+}
+
+AWL_TEST(List_Destructor2)
+{
+    AWL_UNUSED_CONTEXT;
+
+    {
+        awl::quick_list<Element, LinkA> list;
+
+        {
+            Element a(1);
+
+            {
+                Element b(2);
+
+                list.push_back(&a);
+                list.push_back(&b);
+
+                AWL_ASSERT_EQUAL(2u, list.size());
+            }
+
+            AWL_ASSERT(a.LinkA::included());
+
+            AWL_ASSERT_EQUAL(1u, list.size());
+        }
+
+        AWL_ASSERT(list.empty());
+    }
 }
