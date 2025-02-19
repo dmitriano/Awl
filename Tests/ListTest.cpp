@@ -35,6 +35,13 @@ namespace
         using Base::Base;
     };
 
+    static_assert(!std::is_copy_assignable_v<LinkA>);
+    static_assert(!std::is_copy_constructible_v<LinkA>);
+    static_assert(!std::is_copy_assignable_v<LinkB>);
+    static_assert(!std::is_copy_constructible_v<LinkB>);
+    static_assert(!std::is_copy_assignable_v<awl::quick_link>);
+    static_assert(!std::is_copy_constructible_v<awl::quick_link>);
+
     static_assert(std::is_move_assignable_v<LinkA>);
     static_assert(std::is_move_constructible_v<LinkA>);
     static_assert(std::is_move_assignable_v<LinkB>);
@@ -42,7 +49,10 @@ namespace
     static_assert(std::is_move_assignable_v<awl::quick_link>);
     static_assert(std::is_move_constructible_v<awl::quick_link>);
 
-    class Element : public LinkA, public LinkB, public awl::quick_link
+    class Element :
+        public LinkA,
+        public LinkB,
+        public awl::quick_link
     {
     public:
 
@@ -50,6 +60,10 @@ namespace
         {
             ++elementCount;
         }
+
+        Element(Element&& other) = default;
+
+        Element& operator = (Element&& other) = default;
 
         ~Element()
         {
@@ -61,8 +75,10 @@ namespace
         static int elementCount;
     };
 
-    //static_assert(std::is_move_assignable_v<Element>);
-    //static_assert(std::is_move_constructible_v<Element>);
+    static_assert(!std::is_copy_assignable_v<Element>);
+    static_assert(!std::is_copy_constructible_v<Element>);
+    static_assert(std::is_move_assignable_v<Element>);
+    static_assert(std::is_move_constructible_v<Element>);
 
     int Element::elementCount = 0;
 
@@ -446,6 +462,11 @@ namespace
         int m_val;
     };
 
+    static_assert(!std::is_copy_assignable_v<SingleElement>);
+    static_assert(!std::is_copy_constructible_v<SingleElement>);
+    static_assert(!std::is_move_assignable_v<SingleElement>);
+    static_assert(!std::is_move_constructible_v<SingleElement>);
+
     using SingleList = awl::single_list<SingleElement>;
 
     struct SimpleElement : SingleElement
@@ -457,6 +478,11 @@ namespace
 
         static inline int m_count = 0;
     };
+
+    static_assert(!std::is_copy_assignable_v<SimpleElement>);
+    static_assert(!std::is_copy_constructible_v<SimpleElement>);
+    static_assert(!std::is_move_assignable_v<SimpleElement>);
+    static_assert(!std::is_move_constructible_v<SimpleElement>);
 
     static_assert(std::default_initializable<SingleList::iterator>);
 }

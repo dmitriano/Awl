@@ -34,6 +34,8 @@ namespace
         const TestContext * pContext = nullptr;
     };
 
+    static_assert(!std::is_copy_assignable_v<ChangeHandler>);
+    static_assert(!std::is_copy_constructible_v<ChangeHandler>);
     static_assert(std::is_move_assignable_v<ChangeHandler>);
     static_assert(std::is_move_constructible_v<ChangeHandler>);
 
