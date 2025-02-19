@@ -32,7 +32,7 @@ void Controller::cancel()
     m_handlers.clear();
 }
 
-UpdateTask Controller::wait_all()
+UpdateTask Controller::wait_all_task()
 {
     while (!m_handlers.empty())
     {

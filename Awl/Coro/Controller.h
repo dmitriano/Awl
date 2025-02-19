@@ -51,6 +51,50 @@ namespace awl
 
         friend AnyAwaitable;
 
+        class AllAwaitable : private Observer<TaskSink>
+        {
+        public:
+
+            AllAwaitable(Controller* p_this) : pThis(p_this)
+            {
+                pThis->Subscribe(this);
+            }
+
+            bool await_ready()
+            {
+                return empty();
+            }
+
+            // h is a handler for current coroutine which is suspended
+            void await_suspend(std::coroutine_handle<> h)
+            {
+                m_h = h;
+            }
+
+            void await_resume() {}
+
+        private:
+
+            void OnFinished() override
+            {
+                if (empty())
+                {
+                    m_h.resume();
+                }
+            }
+
+            bool empty() const
+            {
+                return pThis->empty();
+            }
+
+            Controller* const pThis;
+
+            std::coroutine_handle<> m_h;
+        };
+
+        friend AllAwaitable;
+
     public:
 
         void register_task(UpdateTask&& task);
@@ -60,13 +104,23 @@ namespace awl
             return m_handlers.size();
         }
 
+        bool empty() const
+        {
+            return m_handlers.empty();
+        }
+
         void cancel();
 
-        UpdateTask wait_all();
+        UpdateTask wait_all_task();
+
+        auto wait_all()
+        {
+            return AllAwaitable{ this };
+        }
 
         auto wait_any()
         {
-            return AnyAwaitable{*this};
+            return AnyAwaitable{ *this };
         }
 
     private:

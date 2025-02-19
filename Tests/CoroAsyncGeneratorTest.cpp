@@ -144,20 +144,34 @@ namespace
     {
         co_await 100ms;
 
-        context.out << "finished " << id << std::endl;
+        context.out << id << " finished" << std::endl;
     }
 
-    awl::UpdateTask WaitAny(const awl::testing::TestContext& context, awl::Controller& controller)
+    awl::UpdateTask TestWait(const awl::testing::TestContext& context)
     {
+        awl::Controller controller;
+
         controller.register_task(PrintFinished(context, 1));
         controller.register_task(PrintFinished(context, 2));
         controller.register_task(PrintFinished(context, 3));
 
+        AWL_ASSERT_EQUAL(3, controller.task_count());
+
         co_await controller.wait_any();
+
+        context.out << "wait_any() finished" << std::endl;
+
+        AWL_ASSERT_EQUAL(2, controller.task_count());
+
+        co_await controller.wait_all();
+
+        context.out << "wait_all() finished" << std::endl;
+
+        AWL_ASSERT_EQUAL(0, controller.task_count());
     }
 }
 
-AWL_TEST(CoroControllerWaitAll)
+AWL_TEST(CoroControllerWaitAllTask)
 {
     awl::Controller controller;
 
@@ -167,7 +181,7 @@ AWL_TEST(CoroControllerWaitAll)
 
     AWL_ASSERT_EQUAL(3, controller.task_count());
 
-    awl::UpdateTask task = controller.wait_all();
+    awl::UpdateTask task = controller.wait_all_task();
 
     awl::testing::timeQueue.loop(1);
 
@@ -186,19 +200,11 @@ AWL_TEST(CoroControllerWaitAll)
     AWL_ASSERT(task.done());
 }
 
-AWL_TEST(CoroControllerWaitAny)
+AWL_TEST(CoroControllerWait)
 {
-    awl::Controller controller;
-
-    awl::UpdateTask task = WaitAny(context, controller);
-
-    awl::testing::timeQueue.loop(1);
-
-    AWL_ASSERT_EQUAL(2, controller.task_count());
-
-    AWL_ASSERT(task.done());
+    awl::UpdateTask task = TestWait(context);
 
     awl::testing::timeQueue.loop();
 
-    AWL_ASSERT_EQUAL(0, controller.task_count());
+    AWL_ASSERT(task.done());
 }
