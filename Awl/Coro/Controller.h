@@ -22,6 +22,8 @@ namespace awl
 
         void cancel();
 
+        UpdateTask wait_all();
+
     private:
 
         struct Handler : Observer<TaskSink>

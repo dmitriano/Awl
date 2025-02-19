@@ -31,6 +31,16 @@ void Controller::cancel()
     m_handlers.clear();
 }
 
+UpdateTask Controller::wait_all()
+{
+    while (!m_handlers.empty())
+    {
+        co_await m_handlers.back().m_task;
+
+        m_handlers.pop_back();
+    }
+}
+
 void Controller::Handler::OnFinished()
 {
     const std::size_t index = this - pThis->m_handlers.data();
