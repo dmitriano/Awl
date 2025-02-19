@@ -664,3 +664,27 @@ AWL_TEST(List_Destructor2)
         AWL_ASSERT(list.empty());
     }
 }
+
+AWL_TEST(List_MovableElement)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::quick_list<Element, LinkA> list;
+
+    Element a(1);
+
+    list.push_back(&a);
+
+    AWL_ASSERT(a.LinkA::included());
+
+    AWL_ASSERT_EQUAL(1u, list.size());
+
+    Element b = std::move(a);
+
+    static_assert(&b != &a);
+
+    AWL_ASSERT(!a.LinkA::included());
+    AWL_ASSERT(b.LinkA::included());
+
+    AWL_ASSERT_EQUAL(1u, list.size());
+}
