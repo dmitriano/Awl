@@ -147,10 +147,8 @@ namespace
         context.out << id << " finished" << std::endl;
     }
 
-    awl::UpdateTask TestWait(const awl::testing::TestContext& context)
+    awl::UpdateTask TestWait(const awl::testing::TestContext& context, awl::Controller& controller, bool all_task = false, std::size_t actual_N = 2)
     {
-        awl::Controller controller;
-
         controller.register_task(PrintFinished(context, 1));
         controller.register_task(PrintFinished(context, 2));
         controller.register_task(PrintFinished(context, 3));
@@ -161,9 +159,16 @@ namespace
 
         context.out << "wait_any() finished" << std::endl;
 
-        AWL_ASSERT_EQUAL(2, controller.task_count());
+        AWL_ASSERT_EQUAL(actual_N, controller.task_count());
 
-        co_await controller.wait_all();
+        if (all_task)
+        {
+            co_await controller.wait_all_task();
+        }
+        else
+        {
+            co_await controller.wait_all();
+        }
 
         context.out << "wait_all() finished" << std::endl;
 
@@ -202,9 +207,43 @@ AWL_TEST(CoroControllerWaitAllTask)
 
 AWL_TEST(CoroControllerWait)
 {
-    awl::UpdateTask task = TestWait(context);
+    awl::Controller controller;
+
+    awl::UpdateTask task = TestWait(context, controller);
 
     awl::testing::timeQueue.loop();
 
     AWL_ASSERT(task.done());
+}
+
+AWL_TEST(CoroControllerCancelWait1)
+{
+    AWL_FLAG(all_task);
+
+    awl::Controller controller;
+
+    awl::UpdateTask task = TestWait(context, controller, all_task, 0);
+
+    controller.cancel();
+
+    AWL_ASSERT(task.done());
+
+    awl::testing::timeQueue.clear();
+}
+
+AWL_TEST(CoroControllerCancelWait2)
+{
+    AWL_FLAG(all_task);
+
+    awl::Controller controller;
+
+    awl::UpdateTask task = TestWait(context, controller, all_task);
+
+    awl::testing::timeQueue.loop(1);
+
+    controller.cancel();
+
+    AWL_ASSERT(task.done());
+
+    awl::testing::timeQueue.clear();
 }

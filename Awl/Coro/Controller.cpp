@@ -24,12 +24,18 @@ void Controller::register_task(UpdateTask&& task)
 
 void Controller::cancel()
 {
-    for (Handler& handler : m_handlers)
+    // Do not notify awaiters if nothing changed.
+    if (!m_handlers.empty())
     {
-        handler.UnsubscribeSelf();
-    }
+        for (Handler& handler : m_handlers)
+        {
+            handler.UnsubscribeSelf();
+        }
 
-    m_handlers.clear();
+        m_handlers.clear();
+
+        Notify(&TaskSink::OnFinished);
+    }
 }
 
 UpdateTask Controller::wait_all_task()
