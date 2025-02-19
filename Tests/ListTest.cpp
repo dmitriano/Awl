@@ -648,6 +648,8 @@ AWL_TEST(List_Destructor1)
         AWL_ASSERT(a.LinkA::predecessor() == static_cast<LinkA*>(&a));
         AWL_ASSERT(a.LinkA::successor() == static_cast<LinkA*>(&a));
     }
+
+    AWL_ASSERT_EQUAL(0, Element::elementCount);
 }
 
 AWL_TEST(List_Destructor2)
@@ -673,6 +675,8 @@ AWL_TEST(List_Destructor2)
 
             AWL_ASSERT_EQUAL(1u, list.size());
         }
+
+        AWL_ASSERT_EQUAL(0, Element::elementCount);
 
         AWL_ASSERT(list.empty());
     }
