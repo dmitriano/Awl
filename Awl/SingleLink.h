@@ -36,6 +36,7 @@ namespace awl
 
         base_single_link& operator = (base_single_link&& other) = delete;
 
+        //! Single list elements can't exclude themself when they are destroyed.
         ~base_single_link() = default;
 
         Link * next() { return pNext; }

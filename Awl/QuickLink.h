@@ -80,6 +80,33 @@ namespace awl
         using ForwardList = single_list<DLink, ForwardLink>;
         using BackwardList = single_list<DLink, BackwardLink>;
 
+        basic_quick_link(basic_quick_link* next, basic_quick_link* prev) :
+            ForwardLink(next),
+            BackwardLink(prev)
+        {
+        }
+
+        basic_quick_link(const basic_quick_link& other) = delete;
+
+        basic_quick_link& operator = (const basic_quick_link& other) = delete;
+
+        basic_quick_link(basic_quick_link&& other) noexcept
+        {
+            reinsert(std::move(other));
+        }
+
+        basic_quick_link& operator = (basic_quick_link&& other) noexcept
+        {
+            safe_exclude();
+            reinsert(std::move(other));
+            return *this;
+        }
+
+        ~basic_quick_link()
+        {
+            safe_exclude();
+        }
+
         bool included() const
         {
             assert(ForwardLink::included() == BackwardLink::included());
@@ -103,9 +130,19 @@ namespace awl
             }
         }
 
+        const DLink* predecessor() const
+        {
+            return static_cast<DLink*>(this->BackwardLink::next());
+        }
+
         DLink * predecessor()
         {
             return static_cast<DLink *>(this->BackwardLink::next());
+        }
+
+        const DLink* successor() const
+        {
+            return static_cast<DLink*>(this->ForwardLink::next());
         }
 
         DLink * successor()
@@ -135,34 +172,6 @@ namespace awl
 
         //! There should not be template parameter defaults in forward declaration.
         template <class T1, class DLink1> friend class quick_list;
-
-    public:
-
-        basic_quick_link(basic_quick_link * next, basic_quick_link * prev) :
-            ForwardLink(next),
-            BackwardLink(prev)
-        {}
-
-        basic_quick_link(const basic_quick_link& other) = delete;
-
-        basic_quick_link& operator = (const basic_quick_link& other) = delete;
-
-        basic_quick_link(basic_quick_link&& other) noexcept
-        {
-            reinsert(std::move(other));
-        }
-
-        basic_quick_link& operator = (basic_quick_link&& other) noexcept
-        {
-            safe_exclude();
-            reinsert(std::move(other));
-            return *this;
-        }
-
-        ~basic_quick_link()
-        {
-            safe_exclude();
-        }
 
     private:
 
