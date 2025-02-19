@@ -9,8 +9,48 @@
 
 namespace awl
 {
-    class Controller
+    class Controller : private Observable<TaskSink>
     {
+    private:
+
+        class AnyAwaitable : private Observer<TaskSink>
+        {
+        public:
+
+            AnyAwaitable(Observable<TaskSink>& source)
+            {
+                source.Subscribe(this);
+            }
+
+            bool await_ready()
+            {
+                return m_any;
+            }
+
+            // h is a handler for current coroutine which is suspended
+            void await_suspend(std::coroutine_handle<> h)
+            {
+                m_h = h;
+            }
+
+            void await_resume() {}
+
+        private:
+
+            void OnFinished() override
+            {
+                m_any = true;
+
+                m_h.resume();
+            }
+
+            bool m_any = false;
+
+            std::coroutine_handle<> m_h;
+        };
+
+        friend AnyAwaitable;
+
     public:
 
         void register_task(UpdateTask&& task);
@@ -23,6 +63,11 @@ namespace awl
         void cancel();
 
         UpdateTask wait_all();
+
+        auto wait_any()
+        {
+            return AnyAwaitable{*this};
+        }
 
     private:
 

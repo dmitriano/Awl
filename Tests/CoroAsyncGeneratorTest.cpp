@@ -146,6 +146,15 @@ namespace
 
         context.out << "finished " << id << std::endl;
     }
+
+    awl::UpdateTask WaitAny(const awl::testing::TestContext& context, awl::Controller& controller)
+    {
+        controller.register_task(PrintFinished(context, 1));
+        controller.register_task(PrintFinished(context, 2));
+        controller.register_task(PrintFinished(context, 3));
+
+        co_await controller.wait_any();
+    }
 }
 
 AWL_TEST(CoroControllerWaitAll)
@@ -175,4 +184,21 @@ AWL_TEST(CoroControllerWaitAll)
     AWL_ASSERT(awl::testing::timeQueue.empty());
 
     AWL_ASSERT(task.done());
+}
+
+AWL_TEST(CoroControllerWaitAny)
+{
+    awl::Controller controller;
+
+    awl::UpdateTask task = WaitAny(context, controller);
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(2, controller.task_count());
+
+    AWL_ASSERT(task.done());
+
+    awl::testing::timeQueue.loop();
+
+    AWL_ASSERT_EQUAL(0, controller.task_count());
 }

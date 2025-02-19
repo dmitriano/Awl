@@ -13,6 +13,7 @@ void Controller::register_task(UpdateTask&& task)
 {
     // The promise is owned at this point.
     assert(task.m_h != nullptr);
+    assert(!task.done());
 
     UpdateTask::promise_type& promise = task.m_h.promise();
 
@@ -50,4 +51,7 @@ void Controller::Handler::OnFinished()
     assert(index < pThis->m_handlers.size());
 
     pThis->m_handlers.erase(pThis->m_handlers.begin() + index);
+
+    // For wait_any().
+    pThis->Notify(&TaskSink::OnFinished);
 }
