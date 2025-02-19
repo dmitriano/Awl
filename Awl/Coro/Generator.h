@@ -81,7 +81,6 @@ namespace awl
 
             pointer_type m_value;
             std::exception_ptr m_exception;
-
         };
 
         struct generator_sentinel {};
