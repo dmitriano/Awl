@@ -64,12 +64,12 @@ namespace
             ++elementCount;
         }
 
-        Element(Element&& other) : CompositeLink(std::move(other))
+        Element(Element&& other) noexcept : CompositeLink(std::move(other))
         {
             ++elementCount;
         }
 
-        Element& operator = (Element&& other)
+        Element& operator = (Element&& other) noexcept
         {
             *(static_cast<CompositeLink*>(this)) = std::move(other);
 
