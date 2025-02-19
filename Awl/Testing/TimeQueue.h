@@ -8,6 +8,7 @@
 #include <vector>
 #include <thread>
 #include <coroutine>
+#include <limits>
 
 #include "Awl/KeyCompare.h"
 
@@ -22,22 +23,40 @@ namespace awl::testing
             m_tasks.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
         }
 
-        void loop()
+        // Resumes n times.
+        void loop(std::size_t n = std::numeric_limits<std::size_t>::max())
         {
+            std::size_t i = 0;
+
             while (!m_tasks.empty())
             {
                 auto& timer = m_tasks.top();
                 // if it is time to run a coroutine
                 if (timer.targetTime < std::chrono::steady_clock::now())
                 {
-                    auto handle = timer.handle;
-                    m_tasks.pop();
-                    handle.resume();
+                    if (i++ < n)
+                    {
+                        auto handle = timer.handle;
+                        m_tasks.pop();
+                        handle.resume();
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     std::this_thread::sleep_until(timer.targetTime);
                 }
+            }
+        }
+
+        void clear()
+        {
+            while (!m_tasks.empty())
+            {
+                m_tasks.pop();
             }
         }
 

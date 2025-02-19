@@ -6,6 +6,7 @@
 #include "Awl/Separator.h"
 #include "Awl/Coro/UpdateTask.h"
 #include "Awl/Coro/ProcessTask.h"
+#include "Awl/Coro/Controller.h"
 #include "Awl/Coro/AsyncGenerator.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -83,9 +84,48 @@ namespace
     }
 }
 
-AWL_TEST(CoroAsyncGenerator)
+AWL_TEST(CoroAsyncGeneratorOwned)
 {
     awl::UpdateTask task = test(context);
 
     awl::testing::timeQueue.loop();
+}
+
+AWL_TEST(CoroAsyncGeneratorCancel)
+{
+    awl::Controller controller;
+
+    controller.register_task(test(context));
+
+    awl::testing::timeQueue.loop(3);
+
+    AWL_ASSERT_EQUAL(1, controller.task_count());
+
+    context.out << std::endl;
+
+    // This invalidates timeQueue.
+    controller.cancel();
+
+    AWL_ASSERT_EQUAL(0, controller.task_count());
+
+    awl::testing::timeQueue.clear();
+}
+
+AWL_TEST(CoroAsyncGeneratorRegistered)
+{
+    awl::Controller controller;
+
+    controller.register_task(test(context));
+
+    AWL_ASSERT_EQUAL(1, controller.task_count());
+
+    awl::testing::timeQueue.loop(3);
+
+    // The task is still in the list.
+    AWL_ASSERT_EQUAL(1, controller.task_count());
+
+    awl::testing::timeQueue.loop();
+
+    // The task has removed itself automatically from the list.
+    AWL_ASSERT_EQUAL(0, controller.task_count());
 }

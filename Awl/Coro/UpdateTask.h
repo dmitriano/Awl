@@ -4,6 +4,10 @@
 #include <exception>
 #include <utility>
 
+#include "Awl/QuickLink.h"
+
+AWL_DECLARE_QUICK_LINK(ControllerLink);
+
 namespace awl
 {
     struct UpdatePromise;
@@ -56,9 +60,11 @@ namespace awl
         }
 
         std::coroutine_handle<promise_type> m_h;
+
+        friend class Controller;
     };
 
-    struct UpdatePromise
+    struct UpdatePromise : ControllerLink
     {
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
@@ -137,58 +143,5 @@ namespace awl
         void return_void() {}
     };
 
-    inline UpdateTask UpdatePromise::get_return_object()
-    {
-        return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
-    }
-
-    inline void UpdateTask::release()
-    {
-        if (m_h)
-        {
-            m_h.promise().m_owned = false;
-
-            m_h = nullptr;
-        }
-    }
-
-    inline auto operator co_await(const UpdateTask& update_task) noexcept
-    {
-        if (!update_task.m_h)
-        {
-            //coroutine without promise awaited
-            std::terminate();
-        }
-
-        if (update_task.m_h.promise().m_awaitingCoroutine)
-        {
-            //coroutine already awaited
-            std::terminate();
-        }
-
-        struct task_awaitable
-        {
-            std::coroutine_handle<UpdatePromise> m_h;
-
-            // check if this UpdateTask already has value computed
-            bool await_ready()
-            {
-                return m_h.done();
-            }
-
-            // h - is a handle to coroutine that calls co_await
-            // store coroutine handle to be resumed after computing UpdateTask value
-            void await_suspend(std::coroutine_handle<> h)
-            {
-                m_h.promise().m_awaitingCoroutine = h;
-            }
-
-            // when ready return value to a consumer
-            auto await_resume()
-            {
-            }
-        };
-
-        return task_awaitable{ update_task.m_h };
-    }
+    auto operator co_await(const UpdateTask& update_task) noexcept;
 }
