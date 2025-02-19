@@ -15,245 +15,249 @@
 
 namespace awl
 {
-	template<typename T>
-	class generator;
+    template<typename T>
+    class generator;
 
-	namespace detail
-	{
-		template<typename T>
-		class generator_promise
-		{
-		public:
+    namespace detail
+    {
+        template<typename T>
+        class generator_promise
+        {
+        public:
 
-			using value_type = std::remove_reference_t<T>;
-			using reference_type = std::conditional_t<std::is_reference_v<T>, T, T&>;
-			using pointer_type = value_type*;
+            using value_type = std::remove_reference_t<T>;
+            using reference_type = std::conditional_t<std::is_reference_v<T>, T, T&>;
+            using pointer_type = value_type*;
 
-			generator_promise() = default;
+            generator_promise() = default;
 
-			generator<T> get_return_object() noexcept;
+            generator<T> get_return_object() noexcept;
 
-			constexpr std::suspend_always initial_suspend() const noexcept { return {}; }
-			constexpr std::suspend_always final_suspend() const noexcept { return {}; }
+            constexpr std::suspend_always initial_suspend() const noexcept { return {}; }
+            constexpr std::suspend_always final_suspend() const noexcept { return {}; }
 
-			template<
-				typename U = T,
-				std::enable_if_t<!std::is_rvalue_reference<U>::value, int> = 0>
-			std::suspend_always yield_value(std::remove_reference_t<T>& value) noexcept
-			{
-				m_value = std::addressof(value);
-				return {};
-			}
+            template<
+                typename U = T,
+                std::enable_if_t<!std::is_rvalue_reference<U>::value, int> = 0>
+            std::suspend_always yield_value(std::remove_reference_t<T>& value) noexcept
+            {
+                m_value = std::addressof(value);
+                return {};
+            }
 
-			std::suspend_always yield_value(std::remove_reference_t<T>&& value) noexcept
-			{
-				m_value = std::addressof(value);
-				return {};
-			}
+            std::suspend_always yield_value(std::remove_reference_t<T>&& value) noexcept
+            {
+                m_value = std::addressof(value);
+                return {};
+            }
 
-			void unhandled_exception()
-			{
-				m_exception = std::current_exception();
-			}
+            void unhandled_exception()
+            {
+                m_exception = std::current_exception();
+            }
 
-			void return_void()
-			{
-			}
+            void return_void()
+            {
+            }
 
-			reference_type value() const noexcept
-			{
-				return static_cast<reference_type>(*m_value);
-			}
+            reference_type value() const noexcept
+            {
+                return static_cast<reference_type>(*m_value);
+            }
 
-			// Don't allow any use of 'co_await' inside the generator coroutine.
-			template<typename U>
-			std::suspend_never await_transform(U&& value) = delete;
+            // Don't allow any use of 'co_await' inside the generator coroutine.
+            template<typename U>
+            std::suspend_never await_transform(U&& value) = delete;
 
-			void rethrow_if_exception()
-			{
-				if (m_exception)
-				{
-					std::rethrow_exception(m_exception);
-				}
-			}
+            void rethrow_if_exception()
+            {
+                if (m_exception)
+                {
+                    std::rethrow_exception(m_exception);
+                }
+            }
 
-		private:
+        private:
 
-			pointer_type m_value;
-			std::exception_ptr m_exception;
+            pointer_type m_value;
+            std::exception_ptr m_exception;
 
-		};
+        };
 
         struct generator_sentinel {};
 
-		template<typename T>
-		class generator_iterator
-		{
-			using coroutine_handle = std::coroutine_handle<generator_promise<T>>;
+        template<typename T>
+        class generator_iterator
+        {
+            using coroutine_handle = std::coroutine_handle<generator_promise<T>>;
 
-		public:
+        public:
 
-			using iterator_category = std::input_iterator_tag;
-			// What type should we use for counting elements of a potentially infinite sequence?
-			using difference_type = std::ptrdiff_t;
-			using value_type = typename generator_promise<T>::value_type;
-			using reference = typename generator_promise<T>::reference_type;
-			using pointer = typename generator_promise<T>::pointer_type;
+            using iterator_category = std::input_iterator_tag;
+            // What type should we use for counting elements of a potentially infinite sequence?
+            using difference_type = std::ptrdiff_t;
+            using value_type = typename generator_promise<T>::value_type;
+            using reference = typename generator_promise<T>::reference_type;
+            using pointer = typename generator_promise<T>::pointer_type;
 
-			// Iterator needs to be default-constructible to satisfy the Range concept.
-			generator_iterator() noexcept
-				: m_coroutine(nullptr)
-			{}
-			
-			explicit generator_iterator(coroutine_handle coroutine) noexcept
-				: m_coroutine(coroutine)
-			{}
+            // Iterator needs to be default-constructible to satisfy the Range concept.
+            generator_iterator() noexcept
+                : m_coroutine(nullptr)
+            {
+            }
 
-			friend bool operator==(const generator_iterator& it, generator_sentinel) noexcept
-			{
-				return !it.m_coroutine || it.m_coroutine.done();
-			}
+            explicit generator_iterator(coroutine_handle coroutine) noexcept
+                : m_coroutine(coroutine)
+            {
+            }
 
-			friend bool operator!=(const generator_iterator& it, generator_sentinel s) noexcept
-			{
-				return !(it == s);
-			}
+            friend bool operator==(const generator_iterator& it, generator_sentinel) noexcept
+            {
+                return !it.m_coroutine || it.m_coroutine.done();
+            }
 
-			friend bool operator==(generator_sentinel s, const generator_iterator& it) noexcept
-			{
-				return (it == s);
-			}
+            friend bool operator!=(const generator_iterator& it, generator_sentinel s) noexcept
+            {
+                return !(it == s);
+            }
 
-			friend bool operator!=(generator_sentinel s, const generator_iterator& it) noexcept
-			{
-				return it != s;
-			}
+            friend bool operator==(generator_sentinel s, const generator_iterator& it) noexcept
+            {
+                return (it == s);
+            }
 
-			generator_iterator& operator++()
-			{
-				m_coroutine.resume();
-				if (m_coroutine.done())
-				{
-					m_coroutine.promise().rethrow_if_exception();
-				}
+            friend bool operator!=(generator_sentinel s, const generator_iterator& it) noexcept
+            {
+                return it != s;
+            }
 
-				return *this;
-			}
+            generator_iterator& operator++()
+            {
+                m_coroutine.resume();
+                if (m_coroutine.done())
+                {
+                    m_coroutine.promise().rethrow_if_exception();
+                }
 
-			// Need to provide post-increment operator to implement the 'Range' concept.
-			void operator++(int)
-			{
-				(void)operator++();
-			}
+                return *this;
+            }
 
-			reference operator*() const noexcept
-			{
-				return m_coroutine.promise().value();
-			}
+            // Need to provide post-increment operator to implement the 'Range' concept.
+            void operator++(int)
+            {
+                (void)operator++();
+            }
 
-			pointer operator->() const noexcept
-			{
-				return std::addressof(operator*());
-			}
+            reference operator*() const noexcept
+            {
+                return m_coroutine.promise().value();
+            }
 
-		private:
+            pointer operator->() const noexcept
+            {
+                return std::addressof(operator*());
+            }
 
-			coroutine_handle m_coroutine;
-		};
-	}
+        private:
 
-	template<typename T>
-	class [[nodiscard]] generator
-	{
-	public:
+            coroutine_handle m_coroutine;
+        };
+    }
 
-		using promise_type = detail::generator_promise<T>;
-		using iterator = detail::generator_iterator<T>;
+    template<typename T>
+    class [[nodiscard]] generator
+    {
+    public:
 
-		generator() noexcept
-			: m_coroutine(nullptr)
-		{}
+        using promise_type = detail::generator_promise<T>;
+        using iterator = detail::generator_iterator<T>;
 
-		generator(generator&& other) noexcept
-			: m_coroutine(other.m_coroutine)
-		{
-			other.m_coroutine = nullptr;
-		}
+        generator() noexcept
+            : m_coroutine(nullptr)
+        {
+        }
 
-		generator(const generator& other) = delete;
+        generator(generator&& other) noexcept
+            : m_coroutine(other.m_coroutine)
+        {
+            other.m_coroutine = nullptr;
+        }
 
-		~generator()
-		{
-			if (m_coroutine)
-			{
-				m_coroutine.destroy();
-			}
-		}
+        generator(const generator& other) = delete;
 
-		generator& operator=(generator other) noexcept
-		{
-			swap(other);
-			return *this;
-		}
+        ~generator()
+        {
+            if (m_coroutine)
+            {
+                m_coroutine.destroy();
+            }
+        }
 
-		iterator begin()
-		{
-			if (m_coroutine)
-			{
-				m_coroutine.resume();
-				if (m_coroutine.done())
-				{
-					m_coroutine.promise().rethrow_if_exception();
-				}
-			}
+        generator& operator=(generator other) noexcept
+        {
+            swap(other);
+            return *this;
+        }
 
-			return iterator{ m_coroutine };
-		}
+        iterator begin()
+        {
+            if (m_coroutine)
+            {
+                m_coroutine.resume();
+                if (m_coroutine.done())
+                {
+                    m_coroutine.promise().rethrow_if_exception();
+                }
+            }
 
-		detail::generator_sentinel end() noexcept
-		{
-			return detail::generator_sentinel{};
-		}
+            return iterator{ m_coroutine };
+        }
 
-		void swap(generator& other) noexcept
-		{
-			std::swap(m_coroutine, other.m_coroutine);
-		}
+        detail::generator_sentinel end() noexcept
+        {
+            return detail::generator_sentinel{};
+        }
 
-	private:
+        void swap(generator& other) noexcept
+        {
+            std::swap(m_coroutine, other.m_coroutine);
+        }
 
-		friend class detail::generator_promise<T>;
+    private:
 
-		explicit generator(std::coroutine_handle<promise_type> coroutine) noexcept
-			: m_coroutine(coroutine)
-		{}
+        friend class detail::generator_promise<T>;
 
-		std::coroutine_handle<promise_type> m_coroutine;
+        explicit generator(std::coroutine_handle<promise_type> coroutine) noexcept
+            : m_coroutine(coroutine)
+        {
+        }
 
-	};
+        std::coroutine_handle<promise_type> m_coroutine;
 
-	template<typename T>
-	void swap(generator<T>& a, generator<T>& b)
-	{
-		a.swap(b);
-	}
+    };
 
-	namespace detail
-	{
-		template<typename T>
-		generator<T> generator_promise<T>::get_return_object() noexcept
-		{
-			using coroutine_handle = std::coroutine_handle<generator_promise<T>>;
-			return generator<T>{ coroutine_handle::from_promise(*this) };
-		}
-	}
+    template<typename T>
+    void swap(generator<T>& a, generator<T>& b)
+    {
+        a.swap(b);
+    }
 
-	template<typename FUNC, typename T>
-	generator<std::invoke_result_t<FUNC&, typename generator<T>::iterator::reference>> fmap(FUNC func, generator<T> source)
-	{
-		for (auto&& value : source)
-		{
-			co_yield std::invoke(func, static_cast<decltype(value)>(value));
-		}
-	}
+    namespace detail
+    {
+        template<typename T>
+        generator<T> generator_promise<T>::get_return_object() noexcept
+        {
+            using coroutine_handle = std::coroutine_handle<generator_promise<T>>;
+            return generator<T>{ coroutine_handle::from_promise(*this) };
+        }
+    }
+
+    template<typename FUNC, typename T>
+    generator<std::invoke_result_t<FUNC&, typename generator<T>::iterator::reference>> fmap(FUNC func, generator<T> source)
+    {
+        for (auto&& value : source)
+        {
+            co_yield std::invoke(func, static_cast<decltype(value)>(value));
+        }
+    }
 }
