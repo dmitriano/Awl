@@ -85,12 +85,12 @@ namespace
     template <class DLink>
     class ListHolder
     {
-        using ELEMENT_LIST = awl::quick_list<Element, DLink>;
+        using ElementList = awl::quick_list<Element, DLink>;
 
         //Check if it satisfies the concept std::ranges::range.
-        static_assert(awl::range_over<ELEMENT_LIST, Element*>);
+        static_assert(awl::range_over<ElementList, Element*>);
 
-        ELEMENT_LIST list;
+        ElementList list;
 
         const awl::testing::TestContext & context;
 
@@ -220,7 +220,7 @@ namespace
 
             int val = 0;
 
-            for (typename ELEMENT_LIST::iterator i = list.begin(); i != list.end(); ++i)
+            for (typename ElementList::iterator i = list.begin(); i != list.end(); ++i)
             {
                 Element * e = *i;
 
@@ -236,7 +236,7 @@ namespace
 
             int val = 0;
 
-            for (typename ELEMENT_LIST::const_iterator i = list.begin(); i != list.end(); ++i)
+            for (typename ElementList::const_iterator i = list.begin(); i != list.end(); ++i)
             {
                 const Element * e = *i;
 
@@ -252,7 +252,7 @@ namespace
 
             int val = 2;
 
-            for (typename ELEMENT_LIST::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+            for (typename ElementList::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
             {
                 Element * e = *i;
 
@@ -268,7 +268,7 @@ namespace
 
             int val = 2;
 
-            for (typename ELEMENT_LIST::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+            for (typename ElementList::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
             {
                 const Element * e = *i;
 
@@ -341,7 +341,7 @@ namespace
 
         void MoveTest()
         {
-            ELEMENT_LIST other_list;
+            ElementList other_list;
 
             AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
@@ -364,7 +364,7 @@ namespace
         {
             AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
-            ELEMENT_LIST other_list;
+            ElementList other_list;
 
             other_list.push_back(list);
 
@@ -583,4 +583,10 @@ AWL_TEST(List_FindIf)
     AWL_ASSERT(awl::StrCmp("a", name) == 0);
 
     AWL_ASSERT_EQUAL(a.name(), name);
+}
+
+AWL_TEST(List_Destructor)
+{
+    AWL_UNUSED_CONTEXT;
+
 }

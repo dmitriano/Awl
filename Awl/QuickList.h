@@ -88,6 +88,8 @@ namespace awl
             return *this;
         }
 
+        ~quick_list() = default;
+
         //There can be using ForwardList::front, but not BackwardList::front.
         T * front() { return forward().front(); }
         const T * front() const { return forward().front(); }
