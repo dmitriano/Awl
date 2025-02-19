@@ -49,10 +49,13 @@ namespace
     static_assert(std::is_move_assignable_v<awl::quick_link>);
     static_assert(std::is_move_constructible_v<awl::quick_link>);
 
-    class Element :
+    class CompositeLink :
         public LinkA,
         public LinkB,
         public awl::quick_link
+    {};
+
+    class Element : public CompositeLink
     {
     public:
 
@@ -61,9 +64,19 @@ namespace
             ++elementCount;
         }
 
-        Element(Element&& other) = default;
+        Element(Element&& other) : CompositeLink(std::move(other))
+        {
+            ++elementCount;
+        }
 
-        Element& operator = (Element&& other) = default;
+        Element& operator = (Element&& other)
+        {
+            *(static_cast<CompositeLink*>(this)) = std::move(other);
+
+            ++elementCount;
+
+            return *this;
+        }
 
         ~Element()
         {
