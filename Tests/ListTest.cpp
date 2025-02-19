@@ -37,6 +37,10 @@ namespace
 
     static_assert(std::is_move_assignable_v<LinkA>);
     static_assert(std::is_move_constructible_v<LinkA>);
+    static_assert(std::is_move_assignable_v<LinkB>);
+    static_assert(std::is_move_constructible_v<LinkB>);
+    static_assert(std::is_move_assignable_v<awl::quick_link>);
+    static_assert(std::is_move_constructible_v<awl::quick_link>);
 
     class Element : public LinkA, public LinkB, public awl::quick_link
     {
@@ -60,6 +64,9 @@ namespace
 
         static int elementCount;
     };
+
+    //static_assert(std::is_move_assignable_v<Element>);
+    //static_assert(std::is_move_constructible_v<Element>);
 
     int Element::elementCount = 0;
 

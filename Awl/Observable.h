@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    AWL_DECLARE_MOVABLE_LINK(observer_link)
+    AWL_DECLARE_QUICK_LINK(observer_link)
 
     template <class IObserver>
     class Observer : public IObserver, public observer_link
