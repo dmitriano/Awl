@@ -5,12 +5,10 @@
 
 using namespace awl;
 
-void UpdateTask::release()
-{
-    if (m_h)
-    {
-        m_h.promise().m_owned = false;
-
-        m_h = nullptr;
-    }
-}
+//void UpdateTask::release()
+//{
+//    if (m_h)
+//    {
+//        m_h = nullptr;
+//    }
+//}

@@ -4,21 +4,18 @@
 #include <exception>
 #include <utility>
 
-#include "Awl/QuickLink.h"
-
-AWL_DECLARE_QUICK_LINK(ControllerLink);
+#include "Awl/Coro/TaskSink.h"
+#include "Awl/Observable.h"
 
 namespace awl
 {
     class UpdateTask;
 
-    struct UpdatePromise : ControllerLink
+    struct UpdatePromise : Observable<TaskSink>
     {
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
         std::coroutine_handle<> m_awaitingCoroutine;
-
-        bool m_owned = true;
 
         // UpdateTask is async result of our coroutine
         // it is created before execution of the coroutine body
@@ -71,10 +68,9 @@ namespace awl
 
                     auto coro = promise.m_awaitingCoroutine;
 
-                    if (!promise.m_owned)
-                    {
-                        h.destroy();
-                    }
+                    // The Promise is always owned by UpdateTask,
+                    // so we do not call h.destroy() here.
+                    promise.Notify(&TaskSink::OnFinished);
 
                     if (coro)
                     {

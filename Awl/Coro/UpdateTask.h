@@ -31,6 +31,8 @@ namespace awl
             return *this;
         }
 
+        bool operator == (const UpdateTask& other) const = default;
+
         ~UpdateTask()
         {
             free();
@@ -98,7 +100,7 @@ namespace awl
 
     private:
 
-        void release();
+        //void release();
 
         std::coroutine_handle<promise_type> m_h;
 
