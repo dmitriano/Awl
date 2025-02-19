@@ -35,9 +35,11 @@ UpdateTask Controller::wait_all()
 {
     while (!m_handlers.empty())
     {
-        co_await m_handlers.back().m_task;
+        UpdateTask task = std::move(m_handlers.back().m_task);
 
-        m_handlers.pop_back();
+        // The vector contains an empty task and
+        // and OnFinished() should delete it correctly.
+        co_await task;
     }
 }
 

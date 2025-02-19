@@ -99,7 +99,7 @@ AWL_TEST(CoroAsyncGeneratorOwned)
     AWL_ASSERT(task.done());
 }
 
-AWL_TEST(CoroAsyncGeneratorCancel)
+AWL_TEST(CoroControllerCancel)
 {
     awl::Controller controller;
 
@@ -119,7 +119,7 @@ AWL_TEST(CoroAsyncGeneratorCancel)
     awl::testing::timeQueue.clear();
 }
 
-AWL_TEST(CoroAsyncGeneratorRegistered)
+AWL_TEST(CoroControllerRegistered)
 {
     awl::Controller controller;
 
@@ -136,4 +136,43 @@ AWL_TEST(CoroAsyncGeneratorRegistered)
 
     // The task has removed itself automatically from the list.
     AWL_ASSERT_EQUAL(0, controller.task_count());
+}
+
+namespace
+{
+    awl::UpdateTask PrintFinished(const awl::testing::TestContext& context)
+    {
+        co_await 100ms;
+
+        context.out << "finished" << std::endl;
+    }
+}
+
+AWL_TEST(CoroControllerWaitAll)
+{
+    awl::Controller controller;
+
+    controller.register_task(PrintFinished(context));
+    controller.register_task(PrintFinished(context));
+    controller.register_task(PrintFinished(context));
+
+    AWL_ASSERT_EQUAL(3, controller.task_count());
+
+    awl::UpdateTask task = controller.wait_all();
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(2, controller.task_count());
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(1, controller.task_count());
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(0, controller.task_count());
+
+    AWL_ASSERT(awl::testing::timeQueue.empty());
+
+    AWL_ASSERT(task.done());
 }

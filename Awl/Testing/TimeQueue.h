@@ -52,6 +52,11 @@ namespace awl::testing
             }
         }
 
+        bool empty() const
+        {
+            return m_tasks.empty();
+        }
+
         void clear()
         {
             while (!m_tasks.empty())
