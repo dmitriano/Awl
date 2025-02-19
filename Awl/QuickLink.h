@@ -12,7 +12,10 @@
 
 namespace awl
 {
-    //! Forward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
+    //! Forward link for doubly-linked list.
+    //! DLink template paramets makes it unique in the scope of parent class T.
+    //! We'll get "ambiguous conversions from 'Link *' to 'T *'" in basic_single_list
+    //! without DLink template parameter.
     template <class DLink>
     class forward_link : public base_single_link<forward_link<DLink>>
     {
