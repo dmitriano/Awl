@@ -494,7 +494,7 @@ AWL_TEST(List)
     TestLinkFunc<awl::quick_link>(context);
 }
 
-AWL_TEST(List_SingleList)
+AWL_TEST(List_SingleListPushPop)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -539,6 +539,25 @@ AWL_TEST(List_SingleList)
     AWL_ASSERT_EQUAL(list.size(), (size_t)0);
 
     delete first;
+}
+
+AWL_TEST(List_SingleListIncluded)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::single_list<SimpleElement> list;
+
+    SimpleElement a;
+
+    AWL_ASSERT(!a.included());
+
+    list.push_front(&a);
+
+    AWL_ASSERT(a.included());
+
+    list.pop_front();
+
+    AWL_ASSERT(!a.included());
 }
 
 AWL_TEST(List_FindIf)
