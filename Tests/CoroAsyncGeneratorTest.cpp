@@ -140,11 +140,11 @@ AWL_TEST(CoroControllerRegistered)
 
 namespace
 {
-    awl::UpdateTask PrintFinished(const awl::testing::TestContext& context)
+    awl::UpdateTask PrintFinished(const awl::testing::TestContext& context, int id)
     {
         co_await 100ms;
 
-        context.out << "finished" << std::endl;
+        context.out << "finished " << id << std::endl;
     }
 }
 
@@ -152,9 +152,9 @@ AWL_TEST(CoroControllerWaitAll)
 {
     awl::Controller controller;
 
-    controller.register_task(PrintFinished(context));
-    controller.register_task(PrintFinished(context));
-    controller.register_task(PrintFinished(context));
+    controller.register_task(PrintFinished(context, 1));
+    controller.register_task(PrintFinished(context, 2));
+    controller.register_task(PrintFinished(context, 3));
 
     AWL_ASSERT_EQUAL(3, controller.task_count());
 
