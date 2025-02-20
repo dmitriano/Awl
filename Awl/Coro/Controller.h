@@ -111,8 +111,6 @@ namespace awl
 
         void cancel();
 
-        UpdateTask wait_all_task();
-
         auto wait_all()
         {
             return AllAwaitable{ this };
@@ -124,6 +122,10 @@ namespace awl
         }
 
     private:
+
+        UpdateTask wait_all_task_experimental();
+
+        friend class ControllerTest;
 
         struct Handler : Observer<TaskSink>
         {

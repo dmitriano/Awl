@@ -38,7 +38,7 @@ void Controller::cancel()
     }
 }
 
-UpdateTask Controller::wait_all_task()
+UpdateTask Controller::wait_all_task_experimental()
 {
     while (!m_handlers.empty())
     {
@@ -46,6 +46,7 @@ UpdateTask Controller::wait_all_task()
 
         // The vector contains an empty task and
         // and OnFinished() should delete it correctly.
+        // BUG: This task is not cancelled by Controller::cancel().
         co_await task;
     }
 }
