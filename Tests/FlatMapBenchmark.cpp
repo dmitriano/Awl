@@ -26,15 +26,15 @@ namespace
     {
         AWL_ATTRIBUTE(size_t, key_range, 1000000);
         AWL_ATTRIBUTE(size_t, value_range, 1000000);
-        AWL_ATTRIBUTE(size_t, element_count, 1000);
-        AWL_ATTRIBUTE(size_t, iteration_count, 1);
+        AWL_ATTRIBUTE(size_t, element_count, 100);
+        AWL_ATTRIBUTE(size_t, iteration_count, 1000);
+
+        T container;
 
         awl::StopWatch w;
 
         for (size_t i = 0; i < iteration_count; ++i)
         {
-            T container;
-
             std::uniform_int_distribution<size_t> key_dist(0, key_range);
             std::uniform_int_distribution<size_t> value_dist(0, value_range);
 
@@ -46,6 +46,8 @@ namespace
                 //container.emplace(key, val);
                 container.insert(std::make_pair(key, val));
             }
+
+            container.clear();
         }
 
         helpers::ReportCount(context, w, element_count * iteration_count);
@@ -76,6 +78,11 @@ namespace
             return { m_v.insert(i, val), true };
         }
 
+        void clear()
+        {
+            m_v.clear();
+        }
+
         std::vector<value_type> m_v;
     };
 }
@@ -102,13 +109,14 @@ AWL_TEST(FlatMapOrder)
 
 AWL_BENCHMARK(FlatMapInsert)
 {
-    AWL_FLAG(flat);
+    AWL_ATTRIBUTE(bool, flat, true);
 
     Insert<std::map<size_t, size_t>>(context, _T("map"));
     Insert<std::unordered_map<size_t, size_t>>(context, _T("unordered_map"));
 
     if (flat)
     {
+        // std::vector with 100 elements is faster than std::map and std::unordered_map.
         Insert<flat_map>(context, _T("vector"));
     }
 }
