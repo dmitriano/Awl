@@ -13,6 +13,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
+#include "Awl/KeyCompare.h"
 
 #include "Helpers/BenchmarkHelpers.h"
 
@@ -25,8 +26,8 @@ namespace
     {
         AWL_ATTRIBUTE(size_t, key_range, 1000000);
         AWL_ATTRIBUTE(size_t, value_range, 1000000);
-        AWL_ATTRIBUTE(size_t, element_count, 100);
-        AWL_ATTRIBUTE(size_t, iteration_count, 10000);
+        AWL_ATTRIBUTE(size_t, element_count, 1000);
+        AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
         awl::StopWatch w;
 
@@ -58,49 +59,37 @@ namespace
 
         using value_type = std::pair<size_t, size_t>;
 
-        void insert(const value_type & val)
-        {
-            auto i = binary_find(m_v.begin(), m_v.end(), val,
-                [](const value_type & left, const value_type & right)
-            {
-                return left.first < right.first;
-            });
+        using key_compare = std::less<void>;
 
-            if (i != m_v.end())
+        using iterator = std::vector<value_type>::iterator;
+
+        std::pair<iterator, bool> insert(const value_type& val)
+        {
+            auto i = std::lower_bound(m_v.begin(), m_v.end(), val, 
+                awl::member_compare<&value_type::first, key_compare>{});
+
+            if (i != m_v.end() && i->first == val.first)
             {
-                ++i;
+                return { i, false };
             }
 
-            m_v.insert(i, val);
+            return { m_v.insert(i, val), true };
         }
 
         std::vector<value_type> m_v;
-
-    private:
-
-        template<class ForwardIt, class T, class Compare = std::less<>>
-        static ForwardIt binary_find(ForwardIt first, ForwardIt last, const T& value, Compare comp = {})
-        {
-            // Note: BOTH type T and the type after ForwardIt is dereferenced 
-            // must be implicitly convertible to BOTH Type1 and Type2, used in Compare. 
-            // This is stricter than lower_bound requirement (see above)
-
-            first = std::lower_bound(first, last, value, comp);
-            return first != last && !comp(value, *first) ? first : last;
-        }
     };
 }
 
-AWL_DISABLED_TEST(FlatMapOrder)
+AWL_TEST(FlatMapOrder)
 {
     static_cast<void>(context);
     
     flat_map m;
 
-    m.insert(std::make_pair(2, 4));
-    m.insert(std::make_pair(20, 1));
-    m.insert(std::make_pair(5, 3));
-    m.insert(std::make_pair(30, 0));
+    m.insert(std::make_pair(2, 0));
+    m.insert(std::make_pair(20, 3));
+    m.insert(std::make_pair(5, 1));
+    m.insert(std::make_pair(30, 4));
     m.insert(std::make_pair(10, 2));
 
     AWL_ASSERT_EQUAL(m.m_v.size(), static_cast<size_t>(5));
@@ -111,11 +100,17 @@ AWL_DISABLED_TEST(FlatMapOrder)
     }
 }
 
-AWL_BENCHMARK(FlatMap)
+AWL_BENCHMARK(FlatMapInsert)
 {
+    AWL_FLAG(flat);
+
     Insert<std::map<size_t, size_t>>(context, _T("map"));
     Insert<std::unordered_map<size_t, size_t>>(context, _T("unordered_map"));
-    //Insert<flat_map>(context, _T("vector"));
+
+    if (flat)
+    {
+        Insert<flat_map>(context, _T("vector"));
+    }
 }
 
 AWL_BENCHMARK(MemoryRead)
