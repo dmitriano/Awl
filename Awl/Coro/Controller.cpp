@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Awl/Coro/Controller.h"
 
 #include <cassert>

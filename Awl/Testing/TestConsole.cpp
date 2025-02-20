@@ -3,9 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "QtExtras/Json/JsonLoadSave.h"
-#include "QtExtras/StringConversion.h"
-
 #include "Awl/Testing/TestConsole.h"
 #include "Awl/Testing/TestRunner.h"
 #include "Awl/Testing/TestAssert.h"
@@ -16,6 +13,11 @@
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
+
+#ifdef AWL_QT
+    #include "QtExtras/Json/JsonLoadSave.h"
+    #include "QtExtras/StringConversion.h"
+#endif
 
 #include <set>
 #include <regex>

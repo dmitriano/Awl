@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Awl/Coro/UpdatePromise.h"
 #include "Awl/Coro/UpdateTask.h"
 

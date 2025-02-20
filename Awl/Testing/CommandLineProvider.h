@@ -7,6 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/StringFormat.h"
+#include "Awl/Exception.h"
 #include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/AttributeProvider.h"
 
@@ -20,7 +21,7 @@ namespace awl::testing
     using CmdChar = char;
 #else
     using CmdChar = Char;
-#endif;
+#endif
 
     using CmdString = std::basic_string<CmdChar>;
 

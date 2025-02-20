@@ -10,6 +10,7 @@
 #include "Awl/StaticSingleton.h"
 
 #include <ranges>
+#include <functional>
 
 namespace awl
 {

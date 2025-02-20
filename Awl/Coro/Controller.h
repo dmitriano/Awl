@@ -134,9 +134,9 @@ namespace awl
                 m_task(std::move(task))
             {}
 
-            UpdateTask m_task;
-
             Controller* pThis;
+
+            UpdateTask m_task;
 
             void OnFinished() override;
         };
