@@ -107,14 +107,14 @@ AWL_TEST(CoroControllerCancel)
 
     awl::testing::timeQueue.loop(3);
 
-    AWL_ASSERT_EQUAL(1, controller.task_count());
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
 
     context.out << std::endl;
 
     // This invalidates timeQueue.
     controller.cancel();
 
-    AWL_ASSERT_EQUAL(0, controller.task_count());
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
 
     awl::testing::timeQueue.clear();
 }
@@ -125,17 +125,17 @@ AWL_TEST(CoroControllerRegistered)
 
     controller.register_task(test(context));
 
-    AWL_ASSERT_EQUAL(1, controller.task_count());
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
 
     awl::testing::timeQueue.loop(3);
 
     // The task is still in the list.
-    AWL_ASSERT_EQUAL(1, controller.task_count());
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
 
     awl::testing::timeQueue.loop();
 
     // The task has removed itself automatically from the list.
-    AWL_ASSERT_EQUAL(0, controller.task_count());
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
 }
 
 namespace
@@ -182,7 +182,7 @@ namespace awl
 
             context.out << "wait_all() finished" << std::endl;
 
-            AWL_ASSERT_EQUAL(0, controller.task_count());
+            AWL_ASSERT_EQUAL(0u, controller.task_count());
         }
 
     private:
@@ -193,7 +193,7 @@ namespace awl
             controller.register_task(PrintFinished(context, 2));
             controller.register_task(PrintFinished(context, 3));
 
-            AWL_ASSERT_EQUAL(3, controller.task_count());
+            AWL_ASSERT_EQUAL(3u, controller.task_count());
         }
     };
 }
@@ -206,15 +206,15 @@ AWL_TEST(CoroControllerWaitAllTask)
 
     awl::testing::timeQueue.loop(1);
 
-    AWL_ASSERT_EQUAL(2, controller.task_count());
+    AWL_ASSERT_EQUAL(2u, controller.task_count());
 
     awl::testing::timeQueue.loop(1);
 
-    AWL_ASSERT_EQUAL(1, controller.task_count());
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
 
     awl::testing::timeQueue.loop(1);
 
-    AWL_ASSERT_EQUAL(0, controller.task_count());
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
 
     AWL_ASSERT(awl::testing::timeQueue.empty());
 
