@@ -1,0 +1,57 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+#pragma once
+
+#include "QtExtras/Json/JsonSerializer.h"
+
+#include "Awl/EnumTraits.h"
+
+namespace awl
+{
+    template <class T> requires std::is_enum_v<T>
+    class JsonSerializer<T>
+    {
+    private:
+
+        using U = std::underlying_type_t<T>;
+
+    public:
+
+        using value_type = T;
+
+        void FromJson(const QJsonValue& jv, value_type& val)
+        {
+            JsonSerializer<std::string> formatter;
+
+            std::string str_val;
+            formatter.FromJson(jv, str_val);
+
+            auto& names = awl::EnumTraits<T>::names();
+
+            const auto i = names.find(str_val);
+
+            if (i == names.end())
+            {
+                throw JsonException(awl::format() << _T("Wrong enum value '" << awl::FromAString(str_val) << "'."));
+            }
+
+            const size_t index = i - names.begin();
+
+            val = static_cast<T>(index);
+        }
+
+        void ToJson(const value_type & val, QJsonValue & jv)
+        {
+            JsonSerializer<std::string> formatter;
+
+            auto& names = awl::EnumTraits<T>::names();
+
+            const size_t index = static_cast<size_t>(val);
+
+            formatter.ToJson(names[index], jv);
+        }
+    };
+}

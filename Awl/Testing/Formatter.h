@@ -5,128 +5,127 @@
 
 #pragma once
 
+#ifdef AWL_QT
+    #include "QtExtras/StringConversion.h"
+#endif
+
 #include "Awl/Testing/ScalarFormatter.h"
-#include "Awl/Testing/TestTypeTraits.h"
-
 #include "Awl/TypeTraits.h"
+#include "Awl/Inserter.h"
 
-#include <iterator>
-
-namespace awl
+namespace awl::testing
 {
-    namespace testing
+    template <typename C, typename T>
+    class BasicFormatter : public std::false_type {};
+
+    template <typename C, typename T> requires std::is_arithmetic_v<T>
+    class BasicFormatter<C, T> : public std::true_type
     {
-        template <typename C, typename T, typename Enable = void>
-        class BasicFormatter;
+    public:
 
-        template <typename C, typename T>
-        class BasicFormatter<C, T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
+        using String = std::basic_string<C>;
+
+        static String ToString(T val)
         {
-        public:
+            return BasicScalarFormatter<C>::ToString(val);
+        }
 
-            using String = std::basic_string<C>;
-
-            static String ToString(T val)
-            {
-                return BasicScalarFormatter<C>::ToString(val);
-            }
-
-            static T FromString(const String & s)
-            {
-                T val;
-
-                BasicScalarFormatter<C>::FromString(s, val);
-
-                return val;
-            }
-        };
-
-        template <typename C, typename T>
-        class BasicFormatter<C, T, std::enable_if_t<is_specialization_v<T, std::basic_string>>>
+        static T FromString(const String& s)
         {
-        public:
+            T val;
 
-            using String = std::basic_string<C>;
+            BasicScalarFormatter<C>::FromString(s, val);
 
-            static String ToString(T val)
+            return val;
+        }
+    };
+
+    template <typename C, typename T> requires is_specialization_v<T, std::basic_string>
+    class BasicFormatter<C, T> : public std::true_type
+    {
+    public:
+
+        using String = std::basic_string<C>;
+
+        static String ToString(T val)
+        {
+            return StringConvertor<typename String::value_type>::ConvertFrom(val.c_str());
+        }
+
+        static T FromString(String s)
+        {
+            return StringConvertor<typename T::value_type>::ConvertFrom(s.c_str());
+        }
+    };
+
+    template <typename C, typename T> requires inserter_defined<T> &&
+        (std::is_arithmetic<typename T::value_type>::value || is_string<typename T::value_type>)
+        class BasicFormatter<C, T> : public std::true_type
+    {
+    public:
+
+        using String = std::basic_string<C>;
+
+        static String ToString(const T& val)
+        {
+            constexpr C separator = '\x20';
+
+            std::basic_ostringstream<C> out;
+
+            //This adds an extra separator at the end of the stream.
+            //std::copy(val.begin(), val.end(), std::ostream_iterator<typename T::value_type, C>(out, GetSeparator<C>()));
+
+            bool first = true;
+
+            for (const auto& e : val)
             {
-                if constexpr (std::is_same_v<typename T::value_type, C>)
+                if (first)
                 {
-                    return val;
-                }
-                else if constexpr (std::is_same_v<typename T::value_type, char>)
-                {
-                    return FromAString(val);
+                    first = false;
                 }
                 else
                 {
-                    static_assert(dependent_false_v<T>, "Unknown char type");
+                    out << separator;
                 }
+
+                out << e;
             }
 
-            static T FromString(String s)
-            {
-                if constexpr (std::is_same_v<typename T::value_type, C>)
-                {
-                    return s;
-                }
-                else if constexpr (std::is_same_v<typename T::value_type, char>)
-                {
-                    return ToAString(s);
-                }
-                else
-                {
-                    static_assert(dependent_false_v<T>, "Unknown char type");
-                }
-            }
-        };
+            return out.str();
+        }
 
-        template <typename C, typename T>
-        class BasicFormatter<C, T, typename std::enable_if<is_collection<T>::value &&
-            (std::is_arithmetic<typename T::value_type>::value || is_string<C, typename T::value_type>::value)>::type>
+        static T FromString(const String& s)
         {
-        public:
+            std::basic_istringstream<C> in(s);
 
-            using String = std::basic_string<C>;
+            T val{ std::istream_iterator<typename T::value_type, C>(in), std::istream_iterator<typename T::value_type, C>() };
 
-            static String ToString(const T & val)
-            {
-                constexpr C separator = '\x20';
+            return val;
+        }
+    };
 
-                std::basic_ostringstream<C> out;
+#ifdef AWL_QT
 
-                //This adds an extra separator at the end of the stream.
-                //std::copy(val.begin(), val.end(), std::ostream_iterator<typename T::value_type, C>(out, GetSeparator<C>()));
+    template <typename C>
+    class BasicFormatter<C, QString> : public std::true_type
+    {
+    public:
 
-                bool first = true;
+        using String = std::basic_string<C>;
 
-                for (const auto& e : val)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        out << separator;
-                    }
+        static String ToString(QString val)
+        {
+            return FromQString<typename String::value_type>(val);
+        }
 
-                    out << e;
-                }
+        static QString FromString(String s)
+        {
+            return ToQString(s);
+        }
+    };
 
-                return out.str();
-            }
+#endif
 
-            static T FromString(const String & s)
-            {
-                std::basic_istringstream<C> in(s);
-
-                T val{ std::istream_iterator<typename T::value_type, C>(in), std::istream_iterator<typename T::value_type, C>() };
-
-                return val;
-            }
-        };
-
-        template<class T> using Formatter = BasicFormatter<Char, T>;
-    }
+    template <class T>
+    using Formatter = BasicFormatter<Char, T>;
 }

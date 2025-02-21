@@ -63,41 +63,41 @@ namespace awl::testing
     };
 }
 
-#define AWT_STRINGIFY(x) #x
-#define AWT_TOSTRING(x) AWT_STRINGIFY(x)
-#define AWT_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWT_TOSTRING(__LINE__))
+#define AWL_STRINGIFY(x) #x
+#define AWL_TOSTRING(x) AWL_STRINGIFY(x)
+#define AWL_SRC_INFO _T(" ") __FILE__ _T(":") _T(AWL_TOSTRING(__LINE__))
 
-#define AWT_FAIL awl::testing::Assert::Fail(AWT_SRC_INFO)
-#define AWT_FAILM(message) awl::testing::Assert::Fail(_T(#message) AWT_SRC_INFO)
+#define AWL_FAIL awl::testing::Assert::Fail(AWL_SRC_INFO)
+#define AWL_FAILM(message) awl::testing::Assert::Fail(_T(#message) AWL_SRC_INFO)
 
-#ifndef AWT_NO_ASSERTS
+#ifndef AWL_NO_ASSERTS
 
-#define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
-#define AWT_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+#define AWL_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWL_SRC_INFO)
+#define AWL_ASSERTM(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWL_SRC_INFO)
 
-#define AWT_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWT_SRC_INFO)
-#define AWT_ASSERTM_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWT_SRC_INFO)
+#define AWL_ASSERT(cond) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") AWL_SRC_INFO)
+#define AWL_ASSERTM_TRUE(cond, message) awl::testing::Assert::IsTrue(cond, _T(#cond) _T(" ") message AWL_SRC_INFO)
 
-#define AWT_ASSERT_FALSE(cond) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" is not false. ") AWT_SRC_INFO)
-#define AWT_ASSERTM_FALSE(cond, message) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" is not false. ") message AWT_SRC_INFO)
+#define AWL_ASSERT_FALSE(cond) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" is not false. ") AWL_SRC_INFO)
+#define AWL_ASSERTM_FALSE(cond, message) awl::testing::Assert::IsFalse(cond, _T(#cond) _T(" is not false. ") message AWL_SRC_INFO)
 
-#define AWT_ASSERT_EQUAL(expected, actual) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWT_SRC_INFO)
-#define AWT_ASSERTM_EQUAL(expected, actual, message) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWT_SRC_INFO)
+#define AWL_ASSERT_EQUAL(expected, actual) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) AWL_SRC_INFO)
+#define AWL_ASSERTM_EQUAL(expected, actual, message) awl::testing::Assert::AreEqual(expected, actual, _T(#actual) _T(" != ") _T(#expected) _T(" ") message AWL_SRC_INFO)
 
 #else
 
-#define AWT_FAKE_ASSERT ((void)0)
+#define AWL_FAKE_ASSERT ((void)0)
 
-#define AWT_ASSERT(cond) AWT_FAKE_ASSERT
-#define AWT_ASSERTM(cond, message) AWT_FAKE_ASSERT
+#define AWL_ASSERT(cond) AWL_FAKE_ASSERT
+#define AWL_ASSERTM(cond, message) AWL_FAKE_ASSERT
 
-#define AWT_ASSERT(cond) AWT_FAKE_ASSERT
-#define AWT_ASSERTM_TRUE(cond, message) AWT_FAKE_ASSERT
+#define AWL_ASSERT(cond) AWL_FAKE_ASSERT
+#define AWL_ASSERTM_TRUE(cond, message) AWL_FAKE_ASSERT
 
-#define AWT_ASSERT_FALSE(cond) AWT_FAKE_ASSERT
-#define AWT_ASSERTM_FALSE(cond, message) AWT_FAKE_ASSERT
+#define AWL_ASSERT_FALSE(cond) AWL_FAKE_ASSERT
+#define AWL_ASSERTM_FALSE(cond, message) AWL_FAKE_ASSERT
 
-#define AWT_ASSERT_EQUAL(expected, actual) AWT_FAKE_ASSERT
-#define AWT_ASSERTM_EQUAL(expected, actual, message) AWT_FAKE_ASSERT
+#define AWL_ASSERT_EQUAL(expected, actual) AWL_FAKE_ASSERT
+#define AWL_ASSERTM_EQUAL(expected, actual, message) AWL_FAKE_ASSERT
 
 #endif

@@ -117,7 +117,7 @@ namespace
     }
 }
 
-AWT_TEST(IoStdReadWrite)
+AWL_TEST(IoStdReadWrite)
 {
     {
         std::hash<int> hasher;
@@ -196,13 +196,13 @@ AWT_TEST(IoStdReadWrite)
     helpers::TestReadWrite(context, TestEnum::B);
 }
 
-AWT_TEST(IoObjectReadWrite)
+AWL_TEST(IoObjectReadWrite)
 {
     {
         A a1{ 5, 7.0 };
         A a2{ 5, 8.0 };
 
-        AWT_ASSERT(a1 < a2);
+        AWL_ASSERT(a1 < a2);
     }
     
     {
@@ -214,7 +214,7 @@ AWT_TEST(IoObjectReadWrite)
 
         ++std::get<0>(a_ref);
 
-        AWT_ASSERT(a.x == a_saved.x + 1);
+        AWL_ASSERT(a.x == a_saved.x + 1);
 
         helpers::TestReadWrite(context, a);
         helpers::TestReadWrite(context, std::vector<A>{a, a, a});
@@ -235,7 +235,7 @@ AWT_TEST(IoObjectReadWrite)
     }
 }
 
-AWT_TEST(IoVariantReadWrite)
+AWL_TEST(IoVariantReadWrite)
 {
     using V = std::variant<A, B, int>;
 
@@ -247,7 +247,7 @@ AWT_TEST(IoVariantReadWrite)
 template <class T>
 static void TestVector(const TestContext & context, std::vector<T> sample)
 {
-    AWT_ATTRIBUTE(size_t, iteration_count, 10);
+    AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
     std::vector<uint8_t> v;
 
@@ -268,13 +268,13 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 
         ReadVector(in, result);
 
-        AWT_ASSERT(sample == result);
+        AWL_ASSERT(sample == result);
     }
 
-    AWT_ASSERT(in.End());
+    AWL_ASSERT(in.End());
 }
 
-AWT_TEST(IoVectorReadWrite)
+AWL_TEST(IoVectorReadWrite)
 {
     TestVector(context, std::vector<int>{0, 1, 2, 3, 4, 5});
     TestVector(context, std::vector<double>{0.0, 1.0, 2.0, 3.0, 4.0, 5.0});

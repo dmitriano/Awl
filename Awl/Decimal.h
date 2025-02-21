@@ -489,7 +489,7 @@ namespace awl
 
                     if (denom > max_diff)
                     {
-                        throw std::logic_error("Decimal overflow.");
+                        throw std::runtime_error("Decimal overflow.");
                     }
 
                     m_data.set_man(m_data.man() * denom);
@@ -509,7 +509,7 @@ namespace awl
 
                 if (check && m_data.man() % denom != 0)
                 {
-                    throw std::logic_error("Decimal is losing precision.");
+                    throw std::runtime_error("Decimal is losing precision.");
                 }
 
                 m_data.set_man(m_data.man() / denom);
@@ -644,14 +644,14 @@ namespace awl
                 return static_cast<uint8_t>(symbol - '0');
             }
 
-            throw std::logic_error("Not a valid decimal string.");
+            throw std::runtime_error("Not a valid decimal string.");
         }
 
         static constexpr void check_exp(uint8_t digits)
         {
             if (digits > max_exponent())
             {
-                throw std::logic_error("Too many digits in a decimal.");
+                throw std::runtime_error("Too many digits in a decimal.");
             }
         }
 
@@ -703,7 +703,7 @@ namespace awl
 
         if (fractional_i != fractional_text.end())
         {
-            throw std::logic_error("Some characters left at the end of a decimal string.");
+            throw std::runtime_error("Some characters left at the end of a decimal string.");
         }
 
         check_exp(digits);
@@ -712,14 +712,14 @@ namespace awl
 
         if (int_part > max_mantissa() / denom)
         {
-            throw std::logic_error("Too long decimal string.");
+            throw std::runtime_error("Too long decimal string.");
         }
         
         int_part *= denom;
 
         if (fractional_part > max_mantissa() - int_part)
         {
-            throw std::logic_error("Too long decimal string.");
+            throw std::runtime_error("Too long decimal string.");
         }
 
         decimal result;
@@ -779,7 +779,7 @@ namespace awl
             //It does not make a sense to parse a string longer than the mantissa.
             if (val > max_mantissa())
             {
-                throw std::logic_error("A decimal string is too long.");
+                throw std::runtime_error("A decimal string is too long.");
             }
 
             ++digit_count;

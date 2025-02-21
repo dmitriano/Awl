@@ -32,7 +32,7 @@ namespace awl
 
         using reference = value_type &;
 
-        double_iterator() : m_p(nullptr) {}
+        double_iterator() : double_iterator(nullptr) {}
         
         double_iterator(DLink * p) : m_p(p) {}
 

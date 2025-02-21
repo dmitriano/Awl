@@ -213,7 +213,7 @@ namespace
 //TestNestedTask finished.
 //UpdateTask destructor.
 //UpdateTask destructor.
-AWT_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
+AWL_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
 {
     auto task = TestNestedTask(context);
 

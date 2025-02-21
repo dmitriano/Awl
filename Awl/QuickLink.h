@@ -8,10 +8,14 @@
 #include <cassert>
 
 #include "Awl/SingleLink.h"
+#include "Awl/SingleList.h"
 
 namespace awl
 {
-    //! Forward link for doubly-linked list. DLink template paramets makes it unique in the scope of parent class T.
+    //! Forward link for doubly-linked list.
+    //! DLink template paramets makes it unique in the scope of parent class T.
+    //! We'll get "ambiguous conversions from 'Link *' to 'T *'" in basic_single_list
+    //! without DLink template parameter.
     template <class DLink>
     class forward_link : public base_single_link<forward_link<DLink>>
     {
@@ -76,6 +80,33 @@ namespace awl
         using ForwardList = single_list<DLink, ForwardLink>;
         using BackwardList = single_list<DLink, BackwardLink>;
 
+        basic_quick_link(basic_quick_link* next, basic_quick_link* prev) :
+            ForwardLink(next),
+            BackwardLink(prev)
+        {
+        }
+
+        basic_quick_link(const basic_quick_link& other) = delete;
+
+        basic_quick_link& operator = (const basic_quick_link& other) = delete;
+
+        basic_quick_link(basic_quick_link&& other) noexcept
+        {
+            reinsert(std::move(other));
+        }
+
+        basic_quick_link& operator = (basic_quick_link&& other) noexcept
+        {
+            safe_exclude();
+            reinsert(std::move(other));
+            return *this;
+        }
+
+        ~basic_quick_link()
+        {
+            safe_exclude();
+        }
+
         bool included() const
         {
             assert(ForwardLink::included() == BackwardLink::included());
@@ -99,9 +130,19 @@ namespace awl
             }
         }
 
+        const DLink* predecessor() const
+        {
+            return static_cast<DLink*>(this->BackwardLink::next());
+        }
+
         DLink * predecessor()
         {
             return static_cast<DLink *>(this->BackwardLink::next());
+        }
+
+        const DLink* successor() const
+        {
+            return static_cast<DLink*>(this->ForwardLink::next());
         }
 
         DLink * successor()
@@ -132,10 +173,17 @@ namespace awl
         //! There should not be template parameter defaults in forward declaration.
         template <class T1, class DLink1> friend class quick_list;
 
-    public:
+    private:
 
-        basic_quick_link(basic_quick_link * next, basic_quick_link * prev) : ForwardLink(next), BackwardLink(prev)
+        //Reinserts the copy into the list :)
+        void reinsert(basic_quick_link&& other)
         {
+            if (other.included())
+            {
+                DLink* prev = other.predecessor();
+                other.exclude();
+                prev->insert_after(static_cast<DLink*>(this));
+            }
         }
     };
 
@@ -152,45 +200,6 @@ namespace awl
 
         template <class T1, class DLink1> friend class quick_list;
     };
-
-    template <class DLink>
-    class basic_movable_link : public basic_quick_link<DLink>
-    {
-    private:
-
-        using Base = basic_quick_link<DLink>;
-
-    public:
-
-        using Base::Base;
-
-        basic_movable_link(basic_movable_link&& other)
-        {
-            reinsert(std::move(other));
-        }
-
-        basic_movable_link& operator = (basic_movable_link&& other)
-        {
-            Base::safe_exclude();
-            reinsert(std::move(other));
-            return *this;
-        }
-
-    private:
-
-        //Reinserts the copy into the list :)
-        void reinsert(basic_movable_link&& other)
-        {
-            if (other.included())
-            {
-                DLink* prev = other.predecessor();
-                other.exclude();
-                prev->insert_after(static_cast<DLink*>(this));
-            }
-        }
-
-        template <class T1, class DLink1> friend class quick_list;
-    };
 }
 
 #define AWL_DECLARE_QUICK_LINK(name) \
@@ -198,15 +207,6 @@ namespace awl
     { \
     private: \
         using Base = basic_quick_link<name>; \
-    public:\
-        using Base::Base; \
-    };
-
-#define AWL_DECLARE_MOVABLE_LINK(name) \
-    class name : public awl::basic_movable_link<name> \
-    { \
-    private: \
-        using Base = basic_movable_link<name>; \
     public:\
         using Base::Base; \
     };

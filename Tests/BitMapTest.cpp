@@ -27,68 +27,68 @@ namespace BitMapTest
     const std::vector<std::string> expected_names{ "Car", "Train", "AirPlain" };
 }
 
-AWT_TEST(BitMapWithEnumTraits)
+AWL_TEST(BitMapWithEnumTraits)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
     
     using namespace BitMapTest;
 
-    AWT_ASSERT(std::ranges::equal(awl::EnumTraits<Vehicle>::names(), expected_names));
+    AWL_ASSERT(std::ranges::equal(awl::EnumTraits<Vehicle>::names(), expected_names));
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 
-    AWT_ASSERT(car.count() == 1);
+    AWL_ASSERT(car.count() == 1);
     static_assert(car.size() == 3);
 
-    AWT_ASSERT(car);
+    AWL_ASSERT(car);
     
     static_assert(car[Vehicle::Car]);
-    AWT_ASSERT(car & Vehicle::Car);
-    AWT_ASSERT(car | Vehicle::Car);
-    AWT_ASSERT_FALSE(car ^ Vehicle::Car);
+    AWL_ASSERT(car & Vehicle::Car);
+    AWL_ASSERT(car | Vehicle::Car);
+    AWL_ASSERT_FALSE(car ^ Vehicle::Car);
 
     static_assert(!car[Vehicle::Train]);
-    AWT_ASSERT_FALSE(car & Vehicle::Train);
-    AWT_ASSERT_FALSE(car & Vehicle::Train);
-    AWT_ASSERT(car | Vehicle::Train);
-    AWT_ASSERT((car ^ Vehicle::Train) & Vehicle::Car);
+    AWL_ASSERT_FALSE(car & Vehicle::Train);
+    AWL_ASSERT_FALSE(car & Vehicle::Train);
+    AWL_ASSERT(car | Vehicle::Train);
+    AWL_ASSERT((car ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> other = ~car;
 
-    AWT_ASSERT_FALSE(other[Vehicle::Car]);
-    AWT_ASSERT_FALSE(other & Vehicle::Car);
-    AWT_ASSERT(other | Vehicle::Car);
-    AWT_ASSERT(other ^ Vehicle::Car);
+    AWL_ASSERT_FALSE(other[Vehicle::Car]);
+    AWL_ASSERT_FALSE(other & Vehicle::Car);
+    AWL_ASSERT(other | Vehicle::Car);
+    AWL_ASSERT(other ^ Vehicle::Car);
 
-    AWT_ASSERT(other[Vehicle::Train] && other[Vehicle::AirPlain]);
-    AWT_ASSERT((other & Vehicle::Train) && (other & Vehicle::AirPlain));
-    AWT_ASSERT_FALSE(other & Vehicle::Car);
-    AWT_ASSERT(other | Vehicle::Car);
-    AWT_ASSERT_FALSE((other ^ Vehicle::Train) & Vehicle::Car);
+    AWL_ASSERT(other[Vehicle::Train] && other[Vehicle::AirPlain]);
+    AWL_ASSERT((other & Vehicle::Train) && (other & Vehicle::AirPlain));
+    AWL_ASSERT_FALSE(other & Vehicle::Car);
+    AWL_ASSERT(other | Vehicle::Car);
+    AWL_ASSERT_FALSE((other ^ Vehicle::Train) & Vehicle::Car);
 
     const awl::bitmap<Vehicle> all = car | other;
-    AWT_ASSERT(all.all());
-    AWT_ASSERT(all == (car ^ other));
-    AWT_ASSERT_FALSE(car & other);
+    AWL_ASSERT(all.all());
+    AWL_ASSERT(all == (car ^ other));
+    AWL_ASSERT_FALSE(car & other);
 
     const awl::bitmap<Vehicle> none = ~all;
-    AWT_ASSERT(none.none());
-    AWT_ASSERT_FALSE(none);
+    AWL_ASSERT(none.none());
+    AWL_ASSERT_FALSE(none);
 
-    AWT_ASSERT(all == ~none);
+    AWL_ASSERT(all == ~none);
 
     awl::bitmap<Vehicle> var;
-    AWT_ASSERT_FALSE(var);
+    AWL_ASSERT_FALSE(var);
     var[Vehicle::Car] = true;
-    AWT_ASSERT(var[Vehicle::Car]);
-    AWT_ASSERT_FALSE(var[Vehicle::Train]);
-    AWT_ASSERT_FALSE(var[Vehicle::AirPlain]);
-    AWT_ASSERT(var == car);
-    AWT_ASSERT(var != other);
+    AWL_ASSERT(var[Vehicle::Car]);
+    AWL_ASSERT_FALSE(var[Vehicle::Train]);
+    AWL_ASSERT_FALSE(var[Vehicle::AirPlain]);
+    AWL_ASSERT(var == car);
+    AWL_ASSERT(var != other);
 
     //There is no operator == (bool), but this compiles.
-    AWT_ASSERT(var == true);
-    AWT_ASSERT(none == false);
+    AWL_ASSERT(var == true);
+    AWL_ASSERT(none == false);
 }
 
 namespace BitMapTest1
@@ -111,8 +111,8 @@ namespace BitMapTest1
 
         static void Test()
         {
-            AWT_ASSERT(GameLevel1BitMap{}.none());
-            AWT_ASSERT((GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all()));
+            AWL_ASSERT(GameLevel1BitMap{}.none());
+            AWL_ASSERT((GameLevel1BitMap{ GameLevel1::Baby, GameLevel1::Starter, GameLevel1::Professional, GameLevel1::Expert }.all()));
         }
 
         //error: Cannot specialize template in current scope.
@@ -122,22 +122,22 @@ namespace BitMapTest1
 
 AWL_ENUM_TRAITS(BitMapTest1::A, GameLevel)
 
-AWT_TEST(BitMapEnclosed)
+AWL_TEST(BitMapEnclosed)
 {
     using namespace BitMapTest1;
 
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     A::Test();
 
-    AWT_ASSERT(A({ }).m_bm.none());
-    AWT_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
+    AWL_ASSERT(A({ }).m_bm.none());
+    AWL_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
 
     using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
-    AWT_ASSERT(GameLevelBitMap2{ }.none());
-    AWT_ASSERT((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
+    AWL_ASSERT(GameLevelBitMap2{ }.none());
+    AWL_ASSERT((GameLevelBitMap2{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 
     using GameLevelBitMap3 = awl::bitmap<A::GameLevel>;
-    AWT_ASSERT(GameLevelBitMap3{ }.none());
-    AWT_ASSERT((GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
+    AWL_ASSERT(GameLevelBitMap3{ }.none());
+    AWL_ASSERT((GameLevelBitMap3{ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }.all()));
 }

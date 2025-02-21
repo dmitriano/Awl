@@ -42,9 +42,9 @@ namespace
     };
 }
 
-AWT_TEST(ObservableSetAssignment)
+AWL_TEST(ObservableSetAssignment)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Compare = awl::member_compare<&A::key>;
     using Set = awl::observable_set<A, Compare>;

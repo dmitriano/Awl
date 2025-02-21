@@ -26,7 +26,7 @@ namespace
     }
 }
 
-AWT_TEST(NativeStream)
+AWL_TEST(NativeStream)
 {
     auto guard = awl::make_scope_guard(RemoveFile);
 
@@ -35,64 +35,64 @@ AWT_TEST(NativeStream)
     {
         awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
 
-        AWT_ASSERT(s.GetLength() == 0);
-        AWT_ASSERT(s.GetPosition() == 0);
-        AWT_ASSERT(s.End());
+        AWL_ASSERT(s.GetLength() == 0);
+        AWL_ASSERT(s.GetPosition() == 0);
+        AWL_ASSERT(s.End());
 
         s.Write(sample.data(), sample.size());
 
-        AWT_ASSERT(s.GetLength() == sample.size());
+        AWL_ASSERT(s.GetLength() == sample.size());
 
-        AWT_ASSERT(s.End());
+        AWL_ASSERT(s.End());
     }
 
     {
         awl::io::UniqueStream in(awl::io::OpenUniqueFile(file_name));
 
-        AWT_ASSERT(in.GetLength() == sample.size());
-        AWT_ASSERT(in.GetPosition() == 0);
+        AWL_ASSERT(in.GetLength() == sample.size());
+        AWL_ASSERT(in.GetPosition() == 0);
 
         std::vector<uint8_t> actual(sample.size());
 
-        AWT_ASSERT(in.Read(actual.data(), sample.size()) == sample.size());
+        AWL_ASSERT(in.Read(actual.data(), sample.size()) == sample.size());
 
-        AWT_ASSERT(in.GetLength() == sample.size());
-        AWT_ASSERT(in.GetPosition() == sample.size());
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.GetLength() == sample.size());
+        AWL_ASSERT(in.GetPosition() == sample.size());
+        AWL_ASSERT(in.End());
 
-        AWT_ASSERT(actual == sample);
+        AWL_ASSERT(actual == sample);
     }
 
     {
         awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
 
-        AWT_ASSERT(s.GetLength() == sample.size());
-        AWT_ASSERT(s.GetPosition() == 0);
+        AWL_ASSERT(s.GetLength() == sample.size());
+        AWL_ASSERT(s.GetPosition() == 0);
 
-        AWT_ATTRIBUTE(std::size_t, pos, 3);
+        AWL_ATTRIBUTE(std::size_t, pos, 3);
 
         s.Seek(pos);
-        AWT_ASSERT(s.GetPosition() == pos);
+        AWL_ASSERT(s.GetPosition() == pos);
         s.Truncate();
-        AWT_ASSERT_EQUAL(pos, s.GetPosition());
-        AWT_ASSERT_EQUAL(pos, s.GetLength());
-        AWT_ASSERT(s.End());
+        AWL_ASSERT_EQUAL(pos, s.GetPosition());
+        AWL_ASSERT_EQUAL(pos, s.GetLength());
+        AWL_ASSERT(s.End());
 
         s.Seek(0);
 
         std::vector<uint8_t> actual(pos);
 
-        AWT_ASSERT(s.Read(actual.data(), actual.size()) == actual.size());
+        AWL_ASSERT(s.Read(actual.data(), actual.size()) == actual.size());
 
-        AWT_ASSERT(s.GetLength() == actual.size());
-        AWT_ASSERT(s.GetPosition() == actual.size());
-        AWT_ASSERT(s.End());
+        AWL_ASSERT(s.GetLength() == actual.size());
+        AWL_ASSERT(s.GetPosition() == actual.size());
+        AWL_ASSERT(s.End());
 
-        AWT_ASSERT(std::ranges::equal(sample | std::ranges::views::take(pos), actual));
+        AWL_ASSERT(std::ranges::equal(sample | std::ranges::views::take(pos), actual));
     }
 }
 
-AWT_TEST(NativeStreamFileName)
+AWL_TEST(NativeStreamFileName)
 {
     auto guard = awl::make_scope_guard(RemoveFile);
 

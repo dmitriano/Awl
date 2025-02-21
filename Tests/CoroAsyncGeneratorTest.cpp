@@ -6,6 +6,7 @@
 #include "Awl/Separator.h"
 #include "Awl/Coro/UpdateTask.h"
 #include "Awl/Coro/ProcessTask.h"
+#include "Awl/Coro/Controller.h"
 #include "Awl/Coro/AsyncGenerator.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -70,7 +71,7 @@ namespace
         {
             co_await print(context, 10);
 
-            AWT_FAILM(_T("AsyncGenerator did not throw."));
+            AWL_FAILM(_T("AsyncGenerator did not throw."));
         }
         catch (const std::exception& ex)
         {
@@ -78,14 +79,188 @@ namespace
         }
         catch (...)
         {
-            AWT_FAILM(_T("AsyncGenerator thrown a wrong exception."));
+            AWL_FAILM(_T("AsyncGenerator thrown a wrong exception."));
         }
     }
 }
 
-AWT_TEST(CoroAsyncGenerator)
+AWL_TEST(CoroAsyncGeneratorOwned)
 {
     awl::UpdateTask task = test(context);
 
+    AWL_ASSERT(!task.done());
+
+    awl::testing::timeQueue.loop(3);
+
+    AWL_ASSERT(!task.done());
+
     awl::testing::timeQueue.loop();
+
+    AWL_ASSERT(task.done());
+}
+
+AWL_TEST(CoroControllerCancel)
+{
+    awl::Controller controller;
+
+    controller.register_task(test(context));
+
+    awl::testing::timeQueue.loop(3);
+
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
+
+    context.out << std::endl;
+
+    // This invalidates timeQueue.
+    controller.cancel();
+
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
+
+    awl::testing::timeQueue.clear();
+}
+
+AWL_TEST(CoroControllerRegistered)
+{
+    awl::Controller controller;
+
+    controller.register_task(test(context));
+
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
+
+    awl::testing::timeQueue.loop(3);
+
+    // The task is still in the list.
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
+
+    awl::testing::timeQueue.loop();
+
+    // The task has removed itself automatically from the list.
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
+}
+
+namespace
+{
+    awl::UpdateTask PrintFinished(const awl::testing::TestContext& context, int id)
+    {
+        co_await 100ms;
+
+        context.out << id << " finished" << std::endl;
+    }
+}
+
+namespace awl
+{
+    class ControllerTest
+    {
+    public:
+
+        static awl::UpdateTask TestWaitAllTask(const awl::testing::TestContext& context, awl::Controller& controller)
+        {
+            RegisterTasks(context, controller);
+
+            co_await controller.wait_all_task_experimental();
+        }
+
+        static awl::UpdateTask TestWait(const awl::testing::TestContext& context, awl::Controller& controller, bool all_task = false, std::size_t actual_N = 2)
+        {
+            RegisterTasks(context, controller);
+
+            co_await controller.wait_any();
+
+            context.out << "wait_any() finished" << std::endl;
+
+            AWL_ASSERT_EQUAL(actual_N, controller.task_count());
+
+            if (all_task)
+            {
+                co_await controller.wait_all_task_experimental();
+            }
+            else
+            {
+                co_await controller.wait_all();
+            }
+
+            context.out << "wait_all() finished" << std::endl;
+
+            AWL_ASSERT_EQUAL(0u, controller.task_count());
+        }
+
+    private:
+
+        static void RegisterTasks(const awl::testing::TestContext& context, awl::Controller& controller)
+        {
+            controller.register_task(PrintFinished(context, 1));
+            controller.register_task(PrintFinished(context, 2));
+            controller.register_task(PrintFinished(context, 3));
+
+            AWL_ASSERT_EQUAL(3u, controller.task_count());
+        }
+    };
+}
+
+AWL_TEST(CoroControllerWaitAllTask)
+{
+    awl::Controller controller;
+
+    awl::UpdateTask task = awl::ControllerTest::TestWaitAllTask(context, controller);
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(2u, controller.task_count());
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(1u, controller.task_count());
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT_EQUAL(0u, controller.task_count());
+
+    AWL_ASSERT(awl::testing::timeQueue.empty());
+
+    AWL_ASSERT(task.done());
+}
+
+AWL_TEST(CoroControllerWait)
+{
+    awl::Controller controller;
+
+    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller);
+
+    awl::testing::timeQueue.loop();
+
+    AWL_ASSERT(task.done());
+}
+
+AWL_TEST(CoroControllerCancelWait1)
+{
+    AWL_FLAG(all_task);
+
+    awl::Controller controller;
+
+    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task, 0);
+
+    controller.cancel();
+
+    AWL_ASSERT(task.done());
+
+    awl::testing::timeQueue.clear();
+}
+
+// Fails with all_task=true
+AWL_TEST(CoroControllerCancelWait2)
+{
+    AWL_FLAG(all_task);
+
+    awl::Controller controller;
+
+    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task);
+
+    awl::testing::timeQueue.loop(1);
+
+    controller.cancel();
+
+    AWL_ASSERT(task.done());
+
+    awl::testing::timeQueue.clear();
 }

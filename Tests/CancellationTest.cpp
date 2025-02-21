@@ -13,9 +13,9 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Time.h"
 
-AWT_TEST(Cancellation_NegativeTimeDiff)
+AWL_TEST(Cancellation_NegativeTimeDiff)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
     
     auto start = std::chrono::steady_clock::now();
 
@@ -23,12 +23,12 @@ AWT_TEST(Cancellation_NegativeTimeDiff)
 
     auto stop = std::chrono::steady_clock::now();
 
-    AWT_ASSERT(stop > start);
+    AWL_ASSERT(stop > start);
 
     auto diff = start - stop;
 
-    AWT_ASSERT(diff < std::chrono::milliseconds(0));
-    AWT_ASSERT(diff.count() < 0);
+    AWL_ASSERT(diff < std::chrono::milliseconds(0));
+    AWL_ASSERT(diff.count() < 0);
 }
 
 static constexpr int default_client_sleep_time = 100;
@@ -37,11 +37,11 @@ static constexpr int default_worker_sleep_time = 1000;
 using Duration = std::chrono::milliseconds;
 
 //./AwlTest --filter Cancellation_InterruptibleSleep.* --output failed --loop 100 --thread_count 10
-AWT_TEST(Cancellation_InterruptibleSleep)
+AWL_TEST(Cancellation_InterruptibleSleep)
 {
-    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
-    AWT_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
-    AWT_ATTRIBUTE(size_t, thread_count, 3);
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWL_ATTRIBUTE(int, worker_sleep_time, default_worker_sleep_time);
+    AWL_ATTRIBUTE(size_t, thread_count, 3);
     
     std::mutex m;
 
@@ -126,10 +126,10 @@ AWT_TEST(Cancellation_InterruptibleSleep)
                 const auto elapsed = sw.GetElapsedCast<Duration>();
 
                 //This assert failed until I moved StopWatch to the main thread.
-                AWT_ASSERT(elapsed >= Duration(client_sleep_time));
+                AWL_ASSERT(elapsed >= Duration(client_sleep_time));
 
                 //Ctrl+Z on Linux causes this assertion to fail.
-                AWT_ASSERT(elapsed < Duration(worker_sleep_time));
+                AWL_ASSERT(elapsed < Duration(worker_sleep_time));
 
                 out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" succeeded."));
             }
@@ -169,9 +169,9 @@ AWT_TEST(Cancellation_InterruptibleSleep)
     }
 }
 
-AWT_TEST(Cancellation_SimpleSleep)
+AWL_TEST(Cancellation_SimpleSleep)
 {
-    AWT_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
+    AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);
 
     awl::StopWatch w;
 
@@ -179,10 +179,10 @@ AWT_TEST(Cancellation_SimpleSleep)
 
     const auto elapsed = w.GetElapsedCast<Duration>();
 
-    AWT_ASSERT(elapsed.count() >= client_sleep_time);
+    AWL_ASSERT(elapsed.count() >= client_sleep_time);
 }
 
-AWT_TEST(Cancellation_JThread)
+AWL_TEST(Cancellation_JThread)
 {
     using namespace std::chrono_literals;
 
@@ -229,13 +229,13 @@ AWT_TEST(Cancellation_JThread)
     // and join the thread automatically.
 }
 
-AWT_TEST(Cancellation_WatchDogThread1)
+AWL_TEST(Cancellation_WatchDogThread1)
 {
-    AWT_ATTRIBUTE(int, timeout, 1);
+    AWL_ATTRIBUTE(int, sleep_time, 1);
 
-    std::jthread watch_dog_thread([timeout](std::stop_token token)
+    std::jthread watch_dog_thread([sleep_time](std::stop_token token)
     {
-        awl::sleep_for(std::chrono::milliseconds(timeout), token);
+        awl::sleep_for(std::chrono::milliseconds(sleep_time), token);
     });
 
     std::stop_token token = watch_dog_thread.get_stop_token();
@@ -244,23 +244,24 @@ AWT_TEST(Cancellation_WatchDogThread1)
 
     const bool cancelled = token.stop_requested();
 
-    AWT_ASSERT(!cancelled);
+    AWL_ASSERT(!cancelled);
 
     watch_dog_thread.request_stop();
 
-    AWT_ASSERT(token.stop_requested());
+    AWL_ASSERT(token.stop_requested());
 }
 
-AWT_TEST(Cancellation_WatchDogThread2)
+AWL_TEST(Cancellation_WatchDogThread2)
 {
-    AWT_ATTRIBUTE(int, timeout, 5);
+    // `sleep_time` attribute is reserved for testing framework.
+    AWL_ATTRIBUTE(int, sleep_time, 5);
 
     awl::StopWatch sw;
 
     {
-        std::jthread watch_dog_thread([timeout](std::stop_token token)
+        std::jthread watch_dog_thread([sleep_time](std::stop_token token)
         {
-            awl::sleep_for(std::chrono::seconds(timeout), token);
+            awl::sleep_for(std::chrono::seconds(sleep_time), token);
         });
 
         watch_dog_thread.request_stop();
@@ -268,5 +269,7 @@ AWT_TEST(Cancellation_WatchDogThread2)
         watch_dog_thread.join();
     }
 
-    AWT_ASSERT(!sw.HasElapsed(std::chrono::seconds(timeout)));
+    context.logger.debug(awl::format() << "Elapsed: " << sw);
+
+    AWL_ASSERT(!sw.HasElapsed(std::chrono::seconds(sleep_time)));
 }

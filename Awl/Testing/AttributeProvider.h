@@ -24,5 +24,39 @@ namespace awl::testing
         { p.template TryGet(std::declval<const char*>(), std::declval<int&>()) } -> std::same_as<bool>;
         { p.template TryGet(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
         { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
+
+        { p.template Set(std::declval<const char*>(), std::declval<const int&>()) } -> std::same_as<void>;
+        { p.template Set(std::declval<const char*>(), std::declval<const std::string&>()) } -> std::same_as<void>;
+        { p.template Set(std::declval<const char*>(), std::declval<const std::wstring&>()) } -> std::same_as<void>;
     };
+
+    // For acessing Command Line attributes without creating TestContext.
+    template <attribute_provider Provider>
+    struct ProviderContext
+    {
+        Provider& ap;
+    };
+
+    template <class T, attribute_provider Provider>
+    T GetAttributeValue(Provider& provider, const char* name, T default_val)
+    {
+        T val;
+
+        if (!provider.TryGet(name, val))
+        {
+            // Add default values to JSON.
+            provider.Set(name, default_val);
+
+            return default_val;
+        }
+
+        return val;
+    }
+
+    // Default is false.
+    template <attribute_provider Provider>
+    bool GetFlagValue(Provider& provider, const char* name)
+    {
+        return GetAttributeValue<bool, Provider>(name, false);
+    }
 }

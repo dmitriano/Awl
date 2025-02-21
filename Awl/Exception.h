@@ -38,7 +38,7 @@ namespace awl
 
     class GeneralException : public Exception
     {
-    private:
+    protected:
 
         const String theMessage;
 

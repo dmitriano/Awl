@@ -8,63 +8,121 @@
 #include "Awl/String.h"
 #include "Awl/StaticChain.h"
 #include "Awl/StringFormat.h"
+#include "Awl/KeyCompare.h"
 
-#include <map>
+#include <vector>
+#include <algorithm>
 #include <stdexcept>
 #include <regex>
+#include <ranges>
 
 namespace awl
 {
     template <class T>
-    using StaticMap = std::map<const char*, const StaticLink<T>*, CStringLess<char>>;
-
-    namespace helpers
+    class StaticMap
     {
-        template <class T>
-        void insert_static_link(StaticMap<T>& map, const StaticLink<T>* p_link)
+    private:
+
+        using LinkVector = std::vector<const StaticLink<T>*>;
+
+    public:
+
+        StaticMap() = default;
+
+        typename LinkVector::const_iterator begin() const
         {
-            if (!map.emplace(p_link->name(), p_link).second)
+            return m_links.begin();
+        }
+
+        typename LinkVector::const_iterator end() const
+        {
+            return m_links.end();
+        }
+
+        typename std::size_t size() const
+        {
+            return m_links.size();
+        }
+
+        bool empty() const
+        {
+            return m_links.empty();
+        }
+
+        const StaticLink<T>* find(const char* name) const
+        {
+            return internal_find(m_links, name);
+        }
+
+        const StaticLink<T>* find(const std::string& name) const
+        {
+            return find(name.c_str());
+        }
+
+        template <class Pred = true_predicate<T>>
+        static StaticMap fill(const std::string& name_filter = {}, Pred&& value_filter = {})
+        {
+            LinkVector links;
+
+            auto insert_links = [&links, &value_filter](auto name_pred)
             {
-                throw std::runtime_error(aformat() << "Static link '" << p_link->name() << " already exists.");
-            }
-        }
-    }
+                for (const StaticLink<T>* p_link : awl::static_chain<T>())
+                {
+                    if (value_filter(p_link->value()) && name_pred(p_link->name()))
+                    {
+                        if (internal_find(links, p_link->name()) != nullptr)
+                        {
+                            throw std::runtime_error(aformat() << "Static link '" << p_link->name() << " already exists.");
+                        }
 
-    template <class T>
-    StaticMap<T> make_static_map()
-    {
-        StaticMap<T> map;
+                        links.push_back(p_link);
+                    }
+                }
+            };
 
-        for (const StaticLink<T>* p_link : awl::static_chain<T>())
-        {
-            helpers::insert_static_link(map, p_link);
-        }
-
-        return map;
-    }
-
-    template <class T>
-    StaticMap<T> make_static_map(const std::string& filter)
-    {
-        if (filter.empty())
-        {
-            return make_static_map<T>();
-        }
-
-        std::basic_regex<char> name_regex(filter);
-
-        StaticMap<T> map;
-
-        for (const StaticLink<T>* p_link : awl::static_chain<T>())
-        {
-            std::match_results<const char*> match;
-
-            if (std::regex_match(p_link->name(), match, name_regex))
+            if (name_filter.empty())
             {
-                helpers::insert_static_link(map, p_link);
+                insert_links([](const char*) -> bool { return true; });
             }
+            else
+            {
+                std::basic_regex<char> name_regex(name_filter, std::regex_constants::icase);
+
+                insert_links([&name_regex](const char* name) -> bool
+                {
+                    std::match_results<const char*> match;
+
+                    return std::regex_match(name, match, name_regex);
+                });
+            }
+
+            std::sort(links.begin(), links.end(), less_comp());
+
+            return StaticMap<T>(links);
         }
 
-        return map;
-    }
+        using equal_comp_type = StringInsensitiveEqual<char>;
+        using less_comp_type = awl::pointer_compare<&StaticLink<T>::name, awl::CStringInsensitiveLess<char>>;
+
+        static equal_comp_type equal_comp() { return {}; }
+        static less_comp_type less_comp() { return {}; }
+
+    private:
+
+        static const StaticLink<T>* internal_find(const LinkVector& links, const char* name)
+        {
+            auto i = std::lower_bound(links.begin(), links.end(), name, less_comp());
+
+            if (i == links.end() || !equal_comp()((*i)->name(), name))
+            {
+                return nullptr;
+            }
+
+            return *i;
+        }
+
+        explicit StaticMap(LinkVector links) : m_links(std::move(links)) {}
+
+        LinkVector m_links;
+    };
 }

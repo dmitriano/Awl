@@ -44,11 +44,11 @@ namespace awl
             }
 
             Set::Node * pn3 = set.FindNodeByKey(3);
-            AWT_ASSERT(pn3 != nullptr);
-            AWT_ASSERT(pn3->value == 3);
+            AWL_ASSERT(pn3 != nullptr);
+            AWL_ASSERT(pn3->value == 3);
 
             Set::Node * pn7 = set.FindNodeByKey(7);
-            AWT_ASSERT(pn7 == nullptr);
+            AWL_ASSERT(pn7 == nullptr);
 
             {
                 std::array<Set::Node *, count> nodes = { n1, n2, n3, n4, n5 };
@@ -60,29 +60,29 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    AWT_ASSERT(set.GetPredecessor(x) == predecessor);
-                    AWT_ASSERT(set.GetSuccessor(x) == successor);
+                    AWL_ASSERT(set.GetPredecessor(x) == predecessor);
+                    AWL_ASSERT(set.GetSuccessor(x) == successor);
                 }
             }
 
-            AWT_ASSERT_EQUAL(1, set.front());
-            AWT_ASSERT_EQUAL(static_cast<int>(count), set.back());
+            AWL_ASSERT_EQUAL(1, set.front());
+            AWL_ASSERT_EQUAL(static_cast<int>(count), set.back());
             Set::Node * nN = InsertNew(284);
-            AWT_ASSERT_EQUAL(1, set.front());
-            AWT_ASSERT_EQUAL(nN->value, set.back());
+            AWL_ASSERT_EQUAL(1, set.front());
+            AWL_ASSERT_EQUAL(nN->value, set.back());
 
             set.RemoveNode(n1);
-            AWT_ASSERT(set.m_root == n2);
+            AWL_ASSERT(set.m_root == n2);
             set.RemoveNode(n2);
-            AWT_ASSERT(set.m_root == n4);
+            AWL_ASSERT(set.m_root == n4);
             set.RemoveNode(n4);
-            AWT_ASSERT(set.m_root == n5);
+            AWL_ASSERT(set.m_root == n5);
             set.RemoveNode(n3);
-            AWT_ASSERT(set.m_root == n5);
+            AWL_ASSERT(set.m_root == n5);
             set.RemoveNode(n5);
-            AWT_ASSERT(set.m_root == nN);
+            AWL_ASSERT(set.m_root == nN);
             set.RemoveNode(nN);
-            AWT_ASSERT(set.m_root == nullptr);
+            AWL_ASSERT(set.m_root == nullptr);
         }
 
     private:
@@ -90,23 +90,23 @@ namespace awl
         Set::Node * InsertNew(int val)
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
-            AWT_ASSERT(p.second);
+            AWL_ASSERT(p.second);
             return *p.first.m_i;
         }
 
         void InsertExisting(int val)
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
-            AWT_ASSERT_FALSE(p.second);
+            AWL_ASSERT_FALSE(p.second);
         }
 
         Set set;
     };
 }
 
-AWT_TEST(VectorSetInternal)
+AWL_TEST(VectorSetInternal)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     awl::VectorSetTest test;
     test.Run();
@@ -157,14 +157,14 @@ namespace
     {
         const size_t size = my_set.size();
         
-        AWT_ASSERTM_EQUAL(std_set.size(), size, _T("wrong size"));
+        AWL_ASSERTM_EQUAL(std_set.size(), size, _T("wrong size"));
 
         if (size != 0)
         {
-            AWT_ASSERTM_EQUAL(*std_set.begin(), my_set.front(), _T("wrong front"));
-            AWT_ASSERTM_EQUAL(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
-            AWT_ASSERTM_EQUAL(*std_set.rbegin(), my_set.back(), _T("wrong back"));
-            AWT_ASSERTM_EQUAL(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
+            AWL_ASSERTM_EQUAL(*std_set.begin(), my_set.front(), _T("wrong front"));
+            AWL_ASSERTM_EQUAL(*std_set.begin(), *my_set.begin(), _T("wrong begin"));
+            AWL_ASSERTM_EQUAL(*std_set.rbegin(), my_set.back(), _T("wrong back"));
+            AWL_ASSERTM_EQUAL(*std_set.rbegin(), *my_set.rbegin(), _T("wrong rbegin"));
         }
     }
 
@@ -181,10 +181,10 @@ namespace
             for (auto val : my_set)
             {
                 size_t std_val = *i++;
-                AWT_ASSERT_EQUAL(std_val, val);
+                AWL_ASSERT_EQUAL(std_val, val);
             }
 
-            AWT_ASSERT(i == std_set.end());
+            AWL_ASSERT(i == std_set.end());
         }
 
         {
@@ -194,10 +194,10 @@ namespace
             {
                 size_t std_val = *i++;
                 size_t my_val = *my_i;
-                AWT_ASSERTM_EQUAL(std_val, my_val, _T("wrong element"));
+                AWL_ASSERTM_EQUAL(std_val, my_val, _T("wrong element"));
             }
 
-            AWT_ASSERT(i == std_set.rend());
+            AWL_ASSERT(i == std_set.rend());
         }
     }
 
@@ -228,18 +228,18 @@ namespace
 //Parameter examples:
 //--filter Hybrid.* --verbose --insert_count 100 --range 10 --print_set
 //--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
-AWT_TEST(VectorSetRandom)
+AWL_TEST(VectorSetRandom)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(size_t, range, 1000);
-    AWT_FLAG(print_set);
-    AWT_FLAG(do_not_compare_sets);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
+    AWL_FLAG(print_set);
+    AWL_FLAG(do_not_compare_sets);
 
     std::uniform_int_distribution<size_t> dist(1, range);
 
     MySet my_set;
-    AWT_ASSERT(my_set.empty());
-    AWT_ASSERT(my_set.size() == 0);
+    AWL_ASSERT(my_set.empty());
+    AWL_ASSERT(my_set.size() == 0);
 
     StdSet std_set;
 
@@ -256,7 +256,7 @@ AWT_TEST(VectorSetRandom)
                 PrintSet(context, my_set);
             }
 
-            AWT_ASSERT_EQUAL(std_result.second, my_result.second);
+            AWL_ASSERT_EQUAL(std_result.second, my_result.second);
         }
 
         CompareBounds(std_set, my_set);
@@ -271,7 +271,7 @@ AWT_TEST(VectorSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_set.find(val);
             auto std_i = std_set.find(val);
-            AWT_ASSERT((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWL_ASSERT((my_i == my_set.end() && std_i == std_set.end()) || (my_i != my_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         {
@@ -280,7 +280,7 @@ AWT_TEST(VectorSetRandom)
             size_t val = dist(awl::random());
             auto my_i = my_const_set.find(val);
             auto std_i = std_set.find(val);
-            AWT_ASSERT((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
+            AWL_ASSERT((my_i == my_const_set.end() && std_i == std_set.end()) || (my_i != my_const_set.end() && *my_i == val && std_i != std_set.end() && *std_i == val));
         }
 
         //Delete random value.
@@ -302,7 +302,7 @@ AWT_TEST(VectorSetRandom)
 
             context.out << std::endl;
 
-            AWT_ASSERT(my_result == std_result);
+            AWL_ASSERT(my_result == std_result);
 
             if (my_result)
             {
@@ -322,14 +322,14 @@ AWT_TEST(VectorSetRandom)
     }
 
     my_set.clear();
-    AWT_ASSERT(my_set.empty());
-    AWT_ASSERT(my_set.size() == 0);
-    AWT_ASSERTM_EQUAL(0u, memory_size, _T("memory leaks"));
+    AWL_ASSERT(my_set.empty());
+    AWL_ASSERT(my_set.size() == 0);
+    AWL_ASSERTM_EQUAL(0u, memory_size, _T("memory leaks"));
 }
 
-AWT_TEST(VectorSetRValue)
+AWL_TEST(VectorSetRValue)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Set = awl::vector_set<awl::String>;
 
@@ -340,10 +340,10 @@ AWT_TEST(VectorSetRValue)
     set.insert(std::move(rval));
     set.emplace(_T("def"));
 
-    AWT_ASSERT(rval == _T(""));
-    AWT_ASSERT(set.front() == _T("abc"));
-    AWT_ASSERT(*(++set.begin()) == _T("def"));
-    AWT_ASSERT(set.back() == _T("xyz"));
+    AWL_ASSERT(rval == _T(""));
+    AWL_ASSERT(set.front() == _T("abc"));
+    AWL_ASSERT(*(++set.begin()) == _T("def"));
+    AWL_ASSERT(set.back() == _T("xyz"));
 }
 
 template <class Key, class T = Key, class Compare = std::less<>>
@@ -362,31 +362,31 @@ static awl::vector_set<T, Compare> GenerateIntSet(size_t insert_count, Key range
     return sample;
 }
 
-AWT_TEST(VectorSetCopyMove)
+AWL_TEST(VectorSetCopyMove)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using Set = awl::vector_set<int>;
     
     const Set sample = GenerateIntSet<int>(1000, 1000);
-    AWT_ASSERT((sample != Set{ -1, -2, -3, -4, -5 }));
+    AWL_ASSERT((sample != Set{ -1, -2, -3, -4, -5 }));
 
     const Set copy = sample;
-    AWT_ASSERT(copy == sample);
+    AWL_ASSERT(copy == sample);
 
     Set temp = copy;
-    AWT_ASSERT(temp == copy);
+    AWL_ASSERT(temp == copy);
 
     const Set moved = std::move(temp);
-    AWT_ASSERT(moved == copy);
-    AWT_ASSERT(temp.empty());
+    AWL_ASSERT(moved == copy);
+    AWL_ASSERT(temp.empty());
 }
 
 //--filter VectorSetIndex_Test --insert_count 10000000 --range 100000000
-AWT_TEST(VectorSetIndex)
+AWL_TEST(VectorSetIndex)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(size_t, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
 
     auto set = GenerateIntSet(insert_count, range);
 
@@ -397,14 +397,14 @@ AWT_TEST(VectorSetIndex)
         auto val = *i;
 
         const auto found_val = set.at(index);
-        AWT_ASSERT_EQUAL(val, found_val);
+        AWL_ASSERT_EQUAL(val, found_val);
 
         auto [found_iter, found_index] = set.find2(val);
-        AWT_ASSERT_EQUAL(index, found_index);
-        AWT_ASSERT_EQUAL(index, set.index_of(found_iter));
+        AWL_ASSERT_EQUAL(index, found_index);
+        AWL_ASSERT_EQUAL(index, set.index_of(found_iter));
 
         const size_t found_index2 = set.index_of(i);
-        AWT_ASSERT_EQUAL(index, found_index2);
+        AWL_ASSERT_EQUAL(index, found_index2);
 
         ++index;
     }
@@ -456,8 +456,8 @@ namespace
     template <class Compare>
     void TestComparer(const TestContext& context, Compare comp = {})
     {
-        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWT_ATTRIBUTE(size_t, range, 1000u);
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
 
         auto set = GenerateIntSet<size_t, A, Compare>(insert_count, range, comp);
 
@@ -466,13 +466,13 @@ namespace
         for (auto val : set)
         {
             const auto found_val = set.at(index);
-            AWT_ASSERT(val == found_val);
+            AWL_ASSERT(val == found_val);
 
             const auto i = set.find(val.key);
-            AWT_ASSERT(i != set.end() && *i == val);
+            AWL_ASSERT(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
-            AWT_ASSERT_EQUAL(index, found_index);
+            AWL_ASSERT_EQUAL(index, found_index);
 
             ++index;
         }
@@ -494,8 +494,8 @@ namespace
     template <class Compare>
     void TestPointerComparer(const TestContext & context, Compare comp)
     {
-        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWT_ATTRIBUTE(size_t, range, 1000u);
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
 
         std::vector<A> v;
 
@@ -521,21 +521,21 @@ namespace
         {
             const A & val = v[index];
             const A * found_val = set.at(index);
-            AWT_ASSERT(val == *found_val);
+            AWL_ASSERT(val == *found_val);
 
-            AWT_ASSERT_EQUAL(index, set.index_of(&val));
-            AWT_ASSERT_EQUAL(index, set.index_of(val.key));
+            AWL_ASSERT_EQUAL(index, set.index_of(&val));
+            AWL_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(&val);
-                AWT_ASSERT(i != set.end());
-                AWT_ASSERT(*(*i) == val);
+                AWL_ASSERT(i != set.end());
+                AWL_ASSERT(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                AWT_ASSERT(i != set.end());
-                AWT_ASSERT(*(*i) == val);
+                AWL_ASSERT(i != set.end());
+                AWL_ASSERT(*(*i) == val);
             }
         }
     }
@@ -543,8 +543,8 @@ namespace
     template <class Compare>
     void TestSmartPointerComparer(const TestContext & context, Compare comp)
     {
-        AWT_ATTRIBUTE(size_t, insert_count, 1000u);
-        AWT_ATTRIBUTE(size_t, range, 1000u);
+        AWL_ATTRIBUTE(size_t, insert_count, 1000u);
+        AWL_ATTRIBUTE(size_t, range, 1000u);
 
         using Pointer = typename Compare::value_type;
         using A = typename Pointer::element_type;
@@ -568,27 +568,27 @@ namespace
         {
             const A & val = v[index];
             const Pointer & p_found = set.at(index);
-            AWT_ASSERT(val == *p_found);
+            AWL_ASSERT(val == *p_found);
 
-            AWT_ASSERT_EQUAL(index, set.index_of(Pointer(new A(val))));
-            AWT_ASSERT_EQUAL(index, set.index_of(val.key));
+            AWL_ASSERT_EQUAL(index, set.index_of(Pointer(new A(val))));
+            AWL_ASSERT_EQUAL(index, set.index_of(val.key));
 
             {
                 auto i = set.find(Pointer(new A(val)));
-                AWT_ASSERT(i != set.end());
-                AWT_ASSERT(*(*i) == val);
+                AWL_ASSERT(i != set.end());
+                AWL_ASSERT(*(*i) == val);
             }
 
             {
                 auto i = set.find(val.key);
-                AWT_ASSERT(i != set.end());
-                AWT_ASSERT(*(*i) == val);
+                AWL_ASSERT(i != set.end());
+                AWL_ASSERT(*(*i) == val);
             }
         }
     }
 }
 
-AWT_TEST(VectorSetComparer)
+AWL_TEST(VectorSetComparer)
 {
     TestComparer(context, awl::member_compare<&A::key>());
     TestComparer(context, awl::member_compare<&A::GetKey>());
@@ -650,13 +650,13 @@ namespace
         for (auto & val : set)
         {
             const auto & found_val = set.at(index);
-            AWT_ASSERT(val == found_val);
+            AWL_ASSERT(val == found_val);
 
             const auto i = set.find(val.GetKey());
-            AWT_ASSERT(i != set.end() && *i == val);
+            AWL_ASSERT(i != set.end() && *i == val);
 
             const size_t found_index = set.index_of(val);
-            AWT_ASSERT_EQUAL(index, found_index);
+            AWL_ASSERT_EQUAL(index, found_index);
 
             ++index;
         }
@@ -676,10 +676,10 @@ namespace
     }
 }
 
-AWT_TEST(VectorSetNonCopyableElement)
+AWL_TEST(VectorSetNonCopyableElement)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 2000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 2000);
 
     auto set = GenerateIntSet<int, B>(insert_count, range);
 
@@ -705,11 +705,11 @@ AWT_TEST(VectorSetNonCopyableElement)
     {
         const int found_key = set1.at(i).GetKey();
         const int actual_key = keys[i];
-        AWT_ASSERT_EQUAL(found_key, actual_key);
+        AWL_ASSERT_EQUAL(found_key, actual_key);
 
-        AWT_ASSERT_EQUAL(set1.index_of(found_key), i);
-        AWT_ASSERT_EQUAL(set1.index_of(B(found_key)), i);
-        AWT_ASSERT(set1.find(B(found_key)) != set1.end());
+        AWL_ASSERT_EQUAL(set1.index_of(found_key), i);
+        AWL_ASSERT_EQUAL(set1.index_of(B(found_key)), i);
+        AWL_ASSERT(set1.find(B(found_key)) != set1.end());
     }
 
     TestBComparer(insert_count, range, awl::make_compare(&B::GetKey));
@@ -726,11 +726,11 @@ static void AssertIteratorsEqual(const I1 & i1, const I1 & end1, const I2 & i2, 
             const size_t val1 = *i1;
             const size_t val2 = *i2;
 
-            AWT_ASSERTM_EQUAL(val1, val2, _T("different values"));
+            AWL_ASSERTM_EQUAL(val1, val2, _T("different values"));
         }
         else
         {
-            AWT_FAILM(_T("end and not end"));
+            AWL_FAILM(_T("end and not end"));
         }
     }
 }
@@ -747,16 +747,16 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
         AssertIteratorsEqual(set.lower_bound(val), set.end(), std_set.lower_bound(val), std_set.end());
         AssertIteratorsEqual(set.upper_bound(val), set.end(), std_set.upper_bound(val), std_set.end());
         //since C++20
-        AWT_ASSERT_EQUAL(set.contains(val), std_set.find(val) != std_set.end());
+        AWL_ASSERT_EQUAL(set.contains(val), std_set.find(val) != std_set.end());
     }
 }
 
 //--filter VectorSetBoundAndContains.* --insert_count 1000 --range 1200
-AWT_TEST(VectorSetBoundAndContains)
+AWL_TEST(VectorSetBoundAndContains)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(size_t, range, 1000);
-    AWT_ATTRIBUTE(size_t, iter_count, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
+    AWL_ATTRIBUTE(size_t, iter_count, 1000);
 
     auto set = GenerateIntSet(insert_count, range);
 
@@ -775,10 +775,10 @@ AWT_TEST(VectorSetBoundAndContains)
     TestBound(const_set, const_std_set, range, iter_count);
 }
 
-AWT_TEST(VectorSetBidirectional)
+AWL_TEST(VectorSetBidirectional)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(size_t, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(size_t, range, 1000);
 
     auto set = GenerateIntSet(insert_count, range);
 
@@ -786,28 +786,28 @@ AWT_TEST(VectorSetBidirectional)
 
     for (auto i = set.begin(); i != set.end(); ++i)
     {
-        AWT_ASSERT(set.lower_bound(*i) == i);
+        AWL_ASSERT(set.lower_bound(*i) == i);
 
         if (i != set.begin())
         {
             auto i_prev = i;
             --i_prev;
 
-            AWT_ASSERT(set.upper_bound(*i_prev) == i);
+            AWL_ASSERT(set.upper_bound(*i_prev) == i);
 
-            AWT_ASSERT(comp(*i_prev, *i));
+            AWL_ASSERT(comp(*i_prev, *i));
         }
 
         auto i_next = i;
         ++i_next;
 
-        AWT_ASSERT(set.upper_bound(*i) == i_next);
+        AWL_ASSERT(set.upper_bound(*i) == i_next);
 
         if (i_next != set.end())
         {
-            AWT_ASSERT(comp(*i, *i_next));
+            AWL_ASSERT(comp(*i, *i_next));
         }
     }
 
-    AWT_ASSERT(set.upper_bound(*(--set.end())) == set.end());
+    AWL_ASSERT(set.upper_bound(*(--set.end())) == set.end());
 }

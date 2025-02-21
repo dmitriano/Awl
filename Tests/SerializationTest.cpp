@@ -155,7 +155,7 @@ namespace awl
 }
 
 /*
-AWT_TEST(TypeName)
+AWL_TEST(TypeName)
 {
     context.out << awl::FromACString(awl::type_info<int>().name()) << std::endl;
 }

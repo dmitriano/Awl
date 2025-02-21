@@ -83,11 +83,11 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         auto zero_val = hash(r.begin(), r.end());
 
-        AWT_ASSERT_FALSE(zero_val == typename Hash::value_type{});
+        AWL_ASSERT_FALSE(zero_val == typename Hash::value_type{});
     }
 
-    AWT_ATTRIBUTE(size_t, vector_size, 1000000);
-    AWT_ATTRIBUTE(size_t, iteration_count, 100);
+    AWL_ATTRIBUTE(size_t, vector_size, 1000000);
+    AWL_ATTRIBUTE(size_t, iteration_count, 100);
 
     std::unique_ptr<uint8_t[]> p_buffer(new uint8_t[vector_size]);
 
@@ -132,9 +132,9 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     }
 }
 
-AWT_TEST(Hash)
+AWL_TEST(Hash)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -155,7 +155,7 @@ AWT_TEST(Hash)
     }
 }
 
-AWT_BENCHMARK(HashPerformance)
+AWL_BENCHMARK(HashPerformance)
 {
     using namespace awl::crypto;
 
@@ -171,9 +171,9 @@ AWT_BENCHMARK(HashPerformance)
 #endif
 }
 
-AWT_TEST(Hash_ToFromArray)
+AWL_TEST(Hash_ToFromArray)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -183,12 +183,12 @@ AWT_TEST(Hash_ToFromArray)
 
     const auto val = awl::from_array<uint64_t>(a);
 
-    AWT_ASSERT_EQUAL(sample, val);
+    AWL_ASSERT_EQUAL(sample, val);
 }
 
-AWT_TEST(Hash_String)
+AWL_TEST(Hash_String)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 
@@ -234,31 +234,31 @@ namespace
             break;
 
         case hash("will never come"):
-            AWT_FAIL;
+            AWL_FAIL;
 
         case hash("but the crisis"):
-            AWT_FAIL;
+            AWL_FAIL;
 
         case hash("has begun"):
-            AWT_FAIL;
+            AWL_FAIL;
 
         default:
-            AWT_FAIL;
+            AWL_FAIL;
         }
     }
 }
 
-AWT_TEST(Hash_Switch)
+AWL_TEST(Hash_Switch)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     TestSwitch<EasyHash>();
     TestSwitch<Int64Hash>();
 }
 
-AWT_TEST(Hash_Fake)
+AWL_TEST(Hash_Fake)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     using namespace awl::crypto;
 

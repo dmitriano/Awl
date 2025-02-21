@@ -18,7 +18,7 @@ namespace awl::testing::helpers
     template <class T>
     void TestReadWrite(const TestContext& context, const T& sample)
     {
-        AWT_ATTRIBUTE(size_t, iteration_count, 10);
+        AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
         std::vector<uint8_t> reusable_v;
 
@@ -39,15 +39,15 @@ namespace awl::testing::helpers
 
             if constexpr (is_pointer_v<T>)
             {
-                AWT_ASSERT((sample == nullptr && result == nullptr) ||
+                AWL_ASSERT((sample == nullptr && result == nullptr) ||
                     (sample != nullptr && result != nullptr && *sample == *result));
             }
             else
             {
-                AWT_ASSERT(sample == result);
+                AWL_ASSERT(sample == result);
             }
         }
 
-        AWT_ASSERT(in.End());
+        AWL_ASSERT(in.End());
     }
 }

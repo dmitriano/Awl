@@ -7,8 +7,11 @@
 
 #include "Awl/QuickList.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/RangeUtil.h"
+#include "Awl/String.h"
 
 #include <ranges>
+#include <functional>
 
 using namespace awl::testing;
 
@@ -32,7 +35,27 @@ namespace
         using Base::Base;
     };
 
-    class Element : public LinkA, public LinkB, public awl::quick_link
+    static_assert(!std::is_copy_assignable_v<LinkA>);
+    static_assert(!std::is_copy_constructible_v<LinkA>);
+    static_assert(!std::is_copy_assignable_v<LinkB>);
+    static_assert(!std::is_copy_constructible_v<LinkB>);
+    static_assert(!std::is_copy_assignable_v<awl::quick_link>);
+    static_assert(!std::is_copy_constructible_v<awl::quick_link>);
+
+    static_assert(std::is_move_assignable_v<LinkA>);
+    static_assert(std::is_move_constructible_v<LinkA>);
+    static_assert(std::is_move_assignable_v<LinkB>);
+    static_assert(std::is_move_constructible_v<LinkB>);
+    static_assert(std::is_move_assignable_v<awl::quick_link>);
+    static_assert(std::is_move_constructible_v<awl::quick_link>);
+
+    class CompositeLink :
+        public LinkA,
+        public LinkB,
+        public awl::quick_link
+    {};
+
+    class Element : public CompositeLink
     {
     public:
 
@@ -41,12 +64,22 @@ namespace
             ++elementCount;
         }
 
+        Element(Element&& other) noexcept : CompositeLink(std::move(other))
+        {
+            ++elementCount;
+        }
+
+        Element& operator = (Element&& other) noexcept
+        {
+            *(static_cast<CompositeLink*>(this)) = std::move(other);
+
+            ++elementCount;
+
+            return *this;
+        }
+
         ~Element()
         {
-            LinkA::safe_exclude();
-            LinkB::safe_exclude();
-            awl::quick_link::safe_exclude();
-
             --elementCount;
         }
 
@@ -55,17 +88,22 @@ namespace
         static int elementCount;
     };
 
+    static_assert(!std::is_copy_assignable_v<Element>);
+    static_assert(!std::is_copy_constructible_v<Element>);
+    static_assert(std::is_move_assignable_v<Element>);
+    static_assert(std::is_move_constructible_v<Element>);
+
     int Element::elementCount = 0;
 
     template <class DLink>
     class ListHolder
     {
-        using ELEMENT_LIST = awl::quick_list<Element, DLink>;
+        using ElementList = awl::quick_list<Element, DLink>;
 
         //Check if it satisfies the concept std::ranges::range.
-        static_assert(std::ranges::range<ELEMENT_LIST>);
+        static_assert(awl::range_over<ElementList, Element*>);
 
-        ELEMENT_LIST list;
+        ElementList list;
 
         const awl::testing::TestContext & context;
 
@@ -97,28 +135,28 @@ namespace
 
         ListHolder(const awl::testing::TestContext & test_context) : context(test_context)
         {
-            AWT_ASSERT(list.empty());
-            AWT_ASSERT_EQUAL(size_t(0), list.size());
-            AWT_ASSERT(list.empty_or_contains_one());
-            AWT_ASSERT_FALSE(list.contains_one());
+            AWL_ASSERT(list.empty());
+            AWL_ASSERT_EQUAL(size_t(0), list.size());
+            AWL_ASSERT(list.empty_or_contains_one());
+            AWL_ASSERT_FALSE(list.contains_one());
 
             list.push_back(new Element(1));
 
-            AWT_ASSERT_FALSE(list.empty());
-            AWT_ASSERT_EQUAL(size_t(1), list.size());
-            AWT_ASSERT(list.empty_or_contains_one());
-            AWT_ASSERT(list.contains_one());
+            AWL_ASSERT_FALSE(list.empty());
+            AWL_ASSERT_EQUAL(size_t(1), list.size());
+            AWL_ASSERT(list.empty_or_contains_one());
+            AWL_ASSERT(list.contains_one());
 
             list.push_back(new Element(2));
 
-            AWT_ASSERT_FALSE(list.empty());
-            AWT_ASSERT_EQUAL(size_t(2), list.size());
-            AWT_ASSERT_FALSE(list.empty_or_contains_one());
-            AWT_ASSERT_FALSE(list.contains_one());
+            AWL_ASSERT_FALSE(list.empty());
+            AWL_ASSERT_EQUAL(size_t(2), list.size());
+            AWL_ASSERT_FALSE(list.empty_or_contains_one());
+            AWL_ASSERT_FALSE(list.contains_one());
 
             list.push_front(new Element(0));
 
-            AWT_ASSERT_EQUAL(size_t(3), list.size());
+            AWL_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void AddRemoveTest()
@@ -126,12 +164,12 @@ namespace
             list.push_front(new Element(-1));
             list.push_back(new Element(3));
 
-            AWT_ASSERT_EQUAL(size_t(5), list.size());
+            AWL_ASSERT_EQUAL(size_t(5), list.size());
 
             delete list.pop_front();
             delete list.pop_back();
 
-            AWT_ASSERT_EQUAL(size_t(3), list.size());
+            AWL_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void AutoRemoveTest()
@@ -140,11 +178,11 @@ namespace
 
             list.push_front(p_elem);
 
-            AWT_ASSERT_EQUAL(size_t(4), list.size());
+            AWL_ASSERT_EQUAL(size_t(4), list.size());
 
             delete p_elem;
 
-            AWT_ASSERT_EQUAL(size_t(3), list.size());
+            AWL_ASSERT_EQUAL(size_t(3), list.size());
         }
 
         void PrintList()
@@ -157,7 +195,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val++, e->Value);
+                AWL_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -171,7 +209,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val++, e->Value);
+                AWL_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -185,7 +223,7 @@ namespace
             {
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val++, e->Value);
+                AWL_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -195,13 +233,13 @@ namespace
 
             int val = 0;
 
-            for (typename ELEMENT_LIST::iterator i = list.begin(); i != list.end(); ++i)
+            for (typename ElementList::iterator i = list.begin(); i != list.end(); ++i)
             {
                 Element * e = *i;
 
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val++, e->Value);
+                AWL_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -211,13 +249,13 @@ namespace
 
             int val = 0;
 
-            for (typename ELEMENT_LIST::const_iterator i = list.begin(); i != list.end(); ++i)
+            for (typename ElementList::const_iterator i = list.begin(); i != list.end(); ++i)
             {
                 const Element * e = *i;
 
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val++, e->Value);
+                AWL_ASSERT_EQUAL(val++, e->Value);
             }
         }
 
@@ -227,13 +265,13 @@ namespace
 
             int val = 2;
 
-            for (typename ELEMENT_LIST::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+            for (typename ElementList::reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
             {
                 Element * e = *i;
 
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val--, e->Value);
+                AWL_ASSERT_EQUAL(val--, e->Value);
             }
         }
 
@@ -243,13 +281,13 @@ namespace
 
             int val = 2;
 
-            for (typename ELEMENT_LIST::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
+            for (typename ElementList::const_reverse_iterator i = list.rbegin(); i != list.rend(); ++i)
             {
                 const Element * e = *i;
 
                 printer.PrintElement(e);
 
-                AWT_ASSERT_EQUAL(val--, e->Value);
+                AWL_ASSERT_EQUAL(val--, e->Value);
             }
         }
 
@@ -259,7 +297,7 @@ namespace
 
             if (i == list.end())
             {
-                AWT_FAILM(_T("Element 1 not found."));
+                AWL_FAILM(_T("Element 1 not found."));
             }
 
             context.out << _T("The found element is: ") << i->Value << std::endl;
@@ -268,7 +306,7 @@ namespace
 
             if (i != list.end())
             {
-                AWT_FAILM(_T("Non-existing element 25 found."));
+                AWL_FAILM(_T("Non-existing element 25 found."));
             }
 
             Printer printer(context);
@@ -280,18 +318,18 @@ namespace
         {
             list.push_back(new Element(4));
 
-            AWT_ASSERT_EQUAL((size_t)(4), list.size());
+            AWL_ASSERT_EQUAL((size_t)(4), list.size());
 
             auto i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 2; });
 
             if (i == list.end())
             {
-                AWT_FAILM(_T("Element 2 not found."));
+                AWL_FAILM(_T("Element 2 not found."));
             }
 
             list.insert(i, new Element(3));
 
-            AWT_ASSERT_EQUAL((size_t)(5), list.size());
+            AWL_ASSERT_EQUAL((size_t)(5), list.size());
 
             PrintList();
 
@@ -301,57 +339,57 @@ namespace
 
             list.erase(i++); //This only excludes the element from the list but not deletes it.
 
-            AWT_ASSERT_FALSE(p_element_to_be_deleted->DLink::included());
+            AWL_ASSERT_FALSE(p_element_to_be_deleted->DLink::included());
 
             delete p_element_to_be_deleted;
 
-            AWT_ASSERT_EQUAL((size_t)(4), list.size());
+            AWL_ASSERT_EQUAL((size_t)(4), list.size());
 
             delete *(i++); //The element is excluded from the list automatically.
 
-            AWT_ASSERT_EQUAL((size_t)(3), list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
 
         void MoveTest()
         {
-            ELEMENT_LIST other_list;
+            ElementList other_list;
 
-            AWT_ASSERT_EQUAL((size_t)(3), list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
             other_list = std::move(list);
 
-            AWT_ASSERT_EQUAL((size_t)(0), list.size());
+            AWL_ASSERT_EQUAL((size_t)(0), list.size());
 
-            AWT_ASSERT_EQUAL((size_t)(3), other_list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), other_list.size());
 
             list = std::move(other_list);
 
-            AWT_ASSERT_EQUAL((size_t)(0), other_list.size());
+            AWL_ASSERT_EQUAL((size_t)(0), other_list.size());
 
-            AWT_ASSERT_EQUAL((size_t)(3), list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
 
         void PushBackTest()
         {
-            AWT_ASSERT_EQUAL((size_t)(3), list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
-            ELEMENT_LIST other_list;
+            ElementList other_list;
 
             other_list.push_back(list);
 
-            AWT_ASSERT_EQUAL((size_t)(0), list.size());
+            AWL_ASSERT_EQUAL((size_t)(0), list.size());
 
-            AWT_ASSERT_EQUAL((size_t)(3), other_list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), other_list.size());
 
             list.push_back(other_list);
 
-            AWT_ASSERT_EQUAL((size_t)(0), other_list.size());
+            AWL_ASSERT_EQUAL((size_t)(0), other_list.size());
 
-            AWT_ASSERT_EQUAL((size_t)(3), list.size());
+            AWL_ASSERT_EQUAL((size_t)(3), list.size());
 
             PrintList();
         }
@@ -360,17 +398,17 @@ namespace
         {
             auto i = list.end();
 
-            AWT_ASSERT_EQUAL(2, (--i)->Value);
-            AWT_ASSERT_EQUAL(1, (--i)->Value);
-            AWT_ASSERT_EQUAL(0, (--i)->Value);
+            AWL_ASSERT_EQUAL(2, (--i)->Value);
+            AWL_ASSERT_EQUAL(1, (--i)->Value);
+            AWL_ASSERT_EQUAL(0, (--i)->Value);
 
-            AWT_ASSERT(i == list.begin());
+            AWL_ASSERT(i == list.begin());
 
-            AWT_ASSERT_EQUAL(0, (i++)->Value);
-            AWT_ASSERT_EQUAL(1, (i++)->Value);
-            AWT_ASSERT_EQUAL(2, (i++)->Value);
+            AWL_ASSERT_EQUAL(0, (i++)->Value);
+            AWL_ASSERT_EQUAL(1, (i++)->Value);
+            AWL_ASSERT_EQUAL(2, (i++)->Value);
 
-            AWT_ASSERT(i == list.end());
+            AWL_ASSERT(i == list.end());
         }
 
         ~ListHolder()
@@ -417,65 +455,253 @@ namespace
             holder.BidirectionalTest();
         }
 
-        AWT_ASSERT_EQUAL(0, Element::elementCount);
+        AWL_ASSERT_EQUAL(0, Element::elementCount);
     }
 
-    struct EleMent : awl::single_link
+    struct SingleElement : public awl::single_link
     {
-        int a = 25;
+        SingleElement(std::string name, int val) :
+            m_name(std::move(name)),
+            m_val(val)
+        {
+        }
+
+        const char* name() const { return m_name.c_str(); }
+
+        int value() const { return m_val; }
+
+        std::string m_name;
+
+        int m_val;
     };
+
+    static_assert(!std::is_copy_assignable_v<SingleElement>);
+    static_assert(!std::is_copy_constructible_v<SingleElement>);
+    static_assert(!std::is_move_assignable_v<SingleElement>);
+    static_assert(!std::is_move_constructible_v<SingleElement>);
+
+    using SingleList = awl::single_list<SingleElement>;
+
+    struct SimpleElement : SingleElement
+    {
+        SimpleElement() : SingleElement(awl::aformat() << m_count, m_count)
+        {
+            ++m_count;
+        }
+
+        static inline int m_count = 0;
+    };
+
+    static_assert(!std::is_copy_assignable_v<SimpleElement>);
+    static_assert(!std::is_copy_constructible_v<SimpleElement>);
+    static_assert(!std::is_move_assignable_v<SimpleElement>);
+    static_assert(!std::is_move_constructible_v<SimpleElement>);
+
+    static_assert(std::default_initializable<SingleList::iterator>);
 }
 
-AWT_TEST(List)
+AWL_TEST(List)
 {
     TestLinkFunc<LinkA>(context);
     TestLinkFunc<LinkB>(context);
     TestLinkFunc<awl::quick_link>(context);
 }
 
-AWT_TEST(List_SingleList)
+AWL_TEST(List_SingleListPushPop)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
-    awl::single_list<EleMent> list;
+    awl::single_list<SimpleElement> list;
 
     size_t count = 0;
 
-    AWT_ASSERT_EQUAL(list.size(), count);
+    AWL_ASSERT_EQUAL(list.size(), count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
-    AWT_ASSERT_EQUAL(list.size(), ++count);
+    AWL_ASSERT_EQUAL(list.size(), ++count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
-    AWT_ASSERT_EQUAL(list.size(), ++count);
+    AWL_ASSERT_EQUAL(list.size(), ++count);
 
-    list.push_front(new EleMent);
+    list.push_front(new SimpleElement);
 
-    AWT_ASSERT_EQUAL(list.size(), ++count);
-
-    delete list.pop_front();
-
-    AWT_ASSERT_EQUAL(list.size(), --count);
+    AWL_ASSERT_EQUAL(list.size(), ++count);
 
     delete list.pop_front();
 
-    AWT_ASSERT_EQUAL(list.size(), --count);
+    AWL_ASSERT_EQUAL(list.size(), --count);
 
     delete list.pop_front();
 
-    AWT_ASSERT_EQUAL(list.size(), --count);
+    AWL_ASSERT_EQUAL(list.size(), --count);
 
-    list.push_front(new EleMent);
+    delete list.pop_front();
 
-    AWT_ASSERT_EQUAL(list.size(), ++count);
+    AWL_ASSERT_EQUAL(list.size(), --count);
+
+    list.push_front(new SimpleElement);
+
+    AWL_ASSERT_EQUAL(list.size(), ++count);
 
     auto first = list.front();
 
     list.clear();
 
-    AWT_ASSERT_EQUAL(list.size(), (size_t)0);
+    AWL_ASSERT_EQUAL(list.size(), (size_t)0);
 
     delete first;
+}
+
+AWL_TEST(List_SingleListIncluded)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::single_list<SimpleElement> list;
+
+    SimpleElement a;
+
+    AWL_ASSERT(!a.included());
+
+    list.push_front(&a);
+
+    AWL_ASSERT(a.included());
+
+    list.pop_front();
+
+    AWL_ASSERT(!a.included());
+}
+
+AWL_TEST(List_FindIf)
+{
+    AWL_UNUSED_CONTEXT;
+
+    SingleElement a{ "a", 1 };
+    SingleElement b{ "B", 2 };
+    SingleElement c{ "c", 3 };
+
+    SingleList list;
+
+    auto pred = std::bind(awl::CStringInsensitiveEqual<char>(), "b", std::placeholders::_1);
+
+    list.push_front(&c);
+
+    auto i = std::ranges::find_if(list.begin(), list.end(), pred, std::mem_fn(&SingleElement::name));
+
+    AWL_ASSERT(i == list.end());
+
+    list.push_front(&b);
+    list.push_front(&a);
+
+    i = std::ranges::find_if(list.begin(), list.end(), pred, std::mem_fn(&SingleElement::name));
+
+    AWL_ASSERT(i != list.end());
+
+    AWL_ASSERT(*i == &b);
+
+    auto less = std::bind(awl::CStringInsensitiveLess<char>(), std::placeholders::_1, "b");
+
+    auto range = list | std::views::filter([](auto* elem) { return elem->value() < 3; }) |
+        std::views::transform(std::mem_fn(&SingleElement::name)) |
+        std::views::filter(less);
+
+    const std::size_t count = std::ranges::distance(range);
+
+    AWL_ASSERT_EQUAL(1u, count);
+
+    const char* name = *range.begin();
+
+    AWL_ASSERT(awl::StrCmp("a", name) == 0);
+
+    AWL_ASSERT_EQUAL(a.name(), name);
+}
+
+AWL_TEST(List_Destructor1)
+{
+    AWL_UNUSED_CONTEXT;
+
+    {
+        Element a(1);
+
+        {
+            Element b(2);
+
+            {
+                awl::quick_list<Element, LinkA> list;
+
+                list.push_back(&a);
+                list.push_back(&b);
+
+                AWL_ASSERT_EQUAL(2u, list.size());
+            }
+
+            AWL_ASSERT(a.LinkA::included());
+            AWL_ASSERT(b.LinkA::included());
+
+            AWL_ASSERT(a.LinkA::predecessor() == static_cast<LinkA*>(&b));
+            AWL_ASSERT(a.LinkA::successor() == static_cast<LinkA*>(&b));
+        }
+
+        AWL_ASSERT(a.LinkA::included());
+
+        AWL_ASSERT(a.LinkA::predecessor() == static_cast<LinkA*>(&a));
+        AWL_ASSERT(a.LinkA::successor() == static_cast<LinkA*>(&a));
+    }
+
+    AWL_ASSERT_EQUAL(0, Element::elementCount);
+}
+
+AWL_TEST(List_Destructor2)
+{
+    AWL_UNUSED_CONTEXT;
+
+    {
+        awl::quick_list<Element, LinkA> list;
+
+        {
+            Element a(1);
+
+            {
+                Element b(2);
+
+                list.push_back(&a);
+                list.push_back(&b);
+
+                AWL_ASSERT_EQUAL(2u, list.size());
+            }
+
+            AWL_ASSERT(a.LinkA::included());
+
+            AWL_ASSERT_EQUAL(1u, list.size());
+        }
+
+        AWL_ASSERT_EQUAL(0, Element::elementCount);
+
+        AWL_ASSERT(list.empty());
+    }
+}
+
+AWL_TEST(List_MovableElement)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::quick_list<Element, LinkA> list;
+
+    Element a(1);
+
+    list.push_back(&a);
+
+    AWL_ASSERT(a.LinkA::included());
+
+    AWL_ASSERT_EQUAL(1u, list.size());
+
+    Element b = std::move(a);
+
+    static_assert(&b != &a);
+
+    AWL_ASSERT(!a.LinkA::included());
+    AWL_ASSERT(b.LinkA::included());
+
+    AWL_ASSERT_EQUAL(1u, list.size());
 }

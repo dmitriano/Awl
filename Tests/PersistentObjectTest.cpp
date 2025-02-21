@@ -98,11 +98,11 @@ namespace
 
         container.persistentObject.load();
 
-        AWT_ASSERT(container.persistentObject.value() == MakeSettings<String>());
+        AWL_ASSERT(container.persistentObject.value() == MakeSettings<String>());
     }
 }
 
-AWT_TEST(PersistentObject)
+AWL_TEST(PersistentObject)
 {
     WriteStorage<awl::io::AtomicStorage, std::string>(context);
 

@@ -28,6 +28,17 @@ namespace awl
 
         base_single_link() : pNext(nullptr) {}
 
+        base_single_link(const base_single_link& other) = delete;
+
+        base_single_link& operator = (const base_single_link& other) = delete;
+
+        base_single_link(base_single_link&& other) = delete;
+
+        base_single_link& operator = (base_single_link&& other) = delete;
+
+        //! Single list elements can't exclude themself when they are destroyed.
+        ~base_single_link() = default;
+
         Link * next() { return pNext; }
 
         const Link * next() const { return pNext; }

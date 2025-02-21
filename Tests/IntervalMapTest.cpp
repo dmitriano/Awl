@@ -20,9 +20,9 @@ using IntervalMap = awl::interval_map<int, std::string>;
 static_assert(std::ranges::range<Map>);
 static_assert(std::ranges::range<IntervalMap>);
 
-AWT_TEST(IntervalMapIterator)
+AWL_TEST(IntervalMapIterator)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
     IntervalMap actual_map;
 
@@ -30,7 +30,7 @@ AWT_TEST(IntervalMapIterator)
         auto begin = actual_map.begin();
         auto end = actual_map.end();
 
-        AWT_ASSERT(begin == end);
+        AWL_ASSERT(begin == end);
     }
 
     actual_map.assign(1, 3, "a");
@@ -41,36 +41,36 @@ AWT_TEST(IntervalMapIterator)
         auto begin = actual_map.begin();
         auto end = actual_map.end();
 
-        AWT_ASSERT(begin != end);
+        AWL_ASSERT(begin != end);
 
         IntervalMap::const_iterator i = begin;
 
         //auto val = (*i).first;
         //auto val = (*i++).first;
         
-        AWT_ASSERT((*i).second == "a");
-        AWT_ASSERT(i != end && (*i++).first == 1);
-        AWT_ASSERT((*i).second == "a");
-        AWT_ASSERT(i != end && (*i++).first == 2);
-        AWT_ASSERT((*i).second == "a");
-        AWT_ASSERT(i != end && (*i++).first == 3);
+        AWL_ASSERT((*i).second == "a");
+        AWL_ASSERT(i != end && (*i++).first == 1);
+        AWL_ASSERT((*i).second == "a");
+        AWL_ASSERT(i != end && (*i++).first == 2);
+        AWL_ASSERT((*i).second == "a");
+        AWL_ASSERT(i != end && (*i++).first == 3);
 
-        AWT_ASSERT((*i).second == "b");
-        AWT_ASSERT(i != end && (*i++).first == 5);
-        AWT_ASSERT((*i).second == "b");
-        AWT_ASSERT(i != end && (*i++).first == 6);
+        AWL_ASSERT((*i).second == "b");
+        AWL_ASSERT(i != end && (*i++).first == 5);
+        AWL_ASSERT((*i).second == "b");
+        AWL_ASSERT(i != end && (*i++).first == 6);
 
-        AWT_ASSERT(i == end);
+        AWL_ASSERT(i == end);
     }
 }
 
-AWT_TEST(IntervalMap)
+AWL_TEST(IntervalMap)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
     
-    AWT_ATTRIBUTE(int, range, 1000);
-    AWT_ATTRIBUTE(size_t, iteration_count, 100);
-    AWT_ATTRIBUTE(size_t, clear_count, 50);
+    AWL_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, iteration_count, 100);
+    AWL_ATTRIBUTE(size_t, clear_count, 50);
 
     Map expected_map;
 
@@ -84,7 +84,7 @@ AWT_TEST(IntervalMap)
             return actual_pair.first == expected_pair.first && actual_pair.second == expected_pair.second;
         };
 
-        AWT_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
+        AWL_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
     };
 
     auto assign = [&context, &expected_map, &actual_map, &assert_equal](int a, int b, std::string value)
@@ -96,7 +96,7 @@ AWT_TEST(IntervalMap)
 
         for (int i = a; i <= b; ++i)
         {
-            AWT_ASSERT(actual_map.at(i) == value);
+            AWL_ASSERT(actual_map.at(i) == value);
 
             expected_map[i] = value;
         }

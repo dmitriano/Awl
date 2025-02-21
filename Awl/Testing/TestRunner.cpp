@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Testing/TestMap.h"
+#include "Awl/Testing/TestRunner.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
@@ -15,43 +15,23 @@
 #include "Awl/WatchDog.h"
 #include "Awl/ConsoleLogger.h"
 
-#include <set>
-#include <regex>
 #include <thread>
+#include <functional>
+#include <algorithm>
+#include <cassert>
 
 namespace awl::testing
 {
-    TestMap::TestMap(ostringstream& last_output, const std::string& filter) :
+    TestRunner::TestRunner(ostringstream& last_output) :
         nullOutput(&nullBuffer),
-        lastOutput(last_output),
-        testMap(make_static_map<TestFunc>(filter))
+        lastOutput(last_output)
     {}
 
-    void TestMap::Run(const TestContext& context, const char* name)
+    void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context)
     {
-        auto i = testMap.find(name);
-
-        if (i == testMap.end())
-        {
-            throw TestException(format() << _T("The test '" << name << _T(" does not exist.")));
-        }
-
-        RunLink(i->second, context);
-    }
-
-    void TestMap::RunAll(const TestContext& context)
-    {
-        for (auto& p : testMap)
-        {
-            RunLink(p.second, context);
-        }
-    }
-
-    void TestMap::RunLink(const TestLink* p_test_link, const TestContext& context)
-    {
-        AWT_ATTRIBUTE(String, output, _T("failed"));
-        AWT_ATTRIBUTE(size_t, loop, 0);
-        AWT_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
+        AWL_ATTRIBUTE(String, output, _T("failed"));
+        AWL_ATTRIBUTE(size_t, loop, 0);
+        AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
         context.out << FromACString(p_test_link->name());
 

@@ -25,14 +25,14 @@ namespace awl
 
         auto& chain = static_chain<FuncPtr>();
         
-        auto i = chain.find(name);
+        const StaticLink<FuncPtr>* p_link = chain.find(name);
 
-        if (i == chain.end())
+        if (p_link == nullptr)
         {
             throw FactoryException(format() << "Factory function '" << name << "' not found.");
         }
 
-        FuncPtr func = i->value();
+        FuncPtr func = p_link->value();
 
         return func(std::forward<Args>(args)...);
     }
@@ -59,5 +59,5 @@ namespace awl
     static awl::StaticLink<awl::FactoryFuncPtr<T>> name##_FactoryLink(#name, &AWL_FACTORY_FUNC_NAME(name)); \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name)
 
-#define AWT_DISABLED_FACTORY(T, name) \
+#define AWL_DISABLED_FACTORY(T, name) \
     static AWL_FACTORY_FUNC_SIGNATURE(T, name)

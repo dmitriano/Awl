@@ -38,8 +38,8 @@ using CorruptFunc = std::function<void(std::vector<uint8_t> &)>;
 template <class Hash, class T>
 static void TestOnVector(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = {})
 {
-    AWT_ATTRIBUTE(size_t, block_size, 64);
-    AWT_ATTRIBUTE(size_t, sample_count, 100);
+    AWL_ATTRIBUTE(size_t, block_size, 64);
+    AWL_ATTRIBUTE(size_t, sample_count, 100);
 
     static std::vector<uint8_t> v;
 
@@ -86,7 +86,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
         {
             Read(hin, result);
 
-            AWT_ASSERTM(sample == result, _T("read/write mismatch."));
+            AWL_ASSERTM(sample == result, _T("read/write mismatch."));
 
             result.resize(0);
         }
@@ -100,8 +100,8 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
             context.out << std::endl;
         }
 
-        AWT_ASSERT(in.End());
-        AWT_ASSERT(hin.End());
+        AWL_ASSERT(in.End());
+        AWL_ASSERT(hin.End());
     }
 }
 
@@ -110,10 +110,10 @@ using CorruptFileFunc = std::function<void(const awl::Char *)>;
 template <class Hash, class T>
 static void TestOnFile(const TestContext & context, Hash hash, const T & sample, const CorruptFileFunc & corrupt = {})
 {
-    AWT_ATTRIBUTE(size_t, block_size, 64);
-    AWT_ATTRIBUTE(size_t, sample_count, 100);
-    AWT_FLAG(not_buffered);
-    AWT_FLAG(no_hash);
+    AWL_ATTRIBUTE(size_t, block_size, 64);
+    AWL_ATTRIBUTE(size_t, sample_count, 100);
+    AWL_FLAG(not_buffered);
+    AWL_FLAG(no_hash);
 
     const size_t total_size = sample_count * (sample.size() * sizeof(typename T::value_type) + sizeof(decltype(sample.size())));
 
@@ -179,7 +179,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
         {
             Read(redirected_in, result);
 
-            AWT_ASSERTM(sample == result, _T("read/write mismatch."));
+            AWL_ASSERTM(sample == result, _T("read/write mismatch."));
 
             result.resize(0);
         }
@@ -193,8 +193,8 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             context.out << std::endl;
         }
 
-        AWT_ASSERT(in.End());
-        AWT_ASSERT(hin.End());
+        AWL_ASSERT(in.End());
+        AWL_ASSERT(hin.End());
     }
 
     //There is no wchar_t version in C++.
@@ -204,7 +204,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 template <class Hash, class T>
 static void TestCorruption(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt, bool eof_allowed)
 {
-    AWT_ATTRIBUTE(size_t, corruption_count, 100);
+    AWL_ATTRIBUTE(size_t, corruption_count, 100);
     
     for (auto i : awl::make_count(corruption_count))
     {
@@ -214,28 +214,28 @@ static void TestCorruption(const TestContext & context, Hash hash, const T & sam
         {
             TestOnVector(context, hash, sample, corrupt);
 
-            AWT_FAILM("Corrupted stream.");
+            AWL_FAILM("Corrupted stream.");
         }
         catch (const CorruptionException &)
         {
         }
         catch (const EndOfFileException &)
         {
-            AWT_ASSERTM(eof_allowed, _T("End of file is not allowed."));
+            AWL_ASSERTM(eof_allowed, _T("End of file is not allowed."));
         }
     }
 }
 
 static auto MakeVector(const TestContext & context)
 {
-    AWT_ATTRIBUTE(int, sample_size, 10);
+    AWL_ATTRIBUTE(int, sample_size, 10);
 
     const auto range = awl::make_count(sample_size);
 
     return std::vector<int>(range.begin(), range.end());
 }
 
-AWT_TEST(IoHashStreamCorruption)
+AWL_TEST(IoHashStreamCorruption)
 {
     const std::vector<int> sample = MakeVector(context);
 
@@ -264,12 +264,12 @@ AWT_TEST(IoHashStreamCorruption)
     false);
 }
 
-AWT_TEST(IoHashStreamOnVectorCrc64)
+AWL_TEST(IoHashStreamOnVectorCrc64)
 {
     TestOnVector(context, awl::crypto::Crc64(), MakeVector(context));
 }
 
-AWT_TEST(IoHashStreamOnVectorFake)
+AWL_TEST(IoHashStreamOnVectorFake)
 {
     TestOnVector(context, awl::crypto::FakeHash(), MakeVector(context));
 }
@@ -279,7 +279,7 @@ AWT_TEST(IoHashStreamOnVectorFake)
 //./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000 --no_hash --buffered
 //With hash:
 //./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000
-AWT_TEST(IoHashStreamOnFileCrc64)
+AWL_TEST(IoHashStreamOnFileCrc64)
 {
     TestOnFile(context, awl::crypto::Crc64(), MakeVector(context));
 }
@@ -289,7 +289,7 @@ AWT_TEST(IoHashStreamOnFileCrc64)
 // Write speed: 327.32 MB/sec Read speed: 347.95 MB/sec
 //./AwlTest --filter IoHash.*FileFake.* --verbose --block_size 100000 --sample_count 1000 --sample_size 100000
 // Write speed: 1041.22 MB/sec Read speed: 1878.19 MB/sec
-AWT_TEST(IoHashStreamOnFileFake)
+AWL_TEST(IoHashStreamOnFileFake)
 {
     TestOnFile(context, awl::crypto::FakeHash(), MakeVector(context));
 }

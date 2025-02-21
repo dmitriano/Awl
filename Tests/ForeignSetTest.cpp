@@ -62,10 +62,10 @@ namespace
     }
 }
 
-AWT_TEST(ForeignSetAddRemoveClear)
+AWL_TEST(ForeignSetAddRemoveClear)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     PrimarySet ps{ PrimaryGetter{ &A::pk } };
     ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
@@ -80,15 +80,15 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
             if (f_count != 0)
             {
-                AWT_ASSERT(i != fs.end());
+                AWL_ASSERT(i != fs.end());
 
                 const auto & vs = *i;
                 
-                AWT_ASSERT_EQUAL(f_count, vs.size());
+                AWL_ASSERT_EQUAL(f_count, vs.size());
             }
             else
             {
-                AWT_ASSERT(i == fs.end());
+                AWL_ASSERT(i == fs.end());
             }
         }
     };
@@ -107,13 +107,13 @@ AWT_TEST(ForeignSetAddRemoveClear)
 
     check();
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetDestructor)
+AWL_TEST(ForeignSetDestructor)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
     
@@ -125,13 +125,13 @@ AWT_TEST(ForeignSetDestructor)
         GenerateSet(ps, insert_count, range);
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetConstructor)
+AWL_TEST(ForeignSetConstructor)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
@@ -148,13 +148,13 @@ AWT_TEST(ForeignSetConstructor)
         count += set.size();
     }
 
-    AWT_ASSERT_EQUAL(ps.size(), count);
+    AWL_ASSERT_EQUAL(ps.size(), count);
 }
 
-AWT_TEST(ForeignSetShared)
+AWL_TEST(ForeignSetShared)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     {
         A a;
@@ -198,13 +198,13 @@ AWT_TEST(ForeignSetShared)
         }
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetUnique)
+AWL_TEST(ForeignSetUnique)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     //Check if it compiles.
 
@@ -228,13 +228,13 @@ AWT_TEST(ForeignSetUnique)
         }
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }
 
-AWT_TEST(ForeignSetPlainPointer)
+AWL_TEST(ForeignSetPlainPointer)
 {
-    AWT_ATTRIBUTE(size_t, insert_count, 1000);
-    AWT_ATTRIBUTE(int, range, 1000);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
+    AWL_ATTRIBUTE(int, range, 1000);
 
     //Check if it compiles.
 
@@ -269,5 +269,5 @@ AWT_TEST(ForeignSetPlainPointer)
         delete p;
     }
 
-    AWT_ASSERT(fs.empty());
+    AWL_ASSERT(fs.empty());
 }

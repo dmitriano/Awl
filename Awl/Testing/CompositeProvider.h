@@ -8,6 +8,7 @@
 #include <tuple>
 
 #include "Awl/Testing/AttributeProvider.h"
+#include "Awl/TupleHelpers.h"
 
 namespace awl::testing
 {
@@ -26,6 +27,22 @@ namespace awl::testing
         bool TryGet(const char* name, T& val)
         {
             return TryGetAt<T, 0u>(name, val);
+        }
+
+        template <class T>
+        void Set(const char* name, const T& val)
+        {
+            std::apply([name, &val](Ps&... provider)
+            {
+                (provider.Set(name, val), ...);
+
+            }, m_providers);
+        }
+
+        template<std::size_t I>
+        auto& get_provider() const
+        {
+            return std::get<I>(m_providers);
         }
 
     private:

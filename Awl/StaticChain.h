@@ -9,7 +9,8 @@
 #include "Awl/String.h"
 #include "Awl/StaticSingleton.h"
 
-#include <algorithm>
+#include <ranges>
+#include <functional>
 
 namespace awl
 {
@@ -62,28 +63,37 @@ namespace awl
         Iterator begin() { return m_list.begin(); }
         Iterator end() { return m_list.end(); }
 
-        Iterator find(const char* name)
+        template <class Pred = CStringInsensitiveEqual<char>>
+        Link* find(const char* name, Pred&& pred = {})
         {
-            return std::find_if(begin(), end(),
-                [name](const Link* link) -> bool
-                {
-                    return StrCmp(link->name(), name) == 0;
-                });
+            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find(name, pred));
         }
 
-        ConstIterator find(const char* name) const
+        template <class Pred = CStringInsensitiveEqual<char>>
+        const Link* find(const char* name, Pred&& pred = {}) const
         {
-            return const_cast<StaticChain*>(this)->find(name);
+            auto i = std::ranges::find_if(begin(), end(),
+                std::bind(pred, name, std::placeholders::_1),
+                std::mem_fn(&Link::name));
+
+            if (i != end())
+            {
+                return *i;
+            }
+
+            return nullptr;
         }
 
-        Iterator find(const std::string& name)
+        template <class Pred = CStringInsensitiveEqual<char>>
+        Link* find(const std::string& name, Pred&& pred = {})
         {
-            return find(name.c_str());
+            return find(name.c_str(), pred);
         }
 
-        ConstIterator find(const std::string& name) const
+        template <class Pred = CStringInsensitiveEqual<char>>
+        const Link* find(const std::string& name, Pred&& pred = {}) const
         {
-            return const_cast<StaticChain*>(this)->find(name);
+            return find(name.c_str(), pred);
         }
 
         void clear()

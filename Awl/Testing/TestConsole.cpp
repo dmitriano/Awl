@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Testing/TestConsole.h"
-#include "Awl/Testing/TestMap.h"
+#include "Awl/Testing/TestRunner.h"
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
@@ -12,60 +12,31 @@
 #include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
+#include "Awl/StaticMap.h"
+
+#ifdef AWL_QT
+    #include "QtExtras/Json/JsonLoadSave.h"
+    #include "QtExtras/StringConversion.h"
+#endif
 
 #include <set>
 #include <regex>
 
 namespace awl::testing
 {
-    int Run(int argc, Char* argv[])
-    {
-        CompositeProvider<CommandLineProvider> ap(CommandLineProvider(argc, argv));
-
-        TestConsole console(ap);
-
-        // TODO: call PrintUnusedOptions()
-        // auto guard = make_scope_guard([&ap] { ap.PrintUnusedOptions()})
-
-        return console.Run();
-    }
-
-    int Run()
-    {
-        return Run(0, nullptr);
-    }
-
-    TestConsole::TestConsole(CompositeProvider<CommandLineProvider>& ap) :
+    template <attribute_provider Provider>
+    TestConsole<Provider>::TestConsole(Provider& ap) :
         m_ap(ap),
         m_context{ awl::cout(), m_logger, m_source.get_token(), m_ap }
     {
     }
 
-    bool TestConsole::RunTests()
+    template <attribute_provider Provider>
+    bool TestConsole<Provider>::RunTests()
     {
         TestContext& context = m_context;
         
-        AWT_FLAG(list);
-
-        if (list)
-        {
-            AWT_ATTRIBUTE(std::string, filter, {});
-
-            auto test_map = make_static_map<TestFunc>(filter);
-
-            for (auto& p : test_map)
-            {
-                const auto& test_name = p.first;
-
-                awl::cout() << test_name << std::endl;
-            }
-
-            awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
-
-            return 0;
-        }
-
-        AWT_ATTRIBUTE(std::set<String>, run, {});
+        AWL_ATTRIBUTE(std::string, run, {});
 
         bool passed = false;
 
@@ -73,26 +44,33 @@ namespace awl::testing
 
         try
         {
+            TestRunner runner(last_output);
+
             if (run.empty())
             {
-                AWT_ATTRIBUTE(std::string, filter, ".*_Test");
+                AWL_ATTRIBUTE(std::string, filter, ".*_Test");
 
-                TestMap test_map(last_output, filter);
+                StaticMap<TestFunc> test_map{ StaticMap<TestFunc>::fill(filter) };
 
-                context.out << std::endl << _T("***************** Running ") << test_map.GetCount() << _T(" tests *****************") << std::endl;
+                context.out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
 
-                test_map.RunAll(context);
+                for (const TestLink* p_link : test_map)
+                {
+                    runner.RunLink(p_link, context);
+                }
             }
             else
             {
-                TestMap test_map(last_output, "");
+                context.out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
 
-                context.out << std::endl << _T("***************** Running ") << run.size() << _T(" tests *****************") << std::endl;
+                const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
-                for (auto& test : run)
+                if (p_link == nullptr)
                 {
-                    test_map.Run(context, ToAString(test).c_str());
+                    throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
                 }
+
+                runner.RunLink(p_link, context);
             }
 
             context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
@@ -111,7 +89,8 @@ namespace awl::testing
         return passed;
     }
 
-    int TestConsole::Run()
+    template <attribute_provider Provider>
+    int TestConsole<Provider>::Run()
     {
         try
         {
@@ -123,5 +102,80 @@ namespace awl::testing
         }
 
         return 2;
+    }
+
+    int Run(int argc, CmdChar* argv[])
+    {
+        CommandLineProvider cl(argc, argv);
+
+        // "list" command runs without TestRunner
+        {
+            ProviderContext<CommandLineProvider> context{ cl };
+
+            AWL_FLAG(list);
+
+            if (list)
+            {
+                AWL_ATTRIBUTE(std::string, filter, {});
+
+                auto test_map = StaticMap<TestFunc>::fill(filter);
+
+                for (auto& p_link : test_map)
+                {
+                    awl::cout() << p_link->name() << std::endl;
+                }
+
+                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+
+                return 0;
+            }
+        }
+
+#ifdef AWL_QT
+
+        QJsonObject jo;
+
+        CmdString json_file;
+
+        if (cl.TryGet("json", json_file))
+        {
+            try
+            {
+                jo = loadObjectFromFile(ToQString(json_file));
+            }
+            catch (const JsonException& e)
+            {
+                awl::cout() << e.What() << std::endl;
+
+                return 3;
+            }
+        }
+
+        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+
+#else
+
+        CompositeProvider<CommandLineProvider> ap(std::move(cl));
+
+#endif
+
+        TestConsole console(ap);
+
+        auto guard = make_scope_guard([&ap]
+        {
+            auto names = ap.get_provider<0>().GetUnusedOptions();
+
+            for (const std::string& name : names)
+            {
+                cout() << _T("Unused option '" << name << _T("'")) << std::endl;
+            }
+        });
+
+        return console.Run();
+    }
+
+    int Run()
+    {
+        return Run(0, nullptr);
     }
 }

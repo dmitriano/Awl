@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    AWL_DECLARE_MOVABLE_LINK(observer_link)
+    AWL_DECLARE_QUICK_LINK(observer_link)
 
     template <class IObserver>
     class Observer : public IObserver, public observer_link
@@ -25,6 +25,8 @@ namespace awl
         Observer & operator = (const Observer & other) = delete;
 
         Observer& operator = (Observer&& other) = default;
+
+        ~Observer() = default;
 
         bool IsSubscribed() const
         {
@@ -42,11 +44,6 @@ namespace awl
             {
                 UnsubscribeSelf();
             }
-        }
-
-        ~Observer()
-        {
-            observer_link::safe_exclude();
         }
     };
 

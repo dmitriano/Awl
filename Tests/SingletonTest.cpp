@@ -34,89 +34,89 @@ namespace awl
     }
 }
 
-AWT_TEST(Destructible)
+AWL_TEST(Destructible)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
     
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 
     {
         awl::Destructible<A> da(value);
 
         auto guard = awl::make_scope_guard([&da]() { da.Destroy();  });
 
-        AWT_ASSERT(*da == A(value));
+        AWL_ASSERT(*da == A(value));
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(SharedSingleton)
+AWL_TEST(SharedSingleton)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 
     {
         auto p1 = awl::shared_singleton<A>();
 
-        AWT_ASSERT_EQUAL(1, A::count);
-        AWT_ASSERT(*p1 == A(value));
+        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT(*p1 == A(value));
 
         {
             auto p2 = awl::shared_singleton<A>();
 
-            AWT_ASSERT_EQUAL(1, A::count);
-            AWT_ASSERT(*p2 == A(value));
+            AWL_ASSERT_EQUAL(1, A::count);
+            AWL_ASSERT(*p2 == A(value));
         }
 
-        AWT_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, A::count);
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
-    AWT_ASSERT(!awl::shared_singleton<A>());
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT(!awl::shared_singleton<A>());
+    AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWT_TEST(OnDemandSingleton)
+AWL_TEST(OnDemandSingleton)
 {
-    AWT_UNUSED_CONTEXT;
+    AWL_UNUSED_CONTEXT;
 
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
 
     {
         auto p1 = awl::ondemand_singleton<A>();
 
-        AWT_ASSERT_EQUAL(1, A::count);
-        AWT_ASSERT(*p1 == A(value));
+        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT(*p1 == A(value));
 
         {
             auto p2 = awl::ondemand_singleton<A>();
 
-            AWT_ASSERT_EQUAL(1, A::count);
-            AWT_ASSERT(*p2 == A(value));
+            AWL_ASSERT_EQUAL(1, A::count);
+            AWL_ASSERT(*p2 == A(value));
         }
 
-        AWT_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, A::count);
     }
 
-    AWT_ASSERT_EQUAL(0, A::count);
-    AWT_ASSERT(awl::ondemand_singleton<A>() != nullptr);
-    AWT_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT(awl::ondemand_singleton<A>() != nullptr);
+    AWL_ASSERT_EQUAL(0, A::count);
 
     {
         auto p1 = awl::ondemand_singleton<A>();
 
-        AWT_ASSERT_EQUAL(1, A::count);
-        AWT_ASSERT(*p1 == A(value));
+        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT(*p1 == A(value));
 
         {
             auto p2 = awl::ondemand_singleton<A>();
 
-            AWT_ASSERT_EQUAL(1, A::count);
-            AWT_ASSERT(*p2 == A(value));
+            AWL_ASSERT_EQUAL(1, A::count);
+            AWL_ASSERT(*p2 == A(value));
         }
 
-        AWT_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, A::count);
     }
 }
