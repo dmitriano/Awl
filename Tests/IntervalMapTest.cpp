@@ -87,7 +87,7 @@ AWL_TEST(IntervalMap)
         AWL_ASSERT(std::ranges::equal(actual_map, expected_map, pred));
     };
 
-    auto assign = [&context, &expected_map, &actual_map, &assert_equal](int a, int b, std::string value)
+    auto assign = [&expected_map, &actual_map, &assert_equal](int a, int b, std::string value)
     {
         //context.out << _T("Assigning: [") << a << _T(", ") << b << "] = " << awl::FromAString(value) << std::endl;
         

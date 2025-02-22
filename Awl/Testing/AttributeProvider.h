@@ -52,11 +52,4 @@ namespace awl::testing
 
         return val;
     }
-
-    // Default is false.
-    template <attribute_provider Provider>
-    bool GetFlagValue(Provider& provider, const char* name)
-    {
-        return GetAttributeValue<bool, Provider>(name, false);
-    }
 }
