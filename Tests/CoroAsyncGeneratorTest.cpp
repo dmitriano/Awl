@@ -24,6 +24,7 @@ namespace
     {
         for (int i = 0; i < count; ++i)
         {
+            // std::generator has deleted await_transform()
             co_await 100ms;
 
             if (i > 5)

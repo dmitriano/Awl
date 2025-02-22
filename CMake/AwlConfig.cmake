@@ -1,10 +1,6 @@
 cmake_minimum_required (VERSION 3.6.2)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(CMAKE_CXX_STANDARD 23)
-else()
-    set(CMAKE_CXX_STANDARD 20)
-endif()
+set(CMAKE_CXX_STANDARD 23)
 
 option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
 option(AWL_BOOST_EXTRAS "Use boost::multiprecision.")
