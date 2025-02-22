@@ -116,7 +116,7 @@ namespace awl::io
             WriteToStreamFunc(s, [&snapshotable, &v](UniqueStream& s) { snapshotable.WriteSnapshot(s, v); });
         }
 
-        bool LoadFromFile(Value& val, awl::io::UniqueStream& s, LogLevel level);
+        bool LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level);
 
         void ClearBackup()
         {
