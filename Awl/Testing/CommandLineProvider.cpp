@@ -31,7 +31,7 @@ namespace awl::testing
             {
                 CmdString name = match[1].str();
 
-                auto result = allOptions.emplace(StringConvertor<CmdChar>::ConvertFrom(name.c_str()), Option{});
+                auto result = allOptions.emplace(StringConvertor<char>::ConvertFrom(name.c_str()), Option{});
 
                 if (!result.second)
                 {
