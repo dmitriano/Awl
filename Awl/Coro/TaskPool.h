@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    class Controller : private Observable<TaskSink>
+    class TaskPool : private Observable<TaskSink>
     {
     private:
 
@@ -55,7 +55,7 @@ namespace awl
         {
         public:
 
-            AllAwaitable(Controller* p_this) : pThis(p_this)
+            AllAwaitable(TaskPool* p_this) : pThis(p_this)
             {
                 pThis->Subscribe(this);
             }
@@ -88,7 +88,7 @@ namespace awl
                 return pThis->empty();
             }
 
-            Controller* const pThis;
+            TaskPool* const pThis;
 
             std::coroutine_handle<> m_h;
         };
@@ -97,7 +97,7 @@ namespace awl
 
     public:
 
-        void register_task(UpdateTask&& task);
+        void add_task(UpdateTask&& task);
 
         std::size_t task_count() const
         {
@@ -129,12 +129,12 @@ namespace awl
 
         struct Handler : Observer<TaskSink>
         {
-            Handler(Controller* p_this, UpdateTask&& task) :
+            Handler(TaskPool* p_this, UpdateTask&& task) :
                 pThis(p_this),
                 m_task(std::move(task))
             {}
 
-            Controller* pThis;
+            TaskPool* pThis;
 
             UpdateTask m_task;
 

@@ -104,6 +104,6 @@ namespace awl
 
         std::coroutine_handle<promise_type> m_h;
 
-        friend class Controller;
+        friend class TaskPool;
     };
 }

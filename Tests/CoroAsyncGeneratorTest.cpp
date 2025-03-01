@@ -6,7 +6,7 @@
 #include "Awl/Separator.h"
 #include "Awl/Coro/UpdateTask.h"
 #include "Awl/Coro/ProcessTask.h"
-#include "Awl/Coro/Controller.h"
+#include "Awl/Coro/TaskPool.h"
 #include "Awl/Coro/AsyncGenerator.h"
 
 #include "Awl/Testing/UnitTest.h"
@@ -102,9 +102,9 @@ AWL_TEST(CoroAsyncGeneratorOwned)
 
 AWL_TEST(CoroControllerCancel)
 {
-    awl::Controller controller;
+    awl::TaskPool controller;
 
-    controller.register_task(test(context));
+    controller.add_task(test(context));
 
     awl::testing::timeQueue.loop(3);
 
@@ -122,9 +122,9 @@ AWL_TEST(CoroControllerCancel)
 
 AWL_TEST(CoroControllerRegistered)
 {
-    awl::Controller controller;
+    awl::TaskPool controller;
 
-    controller.register_task(test(context));
+    controller.add_task(test(context));
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
@@ -155,14 +155,14 @@ namespace awl
     {
     public:
 
-        static awl::UpdateTask TestWaitAllTask(const awl::testing::TestContext& context, awl::Controller& controller)
+        static awl::UpdateTask TestWaitAllTask(const awl::testing::TestContext& context, awl::TaskPool& controller)
         {
             RegisterTasks(context, controller);
 
             co_await controller.wait_all_task_experimental();
         }
 
-        static awl::UpdateTask TestWait(const awl::testing::TestContext& context, awl::Controller& controller, bool all_task = false, std::size_t actual_N = 2)
+        static awl::UpdateTask TestWait(const awl::testing::TestContext& context, awl::TaskPool& controller, bool all_task = false, std::size_t actual_N = 2)
         {
             RegisterTasks(context, controller);
 
@@ -188,11 +188,11 @@ namespace awl
 
     private:
 
-        static void RegisterTasks(const awl::testing::TestContext& context, awl::Controller& controller)
+        static void RegisterTasks(const awl::testing::TestContext& context, awl::TaskPool& controller)
         {
-            controller.register_task(PrintFinished(context, 1));
-            controller.register_task(PrintFinished(context, 2));
-            controller.register_task(PrintFinished(context, 3));
+            controller.add_task(PrintFinished(context, 1));
+            controller.add_task(PrintFinished(context, 2));
+            controller.add_task(PrintFinished(context, 3));
 
             AWL_ASSERT_EQUAL(3u, controller.task_count());
         }
@@ -201,7 +201,7 @@ namespace awl
 
 AWL_TEST(CoroControllerWaitAllTask)
 {
-    awl::Controller controller;
+    awl::TaskPool controller;
 
     awl::UpdateTask task = awl::ControllerTest::TestWaitAllTask(context, controller);
 
@@ -224,7 +224,7 @@ AWL_TEST(CoroControllerWaitAllTask)
 
 AWL_TEST(CoroControllerWait)
 {
-    awl::Controller controller;
+    awl::TaskPool controller;
 
     awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller);
 
@@ -237,7 +237,7 @@ AWL_TEST(CoroControllerCancelWait1)
 {
     AWL_FLAG(all_task);
 
-    awl::Controller controller;
+    awl::TaskPool controller;
 
     awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task, 0);
 
@@ -253,7 +253,7 @@ AWL_TEST(CoroControllerCancelWait2)
 {
     AWL_FLAG(all_task);
 
-    awl::Controller controller;
+    awl::TaskPool controller;
 
     awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task);
 

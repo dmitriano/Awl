@@ -1,4 +1,4 @@
-#include "Awl/Coro/Controller.h"
+#include "Awl/Coro/TaskPool.h"
 
 #include <cassert>
 #include <ranges>
@@ -7,7 +7,7 @@
 
 using namespace awl;
 
-void Controller::register_task(UpdateTask&& task)
+void TaskPool::add_task(UpdateTask&& task)
 {
     // The promise is owned at this point.
     assert(task.m_h != nullptr);
@@ -24,7 +24,7 @@ void Controller::register_task(UpdateTask&& task)
     }
 }
 
-void Controller::cancel()
+void TaskPool::cancel()
 {
     // Do not notify awaiters if nothing changed.
     if (!m_handlers.empty())
@@ -40,7 +40,7 @@ void Controller::cancel()
     }
 }
 
-UpdateTask Controller::wait_all_task_experimental()
+UpdateTask TaskPool::wait_all_task_experimental()
 {
     while (!m_handlers.empty())
     {
@@ -48,12 +48,12 @@ UpdateTask Controller::wait_all_task_experimental()
 
         // The vector contains an empty task and
         // and OnFinished() should delete it correctly.
-        // BUG: This task is not cancelled by Controller::cancel().
+        // BUG: This task is not cancelled by TaskPool::cancel().
         co_await task;
     }
 }
 
-void Controller::Handler::OnFinished()
+void TaskPool::Handler::OnFinished()
 {
     const std::size_t index = this - pThis->m_handlers.data();
 
