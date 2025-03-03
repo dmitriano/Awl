@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    class TaskPool : private Observable<TaskSink>
+    class TaskPool : public Observable<TaskSink>
     {
     private:
 
