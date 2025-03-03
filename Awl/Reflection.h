@@ -6,12 +6,14 @@
 #pragma once
 
 #include "Awl/Tuplizable.h"
+#include "Awl/IntRange.h"
 
 #include <vector>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <cstring>
+#include <ranges>
 
 namespace awl
 {
@@ -180,6 +182,17 @@ namespace awl
             return ml;
         }
     };
+
+    template <class T> requires is_reflectable_v<T>
+    auto different_member_names(const T& left, const T& right)
+    {
+        auto a = objects_diff(left, right);
+
+        // Capture a by value to keep it alive while iterating over the range.
+        return awl::make_count(a.size()) |
+            std::views::filter([a](size_t index) { return a[index]; }) |
+            std::views::transform([](size_t index) { return T::get_member_names()[index]; });
+    }
 }
 
 #define AWL_REFLECT(...) \
