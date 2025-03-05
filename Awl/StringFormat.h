@@ -36,7 +36,7 @@ namespace awl
         // Allow QT apps use this formatter.
         operator QString() const
         {
-            if constexpr (std::is_same_v<Char, char>)
+            if constexpr (std::is_same_v<C, char>)
             {
                 return QString::fromStdString(str());
             }
