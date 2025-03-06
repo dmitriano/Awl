@@ -840,13 +840,22 @@ namespace awl
 
     //Multiplies two decimals without loosing the precision and throws if an overflow occurs.
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
-    constexpr decimal<UInt, exp_len, DataTemplate> multiply(decimal<UInt, exp_len, DataTemplate> a, decimal<UInt, exp_len, DataTemplate> b)
+    constexpr decimal<UInt, exp_len, DataTemplate> multiply(const decimal<UInt, exp_len, DataTemplate>& a, const decimal<UInt, exp_len, DataTemplate>& b)
     {
         decimal<UInt, exp_len, DataTemplate> c(a.exponent() + b.exponent());
 
         c.set_mantissa(a.mantissa() * b.mantissa());
 
         return c;
+    }
+
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
+    constexpr decimal<UInt, exp_len, DataTemplate> abs(const decimal<UInt, exp_len, DataTemplate>& a)
+    {
+        if (a.negative())
+        {
+            return -a;
+        }
     }
 }
 
