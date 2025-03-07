@@ -4,8 +4,8 @@
 #include <exception>
 #include <utility>
 
-#include "Awl/QuickLink.h"
 #include "Awl/Coro/UpdatePromise.h"
+#include "Awl/QuickLink.h"
 
 namespace awl
 {

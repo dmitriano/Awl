@@ -28,16 +28,12 @@ namespace awl
         // 2. lazy - that start its execution only after 'co_await'ing on them
         // here I used eager coroutine UpdateTask
         // eager: do not suspend before running coroutine body
-        std::suspend_never initial_suspend()
+        std::suspend_never initial_suspend() noexcept
         {
             return {};
         }
 
-        void unhandled_exception()
-        {
-            // alternatively we can store current exeption in std::exception_ptr to rethrow it later
-            std::terminate();
-        }
+        void unhandled_exception() noexcept;
 
         // when final suspend is executed 'value' is already set
         // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
