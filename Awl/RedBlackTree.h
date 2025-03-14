@@ -147,12 +147,12 @@ namespace awl::helpers
             //walk down the tree
             while (x != nullptr)
             {
-                if (m_comp(key, x->value))
+                if (m_comp(key, x->value()))
                 {
                     accum_left(x);
                     x = x->left;
                 }
-                else if (m_comp(x->value, key))
+                else if (m_comp(x->value(), key))
                 {
                     accum_right(x);
                     x = x->right;
@@ -205,12 +205,12 @@ namespace awl::helpers
             //walk down the tree
             while (x != nullptr)
             {
-                if (m_comp(key, x->value))
+                if (m_comp(key, x->value()))
                 {
                     greater = x;
                     x = x->left;
                 }
-                else if (m_comp(x->value, key))
+                else if (m_comp(x->value(), key))
                 {
                     x = x->right;
                 }
@@ -325,14 +325,14 @@ namespace awl::helpers
             }
             else
             {
-                if (m_comp(node->value, parent->value))
+                if (m_comp(node->value(), parent->value()))
                 {
                     parent->SetLeft(node);
                 }
                 else
                 {
                     //They cannot be equal, because we passed the parent in FindNodeByKey(...).
-                    assert(m_comp(parent->value, node->value));
+                    assert(m_comp(parent->value(), node->value()));
                     parent->SetRight(node);
                 }
             }
@@ -344,12 +344,12 @@ namespace awl::helpers
             Node * pred = GetPredecessor(node);
             if (pred != nullptr)
             {
-                assert(m_comp(pred->value, node->value));
+                assert(m_comp(pred->value(), node->value()));
                 m_list.insert(typename List::iterator(pred), node);
             }
             else
             {
-                assert(node == m_root || m_comp(node->value, m_list.front()->value));
+                assert(node == m_root || m_comp(node->value(), m_list.front()->value()));
                 m_list.push_front(node);
             }
         }

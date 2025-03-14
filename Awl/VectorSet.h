@@ -34,20 +34,25 @@ namespace awl
         {
             using Link = helpers::RedBlackLink<Node>;
 
-            Node(const T & v) : Link{}, value(v)
+            Node(const T & v) : Link{}, m_val(v)
             {
             }
 
-            Node(T && v) : Link{}, value(std::move(v))
+            Node(T && v) : Link{}, m_val(std::move(v))
             {
             }
 
             template <class... Args>
-            Node(Args&&... args) : Link{}, value(std::forward<Args>(args) ...)
+            Node(Args&&... args) : Link{}, m_val(std::forward<Args>(args) ...)
             {
             }
 
-            T value;
+            const T& value() const
+            {
+                return m_val;
+            }
+
+            T m_val;
         };
 
         using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
@@ -91,16 +96,16 @@ namespace awl
         using const_reference = const value_type &;
 
         using iterator = double_node_iterator<Node, quick_link, typename quick_link::ForwardLink, typename quick_link::BackwardLink,
-            T, &Node::value, vector_set>;
+            T, &Node::m_val, vector_set>;
 
         using const_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::ForwardLink, const typename quick_link::BackwardLink,
-            const T, &Node::value, vector_set>;
+            const T, &Node::m_val, vector_set>;
 
         using reverse_iterator = double_node_iterator<Node, quick_link, typename quick_link::BackwardLink, typename quick_link::ForwardLink,
-            T, &Node::value, vector_set>;
+            T, &Node::m_val, vector_set>;
 
         using const_reverse_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::BackwardLink, const typename quick_link::ForwardLink,
-            const T, &Node::value, vector_set>;
+            const T, &Node::m_val, vector_set>;
 
         using allocator_type = Allocator;
         using key_compare = Compare;
@@ -201,11 +206,11 @@ namespace awl
             return !operator == (other);
         }
 
-        T & front() { return m_tree.m_list.front()->value; }
-        const T & front() const { return m_tree.m_list.front()->value; }
+        T & front() { return m_tree.m_list.front()->m_val; }
+        const T & front() const { return m_tree.m_list.front()->m_val; }
 
-        T & back() { return m_tree.m_list.back()->value; }
-        const T & back() const { return m_tree.m_list.back()->value; }
+        T & back() { return m_tree.m_list.back()->m_val; }
+        const T & back() const { return m_tree.m_list.back()->m_val; }
 
         iterator begin() { return m_tree.m_list.begin(); }
         const_iterator begin() const { return m_tree.m_list.begin(); }
@@ -219,14 +224,14 @@ namespace awl
         reverse_iterator rend() { return m_tree.m_list.rend(); }
         const_reverse_iterator rend() const { return m_tree.m_list.rend(); }
 
-        std::pair<iterator, bool> insert(const value_type & value)
+        std::pair<iterator, bool> insert(const value_type & m_val)
         {
-            return UniversalInsert(value);
+            return UniversalInsert(m_val);
         }
 
-        std::pair<iterator, bool> insert(value_type && value)
+        std::pair<iterator, bool> insert(value_type && m_val)
         {
-            return UniversalInsert(std::move(value));
+            return UniversalInsert(std::move(m_val));
         }
 
         template <class... Args>
@@ -235,7 +240,7 @@ namespace awl
             Node * parent;
             //TODO: It is probably a bug. We probably need a deleter here.
             std::unique_ptr<Node> val_node(CreateNode(std::forward<Args>(args) ...));
-            Node * node = m_tree.FindNodeByKey(val_node->value, &parent);
+            Node * node = m_tree.FindNodeByKey(val_node->m_val, &parent);
             const bool exists = node != nullptr;
 
             if (!exists)
@@ -347,12 +352,12 @@ namespace awl
 
         reference operator[](size_type pos)
         {
-            return m_tree.FindNodeByIndex(pos)->value;
+            return m_tree.FindNodeByIndex(pos)->m_val;
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_tree.FindNodeByIndex(pos)->value;
+            return m_tree.FindNodeByIndex(pos)->m_val;
         }
 
         reference at(size_type pos)

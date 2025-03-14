@@ -45,7 +45,7 @@ namespace awl
 
             Set::Node * pn3 = set.m_tree.FindNodeByKey(3);
             AWL_ASSERT(pn3 != nullptr);
-            AWL_ASSERT(pn3->value == 3);
+            AWL_ASSERT(pn3->value() == 3);
 
             Set::Node * pn7 = set.m_tree.FindNodeByKey(7);
             AWL_ASSERT(pn7 == nullptr);
@@ -69,7 +69,7 @@ namespace awl
             AWL_ASSERT_EQUAL(static_cast<int>(count), set.back());
             Set::Node * nN = InsertNew(284);
             AWL_ASSERT_EQUAL(1, set.front());
-            AWL_ASSERT_EQUAL(nN->value, set.back());
+            AWL_ASSERT_EQUAL(nN->value(), set.back());
 
             set.m_tree.RemoveNode(n1);
             AWL_ASSERT(set.m_tree.m_root == n2);
