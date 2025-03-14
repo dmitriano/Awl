@@ -51,3 +51,60 @@ AWL_TEST(UniquePtrBegingDestoyed)
 
     AWL_ASSERT_EQUAL(0, count);
 }
+
+namespace
+{
+    template <class T>
+    class TableColumn
+    {
+        virtual void f() const = 0;
+    };
+
+    template <class T>
+    struct ColumnDefinition
+    {
+        ColumnDefinition() = default;
+
+        ColumnDefinition(std::string t, std::string n, TableColumn<T>* p = nullptr) :
+            type(std::move(t)),
+            name(std::move(n)),
+            col(p)
+        {
+        }
+
+        std::string type;
+        std::string name;
+        std::unique_ptr<TableColumn<T>> col;
+    };
+
+    struct ColumnDescriptor
+    {
+        ColumnDefinition<int> def;
+        std::optional<std::string> prop;
+    };
+}
+
+AWL_TEST(UniquePtrMove)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ColumnDefinition<int> d1;
+
+    ColumnDefinition<int> d2 = std::move(d1);
+
+    ColumnDescriptor desc;
+
+    desc.def = std::move(d2);
+
+    std::vector<ColumnDescriptor> cols;
+
+    cols.push_back(ColumnDescriptor{ std::move(d1), "a"});
+
+    ColumnDefinition<int> col1{ "value", "value", nullptr };
+
+    // Initializer list can't be moved.
+    //const std::vector<ColumnDefinition<int>> cols1 =
+    //{
+    //    ColumnDefinition<int>{"value", "value", nullptr}
+    //};
+}
