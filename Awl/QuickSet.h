@@ -312,13 +312,23 @@ namespace awl
             return m_tree.m_comp;
         }
 
+        const_iterator iterator_from_address(const Node* node) const
+        {
+            return const_iterator(typename List::const_iterator(node));
+        }
+
+        iterator iterator_from_address(Node* node)
+        {
+            return iterator(typename List::iterator(node));
+        }
+
     private:
 
         const_iterator NodeToConstIterator(const Node* node) const
         {
             if (node != nullptr)
             {
-                return const_iterator(typename List::const_iterator(node));
+                return iterator_from_address(node);
             }
 
             return end();
@@ -328,7 +338,7 @@ namespace awl
         {
             if (node != nullptr)
             {
-                return iterator(typename List::iterator(node));
+                return iterator_from_address(node);
             }
 
             return end();
