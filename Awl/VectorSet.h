@@ -125,42 +125,6 @@ namespace awl
                 safe_exclude();
             }
 
-            //The only function that requires this to be Node *.
-            void CopyFrom(Node * other)
-            {
-                this->count = other->count;
-
-                if (other->left != nullptr)
-                {
-                    other->left->parent = this;
-                }
-
-                this->left = other->left;
-
-                if (other->right != nullptr)
-                {
-                    other->right->parent = this;
-                }
-
-                this->right = other->right;
-
-                //Replace other with this in the parent node.
-                if (other->parent != nullptr)
-                {
-                    if (other->parent->left == other)
-                    {
-                        other->parent->SetLeft(this);
-                    }
-                    else
-                    {
-                        other->parent->SetRight(this);
-                    }
-                }
-
-                this->color = other->color;
-                this->SetParent(other->parent);
-            }
-
             T value;
         };
 
@@ -765,6 +729,42 @@ namespace awl
             return std::make_pair(iterator(typename List::iterator(node)), !exists);
         }
 
+        //The only function that requires this to be Node *.
+        void CopyFrom(Node* this_node, Node* other)
+        {
+            this_node->count = other->count;
+
+            if (other->left != nullptr)
+            {
+                other->left->parent = this_node;
+            }
+
+            this_node->left = other->left;
+
+            if (other->right != nullptr)
+            {
+                other->right->parent = this_node;
+            }
+
+            this_node->right = other->right;
+
+            //Replace other with this_node in the parent node.
+            if (other->parent != nullptr)
+            {
+                if (other->parent->left == other)
+                {
+                    other->parent->SetLeft(this_node);
+                }
+                else
+                {
+                    other->parent->SetRight(this_node);
+                }
+            }
+
+            this_node->color = other->color;
+            this_node->SetParent(other->parent);
+        }
+
         //Inserts a node that does not exist to the specified parent.
         void InsertNode(Node * node, Node * parent)
         {
@@ -1064,7 +1064,7 @@ namespace awl
             if (y != z)
             {
                 //we must replace 'z' with 'y' node
-                y->CopyFrom(z);
+                CopyFrom(y, z);
 
                 if (z == m_root)
                     m_root = y;
