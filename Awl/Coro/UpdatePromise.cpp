@@ -34,7 +34,7 @@ void UpdatePromise::unhandled_exception() noexcept
         }
         catch (const std::exception& e)
         {
-            std::cout << "of type derived from std::exception, Message: '" << e.what();
+            out << "of type derived from std::exception, Message: '" << e.what();
         }
 
         logger.error(out.str());
