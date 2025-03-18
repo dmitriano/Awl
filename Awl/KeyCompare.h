@@ -250,7 +250,13 @@ namespace awl
     };
 
     template <class Value, class Field>
-    auto bound_mem_fn(Field(Value::* field_ptr)() const, Field field)
+    auto mem_fn_equal_to(Field(Value::* field_ptr)() const, Field field)
+    {
+        return projected_equal_to<Field, decltype(field_ptr)>(field, field_ptr);
+    }
+
+    template <class Value, class Field>
+    auto mem_fn_equal_to(Field Value::*field_ptr, Field field)
     {
         return projected_equal_to<Field, decltype(field_ptr)>(field, field_ptr);
     }
