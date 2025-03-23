@@ -250,7 +250,7 @@ namespace awl
     };
 
     template <class Value, class Field>
-    auto mem_fn_equal_to(Field(Value::* field_ptr)() const, Field field)
+    auto mem_fn_equal_to(Field(Value::* field_ptr)() const, std::decay_t<Field> field)
     {
         return projected_equal_to<Field, decltype(field_ptr)>(field, field_ptr);
     }
