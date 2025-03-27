@@ -13,8 +13,6 @@
 
 namespace awl
 {
-    //using decimal = awl::decimal<uint64_t, 4>;
-
 #if defined(AWL_INT_128)
 
     template <uint8_t exp_len>
