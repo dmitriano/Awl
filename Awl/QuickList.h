@@ -86,6 +86,10 @@ namespace awl
             return *this;
         }
 
+        // If the elements are static objects, for example,
+        // they probably exclude themself after the list is destroyed.
+        // Null element calls exclude() in its destructor and
+        // the list leaves the elements in a closed list.
         ~quick_list() = default;
 
         //There can be using ForwardList::front, but not BackwardList::front.
