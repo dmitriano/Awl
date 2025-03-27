@@ -4,8 +4,8 @@
 #include <exception>
 #include <utility>
 
-#include "Awl/QuickLink.h"
 #include "Awl/Coro/UpdatePromise.h"
+#include "Awl/QuickLink.h"
 
 namespace awl
 {
@@ -104,6 +104,6 @@ namespace awl
 
         std::coroutine_handle<promise_type> m_h;
 
-        friend class Controller;
+        friend class TaskPool;
     };
 }

@@ -104,7 +104,8 @@ cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 
 Use `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option if QT is compiled with static runtime:
 
-```set MY_DRIVE=C:
+```bat
+set MY_DRIVE=C:
 
 %MY_DRIVE%
 cd \dev\build\awl

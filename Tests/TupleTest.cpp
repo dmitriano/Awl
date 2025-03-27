@@ -278,3 +278,19 @@ AWL_TEST(TupleNonCopyable)
 
     std::tuple<A> t(std::move(a));
 }
+
+AWL_TEST(TupleDiff)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using Tuple = std::tuple<int, std::string, bool>;
+
+    Tuple a(5, "a", true);
+    Tuple b(5, "b", true);
+
+    const std::array expected_aa{ false, false, false };
+    const std::array expected_ab{ false, true, false };
+
+    AWL_ASSERT(awl::tuple_diff(a, a) == expected_aa);
+    AWL_ASSERT(awl::tuple_diff(a, b) == expected_ab);
+}

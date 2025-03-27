@@ -49,6 +49,11 @@ namespace
     static_assert(std::is_move_assignable_v<awl::quick_link>);
     static_assert(std::is_move_constructible_v<awl::quick_link>);
 
+    // Standard layout types do not allow multiple inheritance.
+    // static_assert(std::is_standard_layout_v<LinkA>);
+    static_assert(std::is_standard_layout_v<awl::forward_link<LinkA>>);
+    static_assert(std::is_standard_layout_v<awl::backward_link<LinkA>>);
+
     class CompositeLink :
         public LinkA,
         public LinkB,

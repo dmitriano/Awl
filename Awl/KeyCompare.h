@@ -225,4 +225,39 @@ namespace awl
     // When we have a pointer type declared as using ObjectPtr = std::shared_ptr<T>, for example.
     template <class T, auto value, class Compare = std::less<void>>
     using smart_compare = KeyCompare<T, getter<value>, Compare>;
+
+    // For using with std::ranges::filter without std::bind.
+    template <class Field, class Proj>
+    class projected_equal_to
+    {
+    public:
+
+        projected_equal_to(Field field, Proj proj) :
+            m_proj(proj),
+            m_field(std::move(field))
+        {}
+
+        // object_val can be of type std::shared_ptr, for example.
+        bool operator() (const auto& object_val) const
+        {
+            return std::invoke(m_proj, object_val) == m_field;
+        }
+
+    private:
+
+        Proj m_proj;
+        Field m_field;
+    };
+
+    template <class Value, class Field>
+    auto mem_fn_equal_to(Field(Value::* field_ptr)() const, std::decay_t<Field> field)
+    {
+        return projected_equal_to<Field, decltype(field_ptr)>(field, field_ptr);
+    }
+
+    template <class Value, class Field>
+    auto mem_fn_equal_to(Field Value::*field_ptr, Field field)
+    {
+        return projected_equal_to<Field, decltype(field_ptr)>(field, field_ptr);
+    }
 }

@@ -17,7 +17,7 @@ namespace awl
 
         virtual ~Logger() = default;
 
-        virtual void log(LogLevel level, LogString message) = 0;
+        virtual void log(std::string level, LogString message) = 0;
 
         void debug(LogString message)
         {

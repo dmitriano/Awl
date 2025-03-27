@@ -85,7 +85,7 @@ namespace
     }
 }
 
-AWL_TEST(Stringizable_MemberList)
+AWL_TEST(Reflection_MemberList)
 {
     AWL_UNUSED_CONTEXT;
     
@@ -98,7 +98,7 @@ AWL_TEST(Stringizable_MemberList)
     AssertMemberListEqual(B::get_member_names(), Vector{ "x", "y", "z" });
 }
 
-AWL_TEST(Stringizable_ForEach)
+AWL_TEST(Reflection_ForEach)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -121,4 +121,18 @@ AWL_TEST(Stringizable_ForEach)
     });
 
     AWL_ASSERT(a1 == a2);
+}
+
+AWL_TEST(Reflection_Diff)
+{
+    AWL_UNUSED_CONTEXT;
+
+    const A a1 = { 1, 5.0, "abc" };
+    const A a2 = { 1, 6.0, "abc" };
+    const A a3 = { 1, 6.0, "d" };
+
+    AWL_ASSERT(std::ranges::equal(std::vector<std::string>{}, awl::different_member_names(a1, a1)));
+    AWL_ASSERT(std::ranges::equal(std::vector<std::string>{"y"}, awl::different_member_names(a1, a2)));
+    AWL_ASSERT(std::ranges::equal(std::vector<std::string>{"y", "z"}, awl::different_member_names(a1, a3)));
+    AWL_ASSERT(std::ranges::equal(std::vector<std::string>{"z"}, awl::different_member_names(a2, a3)));
 }

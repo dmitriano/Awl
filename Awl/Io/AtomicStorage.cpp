@@ -61,7 +61,7 @@ void AtomicStorage::Save(const Value& val, IMutex* p_mutex)
     ClearBackup();
 }
 
-bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, LogLevel level)
+bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)
 {
     bool success = false;
 

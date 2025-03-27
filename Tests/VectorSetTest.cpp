@@ -43,11 +43,11 @@ namespace awl
                 InsertExisting(static_cast<int>(i + 1));
             }
 
-            Set::Node * pn3 = set.FindNodeByKey(3);
+            Set::Node * pn3 = set.m_tree.FindNodeByKey(3);
             AWL_ASSERT(pn3 != nullptr);
-            AWL_ASSERT(pn3->value == 3);
+            AWL_ASSERT(pn3->value() == 3);
 
-            Set::Node * pn7 = set.FindNodeByKey(7);
+            Set::Node * pn7 = set.m_tree.FindNodeByKey(7);
             AWL_ASSERT(pn7 == nullptr);
 
             {
@@ -60,8 +60,8 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    AWL_ASSERT(set.GetPredecessor(x) == predecessor);
-                    AWL_ASSERT(set.GetSuccessor(x) == successor);
+                    AWL_ASSERT(set.m_tree.GetPredecessor(x) == predecessor);
+                    AWL_ASSERT(set.m_tree.GetSuccessor(x) == successor);
                 }
             }
 
@@ -69,20 +69,20 @@ namespace awl
             AWL_ASSERT_EQUAL(static_cast<int>(count), set.back());
             Set::Node * nN = InsertNew(284);
             AWL_ASSERT_EQUAL(1, set.front());
-            AWL_ASSERT_EQUAL(nN->value, set.back());
+            AWL_ASSERT_EQUAL(nN->value(), set.back());
 
-            set.RemoveNode(n1);
-            AWL_ASSERT(set.m_root == n2);
-            set.RemoveNode(n2);
-            AWL_ASSERT(set.m_root == n4);
-            set.RemoveNode(n4);
-            AWL_ASSERT(set.m_root == n5);
-            set.RemoveNode(n3);
-            AWL_ASSERT(set.m_root == n5);
-            set.RemoveNode(n5);
-            AWL_ASSERT(set.m_root == nN);
-            set.RemoveNode(nN);
-            AWL_ASSERT(set.m_root == nullptr);
+            set.m_tree.RemoveNode(n1);
+            AWL_ASSERT(set.m_tree.m_root == n2);
+            set.m_tree.RemoveNode(n2);
+            AWL_ASSERT(set.m_tree.m_root == n4);
+            set.m_tree.RemoveNode(n4);
+            AWL_ASSERT(set.m_tree.m_root == n5);
+            set.m_tree.RemoveNode(n3);
+            AWL_ASSERT(set.m_tree.m_root == n5);
+            set.m_tree.RemoveNode(n5);
+            AWL_ASSERT(set.m_tree.m_root == nN);
+            set.m_tree.RemoveNode(nN);
+            AWL_ASSERT(set.m_tree.m_root == nullptr);
         }
 
     private:

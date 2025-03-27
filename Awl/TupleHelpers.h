@@ -286,4 +286,16 @@ namespace awl
 
     template<typename ... input_t>
     using tuple_cat_t = decltype(std::tuple_cat(std::declval<input_t>()...));
+
+    template <typename... Args, std::size_t... index>
+    constexpr auto tuple_diff_impl(const std::tuple<Args...>& left, const std::tuple<Args...>& right, std::index_sequence<index...>)
+    {
+        return std::array{ std::get<index>(left) != std::get<index>(right) ... };
+    }
+
+    template <typename... Args>
+    constexpr auto tuple_diff(const std::tuple<Args...>& left, const std::tuple<Args...>& right)
+    {
+        return tuple_diff_impl(left, right, std::index_sequence_for<Args...>{});
+    }
 }

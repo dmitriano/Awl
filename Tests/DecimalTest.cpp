@@ -473,6 +473,32 @@ namespace
                 const Decimal d3 = Decimal::make_truncated(-3, 1);
                 AWL_ASSERT(d3 == Decimal("-3"));
             }
+
+            {
+                Decimal d(2);
+                d = -1.0 / 3.0;
+                AWL_ASSERT(d == Decimal("-0.33"));
+
+                d = -2.0 / 3.0;
+                AWL_ASSERT(d == Decimal("-0.66"));
+
+                d = -3.0;
+                AWL_ASSERT(d == Decimal(_T("-3")));
+            }
+
+            {
+                Decimal d;
+                d = -1.0 / 3.0;
+                AWL_ASSERT(d == Decimal("0"));
+
+                d = -2.0 / 3.0;
+                AWL_ASSERT(d == Decimal("0"));
+
+                d = -3.0;
+                AWL_ASSERT(d == Decimal(_T("-3")));
+            }
+
+            AWL_ASSERT(Decimal{} == Decimal::zero());
         }
 
         void DecimalReadWrite()
