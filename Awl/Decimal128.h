@@ -31,8 +31,8 @@ namespace awl
 
 #else
 
+    // 128 bit integer is not accessible.
     // Leave AWL_DECIMAL_128 undefined.
-    // #error 128 bit integer is not accessible.
 
 #endif
 }
