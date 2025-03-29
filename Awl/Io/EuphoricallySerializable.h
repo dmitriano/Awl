@@ -10,7 +10,6 @@
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/MeasureStream.h"
 #include "Awl/Io/Snapshotable.h"
-#include "Awl/Io/Rw/VectorReadWrite.h"
 
 #include <vector>
 #include <cstdint>
@@ -36,8 +35,7 @@ namespace awl::io
         class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
     class EuphoricallySerializable :
         private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
-        public HashingSerializable<IStream, OStream, Hash>,
-        public Snapshotable<OStream>
+        public HashingSerializable<IStream, OStream, Hash>
     {
     private:
 
@@ -53,33 +51,9 @@ namespace awl::io
             measure_vts(val)
         {}
 
-        std::vector<uint8_t> MakeShanshot() const override
-        {
-            const size_t len = MeasureValue();
+    protected:
 
-            std::vector<uint8_t> v;
-
-            v.reserve(len);
-
-            {
-                VectorOutputStream out(v);
-
-                vector_vts.Write(out);
-            }
-
-            assert(v.size() == len);
-
-            return v;
-        }
-
-        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v) const override
-        {
-            BaseHashing::WriteSnapshotImpl(out, v);
-        }
-
-    private:
-
-        size_t MeasureValue() const
+        std::size_t MeasureContent() const override
         {
             MeasureStream out;
 
@@ -87,6 +61,13 @@ namespace awl::io
 
             return out.GetLength();
         }
+
+        void WriteContent(VectorOutputStream& out) const
+        {
+            vector_vts.Write(out);
+        }
+
+    private:
 
         VersionTolerantSerializable<T, VectorInputStream, VectorOutputStream, true, V> vector_vts;
         VersionTolerantSerializable<T, SequentialInputStream, MeasureStream, true, V> measure_vts;

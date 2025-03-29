@@ -57,16 +57,15 @@ void AtomicStorage::StartSaveLocked(const Value& val, IMutex& mutex)
     std::unique_lock lock(mutex);
 
     // For example, val is updated on a render thread in a video game.
-    const awl::io::Snapshotable<SequentialOutputStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<SequentialOutputStream>&>(val);
+    const awl::io::Snapshotable<UniqueStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<UniqueStream>&>(val);
 
-    auto v = snapshotable.MakeShanshot();
+    std::shared_ptr<Snapshot<UniqueStream>> snapshot = snapshotable.MakeShanshot();
 
     lock.unlock();
 
     Wait();
 
-    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::WriteSnapshotsAndClearBackup,
-        this, std::ref(snapshotable), std::move(v)));
+    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::WriteSnapshotsAndClearBackup, this, std::move(snapshot)));
 }
 
 bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)

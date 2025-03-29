@@ -5,21 +5,26 @@
 
 #pragma once
 
-#include <vector>
-#include <cstdint>
+#include <memory>
 
 namespace awl::io
 {
-    using Snapshot = std::vector<uint8_t>;
+    template <class OStream = SequentialOutputStream>
+    class Snapshot
+    {
+    public:
+
+        virtual void Write(OStream& out) const = 0;
+
+        virtual ~Snapshot() = default;
+    };
 
     template <class OStream>
     class Snapshotable
     {
     public:
 
-        virtual Snapshot MakeShanshot() const = 0;
-
-        virtual void WriteSnapshot(OStream& out, const Snapshot& v) const = 0;
+        virtual std::shared_ptr<Snapshot<OStream>> MakeShanshot() const = 0;
 
         virtual ~Snapshotable() = default;
     };
