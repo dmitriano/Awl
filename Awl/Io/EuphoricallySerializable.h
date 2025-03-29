@@ -36,7 +36,7 @@ namespace awl::io
     class EuphoricallySerializable :
         private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
         public HashingSerializable<IStream, OStream, Hash>,
-        public Snapshotable<OStream>
+        public Snapshotable
     {
     private:
 
@@ -52,14 +52,14 @@ namespace awl::io
             measure_vts(val)
         {}
 
-        std::shared_ptr<Snapshot<OStream>> MakeShanshot() const override
+        std::shared_ptr<Snapshot> MakeShanshot() const override
         {
             std::vector<uint8_t> v;
 
             {
                 VectorOutputStream out(v);
 
-                BaseHashing::WriteHeader(out);
+                this->WriteHeader(out);
 
                 std::size_t header_len = v.size();
 

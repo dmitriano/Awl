@@ -63,9 +63,9 @@ namespace awl::io
 
         virtual void WriteHeader(awl::io::SequentialOutputStream&) const {}
 
-        std::shared_ptr<Snapshot<OStream>> MakeShanshotHelper(std::vector<uint8_t> v) const
+        std::shared_ptr<Snapshot> MakeShanshotHelper(std::vector<uint8_t> v) const
         {
-            return std::make_shared<HashingSnapshot<OStream, Hash>>(std::move(v), m_blockSize, m_hash);
+            return std::make_shared<HashingSnapshot<Hash>>(std::move(v), m_blockSize, m_hash);
         }
 
     private:

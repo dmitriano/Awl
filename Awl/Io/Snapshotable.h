@@ -9,22 +9,21 @@
 
 namespace awl::io
 {
-    template <class OStream = SequentialOutputStream>
     class Snapshot
     {
     public:
 
-        virtual void Write(OStream& out) const = 0;
+        // Snapshot is typically an std::vector<uint8_t> so we wite it to a basic stream.
+        virtual void Write(SequentialOutputStream& out) const = 0;
 
         virtual ~Snapshot() = default;
     };
 
-    template <class OStream>
     class Snapshotable
     {
     public:
 
-        virtual std::shared_ptr<Snapshot<OStream>> MakeShanshot() const = 0;
+        virtual std::shared_ptr<Snapshot> MakeShanshot() const = 0;
 
         virtual ~Snapshotable() = default;
     };

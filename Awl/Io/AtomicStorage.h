@@ -126,9 +126,9 @@ namespace awl::io
             WriteToStreamFunc(s, std::bind(&Value::Write, &val, std::ref(s)));
         }
 
-        static void WriteSnapshot(UniqueStream& s, std::shared_ptr<Snapshot<UniqueStream>> snapshot)
+        static void WriteSnapshot(UniqueStream& s, std::shared_ptr<Snapshot> snapshot)
         {
-            WriteToStreamFunc(s, std::bind(&Snapshot<UniqueStream>::Write, snapshot, std::ref(s)));
+            WriteToStreamFunc(s, std::bind(&Snapshot::Write, snapshot, std::ref(s)));
         }
 
         void WriteToStreamAndClearBackup(const Value& val)
@@ -140,7 +140,7 @@ namespace awl::io
             ClearBackup();
         }
 
-        void WriteSnapshotsAndClearBackup(std::shared_ptr<Snapshot<UniqueStream>> snapshot)
+        void WriteSnapshotsAndClearBackup(std::shared_ptr<Snapshot> snapshot)
         {
             WriteSnapshot(m_backup, snapshot);
 

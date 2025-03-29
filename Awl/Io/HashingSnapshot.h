@@ -15,12 +15,12 @@
 
 namespace awl::io
 {
-    template <class OStream, class Hash>
-    class HashingSnapshot : public Snapshot<OStream>
+    template <class Hash>
+    class HashingSnapshot : public Snapshot
     {
     protected:
 
-        using HashOStream = HashOutputStream<Hash, OStream>;
+        using HashOStream = HashOutputStream<Hash, SequentialOutputStream>;
 
     private:
 
@@ -34,7 +34,7 @@ namespace awl::io
             m_hash(hash)
         {}
 
-        void Write(OStream& s) const override
+        void Write(SequentialOutputStream& s) const override
         {
             HashOStream out{ s, m_blockSize, m_hash };
 
