@@ -37,11 +37,6 @@ namespace awl::io
 
         void save()
         {
-            m_storage.Save(m_serializable);
-        }
-
-        void start_save()
-        {
             m_storage.StartSave(m_serializable);
         }
 
