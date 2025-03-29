@@ -503,8 +503,10 @@ namespace
 
         using Base::Base;
 
-        virtual void ReadOldVersion(size_t version)
+        void ReadOldVersion(awl::io::SequentialInputStream& in, size_t version) override
         {
+            static_cast<void>(in);
+
             oldVersion = version;
         }
 
