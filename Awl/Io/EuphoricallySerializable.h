@@ -10,7 +10,6 @@
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/MeasureStream.h"
 #include "Awl/Io/Snapshotable.h"
-#include "Awl/Io/Rw/VectorReadWrite.h"
 
 #include <vector>
 #include <cstdint>
@@ -37,7 +36,7 @@ namespace awl::io
     class EuphoricallySerializable :
         private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
         public HashingSerializable<IStream, OStream, Hash>,
-        public Snapshotable<OStream>
+        public Snapshotable
     {
     private:
 
@@ -53,39 +52,45 @@ namespace awl::io
             measure_vts(val)
         {}
 
-        std::vector<uint8_t> MakeShanshot() const override
+        std::shared_ptr<Snapshot> MakeShanshot() const override
         {
-            const size_t len = MeasureValue();
-
             std::vector<uint8_t> v;
-
-            v.reserve(len);
 
             {
                 VectorOutputStream out(v);
 
-                vector_vts.Write(out);
+                this->WriteHeader(out);
+
+                std::size_t header_len = v.size();
+
+                const size_t content_len = MeasureContent();
+
+                const size_t len = header_len + content_len;
+
+                v.reserve(len);
+
+                WriteContent(out);
+
+                assert(v.size() == len);
             }
 
-            assert(v.size() == len);
-
-            return v;
-        }
-
-        void WriteSnapshot(OStream& out, const std::vector<uint8_t>& v) const override
-        {
-            BaseHashing::WriteSnapshotImpl(out, v);
+            return BaseHashing::MakeShanshotHelper(std::move(v));
         }
 
     private:
 
-        size_t MeasureValue() const
+        std::size_t MeasureContent() const
         {
             MeasureStream out;
 
             measure_vts.Write(out);
 
             return out.GetLength();
+        }
+
+        void WriteContent(VectorOutputStream& out) const
+        {
+            vector_vts.Write(out);
         }
 
         VersionTolerantSerializable<T, VectorInputStream, VectorOutputStream, true, V> vector_vts;

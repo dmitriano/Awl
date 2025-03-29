@@ -5,6 +5,7 @@
 
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/StringFormat.h"
+#include "Awl/OptionalMutex.h"
 
 #include <mutex>
 
@@ -12,6 +13,8 @@ using namespace awl::io;
 
 bool AtomicStorage::Load(Value& val)
 {
+    Wait();
+
     bool backup_success = LoadFromFile(val, m_backup, LogLevel::Debug);
 
     if (backup_success)
@@ -35,30 +38,34 @@ bool AtomicStorage::Load(Value& val)
     return master_success;
 }
 
-void AtomicStorage::Save(const Value& val, IMutex* p_mutex)
+void AtomicStorage::Save(const Value& val)
 {
-    if (p_mutex == nullptr)
-    {
-        WriteToStream(m_backup, val);
-
-        WriteToStream(m_s, val);
-    }
-    else
-    {
-        std::unique_lock lock(*p_mutex);
-
-        const awl::io::Snapshotable<SequentialOutputStream>& snapshotable = dynamic_cast<const awl::io::Snapshotable<SequentialOutputStream>&>(val);
-
-        auto v = snapshotable.MakeShanshot();
-
-        lock.unlock();
-
-        WriteSnapshot(m_backup, snapshotable, v);
-
-        WriteSnapshot(m_s, snapshotable, v);
-    }
+    Wait();
     
-    ClearBackup();
+    WriteToStreamAndClearBackup(val);
+}
+
+void AtomicStorage::StartSave(const Value& val)
+{
+    awl::FakeMutex fm;
+
+    StartSaveLocked(val, fm);
+}
+
+void AtomicStorage::StartSaveLocked(const Value& val, IMutex& mutex)
+{
+    std::unique_lock lock(mutex);
+
+    // For example, val is updated on a render thread in a video game.
+    const awl::io::Snapshotable& snapshotable = dynamic_cast<const awl::io::Snapshotable&>(val);
+
+    std::shared_ptr<Snapshot> snapshot = snapshotable.MakeShanshot();
+
+    lock.unlock();
+
+    Wait();
+
+    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::WriteSnapshotsAndClearBackup, this, std::move(snapshot)));
 }
 
 bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)

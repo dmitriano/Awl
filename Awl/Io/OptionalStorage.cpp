@@ -19,27 +19,11 @@ bool OptionalStorage::Open(const awl::String& file_name, const awl::String& back
     }
     catch (const IoException& e)
     {
-        m_logger.warning(awl::format() << _T("Settings have not been loaded, from ") <<
+        m_logger.warning(awl::format() << _T("Application settings have not been loaded, from ") <<
             file_name << _T("' and '") << backup_name <<
             _T(", leaving default values.") <<
             _T("Error message: ") << e.What());
     }
 
     return existing;
-}
-
-void OptionalStorage::Save(const Value& val, IMutex* p_mutex)
-{
-    if (m_storage.IsOpened())
-    {
-        try
-        {
-            return m_storage.Save(val, p_mutex);
-        }
-        catch (const IoException& e)
-        {
-            m_logger.warning(awl::format() << _T("Settings were not saved correctly. ") <<
-                _T("Error message: ") << e.What());
-        }
-    }
 }

@@ -10,6 +10,7 @@
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/Snapshotable.h"
+#include <future>
 #include <cassert>
 
 namespace awl::io
@@ -78,10 +79,24 @@ namespace awl::io
 
         bool Load(Value& val);
 
-        void Save(const Value& val, IMutex* p_mutex = nullptr);
+        void Save(const Value& val);
+
+        void StartSave(const Value& val);
+
+        void StartSaveLocked(const Value& val, IMutex& mutex);
+
+        void Wait()
+        {
+            if (m_saveFuture.valid())
+            {
+                m_saveFuture.get();
+            }
+        }
 
         void Close()
         {
+            Wait();
+            
             m_s = {};
             m_backup = {};
         }
@@ -108,12 +123,30 @@ namespace awl::io
 
         static void WriteToStream(UniqueStream& s, const Value& val)
         {
-            WriteToStreamFunc(s, [&val](UniqueStream& s) { val.Write(s); });
+            WriteToStreamFunc(s, std::bind(&Value::Write, &val, std::ref(s)));
         }
 
-        static void WriteSnapshot(UniqueStream& s, const awl::io::Snapshotable<SequentialOutputStream>& snapshotable, const std::vector<uint8_t>& v)
+        static void WriteSnapshot(UniqueStream& s, std::shared_ptr<Snapshot> snapshot)
         {
-            WriteToStreamFunc(s, [&snapshotable, &v](UniqueStream& s) { snapshotable.WriteSnapshot(s, v); });
+            WriteToStreamFunc(s, std::bind(&Snapshot::Write, snapshot, std::ref(s)));
+        }
+
+        void WriteToStreamAndClearBackup(const Value& val)
+        {
+            WriteToStream(m_backup, val);
+
+            WriteToStream(m_s, val);
+
+            ClearBackup();
+        }
+
+        void WriteSnapshotsAndClearBackup(std::shared_ptr<Snapshot> snapshot)
+        {
+            WriteSnapshot(m_backup, snapshot);
+
+            WriteSnapshot(m_s, snapshot);
+
+            ClearBackup();
         }
 
         bool LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level);
@@ -126,7 +159,10 @@ namespace awl::io
         }
 
         Logger& m_logger;
+
         UniqueStream m_s;
         UniqueStream m_backup;
+
+        std::future<void> m_saveFuture;
     };
 }

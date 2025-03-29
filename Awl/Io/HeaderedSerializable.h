@@ -35,7 +35,7 @@ namespace awl::io
 
     protected:
 
-        bool ReadHeader(Base::HashIStream& in) override
+        bool ReadHeader(awl::io::SequentialInputStream& in) override
         {
             Header actual_header;
 
@@ -54,7 +54,7 @@ namespace awl::io
 
             if (actual_header.version < expectedHeader.version)
             {
-                ReadOldVersion(actual_header.version);
+                ReadOldVersion(in, actual_header.version);
 
                 return false;
             }
@@ -62,13 +62,15 @@ namespace awl::io
             return true;
         }
 
-        void WriteHeader(Base::HashOStream& out) const override
+        void WriteHeader(awl::io::SequentialOutputStream& out) const override
         {
             Write(out, expectedHeader, LimitedContext{ formatNameLimit });
         }
 
-        virtual void ReadOldVersion(size_t version)
+        virtual void ReadOldVersion(awl::io::SequentialInputStream& in, size_t version)
         {
+            static_cast<void>(in);
+
             throw IoError(awl::format() << _T("Wrong version. Expected: " << expectedHeader.version << ". Actual: " << version << "."));
         }
 

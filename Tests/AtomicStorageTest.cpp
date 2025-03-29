@@ -310,7 +310,17 @@ namespace
         {
             v2::B b = v2::b_expected;
             Value val(b);
-            storage.Save(val, p_mutex);
+
+            if (p_mutex)
+            {
+                storage.StartSaveLocked(val, *p_mutex);
+
+                storage.Wait();
+            }
+            else
+            {
+                storage.Save(val);
+            }
         }
 
         {
@@ -472,14 +482,13 @@ AWL_TEST(Shapshot)
     {
         awl::io::VectorOutputStream out(actual_v);
 
-        val.WriteSnapshot(out, snapshot);
+        snapshot->Write(out);
     }
 
     AWL_ASSERT(actual_v == expected_v);
 
-    context.out << _T("Snapshot size: ") << snapshot.size() << _T(" bytes") << std::endl;
     context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
-    context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
+    // context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
 }
 
 namespace
@@ -494,8 +503,10 @@ namespace
 
         using Base::Base;
 
-        virtual void ReadOldVersion(size_t version)
+        void ReadOldVersion(awl::io::SequentialInputStream& in, size_t version) override
         {
+            static_cast<void>(in);
+
             oldVersion = version;
         }
 
