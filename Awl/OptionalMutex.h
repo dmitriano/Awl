@@ -73,6 +73,6 @@ namespace awl
     {
     public:
 
-        FakeMutex() : MutexWrapper<fake_mutex>(*this) {}
+        FakeMutex() : MutexWrapper<fake_mutex>(static_cast<fake_mutex&>(*this)) {}
     };
 }
