@@ -482,14 +482,13 @@ AWL_TEST(Shapshot)
     {
         awl::io::VectorOutputStream out(actual_v);
 
-        val.WriteSnapshot(out, snapshot);
+        snapshot->Write(out);
     }
 
     AWL_ASSERT(actual_v == expected_v);
 
-    context.out << _T("Snapshot size: ") << snapshot.size() << _T(" bytes") << std::endl;
     context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
-    context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
+    // context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
 }
 
 namespace

@@ -9,7 +9,6 @@
 #include "Awl/Io/HashStream.h"
 #include "Awl/Io/HashingSnapshot.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
-#include "Awl/Io/VectorStream.h"
 #include "Awl/Crypto/Crc64.h"
 
 #include <vector>
@@ -20,8 +19,7 @@ namespace awl::io
 {
     template <class IStream = SequentialInputStream, class OStream = SequentialOutputStream, class Hash = awl::crypto::Crc64>
     class HashingSerializable :
-        public Serializable<IStream, OStream>,
-        public Snapshotable<OStream>
+        public Serializable<IStream, OStream>
     {
     protected:
 
@@ -59,38 +57,16 @@ namespace awl::io
             m_val.Write(out);
         }
 
-        virtual std::shared_ptr<Snapshot<OStream>> MakeShanshot() const override
-        {
-            std::vector<uint8_t> v;
-
-            {
-                VectorOutputStream out(v);
-
-                WriteHeader(out);
-
-                std::size_t header_len = v.size();
-
-                const size_t len = MeasureContent();
-
-                v.reserve(header_len + len);
-
-                WriteContent(out);
-
-                assert(v.size() == len);
-            }
-
-            return std::make_shared<HashingSnapshot<OStream, Hash>>(std::move(v), m_blockSize, m_hash);
-        }
-
     protected:
 
         virtual bool ReadHeader(awl::io::SequentialInputStream&) { return true; }
 
         virtual void WriteHeader(awl::io::SequentialOutputStream&) const {}
 
-        virtual std::size_t MeasureContent() const = 0;
-            
-        virtual void WriteContent(VectorOutputStream& out) const = 0;
+        std::shared_ptr<Snapshot<OStream>> MakeShanshotHelper(std::vector<uint8_t> v) const
+        {
+            return std::make_shared<HashingSnapshot<OStream, Hash>>(std::move(v), m_blockSize, m_hash);
+        }
 
     private:
 

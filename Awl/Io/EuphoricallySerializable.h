@@ -35,7 +35,8 @@ namespace awl::io
         class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
     class EuphoricallySerializable :
         private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
-        public HashingSerializable<IStream, OStream, Hash>
+        public HashingSerializable<IStream, OStream, Hash>,
+        public Snapshotable<OStream>
     {
     private:
 
@@ -51,9 +52,34 @@ namespace awl::io
             measure_vts(val)
         {}
 
-    protected:
+        std::shared_ptr<Snapshot<OStream>> MakeShanshot() const override
+        {
+            std::vector<uint8_t> v;
 
-        std::size_t MeasureContent() const override
+            {
+                VectorOutputStream out(v);
+
+                BaseHashing::WriteHeader(out);
+
+                std::size_t header_len = v.size();
+
+                const size_t content_len = MeasureContent();
+
+                const size_t len = header_len + content_len;
+
+                v.reserve(len);
+
+                WriteContent(out);
+
+                assert(v.size() == len);
+            }
+
+            return BaseHashing::MakeShanshotHelper(std::move(v));
+        }
+
+    private:
+
+        std::size_t MeasureContent() const
         {
             MeasureStream out;
 
@@ -66,8 +92,6 @@ namespace awl::io
         {
             vector_vts.Write(out);
         }
-
-    private:
 
         VersionTolerantSerializable<T, VectorInputStream, VectorOutputStream, true, V> vector_vts;
         VersionTolerantSerializable<T, SequentialInputStream, MeasureStream, true, V> measure_vts;
