@@ -10,6 +10,7 @@
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/Snapshotable.h"
+#include <future>
 #include <cassert>
 
 namespace awl::io
@@ -78,10 +79,24 @@ namespace awl::io
 
         bool Load(Value& val);
 
-        void Save(const Value& val, IMutex* p_mutex = nullptr);
+        void Save(const Value& val);
+
+        void StartSave(const Value& val);
+
+        void StartSaveLocked(const Value& val, IMutex& mutex);
+
+        void Wait()
+        {
+            if (m_saveFuture.valid())
+            {
+                m_saveFuture.get();
+            }
+        }
 
         void Close()
         {
+            Wait();
+            
             m_s = {};
             m_backup = {};
         }
@@ -116,6 +131,24 @@ namespace awl::io
             WriteToStreamFunc(s, [&snapshotable, &v](UniqueStream& s) { snapshotable.WriteSnapshot(s, v); });
         }
 
+        void WriteToStreamAndClearBackup(const Value& val)
+        {
+            WriteToStream(m_backup, val);
+
+            WriteToStream(m_s, val);
+
+            ClearBackup();
+        }
+
+        void WriteSnapshotsAndClearBackup(const awl::io::Snapshotable<SequentialOutputStream>& snapshotable, const std::vector<uint8_t>& v)
+        {
+            WriteSnapshot(m_backup, snapshotable, v);
+
+            WriteSnapshot(m_s, snapshotable, v);
+
+            ClearBackup();
+        }
+
         bool LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level);
 
         void ClearBackup()
@@ -126,7 +159,10 @@ namespace awl::io
         }
 
         Logger& m_logger;
+
         UniqueStream m_s;
         UniqueStream m_backup;
+
+        std::future<void> m_saveFuture;
     };
 }

@@ -53,17 +53,62 @@ namespace awl::io
 
         bool Load(Value& val)
         {
-            return m_storage.Load(val);
+            return CallIfOpened(std::bind(&AtomicStorage::Load, std::placeholders::_1, std::ref(val)));
         }
 
-        void Save(const Value& val, IMutex* p_mutex = nullptr);
+        void Save(const Value& val)
+        {
+            CallIfOpened(std::bind(&AtomicStorage::Save, std::placeholders::_1, std::ref(val)));
+        }
+
+        void StartSave(const Value& val)
+        {
+            CallIfOpened(std::bind(&AtomicStorage::StartSave, std::placeholders::_1, std::ref(val)));
+        }
+
+        void StartSaveLocked(const Value& val, IMutex& mutex)
+        {
+            CallIfOpened(std::bind(&AtomicStorage::StartSaveLocked, std::placeholders::_1, std::ref(val), std::ref(mutex)));
+        }
+
+        void Wait()
+        {
+            CallIfOpened(std::bind(&AtomicStorage::Wait, std::placeholders::_1));
+        }
 
         void Close()
         {
-            m_storage.Close();
+            CallIfOpened(std::bind(&AtomicStorage::Close, std::placeholders::_1));
         }
 
     private:
+
+        template <class Func>
+        auto CallIfOpened(Func func) -> std::invoke_result_t<Func, AtomicStorage*>
+        {
+            if (m_storage.IsOpened())
+            {
+                try
+                {
+                    return std::invoke(func, m_storage);
+                }
+                catch (const IoException& e)
+                {
+                    m_logger.warning(awl::format() << _T("Application settings were not saved correctly. ") <<
+                        _T("Error message: ") << e.What());
+                }
+            }
+
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, AtomicStorage*>, void>)
+            {
+                return;
+            }
+            else
+            {
+                // This retrns false if the type is bool.
+                return {};
+            }
+        }
 
         Logger& m_logger;
         AtomicStorage m_storage;

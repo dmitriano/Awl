@@ -13,9 +13,7 @@ namespace awl
     {
     public:
 
-        MutexWrapper(mutex& wrapped) : m(wrapped)
-        {
-        }
+        MutexWrapper(mutex& wrapped) : m(wrapped) {}
 
         void lock() override
         {
@@ -60,9 +58,21 @@ namespace awl
         mutex* pMutex;
     };
 
+    // We also need a fake mutex in addition to std::mutex and std::recursive_mutex, etc...
+    // It can be used as a default value of a template class parameter, for example.
     struct fake_mutex
     {
-        virtual void lock() {}
-        virtual void unlock() {}
+        void lock() {}
+        void unlock() {}
+    };
+
+    // Fake mutex wrapper that implements IMutex interface.
+    class FakeMutex :
+        private fake_mutex,
+        public MutexWrapper<fake_mutex>
+    {
+    public:
+
+        FakeMutex() : MutexWrapper<fake_mutex>(*this) {}
     };
 }

@@ -310,7 +310,17 @@ namespace
         {
             v2::B b = v2::b_expected;
             Value val(b);
-            storage.Save(val, p_mutex);
+
+            if (p_mutex)
+            {
+                storage.StartSaveLocked(val, *p_mutex);
+
+                storage.Wait();
+            }
+            else
+            {
+                storage.Save(val);
+            }
         }
 
         {
