@@ -9,6 +9,8 @@
 #include "Awl/Reflection.h"
 #include "Awl/StringFormat.h"
 
+#include <functional>
+
 namespace awl
 {
     template <class T> class EnumTraits;
