@@ -94,7 +94,9 @@ namespace awl::testing
     {
         try
         {
-            return RunTests();
+            const bool passed = RunTests();
+
+            return passed ? 0 : 1;
         }
         catch (const TestException& e)
         {
