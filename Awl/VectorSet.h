@@ -503,10 +503,10 @@ namespace awl
             }
         }
 
+        helpers::RedBlackTree<Node, T, Compare> m_tree;
+
         Allocator m_alloc;
         NodeAllocator m_nodeAlloc;
-
-        helpers::RedBlackTree<Node, T, Compare> m_tree;
 
         friend class VectorSetTest;
     };
