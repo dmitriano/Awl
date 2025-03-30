@@ -33,6 +33,10 @@ namespace awl::testing
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
+        // Call std::terminate() when timeout has elapsed.
+        // Used for simulating an app crash.
+        AWL_FLAG(terminate);
+
         context.out << FromACString(p_test_link->name());
 
         size_t loop_count = loop;
@@ -85,14 +89,25 @@ namespace awl::testing
                 std::chrono::milliseconds t(timeout);
                 
                 watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
-                    [&context, t]()
+                    [&context, t, terminate]()
                     {
                         context.out << _T("The timeout of ");
 
                         //TODO: Casting to std::chrono::nanoseconds is a workround. It does not compile with milliseconds.
                         format_duration(context.out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
 
-                        context.out << _T("ms has elapsed, requesting the test to stop...") << std::endl;
+                        context.out << _T(" has elapsed");
+
+                        if (terminate)
+                        {
+                            context.out << _T(", terminating the app...") << std::endl;
+
+                            std::terminate();
+                        }
+                        else
+                        {
+                            context.out << _T(", requesting the test to stop...") << std::endl;
+                        }
                     });
 
                 test_token = watch_dog->get_token();
