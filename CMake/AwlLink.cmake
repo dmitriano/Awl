@@ -83,11 +83,6 @@ if (AWL_FIND_QT)
         )
         add_definitions(-DAWL_QT)
 
-        # QT compiles without QT_NO_EXCEPTIONS for Apple
-        if (NOT APPLE)
-            add_definitions(-DQT_NO_EXCEPTIONS=1)
-        endif()
-
         target_include_directories(${PROJECT_NAME} PRIVATE ${Qt6_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Qt)
         file(GLOB_RECURSE QT_EXTTRAS_FILES ${CMAKE_SOURCE_DIR}/Extras/Qt/*.h ${AWL_ROOT_DIR}/Extras/Qt/*.cpp)
         target_sources(${PROJECT_NAME} PRIVATE ${QT_EXTTRAS_FILES})
