@@ -127,7 +127,7 @@ namespace awl
 
         friend class ControllerTest;
 
-        // Handlers do not virtual destructors.
+        // Handlers do not need virtual destructor.
         struct Handler final : Observer<TaskSink>
         {
             Handler(TaskPool* p_this, UpdateTask&& task) :
