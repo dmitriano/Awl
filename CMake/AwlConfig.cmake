@@ -16,9 +16,17 @@ option(AWL_SANITIZE_UNDEFINED "Use Undefined Behavior Sanitizer.")
 option(AWL_SANITIZE_ADDRESS "Use Address Sanitizer.")
 option(AWL_ANSI_CMD_CHAR "Define CommandLineProvider with char, but not with awl::Char.")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    # AppleClang and Android Clang do not have std::jthread.
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    # Apple Clang does not have std::jthread.
     set(AWL_JTHREAD_EXTRAS ON)
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # Android Clang has std::jthread since 20.0.
+    add_definitions("-fexperimental-library")
+endif()
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_definitions("-Wall -Wextra -pedantic")
     # Unused operators in local namespaces defined by AWL_MEMBERWISE_EQUATABLE
     add_definitions("-Wno-unused-function")
