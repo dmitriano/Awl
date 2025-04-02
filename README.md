@@ -3,18 +3,17 @@ AWL - A Working Library
 
 AWL is a small cross-platform C++ library that includes:
 
-1. A simple binary [serialization framework](https://developernote.com/2024/07/version-tolerant-serialization-in-c/).
+1. A simple [binary serialization framework](https://developernote.com/2024/07/version-tolerant-serialization-in-c/) and simple [JSON serialization framework](https://github.com/dmitriano/Awl/tree/master/Extras/Qt/QtExtras/Json).
 2. Memory stream, buffered stream, hashing stream.
 3. A [set](https://github.com/dmitriano/Awl/blob/master/Awl/VectorSet.h) that finds an element by both key and index with O(logN) time.
-4. A [doubly linked list](https://github.com/dmitriano/Awl/blob/master/Awl/QuickList.h) with static insert and erase methods.
+4. A [doubly linked list](https://github.com/dmitriano/Awl/blob/master/Awl/QuickList.h) with static `insert` and `erase` methods and movable elements.
 5. An [observable](https://github.com/dmitriano/Awl/blob/master/Awl/Observable.h) with movable observers.
-6. A [pool of reusable objects](https://github.com/dmitriano/Awl/blob/master/Awl/ObjectPool.h) managed with std::shared_ptr.
-7. [Bitset based on enum](https://github.com/dmitriano/Awl/blob/master/Awl/BitMap.h).
-8. A [circular buffer](https://github.com/dmitriano/Awl/blob/master/Awl/Ring.h) with an interface similar to std::queue.
-9. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
-10. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
+6. [Bitset based on enum](https://github.com/dmitriano/Awl/blob/master/Awl/BitMap.h).
+7. A [circular buffer](https://github.com/dmitriano/Awl/blob/master/Awl/Ring.h) with an interface similar to std::queue.
+8. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
+9. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.39.33523`, `GCC 13.1.0`, `Android CLang 17.0.2 (from NDK 26)` and `Apple Clang 15.0.0.15000309 (on MacOS Sonoma with Xcode 15.4)`.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.43.34808`, `GCC 13.1.0`, `Android CLang 20.0 (from NDK 29.0.13113456)` and `Apple Clang 15.0.0.15000309 (on MacOS Sonoma with Xcode 15.4)`.
 
 There is also cpp17 branch that partially compiles with C++17.
 
