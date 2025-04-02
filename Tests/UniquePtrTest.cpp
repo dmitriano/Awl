@@ -57,7 +57,11 @@ namespace
     template <class T>
     class TableColumn
     {
+    public:
+
         virtual void f() const = 0;
+
+        virtual ~TableColumn() = default;
     };
 
     template <class T>

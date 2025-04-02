@@ -3,6 +3,7 @@
 #include <utility>
 #include <coroutine>
 #include <optional>
+#include <exception>
 
 namespace awl
 {
