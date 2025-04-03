@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.6.2)
+cmake_minimum_required (VERSION 3.7)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -22,8 +22,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    # Android Clang has std::jthread since 20.0.
-    add_definitions("-fexperimental-library")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0.0")
+        set(AWL_JTHREAD_EXTRAS ON)
+    else()
+        # Android Clang has std::jthread since 20.0 as experimental.
+        add_definitions("-fexperimental-library")
+    endif()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
