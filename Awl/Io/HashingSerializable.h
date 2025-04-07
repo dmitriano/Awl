@@ -7,16 +7,19 @@
 
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/HashStream.h"
+#include "Awl/Io/HashingSnapshot.h"
 #include "Awl/Io/Rw/VectorReadWrite.h"
 #include "Awl/Crypto/Crc64.h"
 
 #include <vector>
+#include <memory>
 #include <cstdint>
 
 namespace awl::io
 {
     template <class IStream = SequentialInputStream, class OStream = SequentialOutputStream, class Hash = awl::crypto::Crc64>
-    class HashingSerializable : public Serializable<IStream, OStream>
+    class HashingSerializable :
+        public Serializable<IStream, OStream>
     {
     protected:
 
@@ -37,7 +40,7 @@ namespace awl::io
 
         void Read(IStream& s) override
         {
-            HashIStream in(s, m_blockSize, m_hash);
+            HashIStream in{ s, m_blockSize, m_hash };
 
             if (ReadHeader(in))
             {
@@ -47,7 +50,7 @@ namespace awl::io
 
         void Write(OStream& s) const override
         {
-            HashOStream out = MakeHashingOutputStream(s);
+            HashOStream out{ s, m_blockSize, m_hash };
 
             WriteHeader(out);
 
@@ -56,23 +59,13 @@ namespace awl::io
 
     protected:
 
-        void WriteSnapshotImpl(OStream& out, const std::vector<uint8_t>& v) const
+        virtual bool ReadHeader(awl::io::SequentialInputStream&) { return true; }
+
+        virtual void WriteHeader(awl::io::SequentialOutputStream&) const {}
+
+        std::shared_ptr<Snapshot> MakeShanshotHelper(std::vector<uint8_t> v) const
         {
-            HashOStream hashing_out = MakeHashingOutputStream(out);
-
-            WriteHeader(hashing_out);
-
-            // Write vector without leading 8 bytes containing its size.
-            hashing_out.Write(v.data(), v.size());
-        }
-
-        virtual bool ReadHeader(HashIStream&) { return true; }
-
-        virtual void WriteHeader(HashOStream&) const {}
-
-        HashOStream MakeHashingOutputStream(OStream& out) const
-        {
-            return { out, m_blockSize, m_hash };
+            return std::make_shared<HashingSnapshot<Hash>>(std::move(v), m_blockSize, m_hash);
         }
 
     private:

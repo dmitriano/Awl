@@ -7,6 +7,7 @@
 #include "Awl/Logger.h"
 
 #include <filesystem>
+#include <mutex>
 
 namespace awl::io
 {
@@ -36,7 +37,12 @@ namespace awl::io
 
         void save()
         {
-            m_storage.Save(m_serializable, nullptr);
+            m_storage.StartSave(m_serializable);
+        }
+
+        void wait()
+        {
+            m_storage.Wait();
         }
 
         void close()
@@ -100,6 +106,8 @@ namespace awl::io
 
             return std::make_tuple(master_name, backup_name);
         }
+
+        std::mutex m_mutex;
 
         T m_val;
 

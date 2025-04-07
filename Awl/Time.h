@@ -135,7 +135,7 @@ namespace awl
 }
 
 // Looks like both __GNUC__ and __clang__ are defined in Apple Clang.
-#if (defined(__GNUC__) && defined(__clang__)) && !defined(__APPLE__)
+#if (defined(__GNUC__) && defined(__clang__)) && !defined(__APPLE__) && __clang_major__ < 20
 namespace std
 {
     template <class C, class Clock, class Duration = typename Clock::duration>

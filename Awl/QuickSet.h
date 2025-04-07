@@ -21,68 +21,12 @@
 
 namespace awl
 {
-    template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class vector_set
+    template <class Node, class Compare = std::less<>> 
+    class quick_set
     {
     private:
 
-        //emplace(Args...) method may construct the node even if there already is a node with the key in the container,
-        //in which case the newly constructed element will be destroyed immediately. So a node is not guaranteed
-        //to be included.
-        struct Node : public helpers::RedBlackLink<Node>
-        {
-            using Link = helpers::RedBlackLink<Node>;
-
-            Node(const T & v) : Link{}, m_val(v)
-            {
-            }
-
-            Node(T && v) : Link{}, m_val(std::move(v))
-            {
-            }
-
-            template <class... Args>
-            Node(Args&&... args) : Link{}, m_val(std::forward<Args>(args) ...)
-            {
-            }
-
-            const T& value() const
-            {
-                return m_val;
-            }
-
-            T m_val;
-        };
-
-        using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
-
-        Node * CreateNode(const T & val)
-        {
-            Node * node = m_nodeAlloc.allocate(1);
-            new (node) Node(val);
-            return node;
-        }
-
-        Node * CreateNode(T && val)
-        {
-            Node * node = m_nodeAlloc.allocate(1);
-            new (node) Node(std::move(val));
-            return node;
-        }
-
-        template <class... Args>
-        Node * CreateNode(Args&&... args)
-        {
-            Node * node = m_nodeAlloc.allocate(1);
-            new (node) Node(std::forward<Args>(args) ...);
-            return node;
-        }
-
-        void DestroyNode(Node * node)
-        {
-            node->~Node();
-            m_nodeAlloc.deallocate(node, 1);
-        }
+        using T = typename Node::value_type;
 
         using List = quick_list<Node>;
 
@@ -95,91 +39,47 @@ namespace awl
         using const_reference = const value_type &;
 
         using iterator = double_node_iterator<Node, quick_link, typename quick_link::ForwardLink, typename quick_link::BackwardLink,
-            T, &Node::m_val, vector_set>;
+            T, &Node::m_val, quick_set>;
 
         using const_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::ForwardLink, const typename quick_link::BackwardLink,
-            const T, &Node::m_val, vector_set>;
+            const T, &Node::m_val, quick_set>;
 
         using reverse_iterator = double_node_iterator<Node, quick_link, typename quick_link::BackwardLink, typename quick_link::ForwardLink,
-            T, &Node::m_val, vector_set>;
+            T, &Node::m_val, quick_set>;
 
         using const_reverse_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::BackwardLink, const typename quick_link::ForwardLink,
-            const T, &Node::m_val, vector_set>;
+            const T, &Node::m_val, quick_set>;
 
-        using allocator_type = Allocator;
         using key_compare = Compare;
         using value_compare = Compare;
 
-        vector_set() : m_tree(Compare{}), m_nodeAlloc(m_alloc) {}
+        quick_set() : m_tree(Compare{}) {}
 
-        vector_set(Compare comp, const Allocator& alloc = Allocator()) : m_tree(comp), m_alloc(alloc), m_nodeAlloc(m_alloc) {}
+        quick_set(Compare comp) : m_tree(comp) {}
 
-        vector_set(const vector_set& other) : m_tree(other.m_tree.m_comp), m_alloc(other.m_alloc), m_nodeAlloc(other.m_nodeAlloc)
-        {
-            CopyElements(other);
-        }
+        quick_set(const quick_set& other) = delete;
 
-        vector_set(vector_set&& other) noexcept : m_tree(std::move(other.m_tree)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc))
+        quick_set(quick_set&& other) noexcept : m_tree(std::move(other.m_tree))
         {
             other.m_tree.m_root = nullptr;
         }
 
-        vector_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_tree(comp), m_alloc(alloc)
-        {
-            //It is not clear how to move the elemetns from std::initializer_list,
-            //see https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
-            //and https://stackoverflow.com/questions/36377758/how-to-move-elements-of-an-initializer-list/36411040#36411040
-            for (const value_type & val : init)
-            {
-                insert(val);
-            }
-        }
-
-        vector_set(std::initializer_list<value_type> init, const Allocator& alloc)
-            : vector_set(init, Compare(), alloc)
-        {
-        }
-
-        template <class InputIt>
-        vector_set(InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) :
-            vector_set(comp, alloc)
-        {
-            //We do not have insert() with two argumets.
-            //std::copy(first, last, std::inserter(*this, begin()));
-            std::for_each(first, last, [this](const T & val) { insert(val); });
-        }
-
-        template <class InputIt>
-        vector_set(InputIt first, InputIt last, const Allocator& alloc = Allocator()) :
-            vector_set(first, last, Compare(), alloc)
-        {
-        }
-
-        ~vector_set()
+        ~quick_set()
         {
             clear();
         }
 
-        vector_set & operator = (const vector_set & other)
-        {
-            clear();
-            //Should we copy the allocator?
-            m_tree.m_comp = other.m_tree.m_comp;
-            CopyElements(other);
-            return *this;
-        }
+        quick_set& operator = (const quick_set& other) = delete;
 
-        vector_set & operator = (vector_set && other) noexcept
+        quick_set& operator = (quick_set&& other) noexcept
         {
             clear();
             m_tree = std::move(other.m_tree);
-            m_alloc = std::move(other.m_alloc);
-            m_nodeAlloc = std::move(other.m_nodeAlloc);
             other.m_tree.m_root = nullptr;
             return *this;
         }
 
-        bool operator == (const vector_set & other) const
+        bool operator == (const quick_set& other) const
         {
             if (size() == other.size())
             {
@@ -200,7 +100,7 @@ namespace awl
             return false;
         }
 
-        bool operator != (const vector_set & other) const
+        bool operator != (const quick_set & other) const
         {
             return !operator == (other);
         }
@@ -223,32 +123,9 @@ namespace awl
         reverse_iterator rend() { return m_tree.m_list.rend(); }
         const_reverse_iterator rend() const { return m_tree.m_list.rend(); }
 
-        std::pair<iterator, bool> insert(const value_type & m_val)
+        std::pair<iterator, bool> insert(Node* node)
         {
-            return UniversalInsert(m_val);
-        }
-
-        std::pair<iterator, bool> insert(value_type && m_val)
-        {
-            return UniversalInsert(std::move(m_val));
-        }
-
-        template <class... Args>
-        std::pair<iterator, bool> emplace(Args&&... args)
-        {
-            Node * parent;
-            //TODO: It is probably a bug. We probably need a deleter here.
-            std::unique_ptr<Node> val_node(CreateNode(std::forward<Args>(args) ...));
-            Node * node = m_tree.FindNodeByKey(val_node->m_val, &parent);
-            const bool exists = node != nullptr;
-
-            if (!exists)
-            {
-                node = val_node.release();
-                m_tree.InsertNode(node, parent);
-            }
-
-            return std::make_pair(iterator(typename List::iterator(node)), !exists);
+            return UniversalInsert(node);
         }
 
         bool empty() const
@@ -262,13 +139,13 @@ namespace awl
         }
 
         template <class Key>
-        const_iterator find(const Key & key) const
+        const_iterator find(const Key& key) const
         {
             return NodeToConstIterator(m_tree.FindNodeByKey(key));
         }
 
         template <class Key>
-        iterator find(const Key & key)
+        iterator find(const Key& key)
         {
             return NodeToIterator(m_tree.FindNodeByKey(key));
         }
@@ -277,7 +154,7 @@ namespace awl
         //and the calculation the sum of number of the elements in the left subtrees
         //of the parent nodes.
         template <class Key>
-        std::tuple<const_iterator, size_type> find2(const Key & key) const
+        std::tuple<const_iterator, size_type> find2(const Key& key) const
         {
             auto [node, index] = FindIndexByKey(key);
 
@@ -285,7 +162,7 @@ namespace awl
         }
 
         template <class Key>
-        std::tuple<iterator, size_type> find2(const Key & key)
+        std::tuple<iterator, size_type> find2(const Key& key)
         {
             auto [node, index] = m_tree.FindIndexByKey(key);
 
@@ -304,25 +181,25 @@ namespace awl
         }
 
         template <class Key>
-        bool contains(const Key & key) const
+        bool contains(const Key& key) const
         {
             return m_tree.FindNodeByKey(key) != nullptr;
         }
 
         template <class Key>
-        const_iterator lower_bound(const Key & key) const
+        const_iterator lower_bound(const Key& key) const
         {
             return NodeToConstIterator(std::get<0>(m_tree.FindBoundByKey(key)));
         }
 
         template <class Key>
-        iterator lower_bound(const Key & key)
+        iterator lower_bound(const Key& key)
         {
             return NodeToIterator(std::get<0>(m_tree.FindBoundByKey(key)));
         }
 
         template <class Key>
-        const_iterator upper_bound(const Key & key) const
+        const_iterator upper_bound(const Key& key) const
         {
             auto [node, equal] = m_tree.FindBoundByKey(key);
 
@@ -336,7 +213,7 @@ namespace awl
         }
 
         template <class Key>
-        iterator upper_bound(const Key & key)
+        iterator upper_bound(const Key& key)
         {
             auto [node, equal] = m_tree.FindBoundByKey(key);
 
@@ -384,7 +261,7 @@ namespace awl
         }
 
         template <class Key>
-        size_type index_of(const Key & key) const
+        size_type index_of(const Key& key) const
         {
             auto [node, index] = m_tree.FindIndexByKey(key);
 
@@ -402,14 +279,11 @@ namespace awl
             Node* z = *i.m_i;
 
             m_tree.RemoveNode(z);
-
-            //Remove the node from the list.
-            DestroyNode(z);
         }
 
         //Retutns the number of removed elements.
         template <class Key>
-        size_type erase(const Key & key)
+        size_type erase(const Key& key)
         {
             iterator i = find(key);
 
@@ -424,12 +298,6 @@ namespace awl
 
         void clear()
         {
-            while (!m_tree.m_list.empty())
-            {
-                //We destroy the node that is still included to the list.
-                DestroyNode(m_tree.m_list.front());
-            }
-
             m_tree.m_root = nullptr;
         }
 
@@ -444,55 +312,50 @@ namespace awl
             return m_tree.m_comp;
         }
 
-        allocator_type get_allocator() const
+        const_iterator iterator_from_address(const Node* node) const
         {
-            return m_alloc;
+            return const_iterator(typename List::const_iterator(node));
+        }
+
+        iterator iterator_from_address(Node* node)
+        {
+            return iterator(typename List::iterator(node));
         }
 
     private:
 
-        const_iterator NodeToConstIterator(const Node * node) const
+        const_iterator NodeToConstIterator(const Node* node) const
         {
             if (node != nullptr)
             {
-                return const_iterator(typename List::const_iterator(node));
+                return iterator_from_address(node);
             }
 
             return end();
         }
 
-        iterator NodeToIterator(Node * node)
+        iterator NodeToIterator(Node* node)
         {
             if (node != nullptr)
             {
-                return iterator(typename List::iterator(node));
+                return iterator_from_address(node);
             }
 
             return end();
         }
 
-        template <class V>
-        std::pair<iterator, bool> UniversalInsert(V && val)
+        std::pair<iterator, bool> UniversalInsert(Node* node)
         {
             Node * parent;
-            Node * node = m_tree.FindNodeByKey(val, &parent);
-            const bool exists = node != nullptr;
+            Node * existing_node = m_tree.FindNodeByKey(node->value(), &parent);
+            const bool exists = existing_node != nullptr;
 
             if (!exists)
             {
-                node = CreateNode(std::forward<V>(val));
                 m_tree.InsertNode(node, parent);
             }
 
             return std::make_pair(iterator(typename List::iterator(node)), !exists);
-        }
-
-        void CopyElements(const vector_set & other)
-        {
-            for (const T & val : other)
-            {
-                insert(val);
-            }
         }
 
         void CheckPosition(size_type pos) const
@@ -504,10 +367,5 @@ namespace awl
         }
 
         helpers::RedBlackTree<Node, T, Compare> m_tree;
-
-        Allocator m_alloc;
-        NodeAllocator m_nodeAlloc;
-
-        friend class VectorSetTest;
     };
 }

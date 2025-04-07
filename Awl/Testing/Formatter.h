@@ -12,6 +12,7 @@
 #include "Awl/Testing/ScalarFormatter.h"
 #include "Awl/TypeTraits.h"
 #include "Awl/Inserter.h"
+#include "Awl/EnumTraits.h"
 
 namespace awl::testing
 {
@@ -37,6 +38,24 @@ namespace awl::testing
             BasicScalarFormatter<C>::FromString(s, val);
 
             return val;
+        }
+    };
+
+    template <typename C, typename T> requires awl::is_sequential_enum<T>
+    class BasicFormatter<C, T> : public std::true_type
+    {
+    public:
+
+        using String = std::basic_string<C>;
+
+        static String ToString(T val)
+        {
+            return awl::FromAString(awl::enum_to_string(val));
+        }
+
+        static T FromString(const String& s)
+        {
+            return awl::enum_from_string<T>(StringConvertor<char>::ConvertFrom(s.c_str()));
         }
     };
 

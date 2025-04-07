@@ -9,6 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/RangeUtil.h"
 #include "Awl/String.h"
+#include "Awl/Random.h"
 
 #include <ranges>
 #include <functional>
@@ -48,6 +49,11 @@ namespace
     static_assert(std::is_move_constructible_v<LinkB>);
     static_assert(std::is_move_assignable_v<awl::quick_link>);
     static_assert(std::is_move_constructible_v<awl::quick_link>);
+
+    // Standard layout types do not allow multiple inheritance.
+    // static_assert(std::is_standard_layout_v<LinkA>);
+    static_assert(std::is_standard_layout_v<awl::forward_link<LinkA>>);
+    static_assert(std::is_standard_layout_v<awl::backward_link<LinkA>>);
 
     class CompositeLink :
         public LinkA,
@@ -704,4 +710,150 @@ AWL_TEST(List_MovableElement)
     AWL_ASSERT(b.LinkA::included());
 
     AWL_ASSERT_EQUAL(1u, list.size());
+}
+
+namespace
+{
+    class Vertex : public awl::quick_link
+    {
+    public:
+
+        Vertex(const awl::testing::TestContext& ctx, int len) :
+            context(ctx),
+            m_len(len)
+        {
+            context.get().out << "Vertex constructor " << m_len << std::endl;
+        }
+
+        ~Vertex()
+        {
+            context.get().out << "Vertex destructor " << m_len << ", included: " << std::boolalpha << IsIncluded() << std::endl;
+        }
+
+        Vertex(const Vertex& other) :
+            context(other.context),
+            m_len(other.m_len)
+        {
+            context.get().out << "Vertex copy constructor " << m_len << std::endl;
+        }
+
+        Vertex(Vertex&& other) = default;
+
+        Vertex& operator = (const Vertex& other)
+        {
+            context = other.context;
+            m_len = other.m_len;
+            safe_exclude();
+            return *this;
+        }
+
+        Vertex& operator = (Vertex&& right) = default;
+
+        bool IsIncluded() const
+        {
+            return included();
+        }
+
+        std::reference_wrapper<const awl::testing::TestContext> context;
+
+        int m_len;
+    };
+
+    using VertexList = awl::quick_list<Vertex>;
+}
+
+AWL_TEST(List_GameGraph1)
+{
+    AWL_ATTRIBUTE(size_t, element_count, 10);
+
+    VertexList list;
+
+    size_t added_count = 0;
+
+    {
+        std::vector<Vertex> vertices(element_count, Vertex(context, -1));
+
+        std::uniform_int_distribution<size_t> index_dist(0, element_count - 1);
+
+        for (size_t i : awl::make_count(element_count))
+        {
+            static_cast<void>(i);
+
+            size_t index = index_dist(awl::random());
+
+            assert(index < element_count);
+
+            Vertex& v = vertices[index];
+
+            if (!v.IsIncluded())
+            {
+                v.m_len = static_cast<int>(index);
+
+                list.push_back(std::addressof(v));
+
+                ++added_count;
+            }
+        }
+
+        AWL_ASSERT_EQUAL(added_count, list.size());
+    }
+
+    AWL_ASSERT(list.empty());
+}
+
+AWL_TEST(List_GameGraph2)
+{
+    AWL_ATTRIBUTE(size_t, element_count, 10);
+
+    VertexList list;
+
+    {
+        std::vector<Vertex> vertices;
+
+        for (size_t i : awl::make_count(element_count) | std::views::reverse)
+        {
+            vertices.emplace_back(context, -1);
+
+            Vertex& v = vertices.back();
+
+            v.m_len = static_cast<int>(i);
+
+            list.push_back(std::addressof(v));
+        }
+
+        AWL_ASSERT_EQUAL(vertices.size(), list.size());
+    }
+
+    AWL_ASSERT(list.empty());
+}
+
+AWL_TEST(List_GameGraph3)
+{
+    AWL_ATTRIBUTE(size_t, element_count, 10);
+
+    std::vector<Vertex> vertices;
+
+    {
+        VertexList list;
+
+        for (size_t i : awl::make_count(element_count))
+        {
+            vertices.insert(vertices.begin(), Vertex(context, -1));
+
+            Vertex& v = vertices.front();
+
+            v.m_len = static_cast<int>(i);
+
+            list.push_back(std::addressof(v));
+        }
+
+        AWL_ASSERT_EQUAL(vertices.size(), list.size());
+    }
+
+    for (const Vertex& v : vertices)
+    {
+        // The vertices are still included into a closed list.
+        // Theoretically it is possible to add them back to a list.
+        AWL_ASSERT(v.IsIncluded());
+    }
 }

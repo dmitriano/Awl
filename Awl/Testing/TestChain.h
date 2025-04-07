@@ -47,9 +47,11 @@ namespace awl::testing
 #define AWL_TEST(test_name) AWL_LINK(test_name, Test)
 #define AWL_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark)
 #define AWL_EXAMPLE(test_name) AWL_LINK(test_name, Example)
+#define AWL_UTILITY(test_name) AWL_LINK(test_name, Utility)
 
 #define AWL_UNSTABLE_TEST(test_name) AWL_LINK(test_name, Test_Unstable)
 #define AWL_UNSTABLE_BENCHMARK(test_name) AWL_LINK(test_name, Benchmark_Unstable)
 #define AWL_UNSTABLE_EXAMPLE(test_name) AWL_LINK(test_name, Example_Unstable)
+#define AWL_UNSTABLE_UTILITY(test_name) AWL_LINK(test_name, Utility_Unstable)
 
 #define AWL_UNUSED_CONTEXT static_cast<void>(context)

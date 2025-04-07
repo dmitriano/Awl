@@ -9,6 +9,8 @@
 #include "Awl/Reflection.h"
 #include "Awl/StringFormat.h"
 
+#include <functional>
+
 namespace awl
 {
     template <class T> class EnumTraits;
@@ -75,19 +77,15 @@ namespace awl
         {
             auto& names = EnumTraits<T>::names();
 
-            std::underlying_type_t<T> index = 0;
+            auto i = std::find_if(names.begin(), names.end(),
+                std::bind(equal, s, std::placeholders::_1));
 
-            for (const auto& name : names)
+            if (i == names.end())
             {
-                if (equal(name, s))
-                {
-                    return static_cast<T>(index);
-                }
-
-                ++index;
+                throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
             }
 
-            throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
+            return static_cast<T>(i - names.begin());
         }
     }
 

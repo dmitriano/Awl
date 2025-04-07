@@ -35,7 +35,7 @@ namespace awl::io
         
         switch (type)
         {
-            case QVariant::Bool:
+            case QMetaType::Bool:
             {
                 bool val;
                 Read(s, val, ctx);
@@ -51,12 +51,12 @@ namespace awl::io
     template <class Stream, class Context = FakeContext>
     inline void Write(Stream & s, const QVariant & v, const Context & ctx = {})
     {
-        const int type = v.type();
+        const int type = v.typeId();
         Write(s, type, ctx);
 
-        switch (v.type())
+        switch (v.typeId())
         {
-            case QVariant::Bool:
+            case QMetaType::Bool:
             {
                 const bool val = v.toBool();
                 Write(s, val, ctx);

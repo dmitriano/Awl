@@ -5,19 +5,16 @@
 
 #pragma once
 
-#include "Awl/Io/SequentialStream.h"
-
-namespace awl::io
+namespace awl
 {
-    template <class IStream = SequentialInputStream, class OStream = SequentialOutputStream>
-    class Serializable
+    template <class T, typename... Args>
+    class Factory
     {
     public:
 
-        virtual void Read(IStream& in) = 0;
-
-        virtual void Write(OStream& out) const = 0;
-
-        virtual ~Serializable() = default;
+        virtual T* create(Args&&... args)
+        {
+            return new T(std::forward<Args>(args)...);
+        }
     };
 }

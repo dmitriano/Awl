@@ -35,13 +35,10 @@ namespace awl
 
         basic_single_list& operator = (basic_single_list&& other) = delete;
 
-        // If the elements are static objects, for example,
-        // they probably exclude themself after the list is destroyed.
-        ~basic_single_list()
-        {
-            // Excludes null element.
-            clear();
-        }
+        // It does not make a sense to call clear() in
+        // SingleList destructor becuase it can't update
+        // the the last element pNext as QuickList does.
+        ~basic_single_list() = default;
 
         //! Results in undfined behavior if the list is empty.
         T * front()

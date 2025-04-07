@@ -21,13 +21,13 @@ namespace awl::testing
     template <class P>
     concept attribute_provider = requires(P& p)
     {
-        { p.template TryGet(std::declval<const char*>(), std::declval<int&>()) } -> std::same_as<bool>;
-        { p.template TryGet(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
-        { p.template TryGet(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
+        { p.template TryGet<int>(std::declval<const char*>(), std::declval<int&>()) } -> std::same_as<bool>;
+        { p.template TryGet<std::string>(std::declval<const char*>(), std::declval<std::string&>()) } -> std::same_as<bool>;
+        { p.template TryGet<std::wstring>(std::declval<const char*>(), std::declval<std::wstring&>()) } -> std::same_as<bool>;
 
-        { p.template Set(std::declval<const char*>(), std::declval<const int&>()) } -> std::same_as<void>;
-        { p.template Set(std::declval<const char*>(), std::declval<const std::string&>()) } -> std::same_as<void>;
-        { p.template Set(std::declval<const char*>(), std::declval<const std::wstring&>()) } -> std::same_as<void>;
+        { p.template Set<int>(std::declval<const char*>(), std::declval<const int&>()) } -> std::same_as<void>;
+        { p.template Set<std::string>(std::declval<const char*>(), std::declval<const std::string&>()) } -> std::same_as<void>;
+        { p.template Set<std::wstring>(std::declval<const char*>(), std::declval<const std::wstring&>()) } -> std::same_as<void>;
     };
 
     // For acessing Command Line attributes without creating TestContext.

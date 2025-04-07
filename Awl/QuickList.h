@@ -56,9 +56,7 @@ namespace awl
         using const_reverse_iterator = double_iterator<const T, const DLink, const BackwardLink, const ForwardLink>;
 
         //This also works, but I am not sure it is correct : Null(forward().null(), backward().null())
-        quick_list() : Null(&Null, &Null)
-        {
-        }
+        quick_list() noexcept : Null(&Null, &Null) {}
 
         quick_list(std::initializer_list<value_type> init) : quick_list()
         {
@@ -70,7 +68,7 @@ namespace awl
 
         quick_list(const quick_list& other) = delete;
 
-        quick_list(quick_list&& other) noexcept
+        quick_list(quick_list&& other) noexcept : quick_list()
         {
             attach(other);
         }
@@ -88,6 +86,10 @@ namespace awl
             return *this;
         }
 
+        // If the elements are static objects, for example,
+        // they probably exclude themself after the list is destroyed.
+        // Null element calls exclude() in its destructor and
+        // the list leaves the elements in a closed list.
         ~quick_list() = default;
 
         //There can be using ForwardList::front, but not BackwardList::front.
@@ -141,7 +143,7 @@ namespace awl
                 forward().push_front(first, last);
                 backward().push_back(last, first, old_last);
 
-                src.clear();
+                src.detach();
             }
         }
 
@@ -157,14 +159,8 @@ namespace awl
                 forward().push_back(first, last, old_last);
                 backward().push_front(last, first);
 
-                src.clear();
+                src.detach();
             }
-        }
-
-        void clear()
-        {
-            forward().clear();
-            backward().clear();
         }
 
         size_t size() const
@@ -172,7 +168,19 @@ namespace awl
             return forward().size();
         }
 
-    private:
+        void clear()
+        {
+            // It is incorrect to clear() method on forward and backward lists,
+            // because they only exclude thieir first null elements,
+            // and leave the first elements links unchanged.
+            Null.exclude();
+ 
+            // At this point pNext and pPrev of Null element are nullptr,
+            // assign them to &Null.
+            detach();
+        }
+ 
+   private:
 
         DLink * first() { return static_cast<DLink *>(forward().first()); }
         const DLink * first() const { return static_cast<const DLink *>(forward().first()); }
@@ -180,25 +188,24 @@ namespace awl
         DLink * last() { return static_cast<DLink *>(backward().first()); }
         const DLink * last() const { return static_cast<const DLink *>(backward().first()); }
 
-        //If T is included into multiple lists there can be multiple insert_after in T,
-        //so we cast T to DLink first.
+        // If T is included into multiple lists there can be multiple insert_after in T,
+        // so we cast T to DLink first.
         static void insert_after(DLink * p, DLink * a) { p->insert_after(a); }
         static void insert_before(DLink * p, DLink * a) { p->insert_before(a); }
 
         void attach(quick_list & src)
         {
-            if (src.empty())
-            {
-                clear();
-            }
-            else
+            // Leave the elements in a closed list.
+            clear();
+
+            if (!src.empty())
             {
                 T * first = src.front();
                 T * last = src.back();
 
                 attach(first, last);
 
-                src.clear();
+                src.detach();
             }
         }
 
@@ -206,6 +213,13 @@ namespace awl
         {
             forward().attach(first, last);
             backward().attach(last, first);
+        }
+
+        // Leaves the elements in an incorrect state.
+        void detach()
+        {
+            forward().clear();
+            backward().clear();
         }
 
         //! Excludes specified element from the list.

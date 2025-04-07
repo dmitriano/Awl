@@ -13,8 +13,6 @@
 
 namespace awl
 {
-    //using decimal = awl::decimal<uint64_t, 4>;
-
 #if defined(AWL_INT_128)
 
     template <uint8_t exp_len>
@@ -31,7 +29,8 @@ namespace awl
 
 #else
 
-    #error 128 bit integer is not accessible.
+    // 128 bit integer is not accessible.
+    // Leave AWL_DECIMAL_128 undefined.
 
 #endif
 }

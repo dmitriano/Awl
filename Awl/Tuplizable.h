@@ -52,6 +52,12 @@ namespace awl
         return object_as_tuple(left) > object_as_tuple(right);
     }
 
+    template <class T>
+    constexpr auto objects_diff(const T& left, const T& right)
+    {
+        return tuple_diff(object_as_tuple(left), object_as_tuple(right));
+    }
+
     // It can be a concept, but we can't specialize it for custom types
     // we do with inline variables.
     /*
