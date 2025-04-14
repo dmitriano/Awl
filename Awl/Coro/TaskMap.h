@@ -57,6 +57,8 @@ namespace awl
             // A couroutine has executed as a regular function.
             if (!task.done())
             {
+                assert(!contains(key));
+
                 m_handlers.emplace_back(this, std::move(key), std::move(value));
 
                 Handler& handler = m_handlers.back();
@@ -107,6 +109,16 @@ namespace awl
         bool contains(const Key& key) const
         {
             return find(key) != nullptr;
+        }
+
+        auto keys() const
+        {
+            return m_handlers | std::views::transform([](const Handler& h) -> const Key& { return h.m_key; });
+        }
+
+        auto elements() const
+        {
+            return m_handlers | std::views::transform([](const Handler& h) { return std::make_pair(h.m_key, h.m_value); });
         }
 
     private:
