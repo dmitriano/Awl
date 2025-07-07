@@ -113,8 +113,12 @@ namespace awl::testing
             return out.str();
         }
 
-        static T FromString(const String& s)
+        static T FromString(const String& s_raw)
         {
+            String s = s_raw;
+
+            std::replace(s.begin(), s.end(), ',', ' ');
+
             std::basic_istringstream<C> in(s);
 
             T val{ std::istream_iterator<typename T::value_type, C>(in), std::istream_iterator<typename T::value_type, C>() };
