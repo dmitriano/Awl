@@ -10,11 +10,10 @@
 #include <set>
 #include <unordered_set>
 #include <string>
+#include <concepts>
 
 #include <memory>
 #include <stdexcept>
-#include <string>
-#include <vector>
 
 struct Device
 {
@@ -23,18 +22,8 @@ struct Device
     std::vector<std::shared_ptr<Device>> Children;
 };
 
-void f()
-{
-    auto getter = std::mem_fn(&Device::Version);
-
-    using Getter = decltype(getter);
-
-    using Field = std::decay_t<std::invoke_result_t<Getter, Device&>>;
-
-    static_assert(std::is_same_v<Field, std::string>);
-}
-
 template <class Getter>
+    requires std::invocable<Getter, const std::shared_ptr<Device>&>
 class Finder
 {
 public:
@@ -54,7 +43,8 @@ private:
 
     void FindDistinctValuesImpl(const std::shared_ptr<Device>& parentDevice)
     {
-        Field val = m_func(parentDevice);
+        // Pointer to member can be passed directly, without std::mem_fn.
+        Field val = std::invoke(m_func, parentDevice);
 
         m_set.insert(val);
 
@@ -76,7 +66,16 @@ AWL_TEST(Interview)
     std::shared_ptr<Device> d = std::make_shared<Device>(Device{ "v1", 1, std::vector<std::shared_ptr<Device>>{
         std::make_shared<Device>(Device{"v2", 2, std::vector<std::shared_ptr<Device>>{}})} });
 
-    auto versions = Finder{ std::mem_fn(&Device::Version) }.FindDistinctValues(d);
+    {
+        auto versions = Finder{ std::mem_fn(&Device::Version) }.FindDistinctValues(d);
 
-    auto numbers = Finder{ std::mem_fn(&Device::InventoryNumber) }.FindDistinctValues(d);
+        auto numbers = Finder{ std::mem_fn(&Device::InventoryNumber) }.FindDistinctValues(d);
+    }
+
+    {
+        auto versions = Finder{ &Device::Version }.FindDistinctValues(d);
+
+        auto numbers = Finder{ &Device::InventoryNumber }.FindDistinctValues(d);
+    }
+
 }
