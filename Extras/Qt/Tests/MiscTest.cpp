@@ -30,6 +30,7 @@ namespace
     {
     public:
 
+        // std::invoke_result_t is std::string& so we need std::decay_t.
         using Field = std::decay_t<std::invoke_result_t<Getter, const Device&>>;
 
         Finder(Getter func) : m_func(std::move(func)) {}
