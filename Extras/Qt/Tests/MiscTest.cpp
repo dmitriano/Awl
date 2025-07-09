@@ -59,7 +59,7 @@ private:
     std::unordered_set<Field> m_set;
 };
 
-AWL_TEST(Interview)
+AWL_TEST(InterviewTask)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -86,4 +86,16 @@ AWL_TEST(Interview)
 
         auto numbers = Finder{ std::function<int (const std::shared_ptr<Device>&)>(std::mem_fn(&Device::InventoryNumber)) }.FindDistinctValues(d);
     }
+}
+
+AWL_TEST(InterviewMoveSet)
+{
+    std::unordered_set<std::string> set;
+
+    set.insert("a long string number 0000000000000000000000000000001");
+    set.insert("a long string number 0000000000000000000000000000002");
+    set.insert("a long string number 0000000000000000000000000000003");
+
+    // The code below does not move `unordered_set` elements to `vector`, but it copies them because `unordered_set` elements are const.
+    std::vector<std::string> v(std::make_move_iterator(set.begin()), std::make_move_iterator(set.end()));
 }
