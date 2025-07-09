@@ -25,12 +25,12 @@ namespace
     };
 
     template <class Getter>
-        requires std::invocable<Getter, const std::shared_ptr<Device>&>
+        requires std::invocable<Getter, const Device&>
     class Finder
     {
     public:
 
-        using Field = std::decay_t<std::invoke_result_t<Getter, const std::shared_ptr<Device>&>>;
+        using Field = std::decay_t<std::invoke_result_t<Getter, const Device&>>;
 
         Finder(Getter func) : m_func(std::move(func)) {}
 
@@ -46,9 +46,9 @@ namespace
         void FindDistinctValuesImpl(const std::shared_ptr<Device>& parentDevice)
         {
             // Pointer to member can be passed directly, without std::mem_fn.
-            Field val = std::invoke(m_func, parentDevice);
+            Field val = std::invoke(m_func, *parentDevice);
 
-            m_set.insert(val);
+            m_set.emplace(val);
 
             for (const std::shared_ptr<Device>& device : parentDevice->Children)
             {
@@ -96,16 +96,18 @@ AWL_TEST(InterviewTask)
         auto numbers = Finder{ std::mem_fn(&Device::InventoryNumber) }.FindDistinctValues(d);
     }
 
-    // An example of using std::function.
+    // std::function is also invocable.
     {
-        auto versions = Finder{ std::function<std::string(const std::shared_ptr<Device>&)>(std::mem_fn(&Device::Version)) }.FindDistinctValues(d);
+        auto versions = Finder{ std::function<std::string(const Device&)>(std::mem_fn(&Device::Version)) }.FindDistinctValues(d);
 
-        auto numbers = Finder{ std::function<int (const std::shared_ptr<Device>&)>(std::mem_fn(&Device::InventoryNumber)) }.FindDistinctValues(d);
+        auto numbers = Finder{ std::function<int (const Device&)>(std::mem_fn(&Device::InventoryNumber)) }.FindDistinctValues(d);
     }
 }
 
 AWL_TEST(InterviewMoveSet)
 {
+    AWL_UNUSED_CONTEXT;
+
     std::unordered_set<std::string> set;
 
     set.insert("a long string number 0000000000000000000000000000001");
