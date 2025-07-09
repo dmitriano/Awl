@@ -15,49 +15,65 @@
 #include <memory>
 #include <stdexcept>
 
-struct Device
+namespace
 {
-    std::string Version;
-    int InventoryNumber;
-    std::vector<std::shared_ptr<Device>> Children;
-};
-
-template <class Getter>
-    requires std::invocable<Getter, const std::shared_ptr<Device>&>
-class Finder
-{
-public:
-
-    using Field = std::decay_t<std::invoke_result_t<Getter, const std::shared_ptr<Device>&>>;
-
-    Finder(Getter func) : m_func(std::move(func)) {}
-
-    std::vector<Field> FindDistinctValues(std::shared_ptr<Device> rootDevice)
+    struct Device
     {
-        FindDistinctValuesImpl(rootDevice);
+        std::string Version;
+        int InventoryNumber;
+        std::vector<std::shared_ptr<Device>> Children;
+    };
 
-        return std::vector<Field>(std::make_move_iterator(m_set.begin()), std::make_move_iterator(m_set.end()));
-    }
-
-private:
-
-    void FindDistinctValuesImpl(const std::shared_ptr<Device>& parentDevice)
+    template <class Getter>
+        requires std::invocable<Getter, const std::shared_ptr<Device>&>
+    class Finder
     {
-        // Pointer to member can be passed directly, without std::mem_fn.
-        Field val = std::invoke(m_func, parentDevice);
+    public:
 
-        m_set.insert(val);
+        using Field = std::decay_t<std::invoke_result_t<Getter, const std::shared_ptr<Device>&>>;
 
-        for (const std::shared_ptr<Device>& device : parentDevice->Children)
+        Finder(Getter func) : m_func(std::move(func)) {}
+
+        std::vector<Field> FindDistinctValues(std::shared_ptr<Device> rootDevice)
         {
-            FindDistinctValuesImpl(device);
+            FindDistinctValuesImpl(rootDevice);
+
+            return MoveElements();
         }
-    }
 
-    Getter m_func;
+    private:
 
-    std::unordered_set<Field> m_set;
-};
+        void FindDistinctValuesImpl(const std::shared_ptr<Device>& parentDevice)
+        {
+            // Pointer to member can be passed directly, without std::mem_fn.
+            Field val = std::invoke(m_func, parentDevice);
+
+            m_set.insert(val);
+
+            for (const std::shared_ptr<Device>& device : parentDevice->Children)
+            {
+                FindDistinctValuesImpl(device);
+            }
+        }
+
+        std::vector<Field> MoveElements()
+        {
+            std::vector<Field> v;
+            v.reserve(m_set.size());
+
+            while (!m_set.empty())
+            {
+                v.push_back(std::move(m_set.extract(m_set.begin()).value()));
+            }
+
+            return v;
+        }
+
+        Getter m_func;
+
+        std::unordered_set<Field> m_set;
+    };
+}
 
 AWL_TEST(InterviewTask)
 {
@@ -96,6 +112,18 @@ AWL_TEST(InterviewMoveSet)
     set.insert("a long string number 0000000000000000000000000000002");
     set.insert("a long string number 0000000000000000000000000000003");
 
-    // The code below does not move `unordered_set` elements to `vector`, but it copies them because `unordered_set` elements are const.
-    std::vector<std::string> v(std::make_move_iterator(set.begin()), std::make_move_iterator(set.end()));
+    {
+        // The code below does not move `unordered_set` elements to `vector`, but it copies them because `unordered_set` elements are const.
+        std::vector<std::string> v(std::make_move_iterator(set.begin()), std::make_move_iterator(set.end()));
+    }
+
+    {
+        std::vector<std::string> v;
+        v.reserve(set.size());
+
+        while (!set.empty())
+        {
+            v.push_back(std::move(set.extract(set.begin()).value()));
+        }
+    }
 }
