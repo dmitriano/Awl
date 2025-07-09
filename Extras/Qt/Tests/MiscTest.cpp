@@ -52,7 +52,7 @@ public:
 
 private:
 
-    void FindDistinctValuesImpl(std::shared_ptr<Device> parentDevice)
+    void FindDistinctValuesImpl(const std::shared_ptr<Device>& parentDevice)
     {
         Field val = m_func(parentDevice);
 
