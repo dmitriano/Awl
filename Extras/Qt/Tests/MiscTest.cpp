@@ -28,7 +28,7 @@ class Finder
 {
 public:
 
-    using Field = std::decay_t<std::invoke_result_t<Getter, Device&>>;
+    using Field = std::decay_t<std::invoke_result_t<Getter, const std::shared_ptr<Device>&>>;
 
     Finder(Getter func) : m_func(std::move(func)) {}
 
@@ -78,4 +78,20 @@ AWL_TEST(Interview)
         auto numbers = Finder{ &Device::InventoryNumber }.FindDistinctValues(d);
     }
 
+
+    {
+        using VersionFunc = std::function<std::string(const std::shared_ptr<Device>&)>;
+
+        VersionFunc version_func(std::mem_fn(&Device::Version));
+
+        using Field = std::decay_t<std::invoke_result_t<VersionFunc, const std::shared_ptr<Device>&>>;
+
+        std::string type_name = typeid(Field).name();
+
+        static_assert(std::is_same_v<Field, std::string>);
+
+        auto versions = Finder{ version_func }.FindDistinctValues(d);
+
+        auto numbers = Finder{ std::function<int (const std::shared_ptr<Device>&)>(std::mem_fn(&Device::InventoryNumber)) }.FindDistinctValues(d);
+    }
 }
