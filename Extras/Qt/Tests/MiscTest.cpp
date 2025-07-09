@@ -66,31 +66,23 @@ AWL_TEST(Interview)
     std::shared_ptr<Device> d = std::make_shared<Device>(Device{ "v1", 1, std::vector<std::shared_ptr<Device>>{
         std::make_shared<Device>(Device{"v2", 2, std::vector<std::shared_ptr<Device>>{}})} });
 
-    {
-        auto versions = Finder{ std::mem_fn(&Device::Version) }.FindDistinctValues(d);
-
-        auto numbers = Finder{ std::mem_fn(&Device::InventoryNumber) }.FindDistinctValues(d);
-    }
-
+    // Pointer to member is invocable, so we can use it without std::mem_fn.
     {
         auto versions = Finder{ &Device::Version }.FindDistinctValues(d);
 
         auto numbers = Finder{ &Device::InventoryNumber }.FindDistinctValues(d);
     }
 
-
+    // An example of using std::mem_fn.
     {
-        using VersionFunc = std::function<std::string(const std::shared_ptr<Device>&)>;
+        auto versions = Finder{ std::mem_fn(&Device::Version) }.FindDistinctValues(d);
 
-        VersionFunc version_func(std::mem_fn(&Device::Version));
+        auto numbers = Finder{ std::mem_fn(&Device::InventoryNumber) }.FindDistinctValues(d);
+    }
 
-        using Field = std::decay_t<std::invoke_result_t<VersionFunc, const std::shared_ptr<Device>&>>;
-
-        std::string type_name = typeid(Field).name();
-
-        static_assert(std::is_same_v<Field, std::string>);
-
-        auto versions = Finder{ version_func }.FindDistinctValues(d);
+    // An example of using std::function.
+    {
+        auto versions = Finder{ std::function<std::string(const std::shared_ptr<Device>&)>(std::mem_fn(&Device::Version)) }.FindDistinctValues(d);
 
         auto numbers = Finder{ std::function<int (const std::shared_ptr<Device>&)>(std::mem_fn(&Device::InventoryNumber)) }.FindDistinctValues(d);
     }
