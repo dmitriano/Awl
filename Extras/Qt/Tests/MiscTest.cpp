@@ -45,28 +45,28 @@ public:
 
     std::vector<Field> FindDistinctValues(std::shared_ptr<Device> rootDevice)
     {
-        std::unordered_set<Field> set;
+        FindDistinctValuesImpl(rootDevice);
 
-        FindDistinctValuesImpl(rootDevice, set);
-
-        return std::vector<Field>(std::make_move_iterator(set.begin()), std::make_move_iterator(set.end()));
+        return std::vector<Field>(std::make_move_iterator(m_set.begin()), std::make_move_iterator(m_set.end()));
     }
 
 private:
 
-    void FindDistinctValuesImpl(std::shared_ptr<Device> parentDevice, std::unordered_set<Field>& set)
+    void FindDistinctValuesImpl(std::shared_ptr<Device> parentDevice)
     {
         Field val = m_func(parentDevice);
 
-        set.insert(val);
+        m_set.insert(val);
 
         for (const std::shared_ptr<Device>& device : parentDevice->Children)
         {
-            FindDistinctValuesImpl(device, set);
+            FindDistinctValuesImpl(device);
         }
     }
 
     Getter m_func;
+
+    std::unordered_set<Field> m_set;
 };
 
 AWL_TEST(Interview)
