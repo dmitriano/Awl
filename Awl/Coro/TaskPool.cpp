@@ -9,18 +9,15 @@ using namespace awl;
 
 void TaskPool::add_task(UpdateTask&& task)
 {
-    // The promise is owned at this point.
-    assert(task.m_h != nullptr);
-    
     // A couroutine has executed as a regular function.
     // (It did not co_await).
     if (!task.done())
     {
-        UpdateTask::promise_type& promise = task.m_h.promise();
-
         m_handlers.emplace_back(this, std::move(task));
 
-        promise.Subscribe(std::addressof(m_handlers.back()));
+        Handler& handler = m_handlers.back();
+
+        handler.m_task.subscribe(&handler);
     }
 }
 

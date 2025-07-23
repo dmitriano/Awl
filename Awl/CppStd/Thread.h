@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <condition_variable>
+#include <stop_token>
 
 //defined(__APPLE__) || defined(__ANDROID__)
 #ifdef AWL_JTHREAD_EXTRAS

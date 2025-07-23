@@ -3,6 +3,7 @@
 #include <coroutine>
 #include <exception>
 #include <utility>
+#include <cassert>
 
 #include "Awl/Coro/UpdatePromise.h"
 #include "Awl/QuickLink.h"
@@ -98,12 +99,20 @@ namespace awl
             return task_awaitable{ update_task.m_h };
         }
 
+        void subscribe(awl::Observer<TaskSink>* p_sink)
+        {
+            // The promise is owned at this point.
+            assert(m_h != nullptr);
+
+            UpdateTask::promise_type& promise = m_h.promise();
+
+            promise.Subscribe(p_sink);
+        }
+
     private:
 
         //void release();
 
         std::coroutine_handle<promise_type> m_h;
-
-        friend class TaskPool;
     };
 }

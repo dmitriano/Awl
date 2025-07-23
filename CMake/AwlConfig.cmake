@@ -18,7 +18,8 @@ option(AWL_ANSI_CMD_CHAR "Define CommandLineProvider with char, but not with awl
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
-    set(AWL_JTHREAD_EXTRAS ON)
+    # set(AWL_JTHREAD_EXTRAS ON)
+    add_definitions("-fexperimental-library")
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
