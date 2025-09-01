@@ -9,6 +9,8 @@
 
 #include "Helpers/NonCopyable.h"
 
+#include <spdlog/fmt/fmt.h>
+
 using A = awl::testing::helpers::NonCopyable;
 
 AWL_TEST(Aggregator)

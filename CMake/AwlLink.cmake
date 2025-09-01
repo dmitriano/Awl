@@ -90,6 +90,14 @@ if (AWL_FIND_QT)
     endif()
 endif()
 
+find_package(spdlog 1.13.0 EXACT REQUIRED)
+
+message("spdlog_FOUND: ${spdlog_FOUND}")
+get_property(SPDLOG_INTERFACE_INCLUDE_DIRECTORIES TARGET spdlog::spdlog_header_only PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "Location of spdlog: ${SPDLOG_INTERFACE_INCLUDE_DIRECTORIES}")
+
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog_header_only)
+
 find_package(Threads)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
