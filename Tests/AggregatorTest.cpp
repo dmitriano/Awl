@@ -17,6 +17,8 @@ AWL_TEST(Aggregator)
 {
     AWL_UNUSED_CONTEXT;
 
+    auto str = fmt::format("i: {}", 55);
+
     bool called = false;
     
     awl::aggregator a(std::function([&called](int i, char c, A a)
