@@ -15,6 +15,7 @@ option(AWL_SANITIZE_THREAD "Use Thread Sanitizer.")
 option(AWL_SANITIZE_UNDEFINED "Use Undefined Behavior Sanitizer.")
 option(AWL_SANITIZE_ADDRESS "Use Address Sanitizer.")
 option(AWL_ANSI_CMD_CHAR "Define CommandLineProvider with char, but not with awl::Char.")
+option(AWL_OPENSSL "Use OpenSSL.")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
