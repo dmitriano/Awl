@@ -3,19 +3,11 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-#include "Awl/String.h"
-#include "Awl/Separator.h"
-
-#include "Awl/Testing/UnitTest.h"
-
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/cobalt.hpp>
 #include <iostream>
 #include <iomanip>
-
-using namespace awl::testing;
 
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
