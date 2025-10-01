@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#include "Awl/String.h"
+#include "Awl/Separator.h"
+
+#include "Awl/Testing/UnitTest.h"
+
+//#include <openssl/conf.h>
+
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/cobalt.hpp>
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+
+using namespace awl::testing;
+
+AWL_EXAMPLE(Cobalt)
+{
+}

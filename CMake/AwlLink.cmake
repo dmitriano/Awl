@@ -112,3 +112,12 @@ endif()
 if (AWL_ANSI_CMD_CHAR)
     target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_ANSI_CMD_CHAR)
 endif()
+
+if (AWL_OPENSSL)
+    find_package(OpenSSL REQUIRED Crypto SSL)
+    message("OpenSSL include: ${OPENSSL_INCLUDE_DIR}")
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+add_definitions(-D_WIN32_WINNT=0x0A00)
+
