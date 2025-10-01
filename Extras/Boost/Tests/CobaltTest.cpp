@@ -29,16 +29,21 @@ namespace
     cobalt::promise<void> proxy_ssl_to_ssl(ssl::stream<tcp::socket>& from,
         ssl::stream<tcp::socket>& to)
     {
-        try {
+        try
+        {
             char buf[8192];
-            while (true) {
+            while (true)
+            {
                 std::size_t n = co_await from.async_read_some(asio::buffer(buf), cobalt::use_op);
                 co_await asio::async_write(to, asio::buffer(buf, n), cobalt::use_op);
             }
         }
-        catch (...) {
+        catch (std::exception& e)
+        {
             // Любое исключение = завершение проксирования
+            std::cerr << "handle_client exception: " << e.what() << "\n";
         }
+
         co_return;
     }
 
@@ -100,7 +105,8 @@ namespace
 // Главный цикл
 cobalt::main co_main(int argc, char* argv[])
 {
-    if (argc != 5) {
+    if (argc != 5)
+    {
         std::cerr << "Usage: ssl_tcp_proxy <listen_port> <cert.pem> <key.pem> <target_host:port>\n";
         co_return 1;
     }
@@ -116,12 +122,14 @@ cobalt::main co_main(int argc, char* argv[])
 
     // SSL-контекст для стороны клиента (прокси как сервер)
     ssl::context client_ctx(ssl::context::tlsv12_server);
+
     client_ctx.set_options(
         ssl::context::default_workarounds
         | ssl::context::no_sslv2
         | ssl::context::no_sslv3
         | ssl::context::single_dh_use
     );
+
     client_ctx.use_certificate_chain_file(cert_file);
     client_ctx.use_private_key_file(key_file, ssl::context::pem);
 
