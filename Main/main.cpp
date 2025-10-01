@@ -3,6 +3,8 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+
 #include "Awl/Testing/TestConsole.h"
 #include "Awl/Testing/TestException.h"
 #include "Awl/String.h"
@@ -27,3 +29,4 @@ int _tmain(int argc, awl::Char * argv[])
         awl::cout() << e.What() << std::endl;
     }
 }
+*/
