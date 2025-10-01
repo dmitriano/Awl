@@ -50,7 +50,8 @@ namespace
         const std::string& target_port
     )
     {
-        try {
+        try
+        {
             // TLS-рукопожатие с клиентом (прокси как сервер)
             co_await client_ssl.async_handshake(ssl::stream_base::server, cobalt::use_op);
 
@@ -75,9 +76,23 @@ namespace
             );
 
         }
-        catch (std::exception& e) {
+        catch (boost::system::system_error& e)
+        {
+            if (e.code() == boost::asio::ssl::error::stream_truncated)
+            {
+                // Нормальное завершение: SSL shutdown не был отправлен
+                std::cerr << "handle_client: connection closed (stream truncated)\n";
+            }
+            else
+            {
+                std::cerr << "handle_client exception: " << e.what() << "\n";
+            }
+        }
+        catch (std::exception& e)
+        {
             std::cerr << "handle_client exception: " << e.what() << "\n";
         }
+
         co_return;
     }
 }
