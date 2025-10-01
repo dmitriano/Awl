@@ -79,7 +79,6 @@ namespace
                 proxy_ssl_to_ssl(client_ssl, server_ssl),
                 proxy_ssl_to_ssl(server_ssl, client_ssl)
             );
-
         }
         catch (boost::system::system_error& e)
         {
