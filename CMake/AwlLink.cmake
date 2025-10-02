@@ -60,10 +60,12 @@ endif()
 
 if (AWL_BOOST_EXTRAS)
     #header-only libraries have no designated component
-    set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_MULTITHREADED ON)
-    set(Boost_USE_STATIC_RUNTIME ON)
-    find_package(Boost COMPONENTS atomic thread container exception cobalt cobalt_io REQUIRED)
+    #set(Boost_USE_STATIC_LIBS ON)
+    #set(Boost_USE_MULTITHREADED ON)
+    #set(Boost_USE_STATIC_RUNTIME ON)
+    #find_package(Boost COMPONENTS atomic thread container exception cobalt cobalt_io REQUIRED)
+
+    find_package(Boost 1.85.0 EXACT REQUIRED COMPONENTS program_options thread json cobalt)
 
     if(Boost_FOUND)
         message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS} ${Boost_LIB_DIRS}")
@@ -71,7 +73,7 @@ if (AWL_BOOST_EXTRAS)
         target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Boost)
         file(GLOB_RECURSE BOOST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/*.h ${AWL_ROOT_DIR}/Extras/Boost/*.cpp)
         target_sources(${PROJECT_NAME} PRIVATE ${BOOST_FILES})
-        target_link_libraries(${PROJECT_NAME} PRIVATE crypt32 ${Boost_LIBRARIES})
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES}) #crypt32
         message("BOOST libs: ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY}.")
     else()
         message("BOOST not found, AWL will compile without BOOST.")
@@ -129,5 +131,5 @@ if (AWL_OPENSSL)
     target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto OpenSSL::SSL)
 endif()
 
-add_definitions(-D_WIN32_WINNT=0x0A00)
+#add_definitions(-D_WIN32_WINNT=0x0A00)
 
