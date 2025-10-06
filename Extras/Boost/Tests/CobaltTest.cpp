@@ -86,6 +86,8 @@ namespace
 
 namespace
 {
+    using GenRead = cobalt::generator<boost::system::result<std::string_view>>;
+
     cobalt::generator<boost::system::result<std::string_view>> read_lines(asio::stream_file& f)
     {
         std::string buffer;
@@ -110,6 +112,25 @@ namespace
 
         co_return asio::error::broken_pipe;
     }
+
+    using GenReadPtr = std::shared_ptr<GenRead>;
+
+    cobalt::task<void> read_consumer(int id, GenReadPtr gen)
+    {
+        BOOST_COBALT_FOR( // would be for co_await(auto value : read_lines(sf)) if standardized
+            auto line,
+            *gen)
+        {
+            if (line.has_error() && line.error() != asio::error::eof)
+                std::cerr << "Consumer " << id << "Error occured: " << line.error() << std::endl;
+            else if (line.has_value())
+                std::cout << "Consumer " << id << "Read line '" << *line << "'" << std::endl;
+        }
+
+        std::cout << "Consumer " << id << " finished\n";
+
+        co_return;
+    }
 }
 
 cobalt::main co_main(int argc, char* argv[])
@@ -118,15 +139,9 @@ cobalt::main co_main(int argc, char* argv[])
                          argv[1], // skipping the check here for brevity.
                          asio::stream_file::read_only };
 
-    BOOST_COBALT_FOR( // would be for co_await(auto value : read_lines(sf)) if standardized
-        auto line,
-        read_lines(sf))
-    {
-        if (line.has_error() && line.error() != asio::error::eof)
-            std::cerr << "Error occured: " << line.error() << std::endl;
-        else if (line.has_value())
-            std::cout << "Read line '" << *line << "'" << std::endl;
-    }
+    GenReadPtr gen = std::make_shared<GenRead>(read_lines(sf));
+
+    co_await read_consumer(1, gen);
 
     co_return 0;
 }
