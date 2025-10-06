@@ -5,6 +5,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/cobalt.hpp>
+#include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <chrono>
 #include <generator>
@@ -70,15 +71,62 @@ namespace
     }
 }
 
+//cobalt::main co_main(int argc, char* argv[])
+//{
+//    GenPtr gen = std::make_shared<cobalt::generator<int>>(number_source(10));
+//    
+//    auto exec = co_await cobalt::this_coro::executor;
+//
+//    // cobalt::spawn(exec, producer(ch), boost::asio::detached);
+//    cobalt::spawn(exec, consumer(1, gen), boost::asio::detached);
+//    cobalt::spawn(exec, consumer(2, gen), boost::asio::detached);
+//
+//    co_return 0;
+//}
+
+namespace
+{
+    cobalt::generator<boost::system::result<std::string_view>> read_lines(asio::stream_file& f)
+    {
+        std::string buffer;
+        while (f.is_open())
+        {
+            auto [ec, n] = co_await
+                asio::async_read_until(f, asio::dynamic_buffer(buffer), '\n',
+                    asio::as_tuple(cobalt::use_op));
+
+            // no need to copy, just point to the buffer
+            std::string_view ln{ buffer.c_str(), n }; // -1 to skip the line
+            ln = boost::algorithm::trim_copy(ln);
+
+            if (!ln.empty())
+                co_yield ln;
+
+            if (ec)
+                co_return ec;
+
+            buffer.erase(0, n);
+        }
+
+        co_return asio::error::broken_pipe;
+    }
+}
+
 cobalt::main co_main(int argc, char* argv[])
 {
-    GenPtr gen = std::make_shared<cobalt::generator<int>>(number_source(10));
-    
-    auto exec = co_await cobalt::this_coro::executor;
+    asio::stream_file sf{ co_await cobalt::this_coro::executor,
+                         argv[1], // skipping the check here for brevity.
+                         asio::stream_file::read_only };
 
-    // cobalt::spawn(exec, producer(ch), boost::asio::detached);
-    cobalt::spawn(exec, consumer(1, gen), boost::asio::detached);
-    cobalt::spawn(exec, consumer(2, gen), boost::asio::detached);
+    BOOST_COBALT_FOR( // would be for co_await(auto value : read_lines(sf)) if standardized
+        auto line,
+        read_lines(sf))
+    {
+        if (line.has_error() && line.error() != asio::error::eof)
+            std::cerr << "Error occured: " << line.error() << std::endl;
+        else if (line.has_value())
+            std::cout << "Read line '" << *line << "'" << std::endl;
+    }
 
     co_return 0;
 }
