@@ -122,10 +122,34 @@ namespace
             *gen)
         {
             if (line.has_error() && line.error() != asio::error::eof)
-                std::cerr << "Consumer " << id << "Error occured: " << line.error() << std::endl;
+                std::cerr << "Consumer " << id << " Error occured: " << line.error() << std::endl;
             else if (line.has_value())
-                std::cout << "Consumer " << id << "Read line '" << *line << "'" << std::endl;
+                std::cout << "Consumer " << id << " Read line '" << *line << "'" << std::endl;
         }
+
+        std::cout << "Consumer " << id << " finished\n";
+
+        co_return;
+    }
+
+    cobalt::task<void> read_consumer2(int id, GenReadPtr gen)
+    {
+        while (true)
+        {
+            auto line = co_await *gen;
+
+            if (line.has_error())
+            {
+                std::cerr << "Consumer " << id << " Error occured: " << line.error() << std::endl;
+
+                break;
+            }
+            else if (line.has_value())
+            {
+                std::cout << "Consumer " << id << " Read line '" << *line << "'" << std::endl;
+            }
+        }
+
 
         std::cout << "Consumer " << id << " finished\n";
 
@@ -141,7 +165,16 @@ cobalt::main co_main(int argc, char* argv[])
 
     GenReadPtr gen = std::make_shared<GenRead>(read_lines(sf));
 
-    co_await read_consumer(1, gen);
+    auto t1 = read_consumer(1, gen);
+    auto t2 = read_consumer(2, gen);
+
+    co_await t1;
+    co_await t2;
+
+    //auto exec = co_await cobalt::this_coro::executor;
+
+    // cobalt::spawn(exec, read_consumer2(1, gen), boost::asio::detached);
+    // cobalt::spawn(exec, read_consumer2(2, gen), boost::asio::detached);
 
     co_return 0;
 }
