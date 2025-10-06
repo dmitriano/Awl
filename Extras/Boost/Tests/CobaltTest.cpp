@@ -86,7 +86,7 @@ namespace
 
 namespace
 {
-    using GenRead = cobalt::generator<boost::system::result<std::string_view>>;
+    using GenRead = cobalt::generator<boost::system::result<std::string>>;
 
     GenRead read_lines(asio::stream_file& f)
     {
