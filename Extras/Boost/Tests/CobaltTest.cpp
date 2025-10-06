@@ -88,7 +88,7 @@ namespace
 {
     using GenRead = cobalt::generator<boost::system::result<std::string_view>>;
 
-    cobalt::generator<boost::system::result<std::string_view>> read_lines(asio::stream_file& f)
+    GenRead read_lines(asio::stream_file& f)
     {
         std::string buffer;
         while (f.is_open())
@@ -117,6 +117,17 @@ namespace
 
     cobalt::task<void> read_consumer(int id, GenReadPtr gen)
     {
+        if (id == 1)
+        {
+            auto exec = co_await cobalt::this_coro::executor;
+
+            asio::steady_timer timer(exec);
+
+            timer.expires_after(500ms);
+
+            co_await timer.async_wait(cobalt::use_op);
+        }
+
         BOOST_COBALT_FOR( // would be for co_await(auto value : read_lines(sf)) if standardized
             auto line,
             *gen)
@@ -134,6 +145,17 @@ namespace
 
     cobalt::task<void> read_consumer2(int id, GenReadPtr gen)
     {
+        if (id == 1)
+        {
+            auto exec = co_await cobalt::this_coro::executor;
+
+            asio::steady_timer timer(exec);
+
+            timer.expires_after(500ms);
+
+            co_await timer.async_wait(cobalt::use_op);
+        }
+
         while (true)
         {
             auto line = co_await *gen;
@@ -171,10 +193,8 @@ cobalt::main co_main(int argc, char* argv[])
     co_await t1;
     co_await t2;
 
-    //auto exec = co_await cobalt::this_coro::executor;
-
-    // cobalt::spawn(exec, read_consumer2(1, gen), boost::asio::detached);
-    // cobalt::spawn(exec, read_consumer2(2, gen), boost::asio::detached);
+    //cobalt::spawn(exec, read_consumer(1, gen), boost::asio::detached);
+    //cobalt::spawn(exec, read_consumer(2, gen), boost::asio::detached);
 
     co_return 0;
 }
