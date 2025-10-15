@@ -104,6 +104,7 @@ namespace
             if (!ln.empty())
                 co_yield ln;
 
+            // Why we do not throw the error as an exception?
             if (ec)
                 co_return ec;
 
