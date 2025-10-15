@@ -113,88 +113,55 @@ namespace
         co_return asio::error::broken_pipe;
     }
 
-    using GenReadPtr = std::shared_ptr<GenRead>;
-
-    cobalt::task<void> read_consumer(int id, GenReadPtr gen)
-    {
-        if (id == 1)
-        {
-            auto exec = co_await cobalt::this_coro::executor;
-
-            asio::steady_timer timer(exec);
-
-            timer.expires_after(500ms);
-
-            co_await timer.async_wait(cobalt::use_op);
+    cobalt::generator<std::string> read_lines(const char* name, int n) {
+        for (int i = 0; i < n; ++i) {
+            co_yield std::string(name) + ":" + std::to_string(i);
         }
-
-        BOOST_COBALT_FOR( // would be for co_await(auto value : read_lines(sf)) if standardized
-            auto line,
-            *gen)
-        {
-            if (line.has_error() && line.error() != asio::error::eof)
-                std::cerr << "Consumer " << id << " Error occured: " << line.error() << std::endl;
-            else if (line.has_value())
-                std::cout << "Consumer " << id << " Read line '" << *line << "'" << std::endl;
-        }
-
-        std::cout << "Consumer " << id << " finished\n";
-
-        co_return;
-    }
-
-    cobalt::task<void> read_consumer2(int id, GenReadPtr gen)
-    {
-        if (id == 1)
-        {
-            auto exec = co_await cobalt::this_coro::executor;
-
-            asio::steady_timer timer(exec);
-
-            timer.expires_after(500ms);
-
-            co_await timer.async_wait(cobalt::use_op);
-        }
-
-        while (true)
-        {
-            auto line = co_await *gen;
-
-            if (line.has_error())
-            {
-                std::cerr << "Consumer " << id << " Error occured: " << line.error() << std::endl;
-
-                break;
-            }
-            else if (line.has_value())
-            {
-                std::cout << "Consumer " << id << " Read line '" << *line << "'" << std::endl;
-            }
-        }
-
-
-        std::cout << "Consumer " << id << " finished\n";
-
-        co_return;
+        co_return {};
     }
 }
 
+//cobalt::main co_main(int argc, char* argv[])
+//{
+//    auto ga = read_lines("a", 1000);
+//    auto gb = read_lines("b", 1000);
+//
+//    while (ga || gb) { // оператор bool у cobalt::generator
+//        auto v = co_await cobalt::race(ga, gb); // кто-то из генераторов готов — берём строку
+//        boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
+//    }
+//
+//    co_return 0;
+//}
+
 cobalt::main co_main(int argc, char* argv[])
 {
-    asio::stream_file sf{ co_await cobalt::this_coro::executor,
-                         argv[1], // skipping the check here for brevity.
-                         asio::stream_file::read_only };
+    asio::stream_file a{ co_await cobalt::this_coro::executor, argv[1], asio::stream_file::read_only };
+    asio::stream_file b{ co_await cobalt::this_coro::executor, argv[2], asio::stream_file::read_only };
 
-    GenReadPtr gen = std::make_shared<GenRead>(read_lines(sf));
+    auto ga = read_lines(a);
+    auto gb = read_lines(b);
 
-    auto t1 = read_consumer(1, gen);
-    auto t2 = read_consumer(2, gen);
+    //while (ga || gb) { // оператор bool у cobalt::generator
+    //    auto v = co_await cobalt::race(ga, gb); // кто-то из генераторов готов — берём строку
+    //    boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
+    //}
 
-    co_await t1;
-    co_await t2;
+    // cobalt::race will crash if one of the generators is finished.
+    while (ga && gb) {
+        auto v = co_await cobalt::race(ga, gb); // кто-то из генераторов готов — берём строку
+        boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
+    }
 
-    //cobalt::spawn(exec, read_consumer(1, gen), boost::asio::detached);
-    //cobalt::spawn(exec, read_consumer(2, gen), boost::asio::detached);
+    // continue the interation without cobalt::race
+    while (ga) {
+        auto s = co_await ga;
+        std::cout << s << '\n';
+    }
+    while (gb) {
+        auto s = co_await gb;
+        std::cout << s << '\n';
+    }
 
     co_return 0;
 }
