@@ -148,20 +148,27 @@ cobalt::main co_main(int argc, char* argv[])
     //    boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
     //}
 
-    // cobalt::race will crash if one of the generators is finished.
-    while (ga && gb) {
-        auto v = co_await cobalt::race(ga, gb); // кто-то из генераторов готов — берём строку
-        boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
-    }
+    try
+    {
+        // cobalt::race will crash if one of the generators is finished.
+        while (ga || gb) {
+            auto v = co_await cobalt::race(ga, gb); // кто-то из генераторов готов — берём строку
+            boost::variant2::visit([](auto& s) { std::cout << s << "\n"; }, v);
+        }
 
-    // continue the interation without cobalt::race
-    while (ga) {
-        auto s = co_await ga;
-        std::cout << s << '\n';
+        // continue the interation without cobalt::race
+        while (ga) {
+            auto s = co_await ga;
+            std::cout << s << '\n';
+        }
+        while (gb) {
+            auto s = co_await gb;
+            std::cout << s << '\n';
+        }
     }
-    while (gb) {
-        auto s = co_await gb;
-        std::cout << s << '\n';
+    catch (const std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << std::endl;
     }
 
     co_return 0;
