@@ -46,7 +46,7 @@ private:
 
 AWL_EXAMPLE(AsyncConnect)
 {
-    AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
+    AWL_ATTRIBUTE(std::string, target, "192.168.0.123:389");
     AWL_ATTRIBUTE(int, select, std::random_device{}());
 
     auto pos = target.find(':');
