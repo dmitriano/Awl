@@ -16,7 +16,7 @@ using namespace boost::asio::experimental::awaitable_operators;
 namespace
 {
     // Proxying SSL → SSL
-    asio::awaitable<void> proxy_ssl_to_ssl(ssl::stream<tcp::socket>& from,
+    asio::awaitable<void> transfer(ssl::stream<tcp::socket>& from,
         ssl::stream<tcp::socket>& to)
     {
         try
@@ -62,7 +62,7 @@ namespace
             co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
             co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
 
-            co_await (proxy_ssl_to_ssl(client_ssl, server_ssl) || proxy_ssl_to_ssl(server_ssl, client_ssl));
+            co_await (transfer(client_ssl, server_ssl) || transfer(server_ssl, client_ssl));
         }
         catch (boost::system::system_error& e)
         {
