@@ -144,5 +144,12 @@ AWL_EXAMPLE(CobaltTcpProxy)
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
-    cobalt::run(runProxy(static_cast<unsigned short>(listen_port), cert_file, key_file, target_host, target_port));
+    try
+    {
+        cobalt::run(runProxy(static_cast<unsigned short>(listen_port), cert_file, key_file, target_host, target_port));
+    }
+    catch (boost::system::system_error& e)
+    {
+        std::cerr << "Exception: " << e.what() << "\n";
+    }
 }
