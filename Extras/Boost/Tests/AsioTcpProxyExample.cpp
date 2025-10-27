@@ -62,10 +62,7 @@ namespace
             co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
             co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
 
-            //co_await
-            //    proxy_ssl_to_ssl(client_ssl, server_ssl) ||
-            //    proxy_ssl_to_ssl(server_ssl, client_ssl);
-            //);
+            co_await (proxy_ssl_to_ssl(client_ssl, server_ssl) || proxy_ssl_to_ssl(server_ssl, client_ssl));
         }
         catch (boost::system::system_error& e)
         {
