@@ -3,6 +3,8 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Awl/Testing/UnitTest.h"
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/cobalt.hpp>
@@ -35,8 +37,6 @@ namespace
             // Любое исключение = завершение проксирования
             std::cerr << "handle_client exception: " << e.what() << "\n";
         }
-
-        co_return;
     }
 
     // Обработка одного клиента
@@ -88,58 +88,66 @@ namespace
         {
             std::cerr << "handle_client exception: " << e.what() << "\n";
         }
+    }
 
-        co_return;
+    // Arguments: 12345 C:\dev\work\ssl\ldap.crt C:\dev\work\ssl\ldap.key 192.168.0.123:636
+
+    // Testing from WSL:
+    // export ad_ip = "172.24.48.1"
+    // export ad_user = "administrator@my.local"
+    // export ad_password = "1234@abc"
+    //
+    // export LDAPTLS_REQCERT = never
+    //
+    // ldapsearch - H ldaps ://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local" \
+    //   -s sub -a always -z 1000 "(objectClass=user)" "serviceClassName" "serviceDNSName" "objectClass"
+
+    cobalt::task<void> runProxy(unsigned short listen_port, 
+        const std::string& cert_file, const std::string& key_file,
+        const std::string& target_host, const std::string& target_port)
+    {
+        // SSL-контекст для стороны клиента (прокси как сервер)
+        ssl::context client_ctx(ssl::context::tlsv12_server);
+
+        client_ctx.set_options(
+            ssl::context::default_workarounds
+            | ssl::context::no_sslv2
+            | ssl::context::no_sslv3
+            | ssl::context::single_dh_use
+        );
+
+        client_ctx.use_certificate_chain_file(cert_file);
+        client_ctx.use_private_key_file(key_file, ssl::context::pem);
+
+        // Получаем executor для acceptor
+        auto exec = co_await this_coro::executor;
+        tcp::acceptor acceptor(exec, tcp::endpoint(tcp::v4(), listen_port));
+
+        while (true)
+        {
+            tcp::socket sock = co_await acceptor.async_accept(cobalt::use_op);
+            ssl::stream<tcp::socket> client_ssl(std::move(sock), client_ctx);
+
+            // Запускаем корутину-обработчик клиента в фоне
+            cobalt::spawn(
+                exec,
+                handle_client(std::move(client_ssl), client_ctx, target_host, target_port),
+                asio::detached
+            );
+        }
     }
 }
 
-// Главный цикл
-cobalt::main co_main(int argc, char* argv[])
+AWL_EXAMPLE(CobaltTcpProxy)
 {
-    if (argc != 5)
-    {
-        std::cerr << "Usage: ssl_tcp_proxy <listen_port> <cert.pem> <key.pem> <target_host:port>\n";
-        co_return 1;
-    }
-
-    unsigned short listen_port = static_cast<unsigned short>(std::stoi(argv[1]));
-    const char* cert_file = argv[2];
-    const char* key_file = argv[3];
-    std::string target = argv[4];
+    AWL_ATTRIBUTE(unsigned int, listen_port, 12345);
+    AWL_ATTRIBUTE(std::string, cert_file, "ldap.crt");
+    AWL_ATTRIBUTE(std::string, key_file, "ldap.key");
+    AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
 
     auto pos = target.find(':');
-    std::string target_host = target.substr(0, pos);
-    std::string target_port = target.substr(pos + 1);
+    const std::string target_host = target.substr(0, pos);
+    const std::string target_port = target.substr(pos + 1);
 
-    // SSL-контекст для стороны клиента (прокси как сервер)
-    ssl::context client_ctx(ssl::context::tlsv12_server);
-
-    client_ctx.set_options(
-        ssl::context::default_workarounds
-        | ssl::context::no_sslv2
-        | ssl::context::no_sslv3
-        | ssl::context::single_dh_use
-    );
-
-    client_ctx.use_certificate_chain_file(cert_file);
-    client_ctx.use_private_key_file(key_file, ssl::context::pem);
-
-    // Получаем executor для acceptor
-    auto exec = co_await this_coro::executor;
-    tcp::acceptor acceptor(exec, tcp::endpoint(tcp::v4(), listen_port));
-
-    while (true)
-    {
-        tcp::socket sock = co_await acceptor.async_accept(cobalt::use_op);
-        ssl::stream<tcp::socket> client_ssl(std::move(sock), client_ctx);
-
-        // Запускаем корутину-обработчик клиента в фоне
-        cobalt::spawn(
-            exec,
-            handle_client(std::move(client_ssl), client_ctx, target_host, target_port),
-            asio::detached
-        );
-    }
-
-    co_return 0;
+    cobalt::run(runProxy(static_cast<unsigned short>(listen_port), cert_file, key_file, target_host, target_port));
 }
