@@ -15,7 +15,7 @@ using tcp = asio::ip::tcp;
 namespace
 {
     // Proxying SSL → SSL
-    cobalt::promise<void> proxy_ssl_to_ssl(ssl::stream<tcp::socket>& from,
+    cobalt::promise<void> transfer(ssl::stream<tcp::socket>& from,
         ssl::stream<tcp::socket>& to)
     {
         try
@@ -63,8 +63,8 @@ namespace
 
             // Start proxying in both directions in parallel
             co_await cobalt::race(
-                proxy_ssl_to_ssl(client_ssl, server_ssl),
-                proxy_ssl_to_ssl(server_ssl, client_ssl)
+                transfer(client_ssl, server_ssl),
+                transfer(server_ssl, client_ssl)
             );
         }
         catch (boost::system::system_error& e)
