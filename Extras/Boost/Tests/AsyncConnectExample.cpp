@@ -66,25 +66,24 @@ AWL_EXAMPLE(AsyncConnect)
         break;
     case 1:
         std::cout << "Coro await" << std::endl;
-        co_spawn(ioc, [&] -> asio::awaitable<void> {
+        co_spawn(ioc, [&] -> asio::awaitable<void>
+        {
             co_await w.asyncConnect(eps);
             std::cout << "Coro connected" << std::endl;
-            co_return;
-            },
-            asio::detached);
+        },
+        asio::detached);
         break;
     case 2:
         std::cout << "Coro await with promise" << std::endl;
         co_spawn(ioc, [&] -> asio::awaitable<void>
-            {
-                auto p = w.asyncConnect(eps, asio::experimental::use_promise);
-                std::cout << "Doing some other time consuming stuff as well" << std::endl;
+        {
+            auto p = w.asyncConnect(eps, asio::experimental::use_promise);
+            std::cout << "Doing some other time consuming stuff as well" << std::endl;
 
-                co_await p(asio::deferred);
-                std::cout << "Coro with promise connected" << std::endl;
-                co_return;
-            },
-            asio::detached);
+            co_await p(asio::deferred);
+            std::cout << "Coro with promise connected" << std::endl;
+        },
+        asio::detached);
         break;
     case 3: {
         std::cout << "Custom completion token with adaptors" << std::endl;
