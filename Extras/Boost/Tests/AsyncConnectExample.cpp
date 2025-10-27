@@ -11,38 +11,45 @@ using namespace std::chrono_literals;
 namespace asio = boost::asio;
 using asio::ip::tcp;
 
-class SocketWrapper {
-private:
-    using SslStream = asio::ssl::stream<tcp::socket>;
+namespace
+{
+    class SocketWrapper {
+    private:
+        using SslStream = asio::ssl::stream<tcp::socket>;
 
-public:
-    SocketWrapper(asio::any_io_executor ex) : s_{ ex, ctx_ } {}
+    public:
 
-    template <typename Token = asio::deferred_t>
-    auto asyncConnect(tcp::resolver::results_type eps, Token&& token = {}) {
-        auto op = asio::async_connect( //
-            underlyingSocket(), std::move(eps), asio::deferred([this](error_code ec, tcp::endpoint) {
-                return asio::deferred
-                    .when(ec.failed() || !isSSL())
-                    .then(asio::deferred.values(ec))
-                    .otherwise(stream().async_handshake(SslStream::client));
-                }));
+        using Sig = void(error_code, size_t);
 
-        return std::move(op)(std::forward<Token>(token));
-    }
+        SocketWrapper(asio::any_io_executor ex) : s_{ ex, ctx_ } {}
 
-private:
+        // Token can be asio::completion_token_for<Sig>.
+        template <typename Token = asio::deferred_t>
+        auto asyncConnect(tcp::resolver::results_type eps, Token&& token = {}) {
+            auto op = asio::async_connect( //
+                underlyingSocket(), std::move(eps), asio::deferred([this](error_code ec, tcp::endpoint) {
+                    return asio::deferred
+                        .when(ec.failed() || !isSSL())
+                        .then(asio::deferred.values(ec))
+                        .otherwise(stream().async_handshake(SslStream::client));
+                    }));
 
-    bool isSSL() const { return true; }
+            return std::move(op)(std::forward<Token>(token));
+        }
 
-    tcp::socket const& underlyingSocket() const { return s_.next_layer(); }
-    tcp::socket& underlyingSocket() { return s_.next_layer(); }
-    SslStream const& stream() const { return s_; }
-    SslStream& stream() { return s_; }
+    private:
 
-    asio::ssl::context ctx_{ asio::ssl::context::tlsv13 };
-    SslStream          s_;
-};
+        bool isSSL() const { return true; }
+
+        tcp::socket const& underlyingSocket() const { return s_.next_layer(); }
+        tcp::socket& underlyingSocket() { return s_.next_layer(); }
+        SslStream const& stream() const { return s_; }
+        SslStream& stream() { return s_; }
+
+        asio::ssl::context ctx_{ asio::ssl::context::tlsv13 };
+        SslStream          s_;
+    };
+}
 
 AWL_EXAMPLE(AsyncConnect)
 {
