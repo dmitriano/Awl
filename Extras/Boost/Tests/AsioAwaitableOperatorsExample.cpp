@@ -34,18 +34,18 @@ AWL_EXAMPLE(AsioAwaitableOperators)
 {
     boost::asio::thread_pool ioc;
 
-    auto handler = [](auto caption)
+    auto handler = [&context](auto caption)
     {
         return [=](std::exception_ptr e) {
             try {
                 if (e)
                     std::rethrow_exception(e);
-                std::cout << caption << " succeeded at ";
+                context.out << caption << " succeeded at ";
             }
-            catch (std::exception const& e) {
-                std::cout << caption << " failed at ";
+            catch (std::exception const&) {
+                context.out << caption << " failed at ";
             }
-            std::cout << (now() - start) / 1.0s << "s" << std::endl;
+            context.out << (now() - start) / 1.0s << "s" << std::endl;
             };
         };
 
