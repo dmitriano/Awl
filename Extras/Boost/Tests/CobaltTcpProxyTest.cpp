@@ -85,38 +85,12 @@ namespace
         }
     }
 
-    // Arguments: 12345 C:\dev\work\ssl\ldap.crt C:\dev\work\ssl\ldap.key 192.168.0.123:636
-
-    // Testing from WSL:
-    // export ad_ip="172.24.48.1"
-    // export ad_user="administrator@my.local"
-    // export ad_password="1234@abc"
-    //
-    // export LDAPTLS_REQCERT=never
-    //
-    // ldapsearch -H ldaps://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local" \
-    //   -s sub -a always -z 1000 "(objectClass=user)" "serviceClassName" "serviceDNSName" "objectClass"
-
-    cobalt::task<void> runProxy(unsigned short listen_port,
-        const std::string& cert_file, const std::string& key_file,
+    cobalt::task<void> runProxy(tcp::endpoint listen_endpoint, ssl::context client_ctx,
         const std::string& target_host, const std::string& target_port)
     {
-        // SSL context for the client side (proxy acts as a server)
-        ssl::context client_ctx(ssl::context::tlsv12_server);
-
-        client_ctx.set_options(
-            ssl::context::default_workarounds
-            | ssl::context::no_sslv2
-            | ssl::context::no_sslv3
-            | ssl::context::single_dh_use
-        );
-
-        client_ctx.use_certificate_chain_file(cert_file);
-        client_ctx.use_private_key_file(key_file, ssl::context::pem);
-
         // Get the executor for the acceptor
         auto exec = co_await this_coro::executor;
-        tcp::acceptor acceptor(exec, tcp::endpoint(tcp::v4(), listen_port));
+        tcp::acceptor acceptor(exec, listen_endpoint);
 
         while (true)
         {
@@ -133,6 +107,16 @@ namespace
     }
 }
 
+// Testing from WSL:
+// export ad_ip="172.24.48.1"
+// export ad_user="administrator@my.local"
+// export ad_password="1234@abc"
+//
+// export LDAPTLS_REQCERT=never
+//
+// ldapsearch -H ldaps://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local" \
+//   -s sub -a always -z 1000 "(objectClass=user)" "serviceClassName" "serviceDNSName" "objectClass"
+
 AWL_EXAMPLE(CobaltTcpProxy)
 {
     AWL_ATTRIBUTE(unsigned int, listen_port, 12345);
@@ -140,13 +124,27 @@ AWL_EXAMPLE(CobaltTcpProxy)
     AWL_ATTRIBUTE(std::string, key_file, "ldap.key");
     AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
 
+    // SSL context for the client side (proxy acts as a server)
+    ssl::context client_ctx(ssl::context::tlsv12_server);
+
+    client_ctx.set_options(
+        ssl::context::default_workarounds
+        | ssl::context::no_sslv2
+        | ssl::context::no_sslv3
+        | ssl::context::single_dh_use
+    );
+
+    client_ctx.use_certificate_chain_file(cert_file);
+    client_ctx.use_private_key_file(key_file, ssl::context::pem);
+
     auto pos = target.find(':');
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
     try
     {
-        cobalt::run(runProxy(static_cast<unsigned short>(listen_port), cert_file, key_file, target_host, target_port));
+        cobalt::run(runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
+            target_host, target_port));
     }
     catch (boost::system::system_error& e)
     {
