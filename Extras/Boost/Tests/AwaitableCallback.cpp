@@ -31,6 +31,19 @@ namespace
                 });
         }
 
+        template <class CompletionHandler>
+        void asyncProcessOnThread(CompletionHandler&& handler)
+        {
+            std::thread t([this, h = std::forward<CompletionHandler>(handler)]() mutable
+                {
+                    static_assert(std::is_same_v<decltype(h), CompletionHandler>);
+
+                    asyncProcess(std::move(h));
+                });
+
+            t.join();
+        }
+
     private:
 
         asio::any_io_executor m_executor;
@@ -47,7 +60,7 @@ namespace
         // -------------------------------------------
         // Adapter: convert async_legacy_op → awaitable<int>
         // -------------------------------------------
-        asio::awaitable<int> process()
+        asio::awaitable<int> asyncProcess()
         {
             // async_initiate turns callback-style API into co_await-compatible awaitable
             co_return co_await asio::async_initiate<
@@ -57,6 +70,21 @@ namespace
                 // Initiator: calls the legacy function with the handler provided by Asio
                 [this](auto&& completion_handler) {
                     m_processor.asyncProcess(std::forward<decltype(completion_handler)>(completion_handler));
+                },
+                asio::use_awaitable
+            );
+        }
+
+        asio::awaitable<int> asyncProcessOnThread()
+        {
+            // async_initiate turns callback-style API into co_await-compatible awaitable
+            co_return co_await asio::async_initiate<
+                decltype(asio::use_awaitable),
+                void(error_code, int)
+            >(
+                // Initiator: calls the legacy function with the handler provided by Asio
+                [this](auto&& completion_handler) {
+                    m_processor.asyncProcessOnThread(std::forward<decltype(completion_handler)>(completion_handler));
                 },
                 asio::use_awaitable
             );
@@ -77,9 +105,17 @@ namespace
 
         ModernProcessor processor(exec);
 
-        int v = co_await processor.process();
+        {
+            int v = co_await processor.asyncProcess();
 
-        std::cout << "Result = " << v << "\n";
+            std::cout << "Result = " << v << "\n";
+        }
+
+        {
+            int v = co_await processor.asyncProcessOnThread();
+
+            std::cout << "Result = " << v << "\n";
+        }
     }
 }
 
