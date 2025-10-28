@@ -5,6 +5,9 @@
 #include <type_traits>
 
 namespace asio = boost::asio;
+#include <boost/system/system_error.hpp>
+#include <boost/system/error_code.hpp>
+#include <boost/system/errc.hpp>
 using boost::system::error_code;
 
 namespace
@@ -54,9 +57,21 @@ namespace
         );
     }
 
-    asio::awaitable<int> compute_answer()
+    asio::awaitable<int> compute_answer(bool success)
     {
-        co_return 42;
+        if (success)
+        {
+            co_return 42;
+        }
+        else
+        {
+            // Create an error_code from the generic category
+            boost::system::error_code ec =
+                make_error_code(boost::system::errc::permission_denied);
+
+            // Throw as system_error
+            throw boost::system::system_error(ec, "Access denied while opening file");
+        }
     }
 }
 
@@ -68,7 +83,19 @@ AWL_EXAMPLE(CallbackFromAwaitable)
     auto ex = io.get_executor();
 
     // Call awaitable<T> with a callback handler
-    async_from_awaitable(ex, compute_answer(),
+    async_from_awaitable(ex, compute_answer(true),
+        // Handler signature matches void(error_code, int)
+        [](error_code ec, int value) {
+            if (ec) {
+                std::cerr << "Error: " << ec.message() << "\n";
+            }
+            else {
+                std::cout << "Value: " << value << "\n";
+            }
+        }
+    );
+
+    async_from_awaitable(ex, compute_answer(false),
         // Handler signature matches void(error_code, int)
         [](error_code ec, int value) {
             if (ec) {
