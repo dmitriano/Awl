@@ -82,30 +82,23 @@ AWL_EXAMPLE(CallbackFromAwaitable)
     asio::io_context io;
     auto ex = io.get_executor();
 
-    // Call awaitable<T> with a callback handler
-    async_from_awaitable(ex, compute_answer(true),
-        // Handler signature matches void(error_code, int)
-        [](error_code ec, int value) {
-            if (ec) {
+    auto handler = [](error_code ec, int value)
+        {
+            if (ec)
+            {
                 std::cerr << "Error: " << ec.message() << "\n";
             }
-            else {
+            else
+            {
                 std::cout << "Value: " << value << "\n";
             }
-        }
-    );
+        };
 
-    async_from_awaitable(ex, compute_answer(false),
-        // Handler signature matches void(error_code, int)
-        [](error_code ec, int value) {
-            if (ec) {
-                std::cerr << "Error: " << ec.message() << "\n";
-            }
-            else {
-                std::cout << "Value: " << value << "\n";
-            }
-        }
-    );
+    // Success
+    async_from_awaitable(ex, compute_answer(true), handler);
+
+    // Error
+    async_from_awaitable(ex, compute_answer(false), handler);
 
     io.run();
 }
