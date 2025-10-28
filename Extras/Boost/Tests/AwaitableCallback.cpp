@@ -8,45 +8,77 @@ using boost::system::error_code;
 
 namespace
 {
-    // -------------------------------------------
-    // Legacy-style async operation (no std::function!)
-    // Accepts any completion handler — can be move-only
-    // -------------------------------------------
-    template <class CompletionHandler>
-    void async_legacy_op(CompletionHandler&& handler)
+    class LegacyProcessor
     {
-        // Simulate asynchronous work by posting the handler
-        asio::post(asio::system_executor{},
-            [h = std::forward<CompletionHandler>(handler)]() mutable {
-                // Call the handler once the "operation" is complete
-                std::move(h)(error_code{}, 42);
-            });
-    }
+    public:
 
-    // -------------------------------------------
-    // Adapter: convert async_legacy_op → awaitable<int>
-    // -------------------------------------------
-    asio::awaitable<int> async_legacy_op_awaitable()
+        LegacyProcessor(asio::any_io_executor executor) :
+            m_executor(std::move(executor))
+        {}
+
+        // -------------------------------------------
+        // Legacy-style async operation (no std::function!)
+        // Accepts any completion handler — can be move-only
+        // -------------------------------------------
+        template <class CompletionHandler>
+        void asyncProcess(CompletionHandler&& handler)
+        {
+            // Simulate asynchronous work by posting the handler
+            asio::post(m_executor,
+                [h = std::forward<CompletionHandler>(handler)]() mutable {
+                    // Call the handler once the "operation" is complete
+                    std::move(h)(error_code{}, 42);
+                });
+        }
+
+    private:
+
+        asio::any_io_executor m_executor;
+    };
+
+    class ModernProcessor
     {
-        // async_initiate turns callback-style API into co_await-compatible awaitable
-        co_return co_await asio::async_initiate<
-            decltype(asio::use_awaitable),
-            void(error_code, int)
-        >(
-            // Initiator: calls the legacy function with the handler provided by Asio
-            [](auto&& completion_handler) {
-                async_legacy_op(std::forward<decltype(completion_handler)>(completion_handler));
-            },
-            asio::use_awaitable
-        );
-    }
+    public:
+
+        ModernProcessor(asio::any_io_executor executor) :
+            m_processor(std::move(executor))
+        {}
+
+        // -------------------------------------------
+        // Adapter: convert async_legacy_op → awaitable<int>
+        // -------------------------------------------
+        asio::awaitable<int> process()
+        {
+            // async_initiate turns callback-style API into co_await-compatible awaitable
+            co_return co_await asio::async_initiate<
+                decltype(asio::use_awaitable),
+                void(error_code, int)
+            >(
+                // Initiator: calls the legacy function with the handler provided by Asio
+                [this](auto&& completion_handler) {
+                    m_processor.asyncProcess(std::forward<decltype(completion_handler)>(completion_handler));
+                },
+                asio::use_awaitable
+            );
+        }
+
+    private:
+
+        LegacyProcessor m_processor;
+    };
 
     // -------------------------------------------
     // Example coroutine using the awaitable wrapper
     // -------------------------------------------
     asio::awaitable<void> example()
     {
-        int v = co_await async_legacy_op_awaitable();
+        // Get the current coroutine executor
+        auto exec = co_await asio::this_coro::executor;
+
+        ModernProcessor processor(exec);
+
+        int v = co_await processor.process();
+
         std::cout << "Result = " << v << "\n";
     }
 }
