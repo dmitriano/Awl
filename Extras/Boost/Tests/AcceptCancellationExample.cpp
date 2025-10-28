@@ -13,31 +13,22 @@ using namespace std::chrono_literals;
 namespace
 {
     // Coroutine that waits for a client connection but can be cancelled
-    awaitable<void> accept_with_cancellation(tcp::acceptor& acceptor,
+    awaitable<tcp::socket> accept_with_cancellation(tcp::acceptor& acceptor,
         asio::cancellation_signal& cancel_signal)
     {
         auto ex = co_await asio::this_coro::executor;
 
-        try
-        {
-            std::cout << "Waiting for a client on " << acceptor.local_endpoint() << "...\n";
+        std::cout << "Waiting for a client on " << acceptor.local_endpoint() << "...\n";
 
-            // Bind the external cancellation slot specifically to async_accept.
-            // In Boost 1.89 this is the correct way to hook your own signal.
-            tcp::socket socket =
-                co_await acceptor.async_accept(
-                    asio::bind_cancellation_slot(cancel_signal.slot(), use_awaitable));
+        // Bind the external cancellation slot specifically to async_accept.
+        // In Boost 1.89 this is the correct way to hook your own signal.
+        tcp::socket socket =
+            co_await acceptor.async_accept(
+                asio::bind_cancellation_slot(cancel_signal.slot(), use_awaitable));
 
-            std::cout << "Client connected from " << socket.remote_endpoint() << "\n";
-        }
-        catch (const boost::system::system_error& e)
-        {
-            // async_accept completes with operation_aborted when cancelled
-            if (e.code() == asio::error::operation_aborted)
-                std::cout << "Accept operation was cancelled.\n";
-            else
-                throw;
-        }
+        std::cout << "Client connected from " << socket.remote_endpoint() << "\n";
+
+        co_return socket;
     }
 
     // Cancels after 3 seconds by emitting on the shared signal
@@ -60,11 +51,23 @@ namespace
         tcp::acceptor acc(ex, tcp::endpoint(tcp::v4(), 5555));
         asio::cancellation_signal sig;
 
-        // Run accept coroutine in parallel
-        co_spawn(ex, accept_with_cancellation(acc, sig), asio::detached);
-
         // After 3s, emit cancellation (will abort async_accept)
-        co_await cancel_after_delay(sig);
+        co_spawn(ex, cancel_after_delay(sig), asio::detached);
+
+        try
+        {
+            // Run accept coroutine in parallel
+            tcp::socket socket = co_await accept_with_cancellation(acc, sig);
+        }
+        catch (const boost::system::system_error& e)
+        {
+            // async_accept completes with operation_aborted when cancelled
+            if (e.code() == asio::error::operation_aborted)
+                std::cout << "Accept operation was cancelled.\n";
+            else
+                throw;
+        }
+
     }
 }
 
