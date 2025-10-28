@@ -39,15 +39,19 @@ namespace
             {
                 std::cerr << "handle_client: EOF" << std::endl;
             }
+            if (e.code() == boost::system::errc::operation_canceled || e.code() == boost::asio::error::operation_aborted)
+            {
+                std::cerr << "handle_client: Operation cancelled." << std::endl;
+            }
             else
             {
-                std::cerr << "handle_client exception: " << e.what() << "\n";
+                std::cerr << "handle_client exception: " << e.what() << std::endl;
             }
         }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
-            std::cerr << "handle_client exception: " << e.what() << "\n";
+            std::cerr << "handle_client exception: " << e.what() << std::endl;
         }
     }
 
@@ -85,16 +89,16 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                std::cerr << "handle_client: connection closed (stream truncated)\n";
+                std::cerr << "handle_client: connection closed (stream truncated)" << std::endl;
             }
             else
             {
-                std::cerr << "handle_client exception: " << e.what() << "\n";
+                std::cerr << "handle_client exception: " << e.what() << std::endl;
             }
         }
         catch (std::exception& e)
         {
-            std::cerr << "handle_client exception: " << e.what() << "\n";
+            std::cerr << "handle_client exception: " << e.what() << std::endl;
         }
     }
 
