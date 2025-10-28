@@ -67,7 +67,6 @@ namespace
             else
                 throw;
         }
-
     }
 }
 
