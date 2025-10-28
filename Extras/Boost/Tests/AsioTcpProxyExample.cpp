@@ -45,13 +45,13 @@ namespace
             }
             else
             {
-                std::cerr << "handle_client exception: " << e.what() << std::endl;
+                std::cerr << "handle_client boost::system::system_error: " << e.what() << std::endl;
             }
         }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
-            std::cerr << "handle_client exception: " << e.what() << std::endl;
+            std::cerr << "handle_client std::exception: " << e.what() << std::endl;
         }
     }
 
