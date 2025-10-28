@@ -28,6 +28,22 @@ namespace
                 co_await asio::async_write(to, asio::buffer(buf, n), asio::use_awaitable);
             }
         }
+        catch (boost::system::system_error& e)
+        {
+            if (e.code() == boost::asio::ssl::error::stream_truncated)
+            {
+                // Normal termination: SSL shutdown was not sent
+                std::cerr << "handle_client: connection closed (stream truncated)\n";
+            }
+            if (e.code() == boost::asio::error::eof)
+            {
+                std::cerr << "handle_client: EOF" << std::endl;
+            }
+            else
+            {
+                std::cerr << "handle_client exception: " << e.what() << "\n";
+            }
+        }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
