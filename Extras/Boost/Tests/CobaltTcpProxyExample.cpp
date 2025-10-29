@@ -14,7 +14,7 @@ using tcp = asio::ip::tcp;
 
 namespace
 {
-    // The results of reading from tcp::socket and ssl::stream<tcp::socket> have different types:
+    // The results of reading from tcp::socket and ssl::stream<tcp::socket> are of different types:
     // inconsistent deduction for auto return type:
     // ‘boost::asio::async_result<boost::cobalt::use_op_t, void(boost::system::error_code, long unsigned int)>::op_impl<boost::asio::ssl::stream<boost::asio::basic_stream_socket<boost::asio::ip::tcp> >::initiate_async_read_some, boost::asio::mutable_buffer>’ and then
     // ‘boost::asio::async_result<boost::cobalt::use_op_t, void(boost::system::error_code, long unsigned int)>::op_impl<boost::asio::basic_stream_socket<boost::asio::ip::tcp>::initiate_async_receive, boost::asio::mutable_buffer, int>’
