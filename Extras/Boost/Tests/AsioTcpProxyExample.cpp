@@ -25,7 +25,7 @@ namespace
                 co_await asio::async_write(to, asio::buffer(buf, n), asio::use_awaitable);
             }
         }
-        catch (boost::system::system_error& e)
+        catch (const boost::system::system_error& e)
         {
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
@@ -114,7 +114,7 @@ namespace
 
             co_await bidirectional_transfer(client_ssl, server_ssl);
         }
-        catch (boost::system::system_error& e)
+        catch (const boost::system::system_error& e)
         {
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
@@ -126,7 +126,7 @@ namespace
                 std::cerr << "handle_client exception: " << e.what() << std::endl;
             }
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             std::cerr << "handle_client exception: " << e.what() << std::endl;
         }
@@ -135,21 +135,32 @@ namespace
     asio::awaitable<void> runProxy(tcp::endpoint listen_endpoint, ssl::context client_ctx,
         const std::string& target_host, const std::string& target_port)
     {
-        // Get the executor for the acceptor
-        auto exec = co_await asio::this_coro::executor;
-        tcp::acceptor acceptor(exec, listen_endpoint);
-
-        while (true)
+        try
         {
-            tcp::socket sock = co_await acceptor.async_accept(asio::use_awaitable);
-            ssl::stream<tcp::socket> client_ssl(std::move(sock), client_ctx);
+            // Get the executor for the acceptor
+            auto exec = co_await asio::this_coro::executor;
+            tcp::acceptor acceptor(exec, listen_endpoint);
 
-            // Launch a background coroutine to handle the client
-            co_spawn(
-                exec,
-                handle_client(std::move(client_ssl), client_ctx, target_host, target_port),
-                asio::detached
-            );
+            while (true)
+            {
+                tcp::socket sock = co_await acceptor.async_accept(asio::use_awaitable);
+                ssl::stream<tcp::socket> client_ssl(std::move(sock), client_ctx);
+
+                // Launch a background coroutine to handle the client
+                co_spawn(
+                    exec,
+                    handle_client(std::move(client_ssl), client_ctx, target_host, target_port),
+                    asio::detached
+                );
+            }
+        }
+        catch (const boost::system::system_error& e)
+        {
+            std::cerr << "runProxy boost::system::system_error: " << e.what() << "\n";
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "runProxy std::exception: " << e.what() << "\n";
         }
     }
 }
@@ -178,20 +189,13 @@ AWL_EXAMPLE(AsioTcpProxy)
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
-    try
-    {
-        asio::thread_pool ioc(1);
+    asio::thread_pool ioc(1);
 
-        asio::co_spawn(
-            ioc,
-            runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
-                target_host, target_port),
-            asio::detached);
+    asio::co_spawn(
+        ioc,
+        runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
+            target_host, target_port),
+        asio::detached);
 
-        ioc.join();
-    }
-    catch (boost::system::system_error& e)
-    {
-        std::cerr << "Exception: " << e.what() << "\n";
-    }
+    ioc.join();
 }
