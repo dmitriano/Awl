@@ -360,6 +360,27 @@ namespace
             AWL_ASSERT(awl::multiply(Decimal("0.7"), Decimal("0.33")) == Decimal("0.231"));
         }
 
+        void DecimalAbs()
+        {
+            const Decimal positive("123.456"sv);
+            AWL_ASSERT(awl::abs(positive) == positive);
+
+            const Decimal negative("-123.456"sv);
+            AWL_ASSERT(awl::abs(negative) == positive);
+
+            const Decimal zero = Decimal::zero();
+            AWL_ASSERT(awl::abs(zero) == zero);
+
+            const Decimal extended_negative = Decimal("-10.250"sv).extend(5);
+            const Decimal extended_positive = Decimal("10.250"sv).extend(5);
+            AWL_ASSERT(extended_negative != extended_positive);
+            AWL_ASSERT(awl::abs(extended_negative) == extended_positive);
+
+            const Decimal rescaled_negative = Decimal("-0.0123"sv).rescale(6);
+            const Decimal rescaled_positive = Decimal("0.0123"sv).rescale(6);
+            AWL_ASSERT(awl::abs(rescaled_negative) == rescaled_positive);
+        }
+
         void DecimalRound()
         {
             {
@@ -585,6 +606,8 @@ LOCAL_TEST(DecimalCompare)
 LOCAL_TEST(DecimalCast)
 
 LOCAL_TEST(DecimalArithmeticOperators)
+
+LOCAL_TEST(DecimalAbs)
 
 LOCAL_TEST(DecimalTrim)
 
