@@ -84,6 +84,21 @@ namespace awl
             m_nodeAlloc.deallocate(node, 1);
         }
 
+        struct NodeDeleter
+        {
+            vector_set * owner;
+
+            void operator()(Node * node) const noexcept
+            {
+                if (node != nullptr)
+                {
+                    owner->DestroyNode(node);
+                }
+            }
+        };
+
+        using NodeHolder = std::unique_ptr<Node, NodeDeleter>;
+
         using List = quick_list<Node>;
 
     public:
@@ -237,8 +252,7 @@ namespace awl
         std::pair<iterator, bool> emplace(Args&&... args)
         {
             Node * parent;
-            //TODO: It is probably a bug. We probably need a deleter here.
-            std::unique_ptr<Node> val_node(CreateNode(std::forward<Args>(args) ...));
+            NodeHolder val_node(CreateNode(std::forward<Args>(args) ...), NodeDeleter{this});
             Node * node = m_tree.FindNodeByKey(val_node->m_val, &parent);
             const bool exists = node != nullptr;
 
