@@ -73,7 +73,7 @@ AWL_EXAMPLE(AsyncConnect)
         break;
     case 1:
         std::cout << "Coro await" << std::endl;
-        co_spawn(ioc, [&] -> asio::awaitable<void>
+        asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             co_await w.asyncConnect(eps);
             std::cout << "Coro connected" << std::endl;
@@ -82,7 +82,7 @@ AWL_EXAMPLE(AsyncConnect)
         break;
     case 2:
         std::cout << "Coro await with promise" << std::endl;
-        co_spawn(ioc, [&] -> asio::awaitable<void>
+        asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             auto p = w.asyncConnect(eps, asio::experimental::use_promise);
             std::cout << "Doing some other time consuming stuff as well" << std::endl;
