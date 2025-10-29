@@ -17,6 +17,7 @@
 #include <array>
 #include <cmath>
 #include <tuple>
+#include <stdexcept>
 
 namespace awl
 {
@@ -678,6 +679,11 @@ namespace awl
     constexpr decimal<UInt, exp_len, DataTemplate> decimal<UInt, exp_len, DataTemplate>::from_string(std::basic_string_view<C> fixed_string)
     {
         using string_view = std::basic_string_view<C>;
+
+        if (fixed_string.empty())
+        {
+            throw std::runtime_error("An empty string is not a valid decimal value.");
+        }
         
         bool positive = true;
 
@@ -856,6 +862,8 @@ namespace awl
         {
             return -a;
         }
+
+        return a;
     }
 }
 
