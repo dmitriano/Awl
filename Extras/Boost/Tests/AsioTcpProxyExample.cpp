@@ -46,7 +46,7 @@ namespace
             }
             if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
             {
-                std::cerr << "transfer WSAECONNRESET." << std::endl;
+                std::cerr << "transfer Windows Error: WSAECONNRESET." << std::endl;
             }
             else
             {
