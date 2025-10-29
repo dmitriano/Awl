@@ -511,6 +511,68 @@ namespace
             helpers::TestReadWrite<Decimal>(context, std::numeric_limits<Decimal>::max());
             helpers::TestReadWrite<Decimal>(context, std::numeric_limits<Decimal>::min());
         }
+
+        void DecimalNormalize()
+        {
+            {
+                Decimal d("00123.4500"sv);
+
+                const Decimal normalized = d.normalize();
+
+                AWL_ASSERT(normalized.to_astring() == "123.45");
+                AWL_ASSERT(normalized.exponent() == 2);
+                AWL_ASSERT(normalized == Decimal("123.45"sv));
+            }
+
+            {
+                Decimal d("-0000.1200"sv);
+
+                const Decimal normalized = d.normalize();
+
+                AWL_ASSERT(normalized.to_astring() == "-0.12");
+                AWL_ASSERT(normalized.exponent() == 2);
+                AWL_ASSERT(normalized.unsigned_mantissa() == Decimal("0.12"sv).unsigned_mantissa());
+            }
+
+            {
+                Decimal d("0.000"sv);
+
+                const Decimal normalized = d.normalize();
+
+                AWL_ASSERT(normalized.to_astring() == "0");
+                AWL_ASSERT(normalized.exponent() == 0);
+                AWL_ASSERT(normalized == Decimal::zero());
+            }
+        }
+
+        void DecimalRescaledMantissa()
+        {
+            const Decimal d("123.45"sv);
+
+            AWL_ASSERT(d.rescaled_mantissa(2) == d.mantissa());
+
+            const Decimal rescaled = d.rescale(4);
+
+            AWL_ASSERT(d.rescaled_mantissa(4) == rescaled.mantissa());
+            AWL_ASSERT(rescaled.to_astring() == "123.4500");
+
+            const Decimal negative("-123.45"sv);
+
+            AWL_ASSERT(negative.rescaled_mantissa(2) == negative.mantissa());
+            AWL_ASSERT(negative.rescaled_mantissa(4) == negative.rescale(4).mantissa());
+        }
+
+        void DecimalBitsRoundtrip()
+        {
+            const Decimal with_trailing = Decimal("123.45"sv).extend(4);
+            AWL_ASSERT(Decimal::from_bits(with_trailing.to_bits()) == with_trailing);
+
+            const Decimal negative("-9876.5432"sv);
+            AWL_ASSERT(Decimal::from_bits(negative.to_bits()) == negative);
+
+            const Decimal zero = Decimal::zero().extend(3);
+            AWL_ASSERT(Decimal::from_bits(zero.to_bits()) == zero);
+        }
     };
 }
 
@@ -531,6 +593,12 @@ LOCAL_TEST(DecimalCeil)
 LOCAL_TEST(DecimalRound)
 
 LOCAL_TEST(DecimalReadWrite)
+
+LOCAL_TEST(DecimalNormalize)
+
+LOCAL_TEST(DecimalRescaledMantissa)
+
+LOCAL_TEST(DecimalBitsRoundtrip)
 
 AWL_TEST(DecimalRescaleOverflow)
 {
