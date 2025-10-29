@@ -49,8 +49,8 @@ AWL_EXAMPLE(AsioAwaitableOperators)
             };
         };
 
-    co_spawn(ioc.get_executor(), foo_and(), handler("foo_and"));
-    co_spawn(ioc.get_executor(), foo_or(), handler("foo_or"));
+    boost::asio::co_spawn(ioc.get_executor(), foo_and(), handler("foo_and"));
+    boost::asio::co_spawn(ioc.get_executor(), foo_or(), handler("foo_or"));
 
     ioc.join();
 }

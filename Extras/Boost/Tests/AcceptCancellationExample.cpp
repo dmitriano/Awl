@@ -52,7 +52,7 @@ namespace
         asio::cancellation_signal sig;
 
         // After 3s, emit cancellation (will abort async_accept)
-        co_spawn(ex, cancel_after_delay(sig), asio::detached);
+        asio::co_spawn(ex, cancel_after_delay(sig), asio::detached);
 
         try
         {
@@ -77,7 +77,7 @@ AWL_EXAMPLE(AcceptCancellation)
     try
     {
         asio::io_context ctx;
-        co_spawn(ctx, example(), asio::detached);
+        asio::co_spawn(ctx, example(), asio::detached);
         ctx.run();
     }
     catch (const std::exception& e)

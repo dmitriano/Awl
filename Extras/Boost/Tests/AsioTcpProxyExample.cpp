@@ -182,7 +182,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     {
         asio::thread_pool ioc(1);
 
-        co_spawn(
+        asio::co_spawn(
             ioc,
             runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
                 target_host, target_port),
