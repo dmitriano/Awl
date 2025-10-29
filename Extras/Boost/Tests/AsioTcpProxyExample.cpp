@@ -165,6 +165,16 @@ namespace
     }
 }
 
+// Testing from WSL:
+// export ad_ip="172.24.48.1"
+// export ad_user="administrator@my.local"
+// export ad_password="1234@abc"
+//
+// export LDAPTLS_REQCERT=never
+//
+// ldapsearch -H ldaps://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local" \
+//   -s sub -a always -z 1000 "(objectClass=user)" "serviceClassName" "serviceDNSName" "objectClass"
+
 AWL_EXAMPLE(AsioTcpProxy)
 {
     AWL_ATTRIBUTE(unsigned int, listen_port, 12345);
