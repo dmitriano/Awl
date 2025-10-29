@@ -58,7 +58,7 @@ cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
 cmake --build . --parallel
 ```
 
-## Compiling on Ubuntu 22.04 with GCC13.1 (I am not sure if build-essential is really needed):
+## Compiling on Ubuntu 22.04 with GCC13.1:
 
 ```bash
 sudo apt install build-essential
