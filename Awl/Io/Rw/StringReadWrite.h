@@ -53,8 +53,6 @@ namespace awl::io
 
         //There is non-const version of data() since C++ 17.
         ReadRaw(s, reinterpret_cast<uint8_t *>(val.data()), string_length);
-
-        *(val.data() + len) = 0;
     }
 
     template<
