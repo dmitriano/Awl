@@ -11,13 +11,10 @@
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;
-using namespace boost::asio::experimental::awaitable_operators;
 
 namespace
 {
-    // Proxying SSL → SSL
-    asio::awaitable<void> transfer(ssl::stream<tcp::socket>& from,
-        ssl::stream<tcp::socket>& to)
+    asio::awaitable<void> transfer(ssl::stream<tcp::socket>& from, ssl::stream<tcp::socket>& to)
     {
         try
         {
@@ -33,26 +30,59 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                std::cerr << "handle_client: connection closed (stream truncated)\n";
+                std::cerr << "transfer: connection closed (stream truncated)\n";
             }
             if (e.code() == boost::asio::error::eof)
             {
-                std::cerr << "handle_client: EOF" << std::endl;
+                std::cerr << "transfer: EOF" << std::endl;
+            }
+            if (e.code() == asio::error::connection_reset)
+            {
+                std::cerr << "transfer: Connection Reset." << std::endl;
             }
             if (e.code() == boost::system::errc::operation_canceled || e.code() == boost::asio::error::operation_aborted)
             {
-                std::cerr << "handle_client: Operation cancelled." << std::endl;
+                std::cerr << "transfer: Operation cancelled." << std::endl;
+            }
+            if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
+            {
+                std::cerr << "transfer WSAECONNRESET." << std::endl;
             }
             else
             {
-                std::cerr << "handle_client boost::system::system_error: " << e.what() << std::endl;
+                std::cerr << "transfer boost::system::system_error: " << e.what() << std::endl;
             }
         }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
-            std::cerr << "handle_client std::exception: " << e.what() << std::endl;
+            std::cerr << "transfer std::exception: " << e.what() << std::endl;
         }
+    }
+
+    asio::awaitable<void> bidirectional_transfer(ssl::stream<tcp::socket>& client_ssl, ssl::stream<tcp::socket>& server_ssl)
+    {
+        using namespace boost::asio::experimental::awaitable_operators;
+
+        // it calls wait_for_one_error()
+        co_await(transfer(client_ssl, server_ssl) && transfer(server_ssl, client_ssl));
+    }
+        
+    asio::awaitable<void> advanced_bidirectional_transfer_example(ssl::stream<tcp::socket>& client_ssl, ssl::stream<tcp::socket>& server_ssl)
+    {
+        auto ex = co_await boost::asio::this_coro::executor;
+
+        auto [order, ex0, ex1] =
+            co_await asio::experimental::make_parallel_group(
+                asio::co_spawn(ex, transfer(client_ssl, server_ssl), boost::asio::deferred),
+                asio::co_spawn(ex, transfer(server_ssl, client_ssl), boost::asio::deferred)
+            ).async_wait(
+                asio::experimental::wait_for_one_success(),
+                asio::deferred
+            );
+
+        // At this point one of the tasks is still is in progress
+        // and we wait it to finish here.
     }
 
     // Handling a single client
@@ -82,7 +112,7 @@ namespace
             co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
             co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
 
-            co_await (transfer(client_ssl, server_ssl) || transfer(server_ssl, client_ssl));
+            co_await bidirectional_transfer(client_ssl, server_ssl);
         }
         catch (boost::system::system_error& e)
         {
