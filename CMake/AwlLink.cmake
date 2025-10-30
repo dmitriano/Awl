@@ -63,7 +63,7 @@ if (AWL_BOOST_EXTRAS)
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
-    find_package(Boost COMPONENTS atomic thread container exception cobalt cobalt_io REQUIRED)
+    find_package(Boost COMPONENTS atomic thread container exception REQUIRED)
 
     if(Boost_FOUND)
         message("Using BOOST. Include path: ${Boost_INCLUDE_DIRS} ${Boost_LIB_DIRS}")
