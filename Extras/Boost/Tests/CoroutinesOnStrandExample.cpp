@@ -40,13 +40,13 @@ namespace
         {
         }
 
-        awaitable<void> first()
+        awaitable<void> run()
         {
-            log("first started");
+            log("run started");
 
             co_await switchThread();
 
-            log("first resumed before awaiting second");
+            log("run resumed before awaiting second");
 
             auto before = std::this_thread::get_id();
 
@@ -205,6 +205,14 @@ namespace
         asio::thread_pool& pool;
         std::optional<Strand> strand;
     };
+
+    void runWorkers(asio::thread_pool& pool, std::vector<CoroutineWorker>& workers)
+    {
+        for (CoroutineWorker& worker : workers)
+        {
+            asio::co_spawn(pool, worker.run(), asio::detached);
+        }
+    }
 }
 
 AWL_EXAMPLE(CoroutinesOnStrandExample)
@@ -228,10 +236,7 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
         workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val });
     }
 
-    for (CoroutineWorker& worker : workers)
-    {
-        asio::co_spawn(pool, worker.first(), asio::detached);
-    }
+    runWorkers(pool, workers);
 
     pool.join();
 }
