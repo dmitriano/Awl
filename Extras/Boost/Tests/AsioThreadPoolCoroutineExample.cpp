@@ -21,7 +21,6 @@ namespace
     {
         boost::asio::thread_pool& pool;
         const awl::testing::TestContext& context;
-        mutable std::mutex output_mutex;
 
         explicit CoroutineChain(boost::asio::thread_pool& pool, const awl::testing::TestContext& context)
             : pool(pool), context(context)
@@ -30,7 +29,6 @@ namespace
 
         void log(const char* caption) const
         {
-            std::lock_guard lock(output_mutex);
             context.logger.debug(awl::format() << caption << " on thread " << std::this_thread::get_id());
         }
 
@@ -60,7 +58,6 @@ namespace
             auto value = co_await second();
             auto after = std::this_thread::get_id();
             {
-                std::lock_guard lock(output_mutex);
                 context.logger.debug(awl::format()
                     << "first awaited second on thread " << before
                     << " and resumed on thread " << after
