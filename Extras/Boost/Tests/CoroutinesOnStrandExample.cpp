@@ -1,4 +1,5 @@
 #include "Awl/StringFormat.h"
+#include "Awl/Random.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio/awaitable.hpp>
@@ -34,6 +35,28 @@ namespace
             : context(context), pool(pool), strand{ makeStrand(use_strand)}
         {}
 
+        awaitable<void> first()
+        {
+            log("first started");
+
+            co_await switchThread();
+
+            log("first resumed before awaiting second");
+
+            auto before = std::this_thread::get_id();
+
+            auto value = co_await second();
+
+            auto after = std::this_thread::get_id();
+
+            context.logger.debug(awl::format()
+                << "first awaited second on thread " << before
+                << " and resumed on thread " << after
+                << ", result = " << value);
+        }
+
+    private:
+
         void log(const char* caption) const
         {
             context.logger.debug(awl::format() << caption << " on thread " << std::this_thread::get_id());
@@ -60,28 +83,6 @@ namespace
 
             co_return value * 2;
         }
-
-        awaitable<void> first()
-        {
-            log("first started");
-
-            co_await switchThread();
-
-            log("first resumed before awaiting second");
-
-            auto before = std::this_thread::get_id();
-
-            auto value = co_await second();
-
-            auto after = std::this_thread::get_id();
-
-            context.logger.debug(awl::format()
-                << "first awaited second on thread " << before
-                << " and resumed on thread " << after
-                << ", result = " << value);
-        }
-
-    private:
 
         std::optional<Strand> makeStrand(bool use_strand) const
         {
@@ -112,6 +113,7 @@ namespace
         awaitable<void> delay() const
         {
             asio::steady_timer timer{ getExecutor() };
+
             timer.expires_after(randomDelay());
 
             co_await timer.async_wait(use_awaitable);
@@ -119,10 +121,9 @@ namespace
 
         static std::chrono::milliseconds randomDelay()
         {
-            static thread_local std::mt19937 engine{ std::random_device{}() };
             static thread_local std::uniform_int_distribution<int> distribution(0, 200);
 
-            return std::chrono::milliseconds(distribution(engine));
+            return std::chrono::milliseconds(distribution(awl::random()));
         }
 
         asio::any_io_executor getExecutor() const
