@@ -59,7 +59,7 @@ namespace
 
             logger().debug(awl::format()
                 << "#" << m_index
-                << "first awaited second on thread " << before
+                << " first awaited second on thread " << before
                 << " and resumed on thread " << after
                 << ", result = " << value);
         }
@@ -239,7 +239,11 @@ namespace
 AWL_EXAMPLE(CoroutinesOnStrandExample)
 {
     AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
-    AWL_ATTRIBUTE(size_t, spawn_count, 3);
+
+    // The number of concurrent workers.
+    AWL_ATTRIBUTE(size_t, worker_count, 3);
+
+    // Prints "Data Race!" if this flag is set.
     AWL_FLAG(without_strand);
 
     context.logger.debug(awl::format() << "Thread count: " << thread_count);
@@ -252,7 +256,7 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
 
     std::vector<CoroutineWorker> workers;
 
-    for (size_t i : awl::make_count(spawn_count))
+    for (size_t i : awl::make_count(worker_count))
     {
         workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val });
     }
