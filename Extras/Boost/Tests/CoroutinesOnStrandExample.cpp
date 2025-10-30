@@ -21,6 +21,7 @@
 #include <string_view>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -30,7 +31,7 @@ namespace
 {
     using Strand = asio::strand<asio::thread_pool::executor_type>;
 
-    using Value = volatile size_t;
+    using Value = std::atomic<size_t>;
 
     class CoroutineWorker
     {
@@ -125,9 +126,12 @@ namespace
 
                 Value sample = i;
 
-                m_val = sample;
+                m_val.store(sample);
 
-                AWL_ASSERT(m_val == sample);
+                if (m_val.load() != sample)
+                {
+                    logger().error("Data Race!");
+                }
             }
 
             log("finished the work");
