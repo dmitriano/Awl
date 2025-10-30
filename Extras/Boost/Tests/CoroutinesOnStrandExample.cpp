@@ -61,6 +61,13 @@ namespace
                 << ", result = " << value);
         }
 
+        awaitable<void> print()
+        {
+            log("run started");
+
+            co_return;
+        }
+
     private:
 
         void log(const char* caption) const
@@ -211,6 +218,14 @@ namespace
         for (CoroutineWorker& worker : workers)
         {
             asio::co_spawn(pool, worker.run(), asio::detached);
+        }
+    }
+
+    void printWorkers(asio::thread_pool& pool, std::vector<CoroutineWorker>& workers)
+    {
+        for (CoroutineWorker& worker : workers)
+        {
+            asio::co_spawn(pool, worker.print(), asio::detached);
         }
     }
 }
