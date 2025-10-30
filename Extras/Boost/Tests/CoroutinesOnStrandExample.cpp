@@ -6,8 +6,10 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/async_result.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
@@ -21,6 +23,7 @@
 #include <thread>
 #include <vector>
 #include <atomic>
+#include <utility>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -107,12 +110,43 @@ namespace
             co_return 2;
         }
 
+        class ThreadSwitchAwaiter
+        {
+        public:
+            explicit ThreadSwitchAwaiter(asio::any_io_executor executor)
+                : m_executor(std::move(executor))
+            {
+            }
+
+            template <typename CompletionToken>
+            auto async_wait(CompletionToken&& token) const
+            {
+                return asio::async_initiate<CompletionToken, void()>(
+                    Initiate{ m_executor }, std::forward<CompletionToken>(token));
+            }
+
+        private:
+            struct Initiate
+            {
+                asio::any_io_executor executor;
+
+                template <typename Handler>
+                void operator()(Handler&& handler) const
+                {
+                    asio::post(executor, [handler = std::forward<Handler>(handler)]() mutable
+                    {
+                        std::move(handler)();
+                    });
+                }
+            };
+
+            asio::any_io_executor m_executor;
+        };
+
         awaitable<void> switchThread() const
         {
-            asio::steady_timer timer{ getExecutor() };
-            timer.expires_after(std::chrono::steady_clock::duration::zero());
-            co_await timer.async_wait(use_awaitable);
-            co_return;
+            ThreadSwitchAwaiter awaiter{ getExecutor() };
+            co_await awaiter.async_wait(use_awaitable);
         }
 
         void simulateWork()
