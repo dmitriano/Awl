@@ -38,15 +38,14 @@ namespace
     public:
 
         explicit CoroutineWorker(const awl::testing::TestContext& context, 
-            asio::any_io_executor executor, std::size_t index, Value& val)
+            asio::any_io_executor executor, std::size_t index, Value& val, std::chrono::milliseconds work_duration)
         : 
             context(std::cref(context)),
             executor(executor),
             m_index(index),
             m_val(val),
-            workDuration(randomDuration(context))
-        {
-        }
+            workDuration(work_duration)
+        {}
 
         awaitable<void> run()
         {
@@ -153,16 +152,6 @@ namespace
             log("finished the work");
         }
 
-        static std::chrono::milliseconds randomDuration(const awl::testing::TestContext& context)
-        {
-            AWL_ATTRIBUTE(int, distribution_from, 200);
-            AWL_ATTRIBUTE(int, distribution_to, 1000);
-
-            std::uniform_int_distribution<int> distribution(distribution_from, distribution_to);
-
-            return std::chrono::milliseconds(distribution(awl::random()));
-        }
-
         asio::any_io_executor getExecutor() const
         {
             return executor;
@@ -263,9 +252,15 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
 
     std::vector<CoroutineWorker> workers;
 
+    AWL_ATTRIBUTE(int, duration_from, 200);
+    AWL_ATTRIBUTE(int, duration_to, 1000);
+
+    std::uniform_int_distribution<int> distribution(duration_from, duration_to);
+
     for (size_t i : awl::make_count(worker_count))
     {
-        workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val });
+        workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val,
+            std::chrono::milliseconds{distribution(awl::random())} });
     }
 
     runWorkers(pool, workers);
