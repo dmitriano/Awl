@@ -8,8 +8,6 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
-#include <boost/asio/execution.hpp>
-#include <boost/asio/prefer.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
@@ -23,7 +21,6 @@
 #include <thread>
 #include <vector>
 #include <atomic>
-#include <coroutine>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -110,31 +107,12 @@ namespace
             co_return 2;
         }
 
-        struct ThreadSwitchAwaiter
+        awaitable<void> switchThread() const
         {
-            asio::any_io_executor executor;
-
-            bool await_ready() const noexcept
-            {
-                return false;
-            }
-
-            void await_suspend(std::coroutine_handle<> handle) const
-            {
-                boost::asio::execution::execute(
-                    boost::asio::prefer(executor, boost::asio::execution::blocking.never),
-                    [handle]() mutable
-                    {
-                        handle.resume();
-                    });
-            }
-
-            void await_resume() const noexcept {}
-        };
-
-        ThreadSwitchAwaiter switchThread() const
-        {
-            return ThreadSwitchAwaiter{ getExecutor() };
+            asio::steady_timer timer{ getExecutor() };
+            timer.expires_after(std::chrono::steady_clock::duration::zero());
+            co_await timer.async_wait(use_awaitable);
+            co_return;
         }
 
         void simulateWork()
