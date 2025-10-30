@@ -39,7 +39,12 @@ namespace
 
         explicit CoroutineWorker(const awl::testing::TestContext& context, 
             asio::any_io_executor executor, std::size_t index, Value& val)
-        : context(std::cref(context)), executor(executor), m_index(index), m_val(val)
+        : 
+            context(std::cref(context)),
+            executor(executor),
+            m_index(index),
+            m_val(val),
+            workDuration(randomDuration(context))
         {
         }
 
@@ -115,11 +120,9 @@ namespace
 
             awl::StopWatch sw;
 
-            auto duration = randomDuration();
-
             for (size_t i = 0; ; ++i)
             {
-                if (sw.HasElapsed(duration))
+                if (sw.HasElapsed(workDuration))
                 {
                     break;
                 }
@@ -143,16 +146,19 @@ namespace
 
             asio::steady_timer timer{ getExecutor() };
 
-            timer.expires_after(randomDuration());
+            timer.expires_after(workDuration);
 
             co_await timer.async_wait(use_awaitable);
 
             log("finished the work");
         }
 
-        static std::chrono::milliseconds randomDuration()
+        static std::chrono::milliseconds randomDuration(const awl::testing::TestContext& context)
         {
-            static thread_local std::uniform_int_distribution<int> distribution(200, 1000);
+            AWL_ATTRIBUTE(int, distribution_from, 200);
+            AWL_ATTRIBUTE(int, distribution_to, 1000);
+
+            std::uniform_int_distribution<int> distribution(distribution_from, distribution_to);
 
             return std::chrono::milliseconds(distribution(awl::random()));
         }
@@ -171,6 +177,7 @@ namespace
         asio::any_io_executor executor;
         const std::size_t m_index;
         Value& m_val;
+        const std::chrono::milliseconds workDuration;
     };
 
     class StrandHolder
