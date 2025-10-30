@@ -28,7 +28,7 @@ namespace
         {
         }
 
-        void log(std::string_view caption) const
+        void log(const char* caption) const
         {
             std::lock_guard lock(output_mutex);
             context.logger.debug(awl::format() << caption << " on thread " << std::this_thread::get_id());
@@ -72,7 +72,7 @@ namespace
 
 AWL_EXAMPLE(AsioThreadPoolCoroutine)
 {
-    boost::asio::thread_pool pool(2);
+    boost::asio::thread_pool pool(5);
     CoroutineChain chain{pool, context};
 
     boost::asio::co_spawn(pool, chain.first(), boost::asio::detached);
