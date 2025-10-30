@@ -25,23 +25,15 @@ using asio::use_awaitable;
 
 namespace
 {
+    using Strand = asio::strand<asio::thread_pool::executor_type>;
+
     class CoroutineChain
     {
     public:
 
-        using Strand = asio::strand<asio::thread_pool::executor_type>;
-
-        explicit CoroutineChain(const awl::testing::TestContext& context, asio::thread_pool& pool, bool use_strand)
-            : context(context), pool(pool), strand{ makeStrand(use_strand)}
+        explicit CoroutineChain(const awl::testing::TestContext& context, asio::any_io_executor executor)
+            : context(context), executor(executor)
         {
-            if (strand)
-            {
-                context.logger.debug("Using Strand.");
-            }
-            else
-            {
-                context.logger.debug("Using Thread Pool without a Strand.");
-            }
         }
 
         awaitable<void> first()
@@ -97,18 +89,6 @@ namespace
             co_return 2;
         }
 
-        std::optional<Strand> makeStrand(bool use_strand) const
-        {
-            if (use_strand)
-            {
-                return Strand{ pool.get_executor() };
-            }
-            else
-            {
-                return {};
-            }
-        }
-
         awaitable<void> switchThread()
         {
             co_await asio::post(getExecutor(), use_awaitable);
@@ -132,12 +112,52 @@ namespace
 
         asio::any_io_executor getExecutor() const
         {
+            return executor;
+        }
+
+        const awl::testing::TestContext& context;
+        asio::any_io_executor executor;
+    };
+
+    class StrandHolder
+    {
+    public:
+
+        StrandHolder(const awl::testing::TestContext& context, asio::thread_pool& pool, bool use_strand) :
+            context(context), pool(pool), strand(makeStrand(use_strand))
+        {
+            if (strand)
+            {
+                context.logger.debug("Using Strand.");
+            }
+            else
+            {
+                context.logger.debug("Using Thread Pool without a Strand.");
+            }
+        }
+
+        asio::any_io_executor getExecutor() const
+        {
             if (strand)
             {
                 return *strand;
             }
 
             return pool.get_executor();
+        }
+
+    private:
+
+        std::optional<Strand> makeStrand(bool use_strand)
+        {
+            if (use_strand)
+            {
+                return Strand{ pool.get_executor() };
+            }
+            else
+            {
+                return {};
+            }
         }
 
         const awl::testing::TestContext& context;
@@ -153,7 +173,9 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
 
     asio::thread_pool pool(thread_count);
 
-    CoroutineChain chain{context, pool, !without_strand };
+    StrandHolder holder{ context, pool, !without_strand };
+
+    CoroutineChain chain{ context, holder.getExecutor() };
 
     asio::co_spawn(pool, chain.first(), asio::detached);
 
