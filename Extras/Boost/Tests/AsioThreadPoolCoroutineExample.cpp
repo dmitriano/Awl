@@ -23,10 +23,11 @@ namespace
     {
     public:
 
-        explicit CoroutineChain(const awl::testing::TestContext& context, asio::thread_pool& pool)
-            : context(context), pool(pool), strand(pool.get_executor())
-        {
-        }
+        using Strand = asio::strand<asio::thread_pool::executor_type>;
+
+        explicit CoroutineChain(const awl::testing::TestContext& context, asio::thread_pool& pool, bool use_strand)
+            : context(context), pool(pool), strand{ makeStrand(use_strand)}
+        {}
 
         void log(const char* caption) const
         {
@@ -35,7 +36,7 @@ namespace
 
         awaitable<int> third()
         {
-            co_await asio::post(pool, use_awaitable);
+            co_await switchThread();
 
             log("third resumed");
 
@@ -44,7 +45,7 @@ namespace
 
         awaitable<int> second()
         {
-            co_await asio::post(pool, use_awaitable);
+            co_await switchThread();
 
             log("second resumed before awaiting third");
 
@@ -59,7 +60,7 @@ namespace
         {
             log("first started");
 
-            co_await asio::post(pool, use_awaitable);
+            co_await switchThread();
 
             log("first resumed before awaiting second");
 
@@ -77,17 +78,43 @@ namespace
 
     private:
 
+        std::optional<Strand> makeStrand(bool use_strand) const
+        {
+            if (use_strand)
+            {
+                return Strand{ pool.get_executor() };
+            }
+            else
+            {
+                return {};
+            }
+        }
+
+        awaitable<void> switchThread()
+        {
+            if (strand)
+            {
+                co_await asio::post(*strand, use_awaitable);
+            }
+            else
+            {
+                co_await asio::post(pool, use_awaitable);
+            }
+        }
+
         const awl::testing::TestContext& context;
         asio::thread_pool& pool;
-        asio::strand<asio::thread_pool::executor_type> strand;
+        std::optional<Strand> strand;
     };
 }
 
 AWL_EXAMPLE(AsioThreadPoolCoroutine)
 {
+    AWL_FLAG(use_strand);
+
     asio::thread_pool pool(5);
 
-    CoroutineChain chain{context, pool};
+    CoroutineChain chain{context, pool, use_strand };
 
     asio::co_spawn(pool, chain.first(), asio::detached);
 
