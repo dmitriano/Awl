@@ -1,5 +1,7 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Random.h"
+#include "Awl/StopWatch.h"
+#include "Awl/IntRange.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio/awaitable.hpp>
@@ -18,6 +20,7 @@
 #include <random>
 #include <string_view>
 #include <thread>
+#include <vector>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -27,12 +30,13 @@ namespace
 {
     using Strand = asio::strand<asio::thread_pool::executor_type>;
 
-    class CoroutineChain
+    class CoroutineWorker
     {
     public:
 
-        explicit CoroutineChain(const awl::testing::TestContext& context, asio::any_io_executor executor)
-            : context(context), executor(executor)
+        explicit CoroutineWorker(const awl::testing::TestContext& context, 
+            asio::any_io_executor executor, std::size_t index, std::string& val)
+        : context(std::cref(context)), executor(executor), m_index(index), m_val(val)
         {
         }
 
@@ -50,7 +54,8 @@ namespace
 
             auto after = std::this_thread::get_id();
 
-            context.logger.debug(awl::format()
+            logger().debug(awl::format()
+                << "#" << m_index
                 << "first awaited second on thread " << before
                 << " and resumed on thread " << after
                 << ", result = " << value);
@@ -60,14 +65,14 @@ namespace
 
         void log(const char* caption) const
         {
-            context.logger.debug(awl::format() << caption << " on thread " << std::this_thread::get_id());
+            logger().debug(awl::format() << "#" << m_index << " " << caption << " on thread " << std::this_thread::get_id());
         }
 
         awaitable<int> second()
         {
             co_await switchThread();
 
-            co_await simulateWork();
+            simulateWork();
 
             log("second resumed before awaiting third");
 
@@ -82,7 +87,7 @@ namespace
         {
             co_await switchThread();
 
-            co_await simulateWork();
+            simulateWork();
 
             log("third resumed");
 
@@ -94,18 +99,47 @@ namespace
             co_await asio::post(getExecutor(), use_awaitable);
         }
 
-        awaitable<void> simulateWork() const
+        void simulateWork()
         {
+            log("started a work");
+
+            awl::StopWatch sw;
+
+            auto duration = randomDuration();
+
+            for (size_t i = 0; ; ++i)
+            {
+                if (sw.HasElapsed(duration))
+                {
+                    break;
+                }
+
+                const std::string sample = "a string longer than probably 16 or 22, I do no remember exaclty " + std::to_string(i);
+
+                m_val = sample;
+
+                AWL_ASSERT(m_val == sample);
+            }
+
+            log("finished the work");
+        }
+
+        awaitable<void> simulateWorkAsync() const
+        {
+            log("started a work");
+
             asio::steady_timer timer{ getExecutor() };
 
             timer.expires_after(randomDuration());
 
             co_await timer.async_wait(use_awaitable);
+
+            log("finished the work");
         }
 
         static std::chrono::milliseconds randomDuration()
         {
-            static thread_local std::uniform_int_distribution<int> distribution(0, 200);
+            static thread_local std::uniform_int_distribution<int> distribution(200, 1000);
 
             return std::chrono::milliseconds(distribution(awl::random()));
         }
@@ -115,8 +149,15 @@ namespace
             return executor;
         }
 
-        const awl::testing::TestContext& context;
+        awl::Logger& logger() const
+        {
+            return context.get().logger;
+        }
+
+        std::reference_wrapper<const awl::testing::TestContext> context;
         asio::any_io_executor executor;
+        const std::size_t m_index;
+        std::string& m_val;
     };
 
     class StrandHolder
@@ -168,16 +209,29 @@ namespace
 
 AWL_EXAMPLE(CoroutinesOnStrandExample)
 {
-    AWL_ATTRIBUTE(size_t, thread_count, 5);
+    AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+    AWL_ATTRIBUTE(size_t, spawn_count, 3);
     AWL_FLAG(without_strand);
+
+    context.logger.debug(awl::format() << "Thread count: " << thread_count);
 
     asio::thread_pool pool(thread_count);
 
     StrandHolder holder{ context, pool, !without_strand };
 
-    CoroutineChain chain{ context, holder.getExecutor() };
+    std::string val;
 
-    asio::co_spawn(pool, chain.first(), asio::detached);
+    std::vector<CoroutineWorker> workers;
+
+    for (size_t i : awl::make_count(spawn_count))
+    {
+        workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val });
+    }
+
+    for (CoroutineWorker& worker : workers)
+    {
+        asio::co_spawn(pool, worker.first(), asio::detached);
+    }
 
     pool.join();
 }
