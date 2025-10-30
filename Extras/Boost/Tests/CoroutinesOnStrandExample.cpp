@@ -2,14 +2,19 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio/awaitable.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/strand.hpp>
 
+#include <chrono>
 #include <mutex>
+#include <optional>
+#include <random>
 #include <string_view>
 #include <thread>
 
@@ -92,6 +97,8 @@ namespace
 
         awaitable<void> switchThread()
         {
+            co_await delay();
+
             if (strand)
             {
                 co_await asio::post(*strand, use_awaitable);
@@ -100,6 +107,32 @@ namespace
             {
                 co_await asio::post(pool, use_awaitable);
             }
+        }
+
+        awaitable<void> delay() const
+        {
+            asio::steady_timer timer{ getExecutor() };
+            timer.expires_after(randomDelay());
+
+            co_await timer.async_wait(use_awaitable);
+        }
+
+        static std::chrono::milliseconds randomDelay()
+        {
+            static thread_local std::mt19937 engine{ std::random_device{}() };
+            static thread_local std::uniform_int_distribution<int> distribution(0, 200);
+
+            return std::chrono::milliseconds(distribution(engine));
+        }
+
+        asio::any_io_executor getExecutor() const
+        {
+            if (strand)
+            {
+                return *strand;
+            }
+
+            return pool.get_executor();
         }
 
         const awl::testing::TestContext& context;
