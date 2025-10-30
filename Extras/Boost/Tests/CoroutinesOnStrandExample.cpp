@@ -75,6 +75,8 @@ namespace
         {
             co_await switchThread();
 
+            co_await delay();
+
             log("second resumed before awaiting third");
 
             auto value = co_await third();
@@ -87,6 +89,8 @@ namespace
         awaitable<int> third()
         {
             co_await switchThread();
+
+            co_await delay();
 
             log("third resumed");
 
@@ -108,8 +112,6 @@ namespace
         awaitable<void> switchThread()
         {
             co_await asio::post(getExecutor(), use_awaitable);
-
-            co_await delay();
         }
 
         awaitable<void> delay() const
