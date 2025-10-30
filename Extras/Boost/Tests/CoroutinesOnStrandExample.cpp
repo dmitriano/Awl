@@ -62,15 +62,6 @@ namespace
             context.logger.debug(awl::format() << caption << " on thread " << std::this_thread::get_id());
         }
 
-        awaitable<int> third()
-        {
-            co_await switchThread();
-
-            log("third resumed");
-
-            co_return 2;
-        }
-
         awaitable<int> second()
         {
             co_await switchThread();
@@ -82,6 +73,15 @@ namespace
             log("second resumed after awaiting third");
 
             co_return value * 2;
+        }
+
+        awaitable<int> third()
+        {
+            co_await switchThread();
+
+            log("third resumed");
+
+            co_return 2;
         }
 
         std::optional<Strand> makeStrand(bool use_strand) const
@@ -100,26 +100,19 @@ namespace
         {
             co_await delay();
 
-            if (strand)
-            {
-                co_await asio::post(*strand, use_awaitable);
-            }
-            else
-            {
-                co_await asio::post(pool, use_awaitable);
-            }
+            co_await asio::post(getExecutor(), use_awaitable);
         }
 
         awaitable<void> delay() const
         {
             asio::steady_timer timer{ getExecutor() };
 
-            timer.expires_after(randomDelay());
+            timer.expires_after(randomDuration());
 
             co_await timer.async_wait(use_awaitable);
         }
 
-        static std::chrono::milliseconds randomDelay()
+        static std::chrono::milliseconds randomDuration()
         {
             static thread_local std::uniform_int_distribution<int> distribution(0, 200);
 
