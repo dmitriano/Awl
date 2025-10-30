@@ -33,7 +33,16 @@ namespace
 
         explicit CoroutineChain(const awl::testing::TestContext& context, asio::thread_pool& pool, bool use_strand)
             : context(context), pool(pool), strand{ makeStrand(use_strand)}
-        {}
+        {
+            if (strand)
+            {
+                context.logger.debug("Using Strand.");
+            }
+            else
+            {
+                context.logger.debug("Using Thread Pool without a Strand.");
+            }
+        }
 
         awaitable<void> first()
         {
@@ -98,9 +107,9 @@ namespace
 
         awaitable<void> switchThread()
         {
-            co_await delay();
-
             co_await asio::post(getExecutor(), use_awaitable);
+
+            co_await delay();
         }
 
         awaitable<void> delay() const
