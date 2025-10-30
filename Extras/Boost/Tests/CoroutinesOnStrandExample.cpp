@@ -51,7 +51,7 @@ namespace
         {
             log("run started");
 
-            co_await switchThread();
+            co_await asyncOp();
 
             log("run resumed before awaiting second");
 
@@ -84,7 +84,7 @@ namespace
 
         awaitable<int> runSecondStage()
         {
-            co_await switchThread();
+            co_await asyncOp();
 
             simulateWork();
 
@@ -99,7 +99,7 @@ namespace
 
         awaitable<int> runThirdStage()
         {
-            co_await switchThread();
+            co_await asyncOp();
 
             simulateWork();
 
@@ -108,7 +108,12 @@ namespace
             co_return 2;
         }
 
-        awaitable<void> switchThread()
+        // A simulation of an async operation.
+        // If we use tcp::socket we initilaize it with getExecutor() and its asyncRead, asyncWrite, etc...
+        // actually do asio::post(getExecutor(), ...).
+        // And we probably use a similar techinique with DataHandler. We probably create a bridge to
+        // DataHander that is aware of our executor.
+        awaitable<void> asyncOp()
         {
             co_await asio::post(getExecutor(), use_awaitable);
         }
