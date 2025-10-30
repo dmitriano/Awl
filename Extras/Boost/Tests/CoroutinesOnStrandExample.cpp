@@ -57,7 +57,7 @@ namespace
 
             auto before = std::this_thread::get_id();
 
-            auto value = co_await second();
+            auto value = co_await runSecondStage();
 
             auto after = std::this_thread::get_id();
 
@@ -82,7 +82,7 @@ namespace
             logger().debug(awl::format() << "#" << m_index << " " << caption << " on thread " << std::this_thread::get_id());
         }
 
-        awaitable<int> second()
+        awaitable<int> runSecondStage()
         {
             co_await switchThread();
 
@@ -90,14 +90,14 @@ namespace
 
             log("second resumed before awaiting third");
 
-            auto value = co_await third();
+            auto value = co_await runThirdStage();
 
             log("second resumed after awaiting third");
 
             co_return value * 2;
         }
 
-        awaitable<int> third()
+        awaitable<int> runThirdStage()
         {
             co_await switchThread();
 
