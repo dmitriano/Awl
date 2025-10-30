@@ -30,12 +30,14 @@ namespace
 {
     using Strand = asio::strand<asio::thread_pool::executor_type>;
 
+    using Value = volatile size_t;
+
     class CoroutineWorker
     {
     public:
 
         explicit CoroutineWorker(const awl::testing::TestContext& context, 
-            asio::any_io_executor executor, std::size_t index, std::string& val)
+            asio::any_io_executor executor, std::size_t index, Value& val)
         : context(std::cref(context)), executor(executor), m_index(index), m_val(val)
         {
         }
@@ -121,7 +123,7 @@ namespace
                     break;
                 }
 
-                const std::string sample = "a string longer than probably 16 or 22, I do no remember exaclty " + std::to_string(i);
+                Value sample = i;
 
                 m_val = sample;
 
@@ -164,7 +166,7 @@ namespace
         std::reference_wrapper<const awl::testing::TestContext> context;
         asio::any_io_executor executor;
         const std::size_t m_index;
-        std::string& m_val;
+        Value& m_val;
     };
 
     class StrandHolder
@@ -242,7 +244,7 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
 
     StrandHolder holder{ context, pool, !without_strand };
 
-    std::string val;
+    Value val;
 
     std::vector<CoroutineWorker> workers;
 
