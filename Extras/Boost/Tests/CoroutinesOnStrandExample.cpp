@@ -111,8 +111,9 @@ namespace
         // A simulation of an async operation.
         // If we use tcp::socket we initilaize it with getExecutor() and its asyncRead, asyncWrite, etc...
         // actually do asio::post(getExecutor(), ...).
-        // And we probably use a similar techinique with DataHandler. We probably create a bridge to
-        // DataHander that is aware of our executor.
+        // And we probably use a similar techinique with DataHandler.
+        // But looks like all co_awaits are bound to asio::this_coro::executor
+        // and we can do executer = co_await asio::this_coro::executor.
         awaitable<void> asyncOp()
         {
             co_await asio::post(getExecutor(), use_awaitable);
@@ -222,23 +223,26 @@ namespace
         std::optional<Strand> strand;
     };
 
-    void runWorkers(asio::thread_pool& pool, std::vector<CoroutineWorker>& workers)
+    void runWorkers(asio::any_io_executor executor, std::vector<CoroutineWorker>& workers)
     {
         for (CoroutineWorker& worker : workers)
         {
-            asio::co_spawn(pool, worker.run(), asio::detached);
+            asio::co_spawn(executor, worker.run(), asio::detached);
         }
     }
 
-    void printWorkers(asio::thread_pool& pool, std::vector<CoroutineWorker>& workers)
+    void printWorkers(asio::any_io_executor executor, std::vector<CoroutineWorker>& workers)
     {
         for (CoroutineWorker& worker : workers)
         {
-            asio::co_spawn(pool, worker.print(), asio::detached);
+            asio::co_spawn(executor, worker.print(), asio::detached);
         }
     }
 }
 
+// Run
+// AwlTest --run CoroutinesOnStrandExample_Example --output all --without_strand
+// to see the data race.
 AWL_EXAMPLE(CoroutinesOnStrandExample)
 {
     AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
@@ -246,14 +250,17 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
     // The number of concurrent workers.
     AWL_ATTRIBUTE(size_t, worker_count, 3);
 
-    // Prints "Data Race!" if this flag is set.
+    // Prints "Data Race!" if this flag is set and spawn_on_strand flag is unset.
     AWL_FLAG(without_strand);
+
+    // Spawn all the coroutines on the strand.
+    AWL_FLAG(spawn_on_strand);
 
     context.logger.debug(awl::format() << "Thread count: " << thread_count);
 
     asio::thread_pool pool(thread_count);
 
-    StrandHolder holder{ context, pool, !without_strand };
+    StrandHolder holder{ context, pool, !without_strand || spawn_on_strand };
 
     Value val;
 
@@ -264,13 +271,43 @@ AWL_EXAMPLE(CoroutinesOnStrandExample)
 
     std::uniform_int_distribution<int> distribution(duration_from, duration_to);
 
+    asio::any_io_executor worker_executor;
+
+    if (spawn_on_strand)
+    {
+        // Run the workers on the pool.
+        worker_executor = pool.get_executor();
+    }
+    else
+    {
+        // Run the workers on the strand if it exists.
+        worker_executor = holder.getExecutor();
+    }
+
     for (size_t i : awl::make_count(worker_count))
     {
-        workers.push_back(CoroutineWorker{ context, holder.getExecutor(), i, val,
+        workers.push_back(CoroutineWorker{ context, worker_executor, i, val,
             std::chrono::milliseconds{distribution(awl::random())} });
     }
 
-    runWorkers(pool, workers);
+    asio::any_io_executor spawn_executor;
+
+    if (spawn_on_strand)
+    {
+        // Run all the coroutines on the strand.
+        spawn_executor = holder.getExecutor();
+    }
+    else
+    {
+        // Run the coroutines on the pool.
+        spawn_executor = pool.get_executor();
+    }
+
+    // When we spawn the coroutines on the strand,
+    // all the simulateWork() calls are serialized
+    // even if asio::post is called with pool's executor
+    // and data race does not happen.
+    runWorkers(spawn_executor, workers);
 
     pool.join();
 }
