@@ -108,11 +108,12 @@ namespace
     };
 }
 
-AWL_EXAMPLE(AsioThreadPoolCoroutine)
+AWL_EXAMPLE(CoroutinesOnStrandExample)
 {
+    AWL_ATTRIBUTE(size_t, thread_count, 5);
     AWL_FLAG(use_strand);
 
-    asio::thread_pool pool(5);
+    asio::thread_pool pool(thread_count);
 
     CoroutineChain chain{context, pool, use_strand };
 
