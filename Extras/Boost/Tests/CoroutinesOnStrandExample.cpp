@@ -24,6 +24,7 @@
 #include <vector>
 #include <atomic>
 #include <utility>
+#include <coroutine>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -118,35 +119,28 @@ namespace
             {
             }
 
-            template <typename CompletionToken>
-            auto async_wait(CompletionToken&& token) const
+            bool await_ready() const noexcept
             {
-                return asio::async_initiate<CompletionToken, void()>(
-                    Initiate{ m_executor }, std::forward<CompletionToken>(token));
+                return false;
             }
 
-        private:
-            struct Initiate
+            void await_suspend(std::coroutine_handle<> handle) const
             {
-                asio::any_io_executor executor;
-
-                template <typename Handler>
-                void operator()(Handler&& handler) const
+                asio::post(m_executor, [handle]() mutable
                 {
-                    asio::post(executor, [handler = std::forward<Handler>(handler)]() mutable
-                    {
-                        std::move(handler)();
-                    });
-                }
-            };
+                    handle.resume();
+                });
+            }
 
+            void await_resume() const noexcept {}
+
+        private:
             asio::any_io_executor m_executor;
         };
 
         awaitable<void> switchThread() const
         {
-            ThreadSwitchAwaiter awaiter{ getExecutor() };
-            co_await awaiter.async_wait(use_awaitable);
+            co_await ThreadSwitchAwaiter{ getExecutor() };
         }
 
         void simulateWork()
