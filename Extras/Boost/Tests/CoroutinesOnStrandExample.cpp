@@ -75,7 +75,7 @@ namespace
         {
             co_await switchThread();
 
-            co_await delay();
+            co_await simulateWork();
 
             log("second resumed before awaiting third");
 
@@ -90,7 +90,7 @@ namespace
         {
             co_await switchThread();
 
-            co_await delay();
+            co_await simulateWork();
 
             log("third resumed");
 
@@ -114,7 +114,7 @@ namespace
             co_await asio::post(getExecutor(), use_awaitable);
         }
 
-        awaitable<void> delay() const
+        awaitable<void> simulateWork() const
         {
             asio::steady_timer timer{ getExecutor() };
 
@@ -149,11 +149,11 @@ namespace
 AWL_EXAMPLE(CoroutinesOnStrandExample)
 {
     AWL_ATTRIBUTE(size_t, thread_count, 5);
-    AWL_FLAG(use_strand);
+    AWL_FLAG(without_strand);
 
     asio::thread_pool pool(thread_count);
 
-    CoroutineChain chain{context, pool, use_strand };
+    CoroutineChain chain{context, pool, !without_strand };
 
     asio::co_spawn(pool, chain.first(), asio::detached);
 
