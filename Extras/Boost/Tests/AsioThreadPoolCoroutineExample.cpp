@@ -35,16 +35,22 @@ namespace
         awaitable<int> third()
         {
             co_await boost::asio::post(pool, use_awaitable);
+
             log("third resumed");
+
             co_return 2;
         }
 
         awaitable<int> second()
         {
             co_await boost::asio::post(pool, use_awaitable);
+
             log("second resumed before awaiting third");
+
             auto value = co_await third();
+
             log("second resumed after awaiting third");
+
             co_return value * 2;
         }
 
@@ -53,16 +59,19 @@ namespace
             log("first started");
 
             co_await boost::asio::post(pool, use_awaitable);
+
             log("first resumed before awaiting second");
+
             auto before = std::this_thread::get_id();
+
             auto value = co_await second();
+
             auto after = std::this_thread::get_id();
-            {
-                context.logger.debug(awl::format()
-                    << "first awaited second on thread " << before
-                    << " and resumed on thread " << after
-                    << ", result = " << value);
-            }
+
+            context.logger.debug(awl::format()
+                << "first awaited second on thread " << before
+                << " and resumed on thread " << after
+                << ", result = " << value);
         }
     };
 }
@@ -70,6 +79,7 @@ namespace
 AWL_EXAMPLE(AsioThreadPoolCoroutine)
 {
     boost::asio::thread_pool pool(5);
+
     CoroutineChain chain{pool, context};
 
     boost::asio::co_spawn(pool, chain.first(), boost::asio::detached);
