@@ -132,7 +132,7 @@ namespace
 
                 if (m_val.load() != sample)
                 {
-                    logger().error("Data Race!");
+                    logger().error(awl::format() << "#" << m_index << " " << "Data Race!");
                 }
             }
 
