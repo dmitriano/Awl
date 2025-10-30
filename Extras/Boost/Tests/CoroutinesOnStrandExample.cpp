@@ -130,9 +130,11 @@ namespace
 
                 m_val.store(sample);
 
-                if (m_val.load() != sample)
+                const size_t actual = m_val.load();
+
+                if (actual != sample)
                 {
-                    logger().error(awl::format() << "#" << m_index << " " << "Data Race!");
+                    logger().error(awl::format() << "#" << m_index << " " << "Data Race! Stored " << sample << ", but loaded " << actual);
                 }
             }
 
