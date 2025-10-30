@@ -7,23 +7,24 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
+#include <boost/asio/strand.hpp>
 
 #include <mutex>
 #include <string_view>
 #include <thread>
 
-using boost::asio::awaitable;
-using boost::asio::use_awaitable;
+namespace asio = boost::asio;
+using asio::awaitable;
+using asio::use_awaitable;
 
 namespace
 {
-    struct CoroutineChain
+    class CoroutineChain
     {
-        boost::asio::thread_pool& pool;
-        const awl::testing::TestContext& context;
+    public:
 
-        explicit CoroutineChain(boost::asio::thread_pool& pool, const awl::testing::TestContext& context)
-            : pool(pool), context(context)
+        explicit CoroutineChain(const awl::testing::TestContext& context, asio::thread_pool& pool)
+            : context(context), pool(pool), strand(pool.get_executor())
         {
         }
 
@@ -34,7 +35,7 @@ namespace
 
         awaitable<int> third()
         {
-            co_await boost::asio::post(pool, use_awaitable);
+            co_await asio::post(pool, use_awaitable);
 
             log("third resumed");
 
@@ -43,7 +44,7 @@ namespace
 
         awaitable<int> second()
         {
-            co_await boost::asio::post(pool, use_awaitable);
+            co_await asio::post(pool, use_awaitable);
 
             log("second resumed before awaiting third");
 
@@ -58,7 +59,7 @@ namespace
         {
             log("first started");
 
-            co_await boost::asio::post(pool, use_awaitable);
+            co_await asio::post(pool, use_awaitable);
 
             log("first resumed before awaiting second");
 
@@ -73,16 +74,22 @@ namespace
                 << " and resumed on thread " << after
                 << ", result = " << value);
         }
+
+    private:
+
+        const awl::testing::TestContext& context;
+        asio::thread_pool& pool;
+        asio::strand<asio::thread_pool::executor_type> strand;
     };
 }
 
 AWL_EXAMPLE(AsioThreadPoolCoroutine)
 {
-    boost::asio::thread_pool pool(5);
+    asio::thread_pool pool(5);
 
-    CoroutineChain chain{pool, context};
+    CoroutineChain chain{context, pool};
 
-    boost::asio::co_spawn(pool, chain.first(), boost::asio::detached);
+    asio::co_spawn(pool, chain.first(), asio::detached);
 
     pool.join();
 }
