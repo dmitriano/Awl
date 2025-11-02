@@ -21,13 +21,13 @@ namespace awl
         {
         public:
             
-            //typename BasicHash<N>::value_type 
-            template <class InputIt>
-            typename std::enable_if<sizeof(typename std::iterator_traits<InputIt>::value_type) == 1, typename BasicHash<N>::value_type>::type operator()(InputIt begin, InputIt end) const
+            template <class T>
+                requires (std::is_integral_v<T> && sizeof(T) == 1)
+            typename BasicHash<N>::value_type operator()(const T* begin, const T* end) const
             {
-                BasicHash<N>::value_type digest;
+                typename BasicHash<N>::value_type digest;
 
-                func(&(*begin), end - begin, digest.data());
+                func(reinterpret_cast<const unsigned char*>(begin), end - begin, digest.data());
 
                 return digest;
             }

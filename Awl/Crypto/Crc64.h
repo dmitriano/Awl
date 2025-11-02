@@ -56,12 +56,11 @@ namespace awl::crypto
     {
     public:
 
-        constexpr Crc64(uint64_t seed = 127) : m_seed(seed)
-        {
-        }
+        constexpr Crc64(uint64_t seed = 127) : m_seed(seed) {}
 
         template <class InputIt>
-        constexpr typename std::enable_if<std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value, value_type>::type operator()(InputIt begin, InputIt end) const
+            requires std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value
+        constexpr value_type operator()(InputIt begin, InputIt end) const
         {
             using T = typename std::iterator_traits<InputIt>::value_type;
 

@@ -79,9 +79,9 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     const Hash hash;
 
     {
-        auto r = awl::make_int_range<uint8_t>(0, 1);
+        uint8_t buf[1];
 
-        auto zero_val = hash(r.begin(), r.end());
+        auto zero_val = hash(buf, buf);
 
         AWL_ASSERT_FALSE(zero_val == typename Hash::value_type{});
     }
