@@ -17,6 +17,7 @@
 #include "Awl/StringFormat.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/Random.h"
+#include "Awl/StopWatch.h"
 #include "VtsData.h"
 
 #include <memory>

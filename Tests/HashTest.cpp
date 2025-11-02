@@ -133,7 +133,13 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.logger.debug(awl::format() << _T(" Hash : ") << val);
+        {
+            // Temporary workaround.
+            // operator << is defined in FormattingHelpers.h in awl::testing::helpers namespace.
+            awl::ostringstream out;
+            out << _T(" Hash : ") << val;
+            context.logger.debug(out.str());
+        }
     }
 }
 

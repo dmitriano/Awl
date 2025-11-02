@@ -35,7 +35,7 @@ namespace awl::testing::helpers
         }
 
         awl::format message;
-        message << _T("total time: ") << awl::duration_to_string(d) << _T(", ");
+        message << _T("total time: ") << awl::duration_to_string<char>(d) << _T(", ");
 
         const auto time = GetElapsedSeconds<double>(d);
 
@@ -70,7 +70,7 @@ namespace awl::testing::helpers
             {
                 std::chrono::nanoseconds ns(static_cast<std::chrono::nanoseconds::rep>(time / count * std::nano::den));
 
-                message << awl::duration_to_string(ns);
+                message << awl::duration_to_string<char>(ns);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace awl::testing::helpers
         }
 
         awl::format message;
-        message << awl::duration_to_string(d) << _T(", ");
+        message << awl::duration_to_string<char>(d) << _T(", ");
 
         const auto time = GetElapsedSeconds<double>(d);
         const double count_speed = count / time;
@@ -103,7 +103,7 @@ namespace awl::testing::helpers
         {
             std::chrono::nanoseconds ns(static_cast<std::chrono::nanoseconds::rep>(time / count * std::nano::den));
 
-            message << awl::duration_to_string(ns);
+            message << awl::duration_to_string<char>(ns);
         }
         else
         {

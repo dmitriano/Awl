@@ -587,9 +587,16 @@ namespace
                 out.Reset();
             }
 
-            awl::crypto::Crc64 hash;
-            auto h = hash(out.begin(), out.end());
-            context.logger.debug(awl::format() << _T("Test data has been written. Buffer hash=") << h);
+            {
+                // Temporary workaround.
+                // operator << is defined in FormattingHelpers.h in awl::testing::helpers namespace.
+                awl::crypto::Crc64 hash;
+                auto h = hash(out.begin(), out.end());
+
+                awl::ostringstream out;
+                out << _T("Test data has been written. Buffer hash=") << h;
+                context.logger.debug(out.str());
+            }
 
             helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
             context.logger.debug(awl::format());
