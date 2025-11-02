@@ -98,14 +98,14 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
         {
             Decimal a_quotient = a;
 
-            std::cout << "decimal quotient: " << std::endl;
+            context.logger.debug(awl::format() << "decimal quotient: ");
 
             //while (a_quotient != 0)
             for (size_t i = 0; i < div_count; ++i)
             {
                 a_quotient /= 10;
 
-                std::cout << a_quotient << std::endl;
+                context.logger.debug(awl::format() << a_quotient);
             }
         }
 
@@ -122,10 +122,12 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
 
                 a_sqrt = bmp::sqrt(a_sqrt);
 
-                std::cout <<
-                    "square: " << a_square << std::endl <<
-                    "sqrt: " << a_sqrt << std::endl <<
-                    "square + sqrt: " << a_square + a_sqrt << std::endl;
+                Decimal sum = a_square + a_sqrt;
+
+                context.logger.debug(awl::format() <<
+                    "square: " << a_square << awl::format::endl <<
+                    "sqrt: " << a_sqrt << awl::format::endl <<
+                    "square + sqrt: " << sum);
             }
         }
     }
