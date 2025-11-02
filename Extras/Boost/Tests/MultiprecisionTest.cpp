@@ -7,6 +7,7 @@
 #include "Tests/Helpers/RwTest.h"
 
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Separator.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #include "BoostExtras/MultiprecisionTraits.h"
@@ -64,18 +65,11 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     const Decimal a(number);
     const double b = std::stod(number);
 
-    std::cout <<
-        "sizeof(Decimal): " << sizeof(Decimal) << std::endl <<
-        "boost:\t" << std::fixed << a << std::endl <<
-        "double:\t" << std::fixed << b << std::endl <<
-        "cast:\t" << std::fixed << static_cast<double>(a) <<
-        std::endl;
-
-    //context.out <<
-    //    _T("sizeof(Decimal): ") << sizeof(Decimal) << std::endl <<
-    //    _T("boost: ") << std::fixed << std::setprecision(lenght) << decimal << std::endl <<
-    //    _T("double: ") << std::fixed << std::setprecision(lenght) << dbl <<
-    //    std::endl;
+    context.logger.debug(awl::format() <<
+        "sizeof(Decimal): " << sizeof(Decimal) << awl::format::endl <<
+        "boost:\t" << std::fixed << a << awl::format::endl <<
+        "double:\t" << std::fixed << b << awl::format::endl <<
+        "cast:\t" << std::fixed << static_cast<double>(a));
 
     Decimal a_sum = 0;
     double b_sum = 0;
