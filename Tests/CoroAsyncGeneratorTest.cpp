@@ -3,7 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Separator.h"
 #include "Awl/Coro/UpdateTask.h"
 #include "Awl/Coro/ProcessTask.h"
 #include "Awl/Coro/TaskPool.h"
@@ -11,6 +10,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
+#include "Awl/StringFormat.h"
 
 //Why does it fail?
 //static_assert(std::ranges::range<awl::async_generator<int>>);
@@ -38,8 +38,6 @@ namespace
 
     awl::ProcessTask<void> print(const awl::testing::TestContext& context, int count, std::optional<int> limit = {})
     {
-        awl::separator sep(_T(','));
-        
         //Unfortunately, 'for co_await' syntax is not approved for C++20 (I hope for now!) and instead of an elegant code we have to write
         //old school for loop with previously captured by rvalue generator.
         //for co_await(int i : gen())
@@ -48,10 +46,21 @@ namespace
 
         int n = 0;
 
+        awl::format line;
+        bool first = true;
+
         for (auto i = co_await g.begin(); i != g.end(); co_await ++i)
         {
-            context.out << sep << *i;
-            context.out.flush();
+            if (!first)
+            {
+                line << _T(", ");
+            }
+            else
+            {
+                first = false;
+            }
+
+            line << *i;
 
             if (limit && ++n == *limit)
             {
@@ -59,7 +68,7 @@ namespace
             }
         }
 
-        context.out << std::endl;
+        context.logger.debug(line);
     }
 
     awl::UpdateTask test(const awl::testing::TestContext& context)
@@ -76,7 +85,7 @@ namespace
         }
         catch (const std::exception& ex)
         {
-            context.out << std::endl << "Exception: " << ex.what() << std::endl;
+            context.logger.debug(awl::format() << awl::format::endl << "Exception: " << ex.what());
         }
         catch (...)
         {
@@ -110,7 +119,7 @@ AWL_TEST(CoroControllerCancel)
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    context.out << std::endl;
+    context.logger.debug(awl::format());
 
     // This invalidates timeQueue.
     controller.cancel();
@@ -145,7 +154,7 @@ namespace
     {
         co_await 100ms;
 
-        context.out << id << " finished" << std::endl;
+        context.logger.debug(awl::format() << id << " finished");
     }
 }
 
@@ -168,7 +177,7 @@ namespace awl
 
             co_await controller.wait_any();
 
-            context.out << "wait_any() finished" << std::endl;
+            context.logger.debug("wait_any() finished");
 
             AWL_ASSERT_EQUAL(actual_N, controller.task_count());
 
@@ -181,7 +190,7 @@ namespace awl
                 co_await controller.wait_all();
             }
 
-            context.out << "wait_all() finished" << std::endl;
+            context.logger.debug("wait_all() finished");
 
             AWL_ASSERT_EQUAL(0u, controller.task_count());
         }

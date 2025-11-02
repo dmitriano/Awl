@@ -7,6 +7,7 @@
 
 #include "Awl/Decimal.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #ifdef AWL_BOOST
 #include "BoostExtras/MultiprecisionDecimalData.h"
@@ -741,9 +742,9 @@ AWL_EXAMPLE(DecimalBinanceValues)
     
     constexpr uint64_t max_uint = std::numeric_limits<uint64_t>::max();
 
-    context.out << _T("uint64_t max: ") << max_uint << ", decimal digits: " << static_cast<size_t>(std::log10(max_uint)) << std::endl;
+    context.logger.debug(awl::format() << _T("uint64_t max: ") << max_uint << ", decimal digits: " << static_cast<size_t>(std::log10(max_uint)));
 
-    context.out << _T("max decimal man: ") << Decimal64::max_mantissa() << _T(", max decimal exp: ") << Decimal64::max_exponent() << std::endl;
+    context.logger.debug(awl::format() << _T("max decimal man: ") << Decimal64::max_mantissa() << _T(", max decimal exp: ") << Decimal64::max_exponent());
 
     test.CheckConstructorTrows("8426879770.74001051"sv); //BTC day volume
 
@@ -764,7 +765,7 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
     const Decimal64 src_area = square(src_side);
 
-    context.out << _T("Src. side: ") << src_side << _T(", src. area: ") << src_area << std::endl;
+    context.logger.debug(awl::format() << _T("Src. side: ") << src_side << _T(", src. area: ") << src_area);
 
     {
         const Decimal64 a("0.85");
@@ -773,7 +774,7 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
         const Decimal64 area = awl::multiply((awl::multiply(a, b) + awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
 
-        context.out << "area #1: " << area << std::endl;
+        context.logger.debug(awl::format() << "area #1: " << area);
     }
 
     {
@@ -783,6 +784,6 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
         const Decimal64 area = awl::multiply(a, b) + awl::multiply((awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
 
-        context.out << "area #2: " << area << std::endl;
+        context.logger.debug(awl::format() << "area #2: " << area);
     }
 }

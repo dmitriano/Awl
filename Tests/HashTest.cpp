@@ -17,6 +17,7 @@
 
 #include "Awl/String.h"
 #include "Awl/IntRange.h"
+#include "Awl/StringFormat.h"
 
 #include "Awl/StopWatch.h"
 #include "Awl/Crypto/Crc64.h"
@@ -115,20 +116,24 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             }
         }
 
+        awl::format prefix;
+
         if (type_name == nullptr)
         {
-            context.out << awl::FromACString(typeid(hash).name());
+            prefix << awl::FromACString(typeid(hash).name());
         }
         else
         {
-            context.out << type_name;
+            prefix << type_name;
         }
 
-        context.out << _T(": ");
+        prefix << _T(": ");
+
+        context.logger.debug(prefix);
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : ") << val << std::endl;
+        context.logger.debug(awl::format() << _T(" Hash : ") << val);
     }
 }
 

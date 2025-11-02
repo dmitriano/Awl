@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/TypeIndex.h"
+#include "Awl/StringFormat.h"
 
 #include <string>
 #include <vector>
@@ -156,6 +157,6 @@ namespace awl
 /*
 AWL_TEST(TypeName)
 {
-    context.out << awl::FromACString(awl::type_info<int>().name()) << std::endl;
+    context.logger.debug(awl::format() << awl::FromACString(awl::type_info<int>().name()));
 }
 */

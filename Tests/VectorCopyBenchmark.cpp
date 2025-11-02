@@ -15,6 +15,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include "Helpers/BenchmarkHelpers.h"
 
@@ -104,7 +105,7 @@ namespace
             v.reserve(vector_size);
             AWL_ASSERT_EQUAL(vector_size, v.capacity());
 
-            context.out << _T("std::vector<") << type_name << _T(">\t");
+            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
 
             double ratio;
 
@@ -123,7 +124,7 @@ namespace
                     v.resize(0);
                 }
 
-                context.out << _T("copy: ");
+                context.logger.debug(_T("copy: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
             }
@@ -143,14 +144,14 @@ namespace
                     v.resize(0);
                 }
 
-                context.out << _T("\tinsert: ");
+                context.logger.debug(_T("\tinsert: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.out << _T("\t (") << ratio << _T(")");
+            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
 
-            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
         }
     };
 
@@ -162,7 +163,7 @@ namespace
             AWL_ATTRIBUTE(size_t, vector_size, 1000000);
             AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
-            context.out << _T("std::vector<") << type_name << _T(">\t");
+            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -176,7 +177,7 @@ namespace
             }
             catch (const std::bad_alloc&)
             {
-                context.out << "Too long vector. Can't allocate memory." << std::endl;
+                context.logger.debug("Too long vector. Can't allocate memory.");
 
                 return;
             }
@@ -222,7 +223,7 @@ namespace
 
                 std::for_each(futures.begin(), futures.end(), [](std::future<void>& f) { f.get(); });
 
-                context.out << _T("async: ");
+                context.logger.debug(_T("async: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
             }
@@ -232,14 +233,14 @@ namespace
 
                 copy(0, vector_size);
 
-                context.out << _T("\tsync: ");
+                context.logger.debug(_T("\tsync: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.out << _T("\t (") << ratio << _T(")");
+            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
 
-            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
         }
     };
 
@@ -253,7 +254,7 @@ namespace
             AWL_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
             AWL_FLAG(show_result);
 
-            context.out << _T("std::vector<") << type_name << _T(">\t");
+            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -263,7 +264,7 @@ namespace
             }
             catch (const std::bad_alloc&)
             {
-                context.out << "Too long vector. Can't allocate memory." << std::endl;
+                context.logger.debug("Too long vector. Can't allocate memory.");
 
                 return;
             }
@@ -315,11 +316,11 @@ namespace
                 
                 const double result = std::accumulate(range.begin(), range.end(), 0.0);
 
-                context.out << _T("\tasync: ");
+                context.logger.debug(_T("\tasync: "));
 
                 if (show_result)
                 {
-                    context.out << _T("\tresult=" << result << ", ");
+                    context.logger.debug(awl::format() << _T("\tresult=") << result << _T(", "));
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
@@ -330,19 +331,19 @@ namespace
 
                 const double result = sum(0, vector_size);
 
-                context.out << _T("\tsync: ");
+                context.logger.debug(_T("\tsync: "));
 
                 if (show_result)
                 {
-                    context.out << _T("\tresult=" << result << ", ");
+                    context.logger.debug(awl::format() << _T("\tresult=") << result << _T(", "));
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.out << _T("\t (") << ratio << _T(")");
+            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
 
-            context.out << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t") << std::endl;
+            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
         }
     };
 
@@ -370,14 +371,14 @@ AWL_BENCHMARK(VectorCopy)
 
 AWL_BENCHMARK(VectorCopyAsync)
 {
-    context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
+    context.logger.debug(awl::format() << _T("hardware concurrency: ") << std::thread::hardware_concurrency());
 
     CopyVectors<CopyVectorAsync>(context);
 }
 
 AWL_BENCHMARK(VectorSum)
 {
-    context.out << _T("hardware concurrency: ") << std::thread::hardware_concurrency() << std::endl;
+    context.logger.debug(awl::format() << _T("hardware concurrency: ") << std::thread::hardware_concurrency());
 
     CopyVectors<SumVector>(context);
 }

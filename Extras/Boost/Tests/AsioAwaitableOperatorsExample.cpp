@@ -1,5 +1,6 @@
 ﻿#include "Awl/Testing/UnitTest.h"
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -43,17 +44,19 @@ AWL_TEST(AsioAwaitableOperators)
             {
                 using awl::operator <<;
 
+                const char* status = "succeeded";
+
                 try
                 {
                     if (e)
                         std::rethrow_exception(e);
-                    context.out << caption << " succeeded at ";
                 }
                 catch (std::exception const&)
                 {
-                    context.out << caption << " failed at ";
+                    status = "failed";
                 }
-                context.out << (now() - start) / 1.0ms << "ms" << std::endl;
+
+                context.logger.debug(awl::format() << caption << ' ' << status << " at " << (now() - start) / 1.0ms << "ms");
             };
     };
 

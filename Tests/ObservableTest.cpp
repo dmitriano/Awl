@@ -7,6 +7,7 @@
 #include "Awl/String.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/Formatter.h"
+#include "Awl/StringFormat.h"
 
 using namespace awl::testing;
 
@@ -245,7 +246,7 @@ namespace
 
         void SomeHanderFunc(const awl::String & val)
         {
-            context.out << _T("The value is: ") << val << std::endl;
+            context.logger.debug(awl::format() << _T("The value is: ") << val);
         }
 
     private:

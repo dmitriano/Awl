@@ -22,6 +22,7 @@
 #include "Awl/Crypto/Crc64.h"
 
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Random.h"
 #include "Awl/IntRange.h"
 
@@ -62,7 +63,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         if (!corrupt)
         {
-            context.out << _T("Write speed: ");
+            context.logger.debug(awl::format() << _T("Write speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
         }
@@ -93,11 +94,11 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         if (!corrupt)
         {
-            context.out << _T(" Read speed: ");
+            context.logger.debug(awl::format() << _T(" Read speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
 
-            context.out << std::endl;
+            context.logger.debug(awl::format());
         }
 
         AWL_ASSERT(in.End());
@@ -144,7 +145,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         if (!corrupt)
         {
-            context.out << _T("Write speed: ");
+            context.logger.debug(awl::format() << _T("Write speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
         }
@@ -186,11 +187,11 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         if (!corrupt)
         {
-            context.out << _T(" Read speed: ");
+            context.logger.debug(awl::format() << _T(" Read speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
 
-            context.out << std::endl;
+            context.logger.debug(awl::format());
         }
 
         AWL_ASSERT(in.End());

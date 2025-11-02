@@ -8,7 +8,6 @@
 
 #include "Awl/String.h"
 #include "Awl/StringFormat.h"
-#include "Awl/Separator.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #include "BoostExtras/MultiprecisionTraits.h"
 
@@ -34,17 +33,17 @@ AWL_EXAMPLE(MultiprecisionSize)
     auto max = std::numeric_limits<bmp::uint128_t>::max();
 
     size_t size = sizeof(max);
-    
-    context.out <<
-        _T("max: ") << max << std::endl <<
-        _T("size: ") << size << std::endl;
+
+    context.logger.debug(awl::format() <<
+        _T("max: ") << max << awl::format::endl <<
+        _T("size: ") << size);
 }
 
 AWL_EXAMPLE(MultiprecisionDecimalConstants)
 {
     using Constants = awl::helpers::DecimalConstants<bmp::uint128_t, 4, 16>;
 
-    context.out << "man_len: " << Constants::man_len;
+    context.logger.debug(awl::format() << "man_len: " << Constants::man_len);
 }
 
 AWL_EXAMPLE(MultiprecisionDecFloat)
@@ -176,31 +175,43 @@ AWL_EXAMPLE(MultiprecisionDecimalData)
     
     awl::MultiprecisionDecimalData<UInt, 4> d(true, 2, 105);
 
-    context.out << d.man() << ", " << d.exp() << std::endl;
+    context.logger.debug(awl::format() << d.man() << ", " << d.exp());
 
     d.set_man(UInt(105) * UInt(10));
     
     d.set_exp(3);
 
-    context.out << d.man() << ", " << d.exp() << std::endl;
+    context.logger.debug(awl::format() << d.man() << ", " << d.exp());
 }
 
 namespace
 {
-    void PrintVector(awl::ostream& out, const std::vector<uint8_t>& v)
+    void PrintVector(const awl::testing::TestContext& context, const std::vector<uint8_t>& v)
     {
-        out << "Vector size: " << v.size() << std::endl;
+        awl::format message;
 
-        out << "Vector elements:" << std::endl;
+        message << "Vector size: " << v.size() << awl::format::endl;
+        message << "Vector elements:" << awl::format::endl;
 
-        awl::separator sep(_T(','));
+        bool first = true;
 
         for (unsigned char val : v)
         {
-            out << sep << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << val;
+            if (!first)
+            {
+                message << _T(", ");
+            }
+            else
+            {
+                first = false;
+            }
+
+            message << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << static_cast<unsigned int>(val) << std::dec;
         }
 
-        out << std::endl;
+        message << awl::format::endl;
+
+        context.logger.debug(message);
     }
 }
 
@@ -238,15 +249,15 @@ namespace
             i.backend().negate();
         }
 
-        context.out <<
-            _T("number: ") << i << std::endl <<
-            _T("sign:") << i.sign() << std::endl;
+        context.logger.debug(awl::format() <<
+            _T("number: ") << i << awl::format::endl <<
+            _T("sign:") << i.sign());
 
         // export into 8-bit unsigned values, most significant bit first:
         std::vector<uint8_t> v;
         export_bits(i, std::back_inserter(v), 8);
 
-        PrintVector(context.out, v);
+        PrintVector(context, v);
 
         // import back again, and check for equality:
         Int j;
@@ -315,7 +326,7 @@ AWL_TEST(MultiprecisionFloatImportExportBits)
     std::vector<unsigned char> v;
     export_bits(cpp_int(f.backend().bits()), std::back_inserter(v), 8);
 
-    PrintVector(context.out, v);
+    PrintVector(context, v);
 
     // Grab the exponent as well:
     int e = f.backend().exponent();

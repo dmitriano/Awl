@@ -2,7 +2,6 @@
 
 #include "Awl/Io/PersistentObject.h"
 #include "Awl/Decimal.h"
-#include "Awl/ConsoleLogger.h"
 
 #include <map>
 
@@ -74,9 +73,7 @@ namespace
     template <class Storage, class String>
     void WriteStorage(const awl::testing::TestContext& context)
     {
-        awl::ConsoleLogger logger(context.out);
-
-        Container<Storage, String> container(logger);
+        Container<Storage, String> container(context.logger);
 
         container.persistentObject.open(settings_file_name);
 
@@ -90,9 +87,7 @@ namespace
     template <class Storage, class String>
     void ReadStorage(const awl::testing::TestContext& context)
     {
-        awl::ConsoleLogger logger(context.out);
-
-        Container<Storage, String> container(logger);
+        Container<Storage, String> container(context.logger);
 
         container.persistentObject.open(settings_file_name);
 

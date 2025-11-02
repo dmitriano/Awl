@@ -5,6 +5,7 @@
 
 #include "Awl/Io/IoException.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include <locale.h>
 
@@ -13,7 +14,7 @@ using namespace awl::io;
 
 static void Print(const TestContext & context, const awl::Exception & e)
 {
-    context.out << e.GetClassName() << _T(" ") << e.What() << std::endl;
+    context.logger.debug(awl::format() << e.GetClassName() << _T(" ") << e.What());
 }
 
 static void EncodeDecode(const TestContext &, const std::wstring sample)
@@ -32,7 +33,7 @@ AWL_TEST(DecodeString)
     {
         const char * encoded = reinterpret_cast<const char*>(u8"z\u00df\u6c34\U0001f34c");
 
-        context.out << _T("Decoded string: ") << awl::FromACString(encoded) << std::endl;
+        context.logger.debug(awl::format() << _T("Decoded string: ") << awl::FromACString(encoded));
     }
 
     EncodeDecode(context, L"");
@@ -58,7 +59,7 @@ AWL_TEST(ExceptionTryCatch)
     {
         AWL_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
 
-        context.out << awl::FromACString(e.what()) << std::endl;
+        context.logger.debug(awl::format() << awl::FromACString(e.what()));
 
         auto * p_awl_e = dynamic_cast<const awl::Exception *>(&e);
         

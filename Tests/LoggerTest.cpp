@@ -10,7 +10,7 @@
 
 AWL_TEST(Logger)
 {
-    awl::ConsoleLogger logger(context.out);
+    awl::ConsoleLogger logger;
 
     // Check if it comiles with all the strings.
     logger.debug("abc");

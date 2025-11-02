@@ -11,6 +11,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
 #include "Awl/Crypto/Crc64.h"
+#include "Awl/StringFormat.h"
 
 #include <iostream>
 #include <iomanip>
@@ -240,10 +241,10 @@ namespace
 
         if (include_meta)
         {
-            context.out << _T("Meta size: ") << meta_size << _T(", ");
+            context.logger.debug(awl::format() << _T("Meta size: ") << meta_size << _T(", "));
         }
 
-        context.out << _T("block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+        context.logger.debug(awl::format() << _T("block size: ") << block_size << _T(", allocating ") << mem_size << _T(" bytes of memory."));
 
         return mem_size;
     }
@@ -267,7 +268,7 @@ AWL_TEST(VtsReadWriteVectorStream)
     std::vector<uint8_t> v;
     v.reserve(mem_size);
 
-    context.out << v.capacity() << _T(" bytes of memory has been allocated. ") << std::endl;
+    context.logger.debug(awl::format() << v.capacity() << _T(" bytes of memory has been allocated. "));
 
     {
         awl::io::VectorOutputStream out(v);
@@ -283,11 +284,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += WriteDataV1<OldVectorWriter>(out, element_count, true);
         }
 
-        context.out << _T("Test data has been written. ");
+        context.logger.debug(_T("Test data has been written. "));
         
         helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, v.size() * write_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     AWL_ASSERT_EQUAL(mem_size, v.size());
@@ -305,11 +306,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += ReadDataPlain<OldVectorReader>(in, element_count);
         }
 
-        context.out << _T("Plain data has been read. ");
+        context.logger.debug(_T("Plain data has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
@@ -324,11 +325,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += ReadDataV1<OldVectorReader>(in, element_count);
         }
 
-        context.out << _T("Version 1 has been read. ");
+        context.logger.debug(_T("Version 1 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
@@ -343,11 +344,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += ReadDataV2<NewVectorReader>(in, element_count);
         }
 
-        context.out << _T("Version 2 has been read. ");
+        context.logger.debug(_T("Version 2 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 }
 
@@ -362,7 +363,7 @@ AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
 
     const size_t mem_size = MeasureStreamSize(context, element_count);
 
-    context.out << _T("Allocating ") << mem_size << _T(" bytes of memory.") << std::endl;
+    context.logger.debug(awl::format() << _T("Allocating ") << mem_size << _T(" bytes of memory."));
 
     //do the test
 
@@ -386,11 +387,11 @@ AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
             out.Reset();
         }
 
-        context.out << _T("Test data has been written. ");
+        context.logger.debug(_T("Test data has been written. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, mem_size * write_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
@@ -405,11 +406,11 @@ AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
             in.Reset();
         }
 
-        context.out << _T("Plain data has been read. ");
+        context.logger.debug(_T("Plain data has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
@@ -424,11 +425,11 @@ AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
             in.Reset();
         }
 
-        context.out << _T("Version 1 has been read. ");
+        context.logger.debug(_T("Version 1 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
@@ -443,11 +444,11 @@ AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
             in.Reset();
         }
 
-        context.out << _T("Version 2 has been read. ");
+        context.logger.debug(_T("Version 2 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 }
 
@@ -461,11 +462,11 @@ AWL_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 
     auto d = WriteDataV1<OldMeasureWriter>(out, element_count, true);
 
-    context.out << _T("Test data has been written. ");
+    context.logger.debug(_T("Test data has been written. "));
 
     helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
-    context.out << std::endl;
+    context.logger.debug(awl::format());
 
     AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), out.GetLength());
 }
@@ -478,13 +479,13 @@ AWL_BENCHMARK(VtsMeasureSerializationVirtual)
 
     auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
-    context.out << _T("Test data has been written. ");
+    context.logger.debug(_T("Test data has been written. "));
 
     size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
 
     helpers::ReportCountAndSpeed(context, d, element_count, len);
 
-    context.out << std::endl;
+    context.logger.debug(awl::format());
 
     AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), len);
 }
@@ -499,11 +500,11 @@ AWL_BENCHMARK(VtsMeasureSerializationFake)
 
     auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
-    context.out << _T("Test data has been written. ");
+    context.logger.debug(_T("Test data has been written. "));
 
     helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
-    context.out << std::endl;
+    context.logger.debug(awl::format());
 }
 
 AWL_BENCHMARK(VtsMemSetMove)
@@ -513,7 +514,7 @@ AWL_BENCHMARK(VtsMemSetMove)
     std::unique_ptr<uint8_t[]> p(new uint8_t[element_count]);
 
     {
-        context.out << _T("std::memset: ");
+        context.logger.debug(_T("std::memset: "));
 
         awl::StopWatch w;
 
@@ -521,13 +522,13 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     std::unique_ptr<uint8_t[]> p1(new uint8_t[element_count]);
 
     {
-        context.out << _T("std::memmove: ");
+        context.logger.debug(_T("std::memmove: "));
 
         awl::StopWatch w;
 
@@ -535,11 +536,11 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
-        context.out << _T("vector<uint8_t>::insert: ");
+        context.logger.debug(_T("vector<uint8_t>::insert: "));
 
         std::vector<uint8_t> v;
         v.reserve(element_count);
@@ -553,7 +554,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 }
 
@@ -588,10 +589,10 @@ namespace
 
             awl::crypto::Crc64 hash;
             auto h = hash(out.begin(), out.end());
-            context.out << _T("Test data has been written. Buffer hash=") << h << std::endl;
+            context.logger.debug(awl::format() << _T("Test data has been written. Buffer hash=") << h);
 
             helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-            context.out << std::endl;
+            context.logger.debug(awl::format());
         }
     }
 }
