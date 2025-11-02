@@ -436,7 +436,7 @@ namespace boost::multiprecision
 
         a_out << val;
 
-        return out << awl::ToWString(a_out.str());
+        return out << awl::StringConvertor<wchar_t>::ConvertFrom(a_out.str().c_str());
     }
 }
 
