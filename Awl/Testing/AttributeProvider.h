@@ -28,6 +28,8 @@ namespace awl::testing
         { p.template Set<int>(std::declval<const char*>(), std::declval<const int&>()) } -> std::same_as<void>;
         { p.template Set<std::string>(std::declval<const char*>(), std::declval<const std::string&>()) } -> std::same_as<void>;
         { p.template Set<std::wstring>(std::declval<const char*>(), std::declval<const std::wstring&>()) } -> std::same_as<void>;
+
+        { p.Clear() } -> std::same_as<void>;
     };
 
     // For acessing Command Line attributes without creating TestContext.

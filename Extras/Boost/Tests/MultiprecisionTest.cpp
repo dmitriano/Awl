@@ -56,75 +56,84 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     AWL_ATTRIBUTE(size_t, square_count, 5);
     AWL_FLAG(no_div);
 
-    //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
-    //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
-    constexpr unsigned lenght = 30;
-    
-    using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
-
-    const Decimal a(number);
-    const double b = std::stod(number);
-
-    context.logger.debug(awl::format() <<
-        "sizeof(Decimal): " << sizeof(Decimal) << awl::format::endl <<
-        "boost:\t" << std::fixed << a << awl::format::endl <<
-        "double:\t" << std::fixed << b << awl::format::endl <<
-        "cast:\t" << std::fixed << static_cast<double>(a));
-
-    Decimal a_sum = 0;
-    double b_sum = 0;
-
-    for (size_t i = 0; i < iter_count; ++i)
+    try
     {
-        a_sum += a;
-        
-        b_sum += b;
-    }
+        //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
+        //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
+        constexpr unsigned lenght = 30;
 
-    const Decimal a_product = a * iter_count;
-    const double b_product = b * iter_count;
+        using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
 
-    context.logger.debug(awl::format() <<
-        "decimal sum: " << a_sum << awl::format::endl <<
-        "decimal product: " << a_product << awl::format::endl <<
-        "double sum: " << b_sum << awl::format::endl <<
-        "double product: " << b_product);
+        const Decimal a(number);
+        const double b = std::stod(number);
 
-    AWL_ASSERT(a_sum == a_product);
+        context.logger.debug(awl::format() <<
+            "sizeof(Decimal): " << sizeof(Decimal) << awl::format::endl <<
+            "boost:\t" << std::fixed << a << awl::format::endl <<
+            "double:\t" << std::fixed << b << awl::format::endl <<
+            "cast:\t" << std::fixed << static_cast<double>(a));
 
-    if (!no_div)
-    {
-        Decimal a_quotient = a;
+        Decimal a_sum = 0;
+        double b_sum = 0;
 
-        std::cout << "decimal quotient: " << std::endl;
-
-        //while (a_quotient != 0)
-        for (size_t i = 0; i < div_count; ++i)
+        for (size_t i = 0; i < iter_count; ++i)
         {
-            a_quotient /= 10;
+            a_sum += a;
 
-            std::cout << a_quotient << std::endl;
+            b_sum += b;
+        }
+
+        const Decimal a_product = a * iter_count;
+        const double b_product = b * iter_count;
+
+        context.logger.debug(awl::format() <<
+            "decimal sum: " << a_sum << awl::format::endl <<
+            "decimal product: " << a_product << awl::format::endl <<
+            "double sum: " << b_sum << awl::format::endl <<
+            "double product: " << b_product);
+
+        AWL_ASSERT(a_sum == a_product);
+
+        if (!no_div)
+        {
+            Decimal a_quotient = a;
+
+            std::cout << "decimal quotient: " << std::endl;
+
+            //while (a_quotient != 0)
+            for (size_t i = 0; i < div_count; ++i)
+            {
+                a_quotient /= 10;
+
+                std::cout << a_quotient << std::endl;
+            }
+        }
+
+        if (!no_square)
+        {
+            Decimal a_square = a;
+            Decimal a_sqrt = a;
+
+            //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
+
+            for (size_t i = 0; i < square_count; ++i)
+            {
+                a_square = a_square * a_square;
+
+                a_sqrt = bmp::sqrt(a_sqrt);
+
+                std::cout <<
+                    "square: " << a_square << std::endl <<
+                    "sqrt: " << a_sqrt << std::endl <<
+                    "square + sqrt: " << a_square + a_sqrt << std::endl;
+            }
         }
     }
-
-    if (!no_square)
+    catch (const std::exception& e)
     {
-        Decimal a_square = a;
-        Decimal a_sqrt = a;
+        context.logger.debug(awl::format() << "Exception: " << e.what());
 
-        //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
-
-        for (size_t i = 0; i < square_count; ++i)
-        {
-            a_square = a_square * a_square;
-
-            a_sqrt = bmp::sqrt(a_sqrt);
-
-            std::cout <<
-                "square: " << a_square << std::endl <<
-                "sqrt: " << a_sqrt << std::endl <<
-                "square + sqrt: " << a_square + a_sqrt << std::endl;
-        }
+        AWL_FAIL;
     }
 }
 

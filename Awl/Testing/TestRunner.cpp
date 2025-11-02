@@ -131,6 +131,9 @@ namespace awl::testing
             }
 
             context.out << _T("\tPassed within ") << sw << std::endl;
+
+            // Clear the attributes from the passed test.
+            context.ap.Clear();
         }
     }
 }

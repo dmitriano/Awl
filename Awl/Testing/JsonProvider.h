@@ -49,6 +49,12 @@ namespace awl::testing
             m_dirty = true;
         }
 
+        // Quick fix. Clear the attributes from the previous test.
+        void Clear()
+        {
+            m_jo = {};
+        }
+
         bool IsDirty() const
         {
             return m_dirty;
