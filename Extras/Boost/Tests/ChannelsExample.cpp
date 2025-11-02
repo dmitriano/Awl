@@ -20,14 +20,18 @@ namespace
     {
         const awl::testing::TestContext& context;
 
-        void spawn(asio::any_io_executor exec)
+        void run()
         {
+            asio::io_context exec;
+
             // Create a channel with capacity for 3 buffered messages
             asio::experimental::channel<void(boost::system::error_code, std::string)> ch(exec, 3);
 
             // Launch producer and consumer coroutines
             asio::co_spawn(exec, producer(ch), asio::detached);
             asio::co_spawn(exec, consumer(ch), asio::detached);
+
+            exec.run();
         }
 
         awaitable<void> producer(asio::experimental::channel<void(boost::system::error_code, std::string)>& ch)
@@ -41,7 +45,7 @@ namespace
                 co_await ch.async_send({}, msg, use_awaitable);
 
                 // Wait for 500 ms before sending the next message
-                co_await asio::steady_timer(co_await asio::this_coro::executor, 500ms).async_wait(use_awaitable);
+                co_await asio::steady_timer(co_await asio::this_coro::executor, 100ms).async_wait(use_awaitable);
             }
 
             // Close the channel to signal that no more messages will be sent
@@ -73,12 +77,7 @@ namespace
 
 AWL_TEST(Channels)
 {
-    asio::io_context io;
-
     Example example{ context };
 
-    example.spawn(io.get_executor());
-
-    // Run the I/O context to process asynchronous operations
-    io.run();
+    example.run();
 }
