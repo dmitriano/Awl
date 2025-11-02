@@ -90,8 +90,8 @@ set OPENSSL_ROOT_DIR=%MY_DRIVE%/dev/libs/OpenSSL
 set OPENSSL_USE_STATIC_LIBS=ON
 
 %MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -DCMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -DAWL_FIND_OPENSSL:BOOL=ON -DAWL_FIND_BOOST:BOOL=ON -DAWL_FIND_QT:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON -DAWL_ANSI_CMD_CHAR:BOOL=ON
-msbuild Awl.sln /p:Configuration=Debug /p:Platform=x64
-msbuild Awl.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
+%MY_CMAKE_EXE% --build . --parallel --target AwlTest --config Debug
+%MY_CMAKE_EXE% --build . --parallel --target AwlTest --config RelWithDebInfo
 ```
 
 ## Using GCC sanitizer

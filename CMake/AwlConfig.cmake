@@ -1,11 +1,16 @@
-cmake_minimum_required(VERSION 3.28.3...4.1.2)
+cmake_minimum_required(VERSION 3.24.2...4.1.2)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
+message(STATUS "AwlConfig.cmake is in: ${CMAKE_CURRENT_LIST_DIR} directory.")
+
+cmake_path(GET CMAKE_CURRENT_LIST_DIR PARENT_PATH AWL_ROOT_DIR)
+message(STATUS "AWL_ROOT_DIR: ${AWL_ROOT_DIR}")
 
 # Prevent BOOST warnings.
 if(POLICY CMP0167)
-  cmake_policy(SET CMP0167 NEW)
+    cmake_policy(SET CMP0167 NEW)
+    message(STATUS "POLICY CMP0167 has been set.")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
