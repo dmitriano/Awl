@@ -37,7 +37,7 @@ AWL_TEST(AsioAwaitableOperators)
 {
     boost::asio::thread_pool ioc;
 
-    auto handler = [&context](std::string caption)
+    auto make_handler = [&context](std::string caption)
     {
         return [=](std::exception_ptr e)
             {
@@ -53,12 +53,12 @@ AWL_TEST(AsioAwaitableOperators)
                 {
                     context.out << caption << " failed at ";
                 }
-                context.out << (now() - start) / 1.0s << "s" << std::endl;
+                context.out << (now() - start) / 1.0ms << "ms" << std::endl;
             };
     };
 
-    boost::asio::co_spawn(ioc.get_executor(), foo_and(), handler("foo_and"));
-    boost::asio::co_spawn(ioc.get_executor(), foo_or(), handler("foo_or"));
+    boost::asio::co_spawn(ioc.get_executor(), foo_and(), make_handler("foo_and"));
+    boost::asio::co_spawn(ioc.get_executor(), foo_or(), make_handler("foo_or"));
 
     ioc.join();
 }
