@@ -94,6 +94,16 @@ set OPENSSL_USE_STATIC_LIBS=ON
 %MY_CMAKE_EXE% --build . --parallel --target AwlTest --config RelWithDebInfo
 ```
 
+## Compiling on Ubuntu 24.04 with OpenSSL 3.5.4, BOOST 1.89.0
+
+```bash
+export OPENSSL_ROOT_DIR=/home/dmitriano/dev/libs/OpenSSL
+export OPENSSL_USE_STATIC_LIBS=ON
+
+cmake ../../repos/Awl/ -G Ninja -DCMAKE_PREFIX_PATH="/home/dmitriano/dev/libs/boost" -DAWL_FIND_OPENSSL:BOOL=ON -DAWL_FIND_BOOST:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON
+cmake --build . --parallel
+```
+
 ## Using GCC sanitizer
 
 Add `-DAWL_SANITIZE_ADDRESS=1` or `-DAWL_SANITIZE_UNDEFINED=1` or `-DAWL_SANITIZE_THREAD=1` to CMake command, for example:
