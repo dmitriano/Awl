@@ -16,16 +16,18 @@ using boost::asio::use_awaitable;
 using boost::system::error_code;
 
 
-awaitable<void> foo_and() {
-    boost::asio::steady_timer tim1(co_await boost::asio::this_coro::executor, 1s);
-    boost::asio::steady_timer tim2(co_await boost::asio::this_coro::executor, 2s);
+awaitable<void> foo_and()
+{
+    boost::asio::steady_timer tim1(co_await boost::asio::this_coro::executor, 100ms);
+    boost::asio::steady_timer tim2(co_await boost::asio::this_coro::executor, 200ms);
 
     co_await(tim1.async_wait(use_awaitable) && tim2.async_wait(use_awaitable));
 }
 
-awaitable<void> foo_or() {
-    boost::asio::steady_timer tim1(co_await boost::asio::this_coro::executor, 1s);
-    boost::asio::steady_timer tim2(co_await boost::asio::this_coro::executor, 2s);
+awaitable<void> foo_or()
+{
+    boost::asio::steady_timer tim1(co_await boost::asio::this_coro::executor, 100ms);
+    boost::asio::steady_timer tim2(co_await boost::asio::this_coro::executor, 200ms);
 
     co_await(tim1.async_wait(use_awaitable) || tim2.async_wait(use_awaitable));
 }
