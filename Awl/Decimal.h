@@ -183,7 +183,7 @@ namespace awl
         {
             // Quick fix.
             // They both are zeros with different signes.
-            if (mantissa() == 0u && other.mantissa() == 0u)
+            if (unsigned_mantissa() == 0u && other.unsigned_mantissa() == 0u)
             {
                 return true;
             }
@@ -575,7 +575,7 @@ namespace awl
         {
             // Quick fix.
             // They both are zeros with different signes.
-            if (a.mantissa() == 0u && b.mantissa() == 0u)
+            if (a.unsigned_mantissa() == 0u && b.unsigned_mantissa() == 0u)
             {
                 return comp(UInt(0u), UInt(0u));
             }
@@ -757,7 +757,7 @@ namespace awl
     }
 
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate> d)
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate>& d)
     {
         if (d.negative())
         {
