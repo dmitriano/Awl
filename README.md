@@ -94,7 +94,7 @@ set OPENSSL_USE_STATIC_LIBS=ON
 %MY_CMAKE_EXE% --build . --parallel --target AwlTest --config RelWithDebInfo
 ```
 
-## Compiling on Ubuntu 24.04 with OpenSSL 3.5.4, BOOST 1.89.0
+## Compiling on Ubuntu 24.04 with OpenSSL 3.5.4 and BOOST 1.89.0
 
 ```bash
 export OPENSSL_ROOT_DIR=/home/dmitriano/dev/libs/OpenSSL
