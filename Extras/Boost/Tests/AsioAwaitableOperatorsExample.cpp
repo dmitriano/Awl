@@ -38,18 +38,21 @@ AWL_TEST(AsioAwaitableOperators)
 
     auto handler = [&context](auto caption)
     {
-        return [=](std::exception_ptr e) {
-            try {
-                if (e)
-                    std::rethrow_exception(e);
-                context.out << caption << " succeeded at ";
-            }
-            catch (std::exception const&) {
-                context.out << caption << " failed at ";
-            }
-            context.out << (now() - start) / 1.0s << "s" << std::endl;
+        return [=](std::exception_ptr e)
+            {
+                try
+                {
+                    if (e)
+                        std::rethrow_exception(e);
+                    context.out << caption << " succeeded at ";
+                }
+                catch (std::exception const&)
+                {
+                    context.out << caption << " failed at ";
+                }
+                context.out << (now() - start) / 1.0s << "s" << std::endl;
             };
-        };
+    };
 
     boost::asio::co_spawn(ioc.get_executor(), foo_and(), handler("foo_and"));
     boost::asio::co_spawn(ioc.get_executor(), foo_or(), handler("foo_or"));
