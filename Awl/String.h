@@ -436,7 +436,7 @@ namespace boost::multiprecision
 
         a_out << val;
 
-        return out << awl::FromAString(a_out.str());
+        return out << awl::ToWString(a_out.str());
     }
 }
 

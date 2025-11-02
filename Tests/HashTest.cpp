@@ -11,7 +11,7 @@
 #include <memory>
 #include <ranges>
 
-#ifdef AWL_OPENSSL
+#ifdef AWL_OPENSSL_HASH
 #include "Awl/Crypto/OpenSslHash.h"
 #endif
 
@@ -79,7 +79,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     const Hash hash;
 
     {
-        uint8_t buf[1];
+        uint8_t buf[1] = { 0 };
 
         auto zero_val = hash(buf, buf);
 
@@ -161,8 +161,9 @@ AWL_BENCHMARK(HashPerformance)
 
     CalcHash<Crc64>(context, _T("Crc64"));
 
-#ifdef AWL_OPENSSL
+#ifdef AWL_OPENSSL_HASH
 
+    // OpenSSL hash function are deprecated in v3.
     CalcHash<Md5>(context, _T("Md5"));
     CalcHash<Sha1>(context, _T("Sha1"));
     CalcHash<Sha256>(context, _T("Sha256"));

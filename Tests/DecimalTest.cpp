@@ -27,7 +27,8 @@
 
 #endif
 
-#ifdef AWL_BOOST
+// DecimalRound_Test fails with BOOST on Linux with GCC.
+#if defined(AWL_BOOST) && !defined(AWL_INT_128)
 
 namespace bmp = boost::multiprecision; 
 

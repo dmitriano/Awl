@@ -68,6 +68,7 @@ namespace
         co_await(transfer(client_ssl, server_ssl) && transfer(server_ssl, client_ssl));
     }
         
+    [[maybe_unused]]
     asio::awaitable<void> advanced_bidirectional_transfer_example(ssl::stream<tcp::socket>& client_ssl, ssl::stream<tcp::socket>& server_ssl)
     {
         auto ex = co_await boost::asio::this_coro::executor;
@@ -88,7 +89,6 @@ namespace
     // Handling a single client
     asio::awaitable<void> handle_client(
         ssl::stream<tcp::socket> client_ssl,
-        ssl::context& client_ctx,
         const std::string& target_host,
         const std::string& target_port
     )
@@ -149,7 +149,7 @@ namespace
                 // Launch a background coroutine to handle the client
                 co_spawn(
                     exec,
-                    handle_client(std::move(client_ssl), client_ctx, target_host, target_port),
+                    handle_client(std::move(client_ssl), target_host, target_port),
                     asio::detached
                 );
             }
@@ -172,8 +172,7 @@ namespace
 //
 // export LDAPTLS_REQCERT=never
 //
-// ldapsearch -H ldaps://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local" \
-//   -s sub -a always -z 1000 "(objectClass=user)" "serviceClassName" "serviceDNSName" "objectClass"
+// ldapsearch -H ldaps://$ad_ip:12345 -x -D $ad_user -w $ad_password -b "DC=my,DC=local"
 
 AWL_EXAMPLE(AsioTcpProxy)
 {

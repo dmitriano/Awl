@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Awl/String.h"
 #include "Awl/Crypto/IntHash.h"
 
 #include <string>
@@ -62,6 +63,8 @@ namespace awl::crypto
 
     using FixedHash64 = FixedHash<awl::crypto::Int64Hash>;
 
+#ifdef AWL_QT
+
     template <class Hash>
     FixedHash64::value_type hashString(const Hash& hash, const QString& s)
     {
@@ -69,4 +72,6 @@ namespace awl::crypto
 
         return hash(range.begin(), range.end());
     }
+
+#endif
 }

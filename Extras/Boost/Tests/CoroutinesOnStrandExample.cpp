@@ -231,6 +231,7 @@ namespace
         }
     }
 
+    [[maybe_unused]]
     void printWorkers(asio::any_io_executor executor, std::vector<CoroutineWorker>& workers)
     {
         for (CoroutineWorker& worker : workers)
