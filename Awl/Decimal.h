@@ -565,6 +565,7 @@ namespace awl
 
             if (m_data.man() == 0)
             {
+                m_data.set_positive(true);
                 m_data.set_exp(0);
             }
         }
