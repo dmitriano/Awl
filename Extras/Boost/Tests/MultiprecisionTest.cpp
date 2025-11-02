@@ -126,10 +126,12 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
 
             a_sqrt = bmp::sqrt(a_sqrt);
 
+            const Decimal combined = a_square + a_sqrt;
+
             context.logger.debug(awl::format()
                 << "square: " << a_square << awl::format::endl
                 << "sqrt: " << a_sqrt << awl::format::endl
-                << "square + sqrt: " << a_square + a_sqrt);
+                << "square + sqrt: " << combined);
         }
     }
 }
