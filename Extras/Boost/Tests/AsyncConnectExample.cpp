@@ -1,10 +1,10 @@
-﻿#include "Awl/Testing/UnitTest.h"
+﻿#include "Awl/StringFormat.h"
+#include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
 #include <boost/asio/ssl.hpp>
-#include <iostream>
 #include <random>
 using error_code = boost::system::error_code;
 using namespace std::chrono_literals;
@@ -68,37 +68,37 @@ AWL_EXAMPLE(AsyncConnect)
     switch (select % 4)
     {
     case 0:
-        std::cout << "Straight callback" << std::endl;
-        w.asyncConnect(eps, [](error_code ec) { std::cout << "Callback: " << ec.message() << std::endl; });
+        context.logger.debug("Straight callback");
+        w.asyncConnect(eps, [&context](error_code ec) { context.logger.debug(awl::format() << "Callback: " << ec.message()); });
         break;
     case 1:
-        std::cout << "Coro await" << std::endl;
+        context.logger.debug("Coro await");
         asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             co_await w.asyncConnect(eps);
-            std::cout << "Coro connected" << std::endl;
+            context.logger.debug("Coro connected");
         },
         asio::detached);
         break;
     case 2:
-        std::cout << "Coro await with promise" << std::endl;
+        context.logger.debug("Coro await with promise");
         asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             auto p = w.asyncConnect(eps, asio::experimental::use_promise);
-            std::cout << "Doing some other time consuming stuff as well" << std::endl;
+            context.logger.debug("Doing some other time consuming stuff as well");
 
             co_await p(asio::deferred);
-            std::cout << "Coro with promise connected" << std::endl;
+            context.logger.debug("Coro with promise connected");
         },
         asio::detached);
         break;
     case 3: {
-        std::cout << "Custom completion token with adaptors" << std::endl;
+        context.logger.debug("Custom completion token with adaptors");
         auto f = w.asyncConnect(eps, asio::as_tuple(asio::use_future));
 
         if (f.wait_for(20ms) == std::future_status::ready) {
             auto [ec] = f.get();
-            std::cout << "Future resolved within 20ms: " << ec.message() << std::endl;
+            context.logger.debug(awl::format() << "Future resolved within 20ms: " << ec.message());
         }
         break;
     }
