@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24.2...4.1.2)
-
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
     # set(AWL_JTHREAD_EXTRAS ON)
