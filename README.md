@@ -44,7 +44,7 @@ cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
 
 but with couple warnings related to std::streamsize that are not fixed yet.
 
-## Compiling on Linux with Ninja generator:
+## Compiling on Linux with Ninja generator
 
 ```bash
 cmake ../../repos/Awl/ -G Ninja
@@ -57,7 +57,7 @@ Compiling a single source file (by example of `VtsTest.cpp`):
 cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 ```
 
-## Compiling on Linux without Ninja generator:
+## Compiling on Linux without Ninja generator
 
 ```bash
 cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
