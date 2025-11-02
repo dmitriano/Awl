@@ -7,6 +7,7 @@
 #include "Tests/Helpers/RwTest.h"
 
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Separator.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #include "BoostExtras/MultiprecisionTraits.h"
@@ -64,12 +65,11 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     const Decimal a(number);
     const double b = std::stod(number);
 
-    std::cout <<
-        "sizeof(Decimal): " << sizeof(Decimal) << std::endl <<
-        "boost:\t" << std::fixed << a << std::endl <<
-        "double:\t" << std::fixed << b << std::endl <<
-        "cast:\t" << std::fixed << static_cast<double>(a) <<
-        std::endl;
+    context.logger.debug(awl::format()
+        << "sizeof(Decimal): " << sizeof(Decimal) << awl::format::endl
+        << "boost:\t" << std::fixed << a << awl::format::endl
+        << "double:\t" << std::fixed << b << awl::format::endl
+        << "cast:\t" << std::fixed << static_cast<double>(a));
 
     //context.out <<
     //    _T("sizeof(Decimal): ") << sizeof(Decimal) << std::endl <<
@@ -90,11 +90,11 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     const Decimal a_product = a * iter_count;
     const double b_product = b * iter_count;
 
-    std::cout <<
-        "decimal sum: " << a_sum << std::endl <<
-        "decimal product: " << a_product << std::endl <<
-        "double sum: " << b_sum << std::endl <<
-        "double product: " << b_product << std::endl;
+    context.logger.debug(awl::format()
+        << "decimal sum: " << a_sum << awl::format::endl
+        << "decimal product: " << a_product << awl::format::endl
+        << "double sum: " << b_sum << awl::format::endl
+        << "double product: " << b_product);
 
     AWL_ASSERT(a_sum == a_product);
 
@@ -102,14 +102,14 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     {
         Decimal a_quotient = a;
 
-        std::cout << "decimal quotient: " << std::endl;
+        context.logger.debug("decimal quotient:");
 
         //while (a_quotient != 0)
         for (size_t i = 0; i < div_count; ++i)
         {
             a_quotient /= 10;
 
-            std::cout << a_quotient << std::endl;
+            context.logger.debug(awl::format() << a_quotient);
         }
     }
 
@@ -126,10 +126,10 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
 
             a_sqrt = bmp::sqrt(a_sqrt);
 
-            std::cout <<
-                "square: " << a_square << std::endl <<
-                "sqrt: " << a_sqrt << std::endl <<
-                "square + sqrt: " << a_square + a_sqrt << std::endl;
+            context.logger.debug(awl::format()
+                << "square: " << a_square << awl::format::endl
+                << "sqrt: " << a_sqrt << awl::format::endl
+                << "square + sqrt: " << a_square + a_sqrt);
         }
     }
 }
