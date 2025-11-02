@@ -521,6 +521,8 @@ namespace
             }
 
             AWL_ASSERT(Decimal{} == Decimal::zero());
+
+            AWL_ASSERT(Decimal("0") == Decimal("-0"));
         }
 
         void DecimalReadWrite()

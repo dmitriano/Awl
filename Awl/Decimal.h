@@ -181,6 +181,13 @@ namespace awl
 
         bool operator == (const decimal& other) const
         {
+            // Quick fix.
+            // They both are zeros with different signes.
+            if (mantissa() == 0u && other.mantissa() == 0u)
+            {
+                return true;
+            }
+
             if (m_data.positive() == other.m_data.positive())
             {
                 const decimal a = normalize();
@@ -565,6 +572,13 @@ namespace awl
         template <class Comp>
         static constexpr bool compare(const decimal& a, const decimal& b, Comp comp)
         {
+            // Quick fix.
+            // They both are zeros with different signes.
+            if (a.mantissa() == 0u && b.mantissa() == 0u)
+            {
+                return comp(UInt(0u), UInt(0u));
+            }
+
             if (a.negative() && b.negative())
             {
                 return compare_positive(b, a, comp);
