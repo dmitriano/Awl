@@ -1,7 +1,7 @@
 ﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
-#include <iostream>
 
 namespace asio = boost::asio;
 using boost::system::error_code;
@@ -98,7 +98,7 @@ namespace
     // -------------------------------------------
     // Example coroutine using the awaitable wrapper
     // -------------------------------------------
-    asio::awaitable<void> example()
+    asio::awaitable<void> example(const awl::testing::TestContext& context)
     {
         // Get the current coroutine executor
         auto exec = co_await asio::this_coro::executor;
@@ -108,25 +108,23 @@ namespace
         {
             int v = co_await processor.asyncProcess();
 
-            std::cout << "Result = " << v << "\n";
+            context.logger.debug(awl::format() << "Result = " << v);
         }
 
         {
             int v = co_await processor.asyncProcessOnThread();
 
-            std::cout << "Result = " << v << "\n";
+            context.logger.debug(awl::format() << "Result = " << v);
         }
     }
 }
 
 AWL_TEST(AwaitableFromCallback)
 {
-    AWL_UNUSED_CONTEXT;
-
     asio::io_context io;
 
     // Launch the coroutine
-    asio::co_spawn(io, example(), asio::detached);
+    asio::co_spawn(io, example(context), asio::detached);
 
     // Run the I/O context until all operations complete
     io.run();

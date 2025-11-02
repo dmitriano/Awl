@@ -1,4 +1,5 @@
 ﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
 #include <exception>
@@ -77,20 +78,18 @@ namespace
 
 AWL_TEST(CallbackFromAwaitable)
 {
-    AWL_UNUSED_CONTEXT;
-
     asio::io_context io;
     auto ex = io.get_executor();
 
-    auto handler = [](error_code ec, int value)
+    auto handler = [&context](error_code ec, int value)
         {
             if (ec)
             {
-                std::cerr << "Error: " << ec.message() << "\n";
+                context.logger.debug(awl::format() << "Error: " << ec.message());
             }
             else
             {
-                std::cout << "Value: " << value << "\n";
+                context.logger.debug(awl::format() << "Value: " << value);
             }
         };
 
