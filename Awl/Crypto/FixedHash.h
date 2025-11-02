@@ -26,13 +26,13 @@ namespace awl::crypto
         {}
 
         template <typename C>
-        value_type operator()(const std::basic_string<C>& str) const
+        constexpr value_type operator()(const std::basic_string<C>& str) const
         {
             return m_hash(str.begin(), str.end());
         }
 
         template <typename C>
-        value_type operator()(const std::basic_string_view<C>& str) const
+        constexpr value_type operator()(const std::basic_string_view<C>& str) const
         {
             return m_hash(str.begin(), str.end());
         }
@@ -48,7 +48,7 @@ namespace awl::crypto
         }
 
         template <class I>
-        value_type operator()(I begin, I end) const
+        constexpr value_type operator()(I begin, I end) const
         {
             return m_hash(begin, end);
         }
