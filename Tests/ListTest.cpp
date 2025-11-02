@@ -724,19 +724,19 @@ namespace
             context(ctx),
             m_len(len)
         {
-            context.get().out << "Vertex constructor " << m_len << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex constructor " << m_len);
         }
 
         ~Vertex()
         {
-            context.get().out << "Vertex destructor " << m_len << ", included: " << std::boolalpha << IsIncluded() << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex destructor " << m_len << ", included: " << std::boolalpha << IsIncluded());
         }
 
         Vertex(const Vertex& other) :
             context(other.context),
             m_len(other.m_len)
         {
-            context.get().out << "Vertex copy constructor " << m_len << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex copy constructor " << m_len);
         }
 
         Vertex(Vertex&& other) = default;

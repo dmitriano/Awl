@@ -25,7 +25,7 @@ namespace awl
                 return lastOutput.str();
             }
 
-            void RunLink(const TestLink* p_test_link, const TestContext& context);
+            void RunLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out);
 
         private:
 

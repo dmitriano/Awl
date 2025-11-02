@@ -27,7 +27,7 @@ namespace awl::testing
         lastOutput(last_output)
     {}
 
-    void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context)
+    void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
         AWL_ATTRIBUTE(size_t, loop, 0);
@@ -37,31 +37,31 @@ namespace awl::testing
         // Used for simulating an app crash.
         AWL_FLAG(terminate);
 
-        context.out << FromACString(p_test_link->name());
+        out << FromACString(p_test_link->name());
 
         size_t loop_count = loop;
 
         if (loop_count != 0)
         {
-            context.out << _T(" Looping ") << loop_count << _T(" times.");
+            out << _T(" Looping ") << loop_count << _T(" times.");
         }
         else
         {
             loop_count = 1;
         }
 
-        context.out << _T("... ");
+        out << _T("... ");
 
         //Required on Linux with GCC.
-        context.out.flush();
+        out.flush();
 
         std::basic_ostream<Char>* p_out = nullptr;
 
         if (output == _T("all"))
         {
-            context.out << std::endl;
+            out << std::endl;
             
-            p_out = &context.out;
+            p_out = &out;
         }
         else if (output == _T("failed"))
         {
@@ -89,24 +89,24 @@ namespace awl::testing
                 std::chrono::milliseconds t(timeout);
                 
                 watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
-                    [&context, t, terminate]()
+                    [&out, t, terminate]()
                     {
-                        context.out << _T("The timeout of ");
+                        out << _T("The timeout of ");
 
                         //TODO: Casting to std::chrono::nanoseconds is a workround. It does not compile with milliseconds.
-                        format_duration(context.out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
+                        format_duration(out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
 
-                        context.out << _T(" has elapsed");
+                        out << _T(" has elapsed");
 
                         if (terminate)
                         {
-                            context.out << _T(", terminating the app...") << std::endl;
+                            out << _T(", terminating the app...") << std::endl;
 
                             std::terminate();
                         }
                         else
                         {
-                            context.out << _T(", requesting the test to stop...") << std::endl;
+                            out << _T(", requesting the test to stop...") << std::endl;
                         }
                     });
 
@@ -119,7 +119,7 @@ namespace awl::testing
 
             ConsoleLogger logger(*p_out);
             
-            const TestContext temp_context{ *p_out, logger, test_token, context.ap };
+            const TestContext temp_context{ logger, test_token, context.ap };
 
             awl::StopWatch sw;
 
@@ -130,7 +130,7 @@ namespace awl::testing
                 lastOutput.str(String());
             }
 
-            context.out << _T("\tPassed within ") << sw << std::endl;
+            out << _T("\tPassed within ") << sw << std::endl;
 
             // Clear the attributes from the passed test.
             context.ap.Clear();

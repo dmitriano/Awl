@@ -202,9 +202,11 @@ namespace
         }
     }
 
-    static void PrintSet(const TestContext & ctx, const MySet & set)
+    static void PrintSet(const TestContext& ctx, const MySet& set)
     {
-        ctx.out << _T("size: ") << set.size() << _T(" [");
+        awl::ostringstream out;
+
+        out << _T("size: ") << set.size() << _T(" [");
 
         bool first = true;
 
@@ -216,13 +218,15 @@ namespace
             }
             else
             {
-                ctx.out << _T(", ");
+                out << _T(", ");
             }
 
-            ctx.out << val;
+            out << val;
         }
 
-        ctx.out << _T("]") << std::endl;
+        out << _T("]");
+
+        ctx.logger.debug(out.str());
     }
 }
 
