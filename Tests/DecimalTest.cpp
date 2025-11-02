@@ -14,7 +14,7 @@
 
 #include <functional>
 
-#ifdef AWL_INT_128
+#if defined(AWL_INT_128)
 
 #define GCC_SECTION(test_name) \
     { Test<awl::decimal<__uint128_t, 4>> test(context); test.test_name(); } \
@@ -28,7 +28,7 @@
 #endif
 
 // DecimalRound_Test fails with BOOST on Linux with GCC.
-#if defined(AWL_BOOST) && !defined(AWL_INT_128)
+#if defined(AWL_BOOST)
 
 namespace bmp = boost::multiprecision; 
 
