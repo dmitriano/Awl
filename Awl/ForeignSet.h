@@ -8,7 +8,6 @@
 #include "Awl/ObservableSet.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/TypeTraits.h"
-#include "Awl/FunctionTraits.h"
 
 #include <cassert>
 
@@ -24,7 +23,7 @@ namespace awl
         //another type A -> A *
         using Pointer = std::conditional_t<is_copyable_pointer_v<T>, T, const remove_pointer_t<T>*>;
 
-        using ForeignKey = typename function_traits<ForeignKeyGetter>::result_type;
+        using ForeignKey = std::invoke_result_t<ForeignKeyGetter, const remove_pointer_t<T>&>;
         using PrimaryCompare = KeyCompare<Pointer, PrimaryKeyGetter>;
         using ValueSet = observable_set<Pointer, PrimaryCompare>;
 

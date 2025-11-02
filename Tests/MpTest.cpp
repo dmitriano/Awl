@@ -30,15 +30,15 @@ namespace
 
 namespace awl::mp
 {
-    static_assert(make_type_name<std::string>() == fixed_string{ "sequence<int8_t>" });
+    static_assert(make_type_name<std::string>() == std::string("sequence<int8_t>"));
     //wstring is int32_t in GCC and uint16_t in MSVC
-    //static_assert(make_type_name<std::wstring>() == fixed_string{ "sequence<int16_t>" });
-    static_assert(make_type_name<std::vector<int32_t>>() == fixed_string{ "sequence<int32_t>" });
-    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == fixed_string{ "sequence<sequence<int64_t>>" });
+    //static_assert(make_type_name<std::wstring>() == std::string("sequence<int16_t>"));
+    static_assert(make_type_name<std::vector<int32_t>>() == std::string("sequence<int32_t>"));
+    static_assert(make_type_name<std::vector<std::list<uint64_t>>>() == std::string("sequence<sequence<int64_t>>"));
 
-    static_assert(make_type_name<std::map<int32_t, int64_t>>() == fixed_string{ "sequence<pair<int32_t, int64_t>>" });
+    static_assert(make_type_name<std::map<int32_t, int64_t>>() == std::string("sequence<pair<int32_t, int64_t>>"));
 
-    static_assert(make_type_name<std::optional<std::string>>() == fixed_string("optional<sequence<int8_t>>"));
+    static_assert(make_type_name<std::optional<std::string>>() == std::string("optional<sequence<int8_t>>"));
 
     static_assert(std::is_same_v<type_collector<std::vector<int>>::Tuple,
         std::tuple<

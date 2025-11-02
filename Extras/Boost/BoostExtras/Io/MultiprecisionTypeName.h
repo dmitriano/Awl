@@ -25,9 +25,9 @@ namespace awl::mp
     {
         using inner_tuple = std::tuple<>;
 
-        static constexpr auto name()
+        static constexpr std::string name()
         {
-            return fixed_string("multi_int");
+            return "multi_int";
         }
     };
 }

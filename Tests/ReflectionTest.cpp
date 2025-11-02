@@ -94,8 +94,8 @@ AWL_TEST(Reflection_MemberList)
     TestMemberList({ "aaaa", "bb", "c" });
     TestMemberList({ "x", "aaaa", "bb", "c" });
 
-    AssertMemberListEqual(A::get_member_names(), Vector{ "x", "y", "z" });
-    AssertMemberListEqual(B::get_member_names(), Vector{ "x", "y", "z" });
+    AssertMemberListEqual(A::member_names(), Vector{ "x", "y", "z" });
+    AssertMemberListEqual(B::member_names(), Vector{ "x", "y", "z" });
 }
 
 AWL_TEST(Reflection_ForEach)
@@ -108,7 +108,7 @@ AWL_TEST(Reflection_ForEach)
 
     awl::for_each_index(a1.as_const_tuple(), [&a1, &map](auto & val, size_t index)
     {
-        map.emplace(a1.get_member_names()[index], val);
+        map.emplace(a1.member_names()[index], val);
     });
 
     AWL_ASSERT(map.size() == 3);
@@ -117,7 +117,7 @@ AWL_TEST(Reflection_ForEach)
 
     awl::for_each_index(a2.as_tuple(), [&a2, &map](auto & val, size_t index)
     {
-        val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.get_member_names()[index]]);
+        val = std::any_cast<std::remove_reference_t<decltype(val)>>(map[a2.member_names()[index]]);
     });
 
     AWL_ASSERT(a1 == a2);

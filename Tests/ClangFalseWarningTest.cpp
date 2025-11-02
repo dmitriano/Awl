@@ -39,7 +39,7 @@ namespace
             {
                 for_each(val, [this](auto& field)
                 {
-                    //Warining with Android CLang 17.0.2 from NDK 26.0.10792818:
+                    //A false warining with Android CLang 17.0.2 from NDK 26.0.10792818:
                     //lambda capture 'this' is not used [-Wunused-lambda-capture]
                     ReadV(field);
                 });

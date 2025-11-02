@@ -83,13 +83,13 @@ namespace awl
 
         AttachedPrototype() : m_types(helpers::map_types_t2v_no_struct<Tie, V>())
         {
-            assert(m_types.size() == S::get_member_names().size());
+            assert(m_types.size() == S::member_names().size());
         }
 
         Field GetField(size_t index) const override
         {
             assert(index < GetCount());
-            return { S::get_member_names()[index], m_types[index] };
+            return { S::member_names()[index], m_types[index] };
         }
 
         size_t GetCount() const override

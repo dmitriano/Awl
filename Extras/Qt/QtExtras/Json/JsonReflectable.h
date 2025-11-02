@@ -30,7 +30,7 @@ namespace awl
 
                 JsonSerializer<FieldType> formatter;
 
-                const std::string& cpp_key = obj.get_member_names()[index];
+                const std::string& cpp_key = obj.member_names()[index];
 
                 QLatin1String key(cpp_key.c_str());
 
@@ -58,7 +58,7 @@ namespace awl
                 //Remove reference and const.
                 JsonSerializer<std::decay_t<decltype(field_val)>> formatter;
 
-                QLatin1String key(obj.get_member_names()[index].c_str());
+                QLatin1String key(obj.member_names()[index].c_str());
                 QJsonValue field_jv;
                 formatter.ToJson(field_val, field_jv);
                 jo[key] = field_jv;

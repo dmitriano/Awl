@@ -13,7 +13,7 @@ AWL is a small cross-platform C++ library that includes:
 8. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 9. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.43.34808`, `GCC 13.1.0`, `Android CLang 20.0 (from NDK 29.0.13113456)` and `Apple Clang 1700.0.13.5 (on MacOS Sonoma with Xcode 16.4)`.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.44.35219`, `GCC 13.3.0`, `Android CLang 20.0 (from NDK 29.0.13113456)` and `Apple Clang 1700.0.13.5 (on MacOS Sonoma with Xcode 16.4)`.
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -23,7 +23,7 @@ Feel free to use it or fork it, report a bug by opening an issue.
 
 To leave the author a message fill the [form on his website](https://developernote.com/contact/).
 
-## Compiling on Windows with CMake and MSVC 2022:
+## Compiling on Windows with MSVC 2022:
 
 ```bat
 cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
@@ -44,7 +44,20 @@ cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
 
 but with couple warnings related to std::streamsize that are not fixed yet.
 
-## Compiling on Linux with CMake and GCC:
+## Compiling on Linux with Ninja generator:
+
+```bash
+cmake ../../repos/Awl/ -G Ninja
+cmake --build . --parallel --target AwlTest --config RelWithDebInfo
+```
+
+Compiling a single source file (by example of `VtsTest.cpp`):
+
+```bash
+cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
+```
+
+## Compiling on Linux without Ninja generator:
 
 ```bash
 cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
@@ -56,47 +69,6 @@ or
 ```bash
 cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
 cmake --build . --parallel
-```
-
-## Compiling on Ubuntu 22.04 with GCC13.1:
-
-```bash
-sudo apt install build-essential
-sudo apt install cmake
-
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-sudo apt update
-sudo apt install gcc-13 g++-13
-ll /usr/bin/gcc-13
-ll /usr/bin/g++-13
-update-alternatives --display gcc
-ll /etc/alternatives/g*
-sudo update-alternatives --remove-all gcc
-sudo update-alternatives --remove-all g++
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 10 --slave /usr/bin/g++ g++ /usr/bin/g++-13
-g++ --version
-gcc --version
-
-mkdir repos
-cd repos
-git clone https://github.com/dmitriano/Awl
-mkdir -p build/awl
-cd build/awl
-cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Release
-cmake --build . --parallel
-```
-
-## Compiling with Ninja generator (Used these commands on MacOS):
-
-```bash
-cmake ../../repos/Awl/ -G Ninja
-cmake --build . --parallel --target AwlTest --config RelWithDebInfo
-```
-
-Compiling a separate source file (by example of `VtsTest.cpp`):
-
-```bash
-cmake --build . --parallel --target CMakeFiles/AwlTest.dir/Tests/VtsTest.cpp.o
 ```
 
 ## Compiling with QT and Boost on Windows
@@ -117,7 +89,7 @@ set MY_VS_GENERATOR="Visual Studio 17 2022"
 set OPENSSL_ROOT_DIR=%MY_DRIVE%/dev/libs/OpenSSL
 set OPENSSL_USE_STATIC_LIBS=ON
 
-%MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -D CMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -DAWL_NO_DEPRECATED:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON -DAWL_ANSI_CMD_CHAR:BOOL=ON
+%MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -D CMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -DAWL_NO_DEPRECATED:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON  -DAWL_ANSI_CMD_CHAR:BOOL=ON -DAWL_FIND_QT:BOOL=ON
 msbuild Awl.sln /p:Configuration=Debug /p:Platform=x64
 msbuild Awl.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
 ```
@@ -157,7 +129,7 @@ Running the examples:
 ./AwlTest --filter ".*_Example" --output all
 ```
 
-Do not run the commands below:
+Running unstable tests and examples:
 
 ```bash
 ./AwlTest --filter ".*_Unstable"
@@ -168,8 +140,6 @@ or
 ```bash
 ./AwlTest --filter ".*"
 ```
-
-they potentially can format your hard drive.
 
 ## Running the tests on Android device
 

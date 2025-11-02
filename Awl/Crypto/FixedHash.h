@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "Awl/FixedString.h"
-
 #include <string>
 
 namespace awl::crypto
@@ -35,12 +33,6 @@ namespace awl::crypto
 
         template <typename C>
         value_type operator()(const std::basic_string_view<C>& str) const
-        {
-            return m_hash(str.begin(), str.end());
-        }
-
-        template <typename C, size_t N>
-        constexpr value_type operator()(const fixed_string<C, N>& str) const
         {
             return m_hash(str.begin(), str.end());
         }

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "Awl/FixedString.h"
 #include "Awl/CppStd/StringView.h"
 
 #ifdef AWL_QT
@@ -51,27 +50,6 @@ namespace awl
 {
     using Char = TCHAR;
 
-    template<typename CharT, std::size_t N>
-    auto text_literal(const char(&arr)[N])
-    {
-        return fixed_string<CharT, N - 1>::from_ascii(arr);
-    }
-
-    template<std::size_t N>
-    auto text(const char(&arr)[N])
-    {
-        return text_literal<Char>(arr);
-    }
-
-    template<typename CharT, std::size_t N>
-    std::basic_ostream<CharT>& operator << (std::basic_ostream<CharT>& out, const fixed_string<Char, N>& val)
-    {
-        //Why it does not compile with std::basic_string_view<const CharT> ?
-        out << static_cast<std::basic_string<CharT>>(val);
-
-        return out;
-    }
-
     using String = std::basic_string<Char>;
 
     static_assert(std::is_same<String::value_type, TCHAR>::value, "String::value_type is not TCHAR.");
@@ -84,6 +62,31 @@ namespace awl
 
     using ostringstream = std::basic_ostringstream<Char>;
     using istringstream = std::basic_istringstream<Char>;
+
+    template<typename CharT, std::size_t N>
+    constexpr std::basic_string<CharT> string_from_ascii(const char(&arr)[N])
+    {
+        static_assert(N >= 1, "The parameter is not a string literal.");
+
+        // N includes zero terminator.
+        std::size_t nonzero_length = N - 1;
+
+        std::basic_string<CharT> s;
+        s.resize(nonzero_length);
+
+        for (std::size_t i = 0; i < nonzero_length; ++i)
+        {
+            s[i] = static_cast<CharT>(arr[i]);
+        }
+
+        return s;
+    }
+
+    template<std::size_t N>
+    constexpr String text(const char(&arr)[N])
+    {
+        return string_from_ascii<Char>(arr);
+    }
 
     inline auto StrLen(const char* s)
     {

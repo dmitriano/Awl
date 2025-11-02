@@ -18,9 +18,9 @@ namespace awl::mp
         // Supported variant types goes here.
         using inner_tuple = std::tuple<>;
 
-        static constexpr auto name()
+        static constexpr std::string name()
         {
-            return fixed_string("QVariant");
+            return "QVariant";
         }
     };
 }

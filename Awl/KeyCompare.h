@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "Awl/FunctionTraits.h"
 #include "Awl/Tuplizable.h"
 #include "Awl/TypeTraits.h"
 #include "Awl/Getters.h"
@@ -27,7 +26,7 @@ namespace awl
         using value_type = T;
 
         //The type of the key for heterogeneous lookup.
-        using key_type = typename awl::function_traits<GetKey>::result_type;
+        using key_type = std::invoke_result_t<GetKey, const element_type&>;
 
         KeyCompare() = default;
         
@@ -72,7 +71,7 @@ namespace awl
 
         using value_type = T *;
         using element_type = T;
-        using key_type = typename awl::function_traits<GetKey>::result_type;
+        using key_type = std::invoke_result_t<GetKey, const element_type&>;
 
         KeyCompare() = default;
 
@@ -115,7 +114,7 @@ namespace awl
 
         using value_type = std::shared_ptr<T>;
         using element_type = T;
-        using key_type = typename awl::function_traits<GetKey>::result_type;
+        using key_type = std::invoke_result_t<GetKey, const element_type&>;
 
         KeyCompare() = default;
 
@@ -158,7 +157,7 @@ namespace awl
 
         using value_type = std::unique_ptr<T, Deleter>;
         using element_type = T;
-        using key_type = typename awl::function_traits<GetKey>::result_type;
+        using key_type = std::invoke_result_t<GetKey, const element_type&>;
 
         KeyCompare() = default;
 

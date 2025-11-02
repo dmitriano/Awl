@@ -4,7 +4,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/String.h"
-#include "Awl/FixedString.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -209,9 +208,9 @@ namespace
         }
         
         template <std::size_t N>
-        static auto text(const char(&arr)[N])
+        static std::basic_string<C> text(const char(&arr)[N])
         {
-            return awl::fixed_string<C, N - 1>::from_ascii(arr);
+            return awl::string_from_ascii<C>(arr);
         }
     };
 }

@@ -8,6 +8,7 @@
 #include "Awl/Tuplizable.h"
 #include "Awl/IntRange.h"
 
+#include <concepts>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -27,9 +28,7 @@ namespace awl
 
         public:
 
-            MemberList(const char * s) : m_v(getArgNames(s))
-            {
-            }
+            MemberList(const char* s) : m_v(getArgNames(s)) {}
 
             using const_reference = Vector::const_reference;
             using const_pointer = Vector::const_pointer;
@@ -42,14 +41,14 @@ namespace awl
             const_iterator end() const { return m_v.end();}
             const_iterator cend() const noexcept { return m_v.cend();}
 
-            const_iterator find(const std::string & name) const
+            const_iterator find(const std::string& name) const
             {
                 return std::find(m_v.begin(), m_v.end(), name);
             }
 
-            const_iterator find_cstr(const char * name) const
+            const_iterator find_cstr(const char* name) const
             {
-                return std::find_if(m_v.begin(), m_v.end(), [name](const std::string & val)
+                return std::find_if(m_v.begin(), m_v.end(), [name](const std::string& val)
                 {
                     return std::strcmp(val.c_str(), name) == 0;
                 });
@@ -57,7 +56,7 @@ namespace awl
 
             static inline const size_t NotAnIndex = static_cast<size_t>(-1);
 
-            size_t find_index(const std::string & name)
+            size_t find_index(const std::string& name)
             {
                 const_iterator i = find(name);
 
@@ -82,7 +81,8 @@ namespace awl
         private:
 
             template <class Accept>
-            static void traverse(const char * va, Accept accept)
+                requires std::invocable<Accept, const char*, size_t>
+            static void traverse(const char* va, Accept accept)
             {
                 const char * p_start = va;
                 bool eaten_separator = false;
@@ -152,7 +152,7 @@ namespace awl
     struct is_reflectable_impl : std::false_type {};
 
     template <typename T>
-    struct is_reflectable_impl<T, std::void_t<decltype(std::declval<T>().get_member_names())>> : std::true_type {};
+    struct is_reflectable_impl<T, std::void_t<decltype(std::declval<T>().member_names())>> : std::true_type {};
 
     // Hide an extra template parameter.
     template <typename T>
@@ -176,7 +176,7 @@ namespace awl
             return std::tie();
         }
 
-        static const awl::helpers::MemberList& get_member_names()
+        static const awl::helpers::MemberList& member_names()
         {
             static const awl::helpers::MemberList ml("");
             return ml;
@@ -191,16 +191,15 @@ namespace awl
         // Capture a by value to keep it alive while iterating over the range.
         return awl::make_count(a.size()) |
             std::views::filter([a](size_t index) { return a[index]; }) |
-            std::views::transform([](size_t index) { return T::get_member_names()[index]; });
+            std::views::transform([](size_t index) { return T::member_names()[index]; });
     }
 }
 
 #define AWL_REFLECT(...) \
     AWL_TUPLIZABLE(__VA_ARGS__) \
-    static const awl::helpers::MemberList & get_member_names() \
+    static const awl::helpers::MemberList& member_names() \
     { \
-        static const char va[] = #__VA_ARGS__; \
-        static const awl::helpers::MemberList ml(va); \
+        static const awl::helpers::MemberList ml(#__VA_ARGS__); \
         return ml; \
     }
 
