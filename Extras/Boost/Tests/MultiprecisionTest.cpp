@@ -84,11 +84,11 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     const Decimal a_product = a * iter_count;
     const double b_product = b * iter_count;
 
-    std::cout <<
-        "decimal sum: " << a_sum << std::endl <<
-        "decimal product: " << a_product << std::endl <<
-        "double sum: " << b_sum << std::endl <<
-        "double product: " << b_product << std::endl;
+    context.logger.debug(awl::format() <<
+        "decimal sum: " << a_sum << awl::format::endl <<
+        "decimal product: " << a_product << awl::format::endl <<
+        "double sum: " << b_sum << awl::format::endl <<
+        "double product: " << b_product);
 
     AWL_ASSERT(a_sum == a_product);
 
