@@ -243,7 +243,7 @@ namespace
 // Run
 // AwlTest --run CoroutinesOnStrandExample_Example --output all --without_strand
 // to see the data race.
-AWL_EXAMPLE(CoroutinesOnStrandExample)
+AWL_TEST(CoroutinesOnStrandExample)
 {
     AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 

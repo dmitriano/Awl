@@ -30,7 +30,7 @@ awaitable<void> foo_or() {
     co_await(tim1.async_wait(use_awaitable) || tim2.async_wait(use_awaitable));
 }
 
-AWL_EXAMPLE(AsioAwaitableOperators)
+AWL_TEST(AsioAwaitableOperators)
 {
     boost::asio::thread_pool ioc;
 

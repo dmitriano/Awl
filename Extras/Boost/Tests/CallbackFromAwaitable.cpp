@@ -75,7 +75,7 @@ namespace
     }
 }
 
-AWL_EXAMPLE(CallbackFromAwaitable)
+AWL_TEST(CallbackFromAwaitable)
 {
     AWL_UNUSED_CONTEXT;
 

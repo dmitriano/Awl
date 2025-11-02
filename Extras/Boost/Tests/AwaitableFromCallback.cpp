@@ -119,7 +119,7 @@ namespace
     }
 }
 
-AWL_EXAMPLE(AwaitableFromCallback)
+AWL_TEST(AwaitableFromCallback)
 {
     AWL_UNUSED_CONTEXT;
 

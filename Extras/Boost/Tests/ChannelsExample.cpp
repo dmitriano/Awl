@@ -54,7 +54,7 @@ namespace
 }
 
 // Example test case using AWL's testing framework
-AWL_EXAMPLE(Channels)
+AWL_TEST(Channels)
 {
     AWL_UNUSED_CONTEXT;
 
