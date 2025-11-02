@@ -88,7 +88,7 @@ if (AWL_FIND_QT)
         $<$<CXX_COMPILER_ID:MSVC>:/Zi>
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-g>
     )
-    target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_QT)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_QT QT_NO_EMIT)
     target_include_directories(${PROJECT_NAME} PRIVATE ${Qt6_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Qt)
     file(GLOB_RECURSE QT_EXTTRAS_FILES ${CMAKE_SOURCE_DIR}/Extras/Qt/*.h ${AWL_ROOT_DIR}/Extras/Qt/*.cpp)
     target_sources(${PROJECT_NAME} PRIVATE ${QT_EXTTRAS_FILES})

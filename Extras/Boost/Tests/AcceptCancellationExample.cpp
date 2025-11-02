@@ -70,7 +70,7 @@ namespace
     }
 }
 
-AWL_TEST(AcceptCancellation)
+AWL_EXAMPLE(AcceptCancellation)
 {
     AWL_UNUSED_CONTEXT;
 

@@ -71,9 +71,9 @@ cmake ../../Awl/ -DCMAKE_BUILD_TYPE=Debug
 cmake --build . --parallel
 ```
 
-## Compiling with QT and Boost on Windows
+## Compiling with OpenSSL, QT and Boost on Windows
 
-Use `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option if QT is compiled with static runtime:
+Use `-DAWL_STATIC_RUNTIME:BOOL=ON` CMake option if QT and BOOST are compiled with static runtime:
 
 ```bat
 set MY_DRIVE=C:
@@ -81,15 +81,15 @@ set MY_DRIVE=C:
 %MY_DRIVE%
 cd \dev\build\awl
 
-set MY_CMAKE_EXE=%MY_DRIVE%\dev\tools\cmake-3.24.2-windows-x86_64\bin\cmake.exe
+set MY_CMAKE_EXE=%MY_DRIVE%\dev\tools\cmake-4.1.2-windows-x86_64\bin\cmake.exe
 set MY_QT_DIR=%MY_DRIVE%\dev\libs\Qt6\windows
-set MY_BOOST_DIR=%MY_DRIVE%\dev\libs\boost_1_80_0
+set MY_BOOST_DIR=%MY_DRIVE%\dev\libs\boost_1_89_0
 set MY_VS_GENERATOR="Visual Studio 17 2022"
 
 set OPENSSL_ROOT_DIR=%MY_DRIVE%/dev/libs/OpenSSL
 set OPENSSL_USE_STATIC_LIBS=ON
 
-%MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -D CMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -DAWL_NO_DEPRECATED:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON  -DAWL_ANSI_CMD_CHAR:BOOL=ON -DAWL_FIND_QT:BOOL=ON
+%MY_CMAKE_EXE% ..\..\repos\Awl -G %MY_VS_GENERATOR% -A x64 -DCMAKE_PREFIX_PATH="%MY_QT_DIR%;%MY_BOOST_DIR%" -DAWL_FIND_OPENSSL:BOOL=ON -DAWL_FIND_BOOST:BOOL=ON -DAWL_FIND_QT:BOOL=ON -DAWL_STATIC_RUNTIME:BOOL=ON -DAWL_ANSI_CMD_CHAR:BOOL=ON
 msbuild Awl.sln /p:Configuration=Debug /p:Platform=x64
 msbuild Awl.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
 ```
