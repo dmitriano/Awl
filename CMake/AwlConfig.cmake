@@ -6,6 +6,7 @@ message(STATUS "AwlConfig.cmake is in: ${CMAKE_CURRENT_LIST_DIR} directory.")
 
 cmake_path(GET CMAKE_CURRENT_LIST_DIR PARENT_PATH AWL_ROOT_DIR)
 message(STATUS "AWL_ROOT_DIR: ${AWL_ROOT_DIR}")
+set(AWL_DIR ${AWL_ROOT_DIR}/Awl)
 
 # Prevent BOOST warnings.
 if(POLICY CMP0167)
@@ -31,58 +32,3 @@ option(AWL_ANSI_CMD_CHAR "Define CommandLineProvider with char, but not with awl
 option(AWL_SANITIZE_THREAD "Use Thread Sanitizer.")
 option(AWL_SANITIZE_UNDEFINED "Use Undefined Behavior Sanitizer.")
 option(AWL_SANITIZE_ADDRESS "Use Address Sanitizer.")
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-    # Apple Clang does not have std::jthread.
-    # set(AWL_JTHREAD_EXTRAS ON)
-    add_definitions("-fexperimental-library")
-endif()
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "20.0.0")
-        set(AWL_JTHREAD_EXTRAS ON)
-    else()
-        # Android Clang has std::jthread since 20.0 as experimental.
-        add_definitions("-fexperimental-library")
-    endif()
-endif()
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_definitions("-Wall -Wextra -pedantic")
-    # Unused operators in local namespaces defined by AWL_MEMBERWISE_EQUATABLE
-    add_definitions("-Wno-unused-function")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_definitions("-Wall -Wextra -pedantic")
-    #add_definitions("-Wall -Wextra -pedantic -pthread")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    # using Intel C++
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    # using Visual Studio C++
-    # add_compile_options("/std:c++latest")
-    add_compile_options("/W4" "/Zc:__cplusplus")
-    add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
-    if (AWL_NO_DEPRECATED)
-        add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
-    endif()
-endif()
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    if (AWL_SANITIZE_THREAD)
-        message(STATUS "Using Thread Sanitizer.")
-        add_definitions("-fsanitize=thread -fno-omit-frame-pointer")
-        link_libraries("-fsanitize=thread")
-    endif()
-    if (AWL_SANITIZE_UNDEFINED)
-        message(STATUS "Using Undefined Behavior Sanitizer.")
-        add_definitions("-fsanitize=undefined -fno-omit-frame-pointer")
-        link_libraries("-fsanitize=undefined")
-    endif()
-    if (AWL_SANITIZE_ADDRESS)
-        message(STATUS "Using Address Sanitizer.")
-        add_definitions("-fsanitize=address -fno-omit-frame-pointer")
-        link_libraries("-fsanitize=address")
-    endif()
-    #set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=gold")
-endif()
-
-set(AWL_DIR ${AWL_ROOT_DIR}/Awl)

@@ -1,31 +1,8 @@
 cmake_minimum_required(VERSION 3.24.2...4.1.2)
 
-set(AWL_COMPILER_GNU_OR_CLANG ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" 
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-if (${AWL_COMPILER_GNU_OR_CLANG})
-    # won't work before project()!    
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        # 64 bits
-        message("Enabling 128 bit integer support.")
-        add_compile_definitions(AWL_INT_128)
-    endif()
-    if (AWL_NO_DEPRECATED)
-        add_definitions("-Wno-deprecated -Wno-deprecated-declarations")
-    endif()
-endif()
+include(${AWL_ROOT_DIR}/CMake/AwlCompilerOptions.cmake)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${AWL_ROOT_DIR})
-
-if (AWL_STATIC_RUNTIME)
-    if (${AWL_COMPILER_GNU_OR_CLANG})
-        message("Building with static runtime.")
-        target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
-    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-        target_compile_options(${PROJECT_NAME} PRIVATE
-            $<$<CONFIG:Debug>:/MTd>
-            $<$<NOT:$<CONFIG:Debug>>:/MT>)
-    endif()
-endif()
 
 if (AWL_JTHREAD_EXTRAS)
     message(STATUS "Using home made implementation of std::jthread.")

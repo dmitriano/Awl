@@ -4,9 +4,9 @@ project(AwlTest)
 
 include(CMake/AwlConfig.cmake)
 
-add_executable(${PROJECT_NAME})
-
 set(AWL_COMPILE_TESTS ON)
 set(AWL_COMPILE_MAIN ON)
+
+add_executable(${PROJECT_NAME})
 
 include(CMake/AwlLink.cmake)
