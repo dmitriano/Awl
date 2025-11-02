@@ -523,6 +523,16 @@ namespace
             AWL_ASSERT(Decimal{} == Decimal::zero());
 
             AWL_ASSERT(Decimal("0") == Decimal("-0"));
+            AWL_ASSERT(Decimal("0.00") == Decimal("-0"));
+            AWL_ASSERT(Decimal("0.0000") == Decimal("-0"));
+            AWL_ASSERT(Decimal("0.00") == Decimal("-0.0"));
+            AWL_ASSERT(Decimal("0.0000") == Decimal("-0.000"));
+            AWL_ASSERT(Decimal("-0") == Decimal("0"));
+            AWL_ASSERT(Decimal("-0.00") == Decimal("0.0"));
+            AWL_ASSERT(Decimal("-0.0000") == Decimal("0.000"));
+            AWL_ASSERT(Decimal("-0") == Decimal("-0"));
+            AWL_ASSERT(Decimal("-0.00") == Decimal("-0.0"));
+            AWL_ASSERT(Decimal("-0.0000") == Decimal("-0.000"));
         }
 
         void DecimalReadWrite()
