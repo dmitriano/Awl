@@ -1,11 +1,11 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
+#include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
-#include <iostream>
 #include <iomanip>
 
 namespace asio = boost::asio;
@@ -14,7 +14,10 @@ using tcp = asio::ip::tcp;
 
 namespace
 {
-    asio::awaitable<void> transfer(ssl::stream<tcp::socket>& from, ssl::stream<tcp::socket>& to)
+    asio::awaitable<void> transfer(
+        ssl::stream<tcp::socket>& from,
+        ssl::stream<tcp::socket>& to,
+        const awl::testing::TestContext& context)
     {
         try
         {
@@ -30,53 +33,61 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                std::cerr << "transfer: connection closed (stream truncated)\n";
+                context.logger.error("transfer: connection closed (stream truncated)");
             }
-            if (e.code() == boost::asio::error::eof)
+            else if (e.code() == boost::asio::error::eof)
             {
-                std::cerr << "transfer: EOF" << std::endl;
+                context.logger.error("transfer: EOF");
             }
-            if (e.code() == asio::error::connection_reset)
+            else if (e.code() == asio::error::connection_reset)
             {
-                std::cerr << "transfer: Connection Reset." << std::endl;
+                context.logger.error("transfer: Connection Reset.");
             }
-            if (e.code() == boost::system::errc::operation_canceled || e.code() == boost::asio::error::operation_aborted)
+            else if (
+                e.code() == boost::system::errc::operation_canceled
+                || e.code() == boost::asio::error::operation_aborted)
             {
-                std::cerr << "transfer: Operation cancelled." << std::endl;
+                context.logger.error("transfer: Operation cancelled.");
             }
-            if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
+            else if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
             {
-                std::cerr << "transfer Windows Error: WSAECONNRESET." << std::endl;
+                context.logger.error("transfer Windows Error: WSAECONNRESET.");
             }
             else
             {
-                std::cerr << "transfer boost::system::system_error: " << e.what() << std::endl;
+                context.logger.error(awl::format() << "transfer boost::system::system_error: " << e.what());
             }
         }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
-            std::cerr << "transfer std::exception: " << e.what() << std::endl;
+            context.logger.error(awl::format() << "transfer std::exception: " << e.what());
         }
     }
 
-    asio::awaitable<void> bidirectional_transfer(ssl::stream<tcp::socket>& client_ssl, ssl::stream<tcp::socket>& server_ssl)
+    asio::awaitable<void> bidirectional_transfer(
+        ssl::stream<tcp::socket>& client_ssl,
+        ssl::stream<tcp::socket>& server_ssl,
+        const awl::testing::TestContext& context)
     {
         using namespace boost::asio::experimental::awaitable_operators;
 
         // it calls wait_for_one_error()
-        co_await(transfer(client_ssl, server_ssl) && transfer(server_ssl, client_ssl));
+        co_await(transfer(client_ssl, server_ssl, context) && transfer(server_ssl, client_ssl, context));
     }
         
     [[maybe_unused]]
-    asio::awaitable<void> advanced_bidirectional_transfer_example(ssl::stream<tcp::socket>& client_ssl, ssl::stream<tcp::socket>& server_ssl)
+    asio::awaitable<void> advanced_bidirectional_transfer_example(
+        ssl::stream<tcp::socket>& client_ssl,
+        ssl::stream<tcp::socket>& server_ssl,
+        const awl::testing::TestContext& context)
     {
         auto ex = co_await boost::asio::this_coro::executor;
 
         auto [order, ex0, ex1] =
             co_await asio::experimental::make_parallel_group(
-                asio::co_spawn(ex, transfer(client_ssl, server_ssl), boost::asio::deferred),
-                asio::co_spawn(ex, transfer(server_ssl, client_ssl), boost::asio::deferred)
+                asio::co_spawn(ex, transfer(client_ssl, server_ssl, context), boost::asio::deferred),
+                asio::co_spawn(ex, transfer(server_ssl, client_ssl, context), boost::asio::deferred)
             ).async_wait(
                 asio::experimental::wait_for_one_success(),
                 asio::deferred
@@ -90,8 +101,8 @@ namespace
     asio::awaitable<void> handle_client(
         ssl::stream<tcp::socket> client_ssl,
         const std::string& target_host,
-        const std::string& target_port
-    )
+        const std::string& target_port,
+        const awl::testing::TestContext& context)
     {
         try
         {
@@ -112,28 +123,29 @@ namespace
             co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
             co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
 
-            co_await bidirectional_transfer(client_ssl, server_ssl);
+            co_await bidirectional_transfer(client_ssl, server_ssl, context);
         }
         catch (const boost::system::system_error& e)
         {
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                std::cerr << "handle_client: connection closed (stream truncated)" << std::endl;
+                context.logger.error("handle_client: connection closed (stream truncated)");
             }
             else
             {
-                std::cerr << "handle_client exception: " << e.what() << std::endl;
+                context.logger.error(awl::format() << "handle_client exception: " << e.what());
             }
         }
         catch (const std::exception& e)
         {
-            std::cerr << "handle_client exception: " << e.what() << std::endl;
+            context.logger.error(awl::format() << "handle_client exception: " << e.what());
         }
     }
 
     asio::awaitable<void> runProxy(tcp::endpoint listen_endpoint, ssl::context client_ctx,
-        const std::string& target_host, const std::string& target_port)
+        const std::string& target_host, const std::string& target_port,
+        const awl::testing::TestContext& context)
     {
         try
         {
@@ -149,18 +161,18 @@ namespace
                 // Launch a background coroutine to handle the client
                 co_spawn(
                     exec,
-                    handle_client(std::move(client_ssl), target_host, target_port),
+                    handle_client(std::move(client_ssl), target_host, target_port, context),
                     asio::detached
                 );
             }
         }
         catch (const boost::system::system_error& e)
         {
-            std::cerr << "runProxy boost::system::system_error: " << e.what() << "\n";
+            context.logger.error(awl::format() << "runProxy boost::system::system_error: " << e.what());
         }
         catch (const std::exception& e)
         {
-            std::cerr << "runProxy std::exception: " << e.what() << "\n";
+            context.logger.error(awl::format() << "runProxy std::exception: " << e.what());
         }
     }
 }
@@ -203,7 +215,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     asio::co_spawn(
         ioc,
         runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
-            target_host, target_port),
+            target_host, target_port, context),
         asio::detached);
 
     ioc.join();
