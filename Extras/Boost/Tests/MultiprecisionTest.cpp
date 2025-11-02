@@ -256,47 +256,47 @@ namespace
     }
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt128)
+AWL_TEST(MultiprecisionImportExportBitsInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::int128_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt128)
+AWL_TEST(MultiprecisionImportExportBitsUInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint128_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt256)
+AWL_TEST(MultiprecisionImportExportBitsInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::int256_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt256)
+AWL_TEST(MultiprecisionImportExportBitsUInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint256_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt512)
+AWL_TEST(MultiprecisionImportExportBitsInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::int512_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt512)
+AWL_TEST(MultiprecisionImportExportBitsUInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint512_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt1024)
+AWL_TEST(MultiprecisionImportExportBitsInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::int1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt1024)
+AWL_TEST(MultiprecisionImportExportBitsUInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionFloatImportExportBits)
+AWL_TEST(MultiprecisionFloatImportExportBits)
 {
     //using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
     //Decimal i("33.3");
@@ -362,7 +362,7 @@ AWL_TEST(MultiprecisionReadWrite)
     //TestInt<bmp::int1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionContainer)
+AWL_TEST(MultiprecisionContainer)
 {
     AWL_ATTRIBUTE(std::string, number, "max");
 
