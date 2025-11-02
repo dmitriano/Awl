@@ -1,4 +1,5 @@
 ﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/String.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -36,10 +37,12 @@ AWL_TEST(AsioAwaitableOperators)
 {
     boost::asio::thread_pool ioc;
 
-    auto handler = [&context](auto caption)
+    auto handler = [&context](std::string caption)
     {
         return [=](std::exception_ptr e)
             {
+                using awl::operator <<;
+
                 try
                 {
                     if (e)
