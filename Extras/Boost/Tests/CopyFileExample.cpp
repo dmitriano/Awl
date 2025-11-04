@@ -5,11 +5,13 @@
 #include <boost/asio/stream_file.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/system/system_error.hpp>
+#include <boost/asio/any_io_executor.hpp>
 
 #include <cstdint>
 #include <vector>
 #include <format>
 #include <thread>
+#include <optional>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -50,8 +52,6 @@ namespace
             context.logger.debug(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
-            AWL_ATTRIBUTE(std::string, input, "input.dat");
-            AWL_ATTRIBUTE(std::string, output, "output.dat");
 
             asio::io_context io;
 
@@ -66,13 +66,57 @@ namespace
             context.logger.debug(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
         }
 
+        void runStrand1()
+        {
+            context.logger.debug(std::format("Thread {}. runStrand1() has started.", std::this_thread::get_id()));
+
+            AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+            asio::io_context io;
+
+            asio::thread_pool pool(thread_count);
+
+            asio::strand<asio::thread_pool::executor_type> strand(pool.get_executor());
+
+            asio::co_spawn(strand, copyFile(), asio::detached);
+
+            io.run();
+
+            pool.join();
+
+            context.logger.debug(std::format("Thread {}. runStrand1() has finished.", std::this_thread::get_id()));
+        }
+
+        void runStrand2()
+        {
+            context.logger.debug(std::format("Thread {}. runStrand2() has started.", std::this_thread::get_id()));
+
+            AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+            asio::io_context io;
+
+            asio::thread_pool pool(thread_count);
+
+            asio::strand<asio::thread_pool::executor_type> strand(pool.get_executor());
+
+            opExecutor = pool.get_executor();
+
+            asio::co_spawn(strand, copyFile(), asio::detached);
+
+            io.run();
+
+            pool.join();
+
+            context.logger.debug(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
+        }
+
     private:
 
         awaitable<void> copyFile()
         {
             context.logger.debug(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
 
-            auto exec = co_await asio::this_coro::executor;
+            asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
             asio::stream_file source(exec);
             source.open(source_path, asio::stream_file::read_only);
@@ -123,6 +167,8 @@ namespace
 
         std::string source_path;
         std::string destination_path;
+
+        std::optional<asio::any_io_executor> opExecutor;
     };
 }
 
@@ -144,4 +190,18 @@ AWL_EXAMPLE(CopyFileThreadPool)
     Example example{ context };
 
     example.runThreadPool();
+}
+
+AWL_EXAMPLE(CopyFileStrand1)
+{
+    Example example{ context };
+
+    example.runStrand1();
+}
+
+AWL_EXAMPLE(CopyFileStrand2)
+{
+    Example example{ context };
+
+    example.runStrand2();
 }
