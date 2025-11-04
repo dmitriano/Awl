@@ -7,6 +7,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 
 #include <functional>
 
@@ -46,7 +47,7 @@ AWL_TEST(UniquePtrBegingDestoyed)
     AWL_ASSERT_EQUAL(1, count);
 
     p_a->val = _T("beging destoyed");
-    p_a->func = [&p_a, context]() { context.out << p_a->val; };
+    p_a->func = [&p_a, context]() { context.logger.debug(awl::format() << p_a->val); };
     p_a = {};
 
     AWL_ASSERT_EQUAL(0, count);

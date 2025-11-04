@@ -67,6 +67,9 @@ namespace awl::testing
             static_cast<void>(val);
         }
 
+        // Command line attributes applies to all the tests.
+        void Clear() {}
+
     private:
 
         bool TryFind(const char* name, CmdString& val) const;

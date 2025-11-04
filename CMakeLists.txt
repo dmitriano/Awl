@@ -1,17 +1,12 @@
-cmake_minimum_required (VERSION 3.6.2)
+cmake_minimum_required(VERSION 3.24.2...4.1.2)
 
 project(AwlTest)
 
 include(CMake/AwlConfig.cmake)
 
-add_executable(${PROJECT_NAME})
-
-message("Awl C++ standard: ${CMAKE_CXX_STANDARD}")
-
-#${CMAKE_SOURCE_DIR}
-set(AWL_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
 set(AWL_COMPILE_TESTS ON)
 set(AWL_COMPILE_MAIN ON)
+
+add_executable(${PROJECT_NAME})
 
 include(CMake/AwlLink.cmake)

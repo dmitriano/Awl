@@ -27,7 +27,7 @@ namespace awl::testing
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& ap) :
         m_ap(ap),
-        m_context{ awl::cout(), m_logger, m_source.get_token(), m_ap }
+        m_context{ m_logger, m_source.get_token(), m_ap }
     {
     }
 
@@ -35,6 +35,8 @@ namespace awl::testing
     bool TestConsole<Provider>::RunTests()
     {
         TestContext& context = m_context;
+
+        awl::ostream& out = awl::cout();
         
         AWL_ATTRIBUTE(std::string, run, {});
 
@@ -52,16 +54,16 @@ namespace awl::testing
 
                 StaticMap<TestFunc> test_map{ StaticMap<TestFunc>::fill(filter) };
 
-                context.out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
+                out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
 
                 for (const TestLink* p_link : test_map)
                 {
-                    runner.RunLink(p_link, context);
+                    runner.RunLink(p_link, context, out);
                 }
             }
             else
             {
-                context.out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
+                out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
 
                 const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
@@ -70,18 +72,18 @@ namespace awl::testing
                     throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
                 }
 
-                runner.RunLink(p_link, context);
+                runner.RunLink(p_link, context, out);
             }
 
-            context.out << std::endl << _T("***************** The tests passed *****************") << std::endl;
+            out << std::endl << _T("***************** The tests passed *****************") << std::endl;
 
             passed = true;
         }
         catch (const awl::testing::TestException& e)
         {
-            context.out << std::endl << last_output.str();
+            out << std::endl << last_output.str();
 
-            context.out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
+            out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
         }
 
         // awl::static_chain<TestFunc>().clear();

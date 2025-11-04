@@ -9,6 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/RangeUtil.h"
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Random.h"
 
 #include <ranges>
@@ -119,22 +120,23 @@ namespace
 
             Printer(const awl::testing::TestContext & test_context) : context(test_context)
             {
-                context.out << _T("The list content is:");
+                message << _T("The list content is:");
             }
 
             ~Printer()
             {
-                context.out << std::endl;
+                context.logger.debug(message);
             }
 
             void PrintElement(const Element * e) const
             {
-                context.out << _T(" ") << e->Value;
+                message << _T(" ") << e->Value;
             }
 
         private:
 
             const awl::testing::TestContext & context;
+            mutable awl::format message;
         };
 
     public:
@@ -306,7 +308,7 @@ namespace
                 AWL_FAILM(_T("Element 1 not found."));
             }
 
-            context.out << _T("The found element is: ") << i->Value << std::endl;
+            context.logger.debug(awl::format() << _T("The found element is: ") << i->Value);
 
             i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 25; });
 
@@ -722,19 +724,19 @@ namespace
             context(ctx),
             m_len(len)
         {
-            context.get().out << "Vertex constructor " << m_len << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex constructor " << m_len);
         }
 
         ~Vertex()
         {
-            context.get().out << "Vertex destructor " << m_len << ", included: " << std::boolalpha << IsIncluded() << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex destructor " << m_len << ", included: " << std::boolalpha << IsIncluded());
         }
 
         Vertex(const Vertex& other) :
             context(other.context),
             m_len(other.m_len)
         {
-            context.get().out << "Vertex copy constructor " << m_len << std::endl;
+            context.get().logger.debug(awl::format() << "Vertex copy constructor " << m_len);
         }
 
         Vertex(Vertex&& other) = default;

@@ -98,5 +98,5 @@ AWL_TEST(NativeStreamFileName)
 
     awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
 
-    context.out << s.GetFileName() << std::endl;
+    context.logger.debug(awl::format() << s.GetFileName());
 }

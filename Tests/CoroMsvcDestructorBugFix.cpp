@@ -5,6 +5,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
+#include "Awl/StringFormat.h"
 
 #include <coroutine>
 #include <optional>
@@ -177,29 +178,29 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("TestTimerAwait started.") << std::endl;
+        context.logger.debug(_T("TestTimerAwait started."));
 
         co_await 1s;
 
-        context.out << _T("TestTimerAwait finished.") << std::endl;
+        context.logger.debug(_T("TestTimerAwait finished."));
     }
 
     UpdateTask TestNestedTask(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
-        context.out << _T("TestNestedTask started.") << std::endl;
+        context.logger.debug(_T("TestNestedTask started."));
 
         auto task = TestTimerAwait(context);
 
         co_await 2s;
 
-        context.out << _T("Time interval has elapsed.") << std::endl;
+        context.logger.debug(_T("Time interval has elapsed."));
 
         //We can't wait for a destroyed task.
         //co_await task;
 
-        context.out << _T("TestNestedTask finished.") << std::endl;
+        context.logger.debug(_T("TestNestedTask finished."));
     }
 }
 

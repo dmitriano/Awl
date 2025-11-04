@@ -181,6 +181,13 @@ namespace awl
 
         bool operator == (const decimal& other) const
         {
+            // Quick fix.
+            // They both are zeros with different signes.
+            if (unsigned_mantissa() == 0u && other.unsigned_mantissa() == 0u)
+            {
+                return true;
+            }
+
             if (m_data.positive() == other.m_data.positive())
             {
                 const decimal a = normalize();
@@ -558,6 +565,7 @@ namespace awl
 
             if (m_data.man() == 0)
             {
+                m_data.set_positive(true);
                 m_data.set_exp(0);
             }
         }
@@ -565,6 +573,13 @@ namespace awl
         template <class Comp>
         static constexpr bool compare(const decimal& a, const decimal& b, Comp comp)
         {
+            // Quick fix.
+            // They both are zeros with different signes.
+            if (a.unsigned_mantissa() == 0u && b.unsigned_mantissa() == 0u)
+            {
+                return comp(UInt(0u), UInt(0u));
+            }
+
             if (a.negative() && b.negative())
             {
                 return compare_positive(b, a, comp);
@@ -742,7 +757,7 @@ namespace awl
     }
 
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class C>
-    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate> d)
+    std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const decimal<UInt, exp_len, DataTemplate>& d)
     {
         if (d.negative())
         {

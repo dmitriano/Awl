@@ -9,6 +9,7 @@
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/Tuplizable.h"
+#include "Awl/StringFormat.h"
 
 #include <algorithm>
 #include <array>
@@ -201,9 +202,11 @@ namespace
         }
     }
 
-    static void PrintSet(const TestContext & ctx, const MySet & set)
+    static void PrintSet(const TestContext& ctx, const MySet& set)
     {
-        ctx.out << _T("size: ") << set.size() << _T(" [");
+        awl::ostringstream out;
+
+        out << _T("size: ") << set.size() << _T(" [");
 
         bool first = true;
 
@@ -215,13 +218,15 @@ namespace
             }
             else
             {
-                ctx.out << _T(", ");
+                out << _T(", ");
             }
 
-            ctx.out << val;
+            out << val;
         }
 
-        ctx.out << _T("]") << std::endl;
+        out << _T("]");
+
+        ctx.logger.debug(out.str());
     }
 }
 
@@ -289,18 +294,19 @@ AWL_TEST(VectorSetRandom)
             bool my_result = my_set.erase(val);
             bool std_result = std_set.erase(val) != 0;
 
-            context.out << val;
-            
+            awl::format message;
+            message << val;
+
             if (my_result)
             {
-                context.out << _T(" has been deleted.");
+                message << _T(" has been deleted.");
             }
             else
             {
-                context.out << _T(" not found.");
+                message << _T(" not found.");
             }
 
-            context.out << std::endl;
+            context.logger.debug(message);
 
             AWL_ASSERT(my_result == std_result);
 

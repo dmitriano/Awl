@@ -6,6 +6,7 @@
 #include "Awl/Coro/Generator.h"
 
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include <coroutine>
 #include <exception>
@@ -47,18 +48,18 @@ namespace
 
         for (auto [n, j] : gen)
         {
-            context.out << "fib(" << n << ")=" << j << std::endl;
+            context.logger.debug(awl::format() << "fib(" << n << ")=" << j);
         }
     }
 }
 
 AWL_EXAMPLE(CoroGeneratorFibonacci)
 {
-    context.out << "Short Fibonacci sequence: " << std::endl;
+    context.logger.debug("Short Fibonacci sequence: \n");
     
     PrintFibonacci(context, 5);
 
-    context.out << "Long Fibonacci sequence: " << std::endl;
+    context.logger.debug("Long Fibonacci sequence: \n");
 
     try
     {
@@ -66,10 +67,10 @@ AWL_EXAMPLE(CoroGeneratorFibonacci)
     }
     catch (const std::exception& ex)
     {
-        context.out << "Exception: " << ex.what() << '\n';
+        context.logger.debug(awl::format() << "Exception: " << ex.what() << '\n');
     }
     catch (...)
     {
-        context.out << "Unknown exception.\n";
+        context.logger.debug("Unknown exception.\n");
     }
 }

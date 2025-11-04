@@ -7,7 +7,7 @@
 #include "Tests/Helpers/RwTest.h"
 
 #include "Awl/String.h"
-#include "Awl/Separator.h"
+#include "Awl/StringFormat.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #include "BoostExtras/MultiprecisionTraits.h"
 
@@ -33,17 +33,17 @@ AWL_EXAMPLE(MultiprecisionSize)
     auto max = std::numeric_limits<bmp::uint128_t>::max();
 
     size_t size = sizeof(max);
-    
-    context.out <<
-        _T("max: ") << max << std::endl <<
-        _T("size: ") << size << std::endl;
+
+    context.logger.debug(awl::format() <<
+        _T("max: ") << max << awl::format::endl <<
+        _T("size: ") << size);
 }
 
 AWL_EXAMPLE(MultiprecisionDecimalConstants)
 {
     using Constants = awl::helpers::DecimalConstants<bmp::uint128_t, 4, 16>;
 
-    context.out << "man_len: " << Constants::man_len;
+    context.logger.debug(awl::format() << "man_len: " << Constants::man_len);
 }
 
 AWL_EXAMPLE(MultiprecisionDecFloat)
@@ -55,82 +55,86 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
     AWL_ATTRIBUTE(size_t, square_count, 5);
     AWL_FLAG(no_div);
 
-    //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
-    //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
-    constexpr unsigned lenght = 30;
-    
-    using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
-
-    const Decimal a(number);
-    const double b = std::stod(number);
-
-    std::cout <<
-        "sizeof(Decimal): " << sizeof(Decimal) << std::endl <<
-        "boost:\t" << std::fixed << a << std::endl <<
-        "double:\t" << std::fixed << b << std::endl <<
-        "cast:\t" << std::fixed << static_cast<double>(a) <<
-        std::endl;
-
-    //context.out <<
-    //    _T("sizeof(Decimal): ") << sizeof(Decimal) << std::endl <<
-    //    _T("boost: ") << std::fixed << std::setprecision(lenght) << decimal << std::endl <<
-    //    _T("double: ") << std::fixed << std::setprecision(lenght) << dbl <<
-    //    std::endl;
-
-    Decimal a_sum = 0;
-    double b_sum = 0;
-
-    for (size_t i = 0; i < iter_count; ++i)
+    try
     {
-        a_sum += a;
-        
-        b_sum += b;
-    }
+        //IEEE 754 double stores 2^53 without losing precision that is 15 decimal digits,
+        //Simple examples of numbers which cannot be exactly represented in binary floating - point numbers include 1 / 3, 2 / 3, 1 / 5
+        constexpr unsigned lenght = 30;
 
-    const Decimal a_product = a * iter_count;
-    const double b_product = b * iter_count;
+        using Decimal = bmp::number<bmp::cpp_dec_float<lenght, int16_t>>;
 
-    std::cout <<
-        "decimal sum: " << a_sum << std::endl <<
-        "decimal product: " << a_product << std::endl <<
-        "double sum: " << b_sum << std::endl <<
-        "double product: " << b_product << std::endl;
+        const Decimal a(number);
+        const double b = std::stod(number);
 
-    AWL_ASSERT(a_sum == a_product);
+        context.logger.debug(awl::format() <<
+            "sizeof(Decimal): " << sizeof(Decimal) << awl::format::endl <<
+            "boost:\t" << std::fixed << a << awl::format::endl <<
+            "double:\t" << std::fixed << b << awl::format::endl <<
+            "cast:\t" << std::fixed << static_cast<double>(a));
 
-    if (!no_div)
-    {
-        Decimal a_quotient = a;
+        Decimal a_sum = 0;
+        double b_sum = 0;
 
-        std::cout << "decimal quotient: " << std::endl;
-
-        //while (a_quotient != 0)
-        for (size_t i = 0; i < div_count; ++i)
+        for (size_t i = 0; i < iter_count; ++i)
         {
-            a_quotient /= 10;
+            a_sum += a;
 
-            std::cout << a_quotient << std::endl;
+            b_sum += b;
+        }
+
+        const Decimal a_product = a * iter_count;
+        const double b_product = b * iter_count;
+
+        context.logger.debug(awl::format() <<
+            "decimal sum: " << a_sum << awl::format::endl <<
+            "decimal product: " << a_product << awl::format::endl <<
+            "double sum: " << b_sum << awl::format::endl <<
+            "double product: " << b_product);
+
+        AWL_ASSERT(a_sum == a_product);
+
+        if (!no_div)
+        {
+            Decimal a_quotient = a;
+
+            context.logger.debug(awl::format() << "decimal quotient: ");
+
+            //while (a_quotient != 0)
+            for (size_t i = 0; i < div_count; ++i)
+            {
+                a_quotient /= 10;
+
+                context.logger.debug(awl::format() << a_quotient);
+            }
+        }
+
+        if (!no_square)
+        {
+            Decimal a_square = a;
+            Decimal a_sqrt = a;
+
+            //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
+
+            for (size_t i = 0; i < square_count; ++i)
+            {
+                a_square = a_square * a_square;
+
+                a_sqrt = bmp::sqrt(a_sqrt);
+
+                Decimal sum = a_square + a_sqrt;
+
+                context.logger.debug(awl::format() <<
+                    "square: " << a_square << awl::format::endl <<
+                    "sqrt: " << a_sqrt << awl::format::endl <<
+                    "square + sqrt: " << sum);
+            }
         }
     }
-
-    if (!no_square)
+    catch (const std::exception& e)
     {
-        Decimal a_square = a;
-        Decimal a_sqrt = a;
+        context.logger.debug(awl::format() << "Exception: " << e.what());
 
-        //std::cout << std::fixed << std::setprecision(lenght * square_count / 2);
-
-        for (size_t i = 0; i < square_count; ++i)
-        {
-            a_square = a_square * a_square;
-
-            a_sqrt = bmp::sqrt(a_sqrt);
-
-            std::cout <<
-                "square: " << a_square << std::endl <<
-                "sqrt: " << a_sqrt << std::endl <<
-                "square + sqrt: " << a_square + a_sqrt << std::endl;
-        }
+        AWL_FAIL;
     }
 }
 
@@ -171,31 +175,43 @@ AWL_EXAMPLE(MultiprecisionDecimalData)
     
     awl::MultiprecisionDecimalData<UInt, 4> d(true, 2, 105);
 
-    context.out << d.man() << ", " << d.exp() << std::endl;
+    context.logger.debug(awl::format() << d.man() << ", " << d.exp());
 
     d.set_man(UInt(105) * UInt(10));
     
     d.set_exp(3);
 
-    context.out << d.man() << ", " << d.exp() << std::endl;
+    context.logger.debug(awl::format() << d.man() << ", " << d.exp());
 }
 
 namespace
 {
-    void PrintVector(awl::ostream& out, const std::vector<uint8_t>& v)
+    void PrintVector(const awl::testing::TestContext& context, const std::vector<uint8_t>& v)
     {
-        out << "Vector size: " << v.size() << std::endl;
+        awl::format message;
 
-        out << "Vector elements:" << std::endl;
+        message << "Vector size: " << v.size() << awl::format::endl;
+        message << "Vector elements:" << awl::format::endl;
 
-        awl::separator sep(_T(','));
+        bool first = true;
 
         for (unsigned char val : v)
         {
-            out << sep << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << val;
+            if (!first)
+            {
+                message << _T(", ");
+            }
+            else
+            {
+                first = false;
+            }
+
+            message << "0x" << std::hex << std::setfill(_T('0')) << std::setw(2) << static_cast<unsigned int>(val) << std::dec;
         }
 
-        out << std::endl;
+        message << awl::format::endl;
+
+        context.logger.debug(message);
     }
 }
 
@@ -233,15 +249,15 @@ namespace
             i.backend().negate();
         }
 
-        context.out <<
-            _T("number: ") << i << std::endl <<
-            _T("sign:") << i.sign() << std::endl;
+        context.logger.debug(awl::format() <<
+            _T("number: ") << i << awl::format::endl <<
+            _T("sign:") << i.sign());
 
         // export into 8-bit unsigned values, most significant bit first:
         std::vector<uint8_t> v;
         export_bits(i, std::back_inserter(v), 8);
 
-        PrintVector(context.out, v);
+        PrintVector(context, v);
 
         // import back again, and check for equality:
         Int j;
@@ -256,47 +272,47 @@ namespace
     }
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt128)
+AWL_TEST(MultiprecisionImportExportBitsInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::int128_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt128)
+AWL_TEST(MultiprecisionImportExportBitsUInt128)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint128_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt256)
+AWL_TEST(MultiprecisionImportExportBitsInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::int256_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt256)
+AWL_TEST(MultiprecisionImportExportBitsUInt256)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint256_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt512)
+AWL_TEST(MultiprecisionImportExportBitsInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::int512_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt512)
+AWL_TEST(MultiprecisionImportExportBitsUInt512)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint512_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsInt1024)
+AWL_TEST(MultiprecisionImportExportBitsInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::int1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionImportExportBitsUInt1024)
+AWL_TEST(MultiprecisionImportExportBitsUInt1024)
 {
     TestMultiprecisionIntImportExportBits<bmp::uint1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionFloatImportExportBits)
+AWL_TEST(MultiprecisionFloatImportExportBits)
 {
     //using Decimal = bmp::number<bmp::cpp_dec_float<30, int16_t>>;
     //Decimal i("33.3");
@@ -310,7 +326,7 @@ AWL_EXAMPLE(MultiprecisionFloatImportExportBits)
     std::vector<unsigned char> v;
     export_bits(cpp_int(f.backend().bits()), std::back_inserter(v), 8);
 
-    PrintVector(context.out, v);
+    PrintVector(context, v);
 
     // Grab the exponent as well:
     int e = f.backend().exponent();
@@ -362,7 +378,7 @@ AWL_TEST(MultiprecisionReadWrite)
     //TestInt<bmp::int1024_t>(context);
 }
 
-AWL_EXAMPLE(MultiprecisionContainer)
+AWL_TEST(MultiprecisionContainer)
 {
     AWL_ATTRIBUTE(std::string, number, "max");
 

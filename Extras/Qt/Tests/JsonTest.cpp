@@ -10,6 +10,7 @@
 
 #include "Awl/Decimal128.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -49,7 +50,7 @@ namespace
 
                 QJsonValue jmsg = jobj["msg"];
 
-                context.out << "Code: " << jcode.toInt() << ", msg: " << awl::FromQString(jmsg.toString()) << std::endl;
+                context.logger.debug(awl::format() << "Code: " << jcode.toInt() << ", msg: " << awl::FromQString(jmsg.toString()));
                 
                 return true;
             }

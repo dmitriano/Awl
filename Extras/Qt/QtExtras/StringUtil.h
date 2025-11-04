@@ -10,7 +10,6 @@
 
 #include "Awl/EnumTraits.h"
 #include "Awl/Crypto/IntHash.h"
-#include "Awl/Crypto/FixedHash.h"
 
 #include <QHash>
 #include <QString>
@@ -26,16 +25,6 @@
 
 namespace awl
 {
-    using FixedHash64 = awl::crypto::FixedHash<awl::crypto::Int64Hash>;
-
-    template <class Hash>
-    FixedHash64::value_type hashString(const Hash& hash, const QString& s)
-    {
-        const auto range = s | std::views::transform(std::mem_fn(&QChar::toLatin1));
-
-        return hash(range.begin(), range.end());
-    }
-
     void removeTrailingZeros(QString & s);
 
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltinDecimalData>

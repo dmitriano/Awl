@@ -39,6 +39,15 @@ namespace awl::testing
             }, m_providers);
         }
 
+        void Clear()
+        {
+            std::apply([](Ps&... provider)
+                {
+                    (provider.Clear(), ...);
+
+                }, m_providers);
+        }
+
         template<std::size_t I>
         auto& get_provider() const
         {

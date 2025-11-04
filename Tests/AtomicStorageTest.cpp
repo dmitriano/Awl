@@ -14,9 +14,10 @@
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/FieldMap.h"
-#include "Awl/ConsoleLogger.h"
+#include "Awl/StringFormat.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/Random.h"
+#include "Awl/StopWatch.h"
 #include "VtsData.h"
 
 #include <memory>
@@ -487,7 +488,7 @@ AWL_TEST(Shapshot)
 
     AWL_ASSERT(actual_v == expected_v);
 
-    context.out << _T("Snapshot size: ") << actual_v.size() << _T(" bytes") << std::endl;
+    context.logger.debug(awl::format() << _T("Snapshot size: ") << actual_v.size() << _T(" bytes"));
     // context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
 }
 
@@ -683,7 +684,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
         stream_size = measure_out.GetLength();
 
-        context.out << "Stream Size: " << stream_size << " bytes." << std::endl;
+        context.logger.debug(awl::format() << "Stream Size: " << stream_size << " bytes.");
     }
 
     if (vector_stream)
@@ -723,7 +724,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
             helpers::ReportCount(context, w, write_count);
 
-            context.out << std::endl;
+            context.logger.debug(awl::format());
 
             storage.Load(*p_val);
 
@@ -731,6 +732,6 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
         }
 
         // File Size should be equal to Stream Size printed above.
-        context.out << "File Size: " << fs::file_size(master_name) << " bytes." << std::endl;
+        context.logger.debug(awl::format() << "File Size: " << fs::file_size(master_name) << " bytes.");
     }
 }

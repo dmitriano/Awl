@@ -5,8 +5,10 @@
 
 #include "Awl/Observable.h"
 #include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/Formatter.h"
+#include "Awl/StringFormat.h"
 
 using namespace awl::testing;
 
@@ -41,7 +43,7 @@ namespace
 
     void ChangeHandler::ItChanged(int param, awl::String val)
     {
-        pContext->out << _T("It has changed ") << param << _T(" ") << val << std::endl;
+        pContext->logger.debug(awl::format() << _T("It has changed ") << param << _T(" ") << val);
 
         if (param == 2)
         {
@@ -245,7 +247,7 @@ namespace
 
         void SomeHanderFunc(const awl::String & val)
         {
-            context.out << _T("The value is: ") << val << std::endl;
+            context.logger.debug(awl::format() << _T("The value is: ") << val);
         }
 
     private:

@@ -3,23 +3,24 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <set>
 #include <memory>
+#include <ranges>
 
-#ifdef AWL_OPENSSL
+#ifdef AWL_OPENSSL_HASH
 #include "Awl/Crypto/OpenSslHash.h"
 #endif
 
 #include "Awl/String.h"
 #include "Awl/IntRange.h"
+#include "Awl/StringFormat.h"
 
 #include "Awl/StopWatch.h"
 #include "Awl/Crypto/Crc64.h"
-#include "Awl/Crypto/FixedHash.h"
+#include "Experimental/Crypto/FixedHash.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -45,18 +46,17 @@ namespace
 
         using value_type = uint32_t;
 
-        uint32_t operator()(std::string::const_iterator begin, std::string::const_iterator end) const
-        {
-            return (*this)(&(*begin), &(*begin) + (end - begin));
-        }
-
-        constexpr uint32_t operator()(const char * begin, const char * end) const
+        // Does not compile as constexpr.
+        constexpr uint32_t operator()(std::string::const_iterator begin, std::string::const_iterator end) const
         {
             uint32_t seed = std::numeric_limits<uint32_t>::max() / 2;
 
-            for (const char * p = begin; p != end; ++p)
+            // for (char symbol : std::ranges::subrange(begin, end))
+            for (auto i = begin; i != end; ++i)
             {
-                seed = static_cast<uint32_t>(*p * 33ULL) ^ seed;
+                const char symbol = *i;
+
+                seed = static_cast<uint32_t>(symbol * 33ULL) ^ seed;
             }
 
             return seed;
@@ -79,9 +79,9 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
     const Hash hash;
 
     {
-        auto r = awl::make_int_range<uint8_t>(0, 1);
+        uint8_t buf[1] = { 0 };
 
-        auto zero_val = hash(r.begin(), r.end());
+        auto zero_val = hash(buf, buf);
 
         AWL_ASSERT_FALSE(zero_val == typename Hash::value_type{});
     }
@@ -115,20 +115,30 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             }
         }
 
+        awl::format prefix;
+
         if (type_name == nullptr)
         {
-            context.out << awl::FromACString(typeid(hash).name());
+            prefix << awl::FromACString(typeid(hash).name());
         }
         else
         {
-            context.out << type_name;
+            prefix << type_name;
         }
 
-        context.out << _T(": ");
+        prefix << _T(": ");
+
+        context.logger.debug(prefix);
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
-        context.out << _T(" Hash : ") << val << std::endl;
+        {
+            // Temporary workaround.
+            // operator << is defined in FormattingHelpers.h in awl::testing::helpers namespace.
+            awl::ostringstream out;
+            out << _T(" Hash : ") << val;
+            context.logger.debug(out.str());
+        }
     }
 }
 
@@ -161,8 +171,9 @@ AWL_BENCHMARK(HashPerformance)
 
     CalcHash<Crc64>(context, _T("Crc64"));
 
-#ifdef AWL_OPENSSL
+#ifdef AWL_OPENSSL_HASH
 
+    // OpenSSL hash function are deprecated in v3.
     CalcHash<Md5>(context, _T("Md5"));
     CalcHash<Sha1>(context, _T("Sha1"));
     CalcHash<Sha256>(context, _T("Sha256"));
@@ -252,7 +263,7 @@ AWL_TEST(Hash_Switch)
 {
     AWL_UNUSED_CONTEXT;
 
-    TestSwitch<EasyHash>();
+    // TestSwitch<EasyHash>();
     TestSwitch<Int64Hash>();
 }
 

@@ -58,7 +58,7 @@ namespace awl
 
         constexpr void set_exp(uint8_t val)
         {
-            m_val = m_val & ~expMask | (UInt(val) << 1);
+            m_val = (m_val & ~expMask) | (UInt(val) << 1);
         }
 
         constexpr UInt man() const
@@ -68,7 +68,7 @@ namespace awl
 
         constexpr void set_man(UInt val)
         {
-            m_val = m_val & ~manMask | (UInt(val) << (Constants::exp_len + 1));
+            m_val = (m_val & ~manMask) | (UInt(val) << (Constants::exp_len + 1));
         }
 
         static constexpr MultiprecisionDecimalData from_bits(Rep val)

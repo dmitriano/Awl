@@ -25,13 +25,9 @@ namespace awl::testing
     {
         using Provider = CompositeProvider<Ps...>;
 
-        CompositeTestContext(awl::ostream& out, Logger& logger, const std::stop_token stopToken, Provider& ap) :
-            out(out), logger(logger), stopToken(stopToken), ap(ap)
+        CompositeTestContext(Logger& logger, const std::stop_token stopToken, Provider& ap) :
+            logger(logger), stopToken(stopToken), ap(ap)
         {}
-
-        // TODO: out was replaced with logger. Remove out.
-        // A mutex can be used for synchronizing output operations in multithreaded tests, for example.
-        awl::ostream& out;
 
         Logger& logger;
 
@@ -46,8 +42,8 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(awl::ostream& out, Logger& logger, const std::stop_token stopToken, Provider& ap) :
-            Base(out, logger, stopToken, ap),
+        TestContext(Logger& logger, const std::stop_token stopToken, Provider& ap) :
+            Base(logger, stopToken, ap),
             worker(nullptr)
         {}
 

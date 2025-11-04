@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include "Awl/String.h"
+#include "Awl/Crypto/IntHash.h"
+
 #include <string>
 
 namespace awl::crypto
@@ -26,13 +29,13 @@ namespace awl::crypto
         {}
 
         template <typename C>
-        value_type operator()(const std::basic_string<C>& str) const
+        constexpr value_type operator()(const std::basic_string<C>& str) const
         {
             return m_hash(str.begin(), str.end());
         }
 
         template <typename C>
-        value_type operator()(const std::basic_string_view<C>& str) const
+        constexpr value_type operator()(const std::basic_string_view<C>& str) const
         {
             return m_hash(str.begin(), str.end());
         }
@@ -48,7 +51,7 @@ namespace awl::crypto
         }
 
         template <class I>
-        value_type operator()(I begin, I end) const
+        constexpr value_type operator()(I begin, I end) const
         {
             return m_hash(begin, end);
         }
@@ -57,4 +60,18 @@ namespace awl::crypto
 
         Hash m_hash;
     };
+
+    using FixedHash64 = FixedHash<awl::crypto::Int64Hash>;
+
+#ifdef AWL_QT
+
+    template <class Hash>
+    FixedHash64::value_type hashString(const Hash& hash, const QString& s)
+    {
+        const auto range = s | std::views::transform(std::mem_fn(&QChar::toLatin1));
+
+        return hash(range.begin(), range.end());
+    }
+
+#endif
 }

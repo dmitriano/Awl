@@ -14,6 +14,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/StringFormat.h"
 
 #include "Helpers/BenchmarkHelpers.h"
 
@@ -52,7 +53,7 @@ namespace
 
         helpers::ReportCount(context, w, element_count * iteration_count);
 
-        context.out << _T("\t") << type_name << std::endl;
+        context.logger.debug(awl::format() << _T("\t") << type_name);
     }
 
     class flat_map
@@ -133,7 +134,7 @@ AWL_BENCHMARK(MemoryRead)
     auto p = std::make_unique<T[]>(size);
 
     {
-        context.out << _T("Init: ");
+        context.logger.debug(_T("Init: "));
         
         awl::StopWatch w;
 
@@ -144,11 +145,11 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, element_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
-        context.out << _T("Write: ");
+        context.logger.debug(_T("Write: "));
 
         awl::StopWatch w;
 
@@ -163,11 +164,11 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, read_count);
 
-        context.out << std::endl;
+        context.logger.debug(awl::format());
     }
 
     {
-        context.out << _T("Read: ");
+        context.logger.debug(_T("Read: "));
 
         awl::StopWatch w;
 
@@ -184,6 +185,6 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, read_count);
 
-        context.out << _T("\t sum=") << sum << std::endl;
+        context.logger.debug(awl::format() << _T("\t sum=") << sum);
     }
 }
