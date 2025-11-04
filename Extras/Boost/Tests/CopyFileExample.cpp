@@ -1,5 +1,4 @@
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/redirect_error.hpp>
@@ -9,6 +8,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <format>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -52,10 +52,12 @@ namespace
 
             std::vector<uint8_t> buffer(chunkSize);
 
+            std::size_t total_written = 0;
+
             for (;;)
             {
                 boost::system::error_code ec;
-                const std::size_t read = co_await source.async_read_some(asio::buffer(buffer),
+                const std::size_t read_size = co_await source.async_read_some(asio::buffer(buffer),
                     asio::redirect_error(use_awaitable, ec));
 
                 if (ec == asio::error::eof)
@@ -68,16 +70,18 @@ namespace
                     throw boost::system::system_error(ec);
                 }
 
-                std::size_t total_written = 0;
+                const std::size_t written_size = co_await destination.async_write_some(
+                    asio::buffer(buffer.data(), read_size), use_awaitable);
 
-                while (total_written < read)
+                if (written_size != read_size)
                 {
-                    total_written += co_await destination.async_write_some(
-                        asio::buffer(buffer.data() + total_written, read - total_written), use_awaitable);
+                    throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", read_size, written_size));
                 }
+
+                total_written += written_size;
             }
 
-            // context.logger.debug(awl::format() << "Copied " << total_written << " bytes.");
+            context.logger.debug(std::format("Copied {} bytes.", total_written));
         }
     };
 }
