@@ -25,14 +25,7 @@ namespace
     {
     public:
 
-        Example(const awl::testing::TestContext& context) : context(context)
-        {
-            AWL_ATTRIBUTE(std::string, input, "input.dat");
-            AWL_ATTRIBUTE(std::string, output, "output.dat");
-
-            source_path = std::move(input);
-            destination_path = std::move(output);
-        }
+        Example(const awl::testing::TestContext& context) : context(context) {}
 
         void runSingleThread()
         {
@@ -121,10 +114,10 @@ namespace
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
             asio::stream_file source(exec);
-            source.open(source_path, asio::stream_file::read_only);
+            source.open(sourcePath(), asio::stream_file::read_only);
 
             asio::stream_file destination(exec);
-            destination.open(destination_path,
+            destination.open(destinationPath(),
                 asio::stream_file::create | asio::stream_file::write_only | asio::stream_file::truncate);
 
             std::vector<uint8_t> buffer(chunkSize);
@@ -172,8 +165,19 @@ namespace
 
         const awl::testing::TestContext& context;
 
-        std::string source_path;
-        std::string destination_path;
+        std::string sourcePath() const
+        {
+            AWL_ATTRIBUTE(std::string, input, "input.dat");
+
+            return input;
+        }
+
+        std::string destinationPath() const
+        {
+            AWL_ATTRIBUTE(std::string, output, "output.dat");
+
+            return output;
+        }
 
         std::optional<asio::any_io_executor> opExecutor;
     };
