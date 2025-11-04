@@ -36,7 +36,7 @@ namespace
 
         void runSingleThread()
         {
-            context.logger.debug(std::format("Thread {}. runSingleThread() has started.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runSingleThread() has started.", std::this_thread::get_id()));
 
             asio::io_context io;
 
@@ -44,12 +44,12 @@ namespace
 
             io.run();
 
-            context.logger.debug(std::format("Thread {}. runSingleThread() has finished.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runSingleThread() has finished.", std::this_thread::get_id()));
         }
 
         void runThreadPool()
         {
-            context.logger.debug(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -63,12 +63,12 @@ namespace
 
             pool.join();
 
-            context.logger.debug(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
         }
 
         void runStrand1()
         {
-            context.logger.debug(std::format("Thread {}. runStrand1() has started.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runStrand1() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -84,12 +84,12 @@ namespace
 
             pool.join();
 
-            context.logger.debug(std::format("Thread {}. runStrand1() has finished.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runStrand1() has finished.", std::this_thread::get_id()));
         }
 
         void runStrand2()
         {
-            context.logger.debug(std::format("Thread {}. runStrand2() has started.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runStrand2() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -107,14 +107,14 @@ namespace
 
             pool.join();
 
-            context.logger.debug(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
+            log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
     private:
 
         awaitable<void> copyFile()
         {
-            context.logger.debug(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
+            log(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
@@ -145,7 +145,7 @@ namespace
                     throw boost::system::system_error(ec);
                 }
 
-                context.logger.debug(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
+                log(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
 
                 const std::size_t written_size = co_await destination.async_write_some(
                     asio::buffer(buffer.data(), read_size), use_awaitable);
@@ -155,12 +155,17 @@ namespace
                     throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", read_size, written_size));
                 }
 
-                context.logger.debug(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
+                log(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
 
                 total_written += written_size;
             }
 
-            context.logger.debug(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
+            log(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
+        }
+
+        void log(std::string message)
+        {
+            context.logger.debug(message);
         }
 
         const awl::testing::TestContext& context;
