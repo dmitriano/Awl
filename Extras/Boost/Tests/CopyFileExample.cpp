@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <vector>
 #include <format>
+#include <thread>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -24,23 +25,24 @@ namespace
 
         void run()
         {
-            AWL_ATTRIBUTE(std::string, source, "AwlTest.pdb");
-            AWL_ATTRIBUTE(std::string, destination, "AwlTest.pdb.copy");
+            context.logger.debug(std::format("Thread {}. run() has started.", std::this_thread::get_id()));
 
-            if (source.empty() || destination.empty())
-            {
-                AWL_FAILM("Specify source and destination arguments.");
-            }
+            AWL_ATTRIBUTE(std::string, input, "input.dat");
+            AWL_ATTRIBUTE(std::string, output, "output.dat");
 
             asio::io_context exec;
 
-            asio::co_spawn(exec, copyFile(source, destination), asio::detached);
+            asio::co_spawn(exec, copyFile(input, output), asio::detached);
 
             exec.run();
+
+            context.logger.debug(std::format("Thread {}. run() has finished.", std::this_thread::get_id()));
         }
 
         awaitable<void> copyFile(const std::string& source_path, const std::string& destination_path)
         {
+            context.logger.debug(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
+
             auto exec = co_await asio::this_coro::executor;
 
             asio::stream_file source(exec);
@@ -70,6 +72,8 @@ namespace
                     throw boost::system::system_error(ec);
                 }
 
+                context.logger.debug(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
+
                 const std::size_t written_size = co_await destination.async_write_some(
                     asio::buffer(buffer.data(), read_size), use_awaitable);
 
@@ -78,10 +82,12 @@ namespace
                     throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", read_size, written_size));
                 }
 
+                context.logger.debug(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
+
                 total_written += written_size;
             }
 
-            context.logger.debug(std::format("Copied {} bytes.", total_written));
+            context.logger.debug(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
         }
     };
 }
@@ -90,6 +96,8 @@ namespace
 #undef CopyFile
 #endif
 
+// head -c 163840 AwlTest.pdb > input.dat
+// 
 AWL_EXAMPLE(CopyFile)
 {
     Example example{ context };
