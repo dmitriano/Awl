@@ -19,27 +19,56 @@ namespace
 {
     constexpr std::size_t chunkSize = 64 * 1024;
 
-    struct Example
+    class Example
     {
-        const awl::testing::TestContext& context;
+    public:
 
-        void run()
+        Example(const awl::testing::TestContext& context) : context(context)
         {
-            context.logger.debug(std::format("Thread {}. run() has started.", std::this_thread::get_id()));
-
             AWL_ATTRIBUTE(std::string, input, "input.dat");
             AWL_ATTRIBUTE(std::string, output, "output.dat");
 
-            asio::io_context exec;
-
-            asio::co_spawn(exec, copyFile(input, output), asio::detached);
-
-            exec.run();
-
-            context.logger.debug(std::format("Thread {}. run() has finished.", std::this_thread::get_id()));
+            source_path = std::move(input);
+            destination_path = std::move(output);
         }
 
-        awaitable<void> copyFile(const std::string& source_path, const std::string& destination_path)
+        void runSingleThread()
+        {
+            context.logger.debug(std::format("Thread {}. runSingleThread() has started.", std::this_thread::get_id()));
+
+            asio::io_context io;
+
+            asio::co_spawn(io, copyFile(), asio::detached);
+
+            io.run();
+
+            context.logger.debug(std::format("Thread {}. runSingleThread() has finished.", std::this_thread::get_id()));
+        }
+
+        void runThreadPool()
+        {
+            context.logger.debug(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
+
+            AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+            AWL_ATTRIBUTE(std::string, input, "input.dat");
+            AWL_ATTRIBUTE(std::string, output, "output.dat");
+
+            asio::io_context io;
+
+            asio::thread_pool pool(thread_count);
+
+            asio::co_spawn(pool, copyFile(), asio::detached);
+
+            io.run();
+
+            pool.join();
+
+            context.logger.debug(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
+        }
+
+    private:
+
+        awaitable<void> copyFile()
         {
             context.logger.debug(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
 
@@ -89,6 +118,11 @@ namespace
 
             context.logger.debug(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
         }
+
+        const awl::testing::TestContext& context;
+
+        std::string source_path;
+        std::string destination_path;
     };
 }
 
@@ -97,10 +131,17 @@ namespace
 #endif
 
 // head -c 163840 AwlTest.pdb > input.dat
-// 
-AWL_EXAMPLE(CopyFile)
+
+AWL_EXAMPLE(CopyFileSingleThread)
 {
     Example example{ context };
 
-    example.run();
+    example.runSingleThread();
+}
+
+AWL_EXAMPLE(CopyFileThreadPool)
+{
+    Example example{ context };
+
+    example.runThreadPool();
 }
