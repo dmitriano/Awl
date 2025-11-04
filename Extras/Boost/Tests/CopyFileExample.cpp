@@ -1,3 +1,6 @@
+#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
+
 #include <boost/asio.hpp>
 #include <boost/asio/redirect_error.hpp>
 #include <boost/asio/stream_file.hpp>
@@ -5,8 +8,7 @@
 #include <boost/system/system_error.hpp>
 
 #include <cstdint>
-#include <array>
-#include <filesystem>
+#include <vector>
 
 namespace asio = boost::asio;
 using asio::awaitable;
@@ -16,42 +18,77 @@ namespace
 {
     constexpr std::size_t chunkSize = 64 * 1024;
 
-    awaitable<void> copy_file(const std::filesystem::path& source_path, const std::filesystem::path& destination_path)
+    struct Example
     {
-        auto exec = co_await asio::this_coro::executor;
+        const awl::testing::TestContext& context;
 
-        asio::stream_file source(exec);
-        source.open(source_path.string(), asio::stream_file::read_only);
-
-        asio::stream_file destination(exec);
-        destination.open(destination_path.string(),
-            asio::stream_file::create | asio::stream_file::write_only | asio::stream_file::truncate);
-
-        std::array<uint8_t, chunkSize> buffer{};
-
-        for (;;)
+        void run()
         {
-            boost::system::error_code ec;
-            const std::size_t read = co_await source.async_read_some(asio::buffer(buffer),
-                asio::redirect_error(use_awaitable, ec));
+            AWL_ATTRIBUTE(std::string, source, "AwlTest.pdb");
+            AWL_ATTRIBUTE(std::string, destination, "AwlTest.pdb.copy");
 
-            if (ec == asio::error::eof)
+            if (source.empty() || destination.empty())
             {
-                break;
+                AWL_FAILM("Specify source and destination arguments.");
             }
 
-            if (ec)
-            {
-                throw boost::system::system_error(ec);
-            }
+            asio::io_context exec;
 
-            std::size_t total_written = 0;
+            asio::co_spawn(exec, copyFile(source, destination), asio::detached);
 
-            while (total_written < read)
-            {
-                total_written += co_await destination.async_write_some(
-                    asio::buffer(buffer.data() + total_written, read - total_written), use_awaitable);
-            }
+            exec.run();
         }
-    }
+
+        awaitable<void> copyFile(const std::string& source_path, const std::string& destination_path)
+        {
+            auto exec = co_await asio::this_coro::executor;
+
+            asio::stream_file source(exec);
+            source.open(source_path, asio::stream_file::read_only);
+
+            asio::stream_file destination(exec);
+            destination.open(destination_path,
+                asio::stream_file::create | asio::stream_file::write_only | asio::stream_file::truncate);
+
+            std::vector<uint8_t> buffer(chunkSize);
+
+            for (;;)
+            {
+                boost::system::error_code ec;
+                const std::size_t read = co_await source.async_read_some(asio::buffer(buffer),
+                    asio::redirect_error(use_awaitable, ec));
+
+                if (ec == asio::error::eof)
+                {
+                    break;
+                }
+
+                if (ec)
+                {
+                    throw boost::system::system_error(ec);
+                }
+
+                std::size_t total_written = 0;
+
+                while (total_written < read)
+                {
+                    total_written += co_await destination.async_write_some(
+                        asio::buffer(buffer.data() + total_written, read - total_written), use_awaitable);
+                }
+            }
+
+            // context.logger.debug(awl::format() << "Copied " << total_written << " bytes.");
+        }
+    };
+}
+
+#ifdef CopyFile
+#undef CopyFile
+#endif
+
+AWL_EXAMPLE(CopyFile)
+{
+    Example example{ context };
+
+    example.run();
 }
