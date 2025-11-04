@@ -97,13 +97,15 @@ namespace
 
             asio::thread_pool pool(thread_count);
 
-            asio::strand<asio::thread_pool::executor_type> strand(pool.get_executor());
+            asio::thread_pool pool1(1);
 
             opExecutor = pool.get_executor();
 
-            asio::co_spawn(strand, copyFile(), asio::detached);
+            asio::co_spawn(pool1, copyFile(), asio::detached);
 
             io.run();
+
+            pool1.join();
 
             pool.join();
 
