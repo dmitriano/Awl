@@ -14,12 +14,24 @@ namespace
     {
         int x;
         std::string y;
+
+        bool operator ==(const A& other) const = default;
     };
 }
 
-AWL_TEST(Immutable)
+AWL_TEST(ImmutableConstructorAndOperators)
 {
-    awl::immutable<A> a{ 5, "abc" };
+    awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
 
-    context.logger.debug(awl::format() << a->x << " " << a->y);
+    context.logger.debug(awl::format() << a1->x << " " << a1->y);
+
+    awl::immutable<A> a2 = a1;
+
+    context.logger.debug(awl::format() << a2->x << " " << a2->y);
+
+    AWL_ASSERT(a2 == a1);
+}
+
+AWL_TEST(ImmutableConstructor)
+{
 }

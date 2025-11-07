@@ -14,10 +14,9 @@ namespace awl
     class immutable
     {
     public:
-        
-        template <class... Args>
-        constexpr immutable(Args&&... args) : m_val(std::forward<Args>(args)...) {}
 
+        constexpr immutable(T val) : m_val(std::move(val)) {}
+        
         constexpr immutable(const immutable& other) : m_val(other.m_val) {}
 
         constexpr immutable(immutable&& other) noexcept : m_val(other.m_val) {}
@@ -48,13 +47,6 @@ namespace awl
             return m_val == val;
         }
 
-        constexpr const T& operator*() const noexcept
-        {
-            ensureNotMoved();
-
-            return m_val;
-        }
-
         constexpr const T* operator->() const noexcept
         {
             ensureNotMoved();
@@ -76,4 +68,10 @@ namespace awl
 
         T m_val;
     };
+
+    template <class T, class... Args>
+    constexpr immutable<T> make_immutable(Args&&... args)
+    {
+        return T{ std::forward<Args>(args)... };
+    }
 }
