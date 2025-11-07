@@ -72,7 +72,7 @@ namespace awl
             if (m_moved)
             {
                 // This will result in std::terminate, because operator->() is noexcept.
-                throw std::runtime_error("An attempt to use an immutable object that has been moved.");
+                throw std::runtime_error("An attempt to use an immutable object that was moved.");
             }
         }
 
