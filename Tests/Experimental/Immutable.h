@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <cstddef>
 
 namespace awl
 {
