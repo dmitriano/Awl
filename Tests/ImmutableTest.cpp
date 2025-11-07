@@ -37,8 +37,8 @@ AWL_TEST(ImmutableConstructorAndOperators)
 
 AWL_TEST(ImmutableVector)
 {
-    AWL_ATTRIBUTE(size_t, initial_size, 1000u);
-    AWL_ATTRIBUTE(size_t, insert_count, initial_size * 10);
+    AWL_ATTRIBUTE(size_t, initial_size, 0);
+    AWL_ATTRIBUTE(size_t, insert_count, 1000);
 
     std::vector<awl::immutable<A>> v;
 
