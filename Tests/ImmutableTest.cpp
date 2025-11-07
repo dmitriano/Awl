@@ -44,7 +44,7 @@ AWL_TEST(ImmutableVector)
 
     const std::string long_string = "A very long string that is not copied, but moved.";
 
-    v.resize(initial_size, awl::make_immutable<A>(1, long_string));
+    v.resize(initial_size, awl::make_immutable<A>(-1, long_string));
 
     for (size_t i = 0; i < insert_count; ++i)
     {
@@ -52,7 +52,7 @@ AWL_TEST(ImmutableVector)
 
         out << long_string << " " << i;
 
-        v.push_back(awl::make_immutable<A>(2, out.str()));
+        v.push_back(awl::make_immutable<A>(static_cast<int>(i), out.str()));
     }
 }
 
