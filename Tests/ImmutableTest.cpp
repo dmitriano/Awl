@@ -1,0 +1,25 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "Experimental/Immutable.h"
+
+#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
+
+namespace
+{
+    struct A
+    {
+        int x;
+        std::string y;
+    };
+}
+
+AWL_TEST(Immutable)
+{
+    awl::immutable<A> a{ 5, "abc" };
+
+    context.logger.debug(awl::format() << a->x << " " << a->y);
+}
