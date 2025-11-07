@@ -19,7 +19,10 @@ namespace awl
         
         constexpr immutable(const immutable& other) : m_val(other.m_val) {}
 
-        constexpr immutable(immutable&& other) noexcept : m_val(other.m_val) {}
+        constexpr immutable(immutable&& other) noexcept : m_val(other.m_val)
+        {
+            other.markAsMoved();
+        }
 
         immutable& operator=(const immutable& other)
         {
@@ -32,7 +35,7 @@ namespace awl
         {
             m_val = std::move(other.m_val);
 
-            other.m_moved = true;
+            other.markAsMoved();
 
             return *this;
         }
@@ -56,15 +59,32 @@ namespace awl
 
     private:
 
+
+#ifdef AWL_DEBUG_IMMUTABLE
+        
+        constexpr void markAsMoved()
+        {
+            m_moved = true;
+        }
+
         constexpr void ensureNotMoved() const
         {
             if (m_moved)
             {
+                // This will result in std::terminate, because operator->() is noexcept.
                 throw std::runtime_error("An attempt to use an immutable object that has been moved.");
             }
         }
-        
+
         bool m_moved = false;
+
+#else
+        
+        constexpr void markAsMoved() {}
+
+        constexpr void ensureNotMoved() const {}
+
+#endif
 
         T m_val;
     };
