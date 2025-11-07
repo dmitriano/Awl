@@ -24,7 +24,7 @@ namespace awl
             other.markAsMoved();
         }
 
-        immutable& operator=(const immutable& other)
+        constexpr immutable& operator=(const immutable& other)
         {
             m_val = other.m_val;
 
