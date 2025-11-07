@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <stdexcept>
 
 namespace awl
@@ -15,7 +14,7 @@ namespace awl
     {
     public:
 
-        constexpr immutable(T val) : m_val(std::move(val)) {}
+        constexpr immutable(T val) noexcept : m_val(std::move(val)) {}
         
         constexpr immutable(const immutable& other) : m_val(other.m_val) {}
 
