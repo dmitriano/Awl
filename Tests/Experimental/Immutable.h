@@ -60,7 +60,7 @@ namespace awl
     private:
 
 
-// This can be done via a template paramter template<class T, like Checker = FakeChecker<T>>
+// This can be done via a template paramter like template<class T, Checker = FakeChecker<T>>
 #ifdef AWL_DEBUG_IMMUTABLE
         
         constexpr void markAsMoved()
