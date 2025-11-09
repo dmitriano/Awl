@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <cstddef>
+#include <utility>
 
 namespace awl
 {
