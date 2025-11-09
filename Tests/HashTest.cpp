@@ -20,7 +20,7 @@
 
 #include "Awl/StopWatch.h"
 #include "Awl/Crypto/Crc64.h"
-#include "Experimental/Crypto/FixedHash.h"
+#include "Awl/Crypto/FixedHash.h"
 
 #include "Awl/Testing/UnitTest.h"
 
