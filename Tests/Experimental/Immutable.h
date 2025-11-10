@@ -28,19 +28,6 @@ namespace awl
             other.markAsMoved();
         }
 
-        // A funny syntax example.
-        template <class Field>
-        constexpr immutable with(Field T::* p, Field field_val) const
-        {
-            ensureNotMoved();
-
-            T val = m_val;
-
-            val.*p = std::move(field_val);
-
-            return val;
-        }
-
         constexpr immutable& operator=(const immutable& other)
         {
             other.ensureNotMoved();
