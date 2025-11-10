@@ -200,7 +200,7 @@ namespace
 
         void run()
         {
-            AWL_ATTRIBUTE(size_t, insert_count, 3);
+            AWL_ATTRIBUTE(size_t, insert_count, 1000);
 
             std::vector<awl::immutable<ObserverA>> v;
 
