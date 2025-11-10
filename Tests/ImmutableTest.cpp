@@ -253,6 +253,32 @@ namespace
 
 AWL_TEST_CLASS(ImmutableObserver)
 
+namespace
+{
+    // We can't return a const string, but we can return immutable string.
+    awl::immutable<std::string> makeString()
+    {
+        return std::string("abc");
+    }
+}
+
+AWL_TEST(ImmutableString)
+{
+    awl::immutable<std::string> val = makeString();
+
+    // We use val like std::optional
+
+    [[maybe_unused]] auto symbol = (*val)[0];
+
+    // error C3892: 'val': you cannot assign to a variable that is const
+    // (*val)[0] = 'z';
+
+    for (auto symbol : *val)
+    {
+        static_cast<void>(val);
+    }
+}
+
 #ifdef AWL_DEBUG_IMMUTABLE
 
 namespace

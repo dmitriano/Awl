@@ -75,6 +75,13 @@ namespace awl
             return m_val == val;
         }
 
+        constexpr const T& operator*() const noexcept
+        {
+            ensureNotMoved();
+
+            return m_val;
+        }
+
         constexpr const T* operator->() const noexcept
         {
             ensureNotMoved();
