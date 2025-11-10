@@ -200,20 +200,7 @@ namespace
 
         void run()
         {
-            std::vector<awl::immutable<ObserverA>> v = makeVector();
-
-            // Move the elements one more time.
-            std::reverse(v.begin(), v.end());
-
-            const int val = 10;
-
-            Notify(&ASignalHandler::onASignal, val);
-
-            for (const awl::immutable<ObserverA>& ia : v)
-            {
-                AWL_ASSERT_EQUAL(ia->x, val);
-                AWL_ASSERT_EQUAL(ia->y, long_string);
-            }
+            emitSignal(makeVector());
         }
 
     private:
@@ -237,6 +224,29 @@ namespace
             }
 
             return v;
+        }
+
+        // emitSignal accepts a vector of "const" or immutable elements,
+        // but the elements can change while handling the signal
+        // and the vector itself can be changed.
+        // Note that std::vector<const ObserverA> does not compile.
+        void emitSignal(std::vector<awl::immutable<ObserverA>> v)
+        {
+            // Move the elements one more time.
+            std::reverse(v.begin(), v.end());
+
+            const int val = 10;
+
+            Notify(&ASignalHandler::onASignal, val);
+
+            for (const awl::immutable<ObserverA>& ia : v)
+            {
+                // error C3892 : 'ia' : you cannot assign to a variable that is const
+                // ia->x = 25;
+
+                AWL_ASSERT_EQUAL(ia->x, val);
+                AWL_ASSERT_EQUAL(ia->y, long_string);
+            }
         }
     };
 }
