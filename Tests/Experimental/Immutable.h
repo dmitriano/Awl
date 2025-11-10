@@ -23,7 +23,7 @@ namespace awl
         
         constexpr immutable(const immutable& other) : m_val(other.m_val) {}
 
-        constexpr immutable(immutable&& other) noexcept : m_val(other.m_val)
+        constexpr immutable(immutable&& other) noexcept : m_val(std::move(other.m_val))
         {
             other.markAsMoved();
         }
