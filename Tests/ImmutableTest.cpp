@@ -22,6 +22,18 @@ namespace
         bool operator ==(const A& other) const = default;
     };
 
+    constexpr awl::immutable<A> useWith()
+    {
+        awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
+
+        awl::immutable<A> a2 = a1.with(&A::x, 10).with(&A::y, std::string("def"));
+
+        return a2;
+    }
+
+    // it is entirely constexpr
+    static_assert(useWith() == awl::make_immutable<A>(10, "def"));
+
     // B becomes non-copyable and non-movable.
     struct B
     {

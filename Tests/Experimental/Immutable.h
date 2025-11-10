@@ -28,8 +28,23 @@ namespace awl
             other.markAsMoved();
         }
 
+        // A funny syntax example.
+        template <class Field>
+        constexpr immutable with(Field T::* p, Field field_val) const
+        {
+            ensureNotMoved();
+
+            T val = m_val;
+
+            val.*p = std::move(field_val);
+
+            return val;
+        }
+
         constexpr immutable& operator=(const immutable& other)
         {
+            other.ensureNotMoved();
+
             m_val = other.m_val;
 
             return *this;
@@ -37,6 +52,8 @@ namespace awl
 
         constexpr immutable& operator=(immutable&& other) noexcept
         {
+            other.ensureNotMoved();
+
             m_val = std::move(other.m_val);
 
             other.markAsMoved();
@@ -46,11 +63,15 @@ namespace awl
 
         constexpr bool operator == (const immutable& other) const noexcept
         {
-            return m_val == other.m_val;
+            other.ensureNotMoved();
+
+            return operator == (other.m_val);
         }
 
         constexpr bool operator == (const T& val) const noexcept
         {
+            ensureNotMoved();
+
             return m_val == val;
         }
 
@@ -61,7 +82,7 @@ namespace awl
             return &m_val;
         }
 
-        T release()
+        constexpr T release()
         {
             markAsMoved();
 
