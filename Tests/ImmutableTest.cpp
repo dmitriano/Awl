@@ -10,6 +10,7 @@
 #include "Awl/IntRange.h"
 
 #include <vector>
+#include <memory>
 
 namespace
 {
@@ -53,6 +54,29 @@ AWL_TEST(ImmutableVector)
         out << long_string << " " << i;
 
         v.push_back(awl::make_immutable<A>(static_cast<int>(i), out.str()));
+    }
+}
+
+AWL_TEST(ImmutablePointer)
+{
+    // This is possible, but does not make a sense.
+    {
+        std::unique_ptr<awl::immutable<A>> p = std::make_unique<awl::immutable<A>>(awl::make_immutable<A>(5, "abc"));
+
+        [[maybe_unused]] int x = (*p)->x;
+    }
+
+    // To create a smart pointer from awl::immutable we use release method.
+    {
+         awl::immutable<A> a = awl::make_immutable<A>(5, "abc");
+
+         std::unique_ptr<A> p = std::make_unique<A>(a.release());
+
+         [[maybe_unused]] int x1 = p->x;
+
+         std::unique_ptr<const A> const_p = std::make_unique<const A>(a.release());
+
+         [[maybe_unused]] int x2 = const_p->x;
     }
 }
 

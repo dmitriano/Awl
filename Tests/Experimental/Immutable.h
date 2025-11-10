@@ -11,6 +11,7 @@
 
 namespace awl
 {
+    // An immutable object similar in its semantics to std::unique_ptr.
     template <class T>
     class immutable
     {
@@ -58,27 +59,33 @@ namespace awl
             return &m_val;
         }
 
-    private:
+        T release()
+        {
+            markAsMoved();
 
+            return std::move(m_val);
+        }
+
+    private:
 
 // This can be done via a template paramter like template<class T, Checker = FakeChecker<T>>
 #ifdef AWL_DEBUG_IMMUTABLE
         
         constexpr void markAsMoved()
         {
-            m_moved = true;
+            m_owns = false;
         }
 
         constexpr void ensureNotMoved() const
         {
-            if (m_moved)
+            if (!m_owns)
             {
                 // This will result in std::terminate, because operator->() is noexcept.
                 throw std::runtime_error("An attempt to use an immutable object that was moved.");
             }
         }
 
-        bool m_moved = false;
+        bool m_owns = true;
 
 #else
         
