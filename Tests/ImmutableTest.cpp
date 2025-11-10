@@ -21,6 +21,43 @@ namespace
 
         bool operator ==(const A& other) const = default;
     };
+
+    // B becomes non-copyable and non-movable.
+    struct B
+    {
+        B() : p(std::make_unique<int>(5)) {}
+
+        const std::unique_ptr<int> p;
+    };
+
+    B f1()
+    {
+        // RVO, so there is no compiler error.
+        return {};
+    }
+
+    B f2(bool flag)
+    {
+        // Different variables -> NRVO impossible.
+        B b1;
+        B b2;
+
+        if (flag)
+        {
+            // error C2280: '`anonymous-namespace'::B::B(const `anonymous-namespace'::B &)': attempting to reference a deleted function
+            // return b1;
+        }
+
+        // The same error.
+        // return b2;
+    }
+
+    B f3()
+    {
+        // error C2672: 'std::construct_at': no matching overloaded function found
+        // std::vector<B> v;
+        // v.push_back(B{});
+    }
 }
 
 AWL_TEST(ImmutableConstructorAndOperators)
