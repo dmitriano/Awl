@@ -8,6 +8,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 #include "Awl/IntRange.h"
+#include "Awl/Observable.h"
 
 #include <vector>
 #include <memory>
@@ -49,6 +50,33 @@ namespace
         std::unique_ptr<int> p;
     };
 
+    class ASignalHandler
+    {
+    public:
+
+        virtual void onASignal(int val) = 0;
+
+        virtual ~ASignalHandler() = default;
+    };
+
+    struct ObserverA : A, awl::Observer<ASignalHandler>
+    {
+        ObserverA(int x, std::string y) :
+            A(std::move(x), std::move(y))
+        {
+        }
+
+        bool operator ==(const UniqueA& other) const
+        {
+            return *(static_cast<const A*>(this)) == static_cast<const A&>(other);
+        }
+
+        void onASignal(const int val) override
+        {
+            x = val;
+        }
+    };
+
     // We std::unique_ptr with AtomicA, but not immutable.
     struct AtomicA : A
     {
@@ -66,11 +94,11 @@ namespace
     };
 
     template <class A>
-    class Test
+    class Test : public awl::testing::Test
     {
     public:
 
-        explicit Test(const awl::testing::TestContext& context) : context(context) {}
+        using awl::testing::Test::Test;
 
         void ImmutableConstructorAndOperators()
         {
@@ -139,10 +167,6 @@ namespace
                 [[maybe_unused]] int x2 = const_p->x;
             }
         }
-
-    private:
-
-        const awl::testing::TestContext& context;
     };
 }
 
@@ -163,6 +187,49 @@ AWL_TEST(ImmutablePointer)
     Test<A>{context}.ImmutablePointer();
     Test<UniqueA>{context}.ImmutablePointer();
 }
+
+namespace
+{
+    class ImmutableObserver :
+        public awl::testing::Test,
+        public awl::Observable<ASignalHandler>
+    {
+    public:
+
+        using awl::testing::Test::Test;
+
+        void run()
+        {
+            AWL_ATTRIBUTE(size_t, insert_count, 3);
+
+            std::vector<awl::immutable<ObserverA>> v;
+
+            const std::string long_string = "A very long string that is not copied, but moved.";
+
+            for (size_t i = 0; i < insert_count; ++i)
+            {
+                ObserverA a(static_cast<int>(i), long_string);
+
+                Subscribe(&a);
+
+                // The address of a changes here, but it still handlers the signals.
+                v.push_back(std::move(a));
+            }
+
+            const int val = 10;
+
+            Notify(&ASignalHandler::onASignal, val);
+
+            for (const awl::immutable<ObserverA>& ia : v)
+            {
+                AWL_ASSERT_EQUAL(ia->x, val);
+                AWL_ASSERT_EQUAL(ia->y, long_string);
+            }
+        }
+    };
+}
+
+AWL_TEST_CLASS(ImmutableObserver)
 
 #ifdef AWL_DEBUG_IMMUTABLE
 

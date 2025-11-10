@@ -55,3 +55,23 @@ namespace awl::testing
 #define AWL_UNSTABLE_UTILITY(test_name) AWL_LINK(test_name, Utility_Unstable)
 
 #define AWL_UNUSED_CONTEXT static_cast<void>(context)
+
+namespace awl::testing
+{
+    class Test
+    {
+    public:
+
+        explicit Test(const awl::testing::TestContext& context) : context(context) {}
+
+    protected:
+
+        const awl::testing::TestContext& context;
+    };
+}
+
+#define AWL_TEST_CLASS(test_class_name) \
+AWL_TEST(test_class_name) \
+{ \
+    test_class_name{ context }.run(); \
+}
