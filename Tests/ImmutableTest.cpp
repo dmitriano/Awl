@@ -200,11 +200,31 @@ namespace
 
         void run()
         {
+            std::vector<awl::immutable<ObserverA>> v = makeVector();
+
+            // Move the elements one more time.
+            std::reverse(v.begin(), v.end());
+
+            const int val = 10;
+
+            Notify(&ASignalHandler::onASignal, val);
+
+            for (const awl::immutable<ObserverA>& ia : v)
+            {
+                AWL_ASSERT_EQUAL(ia->x, val);
+                AWL_ASSERT_EQUAL(ia->y, long_string);
+            }
+        }
+
+    private:
+
+        static inline const std::string long_string = "A very long string that is not copied, but moved.";
+
+        std::vector<awl::immutable<ObserverA>> makeVector()
+        {
             AWL_ATTRIBUTE(size_t, insert_count, 1000);
 
             std::vector<awl::immutable<ObserverA>> v;
-
-            const std::string long_string = "A very long string that is not copied, but moved.";
 
             for (size_t i = 0; i < insert_count; ++i)
             {
@@ -216,15 +236,7 @@ namespace
                 v.push_back(std::move(a));
             }
 
-            const int val = 10;
-
-            Notify(&ASignalHandler::onASignal, val);
-
-            for (const awl::immutable<ObserverA>& ia : v)
-            {
-                AWL_ASSERT_EQUAL(ia->x, val);
-                AWL_ASSERT_EQUAL(ia->y, long_string);
-            }
+            return v;
         }
     };
 }
