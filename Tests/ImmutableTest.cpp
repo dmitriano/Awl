@@ -258,7 +258,12 @@ namespace
     // We can't return a const string, but we can return immutable string.
     awl::immutable<std::string> makeString()
     {
-        return std::string("abc");
+        std::ostringstream out;
+
+        out << "a temporary string";
+
+        // We can't return it as const std::string&
+        return out.str();
     }
 }
 
