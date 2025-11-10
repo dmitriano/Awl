@@ -11,7 +11,9 @@
 
 namespace awl
 {
-    // An immutable object similar in its semantics to std::unique_ptr.
+    // When we need an object to be "const", but movable we use immutable.
+    // This class is similar in its semantics to std::unique_ptr,
+    // but it does not allocate dynamic memory.
     template <class T>
     class immutable
     {

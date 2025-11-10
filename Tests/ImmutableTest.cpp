@@ -27,13 +27,27 @@ AWL_TEST(ImmutableConstructorAndOperators)
 {
     awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
 
+    // Compiler error:
+    // a2->x = 10;
+
     context.logger.debug(awl::format() << a1->x << " " << a1->y);
 
+    // Copy constructor.
     awl::immutable<A> a2 = a1;
 
     context.logger.debug(awl::format() << a2->x << " " << a2->y);
 
     AWL_ASSERT(a2 == a1);
+
+    // Move constructor
+    awl::immutable<A> a3 = std::move(a1);
+
+    A mutable_a = a3.release();
+
+    mutable_a.x = 10;
+
+    // Make it immutable again
+    awl::immutable<A> a4 = awl::make_immutable<A>(std::move(mutable_a));
 }
 
 AWL_TEST(ImmutableVector)
