@@ -45,6 +45,7 @@ namespace awl
 
         constexpr bool operator == (const immutable& other) const noexcept
         {
+            ensureNotMoved();
             other.ensureNotMoved();
 
             return operator == (other.m_val);
