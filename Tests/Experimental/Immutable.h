@@ -7,6 +7,8 @@
 
 #include <stdexcept>
 #include <cstddef>
+#include <concepts>
+#include <functional>
 #include <utility>
 
 namespace awl
@@ -74,6 +76,19 @@ namespace awl
             ensureNotMoved();
 
             return &m_val;
+        }
+
+        template <class Func, class... Args>
+            requires std::invocable<Func, T&, Args&&...>
+        constexpr immutable with(Func&& func, Args&&... args) const
+        {
+            ensureNotMoved();
+
+            T val = m_val;
+
+            std::invoke(func, val, std::forward<Args>(args)...);
+
+            return val;
         }
 
         constexpr T release()
