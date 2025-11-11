@@ -96,6 +96,28 @@ namespace awl
             return val;
         }
 
+        template <class Field>
+        constexpr immutable with(Field T::* p, Field&& field_val) const &
+        {
+            ensureNotMoved();
+
+            T val = m_val;
+
+            val.*p = std::forward<Field>(field_val);
+
+            return val;
+        }
+
+        template <class Field>
+        constexpr immutable with(Field T::* p, Field&& field_val) &&
+        {
+            T val = release();
+
+            val.*p = std::forward<Field>(field_val);
+
+            return val;
+        }
+
         constexpr T release()
         {
             return safeMove(*this);

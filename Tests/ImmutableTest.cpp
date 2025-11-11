@@ -206,6 +206,8 @@ AWL_TEST(ImmutableWith)
 
     AWL_ASSERT(a1.with(&A::setXY, 10, "def") == expected);
 
+    AWL_ASSERT(a1.with(&A::x, 10).with(&A::y, std::string("def")) == expected);
+
     {
         auto func = [](A& a)
             {
