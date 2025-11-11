@@ -33,20 +33,6 @@ namespace
         bool operator ==(const A& other) const = default;
     };
 
-    constexpr awl::immutable<A> useWith()
-    {
-        awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
-
-        // The first with() copyies a1 because it is value,
-        // and the second with moves the result, because it is rvalue.
-        awl::immutable<A> a2 = a1.with(&A::setX, 9).with(&A::setY, std::string("def"));
-
-        // We can move a2 explicitly.
-        awl::immutable<A> a3 = std::move(a2).with(&A::setX, 10);
-
-        return a3;
-    }
-
     // std::invoke is not constexpr yet, at least in MSVC, but it will in C++23.
     // static_assert(useWith() == awl::make_immutable<A>(10, "def"));
 
@@ -195,8 +181,19 @@ namespace
 AWL_TEST(ImmutableWith)
 {
     AWL_UNUSED_CONTEXT;
-    
-    AWL_ASSERT(useWith() == awl::make_immutable<A>(10, "def"));
+
+    {
+        awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
+
+        // The first with() copyies a1 because it is value,
+        // and the second with moves the result, because it is rvalue.
+        awl::immutable<A> a2 = a1.with(&A::setX, 9).with(&A::setY, std::string("def"));
+
+        // We can move a2 explicitly.
+        awl::immutable<A> a3 = std::move(a2).with(&A::setX, 10);
+
+        AWL_ASSERT(a3 == awl::make_immutable<A>(10, "def"));
+    }
 }
 
 AWL_TEST(ImmutableConstructorAndOperators)
