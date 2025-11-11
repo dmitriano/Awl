@@ -90,7 +90,7 @@ namespace
 
         void ImmutableConstructorAndOperators()
         {
-            awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
+            awl::immutable<A> a1 = makeA();
 
             // Compiler error:
             // a2->x = 10;
@@ -137,14 +137,14 @@ namespace
         {
             // This is possible, but does not make a sense.
             {
-                std::unique_ptr<awl::immutable<A>> p = std::make_unique<awl::immutable<A>>(awl::make_immutable<A>(5, "abc"));
+                std::unique_ptr<awl::immutable<A>> p = std::make_unique<awl::immutable<A>>(makeA());
 
                 [[maybe_unused]] int x = (*p)->x;
             }
 
             // To create a smart pointer from awl::immutable we use release method.
             {
-                awl::immutable<A> a = awl::make_immutable<A>(5, "abc");
+                awl::immutable<A> a = makeA();
 
                 std::unique_ptr<A> p = std::make_unique<A>(a.release());
 
@@ -155,6 +155,14 @@ namespace
                 [[maybe_unused]] int x2 = const_p->x;
             }
         }
+
+    private:
+
+        awl::immutable<A> makeA()
+        {
+            return awl::make_immutable<A>(5, "abc");
+        }
+
     };
 }
 
@@ -207,7 +215,7 @@ namespace
 
                 Subscribe(&a);
 
-                // The address of a changes here, but it still handlers the signals.
+                // The address of a changes here, but it still handles the signals.
                 v.push_back(std::move(a));
             }
 
