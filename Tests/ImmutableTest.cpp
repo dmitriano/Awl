@@ -205,6 +205,16 @@ AWL_TEST(ImmutableWith)
     }
 
     AWL_ASSERT(a1.with(&A::setXY, 10, "def") == expected);
+
+    {
+        auto func = [](A& a)
+            {
+                a.x = 10;
+                a.y = "def";
+            };
+
+        AWL_ASSERT(a1.with(func) == expected);
+    }
 }
 
 AWL_TEST(ImmutableConstructorAndOperators)
