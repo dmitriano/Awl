@@ -39,9 +39,6 @@ namespace
         bool operator ==(const A& other) const = default;
     };
 
-    // std::invoke is not constexpr yet, at least in MSVC, but it will in C++23.
-    // static_assert(useWith() == awl::make_immutable<A>(10, "def"));
-
     struct UniqueA : A
     {
         UniqueA(int x, std::string y) : 
@@ -200,6 +197,9 @@ AWL_TEST(ImmutableWith)
 
         // We can move a2 explicitly.
         awl::immutable<A> a3 = std::move(a2).with(&A::setX, 10);
+
+        // std::invoke is not constexpr yet, at least in MSVC, but it will be in C++23.
+        // static_assert(a3 == awl::make_immutable<A>(10, "def"));
 
         AWL_ASSERT(a3 == expected);
     }
