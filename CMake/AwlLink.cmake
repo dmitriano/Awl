@@ -44,3 +44,7 @@ endif()
 if (AWL_ANSI_CMD_CHAR)
     target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_ANSI_CMD_CHAR)
 endif()
+
+if (AWL_DEBUG_IMMUTABLE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_DEBUG_IMMUTABLE)
+endif()
