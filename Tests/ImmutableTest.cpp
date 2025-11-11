@@ -191,7 +191,7 @@ AWL_TEST(ImmutableWith)
     const awl::immutable<A> expected = awl::make_immutable<A>(10, "def");
 
     {
-        // The first with() copyies a1 because it is value,
+        // The first with() copyies a1 because it is lvalue,
         // and the second with moves the result, because it is rvalue.
         awl::immutable<A> a2 = a1.with(&A::setX, 9).with(&A::setY, std::string("def"));
 
