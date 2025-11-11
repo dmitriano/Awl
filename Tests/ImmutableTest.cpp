@@ -30,6 +30,12 @@ namespace
             y = std::move(val);
         }
 
+        void setXY(int x_val, std::string y_val)
+        {
+            setX(std::move(x_val));
+            setY(std::move(y_val));
+        }
+
         bool operator ==(const A& other) const = default;
     };
 
@@ -182,9 +188,12 @@ AWL_TEST(ImmutableWith)
 {
     AWL_UNUSED_CONTEXT;
 
-    {
-        awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
+    // We will not move a1, so it is const.
+    const awl::immutable<A> a1 = awl::make_immutable<A>(5, "abc");
 
+    const awl::immutable<A> expected = awl::make_immutable<A>(10, "def");
+
+    {
         // The first with() copyies a1 because it is value,
         // and the second with moves the result, because it is rvalue.
         awl::immutable<A> a2 = a1.with(&A::setX, 9).with(&A::setY, std::string("def"));
@@ -192,8 +201,10 @@ AWL_TEST(ImmutableWith)
         // We can move a2 explicitly.
         awl::immutable<A> a3 = std::move(a2).with(&A::setX, 10);
 
-        AWL_ASSERT(a3 == awl::make_immutable<A>(10, "def"));
+        AWL_ASSERT(a3 == expected);
     }
+
+    AWL_ASSERT(a1.with(&A::setXY, 10, "def") == expected);
 }
 
 AWL_TEST(ImmutableConstructorAndOperators)
