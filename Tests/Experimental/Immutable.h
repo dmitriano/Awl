@@ -25,10 +25,7 @@ namespace awl
         
         constexpr immutable(const immutable& other) : m_val(other.m_val) {}
 
-        constexpr immutable(immutable&& other) noexcept : m_val(std::move(other.m_val))
-        {
-            other.markAsMoved();
-        }
+        constexpr immutable(immutable&& other) noexcept : m_val(safeMove(other)) {}
 
         constexpr immutable& operator=(const immutable& other)
         {
@@ -41,11 +38,7 @@ namespace awl
 
         constexpr immutable& operator=(immutable&& other) noexcept
         {
-            other.ensureNotMoved();
-
-            m_val = std::move(other.m_val);
-
-            other.markAsMoved();
+            m_val = safeMove(other);
 
             return *this;
         }
@@ -80,7 +73,7 @@ namespace awl
 
         template <class Func, class... Args>
             requires std::invocable<Func, T&, Args&&...>
-        constexpr immutable with(Func&& func, Args&&... args) const
+        constexpr immutable with(Func&& func, Args&&... args) const &
         {
             ensureNotMoved();
 
@@ -91,11 +84,20 @@ namespace awl
             return val;
         }
 
+        template <class Func, class... Args>
+            requires std::invocable<Func, T&, Args&&...>
+        constexpr immutable with(Func&& func, Args&&... args) &&
+        {
+            T val = release();
+
+            std::invoke(func, val, std::forward<Args>(args)...);
+
+            return val;
+        }
+
         constexpr T release()
         {
-            markAsMoved();
-
-            return std::move(m_val);
+            return safeMove(*this);
         }
 
     private:
@@ -126,6 +128,15 @@ namespace awl
         constexpr void ensureNotMoved() const {}
 
 #endif
+
+        template <class Immutable>
+        constexpr T&& safeMove(Immutable&& other) noexcept
+        {
+            other.ensureNotMoved();
+            other.markAsMoved();
+
+            return std::move(other.m_val);
+        }
 
         T m_val;
     };
