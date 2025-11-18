@@ -163,8 +163,6 @@ namespace
             context.logger.debug(message);
         }
 
-        const awl::testing::TestContext& context;
-
         std::string sourcePath() const
         {
             AWL_ATTRIBUTE(std::string, input, "input.dat");
@@ -178,6 +176,8 @@ namespace
 
             return output;
         }
+
+        const awl::testing::TestContext& context;
 
         std::optional<asio::any_io_executor> opExecutor;
     };
