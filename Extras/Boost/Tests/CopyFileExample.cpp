@@ -17,6 +17,7 @@
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;
+using namespace std::chrono_literals;
 
 namespace
 {
@@ -221,7 +222,6 @@ namespace
                 log(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
 
                 co_await reader_chan.async_send({}, buffer, use_awaitable);
-
             }
 
             // Close the channel to signal that no more messages will be sent
@@ -231,6 +231,9 @@ namespace
 
         awaitable<void> write(Channel& reader_chan)
         {
+            // Wait for 500 ms before sending the next message
+            co_await asio::steady_timer(co_await asio::this_coro::executor, 100ms).async_wait(use_awaitable);
+
             log(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
@@ -291,6 +294,8 @@ namespace
                     log(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
 
                     total_handled += buffer->size();
+
+                    co_await writer_chan.async_send({}, buffer, use_awaitable);
                 }
             }
             catch (const boost::system::system_error& e)
