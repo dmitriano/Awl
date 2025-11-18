@@ -206,6 +206,10 @@ namespace
                 co_await reader_chan.async_send({}, buffer, use_awaitable);
 
             }
+
+            // Close the channel to signal that no more messages will be sent
+            reader_chan.close();
+
         }
 
         awaitable<void> write(Channel& reader_chan)
