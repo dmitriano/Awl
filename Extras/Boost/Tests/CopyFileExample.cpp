@@ -118,6 +118,20 @@ namespace
             io.run();
         }
 
+        void runCopyPipelineWithHandler()
+        {
+            asio::io_context io;
+
+            Channel reader_chan(io.get_executor(), 3);
+            Channel writer_chan(io.get_executor(), 3);
+
+            asio::co_spawn(io, read(reader_chan), boost::asio::detached);
+            asio::co_spawn(io, handle(reader_chan, writer_chan), boost::asio::detached);
+            asio::co_spawn(io, write(writer_chan), boost::asio::detached);
+
+            io.run();
+        }
+
     private:
 
         awaitable<void> copyFile()
@@ -255,9 +269,41 @@ namespace
                     log(awl::format() << "Receive error: " << e.code().message());
             }
 
-            log(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
+            log(std::format("Thread {}. Totally copied {} bytes.", std::this_thread::get_id(), total_written));
         }
             
+        awaitable<void> handle(Channel& reader_chan, Channel& writer_chan)
+        {
+            log(std::format("Thread {}. handle() has started.", std::this_thread::get_id()));
+
+            std::size_t total_handled = 0;
+
+            try
+            {
+                for (;;)
+                {
+                    // Receive a message asynchronously from the channel
+                    Chunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
+
+                    log(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
+
+                    total_handled += buffer->size();
+                }
+            }
+            catch (const boost::system::system_error& e)
+            {
+                // Check if the channel was closed gracefully
+                if (e.code() == boost::asio::experimental::error::channel_closed)
+                    log("Channel closed, exiting handler");
+                else
+                    log(awl::format() << "Receive error: " << e.code().message());
+            }
+
+            writer_chan.close();
+
+            log(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
+        }
+
         void log(awl::LogString message)
         {
             context.logger.debug(message);
@@ -322,4 +368,11 @@ AWL_EXAMPLE(CopyFileWithChannel)
     Example example{ context };
 
     example.runCopyPipeline();
+}
+
+AWL_EXAMPLE(CopyFileWithHandler)
+{
+    Example example{ context };
+
+    example.runCopyPipelineWithHandler();
 }

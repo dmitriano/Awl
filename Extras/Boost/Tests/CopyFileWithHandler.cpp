@@ -125,7 +125,7 @@ namespace
     }
 }
 
-AWL_EXAMPLE(CopyFileWithHandler)
+AWL_EXAMPLE(CopyFileWithHandler1)
 {
     AWL_ATTRIBUTE(std::string, src, "input.dat");
     AWL_ATTRIBUTE(std::string, dst, "output.dat");
