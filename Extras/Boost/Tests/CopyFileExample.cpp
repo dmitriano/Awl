@@ -107,20 +107,24 @@ namespace
             log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        void runCopyPipeline(asio::any_io_executor exec, bool use_handler)
+        awaitable<void> runCopyPipeline(bool use_handler)
         {
+            auto exec = co_await asio::this_coro::executor;
+
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
             Channel reader_chan(exec, reader_buffer_size);
             std::optional<Channel> handler_chan;
             Channel* writer_channl;
 
+            std::vector<awaitable<void>> tasks;
+
             if (use_handler)
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
                 handler_chan = Channel(exec, handler_buffer_size);
-                asio::co_spawn(exec, handle(reader_chan, *handler_chan), boost::asio::detached);
+                tasks.push_back(handle(reader_chan, *handler_chan));
                 writer_channl = &(*handler_chan);
             }
             else
@@ -128,8 +132,13 @@ namespace
                 writer_channl = &reader_chan;
             }
 
-            asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(exec, write(*writer_channl), boost::asio::detached);
+            tasks.push_back(read(reader_chan));
+            tasks.push_back(write(*writer_channl));
+
+            for (auto& t : tasks)
+            {
+                co_await std::move(t);
+            }
         }
 
     private:
@@ -384,7 +393,7 @@ AWL_EXAMPLE(CopyFileWithChannel)
 
         asio::thread_pool pool(thread_count);
 
-        example.runCopyPipeline(pool.get_executor(), use_handler);
+        asio::co_spawn(pool, example.runCopyPipeline(use_handler), asio::detached);
 
         pool.join();
 
@@ -393,7 +402,7 @@ AWL_EXAMPLE(CopyFileWithChannel)
     {
         asio::io_context io;
 
-        example.runCopyPipeline(io.get_executor(), use_handler);
+        asio::co_spawn(io, example.runCopyPipeline(use_handler), asio::detached);
 
         io.run();
     }
