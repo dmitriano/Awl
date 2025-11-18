@@ -231,9 +231,6 @@ namespace
 
         awaitable<void> write(Channel& reader_chan)
         {
-            // Wait for 500 ms before sending the next message
-            co_await asio::steady_timer(co_await asio::this_coro::executor, 100ms).async_wait(use_awaitable);
-
             log(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
@@ -315,6 +312,13 @@ namespace
         void log(awl::LogString message)
         {
             context.logger.debug(message);
+        }
+
+        template <class Rep, class Period>
+        awaitable<void> sleep(std::chrono::duration<Rep, Period> d)
+        {
+            // Wait for 500 ms before sending the next message
+            co_await asio::steady_timer(co_await asio::this_coro::executor, d).async_wait(use_awaitable);
         }
 
         std::string sourcePath() const
