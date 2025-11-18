@@ -106,28 +106,31 @@ namespace
             log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        void runCopyPipeline()
+        void runCopyPipeline(bool use_handler)
         {
             asio::io_context io;
 
-            Channel reader_chan(io.get_executor(), 3);
+            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
+
+            Channel reader_chan(io.get_executor(), reader_buffer_size);
+            std::optional<Channel> handler_chan;
+            Channel* writer_channl;
+
+            if (use_handler)
+            {
+                AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
+
+                handler_chan = Channel(io.get_executor(), handler_buffer_size);
+                asio::co_spawn(io, handle(reader_chan, *handler_chan), boost::asio::detached);
+                writer_channl = &(*handler_chan);
+            }
+            else
+            {
+                writer_channl = &reader_chan;
+            }
 
             asio::co_spawn(io, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(io, write(reader_chan), boost::asio::detached);
-
-            io.run();
-        }
-
-        void runCopyPipelineWithHandler()
-        {
-            asio::io_context io;
-
-            Channel reader_chan(io.get_executor(), 3);
-            Channel writer_chan(io.get_executor(), 3);
-
-            asio::co_spawn(io, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(io, handle(reader_chan, writer_chan), boost::asio::detached);
-            asio::co_spawn(io, write(writer_chan), boost::asio::detached);
+            asio::co_spawn(io, write(*writer_channl), boost::asio::detached);
 
             io.run();
         }
@@ -367,12 +370,7 @@ AWL_EXAMPLE(CopyFileWithChannel)
 {
     Example example{ context };
 
-    example.runCopyPipeline();
-}
+    AWL_FLAG(use_handler);
 
-AWL_EXAMPLE(CopyFileWithHandler)
-{
-    Example example{ context };
-
-    example.runCopyPipelineWithHandler();
+    example.runCopyPipeline(use_handler);
 }
