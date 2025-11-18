@@ -2,6 +2,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/channel.hpp>
+#include <boost/asio/stream_file.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -41,6 +42,8 @@ namespace
                 break;
 
             buf->resize(static_cast<std::size_t>(n));
+
+            std::cout << "reader: block size = " << buf->size() << " bytes\n";
 
             co_await reader_chan.async_send({}, buf, use_awaitable);
 
@@ -117,8 +120,8 @@ namespace
         Channel writer_chan(exec, 3);
 
         co_spawn(exec, reader(src, reader_chan), boost::asio::detached);
-        co_spawn(exec, handler(reader_chan, writer_chan), boost::asio::detached);
-        co_spawn(exec, writer(dst, writer_chan), boost::asio::detached);
+        // co_spawn(exec, handler(reader_chan, writer_chan), boost::asio::detached);
+        // co_spawn(exec, writer(dst, writer_chan), boost::asio::detached);
     }
 }
 

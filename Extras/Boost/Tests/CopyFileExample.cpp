@@ -6,6 +6,7 @@
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/system/system_error.hpp>
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/experimental/channel.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -105,6 +106,18 @@ namespace
             log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
+        void runCopyPipeline()
+        {
+            asio::io_context io;
+
+            Channel reader_chan(io.get_executor(), 3);
+
+            asio::co_spawn(io, read(reader_chan), boost::asio::detached);
+            asio::co_spawn(io, write(reader_chan), boost::asio::detached);
+
+            io.run();
+        }
+
     private:
 
         awaitable<void> copyFile()
@@ -158,23 +171,106 @@ namespace
             log(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
         }
 
-        void log(std::string message)
+        using Chunk = std::shared_ptr<std::vector<char>>;
+        using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
+
+        awaitable<void> read(Channel& reader_chan)
+        {
+            log(std::format("Thread {}. read() has started.", std::this_thread::get_id()));
+
+            asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
+
+            asio::stream_file source(exec);
+            source.open(sourcePath(), asio::stream_file::read_only);
+
+            auto buffer = std::make_shared<std::vector<char>>(chunkSize);
+
+            for (;;)
+            {
+                boost::system::error_code ec;
+                const std::size_t read_size = co_await source.async_read_some(asio::buffer(*buffer),
+                    asio::redirect_error(use_awaitable, ec));
+
+                if (ec == asio::error::eof)
+                {
+                    break;
+                }
+
+                if (ec)
+                {
+                    throw boost::system::system_error(ec);
+                }
+
+                log(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
+
+                co_await reader_chan.async_send({}, buffer, use_awaitable);
+
+            }
+        }
+
+        awaitable<void> write(Channel& reader_chan)
+        {
+            log(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
+
+            asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
+
+            asio::stream_file destination(exec);
+            destination.open(destinationPath(),
+                asio::stream_file::create | asio::stream_file::write_only | asio::stream_file::truncate);
+
+            std::size_t total_written = 0;
+
+            try
+            {
+                for (;;)
+                {
+                    // Receive a message asynchronously from the channel
+                    Chunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
+
+                    log(awl::format() << "Consumed: " << buffer->size() << " bytes.");
+
+                    const std::size_t written_size = co_await destination.async_write_some(
+                        asio::buffer(*buffer), use_awaitable);
+
+                    if (written_size != buffer->size())
+                    {
+                        throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", buffer->size(), written_size));
+                    }
+
+                    log(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
+
+                    total_written += written_size;
+                }
+            }
+            catch (const boost::system::system_error& e)
+            {
+                // Check if the channel was closed gracefully
+                if (e.code() == boost::asio::experimental::error::channel_closed)
+                    log("Channel closed, exiting consumer");
+                else
+                    log(awl::format() << "Receive error: " << e.code().message());
+            }
+
+            log(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
+        }
+            
+        void log(awl::LogString message)
         {
             context.logger.debug(message);
         }
 
         std::string sourcePath() const
         {
-            AWL_ATTRIBUTE(std::string, input, "input.dat");
+            AWL_ATTRIBUTE(std::string, src, "input.dat");
 
-            return input;
+            return src;
         }
 
         std::string destinationPath() const
         {
-            AWL_ATTRIBUTE(std::string, output, "output.dat");
+            AWL_ATTRIBUTE(std::string, dst, "output.dat");
 
-            return output;
+            return dst;
         }
 
         const awl::testing::TestContext& context;
@@ -215,4 +311,11 @@ AWL_EXAMPLE(CopyFileStrand2)
     Example example{ context };
 
     example.runStrand2();
+}
+
+AWL_EXAMPLE(CopyFileWithChannel)
+{
+    Example example{ context };
+
+    example.runCopyPipeline();
 }
