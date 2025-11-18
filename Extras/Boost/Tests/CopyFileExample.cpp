@@ -107,13 +107,11 @@ namespace
             log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        void runCopyPipeline(bool use_handler)
+        void runCopyPipeline(asio::any_io_executor exec, bool use_handler)
         {
-            asio::io_context io;
-
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
-            Channel reader_chan(io.get_executor(), reader_buffer_size);
+            Channel reader_chan(exec, reader_buffer_size);
             std::optional<Channel> handler_chan;
             Channel* writer_channl;
 
@@ -121,8 +119,8 @@ namespace
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler_chan = Channel(io.get_executor(), handler_buffer_size);
-                asio::co_spawn(io, handle(reader_chan, *handler_chan), boost::asio::detached);
+                handler_chan = Channel(exec, handler_buffer_size);
+                asio::co_spawn(exec, handle(reader_chan, *handler_chan), boost::asio::detached);
                 writer_channl = &(*handler_chan);
             }
             else
@@ -130,10 +128,8 @@ namespace
                 writer_channl = &reader_chan;
             }
 
-            asio::co_spawn(io, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(io, write(*writer_channl), boost::asio::detached);
-
-            io.run();
+            asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
+            asio::co_spawn(exec, write(*writer_channl), boost::asio::detached);
         }
 
     private:
@@ -379,7 +375,26 @@ AWL_EXAMPLE(CopyFileWithChannel)
 {
     Example example{ context };
 
+    AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
 
-    example.runCopyPipeline(use_handler);
+    if (on_pool)
+    {
+        AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+        asio::thread_pool pool(thread_count);
+
+        example.runCopyPipeline(pool.get_executor(), use_handler);
+
+        pool.join();
+
+    }
+    else
+    {
+        asio::io_context io;
+
+        example.runCopyPipeline(io.get_executor(), use_handler);
+
+        io.run();
+    }
 }
