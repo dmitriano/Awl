@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <format>
+#include <stdlib.h>
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -97,17 +98,39 @@ namespace
 
 AWL_EXAMPLE(ImplicitLifetimeVector)
 {
-    std::vector<uint8_t> v(sizeof(B), 0);
+    AWL_ATTRIBUTE(size_t, offset, 0);
 
-    B* p = reinterpret_cast<B*>(v.data());
+    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B));
+
+    std::vector<uint8_t> v(sizeof(B) + offset, 0);
+
+    B* p = reinterpret_cast<B*>(v.data() + offset);
 
     p->x = 1;
     p->y = 'a';
 
     context.logger.debug(awl::format() << p->x << " " << p->y);
 
-    v[0] = 10;
-    v[4] = 66;
+    v[offset + 0] = 10;
+    v[offset + 4] = 66;
 
     context.logger.debug(awl::format() << p->x << " " << p->y);
+}
+
+AWL_EXAMPLE(ImplicitLifetimeCalloc)
+{
+    AWL_ATTRIBUTE(size_t, offset, 0);
+
+    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B));
+
+    void* p1 = calloc(1, sizeof(B) + offset);
+
+    B* p = reinterpret_cast<B*>(reinterpret_cast<char*>(p1) + offset);
+
+    p->x = 1;
+    p->y = 'a';
+
+    context.logger.debug(awl::format() << p->x << " " << p->y);
+
+    free(p1);
 }
