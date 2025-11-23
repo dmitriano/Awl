@@ -175,6 +175,8 @@ namespace awl
         {
             RegisterTasks(context, controller);
 
+            context.logger.debug("wait_any() started");
+
             co_await controller.wait_any();
 
             context.logger.debug("wait_any() finished");
