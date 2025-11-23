@@ -10,6 +10,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <iostream>
+#include <cstdint>
 #include <algorithm>
 #include <functional>
 
@@ -115,6 +116,47 @@ namespace
 
         return b;
     }
+}
+
+AWL_TEST(IoArithmeticReadWriteLittleEndian)
+{
+    std::vector<uint8_t> buffer;
+
+    {
+        VectorOutputStream out(buffer);
+
+        Write(out, uint32_t{ 0x0A0B0C0D });
+        Write(out, int16_t{ -0x1234 });
+        Write(out, float{ 1.0f });
+        Write(out, double{ -13.25 });
+    }
+
+    const std::vector<uint8_t> expected_bytes{
+        0x0D, 0x0C, 0x0B, 0x0A, // uint32_t
+        0xCC, 0xED,             // int16_t
+        0x00, 0x00, 0x80, 0x3F, // float
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x2A, 0xC0 // double
+    };
+
+    AWL_ASSERT(buffer == expected_bytes);
+
+    VectorInputStream in(expected_bytes);
+
+    uint32_t u32_value{};
+    int16_t i16_value{};
+    float f_value{};
+    double d_value{};
+
+    Read(in, u32_value);
+    Read(in, i16_value);
+    Read(in, f_value);
+    Read(in, d_value);
+
+    AWL_ASSERT(u32_value == 0x0A0B0C0D);
+    AWL_ASSERT(i16_value == -0x1234);
+    AWL_ASSERT(f_value == 1.0f);
+    AWL_ASSERT(d_value == -13.25);
+    AWL_ASSERT(in.End());
 }
 
 AWL_TEST(IoStdReadWrite)
