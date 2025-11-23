@@ -199,9 +199,9 @@ AWL_TEST(Hash_ToFromArray)
 
     constexpr uint64_t sample = UINT64_C(0xab28ecb46814fe75);
 
-    const auto a = awl::to_array(sample);
+    const auto a = awl::to_buffer(sample);
 
-    const auto val = awl::from_array<uint64_t>(a);
+    const auto val = awl::from_buffer<uint64_t>(a);
 
     AWL_ASSERT_EQUAL(sample, val);
 }

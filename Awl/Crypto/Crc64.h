@@ -74,7 +74,7 @@ namespace awl::crypto
                 }
                 else
                 {
-                    const auto bytes = to_array(*i);
+                    const auto bytes = to_buffer(*i);
 
                     for (size_t j = 0; j < bytes.size(); ++j)
                     {
@@ -83,7 +83,7 @@ namespace awl::crypto
                 }
             }
 
-            return to_array(crc);
+            return to_buffer(crc);
         }
 
     private:
