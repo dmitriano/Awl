@@ -6,20 +6,37 @@
 #pragma once
 
 #include "Awl/Io/Rw/ReadRaw.h"
+#include "Awl/Int2Array.h"
 
 #include <type_traits>
 
 namespace awl::io
 {
+    template <class Stream, size_t N>
+        requires sequential_input_stream<Stream>
+    constexpr void ReadBuffer(Stream& s, std::array<std::uint8_t, N>& a)
+    {
+        ReadRaw(s, a.data(), a.size());
+    }
+
+    template <class Stream, size_t N>
+        requires sequential_output_stream<Stream>
+    constexpr void WriteBuffer(Stream& s, const std::array<std::uint8_t, N>& a)
+    {
+        s.Write(a.data(), a.size());
+    }
+
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && std::is_arithmetic_v<T> && !std::is_same<T, bool>::value)
     void Read(Stream & s, T & val, const Context & ctx = {})
     {
         static_cast<void>(ctx);
 
-        const size_t size = sizeof(T);
+        std::array<std::uint8_t, sizeof(T)> a;
 
-        ReadRaw(s, reinterpret_cast<uint8_t *>(&val), size);
+        ReadBuffer(s, a);
+
+        val = from_buffer<T>(a);
     }
 
     //Scalar types are passed by value but not by const reference.
@@ -29,9 +46,7 @@ namespace awl::io
     {
         static_cast<void>(ctx);
         
-        const size_t size = sizeof(T);
-
-        s.Write(reinterpret_cast<const uint8_t *>(&val), size);
+        WriteBuffer(s, to_buffer(val));
     }
 
     //sizeof(bool) is implementation-defined and it is not required to be 1.
