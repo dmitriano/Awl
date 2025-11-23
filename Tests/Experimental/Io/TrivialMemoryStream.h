@@ -11,6 +11,7 @@
 #include "StreamUtils.h"
 
 #include <cassert>
+#include <cstring>
 
 namespace awl::io
 {
@@ -86,8 +87,7 @@ namespace awl::io
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
     {
         assert(s.GetLength() + sizeof(val) <= s.m_size);
-        //load of misaligned address
-        *(reinterpret_cast<T *>(s.m_p)) = val;
+        std::memcpy(s.m_p, awl::const_data_cast(&val), sizeof(val));
         s.m_p += sizeof(val);
     }
 
@@ -95,8 +95,7 @@ namespace awl::io
     std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
     {
         assert(s.GetLength() + sizeof(val) <= s.m_size);
-        //store to misaligned address:
-        val = *(reinterpret_cast<T *>(s.m_p));
+        std::memcpy(awl::mutable_data_cast(&val), s.m_p, sizeof(val));
         s.m_p += sizeof(val);
     }
 }

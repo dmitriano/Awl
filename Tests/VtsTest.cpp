@@ -351,8 +351,7 @@ AWL_TEST(VtsReadWriteVectorStream)
     }
 }
 
-//store to/load of misaligned address
-AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
+AWL_TEST(VtsReadWriteTrivialMemoryStream)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWL_ATTRIBUTE(size_t, write_count, 1);
