@@ -7,6 +7,7 @@
 
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Io/IoException.h"
+#include "Awl/DataCast.h"
 
 namespace awl 
 {
@@ -23,7 +24,7 @@ namespace awl
             size_t Read(uint8_t * buffer, size_t count) override
             {
                 //good() returns false at the end of file.
-                m_in.read(reinterpret_cast<char *>(buffer), count);
+                m_in.read(launder_cast<char>(buffer), count);
 
                 const size_t actually_read = m_in.gcount();
 
@@ -55,7 +56,7 @@ namespace awl
                 //he write function returns the stream itself. So in your case, it will return a reference to myfile.
                 //The stream types are convertible to bool to check its failure status.
                 
-                if (!m_out.write(reinterpret_cast<const char *>(buffer), count))
+                if (!m_out.write(launder_cast<const char>(buffer), count))
                 {
                     throw WriteFailException();
                 }

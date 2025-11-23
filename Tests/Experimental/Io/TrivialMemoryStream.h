@@ -71,22 +71,6 @@ namespace awl::io
 
     private:
 
-        /*
-        template <class T>
-        std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
-        {
-            uint8_t * const new_p = m_p + sizeof(val);
-
-            if (static_cast<size_t>(new_p - pBuf) > m_size)
-            {
-                throw GeneralException(_T("overflow"));
-            }
-
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p = new_p;
-        }
-        */
-
         template <typename T>
         friend std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val);
 

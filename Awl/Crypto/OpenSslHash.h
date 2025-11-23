@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Awl/Crypto/BasicHash.h"
+#include "Awl/DataCast.h"
 
 #include <type_traits>
 
@@ -27,7 +28,7 @@ namespace awl
             {
                 typename BasicHash<N>::value_type digest;
 
-                func(reinterpret_cast<const unsigned char*>(begin), end - begin, digest.data());
+                func(mutable_data_cast(begin), end - begin, digest.data());
 
                 return digest;
             }
