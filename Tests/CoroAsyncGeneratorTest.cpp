@@ -258,6 +258,7 @@ AWL_TEST(CoroControllerCancelWait1)
 }
 
 // Fails with all_task=true
+// UB: Awl/Awl/Coro/TaskPool.cpp:62:5: runtime error: member access within address 0x616577be4d90 which does not point to an object of type 'Handler'
 AWL_TEST(CoroControllerCancelWait2)
 {
     AWL_FLAG(all_task);
