@@ -318,6 +318,8 @@ namespace
 
 AWL_TEST(ImmutableString)
 {
+    AWL_UNUSED_CONTEXT;
+
     awl::immutable<std::string> val = makeString();
 
     // We use val like std::optional
@@ -329,7 +331,7 @@ AWL_TEST(ImmutableString)
 
     for (auto symbol : *val)
     {
-        static_cast<void>(val);
+        static_cast<void>(symbol);
     }
 }
 
@@ -370,6 +372,7 @@ AWL_TEST(ImmutableException)
 #endif
 
 // The code demonstrating why do we need immutable.
+/*
 namespace
 {
     // B becomes non-copyable and non-movable.
@@ -409,3 +412,4 @@ namespace
         // v.push_back(B{});
     }
 }
+*/
