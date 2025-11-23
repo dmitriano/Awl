@@ -1,0 +1,87 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <iostream>
+#include <format>
+
+#include "Awl/Testing/UnitTest.h"
+
+using namespace awl::testing;
+
+namespace
+{
+    template<std::size_t N>
+    struct MyAllocator
+    {
+        MyAllocator()
+        {
+            for (std::byte& b : data)
+                b = std::byte{ 3 };
+        }
+
+        std::byte data[N];
+        std::size_t sz{ N };
+        void* p{ data };
+
+        // Note: only well-defined for implicit-lifetime types
+        template<typename T>
+        T* implicit_aligned_alloc(std::size_t a = alignof(T))
+        {
+            if (std::align(a, sizeof(T), p, sz))
+            {
+                T* result1 = reinterpret_cast<T*>(p);
+                T* result2 = std::launder(result1);
+                p = static_cast<std::byte*>(p) + sizeof(T);
+                sz -= sizeof(T);
+                return result2;
+            }
+            return nullptr;
+        }
+    };
+
+    struct A { int x; };
+}
+
+AWL_EXAMPLE(ImplicitLifetime)
+{
+    AWL_UNUSED_CONTEXT;
+
+    MyAllocator<64> a;
+
+    std::cout << "allocated a.data at " << (void*)a.data
+        << " (" << sizeof a.data << " bytes)\n";
+
+    // Allocate A
+    if (A* p = a.implicit_aligned_alloc<A>())
+    {
+        std::cout << "allocated A char at " << (void*)p << '\n';
+        std::cout << "\tOriginal value: " << std::format("{:x}", p->x) << '\n';
+        *p = {};
+        std::cout << "\tDefault value: " << std::format("{:x}", p->x) << '\n';
+        p->x = 0x42;
+        std::cout << "\tUpdated value: " << std::format("{:x}", p->x) << '\n';
+    }
+
+    // Allocate a char
+    if (char* p = a.implicit_aligned_alloc<char>())
+    {
+        *p = 'a';
+        std::cout << "allocated a char at " << (void*)p << '\n';
+    }
+
+    // Allocate an int
+    if (int* p = a.implicit_aligned_alloc<int>())
+    {
+        *p = 1;
+        std::cout << "allocated an int at " << (void*)p << '\n';
+    }
+
+    // Allocate an int, aligned at a 32-byte boundary
+    if (int* p = a.implicit_aligned_alloc<int>(32))
+    {
+        *p = 2;
+        std::cout << "allocated an int at " << (void*)p << " (32-byte alignment)\n";
+    }
+}

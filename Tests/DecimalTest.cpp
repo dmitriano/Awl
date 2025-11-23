@@ -18,9 +18,9 @@
 #if defined(AWL_INT_128)
 
 #define GCC_SECTION(test_name) \
-    { Test<awl::decimal<__uint128_t, 4>> test(context); test.test_name(); } \
-    { Test<awl::decimal<__uint128_t, 5>> test(context); test.test_name(); } \
-    { Test<awl::decimal<__uint128_t, 6>> test(context); test.test_name(); }
+    { DecimalCase<awl::decimal<__uint128_t, 4>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<__uint128_t, 5>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<__uint128_t, 6>> test(context); test.test_name(); }
 
 #else
 
@@ -34,9 +34,9 @@
 namespace bmp = boost::multiprecision; 
 
 #define BOOST_SECTION(test_name) \
-    { Test<awl::decimal<bmp::uint128_t, 4, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 5, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
-    { Test<awl::decimal<bmp::uint128_t, 6, awl::MultiprecisionDecimalData>> test(context); test.test_name(); }
+    { DecimalCase<awl::decimal<bmp::uint128_t, 4, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<bmp::uint128_t, 5, awl::MultiprecisionDecimalData>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<bmp::uint128_t, 6, awl::MultiprecisionDecimalData>> test(context); test.test_name(); }
 
 #else
 
@@ -47,9 +47,9 @@ namespace bmp = boost::multiprecision;
 #if true
 
 #define BUILTIN_SECTION(test_name) \
-    { Test<awl::decimal<uint64_t, 4>> test(context); test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 5>> test(context); test.test_name(); } \
-    { Test<awl::decimal<uint64_t, 6>> test(context); test.test_name(); }
+    { DecimalCase<awl::decimal<uint64_t, 4>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<uint64_t, 5>> test(context); test.test_name(); } \
+    { DecimalCase<awl::decimal<uint64_t, 6>> test(context); test.test_name(); }
 
 #else
 
@@ -89,15 +89,12 @@ namespace
     //}
 
     template <class Decimal>
-    class Test
+    class DecimalCase : public Test
     {
-    private:
-
-        const awl::testing::TestContext& context;
 
     public:
 
-        Test(const awl::testing::TestContext& ctx) : context(ctx) {}
+        using Test::Test;
 
         template <class C>
         void TestStringConversion(std::basic_string_view<C> sample, std::basic_string_view<C> result = {})
@@ -639,7 +636,7 @@ LOCAL_TEST(DecimalBitsRoundtrip)
 
 AWL_TEST(DecimalRescaleOverflow)
 {
-    Test<Decimal64> test(context);
+    DecimalCase<Decimal64> test(context);
 
     Decimal64 d("12345678.0000000000"sv);
 
@@ -652,7 +649,7 @@ AWL_TEST(DecimalRescaleOverflow)
 
 AWL_TEST(DecimalStringConversionOverflow)
 {
-    Test<Decimal64> test(context);
+    DecimalCase<Decimal64> test(context);
 
     test.CheckTrows([&]()
     {
@@ -662,7 +659,7 @@ AWL_TEST(DecimalStringConversionOverflow)
 
 AWL_TEST(DecimalLimits)
 {
-    Test<Decimal64> test(context);
+    DecimalCase<Decimal64> test(context);
 
     //19 is wrong
     test.CheckConstructorTrows("0.1234567891234567891"sv);
@@ -738,7 +735,7 @@ AWL_TEST(DecimalMinMax)
 //It is not enough to store some values from Binance.
 AWL_EXAMPLE(DecimalBinanceValues)
 {
-    Test<Decimal64> test(context);
+    DecimalCase<Decimal64> test(context);
     
     constexpr uint64_t max_uint = std::numeric_limits<uint64_t>::max();
 
