@@ -93,6 +93,10 @@ namespace
     {
         int x;
         char y;
+
+        int64_t z[10];
+
+        char y1;
     };
 }
 
@@ -121,7 +125,7 @@ AWL_EXAMPLE(ImplicitLifetimeCalloc)
 {
     AWL_ATTRIBUTE(size_t, offset, 0);
 
-    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B));
+    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B) << ", alignof(B): " << alignof(B));
 
     void* p1 = calloc(1, sizeof(B) + offset);
 
