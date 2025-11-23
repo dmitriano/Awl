@@ -44,7 +44,7 @@ namespace
     struct A { int x; };
 }
 
-AWL_EXAMPLE(ImplicitLifetime)
+AWL_EXAMPLE(ImplicitLifetimeAllocator)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -84,4 +84,30 @@ AWL_EXAMPLE(ImplicitLifetime)
         *p = 2;
         std::cout << "allocated an int at " << (void*)p << " (32-byte alignment)\n";
     }
+}
+
+namespace
+{
+    struct B
+    {
+        int x;
+        char y;
+    };
+}
+
+AWL_EXAMPLE(ImplicitLifetimeVector)
+{
+    std::vector<uint8_t> v(sizeof(B), 0);
+
+    B* p = reinterpret_cast<B*>(v.data());
+
+    p->x = 1;
+    p->y = 'a';
+
+    context.logger.debug(awl::format() << p->x << " " << p->y);
+
+    v[0] = 10;
+    v[4] = 66;
+
+    context.logger.debug(awl::format() << p->x << " " << p->y);
 }
