@@ -138,3 +138,20 @@ AWL_EXAMPLE(ImplicitLifetimeCalloc)
 
     free(p1);
 }
+
+AWL_EXAMPLE(ImplicitLifetimePlacementNew)
+{
+    struct S { int x; char c; };
+
+    alignas(S) unsigned char buf[sizeof(S)];
+    S* p = new(buf) S{};
+
+    p->x = 10;
+    p->c = 'a';
+
+    // An object of type char, unsigned char, or std::byte may be used to access the object representation of any object.
+    // A char, unsigned char, or std::byte array may be used to manipulate the object representation of any object.
+    buf[4] = 66;
+
+    context.logger.debug(awl::format() << p->x << " " << p->c);
+}
