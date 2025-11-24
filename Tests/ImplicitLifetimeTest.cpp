@@ -113,7 +113,7 @@ AWL_EXAMPLE(ImplicitLifetimeVector)
     p->x = 1;
     p->y = 'a';
 
-    context.logger.debug(awl::format() << p->x << " " << p->y);
+    context.logger.debug(awl::format() << p->x << " " << p->y << " " << v[offset + 4]);
 
     v[offset + 0] = 10;
     v[offset + 4] = 66;
@@ -143,15 +143,17 @@ AWL_EXAMPLE(ImplicitLifetimePlacementNew)
 {
     struct S { int x; char c; };
 
-    alignas(S) unsigned char buf[sizeof(S)];
+    alignas(S) char buf[sizeof(S)];
     S* p = new(buf) S{};
 
     p->x = 10;
     p->c = 'a';
 
+    context.logger.debug(awl::format() << p->x << " " << buf[4]);
+
     // An object of type char, unsigned char, or std::byte may be used to access the object representation of any object.
     // A char, unsigned char, or std::byte array may be used to manipulate the object representation of any object.
-    buf[4] = 66;
+    buf[4] = 'b';
 
     context.logger.debug(awl::format() << p->x << " " << p->c);
 }
