@@ -83,3 +83,20 @@ AWL_EXAMPLE(Interface)
     std::cout << "sizeof(E): " << sizeof(E) << std::endl;
     std::cout << "sizeof(X): " << sizeof(E) << std::endl;
 }
+
+namespace
+{
+    template<typename T>
+    concept isInterface =
+        std::is_abstract_v<T> &&
+        // std::is_empty_v<T> &&
+        std::is_polymorphic_v<T>;
+
+    struct I2 {
+        virtual ~I2() = default;
+        virtual void foo() = 0;
+    };
+
+    static_assert(isInterface<I2>);
+}
+
