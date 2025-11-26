@@ -45,18 +45,18 @@ namespace
     using VectorChannel = Channel<VectorChunk>;
     using VectorProcessor = DataProcessor<VectorChunk>;
 
-    class FakeHandler final : public awl::testing::Test, public VectorProcessor
+    class FakeProcessor final : public awl::testing::Test, public VectorProcessor
     {
     public:
 
-        FakeHandler(const awl::testing::TestContext& context, VectorChannel& input_chan) :
+        FakeProcessor(const awl::testing::TestContext& context, VectorChannel& input_chan) :
             Test(context),
             m_inputChan(input_chan)
         {}
 
         awaitable<void> run() override
         {
-            print("FakeHandler that does nothing.");
+            print("FakeProcessor that does nothing.");
 
             co_return;
         }
@@ -71,11 +71,11 @@ namespace
         VectorChannel& m_inputChan;
     };
 
-    class PrintHandler final : public awl::testing::Test, public VectorProcessor
+    class PrintProcessor final : public awl::testing::Test, public VectorProcessor
     {
     public:
 
-        PrintHandler(const awl::testing::TestContext& context, VectorChannel& input_chan, VectorChannel output_chan) :
+        PrintProcessor(const awl::testing::TestContext& context, VectorChannel& input_chan, VectorChannel output_chan) :
             Test(context),
             m_inputChan(input_chan),
             m_outputChan(std::move(output_chan))
@@ -218,11 +218,11 @@ namespace
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler = std::make_shared<PrintHandler>(context, reader_chan, VectorChannel(exec, handler_buffer_size));
+                handler = std::make_shared<PrintProcessor>(context, reader_chan, VectorChannel(exec, handler_buffer_size));
             }
             else
             {
-                handler = std::make_shared<FakeHandler>(context, reader_chan);
+                handler = std::make_shared<FakeProcessor>(context, reader_chan);
             }
 
             return handler;
