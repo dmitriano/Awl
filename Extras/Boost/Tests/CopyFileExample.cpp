@@ -268,6 +268,7 @@ namespace
             }
         }
 
+        // Probably this version of runCopyPipeline is correct.
         awaitable<void> runCopyPipeline3(bool use_handler)
         {
             auto exec = co_await asio::this_coro::executor;
@@ -280,9 +281,39 @@ namespace
 
             using namespace boost::asio::experimental::awaitable_operators;
 
-            co_await (asio::co_spawn(exec, read(reader_chan), asio::use_awaitable) &&
-                asio::co_spawn(exec, handler->run(), asio::use_awaitable) &&
-                asio::co_spawn(exec, write(handler->outputChannel()), asio::use_awaitable));
+            try
+            {
+                // When one the of the tasks throws an exception the others should be cancelled.
+                co_await(asio::co_spawn(exec, read(reader_chan), asio::use_awaitable) &&
+                    asio::co_spawn(exec, handler->run(), asio::use_awaitable) &&
+                    asio::co_spawn(exec, write(handler->outputChannel()), asio::use_awaitable));
+            }
+            catch (const std::exception& e)
+            {
+                print(std::format("Pipeline Exception: {}", e.what()));
+            }
+        }
+
+        awaitable<void> runCopyPipeline4(bool use_handler)
+        {
+            auto exec = co_await asio::this_coro::executor;
+
+            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
+
+            VectorChannel reader_chan(exec, reader_buffer_size);
+
+            std::shared_ptr<VectorProcessor> handler = makeHandler(exec, use_handler, reader_chan);
+
+            std::vector<awaitable<void>> tasks;
+
+            tasks.push_back(asio::co_spawn(exec, read(reader_chan), asio::use_awaitable));
+            tasks.push_back(asio::co_spawn(exec, handler->run(), asio::use_awaitable));
+            tasks.push_back(asio::co_spawn(exec, write(handler->outputChannel()), asio::use_awaitable));
+
+            for (auto& t : tasks)
+            {
+                co_await std::move(t);
+            }
         }
 
     private:
@@ -393,7 +424,7 @@ namespace
                     // Receive a message asynchronously from the channel
                     VectorChunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
 
-                    print(awl::format() << "Consumed: " << buffer->size() << " bytes.");
+                    print(std::format("Thread{}. Consumed: {} bytes.", std::this_thread::get_id(), buffer->size()));
 
                     const std::size_t written_size = co_await destination.async_write_some(
                         asio::buffer(*buffer), use_awaitable);
@@ -530,7 +561,8 @@ AWL_EXAMPLE(CopyFileWithChannel2)
     }
 }
 
-// --filter CopyFileWithChannel3.* --output all --use_handler --src input.dat --dst input.dat.copy
+// This test handles the exceptions correctly.
+// --filter CopyFileWithChannel3.* --output all --use_handler --on_pool --src input.dat --dst input.dat.copy
 AWL_EXAMPLE(CopyFileWithChannel3)
 {
     Example example{ context };
@@ -554,6 +586,34 @@ AWL_EXAMPLE(CopyFileWithChannel3)
         asio::io_context io;
 
         asio::co_spawn(io, example.runCopyPipeline3(use_handler), asio::detached);
+
+        io.run();
+    }
+}
+
+AWL_EXAMPLE(CopyFileWithChannel4)
+{
+    Example example{ context };
+
+    AWL_FLAG(on_pool);
+    AWL_FLAG(use_handler);
+
+    if (on_pool)
+    {
+        AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+        asio::thread_pool pool(thread_count);
+
+        asio::co_spawn(pool, example.runCopyPipeline4(use_handler), asio::detached);
+
+        pool.join();
+
+    }
+    else
+    {
+        asio::io_context io;
+
+        asio::co_spawn(io, example.runCopyPipeline4(use_handler), asio::detached);
 
         io.run();
     }
