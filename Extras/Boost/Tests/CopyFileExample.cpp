@@ -443,9 +443,15 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
+                {
                     print("VectorChannel closed, exiting consumer");
+                }
                 else
+                {
                     print(awl::format() << "Receive error: " << e.code().message());
+
+                    throw;
+                }
             }
 
             print(std::format("Thread {}. Totally copied {} bytes.", std::this_thread::get_id(), total_written));
