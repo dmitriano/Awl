@@ -29,6 +29,8 @@ namespace
     template <class Chunk>
     using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
 
+    // It also can be named DataProducer, because Producer is probably
+    // something like a running coroutine that outputs something to a channel.
     template <class Chunk>
     class DataProcessor
     {
