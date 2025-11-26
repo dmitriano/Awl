@@ -301,7 +301,7 @@ namespace
 }
 
 // This test handles the exceptions correctly.
-// --filter CopyFileWithHandler.* --output all --use_handler --on_pool --src input.dat --dst input.dat.copy
+// --filter CopyFileWithHandler.* --output all --use_handler --on_pool --src input.dat --dst output.dat
 AWL_EXAMPLE(CopyFileWithHandler)
 {
     Example example{ context };
