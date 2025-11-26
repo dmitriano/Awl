@@ -126,7 +126,7 @@ namespace
         VectorChannel m_outputChan;
     };
 
-    class Example : public awl::testing::Test
+    class FileCopier : public awl::testing::Test
     {
     public:
 
@@ -490,35 +490,35 @@ namespace
 
 AWL_EXAMPLE(CopyFileSingleThread)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     example.runSingleThread();
 }
 
 AWL_EXAMPLE(CopyFileThreadPool)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     example.runThreadPool();
 }
 
 AWL_EXAMPLE(CopyFileStrand1)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     example.runStrand1();
 }
 
 AWL_EXAMPLE(CopyFileStrand2)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     example.runStrand2();
 }
 
 AWL_EXAMPLE(CopyFileWithChannel1)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
@@ -541,7 +541,7 @@ AWL_EXAMPLE(CopyFileWithChannel1)
 
 AWL_EXAMPLE(CopyFileWithChannel2)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
@@ -571,7 +571,7 @@ AWL_EXAMPLE(CopyFileWithChannel2)
 // --filter CopyFileWithChannel3.* --output all --use_handler --on_pool --src input.dat --dst input.dat.copy
 AWL_EXAMPLE(CopyFileWithChannel3)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
@@ -599,7 +599,7 @@ AWL_EXAMPLE(CopyFileWithChannel3)
 
 AWL_EXAMPLE(CopyFileWithChannel4)
 {
-    Example example{ context };
+    FileCopier example{ context };
 
     AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
