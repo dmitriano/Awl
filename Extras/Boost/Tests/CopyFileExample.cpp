@@ -26,16 +26,16 @@ namespace
     using Chunk = std::shared_ptr<std::vector<char>>;
     using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
 
-    class AbstractHandler
+    class StreamHandler
     {
     public:
 
-        virtual awaitable<void> handle() = 0;
+        virtual awaitable<void> run() = 0;
 
         virtual Channel& outputChannel() = 0;
     };
 
-    class FakeHandler final : public awl::testing::Test, public AbstractHandler
+    class FakeHandler final : public awl::testing::Test, public StreamHandler
     {
     public:
 
@@ -44,7 +44,7 @@ namespace
             m_inputChan(input_chan)
         {}
 
-        awaitable<void> handle() override
+        awaitable<void> run() override
         {
             print("FakeHandler that does nothing.");
 
@@ -61,19 +61,19 @@ namespace
         Channel& m_inputChan;
     };
 
-    class StreamHandler final : public awl::testing::Test, public AbstractHandler
+    class PrintHandler final : public awl::testing::Test, public StreamHandler
     {
     public:
 
-        StreamHandler(const awl::testing::TestContext& context, Channel& input_chan, Channel output_chan) :
+        PrintHandler(const awl::testing::TestContext& context, Channel& input_chan, Channel output_chan) :
             Test(context),
             m_inputChan(input_chan),
             m_outputChan(std::move(output_chan))
         {}
 
-        awaitable<void> handle() override
+        awaitable<void> run() override
         {
-            print(std::format("Thread {}. handle() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. run() has started.", std::this_thread::get_id()));
 
             std::size_t total_handled = 0;
 
@@ -200,15 +200,15 @@ namespace
             print(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        std::shared_ptr<AbstractHandler> makeHandler(asio::any_io_executor exec, bool use_handler, Channel& reader_chan) const
+        std::shared_ptr<StreamHandler> makeHandler(asio::any_io_executor exec, bool use_handler, Channel& reader_chan) const
         {
-            std::shared_ptr<AbstractHandler> handler;
+            std::shared_ptr<StreamHandler> handler;
 
             if (use_handler)
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler = std::make_shared<StreamHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
+                handler = std::make_shared<PrintHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
             }
             else
             {
@@ -224,10 +224,10 @@ namespace
 
             Channel reader_chan(exec, reader_buffer_size);
 
-            std::shared_ptr<AbstractHandler> handler = makeHandler(exec, use_handler, reader_chan);
+            std::shared_ptr<StreamHandler> handler = makeHandler(exec, use_handler, reader_chan);
 
             asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(exec, handler->handle(), boost::asio::detached);
+            asio::co_spawn(exec, handler->run(), boost::asio::detached);
             asio::co_spawn(exec, write(handler->outputChannel()), boost::asio::detached);
 
             run();
