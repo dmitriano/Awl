@@ -31,9 +31,37 @@ namespace
     public:
 
         virtual awaitable<void> handle() = 0;
+
+        virtual Channel& outputChannel() = 0;
     };
 
-    class StreamHandler : public awl::testing::Test, public AbstractHandler
+    class FakeHandler final : public awl::testing::Test, public AbstractHandler
+    {
+    public:
+
+        FakeHandler(const awl::testing::TestContext& context, Channel& input_chan) :
+            Test(context),
+            m_inputChan(input_chan)
+        {}
+
+        awaitable<void> handle() override
+        {
+            print("FakeHandler that does nothing.");
+
+            co_return;
+        }
+
+        Channel& outputChannel() override
+        {
+            return m_inputChan;
+        }
+
+    private:
+
+        Channel& m_inputChan;
+    };
+
+    class StreamHandler final : public awl::testing::Test, public AbstractHandler
     {
     public:
 
@@ -77,7 +105,7 @@ namespace
             print(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
         }
 
-        Channel& outputChannel()
+        Channel& outputChannel() override
         {
             return m_outputChan;
         }
@@ -172,30 +200,35 @@ namespace
             print(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        void runCopyPipeline1(asio::any_io_executor exec, bool use_handler, std::function<void()> run)
+        std::shared_ptr<AbstractHandler> makeHandler(asio::any_io_executor exec, bool use_handler, Channel& reader_chan) const
         {
-            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
-
-            Channel reader_chan(exec, reader_buffer_size);
-            std::unique_ptr<StreamHandler> handler;
-            Channel* writer_channl;
+            std::shared_ptr<AbstractHandler> handler;
 
             if (use_handler)
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler = std::make_unique<StreamHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
-
-                asio::co_spawn(exec, handler->handle(), boost::asio::detached);
-                writer_channl = &(handler->outputChannel());
+                handler = std::make_shared<StreamHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
             }
             else
             {
-                writer_channl = &reader_chan;
+                handler = std::make_shared<FakeHandler>(context, reader_chan);
             }
 
+            return handler;
+        }
+
+        void runCopyPipeline1(asio::any_io_executor exec, bool use_handler, std::function<void()> run)
+        {
+            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
+
+            Channel reader_chan(exec, reader_buffer_size);
+
+            std::shared_ptr<AbstractHandler> handler = makeHandler(exec, use_handler, reader_chan);
+
             asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
-            asio::co_spawn(exec, write(*writer_channl), boost::asio::detached);
+            asio::co_spawn(exec, handler->handle(), boost::asio::detached);
+            asio::co_spawn(exec, write(handler->outputChannel()), boost::asio::detached);
 
             run();
         }
