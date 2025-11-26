@@ -66,6 +66,16 @@ namespace awl::testing
 
     protected:
 
+        Logger& logger() const
+        {
+            return context.logger;
+        }
+
+        void print(awl::LogString message) const
+        {
+            logger().debug(message);
+        }
+
         const awl::testing::TestContext& context;
     };
 }

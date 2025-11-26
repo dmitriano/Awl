@@ -23,6 +23,71 @@ namespace
 {
     constexpr std::size_t chunkSize = 64 * 1024;
 
+    using Chunk = std::shared_ptr<std::vector<char>>;
+    using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
+
+    class AbstractHandler
+    {
+    public:
+
+        virtual awaitable<void> handle() = 0;
+    };
+
+    class StreamHandler : public awl::testing::Test, public AbstractHandler
+    {
+    public:
+
+        StreamHandler(const awl::testing::TestContext& context, Channel& input_chan, Channel output_chan) :
+            Test(context),
+            m_inputChan(input_chan),
+            m_outputChan(std::move(output_chan))
+        {}
+
+        awaitable<void> handle() override
+        {
+            print(std::format("Thread {}. handle() has started.", std::this_thread::get_id()));
+
+            std::size_t total_handled = 0;
+
+            try
+            {
+                for (;;)
+                {
+                    // Receive a message asynchronously from the channel
+                    Chunk buffer = co_await m_inputChan.async_receive(asio::use_awaitable);
+
+                    print(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
+
+                    total_handled += buffer->size();
+
+                    co_await m_outputChan.async_send({}, buffer, use_awaitable);
+                }
+            }
+            catch (const boost::system::system_error& e)
+            {
+                // Check if the channel was closed gracefully
+                if (e.code() == boost::asio::experimental::error::channel_closed)
+                    print("Channel closed, exiting handler");
+                else
+                    print(awl::format() << "Receive error: " << e.code().message());
+            }
+
+            m_outputChan.close();
+
+            print(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
+        }
+
+        Channel& outputChannel()
+        {
+            return m_outputChan;
+        }
+
+    private:
+
+        Channel& m_inputChan;
+        Channel m_outputChan;
+    };
+
     class Example : public awl::testing::Test
     {
     public:
@@ -31,7 +96,7 @@ namespace
 
         void runSingleThread()
         {
-            log(std::format("Thread {}. runSingleThread() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runSingleThread() has started.", std::this_thread::get_id()));
 
             asio::io_context io;
 
@@ -39,12 +104,12 @@ namespace
 
             io.run();
 
-            log(std::format("Thread {}. runSingleThread() has finished.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runSingleThread() has finished.", std::this_thread::get_id()));
         }
 
         void runThreadPool()
         {
-            log(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runThreadPool() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -58,12 +123,12 @@ namespace
 
             pool.join();
 
-            log(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runThreadPool() has finished.", std::this_thread::get_id()));
         }
 
         void runStrand1()
         {
-            log(std::format("Thread {}. runStrand1() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runStrand1() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -79,12 +144,12 @@ namespace
 
             pool.join();
 
-            log(std::format("Thread {}. runStrand1() has finished.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runStrand1() has finished.", std::this_thread::get_id()));
         }
 
         void runStrand2()
         {
-            log(std::format("Thread {}. runStrand2() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runStrand2() has started.", std::this_thread::get_id()));
 
             AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
 
@@ -104,7 +169,7 @@ namespace
 
             pool.join();
 
-            log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
+            print(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
         void runCopyPipeline1(asio::any_io_executor exec, bool use_handler, std::function<void()> run)
@@ -112,16 +177,17 @@ namespace
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
             Channel reader_chan(exec, reader_buffer_size);
-            std::optional<Channel> handler_chan;
+            std::unique_ptr<StreamHandler> handler;
             Channel* writer_channl;
 
             if (use_handler)
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler_chan = Channel(exec, handler_buffer_size);
-                asio::co_spawn(exec, handle(reader_chan, *handler_chan), boost::asio::detached);
-                writer_channl = &(*handler_chan);
+                handler = std::make_unique<StreamHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
+
+                asio::co_spawn(exec, handler->handle(), boost::asio::detached);
+                writer_channl = &(handler->outputChannel());
             }
             else
             {
@@ -151,7 +217,7 @@ namespace
 
             tasks.push_back(read(reader_chan));
             tasks.push_back(write(handler_chan));
-            tasks.push_back(handle(reader_chan, handler_chan));
+            // tasks.push_back(handle(reader_chan, handler_chan));
 
             for (auto& t : tasks)
             {
@@ -163,7 +229,7 @@ namespace
 
         awaitable<void> copyFile()
         {
-            log(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. copyFile() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
@@ -194,7 +260,7 @@ namespace
                     throw boost::system::system_error(ec);
                 }
 
-                log(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
+                print(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
 
                 const std::size_t written_size = co_await destination.async_write_some(
                     asio::buffer(buffer.data(), read_size), use_awaitable);
@@ -204,20 +270,17 @@ namespace
                     throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", read_size, written_size));
                 }
 
-                log(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
+                print(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
 
                 total_written += written_size;
             }
 
-            log(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
+            print(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
         }
-
-        using Chunk = std::shared_ptr<std::vector<char>>;
-        using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
 
         awaitable<void> read(Channel& reader_chan)
         {
-            log(std::format("Thread {}. read() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. read() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
@@ -242,7 +305,7 @@ namespace
                     throw boost::system::system_error(ec);
                 }
 
-                log(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
+                print(std::format("Thread {}. {} bytes have been read.", std::this_thread::get_id(), read_size));
 
                 co_await reader_chan.async_send({}, buffer, use_awaitable);
             }
@@ -253,7 +316,7 @@ namespace
 
         awaitable<void> write(Channel& reader_chan)
         {
-            log(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
+            print(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
 
             asio::any_io_executor exec = opExecutor ? *opExecutor : co_await asio::this_coro::executor;
 
@@ -270,7 +333,7 @@ namespace
                     // Receive a message asynchronously from the channel
                     Chunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
 
-                    log(awl::format() << "Consumed: " << buffer->size() << " bytes.");
+                    print(awl::format() << "Consumed: " << buffer->size() << " bytes.");
 
                     const std::size_t written_size = co_await destination.async_write_some(
                         asio::buffer(*buffer), use_awaitable);
@@ -280,7 +343,7 @@ namespace
                         throw std::runtime_error(std::format("Read {} bytes, but written {} bytes.", buffer->size(), written_size));
                     }
 
-                    log(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
+                    print(std::format("Thread {}. {} bytes have been written.", std::this_thread::get_id(), written_size));
 
                     total_written += written_size;
                 }
@@ -289,53 +352,14 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
-                    log("Channel closed, exiting consumer");
+                    print("Channel closed, exiting consumer");
                 else
-                    log(awl::format() << "Receive error: " << e.code().message());
+                    print(awl::format() << "Receive error: " << e.code().message());
             }
 
-            log(std::format("Thread {}. Totally copied {} bytes.", std::this_thread::get_id(), total_written));
+            print(std::format("Thread {}. Totally copied {} bytes.", std::this_thread::get_id(), total_written));
         }
             
-        awaitable<void> handle(Channel& reader_chan, Channel& writer_chan)
-        {
-            log(std::format("Thread {}. handle() has started.", std::this_thread::get_id()));
-
-            std::size_t total_handled = 0;
-
-            try
-            {
-                for (;;)
-                {
-                    // Receive a message asynchronously from the channel
-                    Chunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
-
-                    log(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
-
-                    total_handled += buffer->size();
-
-                    co_await writer_chan.async_send({}, buffer, use_awaitable);
-                }
-            }
-            catch (const boost::system::system_error& e)
-            {
-                // Check if the channel was closed gracefully
-                if (e.code() == boost::asio::experimental::error::channel_closed)
-                    log("Channel closed, exiting handler");
-                else
-                    log(awl::format() << "Receive error: " << e.code().message());
-            }
-
-            writer_chan.close();
-
-            log(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
-        }
-
-        void log(awl::LogString message)
-        {
-            context.logger.debug(message);
-        }
-
         template <class Rep, class Period>
         awaitable<void> sleep(std::chrono::duration<Rep, Period> d)
         {
