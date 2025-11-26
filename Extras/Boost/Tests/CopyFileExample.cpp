@@ -224,7 +224,6 @@ namespace
 
             // Close the channel to signal that no more messages will be sent
             reader_chan.close();
-
         }
 
         awaitable<void> write(Channel& reader_chan)
@@ -387,7 +386,6 @@ AWL_EXAMPLE(CopyFileWithChannel)
         asio::thread_pool pool(thread_count);
 
         example.runCopyPipeline(pool.get_executor(), use_handler, [&pool]() { pool.join(); });
-
     }
     else
     {
