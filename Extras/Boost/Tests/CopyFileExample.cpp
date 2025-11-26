@@ -24,21 +24,27 @@ namespace
     constexpr std::size_t chunkSize = 64 * 1024;
 
     using VectorChunk = std::shared_ptr<std::vector<char>>;
-    using VectorChannel = boost::asio::experimental::channel<void(boost::system::error_code, VectorChunk)>;
 
+    template <class Chunk>
+    using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
+
+    template <class Chunk>
     class DataProcessor
     {
     public:
 
         virtual awaitable<void> run() = 0;
 
-        virtual VectorChannel& outputChannel() = 0;
+        virtual Channel<Chunk>& outputChannel() = 0;
 
         // There can be also a method like this
         // virtual void setProgressCallback(std::function<void(Status)) func);
     };
 
-    class FakeHandler final : public awl::testing::Test, public DataProcessor
+    using VectorChannel = Channel<VectorChunk>;
+    using VectorProcessor = DataProcessor<VectorChunk>;
+
+    class FakeHandler final : public awl::testing::Test, public VectorProcessor
     {
     public:
 
@@ -64,7 +70,7 @@ namespace
         VectorChannel& m_inputChan;
     };
 
-    class PrintHandler final : public awl::testing::Test, public DataProcessor
+    class PrintHandler final : public awl::testing::Test, public VectorProcessor
     {
     public:
 
@@ -203,9 +209,9 @@ namespace
             print(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        std::shared_ptr<DataProcessor> makeHandler(asio::any_io_executor exec, bool use_handler, VectorChannel& reader_chan) const
+        std::shared_ptr<VectorProcessor> makeHandler(asio::any_io_executor exec, bool use_handler, VectorChannel& reader_chan) const
         {
-            std::shared_ptr<DataProcessor> handler;
+            std::shared_ptr<VectorProcessor> handler;
 
             if (use_handler)
             {
@@ -227,7 +233,7 @@ namespace
 
             VectorChannel reader_chan(exec, reader_buffer_size);
 
-            std::shared_ptr<DataProcessor> handler = makeHandler(exec, use_handler, reader_chan);
+            std::shared_ptr<VectorProcessor> handler = makeHandler(exec, use_handler, reader_chan);
 
             asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
             asio::co_spawn(exec, handler->run(), boost::asio::detached);
