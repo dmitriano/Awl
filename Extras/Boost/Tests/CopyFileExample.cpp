@@ -530,6 +530,7 @@ AWL_EXAMPLE(CopyFileWithChannel2)
     }
 }
 
+// --filter CopyFileWithChannel3.* --output all --use_handler --src input.dat --dst input.dat.copy
 AWL_EXAMPLE(CopyFileWithChannel3)
 {
     Example example{ context };
