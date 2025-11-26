@@ -23,23 +23,26 @@ namespace
 {
     constexpr std::size_t chunkSize = 64 * 1024;
 
-    using Chunk = std::shared_ptr<std::vector<char>>;
-    using Channel = boost::asio::experimental::channel<void(boost::system::error_code, Chunk)>;
+    using VectorChunk = std::shared_ptr<std::vector<char>>;
+    using VectorChannel = boost::asio::experimental::channel<void(boost::system::error_code, VectorChunk)>;
 
-    class StreamHandler
+    class DataProcessor
     {
     public:
 
         virtual awaitable<void> run() = 0;
 
-        virtual Channel& outputChannel() = 0;
+        virtual VectorChannel& outputChannel() = 0;
+
+        // There can be also a method like this
+        // virtual void setProgressCallback(std::function<void(Status)) func);
     };
 
-    class FakeHandler final : public awl::testing::Test, public StreamHandler
+    class FakeHandler final : public awl::testing::Test, public DataProcessor
     {
     public:
 
-        FakeHandler(const awl::testing::TestContext& context, Channel& input_chan) :
+        FakeHandler(const awl::testing::TestContext& context, VectorChannel& input_chan) :
             Test(context),
             m_inputChan(input_chan)
         {}
@@ -51,21 +54,21 @@ namespace
             co_return;
         }
 
-        Channel& outputChannel() override
+        VectorChannel& outputChannel() override
         {
             return m_inputChan;
         }
 
     private:
 
-        Channel& m_inputChan;
+        VectorChannel& m_inputChan;
     };
 
-    class PrintHandler final : public awl::testing::Test, public StreamHandler
+    class PrintHandler final : public awl::testing::Test, public DataProcessor
     {
     public:
 
-        PrintHandler(const awl::testing::TestContext& context, Channel& input_chan, Channel output_chan) :
+        PrintHandler(const awl::testing::TestContext& context, VectorChannel& input_chan, VectorChannel output_chan) :
             Test(context),
             m_inputChan(input_chan),
             m_outputChan(std::move(output_chan))
@@ -82,7 +85,7 @@ namespace
                 for (;;)
                 {
                     // Receive a message asynchronously from the channel
-                    Chunk buffer = co_await m_inputChan.async_receive(asio::use_awaitable);
+                    VectorChunk buffer = co_await m_inputChan.async_receive(asio::use_awaitable);
 
                     print(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
 
@@ -95,7 +98,7 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
-                    print("Channel closed, exiting handler");
+                    print("VectorChannel closed, exiting handler");
                 else
                     print(awl::format() << "Receive error: " << e.code().message());
             }
@@ -105,15 +108,15 @@ namespace
             print(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
         }
 
-        Channel& outputChannel() override
+        VectorChannel& outputChannel() override
         {
             return m_outputChan;
         }
 
     private:
 
-        Channel& m_inputChan;
-        Channel m_outputChan;
+        VectorChannel& m_inputChan;
+        VectorChannel m_outputChan;
     };
 
     class Example : public awl::testing::Test
@@ -200,15 +203,15 @@ namespace
             print(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        std::shared_ptr<StreamHandler> makeHandler(asio::any_io_executor exec, bool use_handler, Channel& reader_chan) const
+        std::shared_ptr<DataProcessor> makeHandler(asio::any_io_executor exec, bool use_handler, VectorChannel& reader_chan) const
         {
-            std::shared_ptr<StreamHandler> handler;
+            std::shared_ptr<DataProcessor> handler;
 
             if (use_handler)
             {
                 AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-                handler = std::make_shared<PrintHandler>(context, reader_chan, Channel(exec, handler_buffer_size));
+                handler = std::make_shared<PrintHandler>(context, reader_chan, VectorChannel(exec, handler_buffer_size));
             }
             else
             {
@@ -222,9 +225,9 @@ namespace
         {
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
-            Channel reader_chan(exec, reader_buffer_size);
+            VectorChannel reader_chan(exec, reader_buffer_size);
 
-            std::shared_ptr<StreamHandler> handler = makeHandler(exec, use_handler, reader_chan);
+            std::shared_ptr<DataProcessor> handler = makeHandler(exec, use_handler, reader_chan);
 
             asio::co_spawn(exec, read(reader_chan), boost::asio::detached);
             asio::co_spawn(exec, handler->run(), boost::asio::detached);
@@ -240,8 +243,8 @@ namespace
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
             AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
 
-            Channel reader_chan(exec, reader_buffer_size);
-            Channel handler_chan(exec, handler_buffer_size);
+            VectorChannel reader_chan(exec, reader_buffer_size);
+            VectorChannel handler_chan(exec, handler_buffer_size);
 
             std::vector<awaitable<void>> tasks;
 
@@ -311,7 +314,7 @@ namespace
             print(std::format("Thread {}. Copied {} bytes.", std::this_thread::get_id(), total_written));
         }
 
-        awaitable<void> read(Channel& reader_chan)
+        awaitable<void> read(VectorChannel& reader_chan)
         {
             print(std::format("Thread {}. read() has started.", std::this_thread::get_id()));
 
@@ -347,7 +350,7 @@ namespace
             reader_chan.close();
         }
 
-        awaitable<void> write(Channel& reader_chan)
+        awaitable<void> write(VectorChannel& reader_chan)
         {
             print(std::format("Thread {}. write() has started.", std::this_thread::get_id()));
 
@@ -364,7 +367,7 @@ namespace
                 for (;;)
                 {
                     // Receive a message asynchronously from the channel
-                    Chunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
+                    VectorChunk buffer = co_await reader_chan.async_receive(asio::use_awaitable);
 
                     print(awl::format() << "Consumed: " << buffer->size() << " bytes.");
 
@@ -385,7 +388,7 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
-                    print("Channel closed, exiting consumer");
+                    print("VectorChannel closed, exiting consumer");
                 else
                     print(awl::format() << "Receive error: " << e.code().message());
             }
