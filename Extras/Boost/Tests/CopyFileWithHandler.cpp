@@ -115,8 +115,7 @@ namespace
             Test(context),
             readerChannel(reader_channel),
             writerChannel(writer_channel)
-        {
-        }
+        {}
 
         awaitable<void> run()
         {
