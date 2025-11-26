@@ -23,11 +23,11 @@ namespace
 {
     constexpr std::size_t chunkSize = 64 * 1024;
 
-    class Example
+    class Example : public awl::testing::Test
     {
     public:
 
-        Example(const awl::testing::TestContext& context) : context(context) {}
+        using Test::Test;
 
         void runSingleThread()
         {
@@ -356,8 +356,6 @@ namespace
 
             return dst;
         }
-
-        const awl::testing::TestContext& context;
 
         std::optional<asio::any_io_executor> opExecutor;
     };
