@@ -107,7 +107,7 @@ namespace
             log(std::format("Thread {}. runStrand2() has finished.", std::this_thread::get_id()));
         }
 
-        void runCopyPipeline(asio::any_io_executor exec, bool use_handler, std::function<void()> run)
+        void runCopyPipeline1(asio::any_io_executor exec, bool use_handler, std::function<void()> run)
         {
             AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
@@ -132,6 +132,31 @@ namespace
             asio::co_spawn(exec, write(*writer_channl), boost::asio::detached);
 
             run();
+        }
+
+        awaitable<void> runCopyPipeline2(bool use_handler)
+        {
+            auto exec = co_await asio::this_coro::executor;
+
+            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
+            AWL_ATTRIBUTE(size_t, handler_buffer_size, 3);
+
+            Channel reader_chan(exec, reader_buffer_size);
+            Channel handler_chan(exec, handler_buffer_size);
+
+            std::vector<awaitable<void>> tasks;
+
+            // using namespace boost::asio::experimental::awaitable_operators;
+            // co_await(read(reader_chan) && write(*writer_channl));
+
+            tasks.push_back(read(reader_chan));
+            tasks.push_back(write(handler_chan));
+            tasks.push_back(handle(reader_chan, handler_chan));
+
+            for (auto& t : tasks)
+            {
+                co_await std::move(t);
+            }
         }
 
     private:
@@ -372,7 +397,7 @@ AWL_EXAMPLE(CopyFileStrand2)
     example.runStrand2();
 }
 
-AWL_EXAMPLE(CopyFileWithChannel)
+AWL_EXAMPLE(CopyFileWithChannel1)
 {
     Example example{ context };
 
@@ -385,12 +410,40 @@ AWL_EXAMPLE(CopyFileWithChannel)
 
         asio::thread_pool pool(thread_count);
 
-        example.runCopyPipeline(pool.get_executor(), use_handler, [&pool]() { pool.join(); });
+        example.runCopyPipeline1(pool.get_executor(), use_handler, [&pool]() { pool.join(); });
     }
     else
     {
         asio::io_context io;
 
-        example.runCopyPipeline(io.get_executor(), use_handler, [&io]() { io.run(); });
+        example.runCopyPipeline1(io.get_executor(), use_handler, [&io]() { io.run(); });
+    }
+}
+
+AWL_EXAMPLE(CopyFileWithChannel2)
+{
+    Example example{ context };
+
+    AWL_FLAG(on_pool);
+    AWL_FLAG(use_handler);
+
+    if (on_pool)
+    {
+        AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+        asio::thread_pool pool(thread_count);
+
+        asio::co_spawn(pool, example.runCopyPipeline2(use_handler), asio::detached);
+
+        pool.join();
+
+    }
+    else
+    {
+        asio::io_context io;
+
+        asio::co_spawn(io, example.runCopyPipeline2(use_handler), asio::detached);
+
+        io.run();
     }
 }
