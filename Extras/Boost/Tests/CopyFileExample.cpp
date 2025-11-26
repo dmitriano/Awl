@@ -4,6 +4,7 @@
 #include <boost/asio/redirect_error.hpp>
 #include <boost/asio/stream_file.hpp>
 #include <boost/asio/use_awaitable.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/system/system_error.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/experimental/channel.hpp>
@@ -267,6 +268,23 @@ namespace
             }
         }
 
+        awaitable<void> runCopyPipeline3(bool use_handler)
+        {
+            auto exec = co_await asio::this_coro::executor;
+
+            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
+
+            VectorChannel reader_chan(exec, reader_buffer_size);
+
+            std::shared_ptr<VectorProcessor> handler = makeHandler(exec, use_handler, reader_chan);
+
+            using namespace boost::asio::experimental::awaitable_operators;
+
+            co_await (asio::co_spawn(exec, read(reader_chan), asio::use_awaitable) &&
+                asio::co_spawn(exec, handler->run(), asio::use_awaitable) &&
+                asio::co_spawn(exec, write(handler->outputChannel()), asio::use_awaitable));
+        }
+
     private:
 
         awaitable<void> copyFile()
@@ -507,6 +525,34 @@ AWL_EXAMPLE(CopyFileWithChannel2)
         asio::io_context io;
 
         asio::co_spawn(io, example.runCopyPipeline2(use_handler), asio::detached);
+
+        io.run();
+    }
+}
+
+AWL_EXAMPLE(CopyFileWithChannel3)
+{
+    Example example{ context };
+
+    AWL_FLAG(on_pool);
+    AWL_FLAG(use_handler);
+
+    if (on_pool)
+    {
+        AWL_ATTRIBUTE(size_t, thread_count, std::max(1u, std::thread::hardware_concurrency()));
+
+        asio::thread_pool pool(thread_count);
+
+        asio::co_spawn(pool, example.runCopyPipeline3(use_handler), asio::detached);
+
+        pool.join();
+
+    }
+    else
+    {
+        asio::io_context io;
+
+        asio::co_spawn(io, example.runCopyPipeline3(use_handler), asio::detached);
 
         io.run();
     }
