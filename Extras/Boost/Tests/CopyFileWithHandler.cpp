@@ -53,8 +53,7 @@ namespace
             Test(context),
             m_inputChan(input_chan),
             m_outputChan(std::move(output_chan))
-        {
-        }
+        {}
 
         awaitable<void> run() override
         {
@@ -80,9 +79,15 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
-                    print("VectorChannel closed, exiting handler");
+                {
+                    print(std::format("Thread {}. VectorChannel closed, exiting handler.", std::this_thread::get_id()));
+                }
                 else
-                    print(awl::format() << "Receive error: " << e.code().message());
+                {
+                    print(awl::format() << "Processing error: " << e.code().message());
+
+                    throw;
+                }
             }
 
             m_outputChan.close();
@@ -208,7 +213,7 @@ namespace
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
                 {
-                    print("VectorChannel closed, exiting consumer");
+                    print(std::format("Thread {}. VectorChannel closed, exiting consumer.", std::this_thread::get_id()));
                 }
                 else
                 {
