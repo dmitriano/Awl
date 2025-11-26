@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/awaitable.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <iostream>
@@ -15,7 +16,6 @@ using asio::co_spawn;
 
 namespace
 {
-    // Корутина, которая кидает exception
     awaitable<void> task()
     {
         std::cout << "task(): before throw\n";
@@ -23,9 +23,7 @@ namespace
         co_return;
     }
 
-    // "верхняя" корутина, которая делает co_await co_spawn(... use_awaitable)
-    // и ловит исключение
-    awaitable<void> runner(asio::io_context& io)
+    awaitable<void> runner1(asio::io_context& io)
     {
         try
         {
@@ -46,16 +44,48 @@ namespace
 
         co_return;
     }
+
+    awaitable<void> runner2(asio::io_context& io)
+    {
+        try
+        {
+            using namespace boost::asio::experimental::awaitable_operators;
+
+            co_await (co_spawn(io, task(), use_awaitable) && co_spawn(io, task(), use_awaitable));
+
+            std::cout << "task() finished without exception\n";
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "runner(): caught exception: " << e.what() << "\n";
+        }
+        catch (...)
+        {
+            std::cout << "runner(): caught unknown exception\n";
+        }
+
+        co_return;
+    }
 }
 
-AWL_EXAMPLE(SpawnException)
+AWL_EXAMPLE(SpawnException1)
 {
     AWL_UNUSED_CONTEXT;
 
     asio::io_context io;
 
-    // Запускаем верхнюю корутину runner(io)
-    co_spawn(io, runner(io), asio::detached);
+    co_spawn(io, runner1(io), asio::detached);
+
+    io.run();
+}
+
+AWL_EXAMPLE(SpawnException2)
+{
+    AWL_UNUSED_CONTEXT;
+
+    asio::io_context io;
+
+    co_spawn(io, runner2(io), asio::detached);
 
     io.run();
 }
