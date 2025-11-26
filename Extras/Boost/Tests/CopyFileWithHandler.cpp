@@ -106,7 +106,7 @@ namespace
         VectorChannel m_outputChan;
     };
 
-    // This is our session.
+    // This is our session. It is not aware of DataProcessor.
     class FileCopier : public awl::testing::Test
     {
     public:
