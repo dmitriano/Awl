@@ -42,9 +42,9 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(Logger& logger, const std::stop_token stopToken, Provider& ap) :
+        TestContext(Logger& logger, const std::stop_token stopToken, Provider& ap, QObject* worker = nullptr) :
             Base(logger, stopToken, ap),
-            worker(nullptr)
+            worker(worker)
         {}
 
         // For handling QT signals inside the tests.

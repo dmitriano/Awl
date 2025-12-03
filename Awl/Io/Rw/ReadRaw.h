@@ -8,6 +8,7 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/SerializationContext.h"
 #include "Awl/Io/SequentialStream.h"
+#include "Awl/DataCast.h"
 
 #include <cstdint>
 

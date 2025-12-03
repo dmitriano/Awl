@@ -18,7 +18,7 @@ namespace awl::io
     void ReadVector(Stream & s, Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        ReadRaw(s, reinterpret_cast<uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
+        ReadRaw(s, mutable_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     template <class Stream, class Container, class Context = FakeContext>
@@ -26,7 +26,7 @@ namespace awl::io
     void WriteVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        s.Write(reinterpret_cast<const uint8_t *>(v.data()), v.size() * sizeof(typename Container::value_type));
+        s.Write(const_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     //vector<string>, for example.

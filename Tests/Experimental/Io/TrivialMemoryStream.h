@@ -11,6 +11,7 @@
 #include "StreamUtils.h"
 
 #include <cassert>
+#include <cstring>
 
 namespace awl::io
 {
@@ -71,48 +72,26 @@ namespace awl::io
 
     private:
 
-        /*
-        template <class T>
-        std::enable_if_t<std::is_arithmetic_v<T>, void> WriteArithmetic(const T val)
+        template <typename T>
+            requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+        friend void Write(TrivialMemoryStream& s, T val)
         {
-            uint8_t * const new_p = m_p + sizeof(val);
-
-            if (static_cast<size_t>(new_p - pBuf) > m_size)
-            {
-                throw GeneralException(_T("overflow"));
-            }
-
-            *(reinterpret_cast<T *>(m_p)) = val;
-            m_p = new_p;
+            assert(s.GetLength() + sizeof(val) <= s.m_size);
+            std::memcpy(s.m_p, awl::const_data_cast(&val), sizeof(val));
+            s.m_p += sizeof(val);
         }
-        */
 
         template <typename T>
-        friend std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val);
-
-        template <typename T>
-        friend std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val);
+            requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+        friend void Read(TrivialMemoryStream& s, T& val)
+        {
+            assert(s.GetLength() + sizeof(val) <= s.m_size);
+            std::memcpy(awl::mutable_data_cast(&val), s.m_p, sizeof(val));
+            s.m_p += sizeof(val);
+        }
 
         const size_t m_size;
         uint8_t * pBuf;
         uint8_t * m_p;
     };
-
-    template <typename T>
-    std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Write(TrivialMemoryStream & s, T val)
-    {
-        assert(s.GetLength() + sizeof(val) <= s.m_size);
-        //load of misaligned address
-        *(reinterpret_cast<T *>(s.m_p)) = val;
-        s.m_p += sizeof(val);
-    }
-
-    template <typename T>
-    std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, void> Read(TrivialMemoryStream & s, T & val)
-    {
-        assert(s.GetLength() + sizeof(val) <= s.m_size);
-        //store to misaligned address:
-        val = *(reinterpret_cast<T *>(s.m_p));
-        s.m_p += sizeof(val);
-    }
 }

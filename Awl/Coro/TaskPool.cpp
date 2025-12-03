@@ -52,12 +52,17 @@ UpdateTask TaskPool::wait_all_task_experimental()
 
 void TaskPool::Handler::OnFinished()
 {
-    const std::size_t index = this - pThis->m_handlers.data();
+    // The handler is going to be deleted, save its members.
+    TaskPool* saved_this = pThis;
 
-    assert(index < pThis->m_handlers.size());
+    std::vector<Handler>& handlers = saved_this->m_handlers;
 
-    pThis->m_handlers.erase(pThis->m_handlers.begin() + index);
+    const std::size_t index = this - handlers.data();
+
+    assert(index < handlers.size());
+
+    handlers.erase(handlers.begin() + index);
 
     // For wait_any().
-    pThis->Notify(&TaskSink::OnFinished);
+    saved_this->Notify(&TaskSink::OnFinished);
 }

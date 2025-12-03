@@ -27,7 +27,6 @@
 #include "Helpers/FormattingHelpers.h"
 #include "Experimental/Io/TrivialMemoryStream.h"
 #include "Experimental/Io/SampleStreams.h"
-#include "Experimental/TrivialAllocator.h"
 #include "VtsData.h"
 
 using namespace awl::testing;
@@ -352,8 +351,7 @@ AWL_TEST(VtsReadWriteVectorStream)
     }
 }
 
-//store to/load of misaligned address
-AWL_UNSTABLE_TEST(VtsReadWriteTrivialMemoryStream)
+AWL_TEST(VtsReadWriteTrivialMemoryStream)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
     AWL_ATTRIBUTE(size_t, write_count, 1);

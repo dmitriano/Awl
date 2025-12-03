@@ -26,4 +26,6 @@ int _tmain(int argc, awl::Char * argv[])
     {
         awl::cout() << e.What() << std::endl;
     }
+
+    return 1;
 }

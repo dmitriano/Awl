@@ -6,6 +6,7 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
+#include "Awl/DataCast.h"
 
 #include <locale.h>
 
@@ -31,7 +32,7 @@ AWL_TEST(DecodeString)
     setlocale(LC_ALL, "ru_RU.utf8");
 
     {
-        const char * encoded = reinterpret_cast<const char*>(u8"z\u00df\u6c34\U0001f34c");
+        const char * encoded = awl::launder_cast<const char>(u8"z\u00df\u6c34\U0001f34c");
 
         context.logger.debug(awl::format() << _T("Decoded string: ") << awl::FromACString(encoded));
     }

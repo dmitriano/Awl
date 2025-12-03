@@ -17,31 +17,10 @@ namespace awl::testing::helpers
     template <class T>
     using Allocator = std::allocator<T>;
 
-    /*
-    thread_local awl::TrivialSpace trivialSpace;
-    thread_local awl::TrivialAllocator<void> alloc(trivialSpace);
-    thread_local awl::TrivialAllocator<void> expectedAlloc(trivialSpace);
-    */
-
     using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
     
     template <class T>
     using Vector = std::vector<T, Allocator<T>>;
-
-    /*
-    //It can be something like this in a future version:
-    template <template <class> class Allocator>
-    struct A1
-    {
-        A1(Allocator<void> alloc) : c(Allocator<char>(alloc)) {}
-
-        int a;
-        double b;
-        String c;
-
-        AWL_REFLECT(a, b, c)
-    };
-    */
 
     namespace v1
     {

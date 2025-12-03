@@ -46,7 +46,7 @@ namespace awl::io
                     //Write name as string_view but read as string.
                     const size_t len = f.name.length();
                     Write(s, len);
-                    s.Write(reinterpret_cast<const uint8_t *>(f.name.data()), len * sizeof(char));
+                    s.Write(const_data_cast(f.name.data()), len * sizeof(char));
                     Write(s, f.type);
                 }
             }
