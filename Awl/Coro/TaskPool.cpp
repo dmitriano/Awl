@@ -7,7 +7,7 @@
 
 using namespace awl;
 
-void TaskPool::add_task(UpdateTask&& task)
+void TaskPool::spawn(UpdateTask&& task)
 {
     // A couroutine has executed as a regular function.
     // (It did not co_await).

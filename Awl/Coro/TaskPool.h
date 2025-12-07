@@ -96,7 +96,7 @@ namespace awl
 
     public:
 
-        void add_task(UpdateTask&& task);
+        void spawn(UpdateTask&& task);
 
         std::size_t task_count() const
         {
