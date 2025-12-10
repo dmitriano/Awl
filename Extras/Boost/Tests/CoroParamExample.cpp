@@ -79,13 +79,6 @@ namespace
         param.func();
     }
 
-    // awaitable<void> coroFuncByRef(const Param& param)
-    // {
-    //     param.func();
-    //
-    //     co_return;
-    // }
-
     awaitable<void> coroFunc(Param param)
     {
         auto exec = co_await asio::this_coro::executor;
@@ -135,6 +128,13 @@ namespace
             std::cout << "Updated param " << param.value() << std::endl;
         }
     }
+
+    // awaitable<void> coroFuncByRef(const Param& param)
+    // {
+    //     param.func();
+    //
+    //     co_return;
+    // }
 
     // awaitable<void> callerFuncUb()
     // {
