@@ -555,7 +555,6 @@ AWL_EXAMPLE(CopyFileWithChannel2)
         asio::co_spawn(pool, example.runCopyPipeline2(), asio::detached);
 
         pool.join();
-
     }
     else
     {
@@ -585,7 +584,6 @@ AWL_EXAMPLE(CopyFileWithChannel3)
         asio::co_spawn(pool, example.runCopyPipeline3(use_handler), asio::detached);
 
         pool.join();
-
     }
     else
     {
@@ -613,7 +611,6 @@ AWL_EXAMPLE(CopyFileWithChannel4)
         asio::co_spawn(pool, example.runCopyPipeline4(use_handler), asio::detached);
 
         pool.join();
-
     }
     else
     {
