@@ -79,12 +79,12 @@ namespace
         param.func();
     }
 
-    awaitable<void> coroFuncByRef(const Param& param)
-    {
-        param.func();
-
-        co_return;
-    }
+    // awaitable<void> coroFuncByRef(const Param& param)
+    // {
+    //     param.func();
+    //
+    //     co_return;
+    // }
 
     awaitable<void> coroFunc(Param param)
     {
@@ -136,16 +136,18 @@ namespace
         }
     }
 
-    awaitable<void> callerFuncUb()
-    {
-        auto task = coroFuncByRef(1);
-
-        co_await std::move(task);
-    }
+    // awaitable<void> callerFuncUb()
+    // {
+    //     auto task = coroFuncByRef(1);
+    //
+    //     co_await std::move(task);
+    // }
 }
 
 AWL_EXAMPLE(CoroParam)
 {
+    AWL_UNUSED_CONTEXT;
+
     asio::thread_pool pool;
 
     asio::co_spawn(pool, callerFunc(), asio::detached);
