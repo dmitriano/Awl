@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="awl::decimal&lt;*,*,*&gt;">
+    <DisplayString>{to_astring()}</DisplayString>
+    <Expand>
+      <Item Name="Value">{to_astring()}</Item>
+      <Item Name="Mantissa">{m_data.man()}</Item>
+      <Item Name="Exponent">{m_data.exp()}</Item>
+      <Item Name="Positive">{m_data.positive()}</Item>
+      <Item Name="Denominator">{m_denoms[m_data.exp()]}</Item>
+      <Item Name="RawBits">{to_bits()}</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>
+

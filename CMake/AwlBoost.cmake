@@ -14,4 +14,8 @@ message(STATUS "BOOST libs: ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_T
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE crypt32)
+elseif (UNIX)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE "-DBOOST_ASIO_HAS_IO_URING")
+    find_library(URING_LIB uring)
+    target_link_libraries(${TEST_TARGET} PRIVATE ${URING_LIB})
 endif()
