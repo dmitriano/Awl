@@ -1,4 +1,5 @@
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/redirect_error.hpp>

@@ -76,3 +76,8 @@ if (AWL_STATIC_RUNTIME)
             $<$<NOT:$<CONFIG:Debug>>:/MT>)
     endif()
 endif()
+
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    # Use home made std::formatter for std::thread::id.
+    target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_THREAD_ID_FORMATTER)
+endif()

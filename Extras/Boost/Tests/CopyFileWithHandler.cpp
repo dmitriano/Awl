@@ -1,4 +1,5 @@
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/redirect_error.hpp>
@@ -122,8 +123,6 @@ namespace
         awaitable<void> run()
         {
             auto exec = co_await asio::this_coro::executor;
-
-            AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
             using namespace boost::asio::experimental::awaitable_operators;
 
@@ -309,8 +308,6 @@ AWL_EXAMPLE(CopyFileWithHandler)
 
     AWL_FLAG(on_pool);
     AWL_FLAG(use_handler);
-
-    AWL_ATTRIBUTE(size_t, reader_buffer_size, 3);
 
     if (on_pool)
     {
