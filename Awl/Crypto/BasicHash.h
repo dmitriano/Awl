@@ -62,7 +62,7 @@ namespace awl
 
             using value_type = typename Base::value_type;
 
-            explicit constexpr ReverseHash(Hash hash) : m_hash(std::move(hash)) {}
+            explicit constexpr ReverseHash(Hash hash = {}) : m_hash(std::move(hash)) {}
 
             template <class InputIt>
             constexpr value_type operator()(InputIt begin, InputIt end) const
