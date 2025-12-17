@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <array>
 #include <type_traits>
+#include <algorithm>
 
 namespace awl
 {
@@ -48,6 +49,34 @@ namespace awl
                 static_cast<void>(end);
                 return {};
             }
+        };
+
+        template <class Hash>
+        class ReverseHash : public BasicHash<Hash::size()>
+        {
+        private:
+
+            using Base = BasicHash<Hash::size()>;
+
+        public:
+
+            using value_type = typename Base::value_type;
+
+            explicit constexpr ReverseHash(Hash hash) : m_hash(std::move(hash)) {}
+
+            template <class InputIt>
+            constexpr value_type operator()(InputIt begin, InputIt end) const
+            {
+                value_type val = m_hash(begin, end);
+
+                std::reverse(val.begin(), val.end());
+
+                return val;
+            }
+
+        private:
+
+            Hash m_hash;
         };
     }
 }

@@ -165,6 +165,12 @@ AWL_TEST(Hash)
         const Crc64::value_type val = hash(sample.begin(), sample.end());
 
         Assert::IsTrue(val == sampleHash);
+
+        const awl::crypto::ReverseHash reversed_hash(hash);
+
+        const Crc64::value_type reversed_val = reversed_hash(sample.begin(), sample.end());
+
+        Assert::IsTrue(reversed_val == reverse_array(val));
     }
 
     {
