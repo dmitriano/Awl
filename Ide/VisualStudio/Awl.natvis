@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="awl::decimal&lt;*,*,*&gt;">
-    <DisplayString>{to_astring()}</DisplayString>
-  </Type>
-  <Type Name="awl::ring&lt;*,*&gt;">
-    <DisplayString>size={m_size}, capacity={m_capacity}</DisplayString>
-  </Type>
+	<Type Name="awl::decimal&lt;*,*,*&gt;">
+		<DisplayString>{to_astring()}</DisplayString>
+	</Type>
+	<Type Name="awl::ring&lt;*,*&gt;">
+		<DisplayString>size={m_size}, capacity={m_capacity}</DisplayString>
+		<Expand>
+			<IndexListItems>
+				<Size>m_size</Size>
+				<ValueNode>m_data + $i &lt; m_buf + m_capacity ? m_data[$i] : *(m_data + ((m_data + $i) - (m_buf + m_capacity)))</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
 </AutoVisualizer>
