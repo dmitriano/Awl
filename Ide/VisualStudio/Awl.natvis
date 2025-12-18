@@ -11,5 +11,17 @@
       <Item Name="RawBits">{to_bits()}</Item>
     </Expand>
   </Type>
+  <Type Name="awl::ring&lt;*,*&gt;">
+    <DisplayString>size={m_size}, capacity={m_capacity}</DisplayString>
+    <Expand>
+      <Item Name="Size">{m_size}</Item>
+      <Item Name="Capacity">{m_capacity}</Item>
+      <Item Name="Front" Condition="!empty()">{*m_data}</Item>
+      <Item Name="Back" Condition="!empty()">{*(m_size == 0 ? m_data : (m_data + m_size - 1 &lt; m_buf + m_capacity ? m_data + m_size - 1 : m_data + m_size - 1 - m_capacity))}</Item>
+      <IndexListItems>
+        <Size>{m_size}</Size>
+        <ValueNode>{(m_data + $i &lt; m_buf + m_capacity) ? *(m_data + $i) : *(m_data + $i - m_capacity)}</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
 </AutoVisualizer>
-
