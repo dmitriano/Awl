@@ -16,11 +16,11 @@
     <Expand>
       <Item Name="Size">{m_size}</Item>
       <Item Name="Capacity">{m_capacity}</Item>
-      <Item Name="Front" Condition="!empty()">{*m_data}</Item>
-      <Item Name="Back" Condition="!empty()">{*(m_size == 0 ? m_data : (m_data + m_size - 1 &lt; m_buf + m_capacity ? m_data + m_size - 1 : m_data + m_size - 1 - m_capacity))}</Item>
+      <Item Name="Front" Condition="m_size != 0">{front()}</Item>
+      <Item Name="Back" Condition="m_size != 0">{back()}</Item>
       <IndexListItems>
         <Size>{m_size}</Size>
-        <ValueNode>{(m_data + $i &lt; m_buf + m_capacity) ? *(m_data + $i) : *(m_data + $i - m_capacity)}</ValueNode>
+        <ValueNode>{operator[]($i)}</ValueNode>
       </IndexListItems>
     </Expand>
   </Type>
