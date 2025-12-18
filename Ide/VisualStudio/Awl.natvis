@@ -2,39 +2,8 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="awl::decimal&lt;*,*,*&gt;">
     <DisplayString>{to_astring()}</DisplayString>
-    <Expand>
-      <Item Name="Value">{to_astring()}</Item>
-      <Item Name="Mantissa">{m_data.man()}</Item>
-      <Item Name="Exponent">{m_data.exp()}</Item>
-      <Item Name="Positive">{m_data.positive()}</Item>
-      <Item Name="Denominator">{m_denoms[m_data.exp()]}</Item>
-      <Item Name="RawBits">{to_bits()}</Item>
-    </Expand>
   </Type>
   <Type Name="awl::ring&lt;*,*&gt;">
     <DisplayString>size={m_size}, capacity={m_capacity}</DisplayString>
-    <Expand>
-      <Item Name="Size">{m_size}</Item>
-      <Item Name="Capacity">{m_capacity}</Item>
-      <Item Name="Front" Condition="m_size != 0">{front()}</Item>
-      <Item Name="Back" Condition="m_size != 0">{back()}</Item>
-      <IndexListItems>
-        <Size>{m_size}</Size>
-        <ValueNode>{operator[]($i)}</ValueNode>
-      </IndexListItems>
-    </Expand>
-  </Type>
-  <Type Name="awl::io::AtomicStorage">
-    <DisplayString Condition="IsOpened()">opened, master length={m_s.GetLength()}, backup length={m_backup.GetLength()}</DisplayString>
-    <DisplayString Condition="!IsOpened()">not opened</DisplayString>
-    <Expand>
-      <Item Name="Opened">{IsOpened()}</Item>
-      <Item Name="Empty" Condition="IsOpened()">{IsEmpty()}</Item>
-      <Item Name="Master File" Condition="IsOpened()">{m_s.GetFileName()}</Item>
-      <Item Name="Master Length" Condition="IsOpened()">{m_s.GetLength()}</Item>
-      <Item Name="Backup File" Condition="IsOpened()">{m_backup.GetFileName()}</Item>
-      <Item Name="Backup Length" Condition="IsOpened()">{m_backup.GetLength()}</Item>
-      <Item Name="Save Pending">{m_saveFuture.valid()}</Item>
-    </Expand>
   </Type>
 </AutoVisualizer>
