@@ -1,4 +1,5 @@
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio.hpp>
 #include <boost/asio/redirect_error.hpp>
@@ -243,7 +244,7 @@ namespace
             run();
         }
 
-        awaitable<void> runCopyPipeline2(bool use_handler)
+        awaitable<void> runCopyPipeline2()
         {
             auto exec = co_await asio::this_coro::executor;
 
@@ -544,7 +545,6 @@ AWL_EXAMPLE(CopyFileWithChannel2)
     FileCopier example{ context };
 
     AWL_FLAG(on_pool);
-    AWL_FLAG(use_handler);
 
     if (on_pool)
     {
@@ -552,16 +552,15 @@ AWL_EXAMPLE(CopyFileWithChannel2)
 
         asio::thread_pool pool(thread_count);
 
-        asio::co_spawn(pool, example.runCopyPipeline2(use_handler), asio::detached);
+        asio::co_spawn(pool, example.runCopyPipeline2(), asio::detached);
 
         pool.join();
-
     }
     else
     {
         asio::io_context io;
 
-        asio::co_spawn(io, example.runCopyPipeline2(use_handler), asio::detached);
+        asio::co_spawn(io, example.runCopyPipeline2(), asio::detached);
 
         io.run();
     }
@@ -585,7 +584,6 @@ AWL_EXAMPLE(CopyFileWithChannel3)
         asio::co_spawn(pool, example.runCopyPipeline3(use_handler), asio::detached);
 
         pool.join();
-
     }
     else
     {
@@ -613,7 +611,6 @@ AWL_EXAMPLE(CopyFileWithChannel4)
         asio::co_spawn(pool, example.runCopyPipeline4(use_handler), asio::detached);
 
         pool.join();
-
     }
     else
     {

@@ -52,7 +52,7 @@ namespace awl
 
     public:
 
-        void add_task(UpdateTask&& task, Key key, Value value)
+        void spawn(UpdateTask&& task, Key key, Value value)
         {
             // A couroutine has executed as a regular function.
             if (!task.done())
@@ -66,7 +66,7 @@ namespace awl
                 task.subscribe(&handler);
             }
 
-            m_pool.add_task(std::move(task));
+            m_pool.spawn(std::move(task));
         }
 
         std::size_t task_count() const

@@ -113,7 +113,7 @@ AWL_TEST(CoroControllerCancel)
 {
     awl::TaskPool controller;
 
-    controller.add_task(test(context));
+    controller.spawn(test(context));
 
     awl::testing::timeQueue.loop(3);
 
@@ -133,7 +133,7 @@ AWL_TEST(CoroControllerRegistered)
 {
     awl::TaskPool controller;
 
-    controller.add_task(test(context));
+    controller.spawn(test(context));
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
@@ -201,9 +201,9 @@ namespace awl
 
         static void RegisterTasks(const awl::testing::TestContext& context, awl::TaskPool& controller)
         {
-            controller.add_task(PrintFinished(context, 1));
-            controller.add_task(PrintFinished(context, 2));
-            controller.add_task(PrintFinished(context, 3));
+            controller.spawn(PrintFinished(context, 1));
+            controller.spawn(PrintFinished(context, 2));
+            controller.spawn(PrintFinished(context, 3));
 
             AWL_ASSERT_EQUAL(3u, controller.task_count());
         }

@@ -48,3 +48,5 @@ endif()
 if (AWL_DEBUG_IMMUTABLE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_DEBUG_IMMUTABLE)
 endif()
+
+include(${AWL_ROOT_DIR}/CMake/AwlIdeSupport.cmake)

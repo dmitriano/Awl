@@ -3,6 +3,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/any_io_executor.hpp>
