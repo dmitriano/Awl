@@ -784,3 +784,64 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
         context.logger.debug(awl::format() << "area #2: " << area);
     }
 }
+
+AWL_EXAMPLE(DecimalEmpty)
+{
+    try
+    {
+        const Decimal64 a("+");
+
+        AWL_FAILM("+ failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("-");
+
+        AWL_FAILM("- failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("");
+
+        AWL_FAILM("empty failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+}
+
+AWL_EXAMPLE(DecimalWrongCharactes)
+{
+    try
+    {
+        const Decimal64 a("123a");
+
+        AWL_FAILM("123a failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("a123");
+
+        AWL_FAILM("a123 failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+}

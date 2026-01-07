@@ -695,13 +695,9 @@ namespace awl
     {
         using string_view = std::basic_string_view<C>;
 
-        if (fixed_string.empty())
-        {
-            throw std::runtime_error("An empty string is not a valid decimal value.");
-        }
-        
         bool positive = true;
 
+        if (!fixed_string.empty())
         {
             typename string_view::const_iterator i = fixed_string.begin();
 
@@ -714,6 +710,11 @@ namespace awl
 
             //Construction from the iterators is C++20 feature.
             fixed_string = make_string_view<C>(i, fixed_string.end());
+        }
+
+        if (fixed_string.empty())
+        {
+            throw std::runtime_error("An empty string is not a valid decimal value.");
         }
 
         auto [i, int_digits, int_part] = parse_int(fixed_string, true);
