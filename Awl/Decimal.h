@@ -12,12 +12,14 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <cassert>
 #include <limits>
 #include <array>
 #include <cmath>
 #include <tuple>
 #include <stdexcept>
+#include <format>
 
 namespace awl
 {
@@ -881,6 +883,21 @@ namespace awl
 
         return a;
     }
+}
+
+namespace std
+{
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class CharT>
+    struct formatter<awl::decimal<UInt, exp_len, DataTemplate>, CharT> : formatter<std::basic_string<CharT>, CharT>
+    {
+        template <class FormatContext>
+        auto format(const awl::decimal<UInt, exp_len, DataTemplate>& val, FormatContext& ctx) const
+        {
+            std::basic_ostringstream<CharT> out;
+            out << val;
+            return formatter<std::basic_string<CharT>, CharT>::format(out.str(), ctx);
+        }
+    };
 }
 
 namespace std

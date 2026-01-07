@@ -14,6 +14,8 @@
 #endif
 
 #include <functional>
+#include <format>
+#include <sstream>
 
 #if defined(AWL_INT_128)
 
@@ -819,6 +821,23 @@ AWL_EXAMPLE(DecimalEmpty)
     {
         context.logger.debug(e.what());
     }
+}
+
+AWL_TEST(DecimalStdFormatter)
+{
+    Decimal64 d("123.4500"sv);
+
+    std::basic_ostringstream<awl::Char> out;
+    out << d;
+    const awl::String stream_text = out.str();
+    const awl::String formatted = std::format(_T("{}"), d);
+
+    AWL_ASSERT(formatted == stream_text);
+
+    const awl::String padded = std::format(_T("{:>12}"), d);
+    const awl::String padded_expected = std::format(_T("{:>12}"), stream_text);
+
+    AWL_ASSERT(padded == padded_expected);
 }
 
 AWL_EXAMPLE(DecimalWrongCharactes)
