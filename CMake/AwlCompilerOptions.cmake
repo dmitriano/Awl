@@ -77,6 +77,15 @@ if (AWL_STATIC_RUNTIME)
     endif()
 endif()
 
+if (AWL_BIGOBJ)
+    message(STATUS "Enabling BIGOBJ.")
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE /bigobj)
+    else()
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wa,-mbig-obj)
+    endif()
+endif()
+
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # Use home made std::formatter for std::thread::id.
     target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_THREAD_ID_FORMATTER)

@@ -1,3 +1,8 @@
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+    message(STATUS "POLICY CMP0167 has been set to NEW to prevent BOOST warnings.")
+endif()
+
 #header-only libraries have no designated component
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
