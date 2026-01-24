@@ -1,3 +1,19 @@
+# I tried to prevent the following warning from QT6 find package:
+
+#   CMP0156 is set to 'NEW'.  Qt forces the 'OLD' behavior of this policy for
+#   non-Apple platforms by default.  Set QT_FORCE_CMP0156_TO_VALUE=NEW to force
+#   the 'NEW' behavior for Qt commands that create library or executable
+#   targets.
+
+# with the following code:
+
+# if (NOT APPLE)
+#     cmake_policy(SET CMP0156 OLD)
+#     message(STATUS "POLICY CMP0156 has been set to OLD to avoid QT warnings.")
+# endif()
+
+# but it did not help
+
 find_package(Qt6 COMPONENTS Core REQUIRED)
 
 message(STATUS "Using QT6. Include path: ${Qt6_INCLUDE_DIRS}. Applying the workaround for QT Creator.")

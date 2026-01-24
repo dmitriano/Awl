@@ -13,11 +13,6 @@ if(POLICY CMP0167)
     message(STATUS "POLICY CMP0167 has been set to NEW to prevent BOOST warnings.")
 endif()
 
-if (NOT APPLE)
-    cmake_policy(SET CMP0156 OLD)
-    message(STATUS "POLICY CMP0156 has been set to OLD to avoid QT warnings.")
-endif()
-
 set(CMAKE_CXX_STANDARD 23)
 
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
