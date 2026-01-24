@@ -1,7 +1,7 @@
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
     # set(AWL_JTHREAD_EXTRAS ON)
-    add_definitions("-fexperimental-library")
+    target_compile_options(${PROJECT_NAME} PRIVATE "-fexperimental-library")
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -19,16 +19,16 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID
     target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-unused-function")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE "-Wall -Wextra -pedantic")
-    #add_definitions("-Wall -Wextra -pedantic -pthread")
+    #target_compile_options(${PROJECT_NAME} PRIVATE "-Wall -Wextra -pedantic -pthread")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
-    # add_compile_options("/std:c++latest")
+    # target_compile_options(${PROJECT_NAME} PRIVATE "/std:c++latest")
     target_compile_options(${PROJECT_NAME} PRIVATE "/W4" "/Zc:__cplusplus")
-    add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+    target_compile_options(${PROJECT_NAME} PRIVATE -MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
     if (AWL_NO_DEPRECATED)
-        add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
+        target_compile_options(${PROJECT_NAME} PRIVATE -D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
     endif()
 endif()
 
@@ -59,7 +59,7 @@ if (${AWL_COMPILER_GNU_OR_CLANG})
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
         message(STATUS "Enabling 128 bit integer support.")
-        add_compile_definitions(AWL_INT_128)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_INT_128)
     endif()
     if (AWL_NO_DEPRECATED)
         target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-deprecated -Wno-deprecated-declarations")
