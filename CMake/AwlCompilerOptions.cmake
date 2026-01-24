@@ -25,10 +25,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
     # target_compile_options(${PROJECT_NAME} PRIVATE "/std:c++latest")
-    target_compile_options(${PROJECT_NAME} PRIVATE "/W4" "/Zc:__cplusplus")
-    target_compile_options(${PROJECT_NAME} PRIVATE -MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+    target_compile_options(${PROJECT_NAME} PRIVATE -MP "/W4" "/Zc:__cplusplus")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE _CRT_SECURE_NO_WARNINGS NOMINMAX)
     if (AWL_NO_DEPRECATED)
-        target_compile_options(${PROJECT_NAME} PRIVATE -D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
     endif()
 endif()
 
