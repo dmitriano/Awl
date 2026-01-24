@@ -8,10 +8,14 @@ cmake_path(GET CMAKE_CURRENT_LIST_DIR PARENT_PATH AWL_ROOT_DIR)
 message(STATUS "AWL_ROOT_DIR: ${AWL_ROOT_DIR}")
 set(AWL_DIR ${AWL_ROOT_DIR}/Awl)
 
-# Prevent BOOST warnings.
 if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
-    message(STATUS "POLICY CMP0167 has been set to NEW.")
+    message(STATUS "POLICY CMP0167 has been set to NEW to prevent BOOST warnings.")
+endif()
+
+if (NOT APPLE)
+    cmake_policy(SET CMP0156 OLD)
+    message(STATUS "POLICY CMP0156 has been set to OLD to avoid QT warnings.")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)

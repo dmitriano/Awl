@@ -1,8 +1,3 @@
-if (NOT APPLE)
-    cmake_policy(SET CMP0156 OLD)
-    message(STATUS "POLICY CMP0156 has been set to OLD to avoid QT warnings.")
-endif()
-
 find_package(Qt6 COMPONENTS Core REQUIRED)
 
 message(STATUS "Using QT6. Include path: ${Qt6_INCLUDE_DIRS}. Applying the workaround for QT Creator.")
