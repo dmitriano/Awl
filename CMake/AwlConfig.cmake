@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 
+option(AWL_PARALLEL_BUILD "Enable parallel build with MSVC." ON)
 option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
 option(AWL_FIND_OPENSSL "Use OpenSSL.")
 option(AWL_FIND_QT "Use QString if the project is built with QT.")

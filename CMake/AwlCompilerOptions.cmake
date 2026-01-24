@@ -23,7 +23,11 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
-    target_compile_options(${PROJECT_NAME} PRIVATE -MP "/W4" "/Zc:__cplusplus")
+    if (AWL_PARALLEL_BUILD)
+        message(STATUS "Enabling parallel build with -MP option.")
+        target_compile_options(${PROJECT_NAME} PRIVATE -MP)
+    endif()
+    target_compile_options(${PROJECT_NAME} PRIVATE "/W4" "/Zc:__cplusplus")
     target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE _CRT_SECURE_NO_WARNINGS NOMINMAX)
     if (AWL_NO_DEPRECATED)
         target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
