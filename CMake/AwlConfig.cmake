@@ -11,7 +11,7 @@ set(AWL_DIR ${AWL_ROOT_DIR}/Awl)
 # Prevent BOOST warnings.
 if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
-    message(STATUS "POLICY CMP0167 has been set.")
+    message(STATUS "POLICY CMP0167 has been set to NEW.")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)
