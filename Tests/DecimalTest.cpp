@@ -825,6 +825,8 @@ AWL_EXAMPLE(DecimalEmpty)
 
 AWL_TEST(DecimalStdFormatter)
 {
+    AWL_UNUSED_CONTEXT;
+
     Decimal64 d("123.4500"sv);
 
     std::basic_ostringstream<awl::Char> out;

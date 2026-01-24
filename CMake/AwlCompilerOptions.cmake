@@ -1,7 +1,7 @@
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
     # set(AWL_JTHREAD_EXTRAS ON)
-    target_compile_options(${PROJECT_NAME} PRIVATE "-fexperimental-library")
+    target_compile_options(${PROJECT_NAME} PRIVATE -fexperimental-library)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -9,22 +9,20 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(AWL_JTHREAD_EXTRAS ON)
     else()
         # Android Clang has std::jthread since 20.0 as experimental.
-        target_compile_options(${PROJECT_NAME} PRIVATE "-fexperimental-library")
+        target_compile_options(${PROJECT_NAME} PRIVATE -fexperimental-library)
     endif()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE "-Wall -Wextra -pedantic")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
     # Unused operators in local namespaces defined by AWL_MEMBERWISE_EQUATABLE
-    target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-unused-function")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-function)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_compile_options(${PROJECT_NAME} PRIVATE "-Wall -Wextra -pedantic")
-    #target_compile_options(${PROJECT_NAME} PRIVATE "-Wall -Wextra -pedantic -pthread")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
-    # target_compile_options(${PROJECT_NAME} PRIVATE "/std:c++latest")
     target_compile_options(${PROJECT_NAME} PRIVATE -MP "/W4" "/Zc:__cplusplus")
     target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE _CRT_SECURE_NO_WARNINGS NOMINMAX)
     if (AWL_NO_DEPRECATED)
@@ -62,7 +60,7 @@ if (${AWL_COMPILER_GNU_OR_CLANG})
         target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_INT_128)
     endif()
     if (AWL_NO_DEPRECATED)
-        target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-deprecated -Wno-deprecated-declarations")
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-deprecated-declarations)
     endif()
 endif()
 
