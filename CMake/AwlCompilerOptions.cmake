@@ -1,7 +1,7 @@
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # Apple Clang does not have std::jthread.
     # set(AWL_JTHREAD_EXTRAS ON)
-    add_definitions("-fexperimental-library")
+    target_compile_options(${PROJECT_NAME} PRIVATE -fexperimental-library)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -9,26 +9,28 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(AWL_JTHREAD_EXTRAS ON)
     else()
         # Android Clang has std::jthread since 20.0 as experimental.
-        add_definitions("-fexperimental-library")
+        target_compile_options(${PROJECT_NAME} PRIVATE -fexperimental-library)
     endif()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_definitions("-Wall -Wextra -pedantic")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
     # Unused operators in local namespaces defined by AWL_MEMBERWISE_EQUATABLE
-    add_definitions("-Wno-unused-function")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wno-unused-function)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_definitions("-Wall -Wextra -pedantic")
-    #add_definitions("-Wall -Wextra -pedantic -pthread")
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # using Visual Studio C++
-    # add_compile_options("/std:c++latest")
-    add_compile_options("/W4" "/Zc:__cplusplus")
-    add_definitions(-MP -D_UNICODE -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX)
+    if (AWL_PARALLEL_BUILD)
+        message(STATUS "Enabling parallel build with -MP option.")
+        target_compile_options(${PROJECT_NAME} PRIVATE -MP)
+    endif()
+    target_compile_options(${PROJECT_NAME} PRIVATE "/W4" "/Zc:__cplusplus")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE _CRT_SECURE_NO_WARNINGS NOMINMAX)
     if (AWL_NO_DEPRECATED)
-        add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
     endif()
 endif()
 
@@ -59,10 +61,10 @@ if (${AWL_COMPILER_GNU_OR_CLANG})
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
         message(STATUS "Enabling 128 bit integer support.")
-        add_compile_definitions(AWL_INT_128)
+        target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_INT_128)
     endif()
     if (AWL_NO_DEPRECATED)
-        add_definitions("-Wno-deprecated -Wno-deprecated-declarations")
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wno-deprecated -Wno-deprecated-declarations)
     endif()
 endif()
 
@@ -74,6 +76,15 @@ if (AWL_STATIC_RUNTIME)
         target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:Debug>:/MTd>
             $<$<NOT:$<CONFIG:Debug>>:/MT>)
+    endif()
+endif()
+
+if (AWL_BIGOBJ)
+    message(STATUS "Enabling BIGOBJ.")
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE /bigobj)
+    else()
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wa,-mbig-obj)
     endif()
 endif()
 

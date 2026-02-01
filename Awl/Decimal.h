@@ -12,12 +12,14 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <cassert>
 #include <limits>
 #include <array>
 #include <cmath>
 #include <tuple>
 #include <stdexcept>
+#include <format>
 
 namespace awl
 {
@@ -695,13 +697,9 @@ namespace awl
     {
         using string_view = std::basic_string_view<C>;
 
-        if (fixed_string.empty())
-        {
-            throw std::runtime_error("An empty string is not a valid decimal value.");
-        }
-        
         bool positive = true;
 
+        if (!fixed_string.empty())
         {
             typename string_view::const_iterator i = fixed_string.begin();
 
@@ -714,6 +712,11 @@ namespace awl
 
             //Construction from the iterators is C++20 feature.
             fixed_string = make_string_view<C>(i, fixed_string.end());
+        }
+
+        if (fixed_string.empty())
+        {
+            throw std::runtime_error("An empty string is not a valid decimal value.");
         }
 
         auto [i, int_digits, int_part] = parse_int(fixed_string, true);
@@ -880,6 +883,21 @@ namespace awl
 
         return a;
     }
+}
+
+namespace std
+{
+    template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class CharT>
+    struct formatter<awl::decimal<UInt, exp_len, DataTemplate>, CharT> : formatter<std::basic_string<CharT>, CharT>
+    {
+        template <class FormatContext>
+        auto format(const awl::decimal<UInt, exp_len, DataTemplate>& val, FormatContext& ctx) const
+        {
+            std::basic_ostringstream<CharT> out;
+            out << val;
+            return formatter<std::basic_string<CharT>, CharT>::format(out.str(), ctx);
+        }
+    };
 }
 
 namespace std

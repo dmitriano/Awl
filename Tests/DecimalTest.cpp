@@ -14,6 +14,8 @@
 #endif
 
 #include <functional>
+#include <format>
+#include <sstream>
 
 #if defined(AWL_INT_128)
 
@@ -782,5 +784,85 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
         const Decimal64 area = awl::multiply(a, b) + awl::multiply((awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
 
         context.logger.debug(awl::format() << "area #2: " << area);
+    }
+}
+
+AWL_EXAMPLE(DecimalEmpty)
+{
+    try
+    {
+        const Decimal64 a("+");
+
+        AWL_FAILM("+ failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("-");
+
+        AWL_FAILM("- failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("");
+
+        AWL_FAILM("empty failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+}
+
+AWL_TEST(DecimalStdFormatter)
+{
+    AWL_UNUSED_CONTEXT;
+
+    Decimal64 d("123.4500"sv);
+
+    std::basic_ostringstream<awl::Char> out;
+    out << d;
+    const awl::String stream_text = out.str();
+    const awl::String formatted = std::format(_T("{}"), d);
+
+    AWL_ASSERT(formatted == stream_text);
+
+    const awl::String padded = std::format(_T("{:>12}"), d);
+    const awl::String padded_expected = std::format(_T("{:>12}"), stream_text);
+
+    AWL_ASSERT(padded == padded_expected);
+}
+
+AWL_EXAMPLE(DecimalWrongCharactes)
+{
+    try
+    {
+        const Decimal64 a("123a");
+
+        AWL_FAILM("123a failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
+    }
+
+    try
+    {
+        const Decimal64 a("a123");
+
+        AWL_FAILM("a123 failed.");
+    }
+    catch (const std::runtime_error& e)
+    {
+        context.logger.debug(e.what());
     }
 }
