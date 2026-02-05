@@ -29,7 +29,7 @@ namespace awl::testing
 //A test is simply a static function.
 #define AWL_LINK(test_name, suffix) \
     AWL_LINK_FUNC_SIGNATURE(test_name); \
-    static awl::testing::TestLink test_name##_##suffix_TestLink(#test_name "_" #suffix, &AWL_LINK_FUNC_NAME(test_name)); \
+    static awl::testing::TestLink test_name##_##suffix##_TestLink(#test_name "_" #suffix, &AWL_LINK_FUNC_NAME(test_name)); \
     AWL_LINK_FUNC_SIGNATURE(test_name)
 
 #define AWL_DISABLED_FUNC(test_name) \
