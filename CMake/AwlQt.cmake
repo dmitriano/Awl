@@ -25,6 +25,12 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 )
 target_compile_definitions(${PROJECT_NAME} PRIVATE AWL_QT QT_NO_EMIT)
 target_include_directories(${PROJECT_NAME} PRIVATE ${Qt6_INCLUDE_DIRS} ${AWL_ROOT_DIR}/Extras/Qt)
-file(GLOB_RECURSE QT_EXTTRAS_FILES ${CMAKE_SOURCE_DIR}/Extras/Qt/*.h ${AWL_ROOT_DIR}/Extras/Qt/*.cpp)
+file(GLOB_RECURSE QT_EXTTRAS_FILES ${AWL_ROOT_DIR}/Extras/Qt/QtExtras/*.h ${AWL_ROOT_DIR}/Extras/Qt/QtExtras/*.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${QT_EXTTRAS_FILES})
+
+if (AWL_COMPILE_TESTS)
+    file(GLOB_RECURSE QT_EXTTRAS_TEST_FILES ${AWL_ROOT_DIR}/Extras/Qt/Tests/*.h ${AWL_ROOT_DIR}/Extras/Qt/Tests/*.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE ${QT_EXTTRAS_TEST_FILES})
+endif()
+
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core)

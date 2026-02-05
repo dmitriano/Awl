@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_LIBRARIES})
 message(STATUS "BOOST libs: ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY}.")
 
 if (AWL_COMPILE_TESTS)
-    file(GLOB_RECURSE BOOST_TEST_FILES ${CMAKE_SOURCE_DIR}/Extras/Boost/Tests/*.h ${AWL_ROOT_DIR}/Extras/Boost/Tests/*.cpp)
+    file(GLOB_RECURSE BOOST_TEST_FILES ${AWL_ROOT_DIR}/Extras/Boost/Tests/*.h ${AWL_ROOT_DIR}/Extras/Boost/Tests/*.cpp)
     target_sources(${PROJECT_NAME} PRIVATE ${BOOST_TEST_FILES})
 endif()
 

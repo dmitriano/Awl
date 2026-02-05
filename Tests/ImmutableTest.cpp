@@ -324,7 +324,7 @@ AWL_TEST(ImmutableString)
 
     // We use val like std::optional
 
-    [[maybe_unused]] auto symbol = (*val)[0];
+    [[maybe_unused]] auto temp_symbol = (*val)[0];
 
     // error C3892: 'val': you cannot assign to a variable that is const
     // (*val)[0] = 'z';
