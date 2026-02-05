@@ -25,9 +25,9 @@
 namespace awl::testing
 {
     template <attribute_provider Provider>
-    TestConsole<Provider>::TestConsole(Provider& ap) :
+    TestConsole<Provider>::TestConsole(Provider& ap, std::stop_token token) :
         m_ap(ap),
-        m_context{ m_logger, m_source.get_token(), m_ap }
+        m_context{ m_logger, std::move(token), m_ap}
     {
     }
 
@@ -108,7 +108,7 @@ namespace awl::testing
         return 2;
     }
 
-    int Run(int argc, CmdChar* argv[])
+    int Run(int argc, CmdChar* argv[], std::stop_token token)
     {
         CommandLineProvider cl(argc, argv);
 
@@ -163,7 +163,7 @@ namespace awl::testing
 
 #endif
 
-        TestConsole console(ap);
+        TestConsole console(ap, std::move(token));
 
         auto guard = make_scope_guard([&ap]
         {
@@ -178,8 +178,8 @@ namespace awl::testing
         return console.Run();
     }
 
-    int Run()
+    int Run(std::stop_token token)
     {
-        return Run(0, nullptr);
+        return Run(0, nullptr, std::move(token));
     }
 }

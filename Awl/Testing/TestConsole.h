@@ -27,7 +27,7 @@ namespace awl::testing
     {
     public:
 
-        explicit TestConsole(Provider& ap);
+        explicit TestConsole(Provider& ap, std::stop_token token);
 
         int Run();
 
@@ -40,8 +40,6 @@ namespace awl::testing
 
         bool RunTests();
             
-        std::stop_source m_source;
-
         ConsoleLogger m_logger;
 
         Provider& m_ap;
@@ -49,7 +47,7 @@ namespace awl::testing
         TestContext m_context;
     };
 
-    int Run();
+    int Run(std::stop_token token);
 
-    int Run(int argc, CmdChar* argv[]);
+    int Run(int argc, CmdChar* argv[], std::stop_token token);
 }
