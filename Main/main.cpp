@@ -20,7 +20,9 @@ int _tmain(int argc, awl::Char * argv[])
 {
     try
     {
-        return awl::testing::Run(argc, argv);
+        std::stop_source source;
+
+        return awl::testing::Run(argc, argv, source.get_token());
     }
     catch (const awl::testing::TestException& e)
     {
