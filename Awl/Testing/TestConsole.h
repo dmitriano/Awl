@@ -47,7 +47,11 @@ namespace awl::testing
         TestContext m_context;
     };
 
+    int Run();
+
     int Run(std::stop_token token);
+
+    int Run(int argc, CmdChar* argv[]);
 
     int Run(int argc, CmdChar* argv[], std::stop_token token);
 }

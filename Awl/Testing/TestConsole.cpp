@@ -178,6 +178,20 @@ namespace awl::testing
         return console.Run();
     }
 
+    int Run(int argc, CmdChar* argv[])
+    {
+        std::stop_source source;
+
+        return Run(argc, argv, source.get_token());
+    }
+
+    int Run()
+    {
+        std::stop_source source;
+
+        return Run(source.get_token());
+    }
+
     int Run(std::stop_token token)
     {
         return Run(0, nullptr, std::move(token));
