@@ -16,6 +16,9 @@
 
 find_package(Qt6 COMPONENTS Core REQUIRED)
 
+# Suppress "Qt policy QTP0002 is not set" warning.
+qt_policy(SET QTP0002 NEW)
+
 message(STATUS "Using QT6. Include path: ${Qt6_INCLUDE_DIRS}. Applying the workaround for QT Creator.")
 # Sometimes QT Creator requires the configuration to be exactly Debug or Release and not RelWithDebInfo,
 # so we make Release to be RelWithDebinfo with O3.
