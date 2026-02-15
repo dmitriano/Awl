@@ -72,6 +72,10 @@ namespace awl
             }
         }
 
+        // It is not clear enough if we really need const notify methods like this:
+        // template<typename ...Params, typename ... Args>
+        // void notify(void (IObserver::*func)(Params ...) const, const Args& ... args) const
+
         template<typename ...Params, typename ... Args>
         bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
         {
