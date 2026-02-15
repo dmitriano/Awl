@@ -283,24 +283,138 @@ AWL_TEST(Observable_ForwardArgs)
 
 namespace
 {
-    class X
+    template <class Signature, class F>
+    static void AssignHandler(awl::Observer<std::function<Signature>>& observer, F&& handler)
+    {
+        static_cast<std::function<Signature>&>(observer) = std::forward<F>(handler);
+    }
+
+    using FunctionHandler = awl::Observer<std::function<void(int)>>;
+
+    class FunctionObservable : public awl::Observable<std::function<void(int)>>
     {
     public:
-        X() {};
-        X(const X&) { called = "copy"; };
-        X(X&&) { called = "move"; };
 
-        std::string called;
+        void Emit(int val)
+        {
+            notify(val);
+        }
+    };
+
+    using PredicateHandler = awl::Observer<std::function<bool(int)>>;
+
+    class PredicateObservable : public awl::Observable<std::function<bool(int)>>
+    {
+    public:
+
+        bool EmitWhileTrue(int val)
+        {
+            return notifyWhileTrue(val);
+        }
     };
 }
 
-AWL_TEST(Observable_ConstMove)
+AWL_TEST(Observable_Function_Events)
 {
     AWL_UNUSED_CONTEXT;
 
-    const X x1;
-    X x2 = std::move(x1);
+    FunctionObservable observable;
 
-    AWL_ASSERT(x1.called == "");
-    AWL_ASSERT(x2.called == "copy");
+    FunctionHandler handler1;
+    FunctionHandler handler2;
+    FunctionHandler handler3;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+    int callCount3 = 0;
+
+    AssignHandler<void(int)>(handler1, [&](int) { ++callCount1; });
+    AssignHandler<void(int)>(handler2, [&](int) { ++callCount2; });
+    AssignHandler<void(int)>(handler3, [&](int) { ++callCount3; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    AWL_ASSERT_EQUAL(3u, observable.size());
+
+    observable.Emit(1);
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(1, callCount3);
+
+    handler1.unsubscribeSelf();
+    observable.unsubscribe(&handler2);
+
+    observable.Emit(2);
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(2, callCount3);
+}
+
+AWL_TEST(Observable_Function_NotifyWhileTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    PredicateObservable observable;
+
+    PredicateHandler handler1;
+    PredicateHandler handler2;
+    PredicateHandler handler3;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+    int callCount3 = 0;
+
+    AssignHandler<bool(int)>(handler1, [&](int) { ++callCount1; return true; });
+    AssignHandler<bool(int)>(handler2, [&](int) { ++callCount2; return false; });
+    AssignHandler<bool(int)>(handler3, [&](int) { ++callCount3; return true; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.EmitWhileTrue(10);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at false."));
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(0, callCount3);
+}
+
+AWL_TEST(Observable_FunctionObserver_Move)
+{
+    AWL_UNUSED_CONTEXT;
+
+    FunctionObservable observable;
+
+    FunctionHandler handler1;
+    FunctionHandler handler2;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+
+    AssignHandler<void(int)>(handler1, [&](int) { ++callCount1; });
+    AssignHandler<void(int)>(handler2, [&](int) { ++callCount2; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    FunctionHandler handler1_copy = std::move(handler1);
+
+    FunctionHandler handler2_copy;
+    handler2_copy = std::move(handler2);
+
+    observable.Emit(5);
+
+    AWL_ASSERTM_FALSE(handler1.isSubscribed(), _T("Observer #1 is included"));
+    AWL_ASSERTM_FALSE(handler2.isSubscribed(), _T("Observer #2 is included"));
+
+    AWL_ASSERTM_TRUE(handler1_copy.isSubscribed(), _T("Observer copy #1 is not included"));
+    AWL_ASSERTM_TRUE(handler2_copy.isSubscribed(), _T("Observer copy #2 is not included"));
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
 }

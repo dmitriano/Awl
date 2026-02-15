@@ -82,16 +82,20 @@ namespace awl
         // template<typename ...Params, typename ... Args>
         // void notify(void (IObserver::*func)(Params ...) const, const Args& ... args) const
 
-        template<typename ...Params, typename ... Args>
-        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
-            requires (sizeof...(Params) == sizeof...(Args) && (std::is_convertible_v<Args, Params> && ...))
+        template<typename TResult, typename ...Params, typename ... Args>
+        bool notifyWhileTrue(TResult (IObserver::* func)(Params ...), const Args& ... args)
+            requires (
+                std::is_convertible_v<TResult, bool> &&
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
         {
             for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver* p_observer = *(i++);
 
-                if (!(p_observer->*func)(args ...))
+                if (!static_cast<bool>((p_observer->*func)(args ...)))
                 {
                     return false;
                 }
