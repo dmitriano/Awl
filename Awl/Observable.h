@@ -68,16 +68,6 @@ namespace awl
 
         protected:
 
-            ObserverList& observers()
-            {
-                return m_observers;
-            }
-
-            const ObserverList& observers() const
-            {
-                return m_observers;
-            }
-
             template <class Callable>
             void notifyImpl(Callable&& call)
                 requires std::invocable<Callable&, ObserverElement*>
