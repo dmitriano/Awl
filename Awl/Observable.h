@@ -205,13 +205,21 @@ namespace awl
 
         template<typename ... Args>
         void notify(const Args& ... args)
+            requires (
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
         {
             Base::notifyImpl([&](FunctionObserver* p_observer) { (*p_observer)(args ...); });
         }
 
         template<typename ... Args>
         bool notifyWhileTrue(const Args& ... args)
-            requires std::is_convertible_v<Result, bool>
+            requires (
+                std::is_convertible_v<Result, bool> &&
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
         {
             return Base::notifyWhileTrueImpl([&](FunctionObserver* p_observer) { return (*p_observer)(args ...); });
         }
