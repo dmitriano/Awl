@@ -96,7 +96,7 @@ namespace awl
     }
 
     template <class IObserver, class Enclosing = void>
-    class Observable : public details::ObservableImpl<IObserver, Enclosing>
+    class Observable : private details::ObservableImpl<IObserver, Enclosing>
     {
     private:
 
@@ -142,10 +142,10 @@ namespace awl
         // template<typename ...Params, typename ... Args>
         // void notify(void (IObserver::*func)(Params ...) const, const Args& ... args) const
 
-        template<typename TResult, typename ...Params, typename ... Args>
-        bool notifyWhileTrue(TResult (IObserver::* func)(Params ...), const Args& ... args)
+        template<typename Result, typename ...Params, typename ... Args>
+        bool notifyWhileTrue(Result (IObserver::* func)(Params ...), const Args& ... args)
             requires (
-                std::is_convertible_v<TResult, bool> &&
+                std::is_convertible_v<Result, bool> &&
                 sizeof...(Params) == sizeof...(Args) &&
                 (std::is_convertible_v<Args, Params> && ...)
             )
@@ -166,18 +166,17 @@ namespace awl
             return true;
         }
 
-    private:
         friend Enclosing;
     };
 
-    template <class TResult, class... Params, class Enclosing>
-    class Observable<std::function<TResult(Params...)>, Enclosing> :
-        public details::ObservableImpl<std::function<TResult(Params...)>, Enclosing>
+    template <class Result, class... Params, class Enclosing>
+    class Observable<std::function<Result(Params...)>, Enclosing> :
+        private details::ObservableImpl<std::function<Result(Params...)>, Enclosing>
     {
     private:
 
-        using Base = details::ObservableImpl<std::function<TResult(Params...)>, Enclosing>;
-        using FunctionObserver = std::function<TResult(Params...)>;
+        using Base = details::ObservableImpl<std::function<Result(Params...)>, Enclosing>;
+        using FunctionObserver = std::function<Result(Params...)>;
         using ObserverList = typename Base::ObserverList;
 
     public:
@@ -214,7 +213,7 @@ namespace awl
 
         template<typename ... Args>
         bool notifyWhileTrue(const Args& ... args)
-            requires std::is_convertible_v<TResult, bool>
+            requires std::is_convertible_v<Result, bool>
         {
             ObserverList& observer_list = Base::observers();
 
@@ -232,7 +231,6 @@ namespace awl
             return true;
         }
 
-    private:
         friend Enclosing;
     };
 }
