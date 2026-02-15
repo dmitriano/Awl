@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 namespace awl
 {
     class TaskSink
@@ -10,10 +12,5 @@ namespace awl
     };
 
     template <class Key, class Value>
-    class MappedTaskSink
-    {
-    public:
-
-        virtual void OnFinished(const Key& key, const Value& value) = 0;
-    };
+    using MappedTaskFinishedCallback = std::function<void(const Key& key, const Value& value)>;
 }

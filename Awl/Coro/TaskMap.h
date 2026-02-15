@@ -13,7 +13,7 @@
 namespace awl
 {
     template <class Key, class Value>
-    class TaskMap : public awl::Observable<MappedTaskSink<Key, Value>>
+    class TaskMap : public awl::Observable<MappedTaskFinishedCallback<Key, Value>>
     {
     private:
 
@@ -44,7 +44,7 @@ namespace awl
 
                 pThis->m_handlers.erase(pThis->m_handlers.begin() + index);
 
-                pThis->notify(&MappedTaskSink<Key, Value>::OnFinished, temp_key, temp_value);
+                pThis->notify(temp_key, temp_value);
             }
         };
 
