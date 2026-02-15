@@ -67,6 +67,7 @@ namespace awl
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
         void notify(void (IObserver::*func)(Params ...), const Args& ... args)
+            requires (sizeof...(Params) == sizeof...(Args) && (std::is_convertible_v<Args, Params> && ...))
         {
             for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
@@ -83,6 +84,7 @@ namespace awl
 
         template<typename ...Params, typename ... Args>
         bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
+            requires (sizeof...(Params) == sizeof...(Args) && (std::is_convertible_v<Args, Params> && ...))
         {
             for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
@@ -171,7 +173,8 @@ namespace awl
 
     protected:
 
-        void notify(Params ... args)
+        template<typename ... Args>
+        void notify(const Args& ... args)
         {
             for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
@@ -182,7 +185,8 @@ namespace awl
             }
         }
 
-        bool notifyWhileTrue(Params ... args)
+        template<typename ... Args>
+        bool notifyWhileTrue(const Args& ... args)
         {
             static_assert(std::is_convertible_v<TResult, bool>, "notifyWhileTrue requires std::function with bool-convertible result type.");
 
