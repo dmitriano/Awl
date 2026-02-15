@@ -12,9 +12,11 @@ namespace awl
     template <class IObserver, class Enclosing = void>
     class Observable
     {
-    public:
+    private:
 
         using ObserverElement = Observer<IObserver>;
+
+    public:
 
         Observable() = default;
 
@@ -25,20 +27,20 @@ namespace awl
 
         Observable(const Observable& other) = delete;
 
-        Observable(Observable&& other) : Observers(std::move(other.Observers)) {}
+        Observable(Observable&& other) : m_observers(std::move(other.m_observers)) {}
 
         Observable& operator = (const Observable& other) = delete;
 
         Observable& operator = (Observable&& other) noexcept
         {
             clearObservers();
-            Observers = std::move(other.Observers);
+            m_observers = std::move(other.m_observers);
             return *this;
         }
 
         void subscribe(ObserverElement* p_observer)
         {
-            Observers.push_back(p_observer);
+            m_observers.push_back(p_observer);
         }
 
         void unsubscribe(ObserverElement* p_observer)
@@ -48,12 +50,12 @@ namespace awl
 
         bool empty() const
         {
-            return Observers.empty();
+            return m_observers.empty();
         }
 
         auto size() const
         {
-            return Observers.size();
+            return m_observers.size();
         }
 
     protected:
@@ -63,7 +65,7 @@ namespace awl
         template<typename ...Params, typename ... Args>
         void notify(void (IObserver::*func)(Params ...), const Args& ... args)
         {
-            for (typename ObserverList::iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver * p_observer = *(i++);
@@ -79,7 +81,7 @@ namespace awl
         template<typename ...Params, typename ... Args>
         bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
         {
-            for (typename ObserverList::iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver* p_observer = *(i++);
@@ -98,18 +100,18 @@ namespace awl
         //If the observable is deleted before its observers,
         //we remove them from the list, otherwise they will think that they are included and
         //their destructors will delete them from already destroyed list.
-        //So we can't use Observers.clear() here because it only clears list's head.
+        //So we can't use m_observers.clear() here because it only clears list's head.
         void clearObservers()
         {
-            while (!Observers.empty())
+            while (!m_observers.empty())
             {
-                Observers.pop_front();
+                m_observers.pop_front();
             }
         }
         
         using ObserverList = quick_list<ObserverElement, observer_link>;
 
-        ObserverList Observers;
+        ObserverList m_observers;
 
         friend Enclosing;
     };
