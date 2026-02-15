@@ -18,7 +18,7 @@ namespace awl
 
             AnyAwaitable(Observable<TaskSink>& source)
             {
-                source.Subscribe(this);
+                source.subscribe(this);
             }
 
             bool await_ready()
@@ -56,7 +56,7 @@ namespace awl
 
             AllAwaitable(TaskPool* p_this) : pThis(p_this)
             {
-                pThis->Subscribe(this);
+                pThis->subscribe(this);
             }
 
             bool await_ready()

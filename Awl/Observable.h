@@ -5,149 +5,224 @@
 
 #pragma once
 
-#include "Awl/QuickList.h"
+#include "Awl/Observer.h"
+
+#include <functional>
+#include <type_traits>
+#include <utility>
 
 namespace awl
 {
-    AWL_DECLARE_QUICK_LINK(observer_link)
-
-    template <class IObserver>
-    class Observer : public IObserver, public observer_link
+    namespace details
     {
-    public:
-
-        Observer() = default;
-
-        Observer(const Observer & other) = delete;
-
-        Observer(Observer&& other) = default;
-
-        Observer & operator = (const Observer & other) = delete;
-
-        Observer& operator = (Observer&& other) = default;
-
-        ~Observer() = default;
-
-        bool IsSubscribed() const
+        template <class IObserver, class Enclosing>
+        class ObservableImpl
         {
-            return observer_link::included();
-        }
+        protected:
 
-        void UnsubscribeSelf()
-        {
-            observer_link::exclude();
-        }
+            using ObserverElement = Observer<IObserver>;
+            using ObserverList = quick_list<ObserverElement, observer_link>;
 
-        void UnsubscribeSafe()
-        {
-            if (IsSubscribed())
+        public:
+
+            ObservableImpl() = default;
+
+            ~ObservableImpl()
             {
-                UnsubscribeSelf();
+                clearObservers();
             }
-        }
-    };
+
+            ObservableImpl(const ObservableImpl& other) = delete;
+
+            ObservableImpl(ObservableImpl&& other) : m_observers(std::move(other.m_observers)) {}
+
+            ObservableImpl& operator = (const ObservableImpl& other) = delete;
+
+            ObservableImpl& operator = (ObservableImpl&& other) noexcept
+            {
+                clearObservers();
+                m_observers = std::move(other.m_observers);
+                return *this;
+            }
+
+            void subscribe(ObserverElement* p_observer)
+            {
+                m_observers.push_back(p_observer);
+            }
+
+            void unsubscribe(ObserverElement* p_observer)
+            {
+                p_observer->unsubscribeSelf();
+            }
+
+            bool empty() const
+            {
+                return m_observers.empty();
+            }
+
+            auto size() const
+            {
+                return m_observers.size();
+            }
+
+        protected:
+
+            ObserverList& observers()
+            {
+                return m_observers;
+            }
+
+            const ObserverList& observers() const
+            {
+                return m_observers;
+            }
+
+            template <class Callable>
+            void notifyImpl(Callable&& call)
+            {
+                for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+                {
+                    //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                    IObserver* p_observer = *(i++);
+
+                    call(p_observer);
+                }
+            }
+
+            template <class Callable>
+            bool notifyWhileTrueImpl(Callable&& call)
+            {
+                for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+                {
+                    //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                    IObserver* p_observer = *(i++);
+
+                    if (!static_cast<bool>(call(p_observer)))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+        private:
+
+            //If the observable is deleted before its observers,
+            //we remove them from the list, otherwise they will think that they are included and
+            //their destructors will delete them from already destroyed list.
+            //So we can't use m_observers.clear() here because it only clears list's head.
+            void clearObservers()
+            {
+                while (!m_observers.empty())
+                {
+                    m_observers.pop_front();
+                }
+            }
+
+            ObserverList m_observers;
+        };
+    }
 
     template <class IObserver, class Enclosing = void>
-    class Observable
+    class Observable : private details::ObservableImpl<IObserver, Enclosing>
     {
+    private:
+
+        using Base = details::ObservableImpl<IObserver, Enclosing>;
+
     public:
 
-        using OBSERVER = Observer<IObserver>;
-
-        Observable()
-        {
-        }
-
-        ~Observable()
-        {
-            ClearObservers();
-        }
+        Observable() = default;
+        ~Observable() = default;
 
         Observable(const Observable& other) = delete;
-
-        Observable(Observable&& other) : Observers(std::move(other.Observers))
-        {
-        }
+        Observable(Observable&& other) = default;
 
         Observable& operator = (const Observable& other) = delete;
+        Observable& operator = (Observable&& other) noexcept = default;
 
-        Observable& operator = (Observable&& other) noexcept
-        {
-            ClearObservers();
-            Observers = std::move(other.Observers);
-            return *this;
-        }
-
-        void Subscribe(OBSERVER * p_observer)
-        {
-            Observers.push_back(p_observer);
-        }
-
-        void Unsubscribe(OBSERVER * p_observer)
-        {
-            p_observer->UnsubscribeSelf();
-        }
-
-        bool empty() const
-        {
-            return Observers.empty();
-        }
-
-        auto size() const
-        {
-            return Observers.size();
-        }
+        using Base::subscribe;
+        using Base::unsubscribe;
+        using Base::empty;
+        using Base::size;
 
     protected:
 
         //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
-        void Notify(void (IObserver::*func)(Params ...), const Args& ... args)
+        void notify(void (IObserver::*func)(Params ...), const Args& ... args)
+            requires (sizeof...(Params) == sizeof...(Args) && (std::is_convertible_v<Args, Params> && ...))
         {
-            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                IObserver * p_observer = *(i++);
-
-                (p_observer->*func)(args ...);
-            }
+            Base::notifyImpl([&](IObserver* p_observer) { (p_observer->*func)(args ...); });
         }
 
-        template<typename ...Params, typename ... Args>
-        bool NotifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
+        // It is not clear enough if we really need const notify methods like this:
+        // template<typename ...Params, typename ... Args>
+        // void notify(void (IObserver::*func)(Params ...) const, const Args& ... args) const
+
+        template<typename Result, typename ...Params, typename ... Args>
+        bool notifyWhileTrue(Result (IObserver::* func)(Params ...), const Args& ... args)
+            requires (
+                std::is_convertible_v<Result, bool> &&
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
         {
-            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                IObserver* p_observer = *(i++);
-
-                if (!(p_observer->*func)(args ...))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Base::notifyWhileTrueImpl([&](IObserver* p_observer) { return (p_observer->*func)(args ...); });
         }
 
+        friend Enclosing;
+    };
+
+    template <class Result, class... Params, class Enclosing>
+    class Observable<std::function<Result(Params...)>, Enclosing> :
+        private details::ObservableImpl<std::function<Result(Params...)>, Enclosing>
+    {
     private:
 
-        //If the observable is deleted before its observers,
-        //we remove them from the list, otherwise they will think that they are included and
-        //their destructors will delete them from already destroyed list.
-        //So we can't use Observers.clear() here because it only clears list's head.
-        void ClearObservers()
-        {
-            while (!Observers.empty())
-            {
-                Observers.pop_front();
-            }
-        }
-        
-        using OBSERVER_LIST = quick_list<OBSERVER, observer_link>;
+        using Base = details::ObservableImpl<std::function<Result(Params...)>, Enclosing>;
+        using FunctionObserver = std::function<Result(Params...)>;
 
-        OBSERVER_LIST Observers;
+    public:
+
+        Observable() = default;
+        ~Observable() = default;
+
+        Observable(const Observable& other) = delete;
+        Observable(Observable&& other) = default;
+
+        Observable& operator = (const Observable& other) = delete;
+        Observable& operator = (Observable&& other) noexcept = default;
+
+        using Base::subscribe;
+        using Base::unsubscribe;
+        using Base::empty;
+        using Base::size;
+
+    protected:
+
+        template<typename ... Args>
+        void notify(const Args& ... args)
+            requires (
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
+        {
+            Base::notifyImpl([&](FunctionObserver* p_observer) { (*p_observer)(args ...); });
+        }
+
+        template<typename ... Args>
+        bool notifyWhileTrue(const Args& ... args)
+            requires (
+                std::is_convertible_v<Result, bool> &&
+                sizeof...(Params) == sizeof...(Args) &&
+                (std::is_convertible_v<Args, Params> && ...)
+            )
+        {
+            return Base::notifyWhileTrueImpl([&](FunctionObserver* p_observer) { return (*p_observer)(args ...); });
+        }
 
         friend Enclosing;
     };

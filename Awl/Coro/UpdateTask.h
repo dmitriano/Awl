@@ -106,7 +106,7 @@ namespace awl
 
             UpdateTask::promise_type& promise = m_h.promise();
 
-            promise.Subscribe(p_sink);
+            promise.subscribe(p_sink);
         }
 
     private:

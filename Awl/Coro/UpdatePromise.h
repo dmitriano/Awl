@@ -66,7 +66,7 @@ namespace awl
 
                     // The Promise is always owned by UpdateTask,
                     // so we do not call h.destroy() here.
-                    promise.Notify(&TaskSink::OnFinished);
+                    promise.notify(&TaskSink::OnFinished);
 
                     if (coro)
                     {

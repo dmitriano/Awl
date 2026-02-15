@@ -265,7 +265,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                m_observable.Notify(&INotifySetChanged<T>::OnClearing);
+                m_observable.notify(&INotifySetChanged<T>::OnClearing);
                 m_set.clear();
             }
         }
@@ -288,12 +288,12 @@ namespace awl
 
         void Subscribe(InternalObserver* p_observer) const
         {
-            m_observable.Subscribe(p_observer);
+            m_observable.subscribe(p_observer);
         }
 
         void Unsubscribe(InternalObserver* p_observer) const
         {
-            m_observable.Unsubscribe(p_observer);
+            m_observable.unsubscribe(p_observer);
         }
 
     private:
@@ -308,12 +308,12 @@ namespace awl
 
         void NotifyAdded(const T& val)
         {
-            m_observable.Notify(&INotifySetChanged<T>::OnAdded, val);
+            m_observable.notify(&INotifySetChanged<T>::OnAdded, val);
         }
 
         void NotifyRemoving(const T & val)
         {
-            m_observable.Notify(&INotifySetChanged<T>::OnRemoving, val);
+            m_observable.notify(&INotifySetChanged<T>::OnRemoving, val);
         }
 
         void NotifyRemoving(const iterator& i)
@@ -323,7 +323,7 @@ namespace awl
 
         void NotifyClearing()
         {
-            m_observable.Notify(&INotifySetChanged<T>::OnClearing);
+            m_observable.notify(&INotifySetChanged<T>::OnClearing);
         }
 
         InternalSet m_set;

@@ -68,7 +68,7 @@ namespace
             awl::String val_copy = val;
 
             //Here val_copy is not temporary.
-            Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
+            notify(&INotifySomethingChanged::ItChanged, it, val_copy);
 
             AWL_ASSERT(val_copy == val);
         }
@@ -77,8 +77,8 @@ namespace
         {
             It = it;
 
-            //This test demonstrates why Notify should not use std::forward<Args>.
-            Notify(&INotifySomethingChanged::ItChanged, it, awl::String(_T("temporary")));
+            //This test demonstrates why notify should not use std::forward<Args>.
+            notify(&INotifySomethingChanged::ItChanged, it, awl::String(_T("temporary")));
         }
     };
 }
@@ -95,9 +95,9 @@ AWL_TEST(Observable_Events)
         ChangeHandler handler2(context);
         ChangeHandler handler3(context);
 
-        something.Subscribe(&handler1);
-        something.Subscribe(&handler2);
-        something.Subscribe(&handler3);
+        something.subscribe(&handler1);
+        something.subscribe(&handler2);
+        something.subscribe(&handler3);
 
         AWL_ASSERT_EQUAL(3u, something.size());
 
@@ -108,10 +108,10 @@ AWL_TEST(Observable_Events)
         AWL_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
         AWL_ASSERTM_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
 
-        handler1.UnsubscribeSelf();
+        handler1.unsubscribeSelf();
         AWL_ASSERT_EQUAL(2u, something.size());
 
-        something.Unsubscribe(&handler2);
+        something.unsubscribe(&handler2);
         AWL_ASSERT_EQUAL(1u, something.size());
 
         AWL_ASSERT(!something.empty());
@@ -128,8 +128,8 @@ AWL_TEST(Observable_Move)
     ChangeHandler handler1(context);
     ChangeHandler handler2(context);
 
-    something1.Subscribe(&handler1);
-    something1.Subscribe(&handler2);
+    something1.subscribe(&handler1);
+    something1.subscribe(&handler2);
 
     Something something2 = std::move(something1);
 
@@ -158,8 +158,8 @@ AWL_TEST(Observer_Move)
     ChangeHandler handler1(context);
     ChangeHandler handler2(context);
 
-    something1.Subscribe(&handler1);
-    something1.Subscribe(&handler2);
+    something1.subscribe(&handler1);
+    something1.subscribe(&handler2);
 
     ChangeHandler handler1_copy = std::move(handler1);
 
@@ -197,8 +197,8 @@ namespace
 
         Model()
         {
-            something.Subscribe(&handler1);
-            something.Subscribe(&handler2);
+            something.subscribe(&handler1);
+            something.subscribe(&handler2);
         }
 
         Model(const Model & other) = delete;
@@ -283,24 +283,237 @@ AWL_TEST(Observable_ForwardArgs)
 
 namespace
 {
-    class X
+    struct IConditionCheck
+    {
+        virtual bool Check(int value) = 0;
+    };
+
+    class ConditionHandler : public awl::Observer<IConditionCheck>
     {
     public:
-        X() {};
-        X(const X&) { called = "copy"; };
-        X(X&&) { called = "move"; };
 
-        std::string called;
+        ConditionHandler(bool result, int* p_count, int* p_last_value)
+            : m_result(result), pCount(p_count), pLastValue(p_last_value)
+        {
+        }
+
+        bool Check(int value) override
+        {
+            ++(*pCount);
+            *pLastValue = value;
+            return m_result;
+        }
+
+    private:
+
+        bool m_result;
+        int* pCount = nullptr;
+        int* pLastValue = nullptr;
+    };
+
+    class ConditionObservable : public awl::Observable<IConditionCheck>
+    {
+    public:
+
+        bool checkAll(int value)
+        {
+            return notifyWhileTrue(&IConditionCheck::Check, value);
+        }
     };
 }
 
-AWL_TEST(Observable_ConstMove)
+AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
 {
     AWL_UNUSED_CONTEXT;
 
-    const X x1;
-    X x2 = std::move(x1);
+    ConditionObservable observable;
 
-    AWL_ASSERT(x1.called == "");
-    AWL_ASSERT(x2.called == "copy");
+    int count1 = 0;
+    int count2 = 0;
+    int count3 = 0;
+    int last1 = 0;
+    int last2 = 0;
+    int last3 = 0;
+
+    ConditionHandler handler1(true, &count1, &last1);
+    ConditionHandler handler2(false, &count2, &last2);
+    ConditionHandler handler3(true, &count3, &last3);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.checkAll(42);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at first false."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(0, count3);
+    AWL_ASSERT_EQUAL(42, last1);
+    AWL_ASSERT_EQUAL(42, last2);
+    AWL_ASSERT_EQUAL(0, last3);
+}
+
+AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int last1 = 0;
+    int last2 = 0;
+
+    ConditionHandler handler1(true, &count1, &last1);
+    ConditionHandler handler2(true, &count2, &last2);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    const bool result = observable.checkAll(7);
+
+    AWL_ASSERTM_TRUE(result, _T("notifyWhileTrue should return true when all observers return true."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(7, last1);
+    AWL_ASSERT_EQUAL(7, last2);
+}
+
+namespace
+{
+    template <class Signature, class F>
+    static void AssignHandler(awl::Observer<std::function<Signature>>& observer, F&& handler)
+    {
+        static_cast<std::function<Signature>&>(observer) = std::forward<F>(handler);
+    }
+
+    using FunctionHandler = awl::Observer<std::function<void(int)>>;
+
+    class FunctionObservable : public awl::Observable<std::function<void(int)>>
+    {
+    public:
+
+        void Emit(int val)
+        {
+            notify(val);
+        }
+    };
+
+    using PredicateHandler = awl::Observer<std::function<bool(int)>>;
+
+    class PredicateObservable : public awl::Observable<std::function<bool(int)>>
+    {
+    public:
+
+        bool EmitWhileTrue(int val)
+        {
+            return notifyWhileTrue(val);
+        }
+    };
+}
+
+AWL_TEST(Observable_Function_Events)
+{
+    AWL_UNUSED_CONTEXT;
+
+    FunctionObservable observable;
+
+    FunctionHandler handler1;
+    FunctionHandler handler2;
+    FunctionHandler handler3;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+    int callCount3 = 0;
+
+    AssignHandler<void(int)>(handler1, [&](int) { ++callCount1; });
+    AssignHandler<void(int)>(handler2, [&](int) { ++callCount2; });
+    AssignHandler<void(int)>(handler3, [&](int) { ++callCount3; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    AWL_ASSERT_EQUAL(3u, observable.size());
+
+    observable.Emit(1);
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(1, callCount3);
+
+    handler1.unsubscribeSelf();
+    observable.unsubscribe(&handler2);
+
+    observable.Emit(2);
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(2, callCount3);
+}
+
+AWL_TEST(Observable_Function_NotifyWhileTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    PredicateObservable observable;
+
+    PredicateHandler handler1;
+    PredicateHandler handler2;
+    PredicateHandler handler3;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+    int callCount3 = 0;
+
+    AssignHandler<bool(int)>(handler1, [&](int) { ++callCount1; return true; });
+    AssignHandler<bool(int)>(handler2, [&](int) { ++callCount2; return false; });
+    AssignHandler<bool(int)>(handler3, [&](int) { ++callCount3; return true; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.EmitWhileTrue(10);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at false."));
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(0, callCount3);
+}
+
+AWL_TEST(Observable_FunctionObserver_Move)
+{
+    AWL_UNUSED_CONTEXT;
+
+    FunctionObservable observable;
+
+    FunctionHandler handler1;
+    FunctionHandler handler2;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+
+    AssignHandler<void(int)>(handler1, [&](int) { ++callCount1; });
+    AssignHandler<void(int)>(handler2, [&](int) { ++callCount2; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    FunctionHandler handler1_copy = std::move(handler1);
+
+    FunctionHandler handler2_copy;
+    handler2_copy = std::move(handler2);
+
+    observable.Emit(5);
+
+    AWL_ASSERTM_FALSE(handler1.isSubscribed(), _T("Observer #1 is included"));
+    AWL_ASSERTM_FALSE(handler2.isSubscribed(), _T("Observer #2 is included"));
+
+    AWL_ASSERTM_TRUE(handler1_copy.isSubscribed(), _T("Observer copy #1 is not included"));
+    AWL_ASSERTM_TRUE(handler2_copy.isSubscribed(), _T("Observer copy #2 is not included"));
+
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
 }
