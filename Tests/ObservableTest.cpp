@@ -68,7 +68,7 @@ namespace
             awl::String val_copy = val;
 
             //Here val_copy is not temporary.
-            Notify(&INotifySomethingChanged::ItChanged, it, val_copy);
+            notify(&INotifySomethingChanged::ItChanged, it, val_copy);
 
             AWL_ASSERT(val_copy == val);
         }
@@ -77,8 +77,8 @@ namespace
         {
             It = it;
 
-            //This test demonstrates why Notify should not use std::forward<Args>.
-            Notify(&INotifySomethingChanged::ItChanged, it, awl::String(_T("temporary")));
+            //This test demonstrates why notify should not use std::forward<Args>.
+            notify(&INotifySomethingChanged::ItChanged, it, awl::String(_T("temporary")));
         }
     };
 }
@@ -95,9 +95,9 @@ AWL_TEST(Observable_Events)
         ChangeHandler handler2(context);
         ChangeHandler handler3(context);
 
-        something.Subscribe(&handler1);
-        something.Subscribe(&handler2);
-        something.Subscribe(&handler3);
+        something.subscribe(&handler1);
+        something.subscribe(&handler2);
+        something.subscribe(&handler3);
 
         AWL_ASSERT_EQUAL(3u, something.size());
 
@@ -108,10 +108,10 @@ AWL_TEST(Observable_Events)
         AWL_ASSERTM_TRUE(handler2.changeHandled, _T("The observer has not been notified"));
         AWL_ASSERTM_TRUE(handler3.changeHandled, _T("The observer has not been notified"));
 
-        handler1.UnsubscribeSelf();
+        handler1.unsubscribeSelf();
         AWL_ASSERT_EQUAL(2u, something.size());
 
-        something.Unsubscribe(&handler2);
+        something.unsubscribe(&handler2);
         AWL_ASSERT_EQUAL(1u, something.size());
 
         AWL_ASSERT(!something.empty());
@@ -128,8 +128,8 @@ AWL_TEST(Observable_Move)
     ChangeHandler handler1(context);
     ChangeHandler handler2(context);
 
-    something1.Subscribe(&handler1);
-    something1.Subscribe(&handler2);
+    something1.subscribe(&handler1);
+    something1.subscribe(&handler2);
 
     Something something2 = std::move(something1);
 
@@ -158,8 +158,8 @@ AWL_TEST(Observer_Move)
     ChangeHandler handler1(context);
     ChangeHandler handler2(context);
 
-    something1.Subscribe(&handler1);
-    something1.Subscribe(&handler2);
+    something1.subscribe(&handler1);
+    something1.subscribe(&handler2);
 
     ChangeHandler handler1_copy = std::move(handler1);
 
@@ -197,8 +197,8 @@ namespace
 
         Model()
         {
-            something.Subscribe(&handler1);
-            something.Subscribe(&handler2);
+            something.subscribe(&handler1);
+            something.subscribe(&handler2);
         }
 
         Model(const Model & other) = delete;

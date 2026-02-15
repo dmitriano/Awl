@@ -28,12 +28,12 @@ void TaskPool::cancel()
     {
         for (Handler& handler : m_handlers)
         {
-            handler.UnsubscribeSelf();
+            handler.unsubscribeSelf();
         }
 
         m_handlers.clear();
 
-        Notify(&TaskSink::OnFinished);
+        notify(&TaskSink::OnFinished);
     }
 }
 
@@ -64,5 +64,5 @@ void TaskPool::Handler::OnFinished()
     handlers.erase(handlers.begin() + index);
 
     // For wait_any().
-    saved_this->Notify(&TaskSink::OnFinished);
+    saved_this->notify(&TaskSink::OnFinished);
 }

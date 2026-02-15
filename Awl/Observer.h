@@ -28,21 +28,21 @@ namespace awl
 
         ~Observer() = default;
 
-        bool IsSubscribed() const
+        bool isSubscribed() const
         {
             return observer_link::included();
         }
 
-        void UnsubscribeSelf()
+        void unsubscribeSelf()
         {
             observer_link::exclude();
         }
 
-        void UnsubscribeSafe()
+        void unsubscribeSafe()
         {
-            if (IsSubscribed())
+            if (isSubscribed())
             {
-                UnsubscribeSelf();
+                unsubscribeSelf();
             }
         }
     };

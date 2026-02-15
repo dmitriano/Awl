@@ -22,7 +22,7 @@ namespace awl
 
         ~Observable()
         {
-            ClearObservers();
+            clearObservers();
         }
 
         Observable(const Observable& other) = delete;
@@ -35,19 +35,19 @@ namespace awl
 
         Observable& operator = (Observable&& other) noexcept
         {
-            ClearObservers();
+            clearObservers();
             Observers = std::move(other.Observers);
             return *this;
         }
 
-        void Subscribe(OBSERVER * p_observer)
+        void subscribe(OBSERVER* p_observer)
         {
             Observers.push_back(p_observer);
         }
 
-        void Unsubscribe(OBSERVER * p_observer)
+        void unsubscribe(OBSERVER* p_observer)
         {
-            p_observer->UnsubscribeSelf();
+            p_observer->unsubscribeSelf();
         }
 
         bool empty() const
@@ -65,7 +65,7 @@ namespace awl
         //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
-        void Notify(void (IObserver::*func)(Params ...), const Args& ... args)
+        void notify(void (IObserver::*func)(Params ...), const Args& ... args)
         {
             for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
             {
@@ -77,7 +77,7 @@ namespace awl
         }
 
         template<typename ...Params, typename ... Args>
-        bool NotifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
+        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
         {
             for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
             {
@@ -99,7 +99,7 @@ namespace awl
         //we remove them from the list, otherwise they will think that they are included and
         //their destructors will delete them from already destroyed list.
         //So we can't use Observers.clear() here because it only clears list's head.
-        void ClearObservers()
+        void clearObservers()
         {
             while (!Observers.empty())
             {

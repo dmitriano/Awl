@@ -266,7 +266,7 @@ namespace
             {
                 ObserverA a(static_cast<int>(i), long_string);
 
-                Subscribe(&a);
+                subscribe(&a);
 
                 // The address of a changes here, but it still handles the signals.
                 v.push_back(std::move(a));
@@ -286,7 +286,7 @@ namespace
 
             const int val = 10;
 
-            Notify(&ASignalHandler::onASignal, val);
+            notify(&ASignalHandler::onASignal, val);
 
             for (const awl::immutable<ObserverA>& ia : v)
             {
