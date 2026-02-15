@@ -14,11 +14,9 @@ namespace awl
     {
     public:
 
-        using OBSERVER = Observer<IObserver>;
+        using ObserverElement = Observer<IObserver>;
 
-        Observable()
-        {
-        }
+        Observable() = default;
 
         ~Observable()
         {
@@ -27,9 +25,7 @@ namespace awl
 
         Observable(const Observable& other) = delete;
 
-        Observable(Observable&& other) : Observers(std::move(other.Observers))
-        {
-        }
+        Observable(Observable&& other) : Observers(std::move(other.Observers)) {}
 
         Observable& operator = (const Observable& other) = delete;
 
@@ -40,12 +36,12 @@ namespace awl
             return *this;
         }
 
-        void subscribe(OBSERVER* p_observer)
+        void subscribe(ObserverElement* p_observer)
         {
             Observers.push_back(p_observer);
         }
 
-        void unsubscribe(OBSERVER* p_observer)
+        void unsubscribe(ObserverElement* p_observer)
         {
             p_observer->unsubscribeSelf();
         }
@@ -65,9 +61,9 @@ namespace awl
         //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
-        void notify(void (IObserver::*func)(Params ...), const Args& ... args)
+        void notify(void (IObserver::*func)(Params ...), const Args& ... args) const
         {
-            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::const_iterator i = Observers.begin(); i != Observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver * p_observer = *(i++);
@@ -77,9 +73,9 @@ namespace awl
         }
 
         template<typename ...Params, typename ... Args>
-        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
+        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args) const
         {
-            for (typename OBSERVER_LIST::iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::const_iterator i = Observers.begin(); i != Observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver* p_observer = *(i++);
@@ -107,9 +103,9 @@ namespace awl
             }
         }
         
-        using OBSERVER_LIST = quick_list<OBSERVER, observer_link>;
+        using ObserverList = quick_list<ObserverElement, observer_link>;
 
-        OBSERVER_LIST Observers;
+        ObserverList Observers;
 
         friend Enclosing;
     };
