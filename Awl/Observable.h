@@ -61,9 +61,9 @@ namespace awl
         //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
-        void notify(void (IObserver::*func)(Params ...), const Args& ... args) const
+        void notify(void (IObserver::*func)(Params ...), const Args& ... args)
         {
-            for (typename ObserverList::const_iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::iterator i = Observers.begin(); i != Observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver * p_observer = *(i++);
@@ -73,9 +73,9 @@ namespace awl
         }
 
         template<typename ...Params, typename ... Args>
-        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args) const
+        bool notifyWhileTrue(bool (IObserver::* func)(Params ...), const Args& ... args)
         {
-            for (typename ObserverList::const_iterator i = Observers.begin(); i != Observers.end(); )
+            for (typename ObserverList::iterator i = Observers.begin(); i != Observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 IObserver* p_observer = *(i++);
