@@ -77,6 +77,35 @@ namespace awl
                 return m_observers;
             }
 
+            template <class Callable>
+            void notifyImpl(Callable&& call)
+            {
+                for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+                {
+                    //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                    IObserver* p_observer = *(i++);
+
+                    call(p_observer);
+                }
+            }
+
+            template <class Callable>
+            bool notifyWhileTrueImpl(Callable&& call)
+            {
+                for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+                {
+                    //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
+                    IObserver* p_observer = *(i++);
+
+                    if (!static_cast<bool>(call(p_observer)))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
         private:
 
             //If the observable is deleted before its observers,
@@ -101,7 +130,6 @@ namespace awl
     private:
 
         using Base = details::ObservableImpl<IObserver, Enclosing>;
-        using ObserverList = typename Base::ObserverList;
 
     public:
 
@@ -127,15 +155,7 @@ namespace awl
         void notify(void (IObserver::*func)(Params ...), const Args& ... args)
             requires (sizeof...(Params) == sizeof...(Args) && (std::is_convertible_v<Args, Params> && ...))
         {
-            ObserverList& observer_list = Base::observers();
-
-            for (typename ObserverList::iterator i = observer_list.begin(); i != observer_list.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                IObserver * p_observer = *(i++);
-
-                (p_observer->*func)(args ...);
-            }
+            Base::notifyImpl([&](IObserver* p_observer) { (p_observer->*func)(args ...); });
         }
 
         // It is not clear enough if we really need const notify methods like this:
@@ -150,20 +170,7 @@ namespace awl
                 (std::is_convertible_v<Args, Params> && ...)
             )
         {
-            ObserverList& observer_list = Base::observers();
-
-            for (typename ObserverList::iterator i = observer_list.begin(); i != observer_list.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                IObserver* p_observer = *(i++);
-
-                if (!static_cast<bool>((p_observer->*func)(args ...)))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Base::notifyWhileTrueImpl([&](IObserver* p_observer) { return (p_observer->*func)(args ...); });
         }
 
         friend Enclosing;
@@ -177,7 +184,6 @@ namespace awl
 
         using Base = details::ObservableImpl<std::function<Result(Params...)>, Enclosing>;
         using FunctionObserver = std::function<Result(Params...)>;
-        using ObserverList = typename Base::ObserverList;
 
     public:
 
@@ -200,35 +206,14 @@ namespace awl
         template<typename ... Args>
         void notify(const Args& ... args)
         {
-            ObserverList& observer_list = Base::observers();
-
-            for (typename ObserverList::iterator i = observer_list.begin(); i != observer_list.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                FunctionObserver* p_observer = *(i++);
-
-                (*p_observer)(args ...);
-            }
+            Base::notifyImpl([&](FunctionObserver* p_observer) { (*p_observer)(args ...); });
         }
 
         template<typename ... Args>
         bool notifyWhileTrue(const Args& ... args)
             requires std::is_convertible_v<Result, bool>
         {
-            ObserverList& observer_list = Base::observers();
-
-            for (typename ObserverList::iterator i = observer_list.begin(); i != observer_list.end(); )
-            {
-                //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
-                FunctionObserver* p_observer = *(i++);
-
-                if (!static_cast<bool>((*p_observer)(args ...)))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Base::notifyWhileTrueImpl([&](FunctionObserver* p_observer) { return (*p_observer)(args ...); });
         }
 
         friend Enclosing;
