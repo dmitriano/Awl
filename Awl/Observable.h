@@ -187,9 +187,8 @@ namespace awl
 
         template<typename ... Args>
         bool notifyWhileTrue(const Args& ... args)
+            requires std::is_convertible_v<TResult, bool>
         {
-            static_assert(std::is_convertible_v<TResult, bool>, "notifyWhileTrue requires std::function with bool-convertible result type.");
-
             for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
             {
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
