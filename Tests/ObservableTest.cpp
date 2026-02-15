@@ -283,6 +283,105 @@ AWL_TEST(Observable_ForwardArgs)
 
 namespace
 {
+    struct IConditionCheck
+    {
+        virtual bool Check(int value) = 0;
+    };
+
+    class ConditionHandler : public awl::Observer<IConditionCheck>
+    {
+    public:
+
+        ConditionHandler(bool result, int* p_count, int* p_last_value)
+            : m_result(result), pCount(p_count), pLastValue(p_last_value)
+        {
+        }
+
+        bool Check(int value) override
+        {
+            ++(*pCount);
+            *pLastValue = value;
+            return m_result;
+        }
+
+    private:
+
+        bool m_result;
+        int* pCount = nullptr;
+        int* pLastValue = nullptr;
+    };
+
+    class ConditionObservable : public awl::Observable<IConditionCheck>
+    {
+    public:
+
+        bool checkAll(int value)
+        {
+            return notifyWhileTrue(&IConditionCheck::Check, value);
+        }
+    };
+}
+
+AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int count3 = 0;
+    int last1 = 0;
+    int last2 = 0;
+    int last3 = 0;
+
+    ConditionHandler handler1(true, &count1, &last1);
+    ConditionHandler handler2(false, &count2, &last2);
+    ConditionHandler handler3(true, &count3, &last3);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.checkAll(42);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at first false."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(0, count3);
+    AWL_ASSERT_EQUAL(42, last1);
+    AWL_ASSERT_EQUAL(42, last2);
+    AWL_ASSERT_EQUAL(0, last3);
+}
+
+AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int last1 = 0;
+    int last2 = 0;
+
+    ConditionHandler handler1(true, &count1, &last1);
+    ConditionHandler handler2(true, &count2, &last2);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    const bool result = observable.checkAll(7);
+
+    AWL_ASSERTM_TRUE(result, _T("notifyWhileTrue should return true when all observers return true."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(7, last1);
+    AWL_ASSERT_EQUAL(7, last2);
+}
+
+namespace
+{
     template <class Signature, class F>
     static void AssignHandler(awl::Observer<std::function<Signature>>& observer, F&& handler)
     {
