@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Observable.h"
+#include "Tests/Experimental/ObservableFunction.h"
 #include "Awl/String.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
