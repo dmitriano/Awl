@@ -5,20 +5,26 @@
 
 #pragma once
 
-#include "Awl/QuickList.h"
+#include "Awl/Observer.h"
 
+#include <functional>
 #include <utility>
 
 namespace awl
 {
-    AWL_DECLARE_QUICK_LINK(observer_link)
-
-    template <class IObserver>
-    class Observer : public IObserver, public observer_link
+    template <class Result, class... Args>
+    class Observer<std::function<Result(Args...)>> : public observer_link
     {
     public:
 
+        using Function = std::function<Result(Args...)>;
+
         Observer() = default;
+
+        explicit Observer(Function function) :
+            m_function(std::move(function))
+        {
+        }
 
         Observer(const Observer& other) = delete;
 
@@ -47,5 +53,19 @@ namespace awl
                 unsubscribeSelf();
             }
         }
+
+        const Function& function() const
+        {
+            return m_function;
+        }
+
+        void setFunction(Function function)
+        {
+            m_function = std::move(function);
+        }
+
+    private:
+
+        Function m_function;
     };
 }

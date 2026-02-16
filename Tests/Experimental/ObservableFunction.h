@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Tests/Experimental/ObserverFunction.h"
 #include "Awl/Observable.h"
 
 #include <functional>
