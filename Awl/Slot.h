@@ -1,0 +1,23 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <utility>
+
+#define AWL_SLOT(slot_name, ...) \
+    class slot_name \
+    { \
+        void onSignal(__VA_ARGS__) \
+    };
+
+namespace awl
+{
+    template <class T, class... Params>
+    concept slot = requires(T& t)
+    {
+        { t.onSignal(declval(const Params&), ...) };
+    };
+}
