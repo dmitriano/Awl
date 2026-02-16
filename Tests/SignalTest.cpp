@@ -299,14 +299,13 @@ namespace
 {
     struct SlotA
     {
-        virtual void func(int value) = 0;
+        virtual void operator()(int value) = 0;
     };
 
     struct SlotB
     {
-        virtual void func(int value) = 0;
+        virtual void operator()(int value) = 0;
     };
-
 
     class MultiObserver :
         public awl::Observer<SlotA>,
@@ -314,12 +313,12 @@ namespace
     {
     public:
 
-        void SlotA::func(int value) override
+        void SlotA::operator()(int value) override
         {
             aValue = value;
         }
 
-        void SlotB::func(int value) override
+        void SlotB::operator()(int value) override
         {
             aValue = value;
         }
