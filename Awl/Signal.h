@@ -12,15 +12,7 @@
 
 namespace awl
 {
-    // A Slot is a class like this:
-    // template <class Result, class... Params>
-    // class Slot
-    // {
-    // public:
-
-    //     virtual Result operator()(Params... args) = 0;
-    // };
-
+    // A slot is a class that has operator() with the signature of the signal.
     template <class Slot, class Enclosing = void>
     class Signal : private details::ObservableImpl<Slot, Enclosing>
     {

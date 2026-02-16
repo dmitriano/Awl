@@ -12,6 +12,8 @@
 
 namespace awl
 {
+    // Storing this pointer in a std::function with std::bind, for example, prevents the observers from being movable,
+    // so this class is experimental and is not used in production.
     template <class Result, class... Params, class Enclosing>
     class Observable<std::function<Result(Params...)>, Enclosing> :
         private details::ObservableImpl<std::function<Result(Params...)>, Enclosing>
