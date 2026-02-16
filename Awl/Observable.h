@@ -6,3 +6,4 @@
 #pragma once
 
 #include "Awl/GeneralObservable.h"
+#include "Awl/InvocableObservable.h"
