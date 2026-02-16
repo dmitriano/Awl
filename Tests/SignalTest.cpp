@@ -307,6 +307,26 @@ namespace
         virtual void operator()(int value) = 0;
     };
 
+    class SignalA : public awl::Signal<SlotA>
+    {
+    public:
+
+        void emitValue(int value)
+        {
+            emit(value);
+        }
+    };
+
+    class SignalB : public awl::Signal<SlotB>
+    {
+    public:
+
+        void emitValue(int value)
+        {
+            emit(value);
+        }
+    };
+
     class MultiObserver :
         public awl::Observer<SlotA>,
         public awl::Observer<SlotB>
@@ -320,15 +340,57 @@ namespace
 
         void SlotB::operator()(int value) override
         {
-            aValue = value;
+            bValue = value;
         }
 
         int aValue = 0;
         int bValue = 0;
     };
+}
 
-    void f()
-    {
-        MultiObserver mo;
-    }
+AWL_TEST(Signal_MultiObserver_IndependentValues)
+{
+    AWL_UNUSED_CONTEXT;
+
+    SignalA signalA;
+    SignalB signalB;
+    MultiObserver observer;
+
+    signalA.subscribe(static_cast<awl::Observer<SlotA>*>(&observer));
+    signalB.subscribe(static_cast<awl::Observer<SlotB>*>(&observer));
+
+    AWL_ASSERT_EQUAL(0, observer.aValue);
+    AWL_ASSERT_EQUAL(0, observer.bValue);
+
+    signalA.emitValue(11);
+    AWL_ASSERT_EQUAL(11, observer.aValue);
+    AWL_ASSERT_EQUAL(0, observer.bValue);
+
+    signalB.emitValue(22);
+    AWL_ASSERT_EQUAL(11, observer.aValue);
+    AWL_ASSERT_EQUAL(22, observer.bValue);
+
+    signalA.emitValue(-3);
+    AWL_ASSERT_EQUAL(-3, observer.aValue);
+    AWL_ASSERT_EQUAL(22, observer.bValue);
+}
+
+AWL_TEST(Signal_MultiObserver_UnsubscribeA_DoesNotAffectB)
+{
+    AWL_UNUSED_CONTEXT;
+
+    SignalA signalA;
+    SignalB signalB;
+    MultiObserver observer;
+
+    signalA.subscribe(static_cast<awl::Observer<SlotA>*>(&observer));
+    signalB.subscribe(static_cast<awl::Observer<SlotB>*>(&observer));
+
+    signalA.unsubscribe(static_cast<awl::Observer<SlotA>*>(&observer));
+
+    signalA.emitValue(100);
+    signalB.emitValue(200);
+
+    AWL_ASSERT_EQUAL(0, observer.aValue);
+    AWL_ASSERT_EQUAL(200, observer.bValue);
 }
