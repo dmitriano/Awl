@@ -294,3 +294,42 @@ AWL_TEST(Signal_EmitWhileTrue_AllTrue)
     AWL_ASSERT_EQUAL(7, last1);
     AWL_ASSERT_EQUAL(7, last2);
 }
+
+namespace
+{
+    struct SlotA
+    {
+        virtual void func(int value) = 0;
+    };
+
+    struct SlotB
+    {
+        virtual void func(int value) = 0;
+    };
+
+
+    class MultiObserver :
+        public awl::Observer<SlotA>,
+        public awl::Observer<SlotB>
+    {
+    public:
+
+        void SlotA::func(int value) override
+        {
+            aValue = value;
+        }
+
+        void SlotB::func(int value) override
+        {
+            aValue = value;
+        }
+
+        int aValue = 0;
+        int bValue = 0;
+    };
+
+    void f()
+    {
+        MultiObserver mo;
+    }
+}
