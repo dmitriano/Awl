@@ -12,34 +12,34 @@
 
 namespace awl
 {
-    template <class Result, class... Params>
-    class Slot
-    {
-    public:
+    // A Slot is a class like this:
+    // template <class Result, class... Params>
+    // class Slot
+    // {
+    // public:
 
-        virtual Result operator()(Params ... args) = 0;
-    };
+    //     virtual Result operator()(Params... args) = 0;
+    // };
 
-    template <class Result, class... Params, class Enclosing>
-    class Observable<Slot<Result, Params...>, Enclosing> :
-        private details::ObservableImpl<Slot<Result, Params...>, Enclosing>
+    template <class Slot, class Enclosing>
+    class Signal : private details::ObservableImpl<Slot, Enclosing>
     {
     private:
 
-        using IObserver = Slot<Result, Params...>;
+        using IObserver = Slot;
         using Base = details::ObservableImpl<IObserver, Enclosing>;
         using ObserverElement = typename Base::ObserverElement;
 
     public:
 
-        Observable() = default;
-        ~Observable() = default;
+        Signal() = default;
+        ~Signal() = default;
 
-        Observable(const Observable& other) = delete;
-        Observable(Observable&& other) = default;
+        Signal(const Signal& other) = delete;
+        Signal(Signal&& other) = default;
 
-        Observable& operator = (const Observable& other) = delete;
-        Observable& operator = (Observable&& other) noexcept = default;
+        Signal& operator = (const Signal& other) = delete;
+        Signal& operator = (Signal&& other) noexcept = default;
 
         using Base::subscribe;
         using Base::unsubscribe;
@@ -48,21 +48,21 @@ namespace awl
 
     protected:
 
-        template<typename ... Args>
-        void notify(const Args& ... args)
+        template<typename ...Args>
+        void emit(const Args&... args)
             requires (std::invocable<IObserver&, const Args&...>)
         {
-            Base::notifyImpl([&](ObserverElement* p_observer) { (*static_cast<IObserver*>(p_observer))(args ...); });
+            Base::notifyImpl([&](ObserverElement* p_observer) { (*static_cast<IObserver*>(p_observer))(args...); });
         }
 
-        template<typename ... Args>
-        bool notifyWhileTrue(const Args& ... args)
+        template<typename ...Args>
+        bool emitWhileTrue(const Args&... args)
             requires (
-        std::is_convertible_v<Result, bool>&&
-            std::invocable<IObserver&, const Args&...>
+                std::invocable<IObserver&, const Args&...> &&
+                std::is_convertible_v<std::invoke_result_t<IObserver&, const Args&...>, bool>
             )
         {
-            return Base::notifyWhileTrueImpl([&](ObserverElement* p_observer) { return (*static_cast<IObserver*>(p_observer))(args ...); });
+            return Base::notifyWhileTrueImpl([&](ObserverElement* p_observer) { return (*static_cast<IObserver*>(p_observer))(args...); });
         }
 
         friend Enclosing;
