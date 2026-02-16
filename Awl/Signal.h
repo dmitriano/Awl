@@ -21,7 +21,7 @@ namespace awl
     //     virtual Result operator()(Params... args) = 0;
     // };
 
-    template <class Slot, class Enclosing>
+    template <class Slot, class Enclosing = void>
     class Signal : private details::ObservableImpl<Slot, Enclosing>
     {
     private:

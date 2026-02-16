@@ -17,7 +17,7 @@ namespace
         virtual void operator()(int value) = 0;
     };
 
-    class ValueSignal : public awl::Signal<IValueSlot, ValueSignal>
+    class ValueSignal : public awl::Signal<IValueSlot>
     {
     public:
 
@@ -82,7 +82,7 @@ namespace
         virtual bool operator()(int value) = 0;
     };
 
-    class PredicateSignal : public awl::Signal<IPredicateSlot, PredicateSignal>
+    class PredicateSignal : public awl::Signal<IPredicateSlot>
     {
     public:
 
