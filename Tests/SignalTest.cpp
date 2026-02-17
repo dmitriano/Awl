@@ -114,3 +114,41 @@ AWL_TEST(Signal_WeakPtrCompaction)
     AWL_ASSERT_EQUAL(10, owner_alive->sum);
     AWL_ASSERT_EQUAL(1, owner_alive->count);
 }
+
+AWL_TEST(Signal_RemoveExpiredSlotInEmit)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+
+    auto owner1 = std::make_shared<Handler>();
+    auto owner_dead = std::make_shared<Handler>();
+    auto owner2 = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak_dead = owner_dead;
+
+    signal.subscribe(owner1, &Handler::on_value);
+    signal.subscribe(owner_dead, &Handler::on_value);
+    signal.subscribe(owner2, &Handler::on_value);
+
+    AWL_ASSERT_EQUAL(3u, signal.size());
+
+    owner_dead.reset();
+    AWL_ASSERT(weak_dead.expired());
+
+    signal.emit(2);
+
+    AWL_ASSERT_EQUAL(2u, signal.size());
+    AWL_ASSERT_EQUAL(2, owner1->sum);
+    AWL_ASSERT_EQUAL(1, owner1->count);
+    AWL_ASSERT_EQUAL(2, owner2->sum);
+    AWL_ASSERT_EQUAL(1, owner2->count);
+    AWL_ASSERT_FALSE(signal.unsubscribe(weak_dead, &Handler::on_value));
+
+    signal.emit(3);
+
+    AWL_ASSERT_EQUAL(2u, signal.size());
+    AWL_ASSERT_EQUAL(5, owner1->sum);
+    AWL_ASSERT_EQUAL(2, owner1->count);
+    AWL_ASSERT_EQUAL(5, owner2->sum);
+    AWL_ASSERT_EQUAL(2, owner2->count);
+}
