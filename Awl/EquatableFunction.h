@@ -11,7 +11,6 @@
 #include <functional>
 #include <memory>
 #include <tuple>
-#include <type_traits>
 #include <typeindex>
 #include <utility>
 
@@ -56,23 +55,31 @@ namespace awl
 
         equatable_function& operator=(equatable_function&& other) noexcept = default;
 
-        template <class Object, class Member>
-            requires (
-                std::is_member_function_pointer_v<Member> &&
-                std::is_invocable_r_v<Result, Member, Object*, Args...>
-            )
-        equatable_function(Object* p_object, Member member)
+        template <class Object>
+        equatable_function(Object* p_object, Result (Object::*member)(Args...))
         {
+            using Member = Result (Object::*)(Args...);
             m_invocable = std::make_unique<ErasedMember<Object, Member>>(p_object, member);
         }
 
-        template <class Object, class Member>
-            requires (
-                std::is_member_function_pointer_v<Member> &&
-                std::is_invocable_r_v<Result, Member, Object*, Args...>
-            )
-        equatable_function(Object& object, Member member)
+        template <class Object>
+        equatable_function(const Object* p_object, Result (Object::*member)(Args...) const)
         {
+            using Member = Result (Object::*)(Args...) const;
+            m_invocable = std::make_unique<ErasedMember<Object, Member>>(p_object, member);
+        }
+
+        template <class Object>
+        equatable_function(Object& object, Result (Object::*member)(Args...))
+        {
+            using Member = Result (Object::*)(Args...);
+            m_invocable = std::make_unique<ErasedMember<Object, Member>>(std::addressof(object), member);
+        }
+
+        template <class Object>
+        equatable_function(const Object& object, Result (Object::*member)(Args...) const)
+        {
+            using Member = Result (Object::*)(Args...) const;
             m_invocable = std::make_unique<ErasedMember<Object, Member>>(std::addressof(object), member);
         }
 
@@ -155,9 +162,14 @@ namespace awl
         }
 
         template <class Object, class Member>
-        class ErasedMember final : public Invocable
+        class ErasedMember;
+
+        template <class Object>
+        class ErasedMember<Object, Result (Object::*)(Args...)> final : public Invocable
         {
         public:
+
+            using Member = Result (Object::*)(Args...);
 
             ErasedMember(Object* p_object, Member member)
                 : m_object(p_object)
@@ -174,7 +186,7 @@ namespace awl
             {
                 return
                 {
-                    std::type_index(typeid(std::remove_cv_t<Object>)),
+                    std::type_index(typeid(Object)),
                     static_cast<const void*>(m_object)
                 };
             }
@@ -222,6 +234,79 @@ namespace awl
         private:
 
             Object* m_object = nullptr;
+            Member m_member{};
+        };
+
+        template <class Object>
+        class ErasedMember<Object, Result (Object::*)(Args...) const> final : public Invocable
+        {
+        public:
+
+            using Member = Result (Object::*)(Args...) const;
+
+            ErasedMember(const Object* p_object, Member member)
+                : m_object(p_object)
+                , m_member(member)
+            {
+            }
+
+            Result invoke(Args... args) const override
+            {
+                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
+            }
+
+            std::tuple<std::type_index, const void*> target_info() const noexcept override
+            {
+                return
+                {
+                    std::type_index(typeid(Object)),
+                    static_cast<const void*>(m_object)
+                };
+            }
+
+            bool equals(const Invocable& other) const noexcept override
+            {
+                if (this == std::addressof(other))
+                {
+                    return true;
+                }
+
+                const auto info = target_info();
+                const auto other_info = other.target_info();
+
+                if (std::get<0>(info) != std::get<0>(other_info))
+                {
+                    return false;
+                }
+
+                if (std::get<1>(info) != std::get<1>(other_info))
+                {
+                    return false;
+                }
+
+                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
+                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                std::size_t seed = 0;
+                const auto info = target_info();
+                combine_hash(seed, std::get<0>(info));
+                combine_hash(seed, std::get<1>(info));
+                combine_hash(seed, std::type_index(typeid(Member)));
+                combine_binary_hash(seed, m_member);
+                return seed;
+            }
+
+            std::unique_ptr<Invocable> clone() const override
+            {
+                return std::make_unique<ErasedMember>(*this);
+            }
+
+        private:
+
+            const Object* m_object = nullptr;
             Member m_member{};
         };
 
