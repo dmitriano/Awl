@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <unordered_set>
+#include <utility>
 
 namespace
 {
@@ -91,16 +92,43 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     awl::equatable_function<void(int)> f1(&h1, &Handler::on_value);
     awl::equatable_function<void(int)> f2(&h1, &Handler::on_value);
     awl::equatable_function<void(int)> f3(&h2, &Handler::on_value);
+    awl::equatable_function<void(int)> f4(&h1, &Handler::on_other);
+    awl::equatable_function<void(int)> f5 = f1;
+    awl::equatable_function<void(int)> movable(&h1, &Handler::on_value);
+    awl::equatable_function<void(int)> f6(std::move(movable));
+    awl::equatable_function<void(int)> empty1;
+    awl::equatable_function<void(int)> empty2;
 
     std::unordered_set<awl::equatable_function<void(int)>> handlers;
     AWL_ASSERT(handlers.insert(f1).second);
     AWL_ASSERT_FALSE(handlers.insert(f2).second);
     AWL_ASSERT(handlers.insert(f3).second);
+    AWL_ASSERT(handlers.insert(f4).second);
+    AWL_ASSERT_FALSE(handlers.insert(f5).second);
+    AWL_ASSERT_FALSE(handlers.insert(f6).second);
+    AWL_ASSERT(handlers.insert(empty1).second);
+    AWL_ASSERT_FALSE(handlers.insert(empty2).second);
 
-    AWL_ASSERT_EQUAL(2u, handlers.size());
+    AWL_ASSERT_EQUAL(4u, handlers.size());
     AWL_ASSERT(handlers.find(f1) != handlers.end());
     AWL_ASSERT(handlers.find(f2) != handlers.end());
     AWL_ASSERT(handlers.find(f3) != handlers.end());
+    AWL_ASSERT(handlers.find(f4) != handlers.end());
+    AWL_ASSERT(handlers.find(empty1) != handlers.end());
+    AWL_ASSERT_EQUAL(1u, handlers.erase(f3));
+    AWL_ASSERT(handlers.find(f3) == handlers.end());
+    AWL_ASSERT_EQUAL(3u, handlers.size());
+
+    awl::equatable_function<bool(int)> p1(&h1, &Handler::test_value);
+    awl::equatable_function<bool(int)> p2(&h1, &Handler::test_value);
+    awl::equatable_function<bool(int)> p3(&h2, &Handler::test_value);
+
+    std::unordered_set<awl::equatable_function<bool(int)>> predicates;
+    AWL_ASSERT(predicates.insert(p1).second);
+    AWL_ASSERT_FALSE(predicates.insert(p2).second);
+    AWL_ASSERT(predicates.insert(p3).second);
+    AWL_ASSERT_EQUAL(2u, predicates.size());
+    AWL_ASSERT(predicates.find(p2) != predicates.end());
 }
 
 AWL_TEST(EquatableFunction_ConstMember)
