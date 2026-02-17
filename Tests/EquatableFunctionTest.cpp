@@ -33,6 +33,39 @@ namespace
         int sum = 0;
         int threshold = 0;
     };
+
+    class OtherHandler
+    {
+    public:
+
+        void on_value(int value)
+        {
+            sum += value;
+        }
+
+        bool test_value(int value) const
+        {
+            return value > threshold;
+        }
+
+        int sum = 0;
+        int threshold = 0;
+    };
+
+    class DerivedHandler : public Handler
+    {
+    public:
+
+        void on_value_derived(int value)
+        {
+            sum += value * 3;
+        }
+
+        bool test_value_derived(int value) const
+        {
+            return value >= threshold;
+        }
+    };
 }
 
 AWL_TEST(EquatableFunction_MemPtr)
@@ -129,6 +162,47 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     AWL_ASSERT(predicates.insert(p3).second);
     AWL_ASSERT_EQUAL(2u, predicates.size());
     AWL_ASSERT(predicates.find(p2) != predicates.end());
+}
+
+AWL_TEST(EquatableFunction_DifferentHandlerTypes)
+{
+    AWL_UNUSED_CONTEXT;
+
+    Handler base;
+    OtherHandler other;
+    DerivedHandler derived1;
+    DerivedHandler derived2;
+
+    awl::equatable_function<void(int)> f_base(&base, &Handler::on_value);
+    awl::equatable_function<void(int)> f_other(&other, &OtherHandler::on_value);
+    awl::equatable_function<void(int)> f_derived1(&derived1, &DerivedHandler::on_value_derived);
+    awl::equatable_function<void(int)> f_derived1_dup(&derived1, &DerivedHandler::on_value_derived);
+    awl::equatable_function<void(int)> f_derived2(&derived2, &DerivedHandler::on_value_derived);
+
+    AWL_ASSERT_FALSE(f_base == f_other);
+    AWL_ASSERT_FALSE(f_base == f_derived1);
+    AWL_ASSERT(f_derived1 == f_derived1_dup);
+    AWL_ASSERT_FALSE(f_derived1 == f_derived2);
+
+    std::unordered_set<awl::equatable_function<void(int)>> handlers;
+    AWL_ASSERT(handlers.insert(f_base).second);
+    AWL_ASSERT(handlers.insert(f_other).second);
+    AWL_ASSERT(handlers.insert(f_derived1).second);
+    AWL_ASSERT_FALSE(handlers.insert(f_derived1_dup).second);
+    AWL_ASSERT(handlers.insert(f_derived2).second);
+    AWL_ASSERT_EQUAL(4u, handlers.size());
+
+    awl::equatable_function<bool(int)> p_base(&base, &Handler::test_value);
+    awl::equatable_function<bool(int)> p_other(&other, &OtherHandler::test_value);
+    awl::equatable_function<bool(int)> p_derived(&derived1, &DerivedHandler::test_value_derived);
+    awl::equatable_function<bool(int)> p_derived_dup(&derived1, &DerivedHandler::test_value_derived);
+
+    std::unordered_set<awl::equatable_function<bool(int)>> predicates;
+    AWL_ASSERT(predicates.insert(p_base).second);
+    AWL_ASSERT(predicates.insert(p_other).second);
+    AWL_ASSERT(predicates.insert(p_derived).second);
+    AWL_ASSERT_FALSE(predicates.insert(p_derived_dup).second);
+    AWL_ASSERT_EQUAL(3u, predicates.size());
 }
 
 AWL_TEST(EquatableFunction_ConstMember)
