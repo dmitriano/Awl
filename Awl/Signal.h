@@ -8,6 +8,7 @@
 #include "Awl/EquatableFunction.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <concepts>
 #include <memory>
 #include <utility>
@@ -133,10 +134,30 @@ namespace awl
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
         {
-            for (const Slot& slot : m_slots)
+            std::size_t active_end = m_slots.size();
+            std::size_t i = 0;
+
+            while (i < active_end)
             {
-                slot(args...);
+                auto guard = m_slots[i].lock();
+
+                if (guard)
+                {
+                    guard(args...);
+                    ++i;
+                }
+                else
+                {
+                    --active_end;
+
+                    if (i != active_end)
+                    {
+                        std::iter_swap(m_slots.begin() + static_cast<std::ptrdiff_t>(i), m_slots.begin() + static_cast<std::ptrdiff_t>(active_end));
+                    }
+                }
             }
+
+            m_slots.erase(m_slots.begin() + static_cast<std::ptrdiff_t>(active_end), m_slots.end());
         }
 
         void clear() noexcept
@@ -156,6 +177,6 @@ namespace awl
 
     private:
 
-        container_type m_slots;
+        mutable container_type m_slots;
     };
 }

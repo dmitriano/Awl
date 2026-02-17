@@ -87,6 +87,30 @@ AWL_TEST(Signal_WeakPtr)
     owner.reset();
     AWL_ASSERT(weak.expired());
 
-    AWL_ASSERT(signal.unsubscribe(weak, &Handler::on_value));
+    signal.emit(7);
     AWL_ASSERT(signal.empty());
+    AWL_ASSERT_FALSE(signal.unsubscribe(weak, &Handler::on_value));
+}
+
+AWL_TEST(Signal_WeakPtrCompaction)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+
+    auto owner_alive = std::make_shared<Handler>();
+    auto owner_dead = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak_dead = owner_dead;
+
+    signal.subscribe(owner_alive, &Handler::on_value);
+    signal.subscribe(owner_dead, &Handler::on_value);
+
+    owner_dead.reset();
+    AWL_ASSERT(weak_dead.expired());
+
+    signal.emit(10);
+
+    AWL_ASSERT_EQUAL(1u, signal.size());
+    AWL_ASSERT_EQUAL(10, owner_alive->sum);
+    AWL_ASSERT_EQUAL(1, owner_alive->count);
 }
