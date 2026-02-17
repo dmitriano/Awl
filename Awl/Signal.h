@@ -63,9 +63,23 @@ namespace awl
 
         bool unsubscribe(const Slot& slot)
         {
-            const auto old_size = m_slots.size();
-            m_slots.erase(std::remove(m_slots.begin(), m_slots.end(), slot), m_slots.end());
-            return m_slots.size() != old_size;
+            const auto it = std::find(m_slots.begin(), m_slots.end(), slot);
+
+            if (it == m_slots.end())
+            {
+                return false;
+            }
+
+            auto last = m_slots.end();
+            --last;
+
+            if (it != last)
+            {
+                std::iter_swap(it, last);
+            }
+
+            m_slots.pop_back();
+            return true;
         }
 
         template <class Object>
