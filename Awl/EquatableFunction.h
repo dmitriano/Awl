@@ -6,9 +6,9 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <functional>
 #include <memory>
 #include <typeindex>
@@ -161,35 +161,20 @@ namespace awl
             seed ^= std::hash<T>{}(val) + 0x9e3779b9u + (seed << 6) + (seed >> 2);
         }
 
-        template <class Value>
-        static void combine_binary_hash(std::size_t& seed, const Value& val) noexcept
-        {
-            std::array<std::byte, sizeof(Value)> bytes{};
-            std::memcpy(bytes.data(), std::addressof(val), sizeof(Value));
-
-            for (const std::byte b : bytes)
-            {
-                combine_hash(seed, static_cast<unsigned int>(b));
-            }
-        }
-
         template <class Member>
-        static const void* make_member_id(Member member) noexcept
+        static const void* member_identity(Member member) noexcept
         {
-            std::uintptr_t id = 0;
+            static_assert(sizeof(Member) <= sizeof(std::uintptr_t));
 
-            if constexpr (sizeof(Member) <= sizeof(std::uintptr_t))
+            const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(member);
+
+            std::uintptr_t value = 0;
+            for (std::size_t i = 0; i < sizeof(Member); ++i)
             {
-                std::memcpy(std::addressof(id), std::addressof(member), sizeof(Member));
-            }
-            else
-            {
-                std::size_t seed = 0;
-                combine_binary_hash(seed, member);
-                id = static_cast<std::uintptr_t>(seed);
+                value |= static_cast<std::uintptr_t>(std::to_integer<unsigned char>(bytes[i])) << (8u * i);
             }
 
-            return reinterpret_cast<const void*>(id);
+            return reinterpret_cast<const void*>(value);
         }
 
         template <class Object, class Member>
@@ -205,7 +190,6 @@ namespace awl
             ErasedMember(Object* p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
-                , m_member_id(make_member_id(member))
             {
             }
 
@@ -216,7 +200,12 @@ namespace awl
 
             TargetInfo target_info() const noexcept override
             {
-                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), m_member_id };
+                return
+                {
+                    std::type_index(typeid(Object)),
+                    static_cast<const void*>(m_object),
+                    member_identity(m_member)
+                };
             }
 
             std::size_t hash() const noexcept override
@@ -238,7 +227,6 @@ namespace awl
 
             Object* m_object = nullptr;
             Member m_member{};
-            const void* m_member_id = nullptr;
         };
 
         template <class Object>
@@ -251,7 +239,6 @@ namespace awl
             ErasedMember(const Object* p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
-                , m_member_id(make_member_id(member))
             {
             }
 
@@ -262,7 +249,12 @@ namespace awl
 
             TargetInfo target_info() const noexcept override
             {
-                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), m_member_id };
+                return
+                {
+                    std::type_index(typeid(Object)),
+                    static_cast<const void*>(m_object),
+                    member_identity(m_member)
+                };
             }
 
             std::size_t hash() const noexcept override
@@ -284,7 +276,6 @@ namespace awl
 
             const Object* m_object = nullptr;
             Member m_member{};
-            const void* m_member_id = nullptr;
         };
 
         std::unique_ptr<Invocable> m_invocable;
