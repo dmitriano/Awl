@@ -61,15 +61,15 @@ namespace awl
         }
 
         template <class Object>
-        void subscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...))
+        void subscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...))
         {
-            subscribe(Slot(p_object, member));
+            subscribe(Slot(std::move(p_object), member));
         }
 
         template <class Object>
-        void subscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...) const)
+        void subscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...) const)
         {
-            subscribe(Slot(p_object, member));
+            subscribe(Slot(std::move(p_object), member));
         }
 
         bool unsubscribe(const Slot& slot)
@@ -118,15 +118,15 @@ namespace awl
         }
 
         template <class Object>
-        bool unsubscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...))
+        bool unsubscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...))
         {
-            return unsubscribe(Slot(p_object, member));
+            return unsubscribe(Slot(std::move(p_object), member));
         }
 
         template <class Object>
-        bool unsubscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...) const)
+        bool unsubscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...) const)
         {
-            return unsubscribe(Slot(p_object, member));
+            return unsubscribe(Slot(std::move(p_object), member));
         }
 
         template<typename ...Params>
