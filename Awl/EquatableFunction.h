@@ -43,6 +43,13 @@ namespace awl
                 return m_invocable != nullptr && m_owner != nullptr;
             }
 
+            Result operator()(Args... args) const
+            {
+                return invoke(std::forward<Args>(args)...);
+            }
+
+        private:
+
             Result invoke(Args... args) const
             {
                 if (!m_invocable)
@@ -52,13 +59,6 @@ namespace awl
 
                 return m_invocable->invoke_locked(m_owner, std::forward<Args>(args)...);
             }
-
-            Result operator()(Args... args) const
-            {
-                return invoke(std::forward<Args>(args)...);
-            }
-
-        private:
 
             invocation_guard(const Invocable* p_invocable, std::shared_ptr<void> owner)
                 : m_invocable(p_invocable)

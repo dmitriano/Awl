@@ -279,7 +279,7 @@ AWL_TEST(EquatableFunction_TryLockWeak)
         AWL_ASSERT(static_cast<bool>(locked));
 
         p_owner.reset();
-        locked.invoke(5);
+        locked(5);
 
         auto p_locked = weak.lock();
         AWL_ASSERT(p_locked != nullptr);
