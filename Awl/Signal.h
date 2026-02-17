@@ -8,6 +8,7 @@
 #include "Awl/EquatableFunction.h"
 
 #include <algorithm>
+#include <concepts>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -80,11 +81,13 @@ namespace awl
             return unsubscribe(Slot(p_object, member));
         }
 
-        void emit(Args... args) const
+        template<typename ...Params>
+        void emit(const Params&... args) const
+            requires (std::invocable<Slot&, const Params&...>)
         {
             for (const Slot& slot : m_slots)
             {
-                slot(std::forward<Args>(args)...);
+                slot(args...);
             }
         }
 
