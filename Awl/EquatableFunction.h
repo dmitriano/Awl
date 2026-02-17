@@ -142,7 +142,7 @@ namespace awl
             virtual ~Invocable() = default;
 
             virtual Result invoke(Args... args) const = 0;
-            virtual std::tuple<std::type_index, void*> target_info() const noexcept = 0;
+            virtual std::tuple<std::type_index, const void*> target_info() const noexcept = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
@@ -195,7 +195,7 @@ namespace awl
                 return std::invoke(m_callable, std::forward<Args>(args)...);
             }
 
-            std::tuple<std::type_index, void*> target_info() const noexcept override
+            std::tuple<std::type_index, const void*> target_info() const noexcept override
             {
                 return { std::type_index(typeid(Callable)), nullptr };
             }
@@ -278,9 +278,13 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
-            std::tuple<std::type_index, void*> target_info() const noexcept override
+            std::tuple<std::type_index, const void*> target_info() const noexcept override
             {
-                return { std::type_index(typeid(std::remove_cv_t<Object>)), static_cast<void*>(m_object) };
+                return
+                {
+                    std::type_index(typeid(std::remove_cv_t<Object>)),
+                    static_cast<const void*>(m_object)
+                };
             }
 
             bool equals(const Invocable& other) const noexcept override
