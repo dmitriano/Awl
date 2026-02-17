@@ -6,6 +6,8 @@
 #include "Awl/Signal.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <memory>
+
 namespace
 {
     class Handler
@@ -61,4 +63,30 @@ AWL_TEST(Signal_SubscribeUnsubscribeEmit)
     signal.clear();
     AWL_ASSERT(signal.empty());
     AWL_ASSERT_EQUAL(0u, signal.size());
+}
+
+AWL_TEST(Signal_WeakPtr)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+
+    auto owner = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak = owner;
+
+    signal.subscribe(owner, &Handler::on_value);
+    signal.subscribe(weak, &Handler::on_value);
+
+    // Same target must be deduplicated.
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    signal.emit(5);
+    AWL_ASSERT_EQUAL(5, owner->sum);
+    AWL_ASSERT_EQUAL(1, owner->count);
+
+    owner.reset();
+    AWL_ASSERT(weak.expired());
+
+    AWL_ASSERT(signal.unsubscribe(weak, &Handler::on_value));
+    AWL_ASSERT(signal.empty());
 }

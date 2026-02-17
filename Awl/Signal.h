@@ -48,6 +48,30 @@ namespace awl
             subscribe(Slot(p_object, member));
         }
 
+        template <class Object>
+        void subscribe(const std::shared_ptr<Object>& p_object, void (Object::*member)(Args...))
+        {
+            subscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        void subscribe(const std::shared_ptr<Object>& p_object, void (Object::*member)(Args...) const)
+        {
+            subscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        void subscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...))
+        {
+            subscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        void subscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...) const)
+        {
+            subscribe(Slot(p_object, member));
+        }
+
         bool unsubscribe(const Slot& slot)
         {
             const auto it = std::find(m_slots.begin(), m_slots.end(), slot);
@@ -77,6 +101,30 @@ namespace awl
 
         template <class Object>
         bool unsubscribe(const Object* p_object, void (Object::*member)(Args...) const)
+        {
+            return unsubscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        bool unsubscribe(const std::shared_ptr<Object>& p_object, void (Object::*member)(Args...))
+        {
+            return unsubscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        bool unsubscribe(const std::shared_ptr<Object>& p_object, void (Object::*member)(Args...) const)
+        {
+            return unsubscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        bool unsubscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...))
+        {
+            return unsubscribe(Slot(p_object, member));
+        }
+
+        template <class Object>
+        bool unsubscribe(const std::weak_ptr<Object>& p_object, void (Object::*member)(Args...) const)
         {
             return unsubscribe(Slot(p_object, member));
         }
