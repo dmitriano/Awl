@@ -8,7 +8,6 @@
 #include <array>
 #include <bit>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <typeindex>
@@ -146,33 +145,33 @@ namespace awl
         }
 
         template <class Member>
-        static const void* member_identity(Member member) noexcept
+        static std::size_t member_identity(Member member) noexcept
         {
-            static_assert(sizeof(Member) <= sizeof(std::uintptr_t));
+            static_assert(sizeof(Member) <= sizeof(std::size_t));
 
             const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(member);
 
-            std::uintptr_t value = 0;
+            std::size_t value = 0;
             for (std::size_t i = 0; i < sizeof(Member); ++i)
             {
-                value |= static_cast<std::uintptr_t>(std::to_integer<unsigned char>(bytes[i])) << (8u * i);
+                value |= static_cast<std::size_t>(std::to_integer<unsigned char>(bytes[i])) << (8u * i);
             }
 
-            return reinterpret_cast<const void*>(value);
+            return value;
         }
 
         template <class Member>
-        struct member_fn_traits;
+        struct member_function_traits;
 
         template <class Object>
-        struct member_fn_traits<Result (Object::*)(Args...)>
+        struct member_function_traits<Result (Object::*)(Args...)>
         {
             using object_type = Object;
             using object_ptr = Object*;
         };
 
         template <class Object>
-        struct member_fn_traits<Result (Object::*)(Args...) const>
+        struct member_function_traits<Result (Object::*)(Args...) const>
         {
             using object_type = Object;
             using object_ptr = const Object*;
@@ -186,7 +185,7 @@ namespace awl
         {
         public:
 
-            using Traits = member_fn_traits<Member>;
+            using Traits = member_function_traits<Member>;
             using Object = typename Traits::object_type;
             using ObjectPtr = typename Traits::object_ptr;
 
