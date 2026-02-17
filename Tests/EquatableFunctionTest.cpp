@@ -34,6 +34,16 @@ namespace
     };
 }
 
+AWL_TEST(EquatableFunction_MemPtr)
+{
+    AWL_UNUSED_CONTEXT;
+
+    Handler h1;
+    Handler h2;
+
+    AWL_ASSERT(&Handler::on_value == &Handler::on_value);
+}
+
 AWL_TEST(EquatableFunction_CompareAndHash)
 {
     AWL_UNUSED_CONTEXT;
