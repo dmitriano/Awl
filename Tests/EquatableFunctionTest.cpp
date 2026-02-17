@@ -180,6 +180,10 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     AWL_ASSERT(predicates.find(p2) != predicates.end());
     AWL_ASSERT(predicates.find(p_other) != predicates.end());
     AWL_ASSERT(predicates.find(p_derived) != predicates.end());
+    AWL_ASSERT_EQUAL(1u, predicates.erase(p2));
+    AWL_ASSERT(predicates.find(p2) == predicates.end());
+    AWL_ASSERT_EQUAL(0u, predicates.erase(p2));
+    AWL_ASSERT_EQUAL(3u, predicates.size());
 }
 
 AWL_TEST(EquatableFunction_DifferentHandlerTypes)
