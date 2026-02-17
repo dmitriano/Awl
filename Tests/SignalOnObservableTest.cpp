@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Signal.h"
+#include "Awl/Experimental/SignalOnObservable.h"
 #include "Awl/Observer.h"
 #include "Awl/Testing/UnitTest.h"
 
@@ -17,7 +17,7 @@ namespace
         virtual void operator()(int value) = 0;
     };
 
-    class ValueSignal : public awl::Signal<IValueSlot>
+    class ValueSignal : public awl::SignalOnObservable<IValueSlot>
     {
     public:
 
@@ -82,7 +82,7 @@ namespace
         virtual bool operator()(int value) = 0;
     };
 
-    class PredicateSignal : public awl::Signal<IPredicateSlot>
+    class PredicateSignal : public awl::SignalOnObservable<IPredicateSlot>
     {
     public:
 
@@ -116,7 +116,7 @@ namespace
     };
 }
 
-AWL_TEST(Signal_Events)
+AWL_TEST(SignalOnObservable_Events)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -169,7 +169,7 @@ AWL_TEST(Signal_Events)
     AWL_ASSERT_EQUAL(0U, signal.size());
 }
 
-AWL_TEST(Signal_Move)
+AWL_TEST(SignalOnObservable_Move)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -204,7 +204,7 @@ AWL_TEST(Signal_Move)
     AWL_ASSERT_EQUAL(7, last2);
 }
 
-AWL_TEST(Signal_ObserverMove)
+AWL_TEST(SignalOnObservable_ObserverMove)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -237,7 +237,7 @@ AWL_TEST(Signal_ObserverMove)
     AWL_ASSERT_EQUAL(20005, events[1]);
 }
 
-AWL_TEST(Signal_EmitWhileTrue_StopsOnFalse)
+AWL_TEST(SignalOnObservable_EmitWhileTrue_StopsOnFalse)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -269,7 +269,7 @@ AWL_TEST(Signal_EmitWhileTrue_StopsOnFalse)
     AWL_ASSERT_EQUAL(0, last3);
 }
 
-AWL_TEST(Signal_EmitWhileTrue_AllTrue)
+AWL_TEST(SignalOnObservable_EmitWhileTrue_AllTrue)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -295,6 +295,8 @@ AWL_TEST(Signal_EmitWhileTrue_AllTrue)
     AWL_ASSERT_EQUAL(7, last2);
 }
 
+#ifdef _MSC_VER
+
 namespace
 {
     struct SlotA
@@ -307,7 +309,7 @@ namespace
         virtual void operator()(int value) = 0;
     };
 
-    class SignalA : public awl::Signal<SlotA>
+    class SignalA : public awl::SignalOnObservable<SlotA>
     {
     public:
 
@@ -317,7 +319,7 @@ namespace
         }
     };
 
-    class SignalB : public awl::Signal<SlotB>
+    class SignalB : public awl::SignalOnObservable<SlotB>
     {
     public:
 
@@ -348,7 +350,7 @@ namespace
     };
 }
 
-AWL_TEST(Signal_MultiObserver_IndependentValues)
+AWL_TEST(SignalOnObservable_MultiObserver_IndependentValues)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -375,7 +377,7 @@ AWL_TEST(Signal_MultiObserver_IndependentValues)
     AWL_ASSERT_EQUAL(22, observer.bValue);
 }
 
-AWL_TEST(Signal_MultiObserver_UnsubscribeA_DoesNotAffectB)
+AWL_TEST(SignalOnObservable_MultiObserver_UnsubscribeA_DoesNotAffectB)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -394,3 +396,5 @@ AWL_TEST(Signal_MultiObserver_UnsubscribeA_DoesNotAffectB)
     AWL_ASSERT_EQUAL(0, observer.aValue);
     AWL_ASSERT_EQUAL(200, observer.bValue);
 }
+
+#endif

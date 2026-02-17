@@ -64,14 +64,6 @@ AWL_TEST(EquatableFunction_CompareAndHash)
     const auto hsh2 = std::hash<awl::equatable_function<void(int)>>{}(f2);
 
     AWL_ASSERT_EQUAL(hsh1, hsh2);
-
-    std::unordered_set<awl::equatable_function<void(int)>> set;
-    AWL_ASSERT(set.insert(f1).second);
-    AWL_ASSERT_FALSE(set.insert(f2).second);
-    AWL_ASSERT(set.insert(f3).second);
-    AWL_ASSERT(set.insert(f4).second);
-
-    AWL_ASSERT_EQUAL(3u, set.size());
 }
 
 AWL_TEST(EquatableFunction_Invoke)

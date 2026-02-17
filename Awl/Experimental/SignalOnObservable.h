@@ -14,7 +14,7 @@ namespace awl
 {
     // A slot is a class that has operator() with the signature of the signal.
     template <class Slot, class Enclosing = void>
-    class Signal : private details::ObservableImpl<Slot, Enclosing>
+    class SignalOnObservable : private details::ObservableImpl<Slot, Enclosing>
     {
     private:
 
@@ -24,14 +24,14 @@ namespace awl
 
     public:
 
-        Signal() = default;
-        ~Signal() = default;
+        SignalOnObservable() = default;
+        ~SignalOnObservable() = default;
 
-        Signal(const Signal& other) = delete;
-        Signal(Signal&& other) = default;
+        SignalOnObservable(const SignalOnObservable& other) = delete;
+        SignalOnObservable(SignalOnObservable&& other) = default;
 
-        Signal& operator = (const Signal& other) = delete;
-        Signal& operator = (Signal&& other) noexcept = default;
+        SignalOnObservable& operator = (const SignalOnObservable& other) = delete;
+        SignalOnObservable& operator = (SignalOnObservable&& other) noexcept = default;
 
         using Base::subscribe;
         using Base::unsubscribe;
