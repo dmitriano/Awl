@@ -134,12 +134,12 @@ namespace awl
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
         {
-            std::size_t active_end = m_slots.size();
-            std::size_t i = 0;
+            auto i = m_slots.begin();
+            auto active_end = m_slots.end();
 
-            while (i < active_end)
+            while (i != active_end)
             {
-                auto guard = m_slots[i].lock();
+                auto guard = i->lock();
 
                 if (guard)
                 {
@@ -152,12 +152,12 @@ namespace awl
 
                     if (i != active_end)
                     {
-                        std::iter_swap(m_slots.begin() + static_cast<std::ptrdiff_t>(i), m_slots.begin() + static_cast<std::ptrdiff_t>(active_end));
+                        std::iter_swap(i, active_end);
                     }
                 }
             }
 
-            m_slots.erase(m_slots.begin() + static_cast<std::ptrdiff_t>(active_end), m_slots.end());
+            m_slots.erase(active_end, m_slots.end());
         }
 
         void clear() noexcept
