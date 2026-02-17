@@ -179,6 +179,100 @@ namespace awl
         };
 
         template <class Member>
+        class ErasedWeak final : public Invocable
+        {
+        public:
+
+            using Traits = member_function_traits<Member>;
+            using Object = typename Traits::object_type;
+            using WeakObject = std::remove_const_t<Object>;
+            using WeakPtr = std::weak_ptr<WeakObject>;
+
+            ErasedWeak(WeakPtr p_object, Member member)
+                : m_object(std::move(p_object))
+                , m_member(member)
+                , m_object_ptr_snapshot(capture_ptr(m_object))
+            {
+            }
+
+            bool operator==(const ErasedWeak& other) const
+            {
+                return m_object_ptr_snapshot == other.m_object_ptr_snapshot && m_member == other.m_member;
+            }
+
+            Result invoke(Args... args) const override
+            {
+                std::shared_ptr<WeakObject> p_object = m_object.lock();
+
+                if (!p_object)
+                {
+                    throw std::bad_function_call();
+                }
+
+                return std::invoke(m_member, p_object.get(), std::forward<Args>(args)...);
+            }
+
+            bool equals(const Invocable& other) const noexcept override
+            {
+                const auto* p_other = dynamic_cast<const ErasedWeak*>(&other);
+                return p_other != nullptr && *this == *p_other;
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                std::size_t seed = 0;
+                combine_hash(seed, std::type_index(typeid(Object)));
+                combine_hash(seed, m_object_ptr_snapshot);
+
+                const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
+
+                constexpr std::size_t chunk_size = sizeof(std::size_t);
+                const std::size_t chunk_count = bytes.size() / chunk_size;
+
+                for (std::size_t i = 0; i < chunk_count; ++i)
+                {
+                    std::array<std::byte, chunk_size> chunk_bytes{};
+                    const auto first = bytes.begin() + static_cast<std::ptrdiff_t>(i * chunk_size);
+                    const auto last = first + static_cast<std::ptrdiff_t>(chunk_size);
+                    std::copy(first, last, chunk_bytes.begin());
+
+                    combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
+                }
+
+                const std::size_t remainder_begin = chunk_count * chunk_size;
+
+                for (std::size_t i = remainder_begin; i < bytes.size(); ++i)
+                {
+                    combine_hash(seed, std::to_integer<unsigned int>(bytes[i]));
+                }
+
+                return seed;
+            }
+
+            Invocable* clone_to(void* p_storage) const override
+            {
+                return ::new (p_storage) ErasedWeak(*this);
+            }
+
+            Invocable* move_to(void* p_storage) noexcept override
+            {
+                return ::new (p_storage) ErasedWeak(std::move(*this));
+            }
+
+        private:
+
+            static const void* capture_ptr(const WeakPtr& p_object) noexcept
+            {
+                std::shared_ptr<WeakObject> p_locked = p_object.lock();
+                return p_locked ? static_cast<const void*>(p_locked.get()) : nullptr;
+            }
+
+            WeakPtr m_object;
+            Member m_member{};
+            const void* m_object_ptr_snapshot = nullptr;
+        };
+
+        template <class Member>
         class ErasedMember final : public Invocable
         {
         public:
