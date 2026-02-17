@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstring>
 #include <functional>
@@ -12,7 +14,6 @@
 #include <type_traits>
 #include <typeindex>
 #include <utility>
-#include <vector>
 
 namespace awl
 {
@@ -27,18 +28,42 @@ namespace awl
         using signature_type = Result(Args...);
 
         equatable_function() = default;
+        ~equatable_function() = default;
 
         equatable_function(std::nullptr_t) noexcept
         {
         }
 
+        equatable_function(const equatable_function& other)
+        {
+            if (other.m_invocable)
+            {
+                m_invocable = other.m_invocable->clone();
+            }
+        }
+
+        equatable_function(equatable_function&& other) noexcept = default;
+
+        equatable_function& operator=(const equatable_function& other)
+        {
+            if (this != std::addressof(other))
+            {
+                m_invocable = other.m_invocable ? other.m_invocable->clone() : nullptr;
+            }
+
+            return *this;
+        }
+
+        equatable_function& operator=(equatable_function&& other) noexcept = default;
+
         template <class Callable>
             requires (
                 !std::is_same_v<std::remove_cvref_t<Callable>, equatable_function> &&
-                std::is_invocable_r_v<Result, Callable&, Args...>
+                std::copy_constructible<std::decay_t<Callable>> &&
+                std::is_invocable_r_v<Result, std::decay_t<Callable>&, Args...>
             )
         equatable_function(Callable&& callable)
-            : m_function(std::forward<Callable>(callable))
+            : m_invocable(std::make_unique<ErasedCallable<std::decay_t<Callable>>>(std::forward<Callable>(callable)))
         {
         }
 
@@ -49,7 +74,7 @@ namespace awl
             )
         equatable_function(Object* p_object, Member member)
         {
-            assign(p_object, member);
+            m_invocable = std::make_unique<ErasedMember<Object, Member>>(p_object, member);
         }
 
         template <class Object, class Member>
@@ -59,56 +84,37 @@ namespace awl
             )
         equatable_function(Object& object, Member member)
         {
-            assign(std::addressof(object), member);
+            m_invocable = std::make_unique<ErasedMember<Object, Member>>(std::addressof(object), member);
         }
 
         Result operator()(Args... args) const
         {
-            return m_function(std::forward<Args>(args)...);
+            if (!m_invocable)
+            {
+                throw std::bad_function_call();
+            }
+
+            return m_invocable->invoke(std::forward<Args>(args)...);
         }
 
         explicit operator bool() const noexcept
         {
-            return static_cast<bool>(m_function);
-        }
-
-        bool has_identity() const noexcept
-        {
-            return m_has_identity;
+            return static_cast<bool>(m_invocable);
         }
 
         std::size_t hash() const noexcept
         {
-            std::size_t seed = 0;
-
-            combine_hash(seed, m_has_identity);
-
-            if (!m_has_identity)
-            {
-                combine_hash(seed, static_cast<bool>(m_function));
-                return seed;
-            }
-
-            combine_hash(seed, m_object_type);
-            combine_hash(seed, m_object_ptr);
-            combine_hash(seed, m_member_type);
-            combine_range_hash(seed, m_member_ptr_bytes);
-
-            return seed;
+            return m_invocable ? m_invocable->hash() : 0u;
         }
 
         friend bool operator==(const equatable_function& left, const equatable_function& right) noexcept
         {
-            if (!left.m_has_identity || !right.m_has_identity)
+            if (!left.m_invocable || !right.m_invocable)
             {
-                return !left.m_function && !right.m_function;
+                return !left.m_invocable && !right.m_invocable;
             }
 
-            return
-                left.m_object_type == right.m_object_type &&
-                left.m_object_ptr == right.m_object_ptr &&
-                left.m_member_type == right.m_member_type &&
-                left.m_member_ptr_bytes == right.m_member_ptr_bytes;
+            return left.m_invocable->equals(*right.m_invocable);
         }
 
         friend bool operator!=(const equatable_function& left, const equatable_function& right) noexcept
@@ -128,44 +134,161 @@ namespace awl
 
     private:
 
+        class Invocable
+        {
+        public:
+
+            virtual ~Invocable() = default;
+
+            virtual Result invoke(Args... args) const = 0;
+            virtual bool equals(const Invocable& other) const noexcept = 0;
+            virtual std::size_t hash() const noexcept = 0;
+            virtual std::unique_ptr<Invocable> clone() const = 0;
+        };
+
         template <class T>
         static void combine_hash(std::size_t& seed, const T& val) noexcept
         {
             seed ^= std::hash<T>{}(val) + 0x9e3779b9u + (seed << 6) + (seed >> 2);
         }
 
-        static void combine_range_hash(std::size_t& seed, const std::vector<std::byte>& bytes) noexcept
+        template <class Value>
+        static constexpr bool has_equality_operator =
+            requires (const Value& left, const Value& right)
+            {
+                { left == right } -> std::convertible_to<bool>;
+            };
+
+        template <class Value>
+        static constexpr bool has_std_hash =
+            requires (const Value& val)
+            {
+                { std::hash<Value>{}(val) } -> std::convertible_to<std::size_t>;
+            };
+
+        template <class Value>
+        static void combine_binary_hash(std::size_t& seed, const Value& val) noexcept
         {
-            for (std::byte b : bytes)
+            std::array<std::byte, sizeof(Value)> bytes{};
+            std::memcpy(bytes.data(), std::addressof(val), sizeof(Value));
+
+            for (const std::byte b : bytes)
             {
                 combine_hash(seed, static_cast<unsigned int>(b));
             }
         }
 
-        template <class Object, class Member>
-        void assign(Object* p_object, Member member)
+        template <class Callable>
+        class ErasedCallable final : public Invocable
         {
-            m_function = [p_object, member](Args... args) -> Result
+        public:
+
+            explicit ErasedCallable(Callable callable)
+                : m_callable(std::move(callable))
             {
-                return std::invoke(member, p_object, std::forward<Args>(args)...);
-            };
+            }
 
-            m_has_identity = true;
-            m_object_type = std::type_index(typeid(std::remove_cv_t<Object>));
-            m_object_ptr = static_cast<const void*>(p_object);
-            m_member_type = std::type_index(typeid(Member));
+            Result invoke(Args... args) const override
+            {
+                return std::invoke(m_callable, std::forward<Args>(args)...);
+            }
 
-            m_member_ptr_bytes.resize(sizeof(Member));
-            std::memcpy(m_member_ptr_bytes.data(), std::addressof(member), sizeof(Member));
-        }
+            bool equals(const Invocable& other) const noexcept override
+            {
+                if (this == std::addressof(other))
+                {
+                    return true;
+                }
 
-        std::function<Result(Args...)> m_function;
-        bool m_has_identity = false;
+                const auto* p_other = dynamic_cast<const ErasedCallable*>(&other);
 
-        std::type_index m_object_type = std::type_index(typeid(void));
-        const void* m_object_ptr = nullptr;
-        std::type_index m_member_type = std::type_index(typeid(void));
-        std::vector<std::byte> m_member_ptr_bytes;
+                if (p_other == nullptr)
+                {
+                    return false;
+                }
+
+                if constexpr (has_equality_operator<Callable>)
+                {
+                    return m_callable == p_other->m_callable;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                std::size_t seed = 0;
+                combine_hash(seed, std::type_index(typeid(Callable)));
+
+                if constexpr (has_std_hash<Callable>)
+                {
+                    combine_hash(seed, std::hash<Callable>{}(m_callable));
+                }
+
+                return seed;
+            }
+
+            std::unique_ptr<Invocable> clone() const override
+            {
+                return std::make_unique<ErasedCallable>(*this);
+            }
+
+        private:
+
+            mutable Callable m_callable;
+        };
+
+        template <class Object, class Member>
+        class ErasedMember final : public Invocable
+        {
+        public:
+
+            ErasedMember(Object* p_object, Member member)
+                : m_object(p_object)
+                , m_member(member)
+            {
+            }
+
+            Result invoke(Args... args) const override
+            {
+                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
+            }
+
+            bool equals(const Invocable& other) const noexcept override
+            {
+                if (this == std::addressof(other))
+                {
+                    return true;
+                }
+
+                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
+                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                std::size_t seed = 0;
+                combine_hash(seed, std::type_index(typeid(std::remove_cv_t<Object>)));
+                combine_hash(seed, static_cast<const void*>(m_object));
+                combine_hash(seed, std::type_index(typeid(Member)));
+                combine_binary_hash(seed, m_member);
+                return seed;
+            }
+
+            std::unique_ptr<Invocable> clone() const override
+            {
+                return std::make_unique<ErasedMember>(*this);
+            }
+
+        private:
+
+            Object* m_object = nullptr;
+            Member m_member{};
+        };
+
+        std::unique_ptr<Invocable> m_invocable;
     };
 }
 
