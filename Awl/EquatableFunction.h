@@ -8,7 +8,6 @@
 #include <array>
 #include <bit>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <new>
@@ -214,20 +213,20 @@ namespace awl
 
                 const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
 
-                constexpr std::size_t chunk_size = 8;
+                constexpr std::size_t chunk_size = sizeof(std::size_t);
                 const std::size_t chunk_count = bytes.size() / chunk_size;
 
                 for (std::size_t i = 0; i < chunk_count; ++i)
                 {
-                    std::uint64_t chunk = 0;
+                    std::array<std::byte, chunk_size> chunk_bytes{};
 
                     for (std::size_t j = 0; j < chunk_size; ++j)
                     {
                         const std::size_t index = i * chunk_size + j;
-                        chunk |= static_cast<std::uint64_t>(std::to_integer<unsigned int>(bytes[index])) << (j * 8u);
+                        chunk_bytes[j] = bytes[index];
                     }
 
-                    combine_hash(seed, static_cast<std::size_t>(chunk));
+                    combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
                 }
 
                 const std::size_t remainder_begin = chunk_count * chunk_size;
