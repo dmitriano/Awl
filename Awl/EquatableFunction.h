@@ -141,6 +141,7 @@ namespace awl
             virtual ~Invocable() = default;
 
             virtual Result invoke(Args... args) const = 0;
+            virtual std::type_index target_type() const noexcept = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
@@ -193,11 +194,21 @@ namespace awl
                 return std::invoke(m_callable, std::forward<Args>(args)...);
             }
 
+            std::type_index target_type() const noexcept override
+            {
+                return std::type_index(typeid(Callable));
+            }
+
             bool equals(const Invocable& other) const noexcept override
             {
                 if (this == std::addressof(other))
                 {
                     return true;
+                }
+
+                if (target_type() != other.target_type())
+                {
+                    return false;
                 }
 
                 const auto* p_other = dynamic_cast<const ErasedCallable*>(&other);
@@ -220,7 +231,7 @@ namespace awl
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
-                combine_hash(seed, std::type_index(typeid(Callable)));
+                combine_hash(seed, target_type());
 
                 if constexpr (has_std_hash<Callable>)
                 {
@@ -256,11 +267,21 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
+            std::type_index target_type() const noexcept override
+            {
+                return std::type_index(typeid(std::remove_cv_t<Object>));
+            }
+
             bool equals(const Invocable& other) const noexcept override
             {
                 if (this == std::addressof(other))
                 {
                     return true;
+                }
+
+                if (target_type() != other.target_type())
+                {
+                    return false;
                 }
 
                 const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
@@ -270,7 +291,7 @@ namespace awl
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
-                combine_hash(seed, std::type_index(typeid(std::remove_cv_t<Object>)));
+                combine_hash(seed, target_type());
                 combine_hash(seed, static_cast<const void*>(m_object));
                 combine_hash(seed, std::type_index(typeid(Member)));
                 combine_binary_hash(seed, m_member);
