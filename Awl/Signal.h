@@ -14,15 +14,12 @@
 
 namespace awl
 {
-    template <class Signature>
-    class Signal;
-
-    template <class Result, class... Args>
-    class Signal<Result(Args...)>
+    template <class... Args>
+    class Signal
     {
     public:
 
-        using Slot = equatable_function<Result(Args...)>;
+        using Slot = equatable_function<void(Args...)>;
         using container_type = std::vector<Slot>;
 
         void subscribe(Slot slot)
@@ -39,25 +36,25 @@ namespace awl
         }
 
         template <class Object>
-        void subscribe(Object* p_object, Result (Object::*member)(Args...))
+        void subscribe(Object* p_object, void (Object::*member)(Args...))
         {
             subscribe(Slot(p_object, member));
         }
 
         template <class Object>
-        void subscribe(const Object* p_object, Result (Object::*member)(Args...) const)
+        void subscribe(const Object* p_object, void (Object::*member)(Args...) const)
         {
             subscribe(Slot(p_object, member));
         }
 
         template <class Object>
-        void subscribe(Object& object, Result (Object::*member)(Args...))
+        void subscribe(Object& object, void (Object::*member)(Args...))
         {
             subscribe(Slot(std::addressof(object), member));
         }
 
         template <class Object>
-        void subscribe(const Object& object, Result (Object::*member)(Args...) const)
+        void subscribe(const Object& object, void (Object::*member)(Args...) const)
         {
             subscribe(Slot(std::addressof(object), member));
         }
@@ -84,25 +81,25 @@ namespace awl
         }
 
         template <class Object>
-        bool unsubscribe(Object* p_object, Result (Object::*member)(Args...))
+        bool unsubscribe(Object* p_object, void (Object::*member)(Args...))
         {
             return unsubscribe(Slot(p_object, member));
         }
 
         template <class Object>
-        bool unsubscribe(const Object* p_object, Result (Object::*member)(Args...) const)
+        bool unsubscribe(const Object* p_object, void (Object::*member)(Args...) const)
         {
             return unsubscribe(Slot(p_object, member));
         }
 
         template <class Object>
-        bool unsubscribe(Object& object, Result (Object::*member)(Args...))
+        bool unsubscribe(Object& object, void (Object::*member)(Args...))
         {
             return unsubscribe(Slot(std::addressof(object), member));
         }
 
         template <class Object>
-        bool unsubscribe(const Object& object, Result (Object::*member)(Args...) const)
+        bool unsubscribe(const Object& object, void (Object::*member)(Args...) const)
         {
             return unsubscribe(Slot(std::addressof(object), member));
         }
@@ -111,7 +108,7 @@ namespace awl
         {
             for (const Slot& slot : m_slots)
             {
-                static_cast<void>(slot(std::forward<Args>(args)...));
+                slot(std::forward<Args>(args)...);
             }
         }
 

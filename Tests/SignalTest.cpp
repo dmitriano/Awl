@@ -27,7 +27,7 @@ AWL_TEST(Signal_SubscribeUnsubscribeEmit)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<void(int)> signal;
+    awl::Signal<int> signal;
     Handler h1;
     Handler h2;
 

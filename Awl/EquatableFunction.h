@@ -391,9 +391,8 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
             
-            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            bool try_lock(std::shared_ptr<void>&) const noexcept override
             {
-                owner.reset();
                 return true;
             }
 
