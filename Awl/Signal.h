@@ -82,7 +82,7 @@ namespace awl
 
             if (it != last)
             {
-                std::iter_swap(it, last);
+                *it = std::move(*last);
             }
 
             m_slots.pop_back();
