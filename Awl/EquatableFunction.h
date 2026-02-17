@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <new>
 #include <typeindex>
 #include <utility>
 
@@ -26,7 +27,6 @@ namespace awl
         using signature_type = Result(Args...);
 
         equatable_function() = default;
-        ~equatable_function() = default;
 
         equatable_function(std::nullptr_t) noexcept
         {
@@ -34,48 +34,63 @@ namespace awl
 
         equatable_function(const equatable_function& other)
         {
-            if (other.m_invocable)
-            {
-                m_invocable = other.m_invocable->clone();
-            }
+            copy_from(other);
         }
 
-        equatable_function(equatable_function&& other) noexcept = default;
+        equatable_function(equatable_function&& other) noexcept
+        {
+            move_from(std::move(other));
+        }
 
         equatable_function& operator=(const equatable_function& other)
         {
             if (this != std::addressof(other))
             {
-                m_invocable = other.m_invocable ? other.m_invocable->clone() : nullptr;
+                reset();
+                copy_from(other);
             }
 
             return *this;
         }
 
-        equatable_function& operator=(equatable_function&& other) noexcept = default;
+        equatable_function& operator=(equatable_function&& other) noexcept
+        {
+            if (this != std::addressof(other))
+            {
+                reset();
+                move_from(std::move(other));
+            }
+
+            return *this;
+        }
+
+        ~equatable_function()
+        {
+            reset();
+        }
 
         template <class Object>
         equatable_function(Object* p_object, Result (Object::*member)(Args...))
         {
-            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(p_object, member);
+            emplace_invocable<ErasedMember<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
         equatable_function(const Object* p_object, Result (Object::*member)(Args...) const)
         {
-            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(p_object, member);
+            emplace_invocable<ErasedMember<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
         equatable_function(Object& object, Result (Object::*member)(Args...))
         {
-            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(std::addressof(object), member);
+            emplace_invocable<ErasedMember<decltype(member)>>(std::addressof(object), member);
         }
 
         template <class Object>
         equatable_function(const Object& object, Result (Object::*member)(Args...) const)
         {
-            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(std::addressof(object), member);
+            emplace_invocable<ErasedMember<decltype(member)>>(std::addressof(object), member);
         }
 
         Result operator()(Args... args) const
@@ -135,7 +150,8 @@ namespace awl
             virtual Result invoke(Args... args) const = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
-            virtual std::unique_ptr<Invocable> clone() const = 0;
+            virtual Invocable* clone_to(void* p_storage) const = 0;
+            virtual Invocable* move_to(void* p_storage) noexcept = 0;
         };
 
         template <class T>
@@ -214,9 +230,14 @@ namespace awl
                 return seed;
             }
 
-            std::unique_ptr<Invocable> clone() const override
+            Invocable* clone_to(void* p_storage) const override
             {
-                return std::make_unique<ErasedMember>(*this);
+                return ::new (p_storage) ErasedMember(*this);
+            }
+
+            Invocable* move_to(void* p_storage) noexcept override
+            {
+                return ::new (p_storage) ErasedMember(std::move(*this));
             }
 
         private:
@@ -225,7 +246,54 @@ namespace awl
             Member m_member{};
         };
 
-        std::unique_ptr<Invocable> m_invocable;
+        static constexpr std::size_t storage_size = 64;
+        alignas(std::max_align_t) std::byte m_storage[storage_size];
+        Invocable* m_invocable = nullptr;
+
+        void* storage_ptr() noexcept
+        {
+            return static_cast<void*>(m_storage);
+        }
+
+        const void* storage_ptr() const noexcept
+        {
+            return static_cast<const void*>(m_storage);
+        }
+
+        void reset() noexcept
+        {
+            if (m_invocable != nullptr)
+            {
+                m_invocable->~Invocable();
+                m_invocable = nullptr;
+            }
+        }
+
+        void copy_from(const equatable_function& other)
+        {
+            if (other.m_invocable != nullptr)
+            {
+                m_invocable = other.m_invocable->clone_to(storage_ptr());
+            }
+        }
+
+        void move_from(equatable_function&& other) noexcept
+        {
+            if (other.m_invocable != nullptr)
+            {
+                m_invocable = other.m_invocable->move_to(storage_ptr());
+                other.reset();
+            }
+        }
+
+        template <class T, class... Ts>
+        void emplace_invocable(Ts&&... args)
+        {
+            static_assert(sizeof(T) <= storage_size);
+            static_assert(alignof(T) <= alignof(std::max_align_t));
+
+            m_invocable = ::new (storage_ptr()) T(std::forward<Ts>(args)...);
+        }
     };
 }
 
