@@ -6,7 +6,6 @@
 #pragma once
 
 #include <array>
-#include <concepts>
 #include <cstddef>
 #include <cstring>
 #include <functional>
@@ -56,17 +55,6 @@ namespace awl
         }
 
         equatable_function& operator=(equatable_function&& other) noexcept = default;
-
-        template <class Callable>
-            requires (
-                !std::is_same_v<std::remove_cvref_t<Callable>, equatable_function> &&
-                std::copy_constructible<std::decay_t<Callable>> &&
-                std::is_invocable_r_v<Result, std::decay_t<Callable>&, Args...>
-            )
-        equatable_function(Callable&& callable)
-            : m_invocable(std::make_unique<ErasedCallable<std::decay_t<Callable>>>(std::forward<Callable>(callable)))
-        {
-        }
 
         template <class Object, class Member>
             requires (
@@ -155,20 +143,6 @@ namespace awl
         }
 
         template <class Value>
-        static constexpr bool has_equality_operator =
-            requires (const Value& left, const Value& right)
-            {
-                { left == right } -> std::convertible_to<bool>;
-            };
-
-        template <class Value>
-        static constexpr bool has_std_hash =
-            requires (const Value& val)
-            {
-                { std::hash<Value>{}(val) } -> std::convertible_to<std::size_t>;
-            };
-
-        template <class Value>
         static void combine_binary_hash(std::size_t& seed, const Value& val) noexcept
         {
             std::array<std::byte, sizeof(Value)> bytes{};
@@ -179,88 +153,6 @@ namespace awl
                 combine_hash(seed, static_cast<unsigned int>(b));
             }
         }
-
-        template <class Callable>
-        class ErasedCallable final : public Invocable
-        {
-        public:
-
-            explicit ErasedCallable(Callable callable)
-                : m_callable(std::move(callable))
-            {
-            }
-
-            Result invoke(Args... args) const override
-            {
-                return std::invoke(m_callable, std::forward<Args>(args)...);
-            }
-
-            std::tuple<std::type_index, const void*> target_info() const noexcept override
-            {
-                return { std::type_index(typeid(Callable)), nullptr };
-            }
-
-            bool equals(const Invocable& other) const noexcept override
-            {
-                if (this == std::addressof(other))
-                {
-                    return true;
-                }
-
-                const auto info = target_info();
-                const auto other_info = other.target_info();
-
-                if (std::get<0>(info) != std::get<0>(other_info))
-                {
-                    return false;
-                }
-
-                if (std::get<1>(info) != std::get<1>(other_info))
-                {
-                    return false;
-                }
-
-                const auto* p_other = dynamic_cast<const ErasedCallable*>(&other);
-
-                if (p_other == nullptr)
-                {
-                    return false;
-                }
-
-                if constexpr (has_equality_operator<Callable>)
-                {
-                    return m_callable == p_other->m_callable;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            std::size_t hash() const noexcept override
-            {
-                std::size_t seed = 0;
-                const auto info = target_info();
-                combine_hash(seed, std::get<0>(info));
-                combine_hash(seed, std::get<1>(info));
-
-                if constexpr (has_std_hash<Callable>)
-                {
-                    combine_hash(seed, std::hash<Callable>{}(m_callable));
-                }
-
-                return seed;
-            }
-
-            std::unique_ptr<Invocable> clone() const override
-            {
-                return std::make_unique<ErasedCallable>(*this);
-            }
-
-        private:
-
-            mutable Callable m_callable;
-        };
 
         template <class Object, class Member>
         class ErasedMember final : public Invocable
