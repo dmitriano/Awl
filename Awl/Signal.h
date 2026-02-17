@@ -130,9 +130,8 @@ namespace awl
             requires (std::invocable<Slot&, const Params&...>)
         {
             auto i = m_slots.begin();
-            auto active_end = m_slots.end();
 
-            while (i != active_end)
+            while (i != m_slots.end())
             {
                 auto guard = i->lock();
 
@@ -143,16 +142,23 @@ namespace awl
                 }
                 else
                 {
-                    --active_end;
+                    auto last = m_slots.end();
+                    --last;
+                    const bool removing_last = (i == last);
 
-                    if (i != active_end)
+                    if (!removing_last)
                     {
-                        std::iter_swap(i, active_end);
+                        *i = std::move(*last);
+                    }
+
+                    m_slots.pop_back();
+
+                    if (removing_last)
+                    {
+                        i = m_slots.end();
                     }
                 }
             }
-
-            m_slots.erase(active_end, m_slots.end());
         }
 
         void clear() noexcept
