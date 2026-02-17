@@ -66,10 +66,10 @@ AWL_TEST(EquatableFunction_CompareAndHash)
     AWL_ASSERT_EQUAL(hsh1, hsh2);
 
     std::unordered_set<awl::equatable_function<void(int)>> set;
-    set.insert(f1);
-    set.insert(f2);
-    set.insert(f3);
-    set.insert(f4);
+    AWL_ASSERT(set.insert(f1).second);
+    AWL_ASSERT_FALSE(set.insert(f2).second);
+    AWL_ASSERT(set.insert(f3).second);
+    AWL_ASSERT(set.insert(f4).second);
 
     AWL_ASSERT_EQUAL(3u, set.size());
 }
@@ -87,6 +87,28 @@ AWL_TEST(EquatableFunction_Invoke)
     f(7);
 
     AWL_ASSERT_EQUAL(12, h.sum);
+}
+
+AWL_TEST(EquatableFunction_UnorderedSet)
+{
+    AWL_UNUSED_CONTEXT;
+
+    Handler h1;
+    Handler h2;
+
+    awl::equatable_function<void(int)> f1(&h1, &Handler::on_value);
+    awl::equatable_function<void(int)> f2(&h1, &Handler::on_value);
+    awl::equatable_function<void(int)> f3(&h2, &Handler::on_value);
+
+    std::unordered_set<awl::equatable_function<void(int)>> handlers;
+    AWL_ASSERT(handlers.insert(f1).second);
+    AWL_ASSERT_FALSE(handlers.insert(f2).second);
+    AWL_ASSERT(handlers.insert(f3).second);
+
+    AWL_ASSERT_EQUAL(2u, handlers.size());
+    AWL_ASSERT(handlers.find(f1) != handlers.end());
+    AWL_ASSERT(handlers.find(f2) != handlers.end());
+    AWL_ASSERT(handlers.find(f3) != handlers.end());
 }
 
 AWL_TEST(EquatableFunction_ConstMember)
