@@ -150,6 +150,38 @@ namespace awl
             seed ^= std::hash<T>{}(val) + 0x9e3779b9u + (seed << 6) + (seed >> 2);
         }
 
+        template <class Object, class Member>
+        static std::size_t compute_hash(const void* p_object, const Member& member) noexcept
+        {
+            std::size_t seed = 0;
+            combine_hash(seed, std::type_index(typeid(Object)));
+            combine_hash(seed, p_object);
+
+            const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(member);
+
+            constexpr std::size_t chunk_size = sizeof(std::size_t);
+            const std::size_t chunk_count = bytes.size() / chunk_size;
+
+            for (std::size_t i = 0; i < chunk_count; ++i)
+            {
+                std::array<std::byte, chunk_size> chunk_bytes{};
+                const auto first = bytes.begin() + static_cast<std::ptrdiff_t>(i * chunk_size);
+                const auto last = first + static_cast<std::ptrdiff_t>(chunk_size);
+                std::copy(first, last, chunk_bytes.begin());
+
+                combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
+            }
+
+            const std::size_t remainder_begin = chunk_count * chunk_size;
+
+            for (std::size_t i = remainder_begin; i < bytes.size(); ++i)
+            {
+                combine_hash(seed, std::to_integer<unsigned int>(bytes[i]));
+            }
+
+            return seed;
+        }
+
         template <class Member>
         struct member_function_traits;
 
@@ -208,33 +240,7 @@ namespace awl
 
             std::size_t hash() const noexcept override
             {
-                std::size_t seed = 0;
-                combine_hash(seed, std::type_index(typeid(Object)));
-                combine_hash(seed, object_ptr());
-
-                const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
-
-                constexpr std::size_t chunk_size = sizeof(std::size_t);
-                const std::size_t chunk_count = bytes.size() / chunk_size;
-
-                for (std::size_t i = 0; i < chunk_count; ++i)
-                {
-                    std::array<std::byte, chunk_size> chunk_bytes{};
-                    const auto first = bytes.begin() + static_cast<std::ptrdiff_t>(i * chunk_size);
-                    const auto last = first + static_cast<std::ptrdiff_t>(chunk_size);
-                    std::copy(first, last, chunk_bytes.begin());
-
-                    combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
-                }
-
-                const std::size_t remainder_begin = chunk_count * chunk_size;
-
-                for (std::size_t i = remainder_begin; i < bytes.size(); ++i)
-                {
-                    combine_hash(seed, std::to_integer<unsigned int>(bytes[i]));
-                }
-
-                return seed;
+                return compute_hash<Object>(object_ptr(), m_member);
             }
 
             Invocable* clone_to(void* p_storage) const override
@@ -288,33 +294,7 @@ namespace awl
 
             std::size_t hash() const noexcept override
             {
-                std::size_t seed = 0;
-                combine_hash(seed, std::type_index(typeid(Object)));
-                combine_hash(seed, static_cast<const void*>(m_object));
-
-                const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
-
-                constexpr std::size_t chunk_size = sizeof(std::size_t);
-                const std::size_t chunk_count = bytes.size() / chunk_size;
-
-                for (std::size_t i = 0; i < chunk_count; ++i)
-                {
-                    std::array<std::byte, chunk_size> chunk_bytes{};
-                    const auto first = bytes.begin() + static_cast<std::ptrdiff_t>(i * chunk_size);
-                    const auto last = first + static_cast<std::ptrdiff_t>(chunk_size);
-                    std::copy(first, last, chunk_bytes.begin());
-
-                    combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
-                }
-
-                const std::size_t remainder_begin = chunk_count * chunk_size;
-
-                for (std::size_t i = remainder_begin; i < bytes.size(); ++i)
-                {
-                    combine_hash(seed, std::to_integer<unsigned int>(bytes[i]));
-                }
-
-                return seed;
+                return compute_hash<Object>(static_cast<const void*>(m_object), m_member);
             }
 
             Invocable* clone_to(void* p_storage) const override
