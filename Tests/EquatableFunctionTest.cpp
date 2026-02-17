@@ -271,7 +271,6 @@ AWL_TEST(EquatableFunction_TryLockWeak)
 
     auto p_owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = p_owner;
-    Handler* p_raw = p_owner.get();
 
     awl::equatable_function<void(int)> f(std::weak_ptr<Handler>(p_owner), &Handler::on_value);
 
@@ -282,7 +281,9 @@ AWL_TEST(EquatableFunction_TryLockWeak)
         p_owner.reset();
         locked.invoke(5);
 
-        AWL_ASSERT_EQUAL(5, p_raw->sum);
+        auto p_locked = weak.lock();
+        AWL_ASSERT(p_locked != nullptr);
+        AWL_ASSERT_EQUAL(5, p_locked->sum);
     }
 
     AWL_ASSERT(weak.expired());
