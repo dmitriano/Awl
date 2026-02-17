@@ -26,15 +26,6 @@ namespace awl
 
         using signature_type = Result(Args...);
 
-        struct TargetInfo
-        {
-            std::type_index Type = std::type_index(typeid(void));
-            const void* Object = nullptr;
-            const void* Member = nullptr;
-
-            bool operator==(const TargetInfo&) const = default;
-        };
-
         equatable_function() = default;
         ~equatable_function() = default;
 
@@ -142,11 +133,7 @@ namespace awl
             virtual ~Invocable() = default;
 
             virtual Result invoke(Args... args) const = 0;
-            virtual TargetInfo target_info() const noexcept = 0;
-            bool equals(const Invocable& other) const noexcept
-            {
-                return target_info() == other.target_info();
-            }
+            virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
         };
@@ -213,23 +200,18 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
-            TargetInfo target_info() const noexcept override
+            bool equals(const Invocable& other) const noexcept override
             {
-                return
-                {
-                    std::type_index(typeid(Object)),
-                    static_cast<const void*>(m_object),
-                    member_identity(m_member)
-                };
+                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
+                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
             }
 
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
-                const auto info = target_info();
-                combine_hash(seed, info.Type);
-                combine_hash(seed, info.Object);
-                combine_hash(seed, info.Member);
+                combine_hash(seed, std::type_index(typeid(Object)));
+                combine_hash(seed, static_cast<const void*>(m_object));
+                combine_hash(seed, member_identity(m_member));
                 return seed;
             }
 
