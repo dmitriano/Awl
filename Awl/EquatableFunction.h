@@ -128,6 +128,18 @@ namespace awl
         }
 
         template <class Object>
+        equatable_function(std::shared_ptr<Object> p_object, Result (Object::*member)(Args...))
+        {
+            emplace_invocable<ErasedWeak<decltype(member)>>(std::weak_ptr<Object>(std::move(p_object)), member);
+        }
+
+        template <class Object>
+        equatable_function(std::shared_ptr<Object> p_object, Result (Object::*member)(Args...) const)
+        {
+            emplace_invocable<ErasedWeak<decltype(member)>>(std::weak_ptr<Object>(std::move(p_object)), member);
+        }
+
+        template <class Object>
         equatable_function(std::weak_ptr<Object> p_object, Result (Object::*member)(Args...))
         {
             emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
