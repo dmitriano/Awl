@@ -270,17 +270,22 @@ AWL_TEST(EquatableFunction_TryLockWeak)
     AWL_UNUSED_CONTEXT;
 
     auto p_owner = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak = p_owner;
     Handler* p_raw = p_owner.get();
 
     awl::equatable_function<void(int)> f(std::weak_ptr<Handler>(p_owner), &Handler::on_value);
 
-    auto locked = f.try_lock();
-    AWL_ASSERT(static_cast<bool>(locked));
+    {
+        auto locked = f.try_lock();
+        AWL_ASSERT(static_cast<bool>(locked));
 
-    p_owner.reset();
-    locked.invoke(5);
+        p_owner.reset();
+        locked.invoke(5);
 
-    AWL_ASSERT_EQUAL(5, p_raw->sum);
+        AWL_ASSERT_EQUAL(5, p_raw->sum);
+    }
+
+    AWL_ASSERT(weak.expired());
 
     auto expired = f.try_lock();
     AWL_ASSERT_FALSE(static_cast<bool>(expired));
