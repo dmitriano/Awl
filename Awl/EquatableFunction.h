@@ -10,7 +10,6 @@
 #include <cstring>
 #include <functional>
 #include <memory>
-#include <tuple>
 #include <typeindex>
 #include <utility>
 
@@ -25,6 +24,13 @@ namespace awl
     public:
 
         using signature_type = Result(Args...);
+
+        struct TargetInfo
+        {
+            std::type_index Type = std::type_index(typeid(void));
+            const void* Object = nullptr;
+            const void* Member = nullptr;
+        };
 
         equatable_function() = default;
         ~equatable_function() = default;
@@ -137,7 +143,7 @@ namespace awl
             virtual ~Invocable() = default;
 
             virtual Result invoke(Args... args) const = 0;
-            virtual std::tuple<std::type_index, const void*> target_info() const noexcept = 0;
+            virtual TargetInfo target_info() const noexcept = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
@@ -182,13 +188,9 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
-            std::tuple<std::type_index, const void*> target_info() const noexcept override
+            TargetInfo target_info() const noexcept override
             {
-                return
-                {
-                    std::type_index(typeid(Object)),
-                    static_cast<const void*>(m_object)
-                };
+                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), static_cast<const void*>(std::addressof(m_member)) };
             }
 
             bool equals(const Invocable& other) const noexcept override
@@ -201,12 +203,12 @@ namespace awl
                 const auto info = target_info();
                 const auto other_info = other.target_info();
 
-                if (std::get<0>(info) != std::get<0>(other_info))
+                if (info.Type != other_info.Type)
                 {
                     return false;
                 }
 
-                if (std::get<1>(info) != std::get<1>(other_info))
+                if (info.Object != other_info.Object)
                 {
                     return false;
                 }
@@ -219,8 +221,8 @@ namespace awl
             {
                 std::size_t seed = 0;
                 const auto info = target_info();
-                combine_hash(seed, std::get<0>(info));
-                combine_hash(seed, std::get<1>(info));
+                combine_hash(seed, info.Type);
+                combine_hash(seed, info.Object);
                 combine_hash(seed, std::type_index(typeid(Member)));
                 combine_binary_hash(seed, m_member);
                 return seed;
@@ -255,13 +257,9 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
-            std::tuple<std::type_index, const void*> target_info() const noexcept override
+            TargetInfo target_info() const noexcept override
             {
-                return
-                {
-                    std::type_index(typeid(Object)),
-                    static_cast<const void*>(m_object)
-                };
+                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), static_cast<const void*>(std::addressof(m_member)) };
             }
 
             bool equals(const Invocable& other) const noexcept override
@@ -274,12 +272,12 @@ namespace awl
                 const auto info = target_info();
                 const auto other_info = other.target_info();
 
-                if (std::get<0>(info) != std::get<0>(other_info))
+                if (info.Type != other_info.Type)
                 {
                     return false;
                 }
 
-                if (std::get<1>(info) != std::get<1>(other_info))
+                if (info.Object != other_info.Object)
                 {
                     return false;
                 }
@@ -292,8 +290,8 @@ namespace awl
             {
                 std::size_t seed = 0;
                 const auto info = target_info();
-                combine_hash(seed, std::get<0>(info));
-                combine_hash(seed, std::get<1>(info));
+                combine_hash(seed, info.Type);
+                combine_hash(seed, info.Object);
                 combine_hash(seed, std::type_index(typeid(Member)));
                 combine_binary_hash(seed, m_member);
                 return seed;
