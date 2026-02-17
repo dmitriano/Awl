@@ -178,9 +178,6 @@ namespace awl
         };
 
         template <class Member>
-        class ErasedMember;
-
-        template <class Member>
         class ErasedMember final : public Invocable
         {
         public:
