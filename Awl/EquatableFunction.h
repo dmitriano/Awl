@@ -161,22 +161,6 @@ namespace awl
         }
 
         template <class Member>
-        static std::size_t member_identity(Member member) noexcept
-        {
-            static_assert(sizeof(Member) <= sizeof(std::size_t));
-
-            const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(member);
-
-            std::size_t value = 0;
-            for (std::size_t i = 0; i < sizeof(Member); ++i)
-            {
-                value |= static_cast<std::size_t>(std::to_integer<unsigned char>(bytes[i])) << (8u * i);
-            }
-
-            return value;
-        }
-
-        template <class Member>
         struct member_function_traits;
 
         template <class Object>
@@ -226,7 +210,14 @@ namespace awl
                 std::size_t seed = 0;
                 combine_hash(seed, std::type_index(typeid(Object)));
                 combine_hash(seed, static_cast<const void*>(m_object));
-                combine_hash(seed, member_identity(m_member));
+
+                const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
+
+                for (const std::byte b : bytes)
+                {
+                    combine_hash(seed, std::to_integer<unsigned int>(b));
+                }
+
                 return seed;
             }
 
@@ -246,6 +237,8 @@ namespace awl
             Member m_member{};
         };
 
+        // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
+        // We take 4 pointers just to be safe.
         static constexpr std::size_t storage_size = 4 * sizeof(void*);
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
