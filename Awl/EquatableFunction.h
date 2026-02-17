@@ -246,7 +246,7 @@ namespace awl
             Member m_member{};
         };
 
-        static constexpr std::size_t storage_size = 3 * sizeof(void*);
+        static constexpr std::size_t storage_size = 4 * sizeof(void*);
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
 
