@@ -67,29 +67,25 @@ namespace awl
         template <class Object>
         equatable_function(Object* p_object, Result (Object::*member)(Args...))
         {
-            using Member = Result (Object::*)(Args...);
-            m_invocable = std::make_unique<ErasedMember<Object, Member>>(p_object, member);
+            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
         equatable_function(const Object* p_object, Result (Object::*member)(Args...) const)
         {
-            using Member = Result (Object::*)(Args...) const;
-            m_invocable = std::make_unique<ErasedMember<Object, Member>>(p_object, member);
+            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
         equatable_function(Object& object, Result (Object::*member)(Args...))
         {
-            using Member = Result (Object::*)(Args...);
-            m_invocable = std::make_unique<ErasedMember<Object, Member>>(std::addressof(object), member);
+            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(std::addressof(object), member);
         }
 
         template <class Object>
         equatable_function(const Object& object, Result (Object::*member)(Args...) const)
         {
-            using Member = Result (Object::*)(Args...) const;
-            m_invocable = std::make_unique<ErasedMember<Object, Member>>(std::addressof(object), member);
+            m_invocable = std::make_unique<ErasedMember<decltype(member)>>(std::addressof(object), member);
         }
 
         Result operator()(Args... args) const
@@ -177,66 +173,36 @@ namespace awl
             return reinterpret_cast<const void*>(value);
         }
 
-        template <class Object, class Member>
-        class ErasedMember;
+        template <class Member>
+        struct member_fn_traits;
 
         template <class Object>
-        class ErasedMember<Object, Result (Object::*)(Args...)> final : public Invocable
+        struct member_fn_traits<Result (Object::*)(Args...)>
         {
-        public:
-
-            using Member = Result (Object::*)(Args...);
-
-            ErasedMember(Object* p_object, Member member)
-                : m_object(p_object)
-                , m_member(member)
-            {
-            }
-
-            Result invoke(Args... args) const override
-            {
-                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
-            }
-
-            TargetInfo target_info() const noexcept override
-            {
-                return
-                {
-                    std::type_index(typeid(Object)),
-                    static_cast<const void*>(m_object),
-                    member_identity(m_member)
-                };
-            }
-
-            std::size_t hash() const noexcept override
-            {
-                std::size_t seed = 0;
-                const auto info = target_info();
-                combine_hash(seed, info.Type);
-                combine_hash(seed, info.Object);
-                combine_hash(seed, info.Member);
-                return seed;
-            }
-
-            std::unique_ptr<Invocable> clone() const override
-            {
-                return std::make_unique<ErasedMember>(*this);
-            }
-
-        private:
-
-            Object* m_object = nullptr;
-            Member m_member{};
+            using object_type = Object;
+            using object_ptr = Object*;
         };
 
         template <class Object>
-        class ErasedMember<Object, Result (Object::*)(Args...) const> final : public Invocable
+        struct member_fn_traits<Result (Object::*)(Args...) const>
+        {
+            using object_type = Object;
+            using object_ptr = const Object*;
+        };
+
+        template <class Member>
+        class ErasedMember;
+
+        template <class Member>
+        class ErasedMember final : public Invocable
         {
         public:
 
-            using Member = Result (Object::*)(Args...) const;
+            using Traits = member_fn_traits<Member>;
+            using Object = typename Traits::object_type;
+            using ObjectPtr = typename Traits::object_ptr;
 
-            ErasedMember(const Object* p_object, Member member)
+            ErasedMember(ObjectPtr p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
             {
@@ -274,7 +240,7 @@ namespace awl
 
         private:
 
-            const Object* m_object = nullptr;
+            ObjectPtr m_object = nullptr;
             Member m_member{};
         };
 
