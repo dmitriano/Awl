@@ -7,7 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 
-#include "Helpers/NonCopyable.h"
+#include "Tests/Helpers/NonCopyable.h"
 
 #include <deque>
 #include <queue>

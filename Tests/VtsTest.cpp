@@ -10,7 +10,6 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
-#include "Awl/Crypto/Crc64.h"
 #include "Awl/StringFormat.h"
 
 #include <iostream>
@@ -23,11 +22,9 @@
 #include <vector>
 #include <set>
 
-#include "Helpers/BenchmarkHelpers.h"
-#include "Helpers/FormattingHelpers.h"
-#include "Experimental/Io/TrivialMemoryStream.h"
-#include "Experimental/Io/SampleStreams.h"
-#include "VtsData.h"
+#include "Tests/Helpers/BenchmarkHelpers.h"
+#include "Tests/Helpers/FormattingHelpers.h"
+#include "Tests/VtsData.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;
@@ -44,11 +41,9 @@ namespace
     using NewReader = awl::io::Reader<V2, IStream>;
 
     using OldVirtualReader = OldReader<awl::io::SequentialInputStream>;
-    using OldVirtualWriter = OldWriter<awl::io::SequentialOutputStream>;
     using NewVirtualReader = NewReader<awl::io::SequentialInputStream>;
 
     static_assert(awl::io::vts_read_context<OldVirtualReader, awl::io::SequentialInputStream, v1::B>);
-    static_assert(awl::io::vts_write_context<OldVirtualWriter, awl::io::SequentialOutputStream, v1::B>);
     static_assert(awl::io::vts_read_context<NewVirtualReader, awl::io::SequentialInputStream, v2::B>);
 
     using OldVectorReader = OldReader<awl::io::VectorInputStream>;
@@ -58,14 +53,6 @@ namespace
     static_assert(awl::io::vts_read_context<OldVectorReader, awl::io::VectorInputStream, v1::B>);
     static_assert(awl::io::vts_write_context<OldVectorWriter, awl::io::VectorOutputStream, v1::B>);
     static_assert(awl::io::vts_read_context<NewVectorReader, awl::io::VectorInputStream, v2::B>);
-
-    using OldTrivialReader = OldReader<awl::io::TrivialMemoryStream>;
-    using OldTrivialWriter = OldWriter<awl::io::TrivialMemoryStream>;
-    using NewTrivialReader = NewReader<awl::io::TrivialMemoryStream>;
-
-    static_assert(awl::io::vts_read_context<OldTrivialReader, awl::io::TrivialMemoryStream, v1::B>);
-    static_assert(awl::io::vts_write_context<OldTrivialWriter, awl::io::TrivialMemoryStream, v1::B>);
-    static_assert(awl::io::vts_read_context<NewTrivialReader, awl::io::TrivialMemoryStream, v2::B>);
 
     constexpr size_t defaultElementCount = 1000;
 }
@@ -351,160 +338,6 @@ AWL_TEST(VtsReadWriteVectorStream)
     }
 }
 
-AWL_TEST(VtsReadWriteTrivialMemoryStream)
-{
-    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
-    AWL_ATTRIBUTE(size_t, write_count, 1);
-    AWL_ATTRIBUTE(size_t, read_count, 1);
-
-    AWL_ASSERT(write_count >= 1);
-
-    const size_t mem_size = MeasureStreamSize(context, element_count);
-
-    context.logger.debug(awl::format() << _T("Allocating ") << mem_size << _T(" bytes of memory."));
-
-    //do the test
-
-    awl::io::TrivialMemoryStream in(mem_size);
-    awl::io::TrivialMemoryStream & out = in;
-
-    AWL_ASSERT_EQUAL(mem_size, out.GetCapacity());
-
-    {
-        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
-
-        for (auto i : awl::make_count(write_count))
-        {
-            static_cast<void>(i);
-
-            total_d += WriteDataV1<OldTrivialWriter>(out, element_count, true);
-
-            AWL_ASSERT_EQUAL(mem_size, out.GetLength());
-            AWL_ASSERT(in.End());
-
-            out.Reset();
-        }
-
-        context.logger.debug(_T("Test data has been written. "));
-
-        helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, mem_size * write_count);
-
-        context.logger.debug(awl::format());
-    }
-
-    {
-        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
-
-        for (auto i : awl::make_count(read_count))
-        {
-            static_cast<void>(i);
-
-            total_d += ReadDataPlain<OldTrivialReader>(in, element_count);
-
-            in.Reset();
-        }
-
-        context.logger.debug(_T("Plain data has been read. "));
-
-        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
-
-        context.logger.debug(awl::format());
-    }
-
-    {
-        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
-
-        for (auto i : awl::make_count(read_count))
-        {
-            static_cast<void>(i);
-
-            total_d += ReadDataV1<OldTrivialReader>(in, element_count);
-
-            in.Reset();
-        }
-
-        context.logger.debug(_T("Version 1 has been read. "));
-
-        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
-
-        context.logger.debug(awl::format());
-    }
-
-    {
-        std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
-
-        for (auto i : awl::make_count(read_count))
-        {
-            static_cast<void>(i);
-
-            total_d += ReadDataV2<NewTrivialReader>(in, element_count);
-
-            in.Reset();
-        }
-
-        context.logger.debug(_T("Version 2 has been read. "));
-
-        helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, mem_size * read_count);
-
-        context.logger.debug(awl::format());
-    }
-}
-
-AWL_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
-{
-    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
-
-    using OldMeasureWriter = OldWriter<awl::io::VirtualMeasureStream>;
-
-    awl::io::VirtualMeasureStream out;
-
-    auto d = WriteDataV1<OldMeasureWriter>(out, element_count, true);
-
-    context.logger.debug(_T("Test data has been written. "));
-
-    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
-
-    context.logger.debug(awl::format());
-
-    AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), out.GetLength());
-}
-
-AWL_BENCHMARK(VtsMeasureSerializationVirtual)
-{
-    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
-
-    auto p_out = awl::io::CreateMeasureStream();
-
-    auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
-
-    context.logger.debug(_T("Test data has been written. "));
-
-    size_t len = (dynamic_cast<awl::io::MeasureStream &>(*p_out)).GetLength();
-
-    helpers::ReportCountAndSpeed(context, d, element_count, len);
-
-    context.logger.debug(awl::format());
-
-    AWL_ASSERT_EQUAL((MeasureStreamSize(context, element_count, true)), len);
-}
-
-AWL_BENCHMARK(VtsMeasureSerializationFake)
-{
-    AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
-
-    const size_t mem_size = MeasureStreamSize(context, element_count, false);
-
-    auto p_out = awl::io::CreateFakeStream();
-
-    auto d = WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
-
-    context.logger.debug(_T("Test data has been written. "));
-
-    helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
-
-    context.logger.debug(awl::format());
-}
-
 AWL_BENCHMARK(VtsMemSetMove)
 {
     AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
@@ -558,57 +391,6 @@ AWL_BENCHMARK(VtsMemSetMove)
 
 namespace
 {
-    template <class OutputStream>
-    void TestWrite(const TestContext & context)
-    {
-        AWL_ATTRIBUTE(size_t, element_count, defaultElementCount);
-        AWL_ATTRIBUTE(size_t, iteration_count, 1);
-
-        using Writer = OldWriter<OutputStream>;
-
-        const size_t mem_size = MeasureStreamSize(context, element_count, false);
-
-        OutputStream out(mem_size);
-
-        {
-            std::chrono::steady_clock::duration total_d = std::chrono::steady_clock::duration::zero();
-
-            for (auto i : awl::make_count(iteration_count))
-            {
-                static_cast<void>(i);
-
-                total_d += WriteDataV1<Writer>(out, element_count, false);
-
-                AWL_ASSERT_EQUAL(mem_size, out.GetCapacity());
-                AWL_ASSERT_EQUAL(mem_size, out.GetLength());
-
-                out.Reset();
-            }
-
-            {
-                // Temporary workaround.
-                // operator << is defined in FormattingHelpers.h in awl::testing::helpers namespace.
-                awl::crypto::Crc64 hash;
-                auto h = hash(out.begin(), out.end());
-
-                awl::ostringstream temp_out;
-                temp_out << _T("Test data has been written. Buffer hash=") << h;
-                context.logger.debug(temp_out.str());
-            }
-
-            helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-            context.logger.debug(awl::format());
-        }
-    }
-}
-
-AWL_TEST(VtsWriteMemoryStreamMemmove)
-{
-    TestWrite<awl::io::VirtualMemoryOutputStream>(context);
-}
-
-namespace
-{
     struct E1
     {
         std::string a;
@@ -651,16 +433,4 @@ AWL_TEST(VtsDeletedType)
     AWL_ASSERT(e2.b == e1.b);
 
     AWL_ASSERT(e2.c == 1);
-}
-
-//store to/load of misaligned address
-AWL_UNSTABLE_TEST(VtsWriteMemoryStreamSwitch)
-{
-    TestWrite<awl::io::SwitchMemoryOutputStream>(context);
-}
-
-//store to/load of misaligned address
-AWL_UNSTABLE_TEST(VtsWriteMemoryStreamConstexpr)
-{
-    TestWrite<awl::io::TrivialMemoryStream>(context);
 }
