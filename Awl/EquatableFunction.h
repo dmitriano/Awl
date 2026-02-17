@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -30,6 +31,8 @@ namespace awl
             std::type_index Type = std::type_index(typeid(void));
             const void* Object = nullptr;
             const void* Member = nullptr;
+
+            bool operator==(const TargetInfo&) const = default;
         };
 
         equatable_function() = default;
@@ -144,7 +147,10 @@ namespace awl
 
             virtual Result invoke(Args... args) const = 0;
             virtual TargetInfo target_info() const noexcept = 0;
-            virtual bool equals(const Invocable& other) const noexcept = 0;
+            bool equals(const Invocable& other) const noexcept
+            {
+                return target_info() == other.target_info();
+            }
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
         };
@@ -167,6 +173,25 @@ namespace awl
             }
         }
 
+        template <class Member>
+        static const void* make_member_id(Member member) noexcept
+        {
+            std::uintptr_t id = 0;
+
+            if constexpr (sizeof(Member) <= sizeof(std::uintptr_t))
+            {
+                std::memcpy(std::addressof(id), std::addressof(member), sizeof(Member));
+            }
+            else
+            {
+                std::size_t seed = 0;
+                combine_binary_hash(seed, member);
+                id = static_cast<std::uintptr_t>(seed);
+            }
+
+            return reinterpret_cast<const void*>(id);
+        }
+
         template <class Object, class Member>
         class ErasedMember;
 
@@ -180,6 +205,7 @@ namespace awl
             ErasedMember(Object* p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
+                , m_member_id(make_member_id(member))
             {
             }
 
@@ -190,31 +216,7 @@ namespace awl
 
             TargetInfo target_info() const noexcept override
             {
-                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), static_cast<const void*>(std::addressof(m_member)) };
-            }
-
-            bool equals(const Invocable& other) const noexcept override
-            {
-                if (this == std::addressof(other))
-                {
-                    return true;
-                }
-
-                const auto info = target_info();
-                const auto other_info = other.target_info();
-
-                if (info.Type != other_info.Type)
-                {
-                    return false;
-                }
-
-                if (info.Object != other_info.Object)
-                {
-                    return false;
-                }
-
-                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
-                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
+                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), m_member_id };
             }
 
             std::size_t hash() const noexcept override
@@ -223,8 +225,7 @@ namespace awl
                 const auto info = target_info();
                 combine_hash(seed, info.Type);
                 combine_hash(seed, info.Object);
-                combine_hash(seed, std::type_index(typeid(Member)));
-                combine_binary_hash(seed, m_member);
+                combine_hash(seed, info.Member);
                 return seed;
             }
 
@@ -237,6 +238,7 @@ namespace awl
 
             Object* m_object = nullptr;
             Member m_member{};
+            const void* m_member_id = nullptr;
         };
 
         template <class Object>
@@ -249,6 +251,7 @@ namespace awl
             ErasedMember(const Object* p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
+                , m_member_id(make_member_id(member))
             {
             }
 
@@ -259,31 +262,7 @@ namespace awl
 
             TargetInfo target_info() const noexcept override
             {
-                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), static_cast<const void*>(std::addressof(m_member)) };
-            }
-
-            bool equals(const Invocable& other) const noexcept override
-            {
-                if (this == std::addressof(other))
-                {
-                    return true;
-                }
-
-                const auto info = target_info();
-                const auto other_info = other.target_info();
-
-                if (info.Type != other_info.Type)
-                {
-                    return false;
-                }
-
-                if (info.Object != other_info.Object)
-                {
-                    return false;
-                }
-
-                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
-                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
+                return { std::type_index(typeid(Object)), static_cast<const void*>(m_object), m_member_id };
             }
 
             std::size_t hash() const noexcept override
@@ -292,8 +271,7 @@ namespace awl
                 const auto info = target_info();
                 combine_hash(seed, info.Type);
                 combine_hash(seed, info.Object);
-                combine_hash(seed, std::type_index(typeid(Member)));
-                combine_binary_hash(seed, m_member);
+                combine_hash(seed, info.Member);
                 return seed;
             }
 
@@ -306,6 +284,7 @@ namespace awl
 
             const Object* m_object = nullptr;
             Member m_member{};
+            const void* m_member_id = nullptr;
         };
 
         std::unique_ptr<Invocable> m_invocable;
