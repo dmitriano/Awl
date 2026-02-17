@@ -131,6 +131,7 @@ namespace awl
         public:
 
             virtual ~Invocable() = default;
+            bool operator==(const Invocable&) const noexcept { return true; }
 
             virtual Result invoke(Args... args) const = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
@@ -195,6 +196,8 @@ namespace awl
             {
             }
 
+            bool operator==(const ErasedMember& other) const = default;
+
             Result invoke(Args... args) const override
             {
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
@@ -203,7 +206,7 @@ namespace awl
             bool equals(const Invocable& other) const noexcept override
             {
                 const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
-                return p_other != nullptr && m_object == p_other->m_object && m_member == p_other->m_member;
+                return p_other != nullptr && *this == *p_other;
             }
 
             std::size_t hash() const noexcept override
