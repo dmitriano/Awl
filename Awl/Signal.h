@@ -8,6 +8,7 @@
 #include "Awl/EquatableFunction.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -52,13 +53,13 @@ namespace awl
         template <class Object>
         void subscribe(Object& object, Result (Object::*member)(Args...))
         {
-            subscribe(Slot(object, member));
+            subscribe(Slot(std::addressof(object), member));
         }
 
         template <class Object>
         void subscribe(const Object& object, Result (Object::*member)(Args...) const)
         {
-            subscribe(Slot(object, member));
+            subscribe(Slot(std::addressof(object), member));
         }
 
         bool unsubscribe(const Slot& slot)
@@ -97,13 +98,13 @@ namespace awl
         template <class Object>
         bool unsubscribe(Object& object, Result (Object::*member)(Args...))
         {
-            return unsubscribe(Slot(object, member));
+            return unsubscribe(Slot(std::addressof(object), member));
         }
 
         template <class Object>
         bool unsubscribe(const Object& object, Result (Object::*member)(Args...) const)
         {
-            return unsubscribe(Slot(object, member));
+            return unsubscribe(Slot(std::addressof(object), member));
         }
 
         void emit(Args... args) const

@@ -12,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include <new>
+#include <type_traits>
 #include <typeindex>
 #include <utility>
 
@@ -80,18 +81,6 @@ namespace awl
         equatable_function(const Object* p_object, Result (Object::*member)(Args...) const)
         {
             emplace_invocable<ErasedMember<decltype(member)>>(p_object, member);
-        }
-
-        template <class Object>
-        equatable_function(Object& object, Result (Object::*member)(Args...))
-        {
-            emplace_invocable<ErasedMember<decltype(member)>>(std::addressof(object), member);
-        }
-
-        template <class Object>
-        equatable_function(const Object& object, Result (Object::*member)(Args...) const)
-        {
-            emplace_invocable<ErasedMember<decltype(member)>>(std::addressof(object), member);
         }
 
         Result operator()(Args... args) const
@@ -191,13 +180,12 @@ namespace awl
             ErasedWeak(WeakPtr p_object, Member member)
                 : m_object(std::move(p_object))
                 , m_member(member)
-                , m_object_ptr_snapshot(capture_ptr(m_object))
             {
             }
 
             bool operator==(const ErasedWeak& other) const
             {
-                return m_object_ptr_snapshot == other.m_object_ptr_snapshot && m_member == other.m_member;
+                return object_ptr() == other.object_ptr() && m_member == other.m_member;
             }
 
             Result invoke(Args... args) const override
@@ -222,7 +210,7 @@ namespace awl
             {
                 std::size_t seed = 0;
                 combine_hash(seed, std::type_index(typeid(Object)));
-                combine_hash(seed, m_object_ptr_snapshot);
+                combine_hash(seed, object_ptr());
 
                 const auto bytes = std::bit_cast<std::array<std::byte, sizeof(Member)>>(m_member);
 
@@ -260,16 +248,14 @@ namespace awl
             }
 
         private:
-
-            static const void* capture_ptr(const WeakPtr& p_object) noexcept
+            const void* object_ptr() const noexcept
             {
-                std::shared_ptr<WeakObject> p_locked = p_object.lock();
+                std::shared_ptr<WeakObject> p_locked = m_object.lock();
                 return p_locked ? static_cast<const void*>(p_locked.get()) : nullptr;
             }
 
             WeakPtr m_object;
             Member m_member{};
-            const void* m_object_ptr_snapshot = nullptr;
         };
 
         template <class Member>
