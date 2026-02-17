@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
@@ -219,12 +220,9 @@ namespace awl
                 for (std::size_t i = 0; i < chunk_count; ++i)
                 {
                     std::array<std::byte, chunk_size> chunk_bytes{};
-
-                    for (std::size_t j = 0; j < chunk_size; ++j)
-                    {
-                        const std::size_t index = i * chunk_size + j;
-                        chunk_bytes[j] = bytes[index];
-                    }
+                    const auto first = bytes.begin() + static_cast<std::ptrdiff_t>(i * chunk_size);
+                    const auto last = first + static_cast<std::ptrdiff_t>(chunk_size);
+                    std::copy(first, last, chunk_bytes.begin());
 
                     combine_hash(seed, std::bit_cast<std::size_t>(chunk_bytes));
                 }
