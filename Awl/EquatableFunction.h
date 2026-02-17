@@ -430,8 +430,8 @@ namespace awl
         };
 
         // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
-        // We take 4 pointers just to be safe.
-        static constexpr std::size_t storage_size = 4 * sizeof(void*);
+        // And now we take 5 for std::weak_ptr.
+        static constexpr std::size_t storage_size = 5 * sizeof(void*);
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
 

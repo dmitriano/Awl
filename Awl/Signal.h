@@ -26,11 +26,6 @@ namespace awl
 
         void subscribe(Slot slot)
         {
-            if (!slot)
-            {
-                return;
-            }
-
             if (std::find(m_slots.begin(), m_slots.end(), slot) == m_slots.end())
             {
                 m_slots.push_back(std::move(slot));
