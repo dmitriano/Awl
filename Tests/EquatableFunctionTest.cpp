@@ -25,6 +25,10 @@ namespace
             sum += value * 2;
         }
 
+        void on_empty()
+        {
+        }
+
         bool test_value(int value) const
         {
             return value > threshold;
@@ -247,8 +251,12 @@ AWL_TEST(EquatableFunction_EmptyCompare)
 
     awl::equatable_function<void()> f1;
     awl::equatable_function<void()> f2;
+    Handler h;
+    awl::equatable_function<void()> f3(&h, &Handler::on_empty);
 
     AWL_ASSERT(f1 == f2);
+    AWL_ASSERT_FALSE(f1 == f3);
+    AWL_ASSERT_FALSE(f3 == f1);
 
     const auto hsh1 = std::hash<awl::equatable_function<void()>>{}(f1);
     const auto hsh2 = std::hash<awl::equatable_function<void()>>{}(f2);
