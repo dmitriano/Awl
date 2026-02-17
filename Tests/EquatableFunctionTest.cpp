@@ -275,7 +275,7 @@ AWL_TEST(EquatableFunction_TryLockWeak)
     awl::equatable_function<void(int)> f(p_owner, &Handler::on_value);
 
     {
-        auto locked = f.try_lock();
+        auto locked = f.lock();
         AWL_ASSERT(static_cast<bool>(locked));
 
         p_owner.reset();
@@ -288,7 +288,7 @@ AWL_TEST(EquatableFunction_TryLockWeak)
 
     AWL_ASSERT(weak.expired());
 
-    auto expired = f.try_lock();
+    auto expired = f.lock();
     AWL_ASSERT_FALSE(static_cast<bool>(expired));
 
     bool thrown = false;

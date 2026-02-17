@@ -32,11 +32,11 @@ namespace awl
 
         using signature_type = Result(Args...);
         
-        class locked_invocation
+        class invocation_guard
         {
         public:
 
-            locked_invocation() = default;
+            invocation_guard() = default;
 
             explicit operator bool() const noexcept
             {
@@ -60,7 +60,7 @@ namespace awl
 
         private:
 
-            locked_invocation(const Invocable* p_invocable, std::shared_ptr<void> owner)
+            invocation_guard(const Invocable* p_invocable, std::shared_ptr<void> owner)
                 : m_invocable(p_invocable)
                 , m_owner(std::move(owner))
             {
@@ -161,7 +161,7 @@ namespace awl
             return m_invocable->invoke(std::forward<Args>(args)...);
         }
 
-        [[nodiscard]] locked_invocation try_lock() const noexcept
+        [[nodiscard]] invocation_guard lock() const noexcept
         {
             if (!m_invocable)
             {
@@ -175,7 +175,7 @@ namespace awl
                 return {};
             }
 
-            return locked_invocation(m_invocable, std::move(owner));
+            return invocation_guard(m_invocable, std::move(owner));
         }
 
         explicit operator bool() const noexcept
