@@ -6,6 +6,7 @@
 #include "Awl/EquatableFunction.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <memory>
 #include <unordered_set>
 #include <utility>
 
@@ -262,4 +263,38 @@ AWL_TEST(EquatableFunction_EmptyCompare)
     const auto hsh2 = std::hash<awl::equatable_function<void()>>{}(f2);
 
     AWL_ASSERT_EQUAL(hsh1, hsh2);
+}
+
+AWL_TEST(EquatableFunction_TryLockWeak)
+{
+    AWL_UNUSED_CONTEXT;
+
+    auto p_owner = std::make_shared<Handler>();
+    Handler* p_raw = p_owner.get();
+
+    awl::equatable_function<void(int)> f(std::weak_ptr<Handler>(p_owner), &Handler::on_value);
+
+    auto locked = f.try_lock();
+    AWL_ASSERT(static_cast<bool>(locked));
+
+    p_owner.reset();
+    locked.invoke(5);
+
+    AWL_ASSERT_EQUAL(5, p_raw->sum);
+
+    auto expired = f.try_lock();
+    AWL_ASSERT_FALSE(static_cast<bool>(expired));
+
+    bool thrown = false;
+
+    try
+    {
+        f(1);
+    }
+    catch (const std::bad_function_call&)
+    {
+        thrown = true;
+    }
+
+    AWL_ASSERT(thrown);
 }

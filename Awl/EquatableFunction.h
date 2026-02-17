@@ -24,9 +24,53 @@ namespace awl
     template <class Result, class... Args>
     class equatable_function<Result(Args...)>
     {
+    private:
+
+        class Invocable;
+
     public:
 
         using signature_type = Result(Args...);
+        
+        class locked_invocation
+        {
+        public:
+
+            locked_invocation() = default;
+
+            explicit operator bool() const noexcept
+            {
+                return m_invocable != nullptr;
+            }
+
+            Result invoke(Args... args) const
+            {
+                if (!m_invocable)
+                {
+                    throw std::bad_function_call();
+                }
+
+                return m_invocable->invoke_locked(m_owner, std::forward<Args>(args)...);
+            }
+
+            Result operator()(Args... args) const
+            {
+                return invoke(std::forward<Args>(args)...);
+            }
+
+        private:
+
+            locked_invocation(const Invocable* p_invocable, std::shared_ptr<void> owner)
+                : m_invocable(p_invocable)
+                , m_owner(std::move(owner))
+            {
+            }
+
+            const Invocable* m_invocable = nullptr;
+            std::shared_ptr<void> m_owner;
+
+            friend equatable_function;
+        };
 
         equatable_function() = default;
 
@@ -83,6 +127,18 @@ namespace awl
             emplace_invocable<ErasedMember<decltype(member)>>(p_object, member);
         }
 
+        template <class Object>
+        equatable_function(std::weak_ptr<Object> p_object, Result (Object::*member)(Args...))
+        {
+            emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
+        }
+
+        template <class Object>
+        equatable_function(std::weak_ptr<Object> p_object, Result (Object::*member)(Args...) const)
+        {
+            emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
+        }
+
         Result operator()(Args... args) const
         {
             if (!m_invocable)
@@ -91,6 +147,23 @@ namespace awl
             }
 
             return m_invocable->invoke(std::forward<Args>(args)...);
+        }
+
+        [[nodiscard]] locked_invocation try_lock() const noexcept
+        {
+            if (!m_invocable)
+            {
+                return {};
+            }
+
+            std::shared_ptr<void> owner;
+
+            if (!m_invocable->try_lock(owner))
+            {
+                return {};
+            }
+
+            return locked_invocation(m_invocable, std::move(owner));
         }
 
         explicit operator bool() const noexcept
@@ -138,6 +211,8 @@ namespace awl
             bool operator==(const Invocable&) const noexcept { return true; }
 
             virtual Result invoke(Args... args) const = 0;
+            virtual bool try_lock(std::shared_ptr<void>& owner) const noexcept = 0;
+            virtual Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
@@ -231,6 +306,24 @@ namespace awl
 
                 return std::invoke(m_member, p_object.get(), std::forward<Args>(args)...);
             }
+            
+            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            {
+                owner = m_object.lock();
+                return static_cast<bool>(owner);
+            }
+
+            Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const override
+            {
+                auto* p_object = static_cast<WeakObject*>(owner.get());
+
+                if (p_object == nullptr)
+                {
+                    throw std::bad_function_call();
+                }
+
+                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
+            }
 
             bool equals(const Invocable& other) const noexcept override
             {
@@ -284,6 +377,17 @@ namespace awl
             Result invoke(Args... args) const override
             {
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
+            }
+            
+            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            {
+                owner.reset();
+                return true;
+            }
+
+            Result invoke_locked(const std::shared_ptr<void>&, Args... args) const override
+            {
+                return invoke(std::forward<Args>(args)...);
             }
 
             bool equals(const Invocable& other) const noexcept override
