@@ -11,6 +11,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <type_traits>
 #include <typeindex>
 #include <utility>
@@ -141,7 +142,7 @@ namespace awl
             virtual ~Invocable() = default;
 
             virtual Result invoke(Args... args) const = 0;
-            virtual std::type_index target_type() const noexcept = 0;
+            virtual std::tuple<std::type_index, void*> target_info() const noexcept = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual std::unique_ptr<Invocable> clone() const = 0;
@@ -194,9 +195,9 @@ namespace awl
                 return std::invoke(m_callable, std::forward<Args>(args)...);
             }
 
-            std::type_index target_type() const noexcept override
+            std::tuple<std::type_index, void*> target_info() const noexcept override
             {
-                return std::type_index(typeid(Callable));
+                return { std::type_index(typeid(Callable)), nullptr };
             }
 
             bool equals(const Invocable& other) const noexcept override
@@ -206,7 +207,15 @@ namespace awl
                     return true;
                 }
 
-                if (target_type() != other.target_type())
+                const auto info = target_info();
+                const auto other_info = other.target_info();
+
+                if (std::get<0>(info) != std::get<0>(other_info))
+                {
+                    return false;
+                }
+
+                if (std::get<1>(info) != std::get<1>(other_info))
                 {
                     return false;
                 }
@@ -231,7 +240,9 @@ namespace awl
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
-                combine_hash(seed, target_type());
+                const auto info = target_info();
+                combine_hash(seed, std::get<0>(info));
+                combine_hash(seed, std::get<1>(info));
 
                 if constexpr (has_std_hash<Callable>)
                 {
@@ -267,9 +278,9 @@ namespace awl
                 return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
-            std::type_index target_type() const noexcept override
+            std::tuple<std::type_index, void*> target_info() const noexcept override
             {
-                return std::type_index(typeid(std::remove_cv_t<Object>));
+                return { std::type_index(typeid(std::remove_cv_t<Object>)), static_cast<void*>(m_object) };
             }
 
             bool equals(const Invocable& other) const noexcept override
@@ -279,7 +290,15 @@ namespace awl
                     return true;
                 }
 
-                if (target_type() != other.target_type())
+                const auto info = target_info();
+                const auto other_info = other.target_info();
+
+                if (std::get<0>(info) != std::get<0>(other_info))
+                {
+                    return false;
+                }
+
+                if (std::get<1>(info) != std::get<1>(other_info))
                 {
                     return false;
                 }
@@ -291,8 +310,9 @@ namespace awl
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
-                combine_hash(seed, target_type());
-                combine_hash(seed, static_cast<const void*>(m_object));
+                const auto info = target_info();
+                combine_hash(seed, std::get<0>(info));
+                combine_hash(seed, std::get<1>(info));
                 combine_hash(seed, std::type_index(typeid(Member)));
                 combine_binary_hash(seed, m_member);
                 return seed;
