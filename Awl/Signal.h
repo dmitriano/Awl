@@ -47,18 +47,6 @@ namespace awl
             subscribe(Slot(p_object, member));
         }
 
-        template <class Object>
-        void subscribe(Object& object, void (Object::*member)(Args...))
-        {
-            subscribe(Slot(std::addressof(object), member));
-        }
-
-        template <class Object>
-        void subscribe(const Object& object, void (Object::*member)(Args...) const)
-        {
-            subscribe(Slot(std::addressof(object), member));
-        }
-
         bool unsubscribe(const Slot& slot)
         {
             const auto it = std::find(m_slots.begin(), m_slots.end(), slot);
@@ -90,18 +78,6 @@ namespace awl
         bool unsubscribe(const Object* p_object, void (Object::*member)(Args...) const)
         {
             return unsubscribe(Slot(p_object, member));
-        }
-
-        template <class Object>
-        bool unsubscribe(Object& object, void (Object::*member)(Args...))
-        {
-            return unsubscribe(Slot(std::addressof(object), member));
-        }
-
-        template <class Object>
-        bool unsubscribe(const Object& object, void (Object::*member)(Args...) const)
-        {
-            return unsubscribe(Slot(std::addressof(object), member));
         }
 
         void emit(Args... args) const
