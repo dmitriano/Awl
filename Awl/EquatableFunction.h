@@ -9,6 +9,8 @@
 #include <array>
 #include <bit>
 #include <cstddef>
+#include <concepts>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <new>
@@ -151,6 +153,17 @@ namespace awl
             emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
         }
 
+        template <class Callable>
+            requires (
+                !std::is_same_v<std::remove_cvref_t<Callable>, equatable_function> &&
+                std::copy_constructible<std::decay_t<Callable>> &&
+                std::is_invocable_r_v<Result, std::decay_t<Callable>&, Args...>
+            )
+        equatable_function(std::uint64_t id, Callable&& func)
+        {
+            emplace_invocable<ErasedInvocable>(id, std::forward<Callable>(func));
+        }
+
         Result operator()(Args... args) const
         {
             if (!m_invocable)
@@ -225,6 +238,7 @@ namespace awl
             virtual Result invoke(Args... args) const = 0;
             virtual bool try_lock(std::shared_ptr<void>& owner) const noexcept = 0;
             virtual Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const = 0;
+            virtual const std::uint64_t* invocable_id() const noexcept { return nullptr; }
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
@@ -284,6 +298,72 @@ namespace awl
         {
             using object_type = Object;
             using object_ptr = const Object*;
+        };
+
+        class ErasedInvocable final : public Invocable
+        {
+        public:
+
+            template <class Callable>
+            ErasedInvocable(std::uint64_t id, Callable&& func)
+                : m_id(id)
+                , m_func(std::forward<Callable>(func))
+            {
+            }
+
+            bool operator==(const ErasedInvocable& other) const noexcept
+            {
+                return m_id == other.m_id;
+            }
+
+            Result invoke(Args... args) const override
+            {
+                return std::invoke(m_func, std::forward<Args>(args)...);
+            }
+
+            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            {
+                owner = std::shared_ptr<void>(std::shared_ptr<void>{}, const_cast<void*>(static_cast<const void*>(this)));
+                return true;
+            }
+
+            Result invoke_locked(const std::shared_ptr<void>&, Args... args) const override
+            {
+                return invoke(std::forward<Args>(args)...);
+            }
+
+            const std::uint64_t* invocable_id() const noexcept override
+            {
+                return std::addressof(m_id);
+            }
+
+            bool equals(const Invocable& other) const noexcept override
+            {
+                const std::uint64_t* p_other_id = other.invocable_id();
+                return p_other_id != nullptr && m_id == *p_other_id;
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                std::size_t seed = 0;
+                combine_hash(seed, m_id);
+                return seed;
+            }
+
+            Invocable* clone_to(void* p_storage) const override
+            {
+                return ::new (p_storage) ErasedInvocable(*this);
+            }
+
+            Invocable* move_to(void* p_storage) noexcept override
+            {
+                return ::new (p_storage) ErasedInvocable(std::move(*this));
+            }
+
+        private:
+
+            std::uint64_t m_id = 0;
+            mutable std::function<Result(Args...)> m_func;
         };
 
         template <class Member>
@@ -433,7 +513,8 @@ namespace awl
 
         // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
         // The last void* is vtable.
-        static constexpr std::size_t storage_size = sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()) + sizeof(void*);
+        static constexpr std::size_t member_storage_size = sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()) + sizeof(void*);
+        static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedInvocable));
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
 

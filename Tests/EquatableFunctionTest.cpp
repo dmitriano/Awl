@@ -120,6 +120,49 @@ AWL_TEST(EquatableFunction_Invoke)
     AWL_ASSERT_EQUAL(12, h.sum);
 }
 
+AWL_TEST(EquatableFunction_InvocableId)
+{
+    AWL_UNUSED_CONTEXT;
+
+    int sum = 0;
+
+    awl::equatable_function<void(int)> f1(100u, [&sum](int value)
+    {
+        sum += value;
+    });
+
+    awl::equatable_function<void(int)> f2(100u, [&sum](int value)
+    {
+        sum += value * 10;
+    });
+
+    awl::equatable_function<void(int)> f3(101u, [&sum](int value)
+    {
+        sum += value;
+    });
+
+    AWL_ASSERT(f1 == f2);
+    AWL_ASSERT_FALSE(f1 == f3);
+
+    const auto h1 = std::hash<awl::equatable_function<void(int)>>{}(f1);
+    const auto h2 = std::hash<awl::equatable_function<void(int)>>{}(f2);
+    AWL_ASSERT_EQUAL(h1, h2);
+
+    auto locked = f1.lock();
+    AWL_ASSERT(static_cast<bool>(locked));
+    locked(2);
+    AWL_ASSERT_EQUAL(2, sum);
+
+    f1(3);
+    AWL_ASSERT_EQUAL(5, sum);
+
+    std::unordered_set<awl::equatable_function<void(int)>> handlers;
+    AWL_ASSERT(handlers.insert(f1).second);
+    AWL_ASSERT_FALSE(handlers.insert(f2).second);
+    AWL_ASSERT(handlers.insert(f3).second);
+    AWL_ASSERT_EQUAL(2u, handlers.size());
+}
+
 AWL_TEST(EquatableFunction_UnorderedSet)
 {
     AWL_UNUSED_CONTEXT;
