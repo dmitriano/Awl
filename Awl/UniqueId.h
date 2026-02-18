@@ -19,7 +19,7 @@ namespace awl
 
         if (id == 0)
         {
-            // 500 years has ellapsed since the Unix epoch, so this is not expected to happen in practice.
+            // 500 years has elapsed since the Unix epoch, so this is not expected to happen in practice.
             std::terminate();
         }
 
