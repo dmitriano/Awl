@@ -130,15 +130,15 @@ namespace awl
         }
 
         template <class Object>
-        equatable_function(const std::shared_ptr<Object>& p_object, Result (Object::*member)(Args...))
+        equatable_function(std::shared_ptr<Object> p_object, Result (Object::*member)(Args...))
         {
-            emplace_invocable<ErasedShared<decltype(member)>>(p_object, member);
+            emplace_invocable<ErasedShared<decltype(member)>>(std::move(p_object), member);
         }
 
         template <class Object>
-        equatable_function(const std::shared_ptr<Object>& p_object, Result (Object::*member)(Args...) const)
+        equatable_function(std::shared_ptr<Object> p_object, Result (Object::*member)(Args...) const)
         {
-            emplace_invocable<ErasedShared<decltype(member)>>(p_object, member);
+            emplace_invocable<ErasedShared<decltype(member)>>(std::move(p_object), member);
         }
 
         template <class Object>
