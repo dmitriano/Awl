@@ -19,7 +19,7 @@ namespace awl
 
         if (id == 0)
         {
-            // 500 years has elapsed since the Unix epoch, so this is not expected to happen in practice.
+            // Wrap-around to 0 for uint64_t requires about 584 years even at 1e9 IDs/sec.
             std::terminate();
         }
 
