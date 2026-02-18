@@ -112,7 +112,7 @@ AWL_TEST(Signal_WeakPtr)
     auto owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
 
-    signal.subscribe(owner, &Handler::on_value);
+    signal.subscribe(weak, &Handler::on_value);
     signal.subscribe(weak, &Handler::on_value);
 
     // Same target must be deduplicated.
@@ -138,10 +138,11 @@ AWL_TEST(Signal_WeakPtrCompaction)
 
     auto owner_alive = std::make_shared<Handler>();
     auto owner_dead = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak_alive = owner_alive;
     std::weak_ptr<Handler> weak_dead = owner_dead;
 
-    signal.subscribe(owner_alive, &Handler::on_value);
-    signal.subscribe(owner_dead, &Handler::on_value);
+    signal.subscribe(weak_alive, &Handler::on_value);
+    signal.subscribe(weak_dead, &Handler::on_value);
 
     owner_dead.reset();
     AWL_ASSERT(weak_dead.expired());
@@ -162,11 +163,13 @@ AWL_TEST(Signal_RemoveExpiredSlotInEmit)
     auto owner1 = std::make_shared<Handler>();
     auto owner_dead = std::make_shared<Handler>();
     auto owner2 = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak1 = owner1;
     std::weak_ptr<Handler> weak_dead = owner_dead;
+    std::weak_ptr<Handler> weak2 = owner2;
 
-    signal.subscribe(owner1, &Handler::on_value);
-    signal.subscribe(owner_dead, &Handler::on_value);
-    signal.subscribe(owner2, &Handler::on_value);
+    signal.subscribe(weak1, &Handler::on_value);
+    signal.subscribe(weak_dead, &Handler::on_value);
+    signal.subscribe(weak2, &Handler::on_value);
 
     AWL_ASSERT_EQUAL(3u, signal.size());
 

@@ -315,7 +315,7 @@ AWL_TEST(EquatableFunction_TryLockWeak)
     auto p_owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = p_owner;
 
-    awl::equatable_function<void(int)> f(p_owner, &Handler::on_value);
+    awl::equatable_function<void(int)> f(weak, &Handler::on_value);
 
     {
         auto locked = f.lock();

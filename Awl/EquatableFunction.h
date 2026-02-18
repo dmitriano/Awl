@@ -131,14 +131,14 @@ namespace awl
 
         template <class Object>
         equatable_function(const std::shared_ptr<Object>& p_object, Result (Object::*member)(Args...))
-            : equatable_function(std::weak_ptr<Object>(p_object), member)
         {
+            emplace_invocable<ErasedShared<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
         equatable_function(const std::shared_ptr<Object>& p_object, Result (Object::*member)(Args...) const)
-            : equatable_function(std::weak_ptr<Object>(p_object), member)
         {
+            emplace_invocable<ErasedShared<decltype(member)>>(p_object, member);
         }
 
         template <class Object>
@@ -234,6 +234,7 @@ namespace awl
             virtual Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const = 0;
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
+            virtual void destroy() noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
             virtual Invocable* move_to(void* p_storage) noexcept = 0;
         };
@@ -258,6 +259,11 @@ namespace awl
             {
                 const auto* p_other = dynamic_cast<const Derived*>(&other);
                 return p_other != nullptr && static_cast<const Derived&>(*this) == *p_other;
+            }
+
+            void destroy() noexcept override
+            {
+                static_cast<Derived*>(this)->~Derived();
             }
 
             Invocable* clone_to(void* p_storage) const override
@@ -427,6 +433,73 @@ namespace awl
         };
 
         template <class Member>
+        class ErasedShared final : public InvocableImpl<ErasedShared<Member>>
+        {
+        public:
+
+            using Traits = member_function_traits<Member>;
+            using Object = typename Traits::object_type;
+            using SharedObject = std::remove_const_t<Object>;
+            using SharedPtr = std::shared_ptr<SharedObject>;
+
+            ErasedShared(SharedPtr p_object, Member member)
+                : m_object(std::move(p_object))
+                , m_member(member)
+            {
+            }
+
+            bool operator==(const ErasedShared& other) const
+            {
+                return object_ptr() == other.object_ptr() && m_member == other.m_member;
+            }
+
+            Result invoke(Args... args) const override
+            {
+                auto* p_object = m_object.get();
+
+                if (p_object == nullptr)
+                {
+                    throw std::bad_function_call();
+                }
+
+                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
+            }
+
+            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            {
+                owner = m_object;
+                return owner != nullptr;
+            }
+
+            Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const override
+            {
+                auto* p_object = static_cast<SharedObject*>(owner.get());
+
+                if (p_object == nullptr)
+                {
+                    throw std::bad_function_call();
+                }
+
+                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
+            }
+
+            std::size_t hash() const noexcept override
+            {
+                return InvocableImpl<ErasedShared<Member>>::template compute_hash<Object>(object_ptr(), m_member);
+            }
+
+        private:
+
+            const void* object_ptr() const noexcept
+            {
+                return m_object ? static_cast<const void*>(m_object.get()) : nullptr;
+            }
+
+            SharedPtr m_object;
+            Member m_member{};
+        };
+
+        template <class Member>
         class ErasedMember final : public InvocableImpl<ErasedMember<Member>>
         {
         public:
@@ -466,7 +539,9 @@ namespace awl
         static constexpr std::size_t member_storage_size =
             std::max(
                 sizeof(std::uint64_t) + sizeof(std::function<Result(Args...)>),
-                sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)())) +
+                std::max(
+                    sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()),
+                    sizeof(std::shared_ptr<HandleSample>) + sizeof(void (HandleSample::*)()))) +
             sizeof(void*);
 
         static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedLambda));
@@ -487,7 +562,7 @@ namespace awl
         {
             if (m_invocable != nullptr)
             {
-                m_invocable->~Invocable();
+                m_invocable->destroy();
                 m_invocable = nullptr;
             }
         }
@@ -505,7 +580,8 @@ namespace awl
             if (other.m_invocable != nullptr)
             {
                 m_invocable = other.m_invocable->move_to(storage_ptr());
-                other.reset();
+                other.m_invocable->destroy();
+                other.m_invocable = nullptr;
             }
         }
 
