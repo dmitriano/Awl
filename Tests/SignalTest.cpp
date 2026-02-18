@@ -6,6 +6,7 @@
 #include "Awl/Signal.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <functional>
 #include <memory>
 
 namespace
@@ -63,6 +64,43 @@ AWL_TEST(Signal_SubscribeUnsubscribeEmit)
     signal.clear();
     AWL_ASSERT(signal.empty());
     AWL_ASSERT_EQUAL(0u, signal.size());
+}
+
+AWL_TEST(Signal_StdFunction)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+    int sum1 = 0;
+    int sum2 = 0;
+
+    const auto id1 = signal.subscribe(std::function<void(int)>([&sum1](int value)
+    {
+        sum1 += value;
+    }));
+
+    const auto id2 = signal.subscribe(std::function<void(int)>([&sum2](int value)
+    {
+        sum2 += value * 2;
+    }));
+
+    AWL_ASSERT_FALSE(id1 == id2);
+    AWL_ASSERT_EQUAL(2u, signal.size());
+
+    signal.emit(3);
+    AWL_ASSERT_EQUAL(3, sum1);
+    AWL_ASSERT_EQUAL(6, sum2);
+
+    AWL_ASSERT(signal.unsubscribe(id1));
+    AWL_ASSERT_FALSE(signal.unsubscribe(id1));
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    signal.emit(4);
+    AWL_ASSERT_EQUAL(3, sum1);
+    AWL_ASSERT_EQUAL(14, sum2);
+
+    AWL_ASSERT(signal.unsubscribe(id2));
+    AWL_ASSERT(signal.empty());
 }
 
 AWL_TEST(Signal_WeakPtr)

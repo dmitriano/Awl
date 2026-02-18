@@ -6,10 +6,13 @@
 #pragma once
 
 #include "Awl/EquatableFunction.h"
+#include "Awl/UniqueId.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <concepts>
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -23,6 +26,13 @@ namespace awl
 
         using Slot = equatable_function<void(Args...)>;
         using container_type = std::vector<Slot>;
+
+        std::uint64_t subscribe(std::function<void(Args...)> func)
+        {
+            const std::uint64_t id = unique_id();
+            subscribe(Slot(id, std::move(func)));
+            return id;
+        }
 
         void subscribe(Slot slot)
         {
@@ -87,6 +97,11 @@ namespace awl
 
             m_slots.pop_back();
             return true;
+        }
+
+        bool unsubscribe(std::uint64_t id)
+        {
+            return unsubscribe(Slot(id, std::function<void(Args...)>{ [](Args...) {} }));
         }
 
         template <class Object>
