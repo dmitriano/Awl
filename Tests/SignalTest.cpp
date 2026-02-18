@@ -103,6 +103,70 @@ AWL_TEST(Signal_StdFunction)
     AWL_ASSERT(signal.empty());
 }
 
+AWL_TEST(Signal_SharedPtr)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+
+    auto owner = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak = owner;
+
+    signal.subscribe(owner, &Handler::on_value);
+    signal.subscribe(owner, &Handler::on_value);
+
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    owner.reset();
+    AWL_ASSERT_FALSE(weak.expired());
+
+    signal.emit(4);
+
+    auto locked = weak.lock();
+    AWL_ASSERT(locked != nullptr);
+    AWL_ASSERT_EQUAL(4, locked->sum);
+    AWL_ASSERT_EQUAL(1, locked->count);
+
+    AWL_ASSERT(signal.unsubscribe(locked, &Handler::on_value));
+    AWL_ASSERT_FALSE(signal.unsubscribe(locked, &Handler::on_value));
+    AWL_ASSERT(signal.empty());
+
+    locked.reset();
+    AWL_ASSERT(weak.expired());
+}
+
+AWL_TEST(Signal_SharedAndWeakAreDifferentSlots)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+
+    auto owner = std::make_shared<Handler>();
+    std::weak_ptr<Handler> weak = owner;
+
+    signal.subscribe(owner, &Handler::on_value);
+    signal.subscribe(weak, &Handler::on_value);
+
+    AWL_ASSERT_EQUAL(2u, signal.size());
+
+    signal.emit(1);
+    AWL_ASSERT_EQUAL(2, owner->sum);
+    AWL_ASSERT_EQUAL(2, owner->count);
+
+    AWL_ASSERT(signal.unsubscribe(owner, &Handler::on_value));
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    signal.emit(3);
+    AWL_ASSERT_EQUAL(5, owner->sum);
+    AWL_ASSERT_EQUAL(3, owner->count);
+
+    owner.reset();
+    AWL_ASSERT(weak.expired());
+
+    signal.emit(7);
+    AWL_ASSERT(signal.empty());
+}
+
 AWL_TEST(Signal_WeakPtr)
 {
     AWL_UNUSED_CONTEXT;
