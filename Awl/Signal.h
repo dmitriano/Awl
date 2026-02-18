@@ -27,9 +27,9 @@ namespace awl
         using Slot = equatable_function<void(Args...)>;
         using container_type = std::vector<Slot>;
 
-        std::uint64_t subscribe(std::function<void(Args...)> func)
+        Id subscribe(std::function<void(Args...)> func)
         {
-            const std::uint64_t id = unique_id();
+            const Id id = unique_id();
             subscribe(Slot(id, std::move(func)));
             return id;
         }
@@ -99,7 +99,7 @@ namespace awl
             return true;
         }
 
-        bool unsubscribe(std::uint64_t id)
+        bool unsubscribe(Id id)
         {
             return unsubscribe(Slot(id, std::function<void(Args...)>{ [](Args...) {} }));
         }

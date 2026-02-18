@@ -11,6 +11,8 @@
 
 namespace awl
 {
+    using Id = std::uint64_t;
+
     [[nodiscard]] inline std::uint64_t unique_id() noexcept
     {
         static std::atomic<std::uint64_t> next_id{ 1 };
