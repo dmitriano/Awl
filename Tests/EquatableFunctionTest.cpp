@@ -308,6 +308,39 @@ AWL_TEST(EquatableFunction_EmptyCompare)
     AWL_ASSERT_EQUAL(hsh1, hsh2);
 }
 
+AWL_TEST(EquatableFunction_SharedPtr)
+{
+    AWL_UNUSED_CONTEXT;
+
+    std::weak_ptr<Handler> weak;
+
+    {
+        auto p_owner = std::make_shared<Handler>();
+        weak = p_owner;
+
+        awl::equatable_function<void(int)> f1(p_owner, &Handler::on_value);
+        awl::equatable_function<void(int)> f2(p_owner, &Handler::on_value);
+
+        AWL_ASSERT(f1 == f2);
+        AWL_ASSERT_EQUAL(
+            std::hash<awl::equatable_function<void(int)>>{}(f1),
+            std::hash<awl::equatable_function<void(int)>>{}(f2));
+
+        p_owner.reset();
+        AWL_ASSERT_FALSE(weak.expired());
+
+        auto locked = f1.lock();
+        AWL_ASSERT(static_cast<bool>(locked));
+        locked(7);
+
+        auto p_locked = weak.lock();
+        AWL_ASSERT(p_locked != nullptr);
+        AWL_ASSERT_EQUAL(7, p_locked->sum);
+    }
+
+    AWL_ASSERT(weak.expired());
+}
+
 AWL_TEST(EquatableFunction_TryLockWeak)
 {
     AWL_UNUSED_CONTEXT;
