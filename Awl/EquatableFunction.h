@@ -192,7 +192,7 @@ namespace awl
 
         std::size_t hash() const noexcept
         {
-            return m_invocable ? m_invocable->hash() : 0u;
+            return m_invocable ? m_invocable->hash() : std::hash<std::size_t>{}(0u);
         }
 
         friend bool operator==(const equatable_function& left, const equatable_function& right) noexcept
@@ -448,52 +448,29 @@ namespace awl
             {
             }
 
-            bool operator==(const ErasedShared& other) const
-            {
-                return object_ptr() == other.object_ptr() && m_member == other.m_member;
-            }
+            bool operator==(const ErasedShared& other) const = default;
 
             Result invoke(Args... args) const override
             {
-                auto* p_object = m_object.get();
-
-                if (p_object == nullptr)
+                if (!m_object)
                 {
                     throw std::bad_function_call();
                 }
 
-                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
-            }
-
-            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
-            {
-                owner = m_object;
-                return owner != nullptr;
-            }
-
-            Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const override
-            {
-                auto* p_object = static_cast<SharedObject*>(owner.get());
-
-                if (p_object == nullptr)
-                {
-                    throw std::bad_function_call();
-                }
-
-                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
+                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
             }
 
             std::size_t hash() const noexcept override
             {
-                return InvocableImpl<ErasedShared<Member>>::template compute_hash<Object>(object_ptr(), m_member);
+                if (!m_object)
+                {
+                    return std::hash<std::size_t>{}(0u);
+                }
+
+                return InvocableImpl<ErasedShared<Member>>::template compute_hash<Object>(static_cast<const void*>(m_object.get()), m_member);
             }
 
         private:
-
-            const void* object_ptr() const noexcept
-            {
-                return m_object ? static_cast<const void*>(m_object.get()) : nullptr;
-            }
 
             SharedPtr m_object;
             Member m_member{};
