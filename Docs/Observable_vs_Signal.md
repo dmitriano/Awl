@@ -9,7 +9,7 @@
 
 | Критерий | Observable | Signal |
 |---|---|---|
-| Модель | `IObserver` + `Observer<I>` + `Observable<I>` | `Signal<Args...>` + `equatable_function` |
+| Модель | `IObserver` с виртуальными методами | `Signal<Args...>` + `equatable_function` |
 | Подписка | указатель на observer | lambda/std::function, object+member, shared/weak |
 | Отписка | observer pointer или self-unsubscribe | по `Id`, по slot, по object/member |
 | Дедупликация | обычно нет встроенной проверки дубля | есть проверка дублей |
