@@ -248,6 +248,16 @@ namespace awl
                 const auto* p_other = dynamic_cast<const Derived*>(&other);
                 return p_other != nullptr && static_cast<const Derived&>(*this) == *p_other;
             }
+
+            Invocable* clone_to(void* p_storage) const override
+            {
+                return ::new (p_storage) Derived(static_cast<const Derived&>(*this));
+            }
+
+            Invocable* move_to(void* p_storage) noexcept override
+            {
+                return ::new (p_storage) Derived(std::move(static_cast<Derived&>(*this)));
+            }
         };
 
         template <class T>
@@ -342,16 +352,6 @@ namespace awl
                 return seed;
             }
 
-            Invocable* clone_to(void* p_storage) const override
-            {
-                return ::new (p_storage) ErasedLambda(*this);
-            }
-
-            Invocable* move_to(void* p_storage) noexcept override
-            {
-                return ::new (p_storage) ErasedLambda(std::move(*this));
-            }
-
         private:
 
             std::uint64_t m_id = 0;
@@ -414,16 +414,6 @@ namespace awl
                 return compute_hash<Object>(object_ptr(), m_member);
             }
 
-            Invocable* clone_to(void* p_storage) const override
-            {
-                return ::new (p_storage) ErasedWeak(*this);
-            }
-
-            Invocable* move_to(void* p_storage) noexcept override
-            {
-                return ::new (p_storage) ErasedWeak(std::move(*this));
-            }
-
         private:
             const void* object_ptr() const noexcept
             {
@@ -471,16 +461,6 @@ namespace awl
             std::size_t hash() const noexcept override
             {
                 return compute_hash<Object>(static_cast<const void*>(m_object), m_member);
-            }
-
-            Invocable* clone_to(void* p_storage) const override
-            {
-                return ::new (p_storage) ErasedMember(*this);
-            }
-
-            Invocable* move_to(void* p_storage) noexcept override
-            {
-                return ::new (p_storage) ErasedMember(std::move(*this));
             }
 
         private:
