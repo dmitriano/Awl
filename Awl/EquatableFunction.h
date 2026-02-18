@@ -236,6 +236,15 @@ namespace awl
             virtual std::size_t hash() const noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
             virtual Invocable* move_to(void* p_storage) noexcept = 0;
+
+        protected:
+
+            template <class Derived>
+            static bool equalsImpl(const Invocable& other, const Derived& self) noexcept
+            {
+                const auto* p_other = dynamic_cast<const Derived*>(&other);
+                return p_other != nullptr && self == *p_other;
+            }
         };
 
         template <class T>
@@ -325,8 +334,7 @@ namespace awl
 
             bool equals(const Invocable& other) const noexcept override
             {
-                const auto* p_other = dynamic_cast<const ErasedLambda*>(&other);
-                return p_other != nullptr && *this == *p_other;
+                return Invocable::template equalsImpl<ErasedLambda>(other, *this);
             }
 
             std::size_t hash() const noexcept override
@@ -405,8 +413,7 @@ namespace awl
 
             bool equals(const Invocable& other) const noexcept override
             {
-                const auto* p_other = dynamic_cast<const ErasedWeak*>(&other);
-                return p_other != nullptr && *this == *p_other;
+                return Invocable::template equalsImpl<ErasedWeak>(other, *this);
             }
 
             std::size_t hash() const noexcept override
@@ -470,8 +477,7 @@ namespace awl
 
             bool equals(const Invocable& other) const noexcept override
             {
-                const auto* p_other = dynamic_cast<const ErasedMember*>(&other);
-                return p_other != nullptr && *this == *p_other;
+                return Invocable::template equalsImpl<ErasedMember>(other, *this);
             }
 
             std::size_t hash() const noexcept override
