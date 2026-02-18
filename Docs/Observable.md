@@ -109,6 +109,90 @@ public:
 };
 ```
 
+## Use case: `Observable` мувается при real-world релокации контейнера
+
+Ниже сценарий, где `move` происходит не вручную, а автоматически:  
+объекты хранятся в `std::vector`, и при росте емкости вектор перемещает элементы.
+
+```cpp
+#include "Awl/Observable.h"
+#include "Awl/Observer.h"
+#include <vector>
+
+struct IHealthEvents
+{
+    virtual void OnHealthChanged(int hp) = 0;
+};
+
+class HealthChannel : public awl::Observable<IHealthEvents>
+{
+public:
+    void Emit(int hp)
+    {
+        notify(&IHealthEvents::OnHealthChanged, hp);
+    }
+};
+
+class HealthHud : public awl::Observer<IHealthEvents>
+{
+public:
+    void OnHealthChanged(int hp) override
+    {
+        lastHp = hp;
+    }
+
+    int lastHp = 0;
+};
+
+class Unit
+{
+public:
+    Unit()
+    {
+        // Внутренняя подписка "канал -> HUD"
+        healthEvents.subscribe(&hud);
+    }
+
+    Unit(const Unit&) = delete;
+    Unit(Unit&&) = default;
+    Unit& operator=(const Unit&) = delete;
+    Unit& operator=(Unit&&) = default;
+
+    void Damage(int value)
+    {
+        hp -= value;
+        healthEvents.Emit(hp);
+    }
+
+    int LastHudHp() const
+    {
+        return hud.lastHp;
+    }
+
+private:
+    int hp = 100;
+    HealthChannel healthEvents;
+    HealthHud hud;
+};
+
+void ExampleVectorRelocation()
+{
+    std::vector<Unit> units;
+    units.reserve(1);
+
+    units.emplace_back();
+    units[0].Damage(10); // HUD видит 90
+
+    // Здесь обычно происходит real-world move первого элемента из-за reallocation.
+    units.emplace_back();
+
+    // Подписка сохраняет корректность после перемещения Unit.
+    units[0].Damage(5);  // HUD первого Unit видит 85
+}
+```
+
+Почему это важно: в моделях/сценах с контейнерами сущностей `move` часто происходит неявно (reallocation, reordering, swap), и `Observable` в AWL рассчитан на такие сценарии.
+
 ## Когда выбирать Observable
 
 - Нужен строгий OOP-контракт событий через интерфейс.
