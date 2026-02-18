@@ -236,14 +236,17 @@ namespace awl
             virtual std::size_t hash() const noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
             virtual Invocable* move_to(void* p_storage) noexcept = 0;
+        };
 
-        protected:
+        template <class Derived>
+        class InvocableImpl : public Invocable
+        {
+        public:
 
-            template <class Derived>
-            static bool equalsImpl(const Invocable& other, const Derived& self) noexcept
+            bool equals(const Invocable& other) const noexcept override
             {
                 const auto* p_other = dynamic_cast<const Derived*>(&other);
-                return p_other != nullptr && self == *p_other;
+                return p_other != nullptr && static_cast<const Derived&>(*this) == *p_other;
             }
         };
 
@@ -302,7 +305,7 @@ namespace awl
             using object_ptr = const Object*;
         };
 
-        class ErasedLambda final : public Invocable
+        class ErasedLambda final : public InvocableImpl<ErasedLambda>
         {
         public:
 
@@ -332,11 +335,6 @@ namespace awl
                 return invoke(std::forward<Args>(args)...);
             }
 
-            bool equals(const Invocable& other) const noexcept override
-            {
-                return Invocable::template equalsImpl<ErasedLambda>(other, *this);
-            }
-
             std::size_t hash() const noexcept override
             {
                 std::size_t seed = 0;
@@ -361,7 +359,7 @@ namespace awl
         };
 
         template <class Member>
-        class ErasedWeak final : public Invocable
+        class ErasedWeak final : public InvocableImpl<ErasedWeak<Member>>
         {
         public:
 
@@ -411,11 +409,6 @@ namespace awl
                 return std::invoke(m_member, p_object, std::forward<Args>(args)...);
             }
 
-            bool equals(const Invocable& other) const noexcept override
-            {
-                return Invocable::template equalsImpl<ErasedWeak>(other, *this);
-            }
-
             std::size_t hash() const noexcept override
             {
                 return compute_hash<Object>(object_ptr(), m_member);
@@ -443,7 +436,7 @@ namespace awl
         };
 
         template <class Member>
-        class ErasedMember final : public Invocable
+        class ErasedMember final : public InvocableImpl<ErasedMember<Member>>
         {
         public:
 
@@ -473,11 +466,6 @@ namespace awl
             Result invoke_locked(const std::shared_ptr<void>&, Args... args) const override
             {
                 return invoke(std::forward<Args>(args)...);
-            }
-
-            bool equals(const Invocable& other) const noexcept override
-            {
-                return Invocable::template equalsImpl<ErasedMember>(other, *this);
             }
 
             std::size_t hash() const noexcept override
