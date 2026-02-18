@@ -429,9 +429,11 @@ namespace awl
             Member m_member{};
         };
 
+        struct HandleSample { void f() {} };
+
         // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
-        // And now we take 5 for std::weak_ptr.
-        static constexpr std::size_t storage_size = 5 * sizeof(void*);
+        // The last void* is vtable.
+        static constexpr std::size_t storage_size = sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()) + sizeof(void*);
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
 
