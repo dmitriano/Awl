@@ -326,7 +326,7 @@ namespace awl
             bool equals(const Invocable& other) const noexcept override
             {
                 const auto* p_other = dynamic_cast<const ErasedLambda*>(&other);
-                return p_other != nullptr && m_id == p_other->m_id;
+                return p_other != nullptr && *this == *p_other;
             }
 
             std::size_t hash() const noexcept override
