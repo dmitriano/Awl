@@ -120,7 +120,7 @@ AWL_TEST(EquatableFunction_Invoke)
     AWL_ASSERT_EQUAL(12, h.sum);
 }
 
-AWL_TEST(EquatableFunction_InvocableId)
+AWL_TEST(EquatableFunction_Lambda)
 {
     AWL_UNUSED_CONTEXT;
 

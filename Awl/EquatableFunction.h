@@ -161,7 +161,7 @@ namespace awl
             )
         equatable_function(std::uint64_t id, Callable&& func)
         {
-            emplace_invocable<ErasedInvocable>(id, std::forward<Callable>(func));
+            emplace_invocable<ErasedLambda>(id, std::forward<Callable>(func));
         }
 
         Result operator()(Args... args) const
@@ -300,18 +300,18 @@ namespace awl
             using object_ptr = const Object*;
         };
 
-        class ErasedInvocable final : public Invocable
+        class ErasedLambda final : public Invocable
         {
         public:
 
             template <class Callable>
-            ErasedInvocable(std::uint64_t id, Callable&& func)
+            ErasedLambda(std::uint64_t id, Callable&& func)
                 : m_id(id)
                 , m_func(std::forward<Callable>(func))
             {
             }
 
-            bool operator==(const ErasedInvocable& other) const noexcept
+            bool operator==(const ErasedLambda& other) const noexcept
             {
                 return m_id == other.m_id;
             }
@@ -352,12 +352,12 @@ namespace awl
 
             Invocable* clone_to(void* p_storage) const override
             {
-                return ::new (p_storage) ErasedInvocable(*this);
+                return ::new (p_storage) ErasedLambda(*this);
             }
 
             Invocable* move_to(void* p_storage) noexcept override
             {
-                return ::new (p_storage) ErasedInvocable(std::move(*this));
+                return ::new (p_storage) ErasedLambda(std::move(*this));
             }
 
         private:
@@ -514,7 +514,7 @@ namespace awl
         // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
         // The last void* is vtable.
         static constexpr std::size_t member_storage_size = sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()) + sizeof(void*);
-        static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedInvocable));
+        static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedLambda));
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
 
