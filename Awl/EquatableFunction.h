@@ -153,15 +153,9 @@ namespace awl
             emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
         }
 
-        template <class Callable>
-            requires (
-                !std::is_same_v<std::remove_cvref_t<Callable>, equatable_function> &&
-                std::copy_constructible<std::decay_t<Callable>> &&
-                std::is_invocable_r_v<Result, std::decay_t<Callable>&, Args...>
-            )
-        equatable_function(std::uint64_t id, Callable&& func)
+        equatable_function(std::uint64_t id, std::function<Result(Args...)> func)
         {
-            emplace_invocable<ErasedLambda>(id, std::forward<Callable>(func));
+            emplace_invocable<ErasedLambda>(id, std::move(func));
         }
 
         Result operator()(Args... args) const
@@ -304,10 +298,9 @@ namespace awl
         {
         public:
 
-            template <class Callable>
-            ErasedLambda(std::uint64_t id, Callable&& func)
+            ErasedLambda(std::uint64_t id, std::function<Result(Args...)> func)
                 : m_id(id)
-                , m_func(std::forward<Callable>(func))
+                , m_func(std::move(func))
             {
             }
 
@@ -513,7 +506,12 @@ namespace awl
 
         // The size of the pointer to member function is 1 pointer in MSVC and 2 pointers in GCC on x64.
         // The last void* is vtable.
-        static constexpr std::size_t member_storage_size = sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()) + sizeof(void*);
+        static constexpr std::size_t member_storage_size =
+            std::max(
+                sizeof(std::uint64_t) + sizeof(std::function<Result(Args...)>),
+                sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)())) +
+            sizeof(void*);
+
         static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedLambda));
         alignas(std::max_align_t) std::byte m_storage[storage_size];
         Invocable* m_invocable = nullptr;
