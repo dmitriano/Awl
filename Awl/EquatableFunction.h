@@ -42,7 +42,7 @@ namespace awl
 
             explicit operator bool() const noexcept
             {
-                return m_invocable != nullptr && m_owner != nullptr;
+                return m_invocable != nullptr;
             }
 
             Result operator()(Args... args) const
@@ -313,9 +313,8 @@ namespace awl
                 return std::invoke(m_func, std::forward<Args>(args)...);
             }
 
-            bool try_lock(std::shared_ptr<void>& owner) const noexcept override
+            bool try_lock(std::shared_ptr<void>&) const noexcept override
             {
-                owner = std::shared_ptr<void>(std::shared_ptr<void>{}, const_cast<void*>(static_cast<const void*>(this)));
                 return true;
             }
 
@@ -460,7 +459,7 @@ namespace awl
             
             bool try_lock(std::shared_ptr<void>& owner) const noexcept override
             {
-                owner = std::shared_ptr<void>(std::shared_ptr<void>{}, const_cast<void*>(static_cast<const void*>(m_object)));
+                owner.reset();
                 return true;
             }
 
