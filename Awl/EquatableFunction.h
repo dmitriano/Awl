@@ -350,9 +350,7 @@ namespace awl
 
             std::size_t hash() const noexcept override
             {
-                std::size_t seed = 0;
-                InvocableImpl<ErasedLambda>::combine_hash(seed, m_id);
-                return seed;
+                return std::hash<std::uint64_t>{}(m_id);
             }
 
         private:
