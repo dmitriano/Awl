@@ -232,7 +232,6 @@ namespace awl
             virtual Result invoke(Args... args) const = 0;
             virtual bool try_lock(std::shared_ptr<void>& owner) const noexcept = 0;
             virtual Result invoke_locked(const std::shared_ptr<void>& owner, Args... args) const = 0;
-            virtual const std::uint64_t* invocable_id() const noexcept { return nullptr; }
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual Invocable* clone_to(void* p_storage) const = 0;
@@ -325,15 +324,10 @@ namespace awl
                 return invoke(std::forward<Args>(args)...);
             }
 
-            const std::uint64_t* invocable_id() const noexcept override
-            {
-                return std::addressof(m_id);
-            }
-
             bool equals(const Invocable& other) const noexcept override
             {
-                const std::uint64_t* p_other_id = other.invocable_id();
-                return p_other_id != nullptr && m_id == *p_other_id;
+                const auto* p_other = dynamic_cast<const ErasedLambda*>(&other);
+                return p_other != nullptr && m_id == p_other->m_id;
             }
 
             std::size_t hash() const noexcept override
