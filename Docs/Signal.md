@@ -8,6 +8,22 @@
 
 Класс `Signal<Args...>` позволяет объектам (издателям) рассылать уведомления подписчикам (слотам) без жесткой связанности между ними. Это основа для реализации слабо связанных систем, где компоненты взаимодействуют через события.
 
+### Архитектура
+
+```
+┌─────────────────────┐      std::vector      ┌──────────────────────┐
+│   Signal<Args...>   │◄─────────────────────│ equatable_function   │
+│                     │                      │  (type-erased call)  │
+│ - m_slots           │                      └──────────────────────┘
+└─────────────────────┘
+```
+
+**Ключевые особенности:**
+- Использует `std::vector` для хранения слотов
+- Поддержка `equatable_function` с type erasure
+- Автоматическая очистка недействительных `weak_ptr`
+- Поддержка умных указателей (`shared_ptr`/`weak_ptr`)
+
 ### Типы
 
 ```cpp
@@ -21,7 +37,8 @@ public:
 ```
 
 - `Args...` - типы аргументов, передаваемых при эмите сигнала
-- `Slot` - тип функции-обработчика (слота), которая может быть сравнена на равенство
+- `Slot` - тип функции-обработчика (слота) с поддержкой сравнения на равенство
+- `Id` - уникальный идентификатор для отписки (определяется в `Awl/UniqueId.h`)
 
 ## Основные возможности
 
@@ -55,25 +72,53 @@ void subscribe(const Object* p_object, void (Object::*member)(Args...) const);
 template <class Object>
 void subscribe(std::shared_ptr<Object> p_object, void (Object::*member)(Args...));
 
+// Подписка с shared_ptr на const-метод
+template <class Object>
+void subscribe(std::shared_ptr<Object> p_object, void (Object::*member)(Args...) const);
+
 // Подписка с weak_ptr (автоматическая отписка при уничтожении)
 template <class Object>
 void subscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...));
+
+// Подписка с weak_ptr на const-метод
+template <class Object>
+void subscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...) const);
 ```
+
+**Примечание:** const-методы позволяют подписываться на методы, которые не изменяют состояние объекта. Это полезно для immutable объектов или для соблюдения const-корректности.
 
 ### Отписка
 
 ```cpp
-// Отписка по ID
+// Отписка по ID (возвращает true если подписчик был найден и удален)
 bool unsubscribe(Id id);
 
 // Отписка сырым указателем
 template <class Object>
 bool unsubscribe(Object* p_object, void (Object::*member)(Args...));
 
-// Отписка по weak_ptr/shared_ptr
+// Отписка const-метода
+template <class Object>
+bool unsubscribe(const Object* p_object, void (Object::*member)(Args...) const);
+
+// Отписка по shared_ptr
 template <class Object>
 bool unsubscribe(std::shared_ptr<Object> p_object, void (Object::*member)(Args...));
+
+// Отписка по shared_ptr const-метода
+template <class Object>
+bool unsubscribe(std::shared_ptr<Object> p_object, void (Object::*member)(Args...) const);
+
+// Отписка по weak_ptr
+template <class Object>
+bool unsubscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...));
+
+// Отписка по weak_ptr const-метода
+template <class Object>
+bool unsubscribe(std::weak_ptr<Object> p_object, void (Object::*member)(Args...) const);
 ```
+
+**Возвращаемое значение:** `true` если подписчик был найден и удален, `false` если подписчик не найден.
 
 ### Эмит
 
@@ -332,7 +377,123 @@ int main()
 }
 ```
 
+### Use Case 7: Const-методы
+
+```cpp
+class DataLogger
+{
+public:
+    void logData(int value) const
+    {
+        std::cout << "Logging: " << value << "\n";
+    }
+};
+
+class DataSource
+{
+public:
+    awl::Signal<int> onData;
+};
+
+int main()
+{
+    DataSource source;
+    const DataLogger logger;  // const объект
+
+    // Подписка на const-метод
+    source.subscribe(&logger, &DataLogger::logData);
+
+    source.onData.emit(42);  // Logging: 42
+
+    return 0;
+}
+```
+
+### Use Case 8: Проверка дубликатов
+
+```cpp
+Signal<int> sig;
+auto handler = [](int x) { std::cout << x << "\n"; };
+
+// Первая подписка успешна
+awl::Id id1 = sig.subscribe(handler);
+
+// Попытка подписать тот же обработчик снова
+// - будет проигнорирована из-за проверки на дубликаты
+awl::Id id2 = sig.subscribe(handler);
+
+std::cout << "Subscribers: " << sig.size() << "\n";  // Вывод: 1
+```
+
 ## Особенности реализации
+
+### equatable_function
+
+`equatable_function` — это type-erased функция с поддержкой сравнения на равенство:
+
+```cpp
+using Slot = equatable_function<void(Args...)>;
+```
+
+**Преимущества:**
+- Позволяет хранить любой callable объект (лямбды, функции, методы)
+- Поддерживает сравнение для корректной работы `unsubscribe`
+- Работает с умными указателями
+
+**Как работает сравнение:**
+```cpp
+// Два слота равны если они указывают на:
+// 1. Один и тот же объект и один и тот же метод
+// 2. Один и тот же ID (для std::function)
+Slot slot1(&obj, &Class::method);
+Slot slot2(&obj, &Class::method);
+// slot1 == slot2 -> true
+```
+
+### Проверка дубликатов
+
+При подписке `Signal` проверяет, существует ли уже такой слот:
+
+```cpp
+void subscribe(Slot slot)
+{
+    if (std::find(m_slots.begin(), m_slots.end(), slot) == m_slots.end())
+    {
+        m_slots.push_back(std::move(slot));
+    }
+}
+```
+
+Это предотвращает дублирование подписок на один и тот же метод объекта.
+
+### Swap-and-pop стратегия
+
+При удалении слотов используется swap-and-pop для O(1) удаления:
+
+```cpp
+bool unsubscribe(const Slot& slot)
+{
+    const auto it = std::find(m_slots.begin(), m_slots.end(), slot);
+
+    if (it == m_slots.end())
+    {
+        return false;
+    }
+
+    auto last = m_slots.end();
+    --last;
+
+    if (it != last)
+    {
+        *it = std::move(*last);  // Перемещаем последний элемент
+    }
+
+    m_slots.pop_back();  // Удаляем последний элемент
+    return true;
+}
+```
+
+**Примечание:** Это изменяет порядок слотов, но не влияет на функциональность.
 
 ### Автоматическая очистка мертвых подписчиков
 
@@ -361,16 +522,131 @@ while (i != m_slots.end())
 
 `equatable_function` позволяет сравнивать слоты на равенство, что обеспечивает корректную работу `unsubscribe`. Два слота считаются равными, если они указывают на один и тот же объект и один и тот же метод-член.
 
-## Зависимости
+## Compile-time проверки
 
-- `Awl/EquatableFunction.h` - типобезеричная функция с поддержкой сравнения
-- `Awl/UniqueId.h` - генерация уникальных идентификаторов
-- `<concepts>` - C++20 concepts для ограничений шаблонов
-- `<functional>` - std::function
-- `<memory>` - умные указатели
-- `<vector>` - контейнер для хранения слотов
+`Signal` использует C++20 concepts для проверки вызываемости слотов:
+
+```cpp
+template<typename ...Params>
+void emit(const Params&... args) const
+    requires (std::invocable<Slot&, const Params&...>)
+```
+
+Это обеспечивает compile-time проверку типов аргументов:
+
+```cpp
+Signal<int, std::string> sig;
+
+sig.emit(42, "hello");      // OK
+sig.emit("wrong", 42);      // Ошибка компиляции: несовпадение типов
+sig.emit(42);               // Ошибка компиляции: недостаточно аргументов
+```
+
+## Thread Safety
+
+`Signal` **не является потокобезопасным**. Используйте внешнюю синхронизацию при работе с несколькими потоками.
+
+### Многопоточные сценарии
+
+1. **Подписка/отписка из других потоков:** Требуется синхронизация
+2. **Эмит из других потоков:** Требуется синхронизация
+3. **Автоматическая очистка weak_ptr:** Происходит в потоке, вызывающем `emit()`
+
+## Best Practices
+
+### 1. Используйте weak_ptr для предотвращения циклических зависимостей
+
+```cpp
+// Хорошо: weak_ptr не продлевает жизнь объекта
+class Subscriber : public std::enable_shared_from_this<Subscriber>
+{
+public:
+    void subscribe(Signal<int>& sig)
+    {
+        sig.subscribe(std::weak_ptr<Subscriber>(shared_from_this()),
+                      &Subscriber::onEvent);
+    }
+};
+
+// Плохо: shared_ptr может создать циклическую зависимость
+class Subscriber
+{
+public:
+    void subscribe(Signal<int>& sig)
+    {
+        sig.subscribe(shared_from_this(), &Subscriber::onEvent);
+        // Signal удерживает Subscriber, Subscriber удерживает Signal - цикл!
+    }
+};
+```
+
+### 2. Храните ID для отписки лямбд
+
+```cpp
+class MyClass
+{
+    awl::Signal<int> sig;
+    awl::Id lambdaId;
+
+public:
+    void setup()
+    {
+        lambdaId = sig.subscribe([this](int value) {
+            handle(value);
+        });
+    }
+
+    void cleanup()
+    {
+        sig.unsubscribe(lambdaId);  // Отписываем лямбду по ID
+    }
+};
+```
+
+### 3. Проверяйте результат отписки
+
+```cpp
+bool removed = sig.unsubscribe(id);
+if (!removed)
+{
+    std::cout << "Подписчик не найден (уже отписан или не существовал)\n";
+}
+```
+
+### 4. Используйте const-методы для неизменяемых обработчиков
+
+```cpp
+class ImmutableHandler
+{
+public:
+    void process(int value) const  // const-метод
+    {
+        // Только чтение, не изменяет состояние
+    }
+};
+
+const ImmutableHandler handler;
+sig.subscribe(&handler, &ImmutableHandler::process);
+```
+
+### 5. Очищайте сигналы перед уничтожением
+
+```cpp
+class Component
+{
+    awl::Signal<> onDestroy;
+
+public:
+    ~Component()
+    {
+        onDestroy.clear();  // Очищаем все подписки
+        // Это предотвращает вызовы уже уничтоженного объекта
+    }
+};
+```
 
 ## Требования компилятора
 
 - C++20 или выше (используются concepts)
-- Поддержка `std::bit_cast` (C++23) или альтернативы
+- Поддержка `std::invocable` concept
+- Поддержка `std::convertible_to` concept

@@ -310,6 +310,20 @@ btn.onClick.connect([]() { std::cout << "Clicked!\n"; });
 | **Нотификация** | O(n) - итерация по list | O(n) - итерация по vector |
 | **Память на слот** | 1 указатель (intrusive) | ~24-32 байта (type-erased) |
 | **Кэш-эффективность** | Ниже (linked list) | Выше (contiguous vector) |
+| **Проверка дубликатов** | Не выполняется | Да, при подписке |
+| **Удаление во время итерации** | Безопасно (постфиксный инкремент) | Безопасно (swap-and-pop) |
+
+### Детали производительности
+
+**Observable:**
+- Минимальные накладные расходы на память: каждый наблюдатель содержит только один указатель на узел списка
+- Linked list может быть менее эффективен для кэша из-за фрагментации памяти
+- Детерминированное время выполнения уведомлений
+
+**Signal:**
+- Большинство накладных расходов на память из-за type erasure в `equatable_function`
+- Vector обеспечивает лучшую кэш-эффективность за счёт непрерывного хранения
+- Проверка на дубликаты при подписке добавляет O(n) overhead, но предотвращает дублирование
 
 ## Зависимости
 
@@ -354,3 +368,179 @@ public:
 - **Java/C#-подобный код** → Observable (похож на interfaces/events)
 - **Функциональный стиль** → Signal
 - **ООП-стиль** → Observable
+
+## Практические примеры выбора
+
+### Пример 1: GUI Framework
+
+Для GUI framework где компоненты имеют чётко определённые события:
+
+```cpp
+// Используем Observable для строгой типизации
+struct IButtonEvents
+{
+    virtual void onClick() = 0;
+    virtual void onHover(bool enter) = 0;
+    virtual void onKeyPress(int key) = 0;
+};
+
+class Button : public awl::Observable<IButtonEvents>
+{
+public:
+    void click() { notify(&IButtonEvents::onClick); }
+    void setHover(bool hover) { notify(&IButtonEvents::onHover, hover); }
+};
+```
+
+### Пример 2: Event Aggregator
+
+Для системы сбора событий где подписчики добавляются динамически:
+
+```cpp
+// Используем Signal для гибкости
+class EventAggregator
+{
+public:
+    awl::Signal<const std::string&> onEvent;
+    awl::Signal<int, int> onCoordinateChanged;
+};
+
+// Подписчики могут быть любыми callable объектами
+EventAggregator aggregator;
+
+// Лямбда
+aggregator.onEvent.subscribe([](const std::string& e) {
+    std::cout << e << "\n";
+});
+
+// Функция
+void logEvent(const std::string& e) { /* ... */ }
+aggregator.onEvent.subscribe(logEvent);
+
+// Метод класса
+class Handler { void handle(const std::string&); };
+Handler h;
+aggregator.onEvent.subscribe(&h, &Handler::handle);
+```
+
+### Пример 3: MVC Architecture
+
+Для Model-View-Controller где View должен реагировать на изменения Model:
+
+```cpp
+// Observable - для связи Model и View
+struct IModelEvents
+{
+    virtual void onDataChanged() = 0;
+    virtual void onStructureChanged() = 0;
+};
+
+class DataModel : public awl::Observable<IModelEvents>
+{
+    void setData(const std::string& data)
+    {
+        m_data = data;
+        notify(&IModelEvents::onDataChanged);
+    }
+};
+
+class DataView : public awl::Observer<IModelEvents>
+{
+public:
+    void onDataChanged() override { updateView(); }
+};
+```
+
+### Пример 4: Async Operations
+
+Для асинхронных операций где нужно продлевать жизнь объектов:
+
+```cpp
+// Signal - для управления жизнью объектов через weak_ptr
+class AsyncOperation
+{
+public:
+    awl::Signal<int> onComplete;
+    awl::Signal<const std::string&> onError;
+};
+
+class ResultHandler : public std::enable_shared_from_this<ResultHandler>
+{
+public:
+    void start(AsyncOperation& op)
+    {
+        // weak_ptr предотвратит dangling pointers
+        op.onComplete.subscribe(
+            std::weak_ptr<ResultHandler>(shared_from_this()),
+            &ResultHandler::handleComplete);
+    }
+
+private:
+    void handleComplete(int result) { /* ... */ }
+};
+```
+
+## Миграция между Observable и Signal
+
+### Из Observable в Signal
+
+```cpp
+// Было (Observable):
+struct IEvents
+{
+    virtual void onEvent(int value) = 0;
+};
+
+class MyClass : public awl::Observable<IEvents> { };
+
+// Стало (Signal):
+class MyClass
+{
+public:
+    awl::Signal<int> onEvent;
+};
+```
+
+### Из Signal в Observable
+
+```cpp
+// Было (Signal):
+class MyClass
+{
+public:
+    awl::Signal<int> onEvent;
+    awl::Signal<const std::string&> onLog;
+};
+
+// Стало (Observable):
+struct IMyEvents
+{
+    virtual void onEvent(int value) = 0;
+    virtual void onLog(const std::string& msg) = 0;
+};
+
+class MyClass : public awl::Observable<IMyEvents> { };
+```
+
+## Смешанное использование
+
+Оба класса могут использоваться в одном проекте для разных задач:
+
+```cpp
+class Application
+{
+    // Observable для основных событий приложения
+    class AppEvents : public awl::Observable<IAppEvents>
+    {
+        void quit() { notify(&IAppEvents::onQuit); }
+    };
+
+    // Signal для локальных событий компонентов
+    class Button
+    {
+    public:
+        awl::Signal<> onClick;
+        awl::Signal<int, int> onPositionChanged;
+    };
+};
+```
