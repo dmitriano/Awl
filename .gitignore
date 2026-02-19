@@ -252,3 +252,5 @@ ModelManifest.xml
 .fake/
 
 .idea/
+.claude/
+
