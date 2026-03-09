@@ -19,10 +19,10 @@ namespace awl
             }
         }
 
-        int n = i - s.rbegin();
+        const qsizetype n = i - s.rbegin();
         if (n != 0)
         {
-            int pos = s.rend() - i;
+            const qsizetype pos = s.rend() - i;
 
             s.remove(pos, n);
         }
