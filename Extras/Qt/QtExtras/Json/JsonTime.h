@@ -49,6 +49,8 @@ namespace awl
 
         void FromJson(const QJsonValue& jv, value_type& v)
         {
+            using common_duration = std::chrono::nanoseconds;
+
             if (!jv.isString())
             {
                 throw JsonException(awl::format() << "Expected duration as JSON string.");
@@ -72,7 +74,7 @@ namespace awl
             }
 
             std::istringstream in(text.toStdString());
-            value_type parsed{};
+            common_duration parsed{};
 
             in >> std::chrono::parse("%T", parsed);
 
@@ -88,7 +90,19 @@ namespace awl
                 throw JsonException(awl::format() << "Unexpected trailing characters in duration: " << original_text.toStdString());
             }
 
-            v = negative ? -parsed : parsed;
+            if (negative)
+            {
+                parsed = -parsed;
+            }
+
+            const value_type converted = std::chrono::duration_cast<value_type>(parsed);
+
+            if (std::chrono::duration_cast<common_duration>(converted) != parsed)
+            {
+                throw JsonException(awl::format() << "Duration precision loss: " << original_text.toStdString());
+            }
+
+            v = converted;
         }
 
         void ToJson(const value_type& v, QJsonValue& jv)

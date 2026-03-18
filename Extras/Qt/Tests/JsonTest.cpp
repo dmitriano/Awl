@@ -313,6 +313,31 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
+    auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
+    {
+        static_cast<void>(label);
+
+        for (size_t i = 0; i < values.size(); ++i)
+        {
+            {
+                QJsonValue jv = awl::ToJson(values[i]);
+
+                AWL_ASSERT(jv.type() == QJsonValue::String);
+                AWL_ASSERT(jv.toString() == to_json_values[i]);
+            }
+
+            {
+                QJsonValue jv = from_json_values[i];
+
+                Duration actual{};
+
+                awl::FromJson(jv, actual);
+
+                AWL_ASSERT(actual == values[i]);
+            }
+        }
+    };
+
     const std::array<milliseconds, 4> millisecond_values
     {
         hours(48) + minutes(2) + seconds(3) + milliseconds(4),
@@ -337,25 +362,7 @@ AWL_TEST(JsonDuration)
         "48:02:03"
     };
 
-    for (size_t i = 0; i < millisecond_values.size(); ++i)
-    {
-        {
-            QJsonValue jv = awl::ToJson(millisecond_values[i]);
-
-            AWL_ASSERT(jv.type() == QJsonValue::String);
-            AWL_ASSERT(jv.toString() == millisecond_to_json_values[i]);
-        }
-
-        {
-            QJsonValue jv = millisecond_from_json_values[i];
-
-            milliseconds actual{};
-
-            awl::FromJson(jv, actual);
-
-            AWL_ASSERT(actual == millisecond_values[i]);
-        }
-    }
+    test_roundtrip.operator()<milliseconds>("milliseconds", millisecond_values, millisecond_to_json_values, millisecond_from_json_values);
 
     const std::array<microseconds, 1> microsecond_values
     {
@@ -367,25 +374,55 @@ AWL_TEST(JsonDuration)
         "48:02:03.456789"
     };
 
-    for (size_t i = 0; i < microsecond_values.size(); ++i)
+    test_roundtrip.operator()<microseconds>("microseconds", microsecond_values, microsecond_expected_values, microsecond_expected_values);
+
+    const std::array<seconds, 3> second_values
     {
-        {
-            QJsonValue jv = awl::ToJson(microsecond_values[i]);
+        hours(48) + minutes(2) + seconds(3),
+        seconds::zero(),
+        -(hours(48) + minutes(2) + seconds(3))
+    };
 
-            AWL_ASSERT(jv.type() == QJsonValue::String);
-            AWL_ASSERT(jv.toString() == microsecond_expected_values[i]);
-        }
+    const std::array<QString, 3> second_expected_values
+    {
+        "48:02:03",
+        "00:00:00",
+        "-48:02:03"
+    };
 
-        {
-            QJsonValue jv = microsecond_expected_values[i];
+    test_roundtrip.operator()<seconds>("seconds", second_values, second_expected_values, second_expected_values);
 
-            microseconds actual{};
+    const std::array<minutes, 3> minute_values
+    {
+        hours(48) + minutes(2),
+        minutes::zero(),
+        -(hours(48) + minutes(2))
+    };
 
-            awl::FromJson(jv, actual);
+    const std::array<QString, 3> minute_expected_values
+    {
+        "48:02:00",
+        "00:00:00",
+        "-48:02:00"
+    };
 
-            AWL_ASSERT(actual == microsecond_values[i]);
-        }
-    }
+    test_roundtrip.operator()<minutes>("minutes", minute_values, minute_expected_values, minute_expected_values);
+
+    const std::array<hours, 3> hour_values
+    {
+        hours(48),
+        hours::zero(),
+        -hours(48)
+    };
+
+    const std::array<QString, 3> hour_expected_values
+    {
+        "48:00:00",
+        "00:00:00",
+        "-48:00:00"
+    };
+
+    test_roundtrip.operator()<hours>("hours", hour_values, hour_expected_values, hour_expected_values);
 }
 
 #ifdef AWL_DECIMAL_128
