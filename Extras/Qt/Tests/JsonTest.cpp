@@ -315,11 +315,6 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
-    auto format_expected = []<class Duration>(Duration value)
-    {
-        return QString::fromStdString(std::format("{:%T}", std::chrono::hh_mm_ss<Duration>(value)));
-    };
-
     auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
     {
         const awl::String label_text = awl::FromACString(label);
@@ -387,17 +382,23 @@ AWL_TEST(JsonDuration)
         });
 
     test_roundtrip.operator()<microseconds>("microseconds",
-        std::array<microseconds, 1>
+        std::array<microseconds, 3>
         {
-            hours(48) + minutes(2) + seconds(3) + microseconds(456789)
+            hours(48) + minutes(2) + seconds(3) + microseconds(456789),
+            hours(48) + minutes(2) + seconds(3) + microseconds(456000),
+            -(hours(48) + minutes(2) + seconds(3) + microseconds(456000))
         },
-        std::array<QString, 1>
+        std::array<QString, 3>
         {
-            "48:02:03.456789"
+            "48:02:03.456789",
+            "48:02:03.456000",
+            "-48:02:03.456000"
         },
-        std::array<QString, 1>
+        std::array<QString, 3>
         {
-            "48:02:03.456789"
+            "48:02:03.456789",
+            "48:02:03.456",
+            "-48:02:03.456"
         });
 
     test_roundtrip.operator()<seconds>("seconds",
@@ -474,15 +475,15 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            format_expected(system_positive),
-            format_expected(system_zero),
-            format_expected(system_negative)
+            "48:02:03.0000000",
+            "00:00:00.0000000",
+            "-48:02:03.0000000"
         },
         std::array<QString, 3>
         {
-            format_expected(system_positive),
-            format_expected(system_zero),
-            format_expected(system_negative)
+            "48:02:03",
+            "00:00:00",
+            "-48:02:03"
         });
 }
 
