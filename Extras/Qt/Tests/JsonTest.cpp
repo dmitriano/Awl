@@ -537,6 +537,15 @@ AWL_TEST(JsonDurationNew)
     test_new_format.operator()<microseconds>("microseconds fractional", "2d.3h.4m.5s.006007", days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007));
     test_new_format.operator()<microseconds>("negative microseconds fractional", "-2d.3h.4m.5s.006007", -(days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007)));
     test_new_format.operator()<seconds>("seconds omit middle components", "2d.5s", days(2) + seconds(5));
+    test_new_format.operator()<hours>("zero with d h m s as hours", "0d.0h.0m.0s", hours::zero());
+    test_new_format.operator()<minutes>("zero with d h m s as minutes", "0d.0h.0m.0s", minutes::zero());
+    test_new_format.operator()<seconds>("zero with d h m s as seconds", "0d.0h.0m.0s", seconds::zero());
+    test_new_format.operator()<milliseconds>("zero with d h m s as milliseconds", "0d.0h.0m.0s", milliseconds::zero());
+    test_new_format.operator()<system_clock::duration>("zero with d h m s as system duration", "0d.0h.0m.0s", system_clock::duration::zero());
+    test_new_format.operator()<milliseconds>("zero hour with fractional", "0h.125", milliseconds(125));
+    test_new_format.operator()<milliseconds>("zero minute with fractional", "0m.125", milliseconds(125));
+    test_new_format.operator()<milliseconds>("zero components with fractional milliseconds", "0d.0h.0m.0s.125", milliseconds(125));
+    test_new_format.operator()<microseconds>("zero components with fractional microseconds", "0d.0h.0m.0s.000125", microseconds(125));
     test_new_format.operator()<milliseconds>("standalone fractional", "0.125", milliseconds(125));
 }
 

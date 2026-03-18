@@ -335,11 +335,12 @@ namespace awl
                 }
                 else
                 {
-                    if (!saw_seconds || saw_fraction)
+                    if (saw_fraction)
                     {
                         make_invalid_format();
                     }
 
+                    saw_seconds = true;
                     saw_fraction = true;
 
                     int64_t fractional = 0;
