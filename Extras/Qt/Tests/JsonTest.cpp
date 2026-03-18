@@ -313,23 +313,38 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
-    const milliseconds expected = hours(48) + minutes(2) + seconds(3) + milliseconds(4);
-
+    const std::array values
     {
-        QJsonValue jv = awl::ToJson(expected);
+        hours(48) + minutes(2) + seconds(3) + milliseconds(4),
+        milliseconds::zero(),
+        -(hours(48) + minutes(2) + seconds(3) + milliseconds(4))
+    };
 
-        AWL_ASSERT(jv.type() == QJsonValue::String);
-        AWL_ASSERT(jv.toString() == "48:02:03.004");
-    }
-
+    const std::array<QString, 3> expected_values
     {
-        QJsonValue jv = QString("48:02:03.004");
+        "48:02:03.004",
+        "00:00:00.000",
+        "-48:02:03.004"
+    };
 
-        milliseconds actual{};
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        {
+            QJsonValue jv = awl::ToJson(values[i]);
 
-        awl::FromJson(jv, actual);
+            AWL_ASSERT(jv.type() == QJsonValue::String);
+            AWL_ASSERT(jv.toString() == expected_values[i]);
+        }
 
-        AWL_ASSERT(actual == expected);
+        {
+            QJsonValue jv = expected_values[i];
+
+            milliseconds actual{};
+
+            awl::FromJson(jv, actual);
+
+            AWL_ASSERT(actual == values[i]);
+        }
     }
 }
 
