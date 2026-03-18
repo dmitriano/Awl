@@ -491,6 +491,26 @@ AWL_TEST(JsonDuration)
         });
 }
 
+AWL_TEST(JsonDurationInvalid)
+{
+    auto test_invalid_input = [&context]<class Duration>(const char* label, const QString& input)
+    {
+        const awl::String label_text = awl::FromACString(label);
+
+        context.logger.debug(std::format(_T("{} invalid input: {}"),
+            label_text,
+            input));
+
+        awl::testing::Assert::Throws<awl::JsonException>([&input]()
+        {
+            Duration actual{};
+            awl::FromJson(QJsonValue(input), actual);
+        });
+    };
+
+    test_invalid_input.operator()<std::chrono::minutes>("minutes", "-48:02:00.001");
+}
+
 #ifdef AWL_DECIMAL_128
 
 AWL_TEST(JsonDecimal)
