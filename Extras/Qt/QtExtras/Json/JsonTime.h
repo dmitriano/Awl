@@ -221,7 +221,6 @@ namespace awl
             else if (!has_whole_component)
             {
                 text += '0';
-                text += 's';
             }
 
             return QString::fromStdString(text);

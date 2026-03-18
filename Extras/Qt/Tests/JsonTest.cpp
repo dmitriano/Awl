@@ -373,7 +373,7 @@ AWL_TEST(JsonDuration)
         std::array<QString, 4>
         {
             "2d.2m.3s.004",
-            "0s",
+            "0",
             "-2d.2m.3s.004",
             "2d.2m.3s"
         },
@@ -415,7 +415,7 @@ AWL_TEST(JsonDuration)
         std::array<QString, 3>
         {
             "2d.2m.3s",
-            "0s",
+            "0",
             "-2d.2m.3s"
         },
         std::array<QString, 3>
@@ -435,7 +435,7 @@ AWL_TEST(JsonDuration)
         std::array<QString, 3>
         {
             "2d.2m",
-            "0s",
+            "0",
             "-2d.2m"
         },
         std::array<QString, 3>
@@ -455,7 +455,7 @@ AWL_TEST(JsonDuration)
         std::array<QString, 3>
         {
             "2d",
-            "0s",
+            "0",
             "-2d"
         },
         std::array<QString, 3>
@@ -480,7 +480,7 @@ AWL_TEST(JsonDuration)
         std::array<QString, 3>
         {
             "2d.2m.3s",
-            "0s",
+            "0",
             "-2d.2m.3s"
         },
         std::array<QString, 3>
