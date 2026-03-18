@@ -321,24 +321,20 @@ AWL_TEST(JsonDuration)
 
         for (size_t i = 0; i < values.size(); ++i)
         {
-            context.logger.debug(std::format(_T("{} to_json case {}: count={}, json={}"),
-                label_text,
-                i,
-                values[i].count(),
-                awl::FromQString(to_json_values[i])));
-
             {
                 QJsonValue jv = awl::ToJson(values[i]);
+                const QString actual_text = jv.toString();
+                const QString expected_text = to_json_values[i];
+
+                context.logger.debug(std::format(_T("{} to_json case {}: actual={}, expected={}"),
+                    label_text,
+                    i,
+                    awl::FromQString(actual_text),
+                    awl::FromQString(expected_text)));
 
                 AWL_ASSERT(jv.type() == QJsonValue::String);
-                AWL_ASSERT(jv.toString() == to_json_values[i]);
+                AWL_ASSERT(actual_text == expected_text);
             }
-
-            context.logger.debug(std::format(_T("{} from_json case {}: json={}, count={}"),
-                label_text,
-                i,
-                awl::FromQString(from_json_values[i]),
-                values[i].count()));
 
             {
                 QJsonValue jv = from_json_values[i];
@@ -346,6 +342,16 @@ AWL_TEST(JsonDuration)
                 Duration actual{};
 
                 awl::FromJson(jv, actual);
+
+                const QString actual_text = awl::ToJson(actual).toString();
+                const QString expected_text = awl::ToJson(values[i]).toString();
+
+                context.logger.debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
+                    label_text,
+                    i,
+                    awl::FromQString(from_json_values[i]),
+                    awl::FromQString(actual_text),
+                    awl::FromQString(expected_text)));
 
                 AWL_ASSERT(actual == values[i]);
             }
