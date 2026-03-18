@@ -309,6 +309,30 @@ AWL_TEST(JsonMap)
     TestRunner<std::unordered_map<std::string, int>>(context);
 }
 
+AWL_TEST(JsonDuration)
+{
+    using namespace std::chrono;
+
+    const milliseconds expected = hours(1) + minutes(2) + seconds(3) + milliseconds(4);
+
+    {
+        QJsonValue jv = awl::ToJson(expected);
+
+        AWL_ASSERT(jv.type() == QJsonValue::String);
+        AWL_ASSERT(jv.toString() == "01:02:03.004");
+    }
+
+    {
+        QJsonValue jv = QString("01:02:03.004");
+
+        milliseconds actual{};
+
+        awl::FromJson(jv, actual);
+
+        AWL_ASSERT(actual == expected);
+    }
+}
+
 #ifdef AWL_DECIMAL_128
 
 AWL_TEST(JsonDecimal)
