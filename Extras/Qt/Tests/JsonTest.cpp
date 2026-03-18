@@ -17,6 +17,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <format>
+
 AWL_TEST(JsonArray)
 {
     AWL_UNUSED_CONTEXT;
@@ -315,9 +317,15 @@ AWL_TEST(JsonDuration)
 
     auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
     {
+        const awl::String label_text = awl::FromACString(label);
+
         for (size_t i = 0; i < values.size(); ++i)
         {
-            context.logger.debug(awl::format() << label << " to_json case " << i << ": count=" << values[i].count() << ", json=" << to_json_values[i]);
+            context.logger.debug(std::format(_T("{} to_json case {}: count={}, json={}"),
+                label_text,
+                i,
+                values[i].count(),
+                awl::FromQString(to_json_values[i])));
 
             {
                 QJsonValue jv = awl::ToJson(values[i]);
@@ -326,7 +334,11 @@ AWL_TEST(JsonDuration)
                 AWL_ASSERT(jv.toString() == to_json_values[i]);
             }
 
-            context.logger.debug(awl::format() << label << " from_json case " << i << ": json=" << from_json_values[i] << ", count=" << values[i].count());
+            context.logger.debug(std::format(_T("{} from_json case {}: json={}, count={}"),
+                label_text,
+                i,
+                awl::FromQString(from_json_values[i]),
+                values[i].count()));
 
             {
                 QJsonValue jv = from_json_values[i];
