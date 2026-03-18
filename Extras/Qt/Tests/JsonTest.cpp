@@ -508,7 +508,12 @@ AWL_TEST(JsonDurationInvalid)
         });
     };
 
+    test_invalid_input.operator()<std::chrono::milliseconds>("milliseconds", "-48:02:03.0001");
+    test_invalid_input.operator()<std::chrono::microseconds>("microseconds", "-48:02:03.0000001");
+    test_invalid_input.operator()<std::chrono::seconds>("seconds", "-48:02:03.001");
     test_invalid_input.operator()<std::chrono::minutes>("minutes", "-48:02:00.001");
+    test_invalid_input.operator()<std::chrono::hours>("hours", "-48:00:00.001");
+    test_invalid_input.operator()<std::chrono::system_clock::duration>("system_clock::duration", "-48:02:03.invalid");
 }
 
 #ifdef AWL_DECIMAL_128
