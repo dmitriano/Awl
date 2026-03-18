@@ -315,16 +315,18 @@ AWL_TEST(JsonDuration)
 
     auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
     {
-        static_cast<void>(label);
-
         for (size_t i = 0; i < values.size(); ++i)
         {
+            context.logger.debug(awl::format() << label << " to_json case " << i << ": count=" << values[i].count() << ", json=" << to_json_values[i]);
+
             {
                 QJsonValue jv = awl::ToJson(values[i]);
 
                 AWL_ASSERT(jv.type() == QJsonValue::String);
                 AWL_ASSERT(jv.toString() == to_json_values[i]);
             }
+
+            context.logger.debug(awl::format() << label << " from_json case " << i << ": json=" << from_json_values[i] << ", count=" << values[i].count());
 
             {
                 QJsonValue jv = from_json_values[i];
@@ -338,91 +340,102 @@ AWL_TEST(JsonDuration)
         }
     };
 
-    const std::array<milliseconds, 4> millisecond_values
-    {
-        hours(48) + minutes(2) + seconds(3) + milliseconds(4),
-        milliseconds::zero(),
-        -(hours(48) + minutes(2) + seconds(3) + milliseconds(4)),
-        hours(48) + minutes(2) + seconds(3)
-    };
+    test_roundtrip.operator()<milliseconds>("milliseconds",
+        std::array<milliseconds, 4>
+        {
+            hours(48) + minutes(2) + seconds(3) + milliseconds(4),
+            milliseconds::zero(),
+            -(hours(48) + minutes(2) + seconds(3) + milliseconds(4)),
+            hours(48) + minutes(2) + seconds(3)
+        },
+        std::array<QString, 4>
+        {
+            "48:02:03.004",
+            "00:00:00.000",
+            "-48:02:03.004",
+            "48:02:03.000"
+        },
+        std::array<QString, 4>
+        {
+            "48:02:03.004",
+            "00:00:00.000",
+            "-48:02:03.004",
+            "48:02:03"
+        });
 
-    const std::array<QString, 4> millisecond_to_json_values
-    {
-        "48:02:03.004",
-        "00:00:00.000",
-        "-48:02:03.004",
-        "48:02:03.000"
-    };
+    test_roundtrip.operator()<microseconds>("microseconds",
+        std::array<microseconds, 1>
+        {
+            hours(48) + minutes(2) + seconds(3) + microseconds(456789)
+        },
+        std::array<QString, 1>
+        {
+            "48:02:03.456789"
+        },
+        std::array<QString, 1>
+        {
+            "48:02:03.456789"
+        });
 
-    const std::array<QString, 4> millisecond_from_json_values
-    {
-        "48:02:03.004",
-        "00:00:00.000",
-        "-48:02:03.004",
-        "48:02:03"
-    };
+    test_roundtrip.operator()<seconds>("seconds",
+        std::array<seconds, 3>
+        {
+            hours(48) + minutes(2) + seconds(3),
+            seconds::zero(),
+            -(hours(48) + minutes(2) + seconds(3))
+        },
+        std::array<QString, 3>
+        {
+            "48:02:03",
+            "00:00:00",
+            "-48:02:03"
+        },
+        std::array<QString, 3>
+        {
+            "48:02:03",
+            "00:00:00",
+            "-48:02:03"
+        });
 
-    test_roundtrip.operator()<milliseconds>("milliseconds", millisecond_values, millisecond_to_json_values, millisecond_from_json_values);
+    test_roundtrip.operator()<minutes>("minutes",
+        std::array<minutes, 3>
+        {
+            hours(48) + minutes(2),
+            minutes::zero(),
+            -(hours(48) + minutes(2))
+        },
+        std::array<QString, 3>
+        {
+            "48:02:00",
+            "00:00:00",
+            "-48:02:00"
+        },
+        std::array<QString, 3>
+        {
+            "48:02:00",
+            "00:00:00",
+            "-48:02:00"
+        });
 
-    const std::array<microseconds, 1> microsecond_values
-    {
-        hours(48) + minutes(2) + seconds(3) + microseconds(456789)
-    };
-
-    const std::array<QString, 1> microsecond_expected_values
-    {
-        "48:02:03.456789"
-    };
-
-    test_roundtrip.operator()<microseconds>("microseconds", microsecond_values, microsecond_expected_values, microsecond_expected_values);
-
-    const std::array<seconds, 3> second_values
-    {
-        hours(48) + minutes(2) + seconds(3),
-        seconds::zero(),
-        -(hours(48) + minutes(2) + seconds(3))
-    };
-
-    const std::array<QString, 3> second_expected_values
-    {
-        "48:02:03",
-        "00:00:00",
-        "-48:02:03"
-    };
-
-    test_roundtrip.operator()<seconds>("seconds", second_values, second_expected_values, second_expected_values);
-
-    const std::array<minutes, 3> minute_values
-    {
-        hours(48) + minutes(2),
-        minutes::zero(),
-        -(hours(48) + minutes(2))
-    };
-
-    const std::array<QString, 3> minute_expected_values
-    {
-        "48:02:00",
-        "00:00:00",
-        "-48:02:00"
-    };
-
-    test_roundtrip.operator()<minutes>("minutes", minute_values, minute_expected_values, minute_expected_values);
-
-    const std::array<hours, 3> hour_values
-    {
-        hours(48),
-        hours::zero(),
-        -hours(48)
-    };
-
-    const std::array<QString, 3> hour_expected_values
-    {
-        "48:00:00",
-        "00:00:00",
-        "-48:00:00"
-    };
-
-    test_roundtrip.operator()<hours>("hours", hour_values, hour_expected_values, hour_expected_values);
+    test_roundtrip.operator()<hours>("hours",
+        std::array<hours, 3>
+        {
+            hours(48),
+            hours::zero(),
+            -hours(48)
+        },
+        std::array<QString, 3>
+        {
+            "48:00:00",
+            "00:00:00",
+            "-48:00:00"
+        },
+        std::array<QString, 3>
+        {
+            "48:00:00",
+            "00:00:00",
+            "-48:00:00"
+        });
 }
 
 #ifdef AWL_DECIMAL_128
