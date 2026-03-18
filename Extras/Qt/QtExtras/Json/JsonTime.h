@@ -80,14 +80,14 @@ namespace awl
 
             if (in.fail())
             {
-                throw JsonException(awl::format() << "Invalid duration format: " << original_text.toStdString());
+                throw JsonException(awl::format() << "Invalid duration format: " << original_text);
             }
 
             in >> std::ws;
 
             if (!in.eof())
             {
-                throw JsonException(awl::format() << "Unexpected trailing characters in duration: " << original_text.toStdString());
+                throw JsonException(awl::format() << "Unexpected trailing characters in duration: " << original_text);
             }
 
             if (negative)
@@ -99,7 +99,7 @@ namespace awl
 
             if (std::chrono::duration_cast<common_duration>(converted) != parsed)
             {
-                throw JsonException(awl::format() << "Duration precision loss: " << original_text.toStdString());
+                throw JsonException(awl::format() << "Duration precision loss: " << original_text);
             }
 
             v = converted;
