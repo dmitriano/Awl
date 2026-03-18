@@ -47,7 +47,6 @@ namespace awl
     public:
 
         using value_type = std::chrono::duration<Rep, Period>;
-        using formatted_type = std::chrono::hh_mm_ss<value_type>;
         using common_duration = std::chrono::nanoseconds;
 
         void FromJson(const QJsonValue& jv, value_type& v)
@@ -75,10 +74,25 @@ namespace awl
             }
 
             common_duration parsed{};
+            bool parsed_ok = false;
 
-            if (!tryParseLegacyFormat(text, parsed))
+            try
             {
                 parsed = parseExtendedFormat(text, original_text);
+                parsed_ok = true;
+            }
+            catch (const JsonException&)
+            {
+            }
+
+            if (!parsed_ok)
+            {
+                parsed_ok = tryParseLegacyFormat(text, parsed);
+            }
+
+            if (!parsed_ok)
+            {
+                throwWrongDurationValue(original_text);
             }
 
             if (negative)
@@ -90,7 +104,7 @@ namespace awl
 
             if (std::chrono::duration_cast<common_duration>(converted) != parsed)
             {
-                throw JsonException(awl::format() << "Duration precision loss: " << original_text);
+                throwWrongDurationValue(original_text);
             }
 
             v = converted;
@@ -99,31 +113,7 @@ namespace awl
         void ToJson(const value_type& v, QJsonValue& jv)
         {
             const common_duration common_value = std::chrono::duration_cast<common_duration>(v);
-            const common_duration abs_value = common_value < common_duration::zero() ? -common_value : common_value;
-
-            if (abs_value > std::chrono::duration_cast<common_duration>(std::chrono::days(1)))
-            {
-                jv = toExtendedFormat(common_value);
-                return;
-            }
-
-            const formatted_type formatted(v);
-            std::string text = std::format("{:%T}", formatted);
-
-            if (text.contains('.'))
-            {
-                while (text.ends_with('0'))
-                {
-                    text.pop_back();
-                }
-
-                if (text.ends_with('.'))
-                {
-                    text.pop_back();
-                }
-            }
-
-            jv = QString::fromStdString(text);
+            jv = toExtendedFormat(common_value);
         }
 
     private:
@@ -173,38 +163,51 @@ namespace awl
             const auto fractional = v.count();
 
             std::string text;
+            bool has_whole_component = false;
+
+            auto append_component = [&text, &has_whole_component](int64_t value, char suffix)
+            {
+                if (value == 0)
+                {
+                    return;
+                }
+
+                if (!text.empty() && text.back() != '-')
+                {
+                    text += '.';
+                }
+
+                text += std::to_string(value);
+                text += suffix;
+                has_whole_component = true;
+            };
 
             if (negative)
             {
                 text += '-';
             }
 
-            text += std::to_string(days);
-            text += 'd';
-
-            if (hours != 0)
-            {
-                text += '.';
-                text += std::to_string(hours);
-                text += 'h';
-            }
-
-            if (minutes != 0)
-            {
-                text += '.';
-                text += std::to_string(minutes);
-                text += 'm';
-            }
-
-            if (seconds != 0 || fractional != 0)
-            {
-                text += '.';
-                text += std::to_string(seconds);
-                text += 's';
-            }
+            append_component(days, 'd');
+            append_component(hours, 'h');
+            append_component(minutes, 'm');
+            append_component(seconds, 's');
 
             if (fractional != 0)
             {
+                if (!has_whole_component)
+                {
+                    if (!text.empty() && text.back() != '-')
+                    {
+                        text += '.';
+                    }
+
+                    text += '0';
+                }
+                else if (seconds == 0)
+                {
+                    text += ".0s";
+                }
+
                 std::string fraction = std::format("{:09}", fractional);
 
                 while (fraction.ends_with('0'))
@@ -214,6 +217,11 @@ namespace awl
 
                 text += '.';
                 text += fraction;
+            }
+            else if (!has_whole_component)
+            {
+                text += '0';
+                text += 's';
             }
 
             return QString::fromStdString(text);
@@ -375,6 +383,11 @@ namespace awl
             }
 
             return total;
+        }
+
+        static void throwWrongDurationValue(const QString& text)
+        {
+            throw JsonException(awl::format() << "Wrong duration value " << text);
         }
     };
 }
