@@ -139,6 +139,22 @@ AWL_TEST(IoStdReadWrite)
     helpers::TestReadWrite(context, bool(false));
 
     helpers::TestReadWrite(context, std::chrono::system_clock::now());
+    helpers::TestReadWrite(context, std::chrono::milliseconds(0));
+    helpers::TestReadWrite(context, std::chrono::milliseconds(172923004));
+    helpers::TestReadWrite(context, std::chrono::milliseconds(-172923004));
+    helpers::TestReadWrite(context, std::chrono::microseconds(172923456789));
+    helpers::TestReadWrite(context, std::chrono::microseconds(-172923456789));
+    helpers::TestReadWrite(context, std::chrono::seconds(172923));
+    helpers::TestReadWrite(context, std::chrono::seconds(-172923));
+    helpers::TestReadWrite(context, std::chrono::minutes(2882));
+    helpers::TestReadWrite(context, std::chrono::minutes(-2882));
+    helpers::TestReadWrite(context, std::chrono::hours(48));
+    helpers::TestReadWrite(context, std::chrono::hours(-48));
+    helpers::TestReadWrite(context, std::chrono::system_clock::duration::zero());
+    helpers::TestReadWrite(context, std::chrono::duration_cast<std::chrono::system_clock::duration>(
+        std::chrono::hours(48) + std::chrono::minutes(2) + std::chrono::seconds(3)));
+    helpers::TestReadWrite(context, std::chrono::duration_cast<std::chrono::system_clock::duration>(
+        -(std::chrono::hours(48) + std::chrono::minutes(2) + std::chrono::seconds(3))));
 
     helpers::TestReadWrite(context, std::string("some sample string"));
     helpers::TestReadWrite(context, std::wstring(L"some sample string"));

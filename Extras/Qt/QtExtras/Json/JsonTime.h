@@ -13,7 +13,6 @@
 #include <charconv>
 #include <chrono>
 #include <format>
-#include <sstream>
 #include <string_view>
 
 namespace awl
@@ -74,25 +73,14 @@ namespace awl
             }
 
             common_duration parsed{};
-            bool parsed_ok = false;
 
             try
             {
                 parsed = parseExtendedFormat(text, original_text);
-                parsed_ok = true;
             }
-            catch (const JsonException&)
+            catch (const JsonException& e)
             {
-            }
-
-            if (!parsed_ok)
-            {
-                parsed_ok = tryParseLegacyFormat(text, parsed);
-            }
-
-            if (!parsed_ok)
-            {
-                throwWrongDurationValue(original_text);
+                throwWrongDurationValue(original_text, e.What());
             }
 
             if (negative)
@@ -104,7 +92,7 @@ namespace awl
 
             if (std::chrono::duration_cast<common_duration>(converted) != parsed)
             {
-                throwWrongDurationValue(original_text);
+                throwWrongDurationValue(original_text, awl::format() << "Duration precision loss.");
             }
 
             v = converted;
@@ -117,23 +105,6 @@ namespace awl
         }
 
     private:
-
-        static bool tryParseLegacyFormat(const QString& text, common_duration& parsed)
-        {
-            std::istringstream in(text.toStdString());
-
-            in >> std::chrono::parse("%T", parsed);
-
-            if (in.fail())
-            {
-                return false;
-            }
-
-            in >> std::ws;
-
-            return in.eof();
-        }
-
         static QString toExtendedFormat(common_duration v)
         {
             bool negative = v < common_duration::zero();
@@ -385,9 +356,9 @@ namespace awl
             return total;
         }
 
-        static void throwWrongDurationValue(const QString& text)
+        static void throwWrongDurationValue(const QString& text, const awl::String& details)
         {
-            throw JsonException(awl::format() << "Wrong duration value " << text);
+            throw JsonException(awl::format() << "Wrong duration value " << text << ". " << details);
         }
     };
 }

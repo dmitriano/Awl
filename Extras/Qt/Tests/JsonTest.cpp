@@ -379,10 +379,10 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 4>
         {
-            "48:02:03.004000",
-            "00:00:00.0000",
-            "-48:02:03.004000",
-            "48:02:03.000"
+            "2d.2m.3s.004000",
+            "0.0000",
+            "-2d.2m.3s.004000",
+            "2d.2m.3s.000"
         });
 
     test_roundtrip.operator()<microseconds>("microseconds",
@@ -400,9 +400,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03.456789",
-            "48:02:03.4560000",
-            "-48:02:03.4560000"
+            "2d.2m.3s.456789",
+            "2d.2m.3s.4560000",
+            "-2d.2m.3s.4560000"
         });
 
     test_roundtrip.operator()<seconds>("seconds",
@@ -420,9 +420,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03.000",
-            "00:00:00.0000",
-            "-48:02:03.000"
+            "2d.2m.3s.000",
+            "0.0000",
+            "-2d.2m.3s.000"
         });
 
     test_roundtrip.operator()<minutes>("minutes",
@@ -440,9 +440,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:00.000",
-            "00:00:00.0000",
-            "-48:02:00.000"
+            "2d.2m.0s.000",
+            "0.0000",
+            "-2d.2m.0s.000"
         });
 
     test_roundtrip.operator()<hours>("hours",
@@ -460,9 +460,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:00:00.000",
-            "00:00:00.0000",
-            "-48:00:00.000"
+            "2d.0s.000",
+            "0.0000",
+            "-2d.0s.000"
         });
 
     using system_duration = system_clock::duration;
@@ -485,9 +485,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03.0000000",
-            "00:00:00.0000000",
-            "-48:02:03.0000000"
+            "2d.2m.3s.0000000",
+            "0.0000000",
+            "-2d.2m.3s.0000000"
         });
 }
 
