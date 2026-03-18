@@ -315,6 +315,17 @@ namespace awl
                     has_component = true;
                     last_component = component;
                 }
+                else if (!saw_seconds && !saw_fraction && dot_pos != std::string_view::npos && token == "0")
+                {
+                    if (has_component && Component::seconds <= last_component)
+                    {
+                        make_invalid_format();
+                    }
+
+                    saw_seconds = true;
+                    has_component = true;
+                    last_component = Component::seconds;
+                }
                 else
                 {
                     if (!saw_seconds || saw_fraction)

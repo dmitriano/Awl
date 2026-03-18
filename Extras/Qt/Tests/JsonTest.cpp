@@ -537,6 +537,7 @@ AWL_TEST(JsonDurationNew)
     test_new_format.operator()<microseconds>("microseconds fractional", "2d.3h.4m.5s.006007", days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007));
     test_new_format.operator()<microseconds>("negative microseconds fractional", "-2d.3h.4m.5s.006007", -(days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007)));
     test_new_format.operator()<seconds>("seconds omit middle components", "2d.5s", days(2) + seconds(5));
+    test_new_format.operator()<milliseconds>("standalone fractional", "0.125", milliseconds(125));
 }
 
 AWL_TEST(JsonDurationInvalid)
