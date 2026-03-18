@@ -315,7 +315,11 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
-    auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
+    auto test_roundtrip = [&context]<class Duration, size_t N>(
+        const char* label,
+        const std::array<Duration, N>& values,
+        const std::array<QString, N>& to_json_values,
+        const std::array<QString, N>& from_json_values)
     {
         const awl::String label_text = awl::FromACString(label);
 
