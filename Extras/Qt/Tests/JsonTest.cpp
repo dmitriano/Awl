@@ -372,10 +372,10 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 4>
         {
-            "48:02:03.004",
+            "2d.2m.3s.004",
             "00:00:00",
-            "-48:02:03.004",
-            "48:02:03"
+            "-2d.2m.3s.004",
+            "2d.2m.3s"
         },
         std::array<QString, 4>
         {
@@ -394,9 +394,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03.456789",
-            "48:02:03.456",
-            "-48:02:03.456"
+            "2d.2m.3s.456789",
+            "2d.2m.3s.456",
+            "-2d.2m.3s.456"
         },
         std::array<QString, 3>
         {
@@ -414,9 +414,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03",
+            "2d.2m.3s",
             "00:00:00",
-            "-48:02:03"
+            "-2d.2m.3s"
         },
         std::array<QString, 3>
         {
@@ -434,9 +434,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:00",
+            "2d.2m",
             "00:00:00",
-            "-48:02:00"
+            "-2d.2m"
         },
         std::array<QString, 3>
         {
@@ -454,9 +454,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:00:00",
+            "2d",
             "00:00:00",
-            "-48:00:00"
+            "-2d"
         },
         std::array<QString, 3>
         {
@@ -479,9 +479,9 @@ AWL_TEST(JsonDuration)
         },
         std::array<QString, 3>
         {
-            "48:02:03",
+            "2d.2m.3s",
             "00:00:00",
-            "-48:02:03"
+            "-2d.2m.3s"
         },
         std::array<QString, 3>
         {
@@ -489,6 +489,21 @@ AWL_TEST(JsonDuration)
             "00:00:00.0000000",
             "-48:02:03.0000000"
         });
+}
+
+AWL_TEST(JsonDurationWeek)
+{
+    using namespace std::chrono;
+
+    hours week_1{};
+    awl::FromJson(QJsonValue("7d"), week_1);
+    AWL_ASSERT(week_1 == hours(168));
+    AWL_ASSERT(awl::ToJson(week_1).toString() == "7d");
+
+    hours week_4{};
+    awl::FromJson(QJsonValue("28d"), week_4);
+    AWL_ASSERT(week_4 == hours(672));
+    AWL_ASSERT(awl::ToJson(week_4).toString() == "28d");
 }
 
 AWL_TEST(JsonDurationInvalid)
