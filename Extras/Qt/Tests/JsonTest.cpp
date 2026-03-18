@@ -329,8 +329,8 @@ AWL_TEST(JsonDuration)
                 context.logger.debug(std::format(_T("{} to_json case {}: actual={}, expected={}"),
                     label_text,
                     i,
-                    awl::FromQString(actual_text),
-                    awl::FromQString(expected_text)));
+                    actual_text,
+                    expected_text));
 
                 AWL_ASSERT(jv.type() == QJsonValue::String);
                 AWL_ASSERT(actual_text == expected_text);
@@ -349,9 +349,9 @@ AWL_TEST(JsonDuration)
                 context.logger.debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
                     label_text,
                     i,
-                    awl::FromQString(from_json_values[i]),
-                    awl::FromQString(actual_text),
-                    awl::FromQString(expected_text)));
+                    from_json_values[i],
+                    actual_text,
+                    expected_text));
 
                 AWL_ASSERT(actual == values[i]);
             }
