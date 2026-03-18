@@ -182,7 +182,7 @@ adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter .*Compo
 
 ## Running the tests on Android device with QT
 
-Built AWL for Android with `-DAWL_ANDROID_OPENSSL_DIR:STRING=C:/dev/libs/android_openssl -DAWL_FIND_QT:BOOL=ON -DAWL_FIND_OPENSSL:BOOL=ON` CMake option, upload the executable file and libs to the device:
+Built AWL for Android with `-DAWL_ANDROID_OPENSSL_DIR:STRING=C:/dev/libs/android_openssl -DAWL_FIND_QT:BOOL=ON -DAWL_FIND_OPENSSL:BOOL=ON` CMake options, upload the executable file and libs to the device:
 
 ```bash
 adb push AwlTest /data/local/tmp
