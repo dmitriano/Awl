@@ -322,7 +322,7 @@ namespace awl
                     has_component = true;
                     last_component = component;
                 }
-                else if (!saw_seconds && !saw_fraction && dot_pos != std::string_view::npos && token == "0")
+                else if (!saw_seconds && !saw_fraction && token == "0")
                 {
                     if (has_component && Component::seconds <= last_component)
                     {

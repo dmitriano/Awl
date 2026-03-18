@@ -542,6 +542,7 @@ AWL_TEST(JsonDurationNew)
     test_new_format.operator()<seconds>("zero with d h m s as seconds", "0d.0h.0m.0s", seconds::zero());
     test_new_format.operator()<milliseconds>("zero with d h m s as milliseconds", "0d.0h.0m.0s", milliseconds::zero());
     test_new_format.operator()<system_clock::duration>("zero with d h m s as system duration", "0d.0h.0m.0s", system_clock::duration::zero());
+    test_new_format.operator()<seconds>("plain zero", "0", seconds::zero());
     test_new_format.operator()<milliseconds>("zero hour with fractional", "0h.125", milliseconds(125));
     test_new_format.operator()<milliseconds>("zero minute with fractional", "0m.125", milliseconds(125));
     test_new_format.operator()<milliseconds>("zero components with fractional milliseconds", "0d.0h.0m.0s.125", milliseconds(125));
