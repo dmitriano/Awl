@@ -315,6 +315,11 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
+    auto format_expected = []<class Duration>(Duration value)
+    {
+        return QString::fromStdString(std::format("{:%T}", std::chrono::hh_mm_ss<Duration>(value)));
+    };
+
     auto test_roundtrip = [&context]<class Duration>(const char* label, const auto& values, const auto& to_json_values, const auto& from_json_values)
     {
         const awl::String label_text = awl::FromACString(label);
@@ -453,6 +458,31 @@ AWL_TEST(JsonDuration)
             "48:00:00",
             "00:00:00",
             "-48:00:00"
+        });
+
+    using system_duration = system_clock::duration;
+    const system_duration system_positive = duration_cast<system_duration>(hours(48) + minutes(2) + seconds(3));
+    const system_duration system_zero = system_duration::zero();
+    const system_duration system_negative = duration_cast<system_duration>(-(hours(48) + minutes(2) + seconds(3)));
+
+    test_roundtrip.operator()<system_duration>("system_clock::duration",
+        std::array<system_duration, 3>
+        {
+            system_positive,
+            system_zero,
+            system_negative
+        },
+        std::array<QString, 3>
+        {
+            format_expected(system_positive),
+            format_expected(system_zero),
+            format_expected(system_negative)
+        },
+        std::array<QString, 3>
+        {
+            format_expected(system_positive),
+            format_expected(system_zero),
+            format_expected(system_negative)
         });
 }
 
