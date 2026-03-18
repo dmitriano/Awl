@@ -313,37 +313,77 @@ AWL_TEST(JsonDuration)
 {
     using namespace std::chrono;
 
-    const std::array values
+    const std::array<milliseconds, 4> millisecond_values
     {
         hours(48) + minutes(2) + seconds(3) + milliseconds(4),
         milliseconds::zero(),
-        -(hours(48) + minutes(2) + seconds(3) + milliseconds(4))
+        -(hours(48) + minutes(2) + seconds(3) + milliseconds(4)),
+        hours(48) + minutes(2) + seconds(3)
     };
 
-    const std::array<QString, 3> expected_values
+    const std::array<QString, 4> millisecond_to_json_values
     {
         "48:02:03.004",
         "00:00:00.000",
-        "-48:02:03.004"
+        "-48:02:03.004",
+        "48:02:03.000"
     };
 
-    for (size_t i = 0; i < values.size(); ++i)
+    const std::array<QString, 4> millisecond_from_json_values
+    {
+        "48:02:03.004",
+        "00:00:00.000",
+        "-48:02:03.004",
+        "48:02:03"
+    };
+
+    for (size_t i = 0; i < millisecond_values.size(); ++i)
     {
         {
-            QJsonValue jv = awl::ToJson(values[i]);
+            QJsonValue jv = awl::ToJson(millisecond_values[i]);
 
             AWL_ASSERT(jv.type() == QJsonValue::String);
-            AWL_ASSERT(jv.toString() == expected_values[i]);
+            AWL_ASSERT(jv.toString() == millisecond_to_json_values[i]);
         }
 
         {
-            QJsonValue jv = expected_values[i];
+            QJsonValue jv = millisecond_from_json_values[i];
 
             milliseconds actual{};
 
             awl::FromJson(jv, actual);
 
-            AWL_ASSERT(actual == values[i]);
+            AWL_ASSERT(actual == millisecond_values[i]);
+        }
+    }
+
+    const std::array<microseconds, 1> microsecond_values
+    {
+        hours(48) + minutes(2) + seconds(3) + microseconds(456789)
+    };
+
+    const std::array<QString, 1> microsecond_expected_values
+    {
+        "48:02:03.456789"
+    };
+
+    for (size_t i = 0; i < microsecond_values.size(); ++i)
+    {
+        {
+            QJsonValue jv = awl::ToJson(microsecond_values[i]);
+
+            AWL_ASSERT(jv.type() == QJsonValue::String);
+            AWL_ASSERT(jv.toString() == microsecond_expected_values[i]);
+        }
+
+        {
+            QJsonValue jv = microsecond_expected_values[i];
+
+            microseconds actual{};
+
+            awl::FromJson(jv, actual);
+
+            AWL_ASSERT(actual == microsecond_values[i]);
         }
     }
 }
