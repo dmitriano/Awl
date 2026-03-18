@@ -108,7 +108,22 @@ namespace awl
         void ToJson(const value_type& v, QJsonValue& jv)
         {
             const formatted_type formatted(v);
-            jv = QString::fromStdString(std::format("{:%T}", formatted));
+            QString text = QString::fromStdString(std::format("{:%T}", formatted));
+
+            if (text.contains('.'))
+            {
+                while (text.endsWith('0'))
+                {
+                    text.chop(1);
+                }
+
+                if (text.endsWith('.'))
+                {
+                    text.chop(1);
+                }
+            }
+
+            jv = text;
         }
     };
 }
