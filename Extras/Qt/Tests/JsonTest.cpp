@@ -506,6 +506,39 @@ AWL_TEST(JsonDurationWeek)
     AWL_ASSERT(awl::ToJson(week_4).toString() == "28d");
 }
 
+AWL_TEST(JsonDurationNew)
+{
+    using namespace std::chrono;
+
+    auto test_new_format = [&context]<class Duration>(const char* label, const QString& input, Duration expected)
+    {
+        const awl::String label_text = awl::FromACString(label);
+
+        Duration actual{};
+        awl::FromJson(QJsonValue(input), actual);
+
+        const QString actual_text = awl::ToJson(actual).toString();
+        const QString expected_text = awl::ToJson(expected).toString();
+
+        context.logger.debug(std::format(_T("{} new format: input={}, actual={}, expected={}"),
+            label_text,
+            input,
+            actual_text,
+            expected_text));
+
+        AWL_ASSERT(actual == expected);
+    };
+
+    test_new_format.operator()<hours>("hours day only", "7d", hours(24 * 7));
+    test_new_format.operator()<hours>("hours day and hour", "7d.5h", hours(24 * 7 + 5));
+    test_new_format.operator()<minutes>("minutes with day hour minute", "2d.3h.4m", days(2) + hours(3) + minutes(4));
+    test_new_format.operator()<seconds>("seconds with all components", "2d.3h.4m.5s", days(2) + hours(3) + minutes(4) + seconds(5));
+    test_new_format.operator()<milliseconds>("milliseconds fractional", "2d.3h.4m.5s.006", days(2) + hours(3) + minutes(4) + seconds(5) + milliseconds(6));
+    test_new_format.operator()<microseconds>("microseconds fractional", "2d.3h.4m.5s.006007", days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007));
+    test_new_format.operator()<microseconds>("negative microseconds fractional", "-2d.3h.4m.5s.006007", -(days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007)));
+    test_new_format.operator()<seconds>("seconds omit middle components", "2d.5s", days(2) + seconds(5));
+}
+
 AWL_TEST(JsonDurationInvalid)
 {
     auto test_invalid_input = [&context]<class Duration>(const char* label, const QString& input)
