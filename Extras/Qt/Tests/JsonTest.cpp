@@ -493,6 +493,8 @@ AWL_TEST(JsonDuration)
 
 AWL_TEST(JsonDurationWeek)
 {
+    AWL_UNUSED_CONTEXT;
+
     using namespace std::chrono;
 
     hours week_1{};
