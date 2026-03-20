@@ -156,6 +156,17 @@ namespace awl::mp
 
     static_assert(make_type_name<std::chrono::system_clock::time_point>() == std::string("int64_t"));
 
+    template <class Rep, class Period>
+    struct type_descriptor<std::chrono::duration<Rep, Period>>
+    {
+        using inner_tuple = std::tuple<int64_t>;
+
+        static constexpr std::string name()
+        {
+            return make_type_name<int64_t>();
+        }
+    };
+
     template <class T>
     struct type_descriptor<std::optional<T>>
     {

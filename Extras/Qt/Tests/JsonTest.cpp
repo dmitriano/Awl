@@ -17,6 +17,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <format>
+
 AWL_TEST(JsonArray)
 {
     AWL_UNUSED_CONTEXT;
@@ -307,6 +309,272 @@ AWL_TEST(JsonMap)
     TestRunner<std::map<std::string, int>>(context);
     TestRunner<std::unordered_map<QString, int>>(context);
     TestRunner<std::unordered_map<std::string, int>>(context);
+}
+
+AWL_TEST(JsonDuration)
+{
+    using namespace std::chrono;
+
+    auto test_roundtrip = [&context]<class Duration, size_t N>(
+        const char* label,
+        const std::array<Duration, N>& values,
+        const std::array<QString, N>& to_json_values,
+        const std::array<QString, N>& from_json_values)
+    {
+        const awl::String label_text = awl::FromACString(label);
+
+        for (size_t i = 0; i < values.size(); ++i)
+        {
+            {
+                QJsonValue jv = awl::ToJson(values[i]);
+                const QString actual_text = jv.toString();
+                const QString expected_text = to_json_values[i];
+
+                context.logger.debug(std::format(_T("{} to_json case {}: actual={}, expected={}"),
+                    label_text,
+                    i,
+                    actual_text,
+                    expected_text));
+
+                AWL_ASSERT(jv.type() == QJsonValue::String);
+                AWL_ASSERT(actual_text == expected_text);
+            }
+
+            {
+                QJsonValue jv = from_json_values[i];
+
+                Duration actual{};
+
+                awl::FromJson(jv, actual);
+
+                const QString actual_text = awl::ToJson(actual).toString();
+                const QString expected_text = awl::ToJson(values[i]).toString();
+
+                context.logger.debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
+                    label_text,
+                    i,
+                    from_json_values[i],
+                    actual_text,
+                    expected_text));
+
+                AWL_ASSERT(actual == values[i]);
+            }
+        }
+    };
+
+    test_roundtrip.operator()<milliseconds>("milliseconds",
+        std::array<milliseconds, 4>
+        {
+            hours(48) + minutes(2) + seconds(3) + milliseconds(4),
+            milliseconds::zero(),
+            -(hours(48) + minutes(2) + seconds(3) + milliseconds(4)),
+            hours(48) + minutes(2) + seconds(3)
+        },
+        std::array<QString, 4>
+        {
+            "2d.2m.3s.004",
+            "0",
+            "-2d.2m.3s.004",
+            "2d.2m.3s"
+        },
+        std::array<QString, 4>
+        {
+            "2d.2m.3s.004000",
+            "0.0000",
+            "-2d.2m.3s.004000",
+            "2d.2m.3s.000"
+        });
+
+    test_roundtrip.operator()<microseconds>("microseconds",
+        std::array<microseconds, 3>
+        {
+            hours(48) + minutes(2) + seconds(3) + microseconds(456789),
+            hours(48) + minutes(2) + seconds(3) + microseconds(456000),
+            -(hours(48) + minutes(2) + seconds(3) + microseconds(456000))
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s.456789",
+            "2d.2m.3s.456",
+            "-2d.2m.3s.456"
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s.456789",
+            "2d.2m.3s.4560000",
+            "-2d.2m.3s.4560000"
+        });
+
+    test_roundtrip.operator()<seconds>("seconds",
+        std::array<seconds, 3>
+        {
+            hours(48) + minutes(2) + seconds(3),
+            seconds::zero(),
+            -(hours(48) + minutes(2) + seconds(3))
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s",
+            "0",
+            "-2d.2m.3s"
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s.000",
+            "0.0000",
+            "-2d.2m.3s.000"
+        });
+
+    test_roundtrip.operator()<minutes>("minutes",
+        std::array<minutes, 3>
+        {
+            hours(48) + minutes(2),
+            minutes::zero(),
+            -(hours(48) + minutes(2))
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m",
+            "0",
+            "-2d.2m"
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.0s.000",
+            "0.0000",
+            "-2d.2m.0s.000"
+        });
+
+    test_roundtrip.operator()<hours>("hours",
+        std::array<hours, 3>
+        {
+            hours(48),
+            hours::zero(),
+            -hours(48)
+        },
+        std::array<QString, 3>
+        {
+            "2d",
+            "0",
+            "-2d"
+        },
+        std::array<QString, 3>
+        {
+            "2d.0s.000",
+            "0.0000",
+            "-2d.0s.000"
+        });
+
+    using system_duration = system_clock::duration;
+    const system_duration system_positive = duration_cast<system_duration>(hours(48) + minutes(2) + seconds(3));
+    const system_duration system_zero = system_duration::zero();
+    const system_duration system_negative = duration_cast<system_duration>(-(hours(48) + minutes(2) + seconds(3)));
+
+    test_roundtrip.operator()<system_duration>("system_clock::duration",
+        std::array<system_duration, 3>
+        {
+            system_positive,
+            system_zero,
+            system_negative
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s",
+            "0",
+            "-2d.2m.3s"
+        },
+        std::array<QString, 3>
+        {
+            "2d.2m.3s.0000000",
+            "0.0000000",
+            "-2d.2m.3s.0000000"
+        });
+}
+
+AWL_TEST(JsonDurationWeek)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using namespace std::chrono;
+
+    hours week_1{};
+    awl::FromJson(QJsonValue("7d"), week_1);
+    AWL_ASSERT(week_1 == hours(168));
+    AWL_ASSERT(awl::ToJson(week_1).toString() == "7d");
+
+    hours week_4{};
+    awl::FromJson(QJsonValue("28d"), week_4);
+    AWL_ASSERT(week_4 == hours(672));
+    AWL_ASSERT(awl::ToJson(week_4).toString() == "28d");
+}
+
+AWL_TEST(JsonDurationNew)
+{
+    using namespace std::chrono;
+
+    auto test_new_format = [&context]<class Duration>(const char* label, const QString& input, Duration expected)
+    {
+        const awl::String label_text = awl::FromACString(label);
+
+        Duration actual{};
+        awl::FromJson(QJsonValue(input), actual);
+
+        const QString actual_text = awl::ToJson(actual).toString();
+        const QString expected_text = awl::ToJson(expected).toString();
+
+        context.logger.debug(std::format(_T("{} new format: input={}, actual={}, expected={}"),
+            label_text,
+            input,
+            actual_text,
+            expected_text));
+
+        AWL_ASSERT(actual == expected);
+    };
+
+    test_new_format.operator()<hours>("hours day only", "7d", hours(24 * 7));
+    test_new_format.operator()<hours>("hours day and hour", "7d.5h", hours(24 * 7 + 5));
+    test_new_format.operator()<minutes>("minutes with day hour minute", "2d.3h.4m", days(2) + hours(3) + minutes(4));
+    test_new_format.operator()<seconds>("seconds with all components", "2d.3h.4m.5s", days(2) + hours(3) + minutes(4) + seconds(5));
+    test_new_format.operator()<milliseconds>("milliseconds fractional", "2d.3h.4m.5s.006", days(2) + hours(3) + minutes(4) + seconds(5) + milliseconds(6));
+    test_new_format.operator()<microseconds>("microseconds fractional", "2d.3h.4m.5s.006007", days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007));
+    test_new_format.operator()<microseconds>("negative microseconds fractional", "-2d.3h.4m.5s.006007", -(days(2) + hours(3) + minutes(4) + seconds(5) + microseconds(6007)));
+    test_new_format.operator()<seconds>("seconds omit middle components", "2d.5s", days(2) + seconds(5));
+    test_new_format.operator()<hours>("zero with d h m s as hours", "0d.0h.0m.0s", hours::zero());
+    test_new_format.operator()<minutes>("zero with d h m s as minutes", "0d.0h.0m.0s", minutes::zero());
+    test_new_format.operator()<seconds>("zero with d h m s as seconds", "0d.0h.0m.0s", seconds::zero());
+    test_new_format.operator()<milliseconds>("zero with d h m s as milliseconds", "0d.0h.0m.0s", milliseconds::zero());
+    test_new_format.operator()<system_clock::duration>("zero with d h m s as system duration", "0d.0h.0m.0s", system_clock::duration::zero());
+    test_new_format.operator()<seconds>("plain zero", "0", seconds::zero());
+    test_new_format.operator()<milliseconds>("zero hour with fractional", "0h.125", milliseconds(125));
+    test_new_format.operator()<milliseconds>("zero minute with fractional", "0m.125", milliseconds(125));
+    test_new_format.operator()<milliseconds>("zero components with fractional milliseconds", "0d.0h.0m.0s.125", milliseconds(125));
+    test_new_format.operator()<microseconds>("zero components with fractional microseconds", "0d.0h.0m.0s.000125", microseconds(125));
+    test_new_format.operator()<milliseconds>("standalone fractional", "0.125", milliseconds(125));
+}
+
+AWL_TEST(JsonDurationInvalid)
+{
+    auto test_invalid_input = [&context]<class Duration>(const char* label, const QString& input)
+    {
+        const awl::String label_text = awl::FromACString(label);
+
+        context.logger.debug(std::format(_T("{} invalid input: {}"),
+            label_text,
+            input));
+
+        awl::testing::Assert::Throws<awl::JsonException>([&input]()
+        {
+            Duration actual{};
+            awl::FromJson(QJsonValue(input), actual);
+        });
+    };
+
+    test_invalid_input.operator()<std::chrono::milliseconds>("milliseconds", "-48:02:03.0001");
+    test_invalid_input.operator()<std::chrono::microseconds>("microseconds", "-48:02:03.0000001");
+    test_invalid_input.operator()<std::chrono::seconds>("seconds", "-48:02:03.1");
+    test_invalid_input.operator()<std::chrono::minutes>("minutes", "-48:02:01");
+    test_invalid_input.operator()<std::chrono::hours>("hours", "-48:01:00");
+    test_invalid_input.operator()<std::chrono::system_clock::duration>("system_clock::duration", "-48:02:03.invalid");
 }
 
 #ifdef AWL_DECIMAL_128
