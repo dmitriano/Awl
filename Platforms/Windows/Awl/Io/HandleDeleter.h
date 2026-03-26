@@ -5,14 +5,20 @@
 
 #pragma once
 
-#include "Awl/Io/HandleDeleter.h"
-#include "Awl/Io/BasicUniqueHandle.h"
+#include "Awl/Io/Platform.h"
+
+#include <cassert>
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue>
-    using UniqueHandle = BasicUniqueHandle<NullHandleValue, HandleDeleter>;
+    struct HandleDeleter
+    {
+        void operator()(HANDLE h) const
+        {
+            BOOL bRes = ::CloseHandle(h);
 
-    using UniqueFileHandle = UniqueHandle<INVALID_HANDLE_VALUE>;
-    using UniqueProcessHandle = UniqueHandle<nullptr>;
+            assert(bRes);
+            static_cast<void>(bRes);
+        }
+    };
 }

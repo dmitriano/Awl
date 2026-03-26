@@ -14,22 +14,15 @@ namespace awl::io
     {
         HANDLE operator()(HANDLE h) const
         {
-            auto h_process = ::GetCurrentProcess();
-            HANDLE duplicated = nullptr;
+            int duplicated = ::fcntl(h, F_DUPFD_CLOEXEC, 0);
 
-            BOOL bRes = ::DuplicateHandle(
-                h_process, h, h_process, &duplicated, MAXIMUM_ALLOWED, FALSE, DUPLICATE_SAME_ACCESS);
-
-            assert(bRes);
-            static_cast<void>(bRes);
+            assert(duplicated != NullHandleValue);
+            static_cast<void>(duplicated);
 
             return duplicated;
         }
     };
 
-    template <HANDLE NullHandleValue>
     using SharedHandle = BasicSharedHandle<NullHandleValue, HandleDeleter, SharedHandleDuplicator>;
-
-    using SharedFileHandle = SharedHandle<INVALID_HANDLE_VALUE>;
-    using SharedProcessHandle = SharedHandle<nullptr>;
+    using SharedFileHandle = SharedHandle;
 }
