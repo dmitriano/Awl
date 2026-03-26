@@ -15,7 +15,10 @@ namespace awl::io
 {
     template <class NullGetter, class Deleter>
     requires std::invocable<NullGetter> &&
-        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE>
+        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE> &&
+        std::is_nothrow_default_constructible_v<Deleter> &&
+        std::is_nothrow_copy_assignable_v<Deleter> &&
+        std::invocable<Deleter&, HANDLE>
     class BasicUniqueHandle
     {
     public:
@@ -23,12 +26,12 @@ namespace awl::io
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
 
-        BasicUniqueHandle() noexcept(std::is_nothrow_default_constructible_v<deleter_type>)
+        BasicUniqueHandle() noexcept(noexcept(null()))
             : BasicUniqueHandle(null())
         {
         }
 
-        BasicUniqueHandle(HANDLE h) noexcept(std::is_nothrow_default_constructible_v<deleter_type>)
+        BasicUniqueHandle(HANDLE h) noexcept
             : m_h(h)
             , m_deleter()
         {
@@ -62,9 +65,7 @@ namespace awl::io
 
         BasicUniqueHandle& operator=(const BasicUniqueHandle& other) = delete;
 
-        BasicUniqueHandle& operator=(BasicUniqueHandle&& other) noexcept(
-            std::is_nothrow_copy_assignable_v<deleter_type> &&
-            noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        BasicUniqueHandle& operator=(BasicUniqueHandle&& other) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (this != &other)
             {

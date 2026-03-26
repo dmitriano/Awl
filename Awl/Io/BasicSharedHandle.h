@@ -15,7 +15,14 @@ namespace awl::io
 {
     template <class NullGetter, class Deleter, class Duplicator>
     requires std::invocable<NullGetter> &&
-        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE>
+        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE> &&
+        std::is_nothrow_default_constructible_v<Deleter> &&
+        std::is_nothrow_default_constructible_v<Duplicator> &&
+        std::is_nothrow_copy_assignable_v<Deleter> &&
+        std::is_nothrow_copy_assignable_v<Duplicator> &&
+        std::invocable<Deleter&, HANDLE> &&
+        std::invocable<const Duplicator&, HANDLE> &&
+        std::convertible_to<std::invoke_result_t<const Duplicator&, HANDLE>, HANDLE>
     class BasicSharedHandle
     {
     public:
@@ -24,16 +31,12 @@ namespace awl::io
         using deleter_type = Deleter;
         using duplicator_type = Duplicator;
 
-        BasicSharedHandle()
-            noexcept(std::is_nothrow_default_constructible_v<deleter_type> &&
-                std::is_nothrow_default_constructible_v<duplicator_type>)
+        BasicSharedHandle() noexcept(noexcept(null()))
             : BasicSharedHandle(null())
         {
         }
 
-        BasicSharedHandle(HANDLE h)
-            noexcept(std::is_nothrow_default_constructible_v<deleter_type> &&
-                std::is_nothrow_default_constructible_v<duplicator_type>)
+        BasicSharedHandle(HANDLE h) noexcept
             : m_h(h)
             , m_deleter()
             , m_duplicator()
@@ -73,10 +76,7 @@ namespace awl::io
             close();
         }
 
-        BasicSharedHandle& operator=(BasicSharedHandle&& other) noexcept(
-            std::is_nothrow_copy_assignable_v<deleter_type> &&
-            std::is_nothrow_copy_assignable_v<duplicator_type> &&
-            noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        BasicSharedHandle& operator=(BasicSharedHandle&& other) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (this != &other)
             {
@@ -91,8 +91,6 @@ namespace awl::io
         }
 
         BasicSharedHandle& operator=(const BasicSharedHandle& other) noexcept(
-            std::is_nothrow_copy_assignable_v<deleter_type> &&
-            std::is_nothrow_copy_assignable_v<duplicator_type> &&
             noexcept(std::declval<const duplicator_type&>()(std::declval<HANDLE>())) &&
             noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
