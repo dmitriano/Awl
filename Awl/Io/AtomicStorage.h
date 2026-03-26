@@ -41,6 +41,8 @@ namespace awl::io
 
         AtomicStorage& operator = (AtomicStorage&& other) noexcept
         {
+            Wait();
+
             m_s = std::move(other.m_s);
             m_backup = std::move(other.m_backup);
             return *this;
