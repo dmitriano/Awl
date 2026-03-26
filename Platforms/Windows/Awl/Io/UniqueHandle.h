@@ -5,81 +5,25 @@
 
 #pragma once
 
-#include "Awl/Io/Platform.h"
+#include "Awl/Io/BasicUniqueHandle.h"
 
 #include <cassert>
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue>
-    class UniqueHandle
+    struct UniqueHandleDeleter
     {
-    public:
-        
-        UniqueHandle() : UniqueHandle(NullHandleValue) {}
-
-        UniqueHandle(HANDLE h) : m_h(h) {}
-
-        UniqueHandle(const UniqueHandle& other) = delete;
-
-        UniqueHandle(UniqueHandle&& other) noexcept
-            : UniqueHandle(other.m_h)
+        void operator()(HANDLE h) const
         {
-            other.m_h = NullHandleValue;
+            BOOL bRes = ::CloseHandle(h);
+
+            assert(bRes);
+            static_cast<void>(bRes);
         }
-
-        ~UniqueHandle()
-        {
-            Close();
-        }
-
-        UniqueHandle& operator=(const UniqueHandle& other) = delete;
-
-        UniqueHandle& operator=(UniqueHandle&& other) noexcept
-        {
-            Close();
-
-            m_h = other.m_h;
-
-            other.m_h = NullHandleValue;
-
-            return *this;
-        }
-
-        bool operator == (const UniqueHandle& other) const = default;
-
-        operator HANDLE() const
-        {
-            return m_h;
-        }
-
-        operator bool() const
-        {
-            return m_h != NullHandleValue;
-        }
-
-        void Close()
-        {
-            if (m_h != NullHandleValue)
-            {
-                BOOL bRes = ::CloseHandle(m_h);
-
-                assert(bRes);
-                static_cast<void>(bRes);
-
-                m_h = NullHandleValue;
-            }
-        }
-
-        static bool IsNull(HANDLE h)
-        {
-            return h == NullHandleValue;
-        }
-
-    private:
-        
-        HANDLE m_h;
     };
+
+    template <HANDLE NullHandleValue>
+    using UniqueHandle = BasicUniqueHandle<NullHandleValue, UniqueHandleDeleter>;
 
     using UniqueFileHandle = UniqueHandle<INVALID_HANDLE_VALUE>;
     using UniqueProcessHandle = UniqueHandle<nullptr>;
