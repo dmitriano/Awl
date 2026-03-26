@@ -11,7 +11,7 @@ namespace awl::io
 {
     struct FileNullGetter
     {
-        HANDLE operator()() const noexcept
+        static HANDLE null() noexcept
         {
             return INVALID_HANDLE_VALUE;
         }
@@ -19,7 +19,7 @@ namespace awl::io
 
     struct ProcessNullGetter
     {
-        constexpr HANDLE operator()() const noexcept
+        static constexpr HANDLE null() noexcept
         {
             return nullptr;
         }

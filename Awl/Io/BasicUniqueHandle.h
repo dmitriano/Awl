@@ -14,8 +14,10 @@
 namespace awl::io
 {
     template <class NullGetter, class Deleter>
-    requires std::is_nothrow_invocable_v<NullGetter> &&
-        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE> &&
+    requires requires
+    {
+        { NullGetter::null() } noexcept -> std::convertible_to<HANDLE>;
+    } &&
         std::is_nothrow_default_constructible_v<Deleter> &&
         std::is_nothrow_copy_constructible_v<Deleter> &&
         std::is_nothrow_move_constructible_v<Deleter> &&
@@ -143,7 +145,7 @@ namespace awl::io
     private:
         static HANDLE null() noexcept
         {
-            return null_getter_type{}();
+            return null_getter_type::null();
         }
 
         HANDLE m_h;

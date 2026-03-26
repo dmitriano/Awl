@@ -11,7 +11,7 @@ namespace awl::io
 {
     struct NullGetter
     {
-        constexpr HANDLE operator()() const noexcept
+        static constexpr HANDLE null() noexcept
         {
             return NullHandleValue;
         }
