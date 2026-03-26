@@ -6,3 +6,4 @@
 #pragma once
 
 #include "UniqueHandle.h"
+#include "SharedHandle.h"

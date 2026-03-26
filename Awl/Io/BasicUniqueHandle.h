@@ -44,9 +44,9 @@ namespace awl::io
 
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 
-        BasicUniqueHandle(BasicUniqueHandle&& other) noexcept(std::is_nothrow_move_constructible_v<deleter_type>)
+        BasicUniqueHandle(BasicUniqueHandle&& other) noexcept(std::is_nothrow_copy_constructible_v<deleter_type>)
             : m_h(NullHandleValue)
-            , m_deleter(std::move(other.m_deleter))
+            , m_deleter(other.m_deleter)
         {
             m_h = other.release();
         }
@@ -59,14 +59,14 @@ namespace awl::io
         BasicUniqueHandle& operator=(const BasicUniqueHandle& other) = delete;
 
         BasicUniqueHandle& operator=(BasicUniqueHandle&& other) noexcept(
-            std::is_nothrow_move_assignable_v<deleter_type> &&
+            std::is_nothrow_copy_assignable_v<deleter_type> &&
             noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (this != &other)
             {
                 Close();
 
-                m_deleter = std::move(other.m_deleter);
+                m_deleter = other.m_deleter;
                 m_h = other.release();
             }
 

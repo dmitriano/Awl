@@ -5,101 +5,42 @@
 
 #pragma once
 
-#include "Awl/Io/Platform.h"
+#include "Awl/Io/BasicSharedHandle.h"
 
 #include <cassert>
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue>
-    class SharedHandle
+    struct SharedHandleDeleter
     {
-    public:
-        SharedHandle() : SharedHandle(NullHandleValue) {}
-
-        SharedHandle(HANDLE h) : m_h(h) {}
-
-        SharedHandle(const SharedHandle& other)
+        void operator()(HANDLE h) const
         {
-            Duplicate(other.m_h);
-        }
-
-        SharedHandle(SharedHandle&& other) noexcept
-            : SharedHandle(other.m_h)
-        {
-            other.m_h = NullHandleValue;
-        }
-
-        ~SharedHandle()
-        {
-            Close();
-        }
-
-        SharedHandle& operator=(const SharedHandle& other)
-        {
-            Close();
-
-            Duplicate(other.m_h);
-
-            return *this;
-        }
-
-        SharedHandle& operator=(SharedHandle&& other) noexcept
-        {
-            Close();
-
-            m_h = other.m_h;
-
-            other.m_h = NullHandleValue;
-
-            return *this;
-        }
-
-        bool operator == (const SharedHandle& other) const = default;
-
-        operator HANDLE() const
-        {
-            return m_h;
-        }
-
-        operator bool() const
-        {
-            return m_h != NullHandleValue;
-        }
-
-        void Close()
-        {
-            if (m_h != NullHandleValue)
-            {
-                BOOL bRes = ::CloseHandle(m_h);
-
-                assert(bRes);
-                static_cast<void>(bRes);
-
-                m_h = NullHandleValue;
-            }
-        }
-
-        static bool IsNull(HANDLE h)
-        {
-            return h == NullHandleValue;
-        }
-
-    private:
-        
-        HANDLE m_h;
-
-        void Duplicate(HANDLE h)
-        {
-            auto h_process = ::GetCurrentProcess();
-
-            BOOL bRes = ::DuplicateHandle(
-                h_process, h, h_process, &m_h, MAXIMUM_ALLOWED, FALSE, DUPLICATE_SAME_ACCESS);
+            BOOL bRes = ::CloseHandle(h);
 
             assert(bRes);
             static_cast<void>(bRes);
         }
     };
+
+    struct SharedHandleDuplicator
+    {
+        HANDLE operator()(HANDLE h) const
+        {
+            auto h_process = ::GetCurrentProcess();
+            HANDLE duplicated = nullptr;
+
+            BOOL bRes = ::DuplicateHandle(
+                h_process, h, h_process, &duplicated, MAXIMUM_ALLOWED, FALSE, DUPLICATE_SAME_ACCESS);
+
+            assert(bRes);
+            static_cast<void>(bRes);
+
+            return duplicated;
+        }
+    };
+
+    template <HANDLE NullHandleValue>
+    using SharedHandle = BasicSharedHandle<NullHandleValue, SharedHandleDeleter, SharedHandleDuplicator>;
 
     using SharedFileHandle = SharedHandle<INVALID_HANDLE_VALUE>;
     using SharedProcessHandle = SharedHandle<nullptr>;
