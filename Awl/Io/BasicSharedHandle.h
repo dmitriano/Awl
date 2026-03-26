@@ -67,7 +67,7 @@ namespace awl::io
 
         ~BasicSharedHandle()
         {
-            Close();
+            close();
         }
 
         BasicSharedHandle& operator=(BasicSharedHandle&& other) noexcept(
@@ -77,7 +77,7 @@ namespace awl::io
         {
             if (this != &other)
             {
-                Close();
+                close();
 
                 m_h = other.release();
                 m_deleter = other.m_deleter;
@@ -97,7 +97,7 @@ namespace awl::io
             {
                 HANDLE h = other.Duplicate(other.m_h);
 
-                Close();
+                close();
 
                 m_h = h;
                 m_deleter = other.m_deleter;
@@ -163,12 +163,12 @@ namespace awl::io
                 return;
             }
 
-            Close();
+            close();
 
             m_h = h;
         }
 
-        void Close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (m_h != Null())
             {

@@ -54,7 +54,7 @@ namespace awl::io
 
         ~BasicUniqueHandle()
         {
-            Close();
+            close();
         }
 
         BasicUniqueHandle& operator=(const BasicUniqueHandle& other) = delete;
@@ -65,7 +65,7 @@ namespace awl::io
         {
             if (this != &other)
             {
-                Close();
+                close();
 
                 m_deleter = other.m_deleter;
                 m_h = other.release();
@@ -120,12 +120,12 @@ namespace awl::io
                 return;
             }
 
-            Close();
+            close();
 
             m_h = h;
         }
 
-        void Close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (m_h != Null())
             {
