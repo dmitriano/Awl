@@ -9,7 +9,7 @@
 
 namespace awl::io
 {
-    struct FileNullChecker
+    struct NullChecker
     {
         static constexpr HANDLE Null() noexcept
         {
@@ -17,5 +17,6 @@ namespace awl::io
         }
     };
 
+    using FileNullChecker = NullChecker;
     using ProcessNullChecker = FileNullChecker;
 }
