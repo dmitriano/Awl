@@ -25,7 +25,7 @@ namespace awl::io
         }
 
         SharedHandle(SharedHandle&& other) noexcept
-            : m_h(other.m_h)
+            : SharedHandle(other.m_h)
         {
             other.m_h = NullHandleValue;
         }
