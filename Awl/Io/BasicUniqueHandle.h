@@ -28,7 +28,7 @@ namespace awl::io
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
 
-        BasicUniqueHandle() noexcept(noexcept(null()))
+        BasicUniqueHandle() noexcept
             : BasicUniqueHandle(null())
         {
         }
@@ -141,7 +141,7 @@ namespace awl::io
         }
 
     private:
-        static HANDLE null() noexcept(noexcept(null_getter_type{}()))
+        static HANDLE null() noexcept
         {
             return null_getter_type{}();
         }
