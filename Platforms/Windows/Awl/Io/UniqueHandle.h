@@ -16,15 +16,9 @@ namespace awl::io
     {
     public:
         
-        UniqueHandle()
-            : m_h(NullHandleValue)
-        {
-        }
+        UniqueHandle() : UniqueHandle(NullHandleValue) {}
 
-        UniqueHandle(HANDLE h)
-            : m_h(h)
-        {
-        }
+        UniqueHandle(HANDLE h) : m_h(h) {}
 
         UniqueHandle(const UniqueHandle& other) = delete;
 
@@ -52,18 +46,7 @@ namespace awl::io
             return *this;
         }
 
-        // defaulting comparison operators requires at least '/std:c++20'
-        // bool operator == (const UniqueHandle& other) const = default;
-
-        bool operator == (const UniqueHandle& other) const
-        {
-            return m_h == other.m_h;
-        }
-
-        bool operator != (const UniqueHandle& other) const
-        {
-            return !operator == (other);
-        }
+        bool operator == (const UniqueHandle& other) const = default;
 
         operator HANDLE() const
         {
@@ -99,4 +82,5 @@ namespace awl::io
     };
 
     using UniqueFileHandle = UniqueHandle<INVALID_HANDLE_VALUE>;
+    using UniqueProcessHandle = UniqueHandle<nullptr>;
 }

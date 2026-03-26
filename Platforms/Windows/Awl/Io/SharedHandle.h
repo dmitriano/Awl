@@ -15,15 +15,9 @@ namespace awl::io
     class SharedHandle
     {
     public:
-        SharedHandle()
-            : m_h(NullHandleValue)
-        {
-        }
+        SharedHandle() : SharedHandle(NullHandleValue) {}
 
-        SharedHandle(HANDLE h)
-            : m_h(h)
-        {
-        }
+        SharedHandle(HANDLE h) : m_h(h) {}
 
         SharedHandle(const SharedHandle& other)
         {
@@ -60,6 +54,8 @@ namespace awl::io
 
             return *this;
         }
+
+        bool operator == (const SharedHandle& other) const = default;
 
         operator HANDLE() const
         {
@@ -106,4 +102,5 @@ namespace awl::io
     };
 
     using SharedFileHandle = SharedHandle<INVALID_HANDLE_VALUE>;
+    using SharedProcessHandle = SharedHandle<nullptr>;
 }
