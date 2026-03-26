@@ -14,13 +14,15 @@
 namespace awl::io
 {
     template <class NullGetter, class Deleter, class Duplicator>
-    requires std::invocable<NullGetter> &&
+    requires std::is_nothrow_invocable_v<NullGetter> &&
         std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE> &&
         std::is_nothrow_default_constructible_v<Deleter> &&
+        std::is_nothrow_copy_constructible_v<Deleter> &&
         std::is_nothrow_default_constructible_v<Duplicator> &&
+        std::is_nothrow_copy_constructible_v<Duplicator> &&
         std::is_nothrow_copy_assignable_v<Deleter> &&
         std::is_nothrow_copy_assignable_v<Duplicator> &&
-        std::invocable<Deleter&, HANDLE> &&
+        std::is_nothrow_invocable_v<Deleter&, HANDLE> &&
         std::invocable<const Duplicator&, HANDLE> &&
         std::convertible_to<std::invoke_result_t<const Duplicator&, HANDLE>, HANDLE>
     class BasicSharedHandle
@@ -44,17 +46,14 @@ namespace awl::io
         }
 
         BasicSharedHandle(HANDLE h, const deleter_type& deleter, const duplicator_type& duplicator)
-            noexcept(std::is_nothrow_copy_constructible_v<deleter_type> &&
-                std::is_nothrow_copy_constructible_v<duplicator_type>)
+            noexcept
             : m_h(h)
             , m_deleter(deleter)
             , m_duplicator(duplicator)
         {
         }
 
-        BasicSharedHandle(BasicSharedHandle&& other) noexcept(
-            std::is_nothrow_copy_constructible_v<deleter_type> &&
-            std::is_nothrow_copy_constructible_v<duplicator_type>)
+        BasicSharedHandle(BasicSharedHandle&& other) noexcept
             : m_h(other.release())
             , m_deleter(other.m_deleter)
             , m_duplicator(other.m_duplicator)
@@ -62,9 +61,7 @@ namespace awl::io
         }
 
         BasicSharedHandle(const BasicSharedHandle& other)
-            noexcept(std::is_nothrow_copy_constructible_v<deleter_type> &&
-                std::is_nothrow_copy_constructible_v<duplicator_type> &&
-                noexcept(std::declval<const duplicator_type&>()(std::declval<HANDLE>())))
+            noexcept(DuplicateNoexcept)
             : m_h(other.Duplicate(other.m_h))
             , m_deleter(other.m_deleter)
             , m_duplicator(other.m_duplicator)
@@ -76,7 +73,7 @@ namespace awl::io
             close();
         }
 
-        BasicSharedHandle& operator=(BasicSharedHandle&& other) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        BasicSharedHandle& operator=(BasicSharedHandle&& other) noexcept
         {
             if (this != &other)
             {
@@ -90,9 +87,7 @@ namespace awl::io
             return *this;
         }
 
-        BasicSharedHandle& operator=(const BasicSharedHandle& other) noexcept(
-            noexcept(std::declval<const duplicator_type&>()(std::declval<HANDLE>())) &&
-            noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        BasicSharedHandle& operator=(const BasicSharedHandle& other) noexcept(DuplicateNoexcept)
         {
             if (this != &other)
             {
@@ -157,7 +152,7 @@ namespace awl::io
             return h;
         }
 
-        void reset(HANDLE h = null()) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void reset(HANDLE h = null()) noexcept
         {
             if (m_h == h)
             {
@@ -169,7 +164,7 @@ namespace awl::io
             m_h = h;
         }
 
-        void close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void close() noexcept
         {
             if (m_h != null())
             {
@@ -179,6 +174,8 @@ namespace awl::io
         }
 
     private:
+        static constexpr bool DuplicateNoexcept = std::is_nothrow_invocable_v<const duplicator_type&, HANDLE>;
+
         static HANDLE null() noexcept(noexcept(null_getter_type{}()))
         {
             return null_getter_type{}();
@@ -188,7 +185,7 @@ namespace awl::io
         deleter_type m_deleter;
         duplicator_type m_duplicator;
 
-        HANDLE Duplicate(HANDLE h) const noexcept(noexcept(std::declval<const duplicator_type&>()(std::declval<HANDLE>())))
+        HANDLE Duplicate(HANDLE h) const noexcept(DuplicateNoexcept)
         {
             if (h == null())
             {

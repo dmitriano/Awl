@@ -14,11 +14,13 @@
 namespace awl::io
 {
     template <class NullGetter, class Deleter>
-    requires std::invocable<NullGetter> &&
+    requires std::is_nothrow_invocable_v<NullGetter> &&
         std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE> &&
         std::is_nothrow_default_constructible_v<Deleter> &&
+        std::is_nothrow_copy_constructible_v<Deleter> &&
+        std::is_nothrow_move_constructible_v<Deleter> &&
         std::is_nothrow_copy_assignable_v<Deleter> &&
-        std::invocable<Deleter&, HANDLE>
+        std::is_nothrow_invocable_v<Deleter&, HANDLE>
     class BasicUniqueHandle
     {
     public:
@@ -37,13 +39,13 @@ namespace awl::io
         {
         }
 
-        BasicUniqueHandle(HANDLE h, const deleter_type& deleter) noexcept(std::is_nothrow_copy_constructible_v<deleter_type>)
+        BasicUniqueHandle(HANDLE h, const deleter_type& deleter) noexcept
             : m_h(h)
             , m_deleter(deleter)
         {
         }
 
-        BasicUniqueHandle(HANDLE h, deleter_type&& deleter) noexcept(std::is_nothrow_move_constructible_v<deleter_type>)
+        BasicUniqueHandle(HANDLE h, deleter_type&& deleter) noexcept
             : m_h(h)
             , m_deleter(std::move(deleter))
         {
@@ -51,7 +53,7 @@ namespace awl::io
 
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 
-        BasicUniqueHandle(BasicUniqueHandle&& other) noexcept(std::is_nothrow_copy_constructible_v<deleter_type>)
+        BasicUniqueHandle(BasicUniqueHandle&& other) noexcept
             : m_h(null())
             , m_deleter(other.m_deleter)
         {
@@ -65,7 +67,7 @@ namespace awl::io
 
         BasicUniqueHandle& operator=(const BasicUniqueHandle& other) = delete;
 
-        BasicUniqueHandle& operator=(BasicUniqueHandle&& other) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        BasicUniqueHandle& operator=(BasicUniqueHandle&& other) noexcept
         {
             if (this != &other)
             {
@@ -117,7 +119,7 @@ namespace awl::io
             return h;
         }
 
-        void reset(HANDLE h = null()) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void reset(HANDLE h = null()) noexcept
         {
             if (m_h == h)
             {
@@ -129,7 +131,7 @@ namespace awl::io
             m_h = h;
         }
 
-        void close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void close() noexcept
         {
             if (m_h != null())
             {
