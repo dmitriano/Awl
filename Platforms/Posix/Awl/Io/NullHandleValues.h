@@ -15,11 +15,6 @@ namespace awl::io
         {
             return NullHandleValue;
         }
-
-        static constexpr bool IsNull(HANDLE h) noexcept
-        {
-            return h == Null();
-        }
     };
 
     struct ProcessNullChecker
@@ -27,11 +22,6 @@ namespace awl::io
         static constexpr HANDLE Null() noexcept
         {
             return NullHandleValue;
-        }
-
-        static constexpr bool IsNull(HANDLE h) noexcept
-        {
-            return h == Null();
         }
     };
 }

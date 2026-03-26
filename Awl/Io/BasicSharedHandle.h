@@ -144,7 +144,7 @@ namespace awl::io
 
         operator bool() const noexcept
         {
-            return !IsNull(m_h);
+            return m_h != Null();
         }
 
         HANDLE release() noexcept
@@ -170,16 +170,11 @@ namespace awl::io
 
         void Close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
-            if (!IsNull(m_h))
+            if (m_h != Null())
             {
                 HANDLE h = release();
                 m_deleter(h);
             }
-        }
-
-        static bool IsNull(HANDLE h) noexcept
-        {
-            return null_checker_type::IsNull(h);
         }
 
         static HANDLE Null() noexcept
@@ -194,7 +189,7 @@ namespace awl::io
 
         HANDLE Duplicate(HANDLE h) const noexcept(noexcept(std::declval<const duplicator_type&>()(std::declval<HANDLE>())))
         {
-            if (IsNull(h))
+            if (h == Null())
             {
                 return Null();
             }
