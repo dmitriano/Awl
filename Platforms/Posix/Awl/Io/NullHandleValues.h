@@ -17,11 +17,5 @@ namespace awl::io
         }
     };
 
-    struct ProcessNullChecker
-    {
-        static constexpr HANDLE Null() noexcept
-        {
-            return NullHandleValue;
-        }
-    };
+    using ProcessNullChecker = FileNullChecker;
 }
