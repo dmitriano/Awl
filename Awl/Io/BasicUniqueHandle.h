@@ -134,12 +134,12 @@ namespace awl::io
             }
         }
 
+    private:
         static HANDLE Null() noexcept
         {
             return null_checker_type::Null();
         }
 
-    private:
         HANDLE m_h;
         deleter_type m_deleter;
     };
