@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "NonOwningHandle.h"
+#include "Awl/Io/Platform.h"
 
 #include <cassert>
 
@@ -15,20 +15,14 @@ namespace awl::io
     {
     public:
         
-        UniqueHandle()
-            : m_h(NullHandleValue)
-        {
-        }
+        UniqueHandle() : UniqueHandle(NullHandleValue) {}
 
-        UniqueHandle(HANDLE h)
-            : m_h(h)
-        {
-        }
+        UniqueHandle(HANDLE h) : m_h(h) {}
 
         UniqueHandle(const UniqueHandle& other) = delete;
 
         UniqueHandle(UniqueHandle&& other) noexcept
-            : m_h(other.m_h)
+            : UniqueHandle(other.m_h)
         {
             other.m_h = NullHandleValue;
         }
@@ -52,7 +46,6 @@ namespace awl::io
         }
 
         bool operator == (const UniqueHandle& other) const = default;
-        bool operator != (const UniqueHandle& other) const = default;
 
         operator HANDLE() const
         {
