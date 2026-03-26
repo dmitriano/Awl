@@ -3,6 +3,7 @@
 #include "Awl/Io/PersistentObject.h"
 #include "Awl/Decimal.h"
 
+#include <filesystem>
 #include <map>
 
 namespace
@@ -82,6 +83,10 @@ namespace
         container.persistentObject.value() = MakeSettings<String>();
 
         container.persistentObject.save();
+        
+        // TODO: Where should we do this? In the destructor?
+        container.persistentObject.wait();
+        container.persistentObject.close();
     }
 
     template <class Storage, class String>
@@ -94,6 +99,9 @@ namespace
         container.persistentObject.load();
 
         AWL_ASSERT(container.persistentObject.value() == MakeSettings<String>());
+
+        // TODO: Where should we do this? In the destructor?
+        container.persistentObject.close();
     }
 }
 
@@ -106,4 +114,7 @@ AWL_TEST(PersistentObject)
     WriteStorage<awl::io::OptionalStorage, std::string>(context);
 
     ReadStorage<awl::io::OptionalStorage, std::string>(context);
+
+    AWL_ASSERT(std::filesystem::remove(settings_file_name + awl::text(".dat")));
+    AWL_ASSERT(std::filesystem::remove(settings_file_name + awl::text(".bak")));
 }
