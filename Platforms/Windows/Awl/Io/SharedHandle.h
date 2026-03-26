@@ -7,7 +7,7 @@
 
 #include "Awl/Io/Platform.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace awl::io
 {

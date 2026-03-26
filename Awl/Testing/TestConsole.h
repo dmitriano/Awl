@@ -18,7 +18,7 @@
 #include <iostream>
 #include <functional>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 namespace awl::testing
 {

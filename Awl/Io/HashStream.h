@@ -11,7 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
+#include <cassert>
 
 namespace awl 
 {

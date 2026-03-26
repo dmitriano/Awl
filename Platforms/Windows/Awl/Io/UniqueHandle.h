@@ -7,7 +7,7 @@
 
 #include "NonOwningHandle.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace awl::io
 {
