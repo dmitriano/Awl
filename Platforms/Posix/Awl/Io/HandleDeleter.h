@@ -13,7 +13,7 @@ namespace awl::io
 {
     struct HandleDeleter
     {
-        void operator()(HANDLE h) const
+        void operator()(HANDLE h) const noexcept
         {
             int res = ::close(h);
 
