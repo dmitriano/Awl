@@ -30,7 +30,7 @@ namespace awl
         public:
 
             //it is a dependent name, so we need a typename here to specify that it refers to a type
-            //typedef typename awl::quick_list<Message>::iterator iterator;
+            //using iterator = typename awl::quick_list<Message>::iterator;
 
             MessageQueue& operator=(MessageQueue&& other)
             {

@@ -105,5 +105,5 @@ namespace awl::io
         }
     };
 
-    typedef SharedHandle<INVALID_HANDLE_VALUE> SharedFileHandle;
+    using SharedFileHandle = SharedHandle<INVALID_HANDLE_VALUE>;
 }

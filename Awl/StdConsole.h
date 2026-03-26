@@ -11,7 +11,7 @@
 
 namespace awl
 {
-    //We use std::cout/std::cin or std::wcout/std::wcin depending on Char typedef.
+    //We use std::cout/std::cin or std::wcout/std::wcin depending on the Char alias.
     template<typename T> struct select_console;
 
     template<>

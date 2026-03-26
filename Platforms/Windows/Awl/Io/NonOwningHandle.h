@@ -51,5 +51,5 @@ namespace awl::io
         HANDLE m_h;
     };
 
-    typedef NonOwningHandle<INVALID_HANDLE_VALUE> NonOwningFileHandle;
+    using NonOwningFileHandle = NonOwningHandle<INVALID_HANDLE_VALUE>;
 }
