@@ -8,13 +8,13 @@
 #include "Awl/Io/HandleDeleter.h"
 #include "Awl/Io/HandleDuplicator.h"
 #include "Awl/Io/BasicSharedHandle.h"
-#include "Awl/Io/NullHandleValues.h"
+#include "Awl/Io/NullGetter.h"
 
 namespace awl::io
 {
-    template <class NullChecker>
-    using SharedHandle = BasicSharedHandle<NullChecker, HandleDeleter, HandleDuplicator>;
+    template <class NullGetter>
+    using SharedHandle = BasicSharedHandle<NullGetter, HandleDeleter, HandleDuplicator>;
 
-    using SharedFileHandle = SharedHandle<FileNullChecker>;
-    using SharedProcessHandle = SharedHandle<ProcessNullChecker>;
+    using SharedFileHandle = SharedHandle<FileNullGetter>;
+    using SharedProcessHandle = SharedHandle<ProcessNullGetter>;
 }

@@ -9,17 +9,17 @@
 
 namespace awl::io
 {
-    struct FileNullChecker
+    struct FileNullGetter
     {
-        static HANDLE Null() noexcept
+        HANDLE operator()() const noexcept
         {
             return INVALID_HANDLE_VALUE;
         }
     };
 
-    struct ProcessNullChecker
+    struct ProcessNullGetter
     {
-        static constexpr HANDLE Null() noexcept
+        constexpr HANDLE operator()() const noexcept
         {
             return nullptr;
         }

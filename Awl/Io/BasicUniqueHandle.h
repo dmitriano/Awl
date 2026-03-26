@@ -7,21 +7,24 @@
 
 #include "Awl/Io/Platform.h"
 
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
 namespace awl::io
 {
-    template <class NullChecker, class Deleter>
+    template <class NullGetter, class Deleter>
+    requires std::invocable<NullGetter> &&
+        std::convertible_to<std::invoke_result_t<NullGetter>, HANDLE>
     class BasicUniqueHandle
     {
     public:
         using handle_type = HANDLE;
-        using null_checker_type = NullChecker;
+        using null_getter_type = NullGetter;
         using deleter_type = Deleter;
 
         BasicUniqueHandle() noexcept(std::is_nothrow_default_constructible_v<deleter_type>)
-            : BasicUniqueHandle(Null())
+            : BasicUniqueHandle(null())
         {
         }
 
@@ -46,7 +49,7 @@ namespace awl::io
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 
         BasicUniqueHandle(BasicUniqueHandle&& other) noexcept(std::is_nothrow_copy_constructible_v<deleter_type>)
-            : m_h(Null())
+            : m_h(null())
             , m_deleter(other.m_deleter)
         {
             m_h = other.release();
@@ -101,19 +104,19 @@ namespace awl::io
 
         operator bool() const noexcept
         {
-            return m_h != Null();
+            return m_h != null();
         }
 
         HANDLE release() noexcept
         {
             HANDLE h = m_h;
 
-            m_h = Null();
+            m_h = null();
 
             return h;
         }
 
-        void reset(HANDLE h = Null()) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void reset(HANDLE h = null()) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (m_h == h)
             {
@@ -127,7 +130,7 @@ namespace awl::io
 
         void close() noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
-            if (m_h != Null())
+            if (m_h != null())
             {
                 HANDLE h = release();
                 m_deleter(h);
@@ -135,9 +138,9 @@ namespace awl::io
         }
 
     private:
-        static HANDLE Null() noexcept
+        static HANDLE null() noexcept(noexcept(null_getter_type{}()))
         {
-            return null_checker_type::Null();
+            return null_getter_type{}();
         }
 
         HANDLE m_h;

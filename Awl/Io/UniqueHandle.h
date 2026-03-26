@@ -7,13 +7,13 @@
 
 #include "Awl/Io/HandleDeleter.h"
 #include "Awl/Io/BasicUniqueHandle.h"
-#include "Awl/Io/NullHandleValues.h"
+#include "Awl/Io/NullGetter.h"
 
 namespace awl::io
 {
-    template <class NullChecker>
-    using UniqueHandle = BasicUniqueHandle<NullChecker, HandleDeleter>;
+    template <class NullGetter>
+    using UniqueHandle = BasicUniqueHandle<NullGetter, HandleDeleter>;
 
-    using UniqueFileHandle = UniqueHandle<FileNullChecker>;
-    using UniqueProcessHandle = UniqueHandle<ProcessNullChecker>;
+    using UniqueFileHandle = UniqueHandle<FileNullGetter>;
+    using UniqueProcessHandle = UniqueHandle<ProcessNullGetter>;
 }
