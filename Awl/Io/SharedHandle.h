@@ -12,9 +12,9 @@
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue>
-    using SharedHandle = BasicSharedHandle<NullHandleValue, HandleDeleter, HandleDuplicator>;
+    template <class NullChecker>
+    using SharedHandle = BasicSharedHandle<NullChecker, HandleDeleter, HandleDuplicator>;
 
-    using SharedFileHandle = SharedHandle<NullFileHandleValue>;
-    using SharedProcessHandle = SharedHandle<NullProcessHandleValue>;
+    using SharedFileHandle = SharedHandle<FileNullChecker>;
+    using SharedProcessHandle = SharedHandle<ProcessNullChecker>;
 }

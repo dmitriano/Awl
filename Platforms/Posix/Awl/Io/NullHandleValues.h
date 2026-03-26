@@ -9,8 +9,29 @@
 
 namespace awl::io
 {
-    inline constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+    struct FileNullChecker
+    {
+        static constexpr HANDLE Null() noexcept
+        {
+            return NullHandleValue;
+        }
 
-    inline constexpr HANDLE NullFileHandleValue = NullFileHandleValue;
-    inline constexpr HANDLE NullProcessHandleValue = NullFileHandleValue;
+        static constexpr bool IsNull(HANDLE h) noexcept
+        {
+            return h == Null();
+        }
+    };
+
+    struct ProcessNullChecker
+    {
+        static constexpr HANDLE Null() noexcept
+        {
+            return NullHandleValue;
+        }
+
+        static constexpr bool IsNull(HANDLE h) noexcept
+        {
+            return h == Null();
+        }
+    };
 }

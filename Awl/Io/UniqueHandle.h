@@ -11,9 +11,9 @@
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue>
-    using UniqueHandle = BasicUniqueHandle<NullHandleValue, HandleDeleter>;
+    template <class NullChecker>
+    using UniqueHandle = BasicUniqueHandle<NullChecker, HandleDeleter>;
 
-    using UniqueFileHandle = UniqueHandle<NullFileHandleValue>;
-    using UniqueProcessHandle = UniqueHandle<NullProcessHandleValue>;
+    using UniqueFileHandle = UniqueHandle<FileNullChecker>;
+    using UniqueProcessHandle = UniqueHandle<ProcessNullChecker>;
 }

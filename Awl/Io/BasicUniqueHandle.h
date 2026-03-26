@@ -12,15 +12,16 @@
 
 namespace awl::io
 {
-    template <HANDLE NullHandleValue, class Deleter>
+    template <class NullChecker, class Deleter>
     class BasicUniqueHandle
     {
     public:
         using handle_type = HANDLE;
+        using null_checker_type = NullChecker;
         using deleter_type = Deleter;
 
         BasicUniqueHandle() noexcept(std::is_nothrow_default_constructible_v<deleter_type>)
-            : BasicUniqueHandle(NullHandleValue)
+            : BasicUniqueHandle(Null())
         {
         }
 
@@ -45,7 +46,7 @@ namespace awl::io
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 
         BasicUniqueHandle(BasicUniqueHandle&& other) noexcept(std::is_nothrow_copy_constructible_v<deleter_type>)
-            : m_h(NullHandleValue)
+            : m_h(Null())
             , m_deleter(other.m_deleter)
         {
             m_h = other.release();
@@ -107,12 +108,12 @@ namespace awl::io
         {
             HANDLE h = m_h;
 
-            m_h = NullHandleValue;
+            m_h = Null();
 
             return h;
         }
 
-        void reset(HANDLE h = NullHandleValue) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
+        void reset(HANDLE h = Null()) noexcept(noexcept(std::declval<deleter_type&>()(std::declval<HANDLE>())))
         {
             if (m_h == h)
             {
@@ -133,9 +134,14 @@ namespace awl::io
             }
         }
 
-        static constexpr bool IsNull(HANDLE h) noexcept
+        static bool IsNull(HANDLE h) noexcept
         {
-            return h == NullHandleValue;
+            return null_checker_type::IsNull(h);
+        }
+
+        static HANDLE Null() noexcept
+        {
+            return null_checker_type::Null();
         }
 
     private:
