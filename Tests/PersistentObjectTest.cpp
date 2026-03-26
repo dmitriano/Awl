@@ -83,10 +83,6 @@ namespace
         container.persistentObject.value() = MakeSettings<String>();
 
         container.persistentObject.save();
-        
-        // TODO: Where should we do this? In the destructor?
-        container.persistentObject.wait();
-        container.persistentObject.close();
     }
 
     template <class Storage, class String>
@@ -99,9 +95,6 @@ namespace
         container.persistentObject.load();
 
         AWL_ASSERT(container.persistentObject.value() == MakeSettings<String>());
-
-        // TODO: Where should we do this? In the destructor?
-        container.persistentObject.close();
     }
 }
 
