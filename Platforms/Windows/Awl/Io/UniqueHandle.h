@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "NonOwningHandle.h"
+#include "Awl/Io/Platform.h"
 
 #include <cassert>
 
