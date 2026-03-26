@@ -6,29 +6,13 @@
 #pragma once
 
 #include "Awl/Io/HandleDeleter.h"
+#include "Awl/Io/HandleDuplicator.h"
 #include "Awl/Io/BasicSharedHandle.h"
 
 namespace awl::io
 {
-    struct SharedHandleDuplicator
-    {
-        HANDLE operator()(HANDLE h) const
-        {
-            auto h_process = ::GetCurrentProcess();
-            HANDLE duplicated = nullptr;
-
-            BOOL bRes = ::DuplicateHandle(
-                h_process, h, h_process, &duplicated, MAXIMUM_ALLOWED, FALSE, DUPLICATE_SAME_ACCESS);
-
-            assert(bRes);
-            static_cast<void>(bRes);
-
-            return duplicated;
-        }
-    };
-
     template <HANDLE NullHandleValue>
-    using SharedHandle = BasicSharedHandle<NullHandleValue, HandleDeleter, SharedHandleDuplicator>;
+    using SharedHandle = BasicSharedHandle<NullHandleValue, HandleDeleter, HandleDuplicator>;
 
     using SharedFileHandle = SharedHandle<INVALID_HANDLE_VALUE>;
     using SharedProcessHandle = SharedHandle<nullptr>;
