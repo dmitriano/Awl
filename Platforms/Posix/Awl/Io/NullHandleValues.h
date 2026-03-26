@@ -5,5 +5,12 @@
 
 #pragma once
 
-#include "UniqueHandle.h"
-#include "SharedHandle.h"
+#include "Awl/Io/Platform.h"
+
+namespace awl::io
+{
+    inline constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+
+    inline constexpr HANDLE NullFileHandleValue = NullFileHandleValue;
+    inline constexpr HANDLE NullProcessHandleValue = NullFileHandleValue;
+}

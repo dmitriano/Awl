@@ -14,6 +14,4 @@
 namespace awl::io
 {
     using HANDLE = int;
-
-    inline constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
 }

@@ -6,10 +6,15 @@
 #pragma once
 
 #include "Awl/Io/HandleDeleter.h"
-#include "Awl/Io/BasicUniqueHandle.h"
+#include "Awl/Io/HandleDuplicator.h"
+#include "Awl/Io/BasicSharedHandle.h"
+#include "Awl/Io/NullHandleValues.h"
 
 namespace awl::io
 {
-    using UniqueHandle = BasicUniqueHandle<NullHandleValue, HandleDeleter>;
-    using UniqueFileHandle = UniqueHandle;
+    template <HANDLE NullHandleValue>
+    using SharedHandle = BasicSharedHandle<NullHandleValue, HandleDeleter, HandleDuplicator>;
+
+    using SharedFileHandle = SharedHandle<NullFileHandleValue>;
+    using SharedProcessHandle = SharedHandle<NullProcessHandleValue>;
 }
