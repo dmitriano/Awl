@@ -23,17 +23,17 @@ namespace awl::testing
     template <class ... Ps>
     struct CompositeTestContext
     {
-        using Provider = CompositeProvider<Ps...>;
+        using AttributeProvider = CompositeProvider<Ps...>;
 
-        CompositeTestContext(Logger& logger, const std::stop_token stopToken, Provider& ap) :
-            logger(logger), stopToken(stopToken), ap(ap)
+        CompositeTestContext(Logger& logger, const std::stop_token stopToken, AttributeProvider& attributeProvider) :
+            logger(logger), stopToken(stopToken), attributeProvider(attributeProvider)
         {}
 
         Logger& logger;
 
         const std::stop_token stopToken;
 
-        Provider& ap;
+        AttributeProvider& attributeProvider;
     };
 
 #ifdef AWL_QT
@@ -42,8 +42,8 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(Logger& logger, const std::stop_token stopToken, Provider& ap, QObject* worker = nullptr) :
-            Base(logger, stopToken, ap),
+        TestContext(Logger& logger, const std::stop_token stopToken, AttributeProvider& attributeProvider, QObject* worker = nullptr) :
+            Base(logger, stopToken, attributeProvider),
             worker(worker)
         {}
 
@@ -57,5 +57,5 @@ namespace awl::testing
 
 #endif
 
-    static_assert(attribute_provider<TestContext::Provider>);
+    static_assert(attribute_provider<TestContext::AttributeProvider>);
 }

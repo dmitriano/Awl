@@ -119,7 +119,7 @@ namespace awl::testing
 
             ConsoleLogger logger(*p_out);
             
-            const TestContext temp_context{ logger, test_token, context.ap };
+            const TestContext temp_context{ logger, test_token, context.attributeProvider };
 
             awl::StopWatch sw;
 
@@ -133,7 +133,7 @@ namespace awl::testing
             out << _T("\tPassed within ") << sw << std::endl;
 
             // Clear the attributes from the passed test.
-            context.ap.Clear();
+            context.attributeProvider.Clear();
         }
     }
 }

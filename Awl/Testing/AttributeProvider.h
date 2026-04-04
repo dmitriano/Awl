@@ -36,7 +36,7 @@ namespace awl::testing
     template <attribute_provider Provider>
     struct ProviderContext
     {
-        Provider& ap;
+        Provider& attributeProvider;
     };
 
     template <class T, attribute_provider Provider>
