@@ -110,7 +110,7 @@ AWL_TEST(VectorSetInternal)
     AWL_UNUSED_CONTEXT;
 
     awl::VectorSetTest test;
-    test.Run();
+    test.run();
 }
 
 namespace
@@ -417,12 +417,12 @@ AWL_TEST(VectorSetIndex)
 
     for (size_t i = 0; i < 5; ++i)
     {
-        Assert::Throws<std::out_of_range>([&set, i]()
+        Assert::throws<std::out_of_range>([&set, i]()
         {
             set.at(set.size() + i);
         });
 
-        Assert::Throws<std::out_of_range>([&set, range, i]()
+        Assert::throws<std::out_of_range>([&set, range, i]()
         {
             set.index_of(range + 1 + i);
         });
@@ -485,12 +485,12 @@ namespace
 
         for (size_t i = 0; i < 5; ++i)
         {
-            Assert::Throws<std::out_of_range>([&set, i]()
+            Assert::throws<std::out_of_range>([&set, i]()
             {
                 set.at(set.size() + i);
             });
 
-            Assert::Throws<std::out_of_range>([&set, range, i]()
+            Assert::throws<std::out_of_range>([&set, range, i]()
             {
                 set.index_of(range + 1 + i);
             });
@@ -669,12 +669,12 @@ namespace
 
         for (size_t i = 0; i < 5; ++i)
         {
-            Assert::Throws<std::out_of_range>([&set, i]()
+            Assert::throws<std::out_of_range>([&set, i]()
             {
                 set.at(set.size() + i);
             });
 
-            Assert::Throws<std::out_of_range>([&set, range, i]()
+            Assert::throws<std::out_of_range>([&set, range, i]()
             {
                 set.index_of(static_cast<int>(range + 1 + i));
             });

@@ -56,7 +56,7 @@ namespace awl::testing
         }
     }
 
-    bool CommandLineProvider::TryFind(const char* name, CmdString& val) const
+    bool CommandLineProvider::tryFind(const char* name, CmdString& val) const
     {
         auto i = allOptions.find(name);
 

@@ -20,7 +20,7 @@ int _tmain(int argc, awl::Char * argv[])
 {
     try
     {
-        return awl::testing::Run(argc, argv);
+        return awl::testing::run(argc, argv);
     }
     catch (const awl::testing::TestException& e)
     {

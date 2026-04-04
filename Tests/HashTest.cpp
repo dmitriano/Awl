@@ -120,7 +120,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             }
             else
             {
-                Assert::IsTrue(new_val == val);
+                Assert::isTrue(new_val == val);
             }
         }
 
@@ -164,13 +164,13 @@ AWL_TEST(Hash)
 
         const Crc64::value_type val = hash(sample.begin(), sample.end());
 
-        Assert::IsTrue(val == sampleHash);
+        Assert::isTrue(val == sampleHash);
 
         const awl::crypto::ReverseHash reversed_hash(hash);
 
         const Crc64::value_type reversed_val = reversed_hash(sample.begin(), sample.end());
 
-        Assert::IsTrue(reversed_val == reverse_array(val));
+        Assert::isTrue(reversed_val == reverse_array(val));
     }
 
     {
@@ -227,7 +227,7 @@ AWL_TEST(Hash_String)
 
         const Hash::value_type val = hash(sample);
 
-        Assert::IsTrue(val == sampleHash);
+        Assert::isTrue(val == sampleHash);
     }
 
     {
@@ -237,7 +237,7 @@ AWL_TEST(Hash_String)
 
         auto literal_hash = hash(L"123456789");
 
-        Assert::IsTrue(str_hash == literal_hash);
+        Assert::isTrue(str_hash == literal_hash);
     }
 }
 
@@ -293,5 +293,5 @@ AWL_TEST(Hash_Fake)
 
     FakeHash hash;
 
-    Assert::IsTrue(hash(sample1.begin(), sample1.end()) == hash(sample2.begin(), sample2.end()));
+    Assert::isTrue(hash(sample1.begin(), sample1.end()) == hash(sample2.begin(), sample2.end()));
 }

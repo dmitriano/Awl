@@ -20,12 +20,12 @@ namespace awl
 
             TestRunner(ostringstream& last_output);
 
-            String GetLastOutput() const
+            String getLastOutput() const
             {
                 return lastOutput.str();
             }
 
-            void RunLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out);
+            void runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out);
 
         private:
 

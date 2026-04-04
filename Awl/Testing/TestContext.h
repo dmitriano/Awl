@@ -25,8 +25,8 @@ namespace awl::testing
     {
         using AttributeProvider = CompositeProvider<Ps...>;
 
-        CompositeTestContext(Logger& logger, const std::stop_token stopToken, AttributeProvider& attributeProvider) :
-            logger(logger), stopToken(stopToken), attributeProvider(attributeProvider)
+        CompositeTestContext(Logger& logger, const std::stop_token stop_token, AttributeProvider& attribute_provider) :
+            logger(logger), stopToken(stop_token), attributeProvider(attribute_provider)
         {}
 
         Logger& logger;
@@ -42,8 +42,8 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(Logger& logger, const std::stop_token stopToken, AttributeProvider& attributeProvider, QObject* worker = nullptr) :
-            Base(logger, stopToken, attributeProvider),
+        TestContext(Logger& logger, const std::stop_token stop_token, AttributeProvider& attribute_provider, QObject* worker = nullptr) :
+            Base(logger, stop_token, attribute_provider),
             worker(worker)
         {}
 

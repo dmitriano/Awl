@@ -7,7 +7,7 @@
 
 #include "Awl/Testing/AttributeProvider.h"
 
-#define AWL_VARIABLE_ATTRIBUTE(attribute_type, attribute_name, default_val) attribute_type attribute_name(awl::testing::GetAttributeValue<attribute_type>( \
+#define AWL_VARIABLE_ATTRIBUTE(attribute_type, attribute_name, default_val) attribute_type attribute_name(awl::testing::getAttributeValue<attribute_type>( \
     context.attributeProvider, #attribute_name, default_val))
 
 #define AWL_ATTRIBUTE(attribute_type, attribute_name, default_val) const AWL_VARIABLE_ATTRIBUTE(attribute_type, attribute_name, default_val)

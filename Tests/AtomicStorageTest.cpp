@@ -547,7 +547,7 @@ AWL_TEST(HeaderedSerializable)
         AWL_ASSERT(val.oldVersion == HeaderedValue::NoVersion);
     }
 
-    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    awl::testing::Assert::throws<awl::io::IoException>([&v, &current_header]()
     {
         const awl::io::Header wrong_header{ "WRONG FORMAT", current_header.version };
 
@@ -560,7 +560,7 @@ AWL_TEST(HeaderedSerializable)
     });
 
     // Read an older version from a newer stream.
-    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    awl::testing::Assert::throws<awl::io::IoException>([&v, &current_header]()
     {
         const size_t old_version = 1u;
 
@@ -591,7 +591,7 @@ AWL_TEST(HeaderedSerializable)
 
     // Exceed format name limit.
 
-    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    awl::testing::Assert::throws<awl::io::IoException>([&v, &current_header]()
     {
         awl::io::VectorInputStream in(v);
 
@@ -602,7 +602,7 @@ AWL_TEST(HeaderedSerializable)
 
     v.clear();
 
-    awl::testing::Assert::Throws<awl::io::IoException>([&v, &current_header]()
+    awl::testing::Assert::throws<awl::io::IoException>([&v, &current_header]()
     {
         awl::io::VectorOutputStream out(v);
 

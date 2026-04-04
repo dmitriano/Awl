@@ -26,16 +26,16 @@ namespace awl::testing
 
         using String = std::basic_string<C>;
 
-        static String ToString(T val)
+        static String toString(T val)
         {
-            return BasicScalarFormatter<C>::ToString(val);
+            return BasicScalarFormatter<C>::toString(val);
         }
 
-        static T FromString(const String& s)
+        static T fromString(const String& s)
         {
             T val;
 
-            BasicScalarFormatter<C>::FromString(s, val);
+            BasicScalarFormatter<C>::fromString(s, val);
 
             return val;
         }
@@ -48,12 +48,12 @@ namespace awl::testing
 
         using String = std::basic_string<C>;
 
-        static String ToString(T val)
+        static String toString(T val)
         {
             return awl::FromAString(awl::enum_to_string(val));
         }
 
-        static T FromString(const String& s)
+        static T fromString(const String& s)
         {
             return awl::enum_from_string<T>(StringConvertor<char>::ConvertFrom(s.c_str()));
         }
@@ -66,12 +66,12 @@ namespace awl::testing
 
         using String = std::basic_string<C>;
 
-        static String ToString(T val)
+        static String toString(T val)
         {
             return StringConvertor<typename String::value_type>::ConvertFrom(val.c_str());
         }
 
-        static T FromString(String s)
+        static T fromString(String s)
         {
             return StringConvertor<typename T::value_type>::ConvertFrom(s.c_str());
         }
@@ -85,7 +85,7 @@ namespace awl::testing
 
         using String = std::basic_string<C>;
 
-        static String ToString(const T& val)
+        static String toString(const T& val)
         {
             constexpr C separator = '\x20';
 
@@ -113,7 +113,7 @@ namespace awl::testing
             return out.str();
         }
 
-        static T FromString(const String& s_raw)
+        static T fromString(const String& s_raw)
         {
             String s = s_raw;
 
@@ -136,12 +136,12 @@ namespace awl::testing
 
         using String = std::basic_string<C>;
 
-        static String ToString(QString val)
+        static String toString(QString val)
         {
             return FromQString<typename String::value_type>(val);
         }
 
-        static QString FromString(String s)
+        static QString fromString(String s)
         {
             return ToQString(s);
         }

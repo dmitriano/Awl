@@ -63,7 +63,7 @@ namespace
         {
             It = it;
 
-            awl::String val = Formatter<int>::ToString(It);
+            awl::String val = Formatter<int>::toString(It);
 
             awl::String val_copy = val;
 

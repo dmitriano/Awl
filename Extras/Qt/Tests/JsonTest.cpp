@@ -562,7 +562,7 @@ AWL_TEST(JsonDurationInvalid)
             label_text,
             input));
 
-        awl::testing::Assert::Throws<awl::JsonException>([&input]()
+        awl::testing::Assert::throws<awl::JsonException>([&input]()
         {
             Duration actual{};
             awl::FromJson(QJsonValue(input), actual);

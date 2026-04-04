@@ -14,7 +14,7 @@ namespace awl::testing
         JsonProvider(QJsonObject& jo) : m_jo(jo) {}
 
         template <class T>
-        bool TryGet(const char* name, T& val)
+        bool tryGet(const char* name, T& val)
         {
             auto i = m_jo.find(name);
 
@@ -31,7 +31,7 @@ namespace awl::testing
         }
 
         template <class T>
-        void Set(const char* name, const T& val)
+        void set(const char* name, const T& val)
         {
             if (m_jo.contains(name))
             {
@@ -50,12 +50,12 @@ namespace awl::testing
         }
 
         // Quick fix. Clear the attributes from the previous test.
-        void Clear()
+        void clear()
         {
             m_jo = {};
         }
 
-        bool IsDirty() const
+        bool isDirty() const
         {
             return m_dirty;
         }

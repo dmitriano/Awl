@@ -21,11 +21,11 @@ static void TestIntContainer(const C * sample)
 
     TString s_sample = sample;
 
-    V v = F::FromString(s_sample);
+    V v = F::fromString(s_sample);
 
     AWL_ASSERT((v == V { 10, -3, 50 }));
 
-    TString s_result = F::ToString(v);
+    TString s_result = F::toString(v);
 
     AWL_ASSERT(s_sample == s_result);
 }
@@ -47,11 +47,11 @@ AWL_TEST(Formatter_StringContainer)
 
     String s_sample = _T("a b cde");
 
-    auto v = F::FromString(s_sample);
+    auto v = F::fromString(s_sample);
 
     AWL_ASSERT((v == V { _T("a"), _T("b"), _T("cde") }));
 
-    String s_result = F::ToString(v);
+    String s_result = F::toString(v);
 
     AWL_ASSERT(s_sample == s_result);
 }
@@ -65,11 +65,11 @@ AWL_TEST(Formatter_BoolContainer)
 
     String s_sample = _T("1 0 0");
 
-    auto v = F::FromString(s_sample);
+    auto v = F::fromString(s_sample);
 
     AWL_ASSERT((v == V { true, false, false }));
 
-    String s_result = F::ToString(v);
+    String s_result = F::toString(v);
 
     AWL_ASSERT(s_sample == s_result);
 }
@@ -82,11 +82,11 @@ AWL_TEST(Formatter_String)
 
     String sample = _T("abc");
 
-    auto from_result = F::FromString(sample);
+    auto from_result = F::fromString(sample);
 
     AWL_ASSERT(from_result == sample);
 
-    String to_result = F::ToString(sample);
+    String to_result = F::toString(sample);
 
     AWL_ASSERT(to_result == sample);
 }

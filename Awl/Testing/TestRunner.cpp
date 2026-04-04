@@ -27,7 +27,7 @@ namespace awl::testing
         lastOutput(last_output)
     {}
 
-    void TestRunner::RunLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
+    void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
         AWL_ATTRIBUTE(size_t, loop, 0);
@@ -133,7 +133,7 @@ namespace awl::testing
             out << _T("\tPassed within ") << sw << std::endl;
 
             // Clear the attributes from the passed test.
-            context.attributeProvider.Clear();
+            context.attributeProvider.clear();
         }
     }
 }
