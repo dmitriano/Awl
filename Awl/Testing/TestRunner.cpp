@@ -119,7 +119,7 @@ namespace awl::testing
 
             ConsoleLogger logger(*p_out);
             
-            const TestContext temp_context{ logger, test_token, context.attributeProvider };
+            const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 
             awl::StopWatch sw;
 

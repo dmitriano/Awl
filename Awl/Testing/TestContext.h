@@ -48,8 +48,7 @@ namespace awl::testing
 
         TestContext(Logger& logger, const std::stop_token stop_token,
             AttributeProvider& attribute_provider, TypeProvider& type_provider, QObject* worker = nullptr) :
-            Base(logger, stop_token, attribute_provider),
-            typeProvider(type_provider),
+            Base(logger, stop_token, attribute_provider, type_provider),
             worker(worker)
         {}
 

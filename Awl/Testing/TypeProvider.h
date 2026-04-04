@@ -82,6 +82,4 @@ namespace awl::testing
 
         std::unordered_map<std::type_index, std::shared_ptr<IModel>> m_values;
     };
-
-    static_assert(attribute_provider<TypeProvider>);
 }

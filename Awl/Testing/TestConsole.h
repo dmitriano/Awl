@@ -43,6 +43,7 @@ namespace awl::testing
         ConsoleLogger m_logger;
 
         Provider& m_ap;
+        TypeProvider m_typeProvider;
 
         TestContext m_context;
     };
