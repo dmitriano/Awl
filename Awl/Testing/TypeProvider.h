@@ -8,8 +8,8 @@
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
-#include <memory>
-#include <typeindex>
+#include <algorithm>
+#include <any>
 #include <vector>
 
 namespace awl::testing
@@ -22,42 +22,28 @@ namespace awl::testing
         void set(const T& val)
         {
             using Value = std::decay_t<T>;
-            const std::type_index requested_type(typeid(Value));
 
-            for (auto& p_value : m_values)
+            const auto it = std::ranges::find(m_values, typeid(Value), &std::any::type);
+
+            if (it != m_values.end())
             {
-                if (p_value->type() == requested_type)
-                {
-                    p_value = std::make_shared<Model<Value>>(val);
-                    return;
-                }
+                *it = val;
+                return;
             }
 
-            m_values.push_back(std::make_shared<Model<Value>>(val));
+            m_values.emplace_back(val);
         }
 
         template <class T>
         bool tryGet(T& val) const
         {
             using Value = std::decay_t<T>;
-            const std::type_index requested_type(typeid(Value));
 
-            for (const auto& p_value : m_values)
+            const auto it = std::ranges::find(m_values, typeid(Value), &std::any::type);
+
+            if (it != m_values.end())
             {
-                if (p_value->type() != requested_type)
-                {
-                    continue;
-                }
-
-                auto p_model = std::dynamic_pointer_cast<Model<Value>>(p_value);
-
-                if (p_model == nullptr)
-                {
-                    throw awl::GeneralException(awl::format() << "TypeProvider: bad stored type for " << typeid(Value).name() << ".");
-                }
-
-                val = p_model->val;
-
+                val = std::any_cast<const Value&>(*it);
                 return true;
             }
 
@@ -79,28 +65,6 @@ namespace awl::testing
 
     private:
 
-        struct IModel
-        {
-            virtual ~IModel() = default;
-
-            virtual std::type_index type() const = 0;
-        };
-
-        template <class T>
-        struct Model : public IModel
-        {
-            explicit Model(const T& init_val) :
-                val(init_val)
-            {}
-
-            std::type_index type() const override
-            {
-                return std::type_index(typeid(T));
-            }
-
-            T val;
-        };
-
-        std::vector<std::shared_ptr<IModel>> m_values;
+        std::vector<std::any> m_values;
     };
 }

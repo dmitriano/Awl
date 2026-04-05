@@ -10,7 +10,7 @@
 
 using namespace awl::testing;
 
-AWL_TEST(TypeProvider_Basic)
+AWL_TEST(TypeProvider)
 {
     AWL_UNUSED_CONTEXT;
 

@@ -110,7 +110,7 @@ AWL_TEST(VectorSetInternal)
     AWL_UNUSED_CONTEXT;
 
     awl::VectorSetTest test;
-    test.run();
+    test.Run();
 }
 
 namespace
