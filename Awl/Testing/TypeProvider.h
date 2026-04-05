@@ -10,7 +10,7 @@
 
 #include <memory>
 #include <typeindex>
-#include <unordered_map>
+#include <vector>
 
 namespace awl::testing
 {
@@ -22,32 +22,46 @@ namespace awl::testing
         void set(const T& val)
         {
             using Value = std::decay_t<T>;
+            const std::type_index requested_type(typeid(Value));
 
-            m_values[std::type_index(typeid(Value))] = std::make_shared<Model<Value>>(val);
+            for (auto& p_value : m_values)
+            {
+                if (p_value->type() == requested_type)
+                {
+                    p_value = std::make_shared<Model<Value>>(val);
+                    return;
+                }
+            }
+
+            m_values.push_back(std::make_shared<Model<Value>>(val));
         }
 
         template <class T>
         bool tryGet(T& val) const
         {
             using Value = std::decay_t<T>;
+            const std::type_index requested_type(typeid(Value));
 
-            auto i = m_values.find(std::type_index(typeid(Value)));
-
-            if (i == m_values.end())
+            for (const auto& p_value : m_values)
             {
-                return false;
+                if (p_value->type() != requested_type)
+                {
+                    continue;
+                }
+
+                auto p_model = std::dynamic_pointer_cast<Model<Value>>(p_value);
+
+                if (p_model == nullptr)
+                {
+                    throw awl::GeneralException(awl::format() << "TypeProvider: bad stored type for " << typeid(Value).name() << ".");
+                }
+
+                val = p_model->val;
+
+                return true;
             }
 
-            auto p_model = std::dynamic_pointer_cast<Model<Value>>(i->second);
-
-            if (p_model == nullptr)
-            {
-                throw awl::GeneralException(awl::format() << "TypeProvider: bad stored type for " << typeid(Value).name() << ".");
-            }
-
-            val = p_model->val;
-
-            return true;
+            return false;
         }
 
         template <class T>
@@ -68,6 +82,8 @@ namespace awl::testing
         struct IModel
         {
             virtual ~IModel() = default;
+
+            virtual std::type_index type() const = 0;
         };
 
         template <class T>
@@ -77,9 +93,14 @@ namespace awl::testing
                 val(init_val)
             {}
 
+            std::type_index type() const override
+            {
+                return std::type_index(typeid(T));
+            }
+
             T val;
         };
 
-        std::unordered_map<std::type_index, std::shared_ptr<IModel>> m_values;
+        std::vector<std::shared_ptr<IModel>> m_values;
     };
 }
