@@ -10,6 +10,20 @@
 
 using namespace awl::testing;
 
+namespace awl::testing
+{
+    class TypeProviderTest
+    {
+    public:
+
+        template <class T>
+        static bool tryGet(const TypeProvider& provider, T& val)
+        {
+            return provider.tryGet(val);
+        }
+    };
+}
+
 AWL_TEST(TypeProvider)
 {
     AWL_UNUSED_CONTEXT;
@@ -23,13 +37,13 @@ AWL_TEST(TypeProvider)
     std::string s;
     double d = 0;
 
-    AWL_ASSERT(provider.tryGet(i));
+    AWL_ASSERT(TypeProviderTest::tryGet(provider, i));
     AWL_ASSERT_EQUAL(42, i);
 
-    AWL_ASSERT(provider.tryGet(s));
+    AWL_ASSERT(TypeProviderTest::tryGet(provider, s));
     AWL_ASSERT_EQUAL(std::string("abc"), s);
 
-    AWL_ASSERT_FALSE(provider.tryGet(d));
+    AWL_ASSERT_FALSE(TypeProviderTest::tryGet(provider, d));
 
     provider.set(77);
 

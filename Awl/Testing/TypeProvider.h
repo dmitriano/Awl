@@ -6,10 +6,11 @@
 #pragma once
 
 #include "Awl/Exception.h"
-#include "Awl/StringFormat.h"
 
 #include <algorithm>
 #include <any>
+#include <format>
+#include <utility>
 #include <vector>
 
 namespace awl::testing
@@ -19,7 +20,7 @@ namespace awl::testing
     public:
 
         template <class T>
-        void set(const T& val)
+        void set(T&& val)
         {
             using Value = std::decay_t<T>;
 
@@ -27,12 +28,28 @@ namespace awl::testing
 
             if (it != m_values.end())
             {
-                *it = val;
+                *it = std::forward<T>(val);
                 return;
             }
 
-            m_values.emplace_back(val);
+            m_values.emplace_back(std::forward<T>(val));
         }
+
+        template <class T>
+        T get() const
+        {
+            T val;
+
+            if (!tryGet(val))
+            {
+                throw awl::GeneralException(std::format(_T("TypeProvider: type {} not found."),
+                    awl::FromACString(typeid(std::decay_t<T>).name())));
+            }
+
+            return val;
+        }
+
+    private:
 
         template <class T>
         bool tryGet(T& val) const
@@ -50,21 +67,8 @@ namespace awl::testing
             return false;
         }
 
-        template <class T>
-        T get() const
-        {
-            T val;
-
-            if (!tryGet(val))
-            {
-                throw awl::GeneralException(awl::format() << "TypeProvider: type " << typeid(std::decay_t<T>).name() << " not found.");
-            }
-
-            return val;
-        }
-
-    private:
-
         std::vector<std::any> m_values;
+
+        friend class TypeProviderTest;
     };
 }
