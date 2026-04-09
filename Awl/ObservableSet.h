@@ -8,8 +8,62 @@
 #include "Awl/VectorSet.h"
 #include "Awl/Observable.h"
 
+#include <type_traits>
+#include <unordered_set>
+
 namespace awl
 {
+    namespace detail
+    {
+        template <class Set, class = void>
+        struct reverse_iterator_of
+        {
+            using type = typename Set::iterator;
+        };
+
+        template <class Set>
+        struct reverse_iterator_of<Set, std::void_t<typename Set::reverse_iterator>>
+        {
+            using type = typename Set::reverse_iterator;
+        };
+
+        template <class Set, class = void>
+        struct const_reverse_iterator_of
+        {
+            using type = typename Set::const_iterator;
+        };
+
+        template <class Set>
+        struct const_reverse_iterator_of<Set, std::void_t<typename Set::const_reverse_iterator>>
+        {
+            using type = typename Set::const_reverse_iterator;
+        };
+
+        template <class Set, class Fallback, class = void>
+        struct key_compare_of
+        {
+            using type = Fallback;
+        };
+
+        template <class Set, class Fallback>
+        struct key_compare_of<Set, Fallback, std::void_t<typename Set::key_compare>>
+        {
+            using type = typename Set::key_compare;
+        };
+
+        template <class Set, class Fallback, class = void>
+        struct value_compare_of
+        {
+            using type = Fallback;
+        };
+
+        template <class Set, class Fallback>
+        struct value_compare_of<Set, Fallback, std::void_t<typename Set::value_compare>>
+        {
+            using type = typename Set::value_compare;
+        };
+    }
+
     //The argument is const probably because it can be 'const shared_ptr<A> &'.
     template <class T>
     struct INotifySetChanged
@@ -20,18 +74,17 @@ namespace awl
     };
     
     template <
-        template <class, class, class> class Set,
-        class T,
+        class Set,
         class Compare = std::less<>,
-        class Allocator = std::allocator<T>>
+        class Allocator = typename Set::allocator_type>
     class basic_observable_set
     {
     private:
 
-        using This = basic_observable_set<Set, T, Compare, Allocator>;
-        using InternalObservable = Observable<INotifySetChanged<T>, This>;
-        using InternalObserver = Observer<INotifySetChanged<T>>;
-        using InternalSet = Set<T, Compare, Allocator>;
+        using This = basic_observable_set<Set, Compare, Allocator>;
+        using InternalSet = Set;
+        using InternalObservable = Observable<INotifySetChanged<typename InternalSet::value_type>, This>;
+        using InternalObserver = Observer<INotifySetChanged<typename InternalSet::value_type>>;
 
     public:
 
@@ -44,12 +97,12 @@ namespace awl
         using iterator = typename InternalSet::iterator;
         using const_iterator = typename InternalSet::const_iterator;
 
-        using reverse_iterator = typename InternalSet::reverse_iterator;
-        using const_reverse_iterator = typename InternalSet::const_reverse_iterator;
+        using reverse_iterator = typename detail::reverse_iterator_of<InternalSet>::type;
+        using const_reverse_iterator = typename detail::const_reverse_iterator_of<InternalSet>::type;
 
         using allocator_type = typename InternalSet::allocator_type;
-        using key_compare = typename InternalSet::key_compare;
-        using value_compare = typename InternalSet::value_compare;
+        using key_compare = typename detail::key_compare_of<InternalSet, Compare>::type;
+        using value_compare = typename detail::value_compare_of<InternalSet, Compare>::type;
 
         basic_observable_set() = default;
         
@@ -103,7 +156,7 @@ namespace awl
             m_set = std::move(other.m_set);
             other.m_set.clear();
 
-            for (const T & elem : *this)
+            for (const value_type & elem : *this)
             {
                 notifyAdded(elem);
             }
@@ -127,11 +180,11 @@ namespace awl
             return !operator == (other);
         }
 
-        T & front() { return m_set.front(); }
-        const T & front() const { return m_set.front(); }
+        value_type & front() { return m_set.front(); }
+        const value_type & front() const { return m_set.front(); }
 
-        T & back() { return m_set.back(); }
-        const T & back() const { return m_set.back(); }
+        value_type & back() { return m_set.back(); }
+        const value_type & back() const { return m_set.back(); }
 
         iterator begin() { return m_set.begin(); }
         const_iterator begin() const { return m_set.begin(); }
@@ -270,7 +323,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                m_observable.notify(&INotifySetChanged<T>::onClearing);
+                m_observable.notify(&INotifySetChanged<value_type>::onClearing);
                 m_set.clear();
             }
         }
@@ -311,14 +364,14 @@ namespace awl
             }
         }
 
-        void notifyAdded(const T& val)
+        void notifyAdded(const value_type& val)
         {
-            m_observable.notify(&INotifySetChanged<T>::onAdded, val);
+            m_observable.notify(&INotifySetChanged<value_type>::onAdded, val);
         }
 
-        void notifyRemoving(const T & val)
+        void notifyRemoving(const value_type & val)
         {
-            m_observable.notify(&INotifySetChanged<T>::onRemoving, val);
+            m_observable.notify(&INotifySetChanged<value_type>::onRemoving, val);
         }
 
         void notifyRemoving(const iterator& i)
@@ -328,7 +381,7 @@ namespace awl
 
         void notifyClearing()
         {
-            m_observable.notify(&INotifySetChanged<T>::onClearing);
+            m_observable.notify(&INotifySetChanged<value_type>::onClearing);
         }
 
         InternalSet m_set;
@@ -337,5 +390,8 @@ namespace awl
     };
 
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>>
-    using observable_vector_set = basic_observable_set<vector_set, T, Compare, Allocator>;
+    using observable_vector_set = basic_observable_set<vector_set<T, Compare, Allocator>, Compare, Allocator>;
+
+    template <class T, class Hash = std::hash<T>, class Allocator = std::allocator<T>>
+    using observable_unordered_set = basic_observable_set<std::unordered_set<T, Hash, std::equal_to<T>, Allocator>, Hash, Allocator>;
 }
