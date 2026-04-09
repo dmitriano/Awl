@@ -11,6 +11,7 @@
 #include "Awl/Tuplizable.h"
 
 #include <ranges>
+#include <unordered_set>
 #include <vector>
 
 using namespace awl::testing;
@@ -65,17 +66,41 @@ namespace
         }
     };
 
-    template <class Set>
+    template <class Set, class ReferenceSet>
+    void assertSameContent(const Set& actual, const ReferenceSet& expected)
+    {
+        AWL_ASSERT_EQUAL(expected.size(), actual.size());
+
+        for (const auto& val : expected)
+        {
+            AWL_ASSERT(actual.contains(val));
+        }
+
+        for (const auto& val : actual)
+        {
+            AWL_ASSERT(expected.contains(val));
+        }
+    }
+
+    template <class Set, class ReferenceSet>
     void checkSetNotifications()
     {
         Set s;
+        ReferenceSet expected;
         SetChangeRecorder<typename Set::value_type> recorder;
 
         s.subscribe(&recorder);
 
         AWL_ASSERT(s.insert(10).second);
+        expected.insert(10);
+        assertSameContent<Set, ReferenceSet>(s, expected);
+
         AWL_ASSERT(s.insert(20).second);
+        expected.insert(20);
+        assertSameContent<Set, ReferenceSet>(s, expected);
+
         AWL_ASSERT_FALSE(s.insert(10).second);
+        assertSameContent<Set, ReferenceSet>(s, expected);
 
         AWL_ASSERT_EQUAL(size_t(2), recorder.added.size());
         AWL_ASSERT_EQUAL(10, recorder.added[0]);
@@ -86,12 +111,16 @@ namespace
         auto i = s.find(10);
         AWL_ASSERT(i != s.end());
         s.erase(i);
+        expected.erase(10);
+        assertSameContent<Set, ReferenceSet>(s, expected);
 
         AWL_ASSERT_EQUAL(size_t(1), recorder.removed.size());
         AWL_ASSERT_EQUAL(10, recorder.removed[0]);
         AWL_ASSERT_EQUAL(size_t(0), recorder.clearing_count);
 
         s.clear();
+        expected.clear();
+        assertSameContent<Set, ReferenceSet>(s, expected);
 
         AWL_ASSERT_EQUAL(size_t(1), recorder.clearing_count);
         AWL_ASSERT(s.empty());
@@ -119,12 +148,12 @@ AWL_TEST(ObservableSetVector)
 {
     AWL_UNUSED_CONTEXT;
 
-    checkSetNotifications<awl::observable_vector_set<int>>();
+    checkSetNotifications<awl::observable_vector_set<int>, awl::vector_set<int>>();
 }
 
 AWL_TEST(ObservableSetUnordered)
 {
     AWL_UNUSED_CONTEXT;
 
-    checkSetNotifications<awl::observable_unordered_set<int>>();
+    checkSetNotifications<awl::observable_unordered_set<int>, std::unordered_set<int>>();
 }
