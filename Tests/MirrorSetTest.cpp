@@ -28,7 +28,7 @@ namespace
     using Compare1 = awl::member_compare<&A::key1>;
     using Compare2 = awl::member_compare<&A::key2>;
     
-    using Set = awl::observable_set<A, Compare1>;
+    using Set = awl::observable_vector_set<A, Compare1>;
     using MirrorSet = awl::mirror_set<A, Compare2>;
 
     void AssertEqual(const Set& s, const MirrorSet& ms)

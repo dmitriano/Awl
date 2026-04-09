@@ -47,7 +47,7 @@ AWL_TEST(ObservableSetAssignment)
     AWL_UNUSED_CONTEXT;
 
     using Compare = awl::member_compare<&A::key>;
-    using Set = awl::observable_set<A, Compare>;
+    using Set = awl::observable_vector_set<A, Compare>;
 
     //Check if it satisfies the concept std::ranges::range.
     static_assert(std::ranges::range<Set>);

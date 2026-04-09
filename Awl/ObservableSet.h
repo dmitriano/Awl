@@ -19,14 +19,19 @@ namespace awl
         virtual void onClearing() = 0;
     };
     
-    template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
-    class observable_set
+    template <
+        template <class, class, class> class Set,
+        class T,
+        class Compare = std::less<>,
+        class Allocator = std::allocator<T>>
+    class basic_observable_set
     {
     private:
 
-        using InternalObservable = Observable<INotifySetChanged<T>, observable_set>;
+        using This = basic_observable_set<Set, T, Compare, Allocator>;
+        using InternalObservable = Observable<INotifySetChanged<T>, This>;
         using InternalObserver = Observer<INotifySetChanged<T>>;
-        using InternalSet = vector_set<T, Compare, Allocator>;
+        using InternalSet = Set<T, Compare, Allocator>;
 
     public:
 
@@ -46,37 +51,37 @@ namespace awl
         using key_compare = typename InternalSet::key_compare;
         using value_compare = typename InternalSet::value_compare;
 
-        observable_set() = default;
+        basic_observable_set() = default;
         
-        observable_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
+        basic_observable_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
         {
         }
 
         //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
-        // observable_set(const observable_set & other) : InternalObservable{}, m_set(other.m_set)
+        // basic_observable_set(const basic_observable_set & other) : InternalObservable{}, m_set(other.m_set)
         // {
         // }
 
-        observable_set(const observable_set & other) = delete;
+        basic_observable_set(const basic_observable_set & other) = delete;
 
         //If it is returned from a function by value it should keep its observers and
         //do not fire a notification because the content was not changed.
-        observable_set(observable_set && other) = default;
+        basic_observable_set(basic_observable_set && other) = default;
 
-        observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
+        basic_observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
         {
         }
 
-        observable_set(std::initializer_list<value_type> init, const Allocator& alloc)
-            : observable_set(init, Compare(), alloc)
+        basic_observable_set(std::initializer_list<value_type> init, const Allocator& alloc)
+            : basic_observable_set(init, Compare(), alloc)
         {
         }
 
-        observable_set & operator = (const observable_set & other) = delete;
+        basic_observable_set & operator = (const basic_observable_set & other) = delete;
 
         //Notifies that the set is clearing and removes (and clears) all the subscribers,
         //so with move assignment one set becomes another set with its content and subscribers.
-        observable_set& operator = (observable_set&& other) noexcept
+        basic_observable_set& operator = (basic_observable_set&& other) noexcept
         {
             if (!m_set.empty())
             {
@@ -90,7 +95,7 @@ namespace awl
         }
 
         //It does not move observers, only set elements.
-        void migrate(observable_set && other)
+        void migrate(basic_observable_set && other)
         {
             clear();
 
@@ -104,7 +109,7 @@ namespace awl
             }
         }
 
-        ~observable_set()
+        ~basic_observable_set()
         {
             if (!m_set.empty())
             {
@@ -112,12 +117,12 @@ namespace awl
             }
         }
 
-        bool operator == (const observable_set & other) const
+        bool operator == (const basic_observable_set & other) const
         {
             return m_set == other.m_set;
         }
 
-        bool operator != (const observable_set & other) const
+        bool operator != (const basic_observable_set & other) const
         {
             return !operator == (other);
         }
@@ -330,4 +335,7 @@ namespace awl
 
         mutable InternalObservable m_observable;
     };
+
+    template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>>
+    using observable_vector_set = basic_observable_set<vector_set, T, Compare, Allocator>;
 }

@@ -15,7 +15,7 @@ namespace awl
     private:
 
         using InternalObserver = Observer<INotifySetChanged<T>>;
-        using InternalSet = observable_set<T, Compare, Allocator>;
+        using InternalSet = observable_vector_set<T, Compare, Allocator>;
 
     public:
 
@@ -60,7 +60,7 @@ namespace awl
         }
 
         template <class SrcCompare, class SrcAllocator>
-        void reflect(const observable_set<T, SrcCompare, SrcAllocator>& src_set)
+        void reflect(const observable_vector_set<T, SrcCompare, SrcAllocator>& src_set)
         {
             for (const T& val : src_set)
             {

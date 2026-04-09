@@ -25,7 +25,7 @@ namespace awl
 
         using ForeignKey = std::invoke_result_t<ForeignKeyGetter, const remove_pointer_t<T>&>;
         using PrimaryCompare = KeyCompare<Pointer, PrimaryKeyGetter>;
-        using ValueSet = observable_set<Pointer, PrimaryCompare>;
+        using ValueSet = observable_vector_set<Pointer, PrimaryCompare>;
 
         class ValueSetCompare
         {
@@ -61,7 +61,7 @@ namespace awl
             ForeignKeyGetter foreignKeyGetter;
         };
         
-        using MultiSet = observable_set<ValueSet, ValueSetCompare>;
+        using MultiSet = observable_vector_set<ValueSet, ValueSetCompare>;
         using MultiSetObserver = Observer<INotifySetChanged<ValueSet>>;
 
     public:
