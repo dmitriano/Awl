@@ -93,7 +93,7 @@ AWL_TEST(ForeignSetAddRemoveClear)
         }
     };
 
-    ps.Subscribe(&fs);
+    ps.subscribe(&fs);
 
     GenerateSet(ps, insert_count, range);
 
@@ -120,7 +120,7 @@ AWL_TEST(ForeignSetDestructor)
     {
         PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         GenerateSet(ps, insert_count, range);
     }
@@ -188,7 +188,7 @@ AWL_TEST(ForeignSetShared)
     {
         SharedPrimarySet ps{ PrimaryGetter{&A::pk} };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         std::uniform_int_distribution<int> dist(1, range);
 
@@ -218,7 +218,7 @@ AWL_TEST(ForeignSetUnique)
     {
         UniquePrimarySet ps{ PrimaryGetter{&A::pk} };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         std::uniform_int_distribution<int> dist(1, range);
 
@@ -246,7 +246,7 @@ AWL_TEST(ForeignSetPlainPointer)
     PointerForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
     PointerPrimarySet ps{ PrimaryGetter{&A::pk} };
 
-    ps.Subscribe(&fs);
+    ps.subscribe(&fs);
 
     std::uniform_int_distribution<int> dist(1, range);
 

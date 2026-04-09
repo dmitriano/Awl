@@ -14,9 +14,9 @@ namespace awl
     template <class T>
     struct INotifySetChanged
     {
-        virtual void OnAdded(const T & val) = 0;
-        virtual void OnRemoving(const T & val) = 0;
-        virtual void OnClearing() = 0;
+        virtual void onAdded(const T & val) = 0;
+        virtual void onRemoving(const T & val) = 0;
+        virtual void onClearing() = 0;
     };
     
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 
@@ -80,7 +80,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                NotifyClearing();
+                notifyClearing();
             }
 
             m_set = std::move(other.m_set);
@@ -94,13 +94,13 @@ namespace awl
         {
             clear();
 
-            other.NotifyClearing();
+            other.notifyClearing();
             m_set = std::move(other.m_set);
             other.m_set.clear();
 
             for (const T & elem : *this)
             {
-                NotifyAdded(elem);
+                notifyAdded(elem);
             }
         }
 
@@ -108,7 +108,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                NotifyClearing();
+                notifyClearing();
             }
         }
 
@@ -143,14 +143,14 @@ namespace awl
         std::pair<iterator, bool> insert(const value_type & value)
         {
             const std::pair<iterator, bool> result = m_set.insert(value);
-            NotifyAdded(result);
+            notifyAdded(result);
             return result;
         }
 
         std::pair<iterator, bool> insert(value_type && value)
         {
             const std::pair<iterator, bool> result = m_set.insert(std::move(value));
-            NotifyAdded(result);
+            notifyAdded(result);
             return result;
         }
 
@@ -158,7 +158,7 @@ namespace awl
         std::pair<iterator, bool> emplace(Args&&... args)
         {
             const std::pair<iterator, bool> result = m_set.insert(std::forward<Args>(args) ...);
-            NotifyAdded(result);
+            notifyAdded(result);
             return result;
         }
 
@@ -243,7 +243,7 @@ namespace awl
         //TODO: It should return an iterator pointing to the next element.
         void erase(iterator i)
         {
-            NotifyRemoving(i);
+            notifyRemoving(i);
             m_set.erase(i);
         }
 
@@ -265,7 +265,7 @@ namespace awl
         {
             if (!m_set.empty())
             {
-                m_observable.notify(&INotifySetChanged<T>::OnClearing);
+                m_observable.notify(&INotifySetChanged<T>::onClearing);
                 m_set.clear();
             }
         }
@@ -286,44 +286,44 @@ namespace awl
             return m_set.get_allocator();
         }
 
-        void Subscribe(InternalObserver* p_observer) const
+        void subscribe(InternalObserver* p_observer) const
         {
             m_observable.subscribe(p_observer);
         }
 
-        void Unsubscribe(InternalObserver* p_observer) const
+        void unsubscribe(InternalObserver* p_observer) const
         {
             m_observable.unsubscribe(p_observer);
         }
 
     private:
 
-        void NotifyAdded(const std::pair<iterator, bool> & result)
+        void notifyAdded(const std::pair<iterator, bool> & result)
         {
             if (result.second)
             {
-                NotifyAdded(*result.first);
+                notifyAdded(*result.first);
             }
         }
 
-        void NotifyAdded(const T& val)
+        void notifyAdded(const T& val)
         {
-            m_observable.notify(&INotifySetChanged<T>::OnAdded, val);
+            m_observable.notify(&INotifySetChanged<T>::onAdded, val);
         }
 
-        void NotifyRemoving(const T & val)
+        void notifyRemoving(const T & val)
         {
-            m_observable.notify(&INotifySetChanged<T>::OnRemoving, val);
+            m_observable.notify(&INotifySetChanged<T>::onRemoving, val);
         }
 
-        void NotifyRemoving(const iterator& i)
+        void notifyRemoving(const iterator& i)
         {
-            NotifyRemoving(*i);
+            notifyRemoving(*i);
         }
 
-        void NotifyClearing()
+        void notifyClearing()
         {
-            m_observable.notify(&INotifySetChanged<T>::OnClearing);
+            m_observable.notify(&INotifySetChanged<T>::onClearing);
         }
 
         InternalSet m_set;
