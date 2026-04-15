@@ -43,7 +43,7 @@ namespace awl::testing
             if (!tryGet(val))
             {
                 throw awl::GeneralException(std::format(_T("TypeProvider: type {} not found."),
-                    awl::FromACString(typeid(std::decay_t<T>).name())));
+                    awl::fromACString(typeid(std::decay_t<T>).name())));
             }
 
             return val;

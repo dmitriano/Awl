@@ -37,7 +37,7 @@ namespace awl::testing
         // Used for simulating an app crash.
         AWL_FLAG(terminate);
 
-        out << FromACString(p_test_link->name());
+        out << fromACString(p_test_link->name());
 
         size_t loop_count = loop;
 

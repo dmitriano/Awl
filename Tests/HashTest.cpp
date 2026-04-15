@@ -128,7 +128,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         if (type_name == nullptr)
         {
-            prefix << awl::FromACString(typeid(hash).name());
+            prefix << awl::fromACString(typeid(hash).name());
         }
         else
         {

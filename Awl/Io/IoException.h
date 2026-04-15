@@ -102,7 +102,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << _T("Field '") << FromAString(fieldName) << _T("' not found.") << _T(" .");
+            return format() << _T("Field '") << fromAString(fieldName) << _T("' not found.") << _T(" .");
         }
 
     private:
@@ -121,7 +121,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << _T("Expected '") << FromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
+            return format() << _T("Expected '") << fromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
         }
 
     private:

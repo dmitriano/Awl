@@ -18,7 +18,7 @@ namespace awl
 
         String GetClassName() const
         {
-            return FromACString(what());
+            return fromACString(what());
         }
         
         virtual String What() const

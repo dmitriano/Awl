@@ -54,7 +54,7 @@ namespace awl::testing
             try
             {
                 func();
-                Assert::fail(format() << _T("Exception of type '") << FromACString(typeid(E).name()) << _T("' was not thrown."));
+                Assert::fail(format() << _T("Exception of type '") << fromACString(typeid(E).name()) << _T("' was not thrown."));
             }
             catch (const E &)
             {

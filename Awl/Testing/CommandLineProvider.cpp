@@ -14,7 +14,7 @@ namespace awl::testing
 {
     CommandLineProvider::CommandLineProvider(int argc, CmdChar* argv[])
     {
-        std::basic_regex<CmdChar> option_regex(StringConvertor<CmdChar>::ConvertFrom("--([[:alpha:]][_[:alpha:][:digit:]]+)"),
+        std::basic_regex<CmdChar> option_regex(StringConvertor<CmdChar>::convertFrom("--([[:alpha:]][_[:alpha:][:digit:]]+)"),
             std::regex_constants::icase);
 
         std::match_results<const CmdChar*> match;
@@ -31,7 +31,7 @@ namespace awl::testing
             {
                 CmdString name = match[1].str();
 
-                auto result = allOptions.emplace(StringConvertor<char>::ConvertFrom(name.c_str()), Option{});
+                auto result = allOptions.emplace(StringConvertor<char>::convertFrom(name.c_str()), Option{});
 
                 if (!result.second)
                 {

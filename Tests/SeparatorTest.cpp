@@ -22,7 +22,7 @@ namespace SeparatorTest
 
         auto result = out.str();
         
-        AWL_ASSERT(result == awl::StringConvertor<C>::ConvertFrom(", , "));
+        AWL_ASSERT(result == awl::StringConvertor<C>::convertFrom(", , "));
     }
 }
 

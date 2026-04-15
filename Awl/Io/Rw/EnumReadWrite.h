@@ -58,7 +58,7 @@ namespace awl::io
 
         if (int_val >= EnumTraits<T>::count())
         {
-            throw IoError(format() << _T("Wrong ") << FromACString(EnumTraits<T>::enum_name()) << _T(" enum index: ") << int_val);
+            throw IoError(format() << _T("Wrong ") << fromACString(EnumTraits<T>::enum_name()) << _T(" enum index: ") << int_val);
         }
     }
 

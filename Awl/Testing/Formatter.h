@@ -50,12 +50,12 @@ namespace awl::testing
 
         static String toString(T val)
         {
-            return awl::FromAString(awl::enum_to_string(val));
+            return awl::fromAString(awl::enum_to_string(val));
         }
 
         static T fromString(const String& s)
         {
-            return awl::enum_from_string<T>(StringConvertor<char>::ConvertFrom(s.c_str()));
+            return awl::enum_from_string<T>(StringConvertor<char>::convertFrom(s.c_str()));
         }
     };
 
@@ -68,12 +68,12 @@ namespace awl::testing
 
         static String toString(T val)
         {
-            return StringConvertor<typename String::value_type>::ConvertFrom(val.c_str());
+            return StringConvertor<typename String::value_type>::convertFrom(val.c_str());
         }
 
         static T fromString(String s)
         {
-            return StringConvertor<typename T::value_type>::ConvertFrom(s.c_str());
+            return StringConvertor<typename T::value_type>::convertFrom(s.c_str());
         }
     };
 

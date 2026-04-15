@@ -47,13 +47,13 @@ namespace awl
     {
     public:
 
-        LogString(const char* m) : m_message(awl::FromACString(m)) {}
+        LogString(const char* m) : m_message(awl::fromACString(m)) {}
 
-        LogString(const wchar_t* m) : m_message(awl::FromWCString(m)) {}
+        LogString(const wchar_t* m) : m_message(awl::fromWCString(m)) {}
 
-        LogString(std::string message) : m_message(awl::FromAString(message)) {}
+        LogString(std::string message) : m_message(awl::fromAString(message)) {}
 
-        LogString(std::wstring message) : m_message(awl::FromWString(message)) {}
+        LogString(std::wstring message) : m_message(awl::fromWString(message)) {}
 
         String& str()
         {

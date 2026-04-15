@@ -321,7 +321,7 @@ AWL_TEST(JsonDuration)
         const std::array<QString, N>& to_json_values,
         const std::array<QString, N>& from_json_values)
     {
-        const awl::String label_text = awl::FromACString(label);
+        const awl::String label_text = awl::fromACString(label);
 
         for (size_t i = 0; i < values.size(); ++i)
         {
@@ -514,7 +514,7 @@ AWL_TEST(JsonDurationNew)
 
     auto test_new_format = [&context]<class Duration>(const char* label, const QString& input, Duration expected)
     {
-        const awl::String label_text = awl::FromACString(label);
+        const awl::String label_text = awl::fromACString(label);
 
         Duration actual{};
         awl::FromJson(QJsonValue(input), actual);
@@ -556,7 +556,7 @@ AWL_TEST(JsonDurationInvalid)
 {
     auto test_invalid_input = [&context]<class Duration>(const char* label, const QString& input)
     {
-        const awl::String label_text = awl::FromACString(label);
+        const awl::String label_text = awl::fromACString(label);
 
         context.logger.debug(std::format(_T("{} invalid input: {}"),
             label_text,

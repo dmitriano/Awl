@@ -84,15 +84,15 @@ namespace awl::mp
 
 AWL_TEST(TypeCollector)
 {
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::type_collector<std::pair<const std::string, int>>::Tuple).name()) << awl::format::endl << awl::format::endl);
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::type_collector<std::pair<const std::string, int>>::Tuple).name()) << awl::format::endl << awl::format::endl);
 
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::type_collector<std::map<const std::string, int>>::Tuple).name()) << awl::format::endl << awl::format::endl);
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::type_collector<std::map<const std::string, int>>::Tuple).name()) << awl::format::endl << awl::format::endl);
 
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::type_collector<v1::A>::Tuple).name()) << awl::format::endl << awl::format::endl);
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::type_collector<v1::A>::Tuple).name()) << awl::format::endl << awl::format::endl);
 
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::type_collector<v1::B>::Tuple).name()) << awl::format::endl << awl::format::endl);
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::type_collector<v1::B>::Tuple).name()) << awl::format::endl << awl::format::endl);
 
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::type_collector<D>::Tuple).name()) << awl::format::endl << awl::format::endl);
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::type_collector<D>::Tuple).name()) << awl::format::endl << awl::format::endl);
 
     // class std::tuple<
     // struct `anonymous namespace'::D,
@@ -114,5 +114,5 @@ AWL_TEST(TypeCollector)
 
 AWL_TEST(VariantFromStructs)
 {
-    context.logger.debug(awl::format() << awl::FromAString(typeid(awl::mp::variant_from_struct<v1::A>).name()));
+    context.logger.debug(awl::format() << awl::fromAString(typeid(awl::mp::variant_from_struct<v1::A>).name()));
 }
