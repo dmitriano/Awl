@@ -134,7 +134,7 @@ namespace awl::io
 
     using UniqueStream = PosixStream<UniqueFileHandle>;
     
-    // using SharedStream = PosixStream<SharedFileHandle>;
+    using SharedStream = PosixStream<SharedFileHandle>;
 
     inline thread_local bool openedExisting;
 

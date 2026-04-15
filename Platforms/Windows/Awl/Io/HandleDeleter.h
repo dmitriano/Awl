@@ -5,6 +5,20 @@
 
 #pragma once
 
-#include "NonOwningHandle.h"
-#include "UniqueHandle.h"
-#include "SharedHandle.h"
+#include "Awl/Io/Platform.h"
+
+#include <cassert>
+
+namespace awl::io
+{
+    struct HandleDeleter
+    {
+        void operator()(HANDLE h) const noexcept
+        {
+            BOOL bRes = ::CloseHandle(h);
+
+            assert(bRes);
+            static_cast<void>(bRes);
+        }
+    };
+}

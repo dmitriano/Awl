@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
+#include "Awl/Io/HandleDeleter.h"
+#include "Awl/Io/BasicUniqueHandle.h"
+#include "Awl/Io/NullGetter.h"
 
 namespace awl::io
 {
-    using HANDLE = int;
+    template <class NullGetter>
+    using UniqueHandle = BasicUniqueHandle<NullGetter, HandleDeleter>;
 
-    constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+    using UniqueFileHandle = UniqueHandle<FileNullGetter>;
+    using UniqueProcessHandle = UniqueHandle<ProcessNullGetter>;
 }

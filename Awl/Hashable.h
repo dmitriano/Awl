@@ -50,8 +50,8 @@ namespace std
     template<typename T>
     struct hash<vector<T>>
     {
-        typedef vector<T> argument_type;
-        typedef std::size_t result_type;
+        using argument_type = vector<T>;
+        using result_type = std::size_t;
         result_type operator()(argument_type const& in) const
         {
             size_t seed = 0;

@@ -142,14 +142,14 @@ namespace awl::io
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, observable_set<T, Compare, Alloc> & coll, const Context & ctx = {})
+    void Read(Stream & s, observable_vector_set<T, Compare, Alloc> & coll, const Context & ctx = {})
     {
         ReadCollection(s, coll, ctx);
     }
 
     template <class Stream, class T, class Compare, class Alloc, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const observable_set<T, Compare, Alloc> &coll, const Context & ctx = {})
+    void Write(Stream & s, const observable_vector_set<T, Compare, Alloc> &coll, const Context & ctx = {})
     {
         WriteCollection(s, coll, ctx);
     }

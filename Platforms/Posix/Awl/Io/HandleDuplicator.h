@@ -5,15 +5,22 @@
 
 #pragma once
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
+#include "Awl/Io/Platform.h"
+
+#include <cassert>
 
 namespace awl::io
 {
-    using HANDLE = int;
+    struct HandleDuplicator
+    {
+        HANDLE operator()(HANDLE h) const
+        {
+            int duplicated = ::fcntl(h, F_DUPFD_CLOEXEC, 0);
 
-    constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+            assert(duplicated != NullHandleValue);
+            static_cast<void>(duplicated);
+
+            return duplicated;
+        }
+    };
 }

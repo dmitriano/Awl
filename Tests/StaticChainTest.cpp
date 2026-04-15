@@ -52,7 +52,7 @@ AWL_TEST(StaticChainFactoryParameterless)
     AWL_ASSERT(awl::create<std::string>("b") == "b");
     AWL_ASSERT(awl::create<std::string>("c") == "c");
 
-    awl::testing::Assert::Throws<awl::FactoryException>([]()
+    awl::testing::Assert::throws<awl::FactoryException>([]()
     {
         awl::create<std::string>("d");
     });
@@ -65,7 +65,7 @@ AWL_TEST(StaticChainFactoryArgs)
     AWL_ASSERT(awl::create<std::string>("a1", 5) == "A5");
     AWL_ASSERT(awl::create<std::string>("b1", 7) == "B7");
 
-    awl::testing::Assert::Throws<awl::FactoryException>([]()
+    awl::testing::Assert::throws<awl::FactoryException>([]()
     {
         // c is of different type.
         awl::create<std::string>("c", 7);

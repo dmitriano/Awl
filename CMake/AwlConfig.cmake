@@ -29,3 +29,19 @@ option(AWL_DEBUG_IMMUTABLE "Enable debug mode for immutable.")
 option(AWL_SANITIZE_THREAD "Use Thread Sanitizer.")
 option(AWL_SANITIZE_UNDEFINED "Use Undefined Behavior Sanitizer.")
 option(AWL_SANITIZE_ADDRESS "Use Address Sanitizer.")
+
+set(AWL_COMPILER_GNU_OR_CLANG ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
+    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+
+# AWL_STATIC_RUNTIME is applied globally here because some external targets can
+# be created before AwlCompilerOptions.cmake is included for ${PROJECT_NAME}.
+# In that case target-level runtime settings would be too late to affect
+# subprojects such as qtkeychain.
+if (AWL_STATIC_RUNTIME)
+    message(STATUS "Building with static runtime.")
+    if (${AWL_COMPILER_GNU_OR_CLANG})
+        add_link_options(-static-libgcc -static-libstdc++)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+endif()

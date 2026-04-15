@@ -5,6 +5,18 @@
 
 #pragma once
 
-#include "NonOwningHandle.h"
-#include "UniqueHandle.h"
-//#include "SharedHandle.h"
+#include "Awl/Io/Platform.h"
+
+namespace awl::io
+{
+    struct NullGetter
+    {
+        static constexpr HANDLE null() noexcept
+        {
+            return NullHandleValue;
+        }
+    };
+
+    using FileNullGetter = NullGetter;
+    using ProcessNullGetter = FileNullGetter;
+}

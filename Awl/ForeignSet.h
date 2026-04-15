@@ -25,7 +25,7 @@ namespace awl
 
         using ForeignKey = std::invoke_result_t<ForeignKeyGetter, const remove_pointer_t<T>&>;
         using PrimaryCompare = KeyCompare<Pointer, PrimaryKeyGetter>;
-        using ValueSet = observable_set<Pointer, PrimaryCompare>;
+        using ValueSet = observable_vector_set<Pointer, PrimaryCompare>;
 
         class ValueSetCompare
         {
@@ -61,7 +61,7 @@ namespace awl
             ForeignKeyGetter foreignKeyGetter;
         };
         
-        using MultiSet = observable_set<ValueSet, ValueSetCompare>;
+        using MultiSet = observable_vector_set<ValueSet, ValueSetCompare>;
         using MultiSetObserver = Observer<INotifySetChanged<ValueSet>>;
 
     public:
@@ -79,10 +79,10 @@ namespace awl
         {
             for (auto& val : src_set)
             {
-                OnAdded(val);
+                onAdded(val);
             }
 
-            src_set.Subscribe(this);
+            src_set.subscribe(this);
         }
 
         using value_type = ValueSet;
@@ -138,14 +138,14 @@ namespace awl
             return m_set.find(key);
         }
 
-        void Subscribe(MultiSetObserver* p_observer) const
+        void subscribe(MultiSetObserver* p_observer) const
         {
-            m_set.Subscribe(p_observer);
+            m_set.subscribe(p_observer);
         }
 
-        void Unsubscribe(MultiSetObserver* p_observer) const
+        void unsubscribe(MultiSetObserver* p_observer) const
         {
-            m_set.Unsubscribe(p_observer);
+            m_set.unsubscribe(p_observer);
         }
 
     private:
@@ -169,7 +169,7 @@ namespace awl
             }
         }
 
-        void OnAdded(const T & val) override
+        void onAdded(const T & val) override
         {
             auto& val_ref = *object_address(val);
 
@@ -192,7 +192,7 @@ namespace awl
             }
         }
 
-        void OnRemoving(const T & val) override
+        void onRemoving(const T & val) override
         {
             auto& val_ref = *object_address(val);
             
@@ -208,7 +208,7 @@ namespace awl
             {
                 assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val_ref));
                 
-                //vs destructor will fire 'OnClearing'.
+                //vs destructor will fire 'onClearing'.
                 m_set.erase(vs);
             }
             else
@@ -221,7 +221,7 @@ namespace awl
             }
         }
 
-        void OnClearing() override
+        void onClearing() override
         {
             m_set.clear();
         }

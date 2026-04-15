@@ -18,7 +18,7 @@
 #include <iostream>
 #include <functional>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 namespace awl::testing
 {
@@ -27,9 +27,9 @@ namespace awl::testing
     {
     public:
 
-        explicit TestConsole(Provider& ap, std::stop_token token);
+        explicit TestConsole(Provider& provider, std::stop_token stop_token);
 
-        int Run();
+        int run();
 
         const TestContext& context() const
         {
@@ -38,20 +38,21 @@ namespace awl::testing
 
     private:
 
-        bool RunTests();
+        bool runTests();
             
         ConsoleLogger m_logger;
 
         Provider& m_ap;
+        TypeProvider m_typeProvider;
 
         TestContext m_context;
     };
 
-    int Run();
+    int run();
 
-    int Run(std::stop_token token);
+    int run(std::stop_token stop_token);
 
-    int Run(int argc, CmdChar* argv[]);
+    int run(int argc, CmdChar* argv[]);
 
-    int Run(int argc, CmdChar* argv[], std::stop_token token);
+    int run(int argc, CmdChar* argv[], std::stop_token stop_token);
 }

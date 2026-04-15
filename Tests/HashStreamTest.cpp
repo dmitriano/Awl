@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <fstream>
+#include <filesystem>
 
 #include "Awl/Io/HashStream.h"
 #include "Awl/Io/BufferedStream.h"
@@ -198,8 +199,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
         AWL_ASSERT(hin.End());
     }
 
-    //There is no wchar_t version in C++.
-    //std::remove(file_name);
+    std::filesystem::remove(file_name);
 }
 
 template <class Hash, class T>

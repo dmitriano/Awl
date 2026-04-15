@@ -11,7 +11,7 @@
 #include <vector>
 #include <functional>
 #include <limits>
-#include <assert.h>
+#include <cassert>
 
 namespace awl
 {

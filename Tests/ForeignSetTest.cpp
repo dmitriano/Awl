@@ -30,7 +30,7 @@ namespace
     using PrimaryGetter = awl::field_getter<A, int>; //&A::pk
     using ForeignGetter = awl::field_getter<A, int>; //&A::fk
 
-    using PrimarySet = awl::observable_set<A, awl::KeyCompare<A, PrimaryGetter>>;
+    using PrimarySet = awl::observable_vector_set<A, awl::KeyCompare<A, PrimaryGetter>>;
     using ForeignSet = awl::foreign_set<A, PrimaryGetter, ForeignGetter>;
 
     //Do we really need it to be const?
@@ -93,7 +93,7 @@ AWL_TEST(ForeignSetAddRemoveClear)
         }
     };
 
-    ps.Subscribe(&fs);
+    ps.subscribe(&fs);
 
     GenerateSet(ps, insert_count, range);
 
@@ -120,7 +120,7 @@ AWL_TEST(ForeignSetDestructor)
     {
         PrimarySet ps{ PrimaryGetter{ &A::pk } };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         GenerateSet(ps, insert_count, range);
     }
@@ -178,7 +178,7 @@ AWL_TEST(ForeignSetShared)
 
     //Check if it compiles.
     
-    using SharedPrimarySet = awl::observable_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
+    using SharedPrimarySet = awl::observable_vector_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
     using SharedForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
 
     static_assert(std::is_same_v<typename SharedForeignSet::value_type::value_type, std::shared_ptr<A>>);
@@ -188,7 +188,7 @@ AWL_TEST(ForeignSetShared)
     {
         SharedPrimarySet ps{ PrimaryGetter{&A::pk} };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         std::uniform_int_distribution<int> dist(1, range);
 
@@ -208,7 +208,7 @@ AWL_TEST(ForeignSetUnique)
 
     //Check if it compiles.
 
-    using UniquePrimarySet = awl::observable_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, PrimaryGetter>>;
+    using UniquePrimarySet = awl::observable_vector_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, PrimaryGetter>>;
     using UniqueForeignSet = awl::foreign_set<std::unique_ptr<A>, PrimaryGetter, ForeignGetter>;
 
     static_assert(std::is_same_v<typename UniqueForeignSet::value_type::value_type, const A*>);
@@ -218,7 +218,7 @@ AWL_TEST(ForeignSetUnique)
     {
         UniquePrimarySet ps{ PrimaryGetter{&A::pk} };
 
-        ps.Subscribe(&fs);
+        ps.subscribe(&fs);
 
         std::uniform_int_distribution<int> dist(1, range);
 
@@ -238,7 +238,7 @@ AWL_TEST(ForeignSetPlainPointer)
 
     //Check if it compiles.
 
-    using PointerPrimarySet = awl::observable_set<A *, awl::KeyCompare<A *, PrimaryGetter>>;
+    using PointerPrimarySet = awl::observable_vector_set<A *, awl::KeyCompare<A *, PrimaryGetter>>;
     using PointerForeignSet = awl::foreign_set<A *, PrimaryGetter, ForeignGetter>;
 
     static_assert(std::is_same_v<typename PointerForeignSet::value_type::value_type, A*>);
@@ -246,7 +246,7 @@ AWL_TEST(ForeignSetPlainPointer)
     PointerForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
     PointerPrimarySet ps{ PrimaryGetter{&A::pk} };
 
-    ps.Subscribe(&fs);
+    ps.subscribe(&fs);
 
     std::uniform_int_distribution<int> dist(1, range);
 

@@ -3,6 +3,7 @@
 #include "Awl/Io/PersistentObject.h"
 #include "Awl/Decimal.h"
 
+#include <filesystem>
 #include <map>
 
 namespace
@@ -106,4 +107,7 @@ AWL_TEST(PersistentObject)
     WriteStorage<awl::io::OptionalStorage, std::string>(context);
 
     ReadStorage<awl::io::OptionalStorage, std::string>(context);
+
+    AWL_ASSERT(std::filesystem::remove(settings_file_name + awl::text(".dat")));
+    AWL_ASSERT(std::filesystem::remove(settings_file_name + awl::text(".bak")));
 }

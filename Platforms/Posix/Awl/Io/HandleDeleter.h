@@ -5,15 +5,20 @@
 
 #pragma once
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
+#include "Awl/Io/Platform.h"
+
+#include <cassert>
 
 namespace awl::io
 {
-    using HANDLE = int;
+    struct HandleDeleter
+    {
+        void operator()(HANDLE h) const noexcept
+        {
+            int res = ::close(h);
 
-    constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+            assert(res == 0);
+            static_cast<void>(res);
+        }
+    };
 }

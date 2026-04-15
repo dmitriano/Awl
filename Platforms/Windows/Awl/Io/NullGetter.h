@@ -5,15 +5,23 @@
 
 #pragma once
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
+#include "Awl/Io/Platform.h"
 
 namespace awl::io
 {
-    using HANDLE = int;
+    struct FileNullGetter
+    {
+        static HANDLE null() noexcept
+        {
+            return INVALID_HANDLE_VALUE;
+        }
+    };
 
-    constexpr HANDLE NullHandleValue = static_cast<HANDLE>(-1);
+    struct ProcessNullGetter
+    {
+        static constexpr HANDLE null() noexcept
+        {
+            return nullptr;
+        }
+    };
 }

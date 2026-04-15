@@ -15,7 +15,7 @@ namespace awl
     private:
 
         using InternalObserver = Observer<INotifySetChanged<T>>;
-        using InternalSet = observable_set<T, Compare, Allocator>;
+        using InternalSet = observable_vector_set<T, Compare, Allocator>;
 
     public:
 
@@ -60,15 +60,15 @@ namespace awl
         }
 
         template <class SrcCompare, class SrcAllocator>
-        void reflect(const observable_set<T, SrcCompare, SrcAllocator>& src_set)
+        void reflect(const observable_vector_set<T, SrcCompare, SrcAllocator>& src_set)
         {
             for (const T& val : src_set)
             {
-                OnAdded(val);
+                onAdded(val);
             }
 
             //It will unsubscribe automatically in the destructor.
-            src_set.Subscribe(this);
+            src_set.subscribe(this);
         }
 
         //A mirror successfully reflects another mirror.
@@ -77,11 +77,11 @@ namespace awl
         {
             for (const T& val : src_set)
             {
-                OnAdded(val);
+                onAdded(val);
             }
 
             //It will unsubscribe automatically in the destructor.
-            src_set.Subscribe(this);
+            src_set.subscribe(this);
         }
 
         const T & front() const { return m_set.front(); }
@@ -168,19 +168,19 @@ namespace awl
             return m_set.get_allocator();
         }
 
-        void Subscribe(InternalObserver* p_observer) const
+        void subscribe(InternalObserver* p_observer) const
         {
-            m_set.Subscribe(p_observer);
+            m_set.subscribe(p_observer);
         }
 
-        void Unsubscribe(InternalObserver* p_observer) const
+        void unsubscribe(InternalObserver* p_observer) const
         {
-            m_set.Unsubscribe(p_observer);
+            m_set.unsubscribe(p_observer);
         }
 
     private:
 
-        void OnAdded(const T& val) override
+        void onAdded(const T& val) override
         {
             if (!m_set.insert(val).second)
             {
@@ -188,7 +188,7 @@ namespace awl
             }
         }
 
-        void OnRemoving(const T& val) override
+        void onRemoving(const T& val) override
         {
             if (m_set.erase(val) == 0)
             {
@@ -196,7 +196,7 @@ namespace awl
             }
         }
 
-        void OnClearing() override
+        void onClearing() override
         {
             m_set.clear();
         }

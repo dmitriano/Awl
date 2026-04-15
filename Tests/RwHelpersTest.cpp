@@ -79,7 +79,7 @@ namespace
         awl::vector_set<int> m_hset;
         
         //It is not copyable.
-        //awl::observable_set<int> m_oset;
+        //awl::observable_vector_set<int> m_oset;
 
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
         

@@ -12,7 +12,7 @@
 namespace awl
 {
     //! The base class for list iterators. All the object in the should be of the same type T derived from Link.
-    /*!	To satisfy iterator requirements, such as providing iterator_category member typedef, for example, the basic iterator derives from appropriate specialization
+    /*!	To satisfy iterator requirements, such as providing iterator_category member type alias, for example, the basic iterator derives from appropriate specialization
         of std::iterator.*/
     template <class T, class Link>
     class single_iterator

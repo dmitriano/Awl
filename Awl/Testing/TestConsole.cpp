@@ -25,14 +25,14 @@
 namespace awl::testing
 {
     template <attribute_provider Provider>
-    TestConsole<Provider>::TestConsole(Provider& ap, std::stop_token token) :
-        m_ap(ap),
-        m_context{ m_logger, std::move(token), m_ap}
+    TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
+        m_ap(provider),
+        m_context{ m_logger, std::move(stop_token), m_ap, m_typeProvider}
     {
     }
 
     template <attribute_provider Provider>
-    bool TestConsole<Provider>::RunTests()
+    bool TestConsole<Provider>::runTests()
     {
         TestContext& context = m_context;
 
@@ -58,7 +58,7 @@ namespace awl::testing
 
                 for (const TestLink* p_link : test_map)
                 {
-                    runner.RunLink(p_link, context, out);
+                    runner.runLink(p_link, context, out);
                 }
             }
             else
@@ -72,7 +72,7 @@ namespace awl::testing
                     throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
                 }
 
-                runner.RunLink(p_link, context, out);
+                runner.runLink(p_link, context, out);
             }
 
             out << std::endl << _T("***************** The tests passed *****************") << std::endl;
@@ -92,11 +92,11 @@ namespace awl::testing
     }
 
     template <attribute_provider Provider>
-    int TestConsole<Provider>::Run()
+    int TestConsole<Provider>::run()
     {
         try
         {
-            const bool passed = RunTests();
+            const bool passed = runTests();
 
             return passed ? 0 : 1;
         }
@@ -108,7 +108,7 @@ namespace awl::testing
         return 2;
     }
 
-    int Run(int argc, CmdChar* argv[], std::stop_token token)
+    int run(int argc, CmdChar* argv[], std::stop_token stop_token)
     {
         CommandLineProvider cl(argc, argv);
 
@@ -141,7 +141,7 @@ namespace awl::testing
 
         CmdString json_file;
 
-        if (cl.TryGet("json", json_file))
+        if (cl.tryGet("json", json_file))
         {
             try
             {
@@ -163,11 +163,11 @@ namespace awl::testing
 
 #endif
 
-        TestConsole console(ap, std::move(token));
+        TestConsole console(ap, std::move(stop_token));
 
         auto guard = make_scope_guard([&ap]
         {
-            auto names = ap.get_provider<0>().GetUnusedOptions();
+            auto names = ap.get_provider<0>().getUnusedOptions();
 
             for (const std::string& name : names)
             {
@@ -175,25 +175,25 @@ namespace awl::testing
             }
         });
 
-        return console.Run();
+        return console.run();
     }
 
-    int Run(int argc, CmdChar* argv[])
+    int run(int argc, CmdChar* argv[])
     {
         std::stop_source source;
 
-        return Run(argc, argv, source.get_token());
+        return run(argc, argv, source.get_token());
     }
 
-    int Run()
+    int run()
     {
         std::stop_source source;
 
-        return Run(source.get_token());
+        return run(source.get_token());
     }
 
-    int Run(std::stop_token token)
+    int run(std::stop_token stop_token)
     {
-        return Run(0, nullptr, std::move(token));
+        return run(0, nullptr, std::move(stop_token));
     }
 }

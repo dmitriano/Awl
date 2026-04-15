@@ -24,26 +24,26 @@ namespace awl::testing
         constexpr CompositeProvider(Ps... providers) : m_providers(std::move(providers) ...) {}
 
         template <class T>
-        bool TryGet(const char* name, T& val)
+        bool tryGet(const char* name, T& val)
         {
-            return TryGetAt<T, 0u>(name, val);
+            return tryGetAt<T, 0u>(name, val);
         }
 
         template <class T>
-        void Set(const char* name, const T& val)
+        void set(const char* name, const T& val)
         {
             std::apply([name, &val](Ps&... provider)
             {
-                (provider.Set(name, val), ...);
+                (provider.set(name, val), ...);
 
             }, m_providers);
         }
 
-        void Clear()
+        void clear()
         {
             std::apply([](Ps&... provider)
                 {
-                    (provider.Clear(), ...);
+                    (provider.clear(), ...);
 
                 }, m_providers);
         }
@@ -59,7 +59,7 @@ namespace awl::testing
         using Tuple = std::tuple<std::decay_t<Ps>...>;
 
         template <class T, std::size_t Index>
-        bool TryGetAt(const char* name, T& val)
+        bool tryGetAt(const char* name, T& val)
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
             {
@@ -71,12 +71,12 @@ namespace awl::testing
             {
                 auto& provider = std::get<Index>(m_providers);
 
-                if (provider.TryGet(name, val))
+                if (provider.tryGet(name, val))
                 {
                     return true;
                 }
 
-                return TryGetAt<T, Index + 1>(name, val);
+                return tryGetAt<T, Index + 1>(name, val);
             }
         }
 

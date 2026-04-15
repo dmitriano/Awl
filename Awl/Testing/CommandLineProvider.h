@@ -31,22 +31,22 @@ namespace awl::testing
 
         CommandLineProvider(int argc, CmdChar* argv[]);
 
-        auto GetUnusedOptions() const
+        auto getUnusedOptions() const
         {
             return allOptions | std::views::filter([](const auto& pair) -> bool { return pair.second.usage == 0; }) |
                 std::views::keys;
         }
 
         template <class T>
-        bool TryGet(const char* name, T& val)
+        bool tryGet(const char* name, T& val)
         {
             CmdString s;
 
-            if (TryFind(name, s))
+            if (tryFind(name, s))
             {
                 if constexpr (BasicFormatter<CmdChar, T>::value)
                 {
-                    val = BasicFormatter<CmdChar, T>::FromString(s);
+                    val = BasicFormatter<CmdChar, T>::fromString(s);
 
                     return true;
                 }
@@ -61,18 +61,18 @@ namespace awl::testing
         }
 
         template <class T>
-        void Set(const char* name, const T& val)
+        void set(const char* name, const T& val)
         {
             static_cast<void>(name);
             static_cast<void>(val);
         }
 
         // Command line attributes applies to all the tests.
-        void Clear() {}
+        void clear() {}
 
     private:
 
-        bool TryFind(const char* name, CmdString& val) const;
+        bool tryFind(const char* name, CmdString& val) const;
 
         struct Option
         {
@@ -80,13 +80,13 @@ namespace awl::testing
             {
             }
 
-            Option(const CmdChar* v) : Option()
+            Option(const CmdChar* val_ptr) : Option()
             {
-                val = v;
+                val = val_ptr;
             }
 
             //A flag is an option that does not have a value.
-            bool IsFlag() const
+            bool isFlag() const
             {
                 return val != nullptr;
             }

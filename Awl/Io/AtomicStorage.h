@@ -41,6 +41,9 @@ namespace awl::io
 
         AtomicStorage& operator = (AtomicStorage&& other) noexcept
         {
+            // We can't move m_saveFuture, because it holds this pointer.
+            Wait();
+
             m_s = std::move(other.m_s);
             m_backup = std::move(other.m_backup);
             return *this;
@@ -49,6 +52,8 @@ namespace awl::io
         bool IsEmpty() const
         {
             assert(IsOpened());
+            assert(!m_saveFuture.valid());
+
             return m_s.GetLength() == 0 && m_backup.GetLength() == 0;
         }
 
