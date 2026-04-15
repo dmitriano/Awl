@@ -19,10 +19,8 @@ bool OptionalStorage::Open(const awl::String& file_name, const awl::String& back
     }
     catch (const IoException& e)
     {
-        m_logger.warning(awl::format() << _T("Application settings have not been loaded, from ") <<
-            file_name << _T("' and '") << backup_name <<
-            _T(", leaving default values.") <<
-            _T("Error message: ") << e.What());
+        m_logger.warning(_T("Application settings have not been loaded, from '{}' and '{}', leaving default values. Error message: {}"),
+            file_name, backup_name, e.What());
     }
 
     return existing;

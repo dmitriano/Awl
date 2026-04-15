@@ -10,7 +10,7 @@ using namespace awl::testing;
 
 AWL_EXAMPLE(CppVersion)
 {
-    awl::format message;
+    awl::ostringstream message;
 
     message << _T("C++ version: ") << __cplusplus << _T(", ");
 
@@ -21,5 +21,5 @@ AWL_EXAMPLE(CppVersion)
     else if constexpr (__cplusplus >= 199711L) message << "C++98\n";
     else message << "pre-standard C++\n";
 
-    context.logger.debug(message);
+    context.logger.debug(message.str());
 }

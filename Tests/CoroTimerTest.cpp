@@ -16,9 +16,9 @@ namespace
 
     awl::ProcessTask<int> wait_n(const awl::testing::TestContext& context, int n)
     {
-        context.logger.debug(awl::format() << "before wait " << n << awl::format::endl);
+        context.logger.debug(_T("before wait {}\n"), n);
         co_await std::chrono::seconds(n);
-        context.logger.debug(awl::format() << "after wait " << n << awl::format::endl);
+        context.logger.debug(_T("after wait {}\n"), n);
         co_return n;
     }
 
@@ -26,7 +26,7 @@ namespace
     {
         for (auto c : "hello world\n")
         {
-            context.logger.debug(awl::format() << c);
+            context.logger.debug(_T("{}"), c);
             co_await 100ms;
         }
 
@@ -56,7 +56,7 @@ AWL_EXAMPLE(CoroTimer)
     // execute deferred coroutines
     awl::testing::timeQueue.loop();
 
-    context.logger.debug(awl::format() << "result: " << result.get());
+    context.logger.debug(_T("result: {}"), result.get());
 }
 
 AWL_EXAMPLE(CoroTimer0)
@@ -66,5 +66,5 @@ AWL_EXAMPLE(CoroTimer0)
     // execute deferred coroutines
     awl::testing::timeQueue.loop();
 
-    context.logger.debug(awl::format() << "result: " << result.get());
+    context.logger.debug(_T("result: {}"), result.get());
 }

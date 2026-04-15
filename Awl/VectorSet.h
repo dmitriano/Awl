@@ -513,7 +513,7 @@ namespace awl
         {
             if (!(pos < size()))
             {
-                throw std::out_of_range(aformat() << "Index " << pos << " is out of range [0, " << size() << "].");
+                throw std::out_of_range(std::format("Index {} is out of range [0, {}].", pos, size()));
             }
         }
 

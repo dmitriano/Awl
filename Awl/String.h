@@ -420,29 +420,6 @@ inline std::wistream& operator >> (std::wistream& in, QString& val)
     return in;
 }
 
-namespace std
-{
-    template <>
-    struct formatter<QString, char> : formatter<string_view, char>
-    {
-        auto format(const QString& val, format_context& ctx) const
-        {
-            const std::string text = val.toStdString();
-            return formatter<string_view, char>::format(text, ctx);
-        }
-    };
-
-    template <>
-    struct formatter<QString, wchar_t> : formatter<wstring_view, wchar_t>
-    {
-        auto format(const QString& val, wformat_context& ctx) const
-        {
-            const std::wstring text = val.toStdWString();
-            return formatter<wstring_view, wchar_t>::format(text, ctx);
-        }
-    };
-}
-
 #endif //AWL_QT
 
 #ifdef AWL_BOOST

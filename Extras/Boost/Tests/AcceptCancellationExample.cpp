@@ -1,4 +1,5 @@
 #include "Awl/StringFormat.h"
+#include "Extras/Boost/BoostExtras/AsioEndpointFormatter.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
@@ -19,7 +20,7 @@ namespace
     {
         auto ex = co_await asio::this_coro::executor;
 
-        context.logger.debug(awl::format() << "Waiting for a client on " << acceptor.local_endpoint() << "...");
+        context.logger.debug(_T("Waiting for a client on {}..."), acceptor.local_endpoint());
 
         // Bind the external cancellation slot specifically to async_accept.
         // In Boost 1.89 this is the correct way to hook your own signal.
@@ -27,7 +28,7 @@ namespace
             co_await acceptor.async_accept(
                 asio::bind_cancellation_slot(cancel_signal.slot(), use_awaitable));
 
-        context.logger.debug(awl::format() << "Client connected from " << socket.remote_endpoint());
+        context.logger.debug(_T("Client connected from {}"), socket.remote_endpoint());
 
         co_return socket;
     }
@@ -84,6 +85,6 @@ AWL_EXAMPLE(AcceptCancellation)
     }
     catch (const std::exception& e)
     {
-        context.logger.error(awl::format() << "Exception: " << e.what());
+        context.logger.error(_T("Exception: {}"), awl::fromACString(e.what()));
     }
 }

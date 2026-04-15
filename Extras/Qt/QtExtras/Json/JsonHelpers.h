@@ -28,14 +28,14 @@ namespace awl
             case QJsonValue::Undefined: return _T("Undefined");
         }
 
-        throw JsonException(format() << _T("Wrong type value: ") << t << _T("."));
+        throw JsonException(std::format(_T("Wrong type value: {}."), static_cast<int>(t)));
     }
         
     inline void EnsureType(const QJsonValue& jv, QJsonValue::Type t)
     {
         if (jv.type() != t)
         {
-            throw JsonException(format() << _T("Expected value type: ") << TypeToString(t) << _T(", actul value type: ") << TypeToString(jv.type()));
+            throw JsonException(std::format(_T("Expected value type: {}, actul value type: {}"), TypeToString(t), TypeToString(jv.type())));
         }
     }
     

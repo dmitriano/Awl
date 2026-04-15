@@ -44,7 +44,9 @@ namespace awl::testing
         {
             if (expected != actual)
             {
-                fail(format() << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T("."));
+                awl::ostringstream out;
+                out << message << _T(" ") << _T(" expected ") << expected << _T(", actual ") << actual << _T(".");
+                fail(out.str());
             }
         }
 
@@ -54,7 +56,7 @@ namespace awl::testing
             try
             {
                 func();
-                Assert::fail(format() << _T("Exception of type '") << fromACString(typeid(E).name()) << _T("' was not thrown."));
+                Assert::fail(std::format(_T("Exception of type '{}' was not thrown."), fromACString(typeid(E).name())));
             }
             catch (const E &)
             {

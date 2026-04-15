@@ -69,8 +69,7 @@ namespace awl::io
 
             if (nNumberOfBytesToWrite != NumberOfBytesWritten)
             {
-                throw IoError(format() << _T("Requested ") << nNumberOfBytesToWrite
-                    << _T(" bytes, but actually written ") << NumberOfBytesWritten << _T("."));
+                throw IoError(std::format(_T("Requested {} bytes, but actually written {}."), nNumberOfBytesToWrite, NumberOfBytesWritten));
             }
         }
 
@@ -179,7 +178,7 @@ namespace awl::io
 
         if (hFile == INVALID_HANDLE_VALUE)
         {
-            throw Win32Exception(format() << _T("Cannot open file ')") << file_name << _T("' for updating"));
+            throw Win32Exception(std::format(_T("Cannot open file '{}' for updating"), file_name));
         }
 
         return hFile;
@@ -210,7 +209,7 @@ namespace awl::io
 
         if (hFile == INVALID_HANDLE_VALUE)
         {
-            throw Win32Exception(format() << _T("Cannot open file ')") << file_name << _T("' for reading."));
+            throw Win32Exception(std::format(_T("Cannot open file '{}' for reading."), file_name));
         }
 
         return hFile;

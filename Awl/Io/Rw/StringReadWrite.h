@@ -18,7 +18,7 @@ namespace awl::io
     {
         if (actual_len > expected_len)
         {
-            throw IoError(format() << _T("The length of a string exceeds the limit of " << expected_len << " bytes. Actual length: " << actual_len << "."));
+            throw IoError(std::format(_T("The length of a string exceeds the limit of {} bytes. Actual length: {}."), expected_len, actual_len));
         }
     }
 

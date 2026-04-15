@@ -488,7 +488,7 @@ AWL_TEST(Shapshot)
 
     AWL_ASSERT(actual_v == expected_v);
 
-    context.logger.debug(awl::format() << _T("Snapshot size: ") << actual_v.size() << _T(" bytes"));
+    context.logger.debug(_T("Snapshot size: {} bytes"), actual_v.size());
     // context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
 }
 
@@ -684,7 +684,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
         stream_size = measure_out.GetLength();
 
-        context.logger.debug(awl::format() << "Stream Size: " << stream_size << " bytes.");
+        context.logger.debug(_T("Stream Size: {} bytes."), stream_size);
     }
 
     if (vector_stream)
@@ -724,7 +724,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
             helpers::ReportCount(context, w, write_count);
 
-            context.logger.debug(awl::format());
+            context.logger.debug(_T(""));
 
             storage.Load(*p_val);
 
@@ -732,6 +732,6 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
         }
 
         // File Size should be equal to Stream Size printed above.
-        context.logger.debug(awl::format() << "File Size: " << fs::file_size(master_name) << " bytes.");
+        context.logger.debug(_T("File Size: {} bytes."), fs::file_size(master_name));
     }
 }

@@ -53,7 +53,7 @@ namespace
 
         helpers::ReportCount(context, w, element_count * iteration_count);
 
-        context.logger.debug(awl::format() << _T("\t") << type_name);
+        context.logger.debug(_T("\t{}"), type_name);
     }
 
     class flat_map
@@ -145,7 +145,7 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     {
@@ -164,7 +164,7 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, read_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     {
@@ -185,6 +185,6 @@ AWL_BENCHMARK(MemoryRead)
 
         helpers::ReportCount(context, w, read_count);
 
-        context.logger.debug(awl::format() << _T("\t sum=") << sum);
+        context.logger.debug(_T("\t sum={}"), sum);
     }
 }

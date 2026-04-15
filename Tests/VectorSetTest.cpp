@@ -294,7 +294,7 @@ AWL_TEST(VectorSetRandom)
             bool my_result = my_set.erase(val);
             bool std_result = std_set.erase(val) != 0;
 
-            awl::format message;
+            awl::ostringstream message;
             message << val;
 
             if (my_result)
@@ -306,7 +306,7 @@ AWL_TEST(VectorSetRandom)
                 message << _T(" not found.");
             }
 
-            context.logger.debug(message);
+            context.logger.debug(message.str());
 
             AWL_ASSERT(my_result == std_result);
 

@@ -52,7 +52,7 @@ namespace
 
                 QJsonValue jmsg = jobj["msg"];
 
-                context.logger.debug(awl::format() << "Code: " << jcode.toInt() << ", msg: " << awl::FromQString(jmsg.toString()));
+                context.logger.debug(_T("Code: {}, msg: {}"), jcode.toInt(), awl::FromQString(jmsg.toString()));
                 
                 return true;
             }
@@ -161,7 +161,7 @@ AWL_TEST(JsonReflectableExceptionTypeMismatch)
     {
         awl::FromJson(b_jo, b);
 
-        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
     catch (const awl::JsonException& e)
     {
@@ -190,7 +190,7 @@ AWL_TEST(JsonReflectableExceptionNull)
     {
         awl::FromJson(b_jo, b);
 
-        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
     catch (const awl::JsonException& e)
     {
@@ -220,7 +220,7 @@ AWL_TEST(JsonReflectableExceptionVector)
     {
         awl::FromJson(b_jo, b);
 
-        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
     catch (const awl::JsonException& e)
     {
@@ -255,7 +255,7 @@ AWL_TEST(JsonReflectableExceptionSet)
     {
         awl::FromJson(b_jo, b);
 
-        AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+        AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
     catch (const awl::JsonException& e)
     {
@@ -293,7 +293,7 @@ namespace
             {
                 awl::FromJson(jo, map);
 
-                AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+                AWL_FAILM(_T("Exception of type JsonException was not thrown."));
             }
             catch (const awl::JsonException& e)
             {
@@ -613,7 +613,7 @@ AWL_TEST(JsonDecimal)
 
             awl::FromJson(jv, d);
 
-            AWL_FAILM(awl::format() << "Exception of type JsonException was not thrown.");
+            AWL_FAILM(_T("Exception of type JsonException was not thrown."));
         }
         catch (const awl::JsonException& e)
         {

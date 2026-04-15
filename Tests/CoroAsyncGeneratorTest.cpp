@@ -46,7 +46,7 @@ namespace
 
         int n = 0;
 
-        awl::format line;
+        awl::ostringstream line;
         bool first = true;
 
         for (auto i = co_await g.begin(); i != g.end(); co_await ++i)
@@ -68,7 +68,7 @@ namespace
             }
         }
 
-        context.logger.debug(line);
+        context.logger.debug(line.str());
     }
 
     awl::UpdateTask test(const awl::testing::TestContext& context)
@@ -85,7 +85,7 @@ namespace
         }
         catch (const std::exception& ex)
         {
-            context.logger.debug(awl::format() << awl::format::endl << "Exception: " << ex.what());
+            context.logger.debug(_T("\nException: {}"), awl::fromACString(ex.what()));
         }
         catch (...)
         {
@@ -119,7 +119,7 @@ AWL_TEST(CoroControllerCancel)
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    context.logger.debug(awl::format());
+    context.logger.debug(_T(""));
 
     // This invalidates timeQueue.
     controller.cancel();
@@ -154,7 +154,7 @@ namespace
     {
         co_await 100ms;
 
-        context.logger.debug(awl::format() << id << " finished");
+        context.logger.debug(_T("{} finished"), id);
     }
 }
 

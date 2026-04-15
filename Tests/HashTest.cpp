@@ -124,7 +124,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             }
         }
 
-        awl::format prefix;
+        awl::ostringstream prefix;
 
         if (type_name == nullptr)
         {
@@ -137,7 +137,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         prefix << _T(": ");
 
-        context.logger.debug(prefix);
+        context.logger.debug(prefix.str());
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 

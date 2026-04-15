@@ -35,7 +35,7 @@ namespace awl::testing
         {
             if (m_jo.contains(name))
             {
-                throw JsonException(awl::format() << "Attribute '" << name << "' is already set.");
+                throw JsonException(std::format(_T("Attribute '{}' is already set."), awl::fromACString(name)));
             }
 
             JsonSerializer<T> serializer;

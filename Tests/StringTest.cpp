@@ -13,14 +13,18 @@ AWL_TEST(StringFormatQt)
 {
     const char sample[] = "abc";
 
-    QString a_str = awl::aformat() << sample;
+    std::ostringstream a_out;
+    a_out << sample;
+    QString a_str = QString::fromStdString(a_out.str());
 
-    QString w_str = awl::wformat() << sample;
+    std::wostringstream w_out;
+    w_out << sample;
+    QString w_str = QString::fromStdWString(w_out.str());
 
     AWL_ASSERT(a_str == sample);
     AWL_ASSERT(a_str == sample);
 
-    context.logger.debug(awl::format() << a_str << ", " << w_str);
+    context.logger.debug(_T("{}, {}"), a_str, w_str);
 }
 
 #endif //AWL_QT

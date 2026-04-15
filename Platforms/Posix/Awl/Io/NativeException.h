@@ -29,7 +29,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << IoError::What() << _T(" Error code: ") << m_error << _T(" .");
+            return std::format(_T("{} Error code: {} ."), IoError::What(), m_error);
         }
 
     private:

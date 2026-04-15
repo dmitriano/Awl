@@ -108,13 +108,13 @@ namespace
         {
             int v = co_await processor.asyncProcess();
 
-            context.logger.debug(awl::format() << "Result = " << v);
+            context.logger.debug(_T("Result = {}"), v);
         }
 
         {
             int v = co_await processor.asyncProcessOnThread();
 
-            context.logger.debug(awl::format() << "Result = " << v);
+            context.logger.debug(_T("Result = {}"), v);
         }
     }
 }

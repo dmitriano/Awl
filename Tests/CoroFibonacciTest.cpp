@@ -48,7 +48,7 @@ namespace
 
         for (auto [n, j] : gen)
         {
-            context.logger.debug(awl::format() << "fib(" << n << ")=" << j);
+            context.logger.debug(_T("fib({})={}"), n, j);
         }
     }
 }
@@ -67,7 +67,7 @@ AWL_EXAMPLE(CoroGeneratorFibonacci)
     }
     catch (const std::exception& ex)
     {
-        context.logger.debug(awl::format() << "Exception: " << ex.what() << '\n');
+        context.logger.debug(_T("Exception: {}\n"), awl::fromACString(ex.what()));
     }
     catch (...)
     {

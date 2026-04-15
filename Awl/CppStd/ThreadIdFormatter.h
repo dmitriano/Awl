@@ -7,15 +7,16 @@
 #include <cstdint>
 #include <functional>
 
-template<>
-struct std::formatter<std::thread::id> : std::formatter<std::size_t>
+template<class CharT>
+struct std::formatter<std::thread::id, CharT> : std::formatter<std::size_t, CharT>
 {
-    auto format(const std::thread::id& id, std::format_context& ctx) const
+    template <class FormatContext>
+    auto format(const std::thread::id& id, FormatContext& ctx) const
     {
         const size_t value = std::hash<std::thread::id>{}(id);
 
         // Delegate formatting to base formatter (allows custom {:x}, {:08x}, etc.)
-        return std::formatter<uintptr_t>::format(value, ctx);
+        return std::formatter<std::size_t, CharT>::format(value, ctx);
     }
 };
 

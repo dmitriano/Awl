@@ -87,7 +87,7 @@ namespace
                 }
                 else
                 {
-                    print(awl::format() << "Processing error: " << e.code().message());
+                    print(std::format(_T("Processing error: {}"), awl::fromAString(e.code().message())));
 
                     throw;
                 }
@@ -217,7 +217,7 @@ namespace
                 }
                 else
                 {
-                    print(awl::format() << "Receive error: " << e.code().message());
+                    print(std::format(_T("Receive error: {}"), awl::fromAString(e.code().message())));
 
                     throw;
                 }

@@ -35,7 +35,7 @@ namespace awl
 
             if (i == names.end())
             {
-                throw JsonException(awl::format() << _T("Wrong enum value '") << awl::fromAString(str_val) << _T("'.")); 
+                throw JsonException(std::format(_T("Wrong enum value '{}'."), awl::fromAString(str_val))); 
             }
 
             const size_t index = i - names.begin();

@@ -50,7 +50,7 @@ AWL_TEST(VtsReadWriteVectorStream)
     std::vector<uint8_t> v;
     v.reserve(mem_size);
 
-    context.logger.debug(awl::format() << v.capacity() << _T(" bytes of memory has been allocated. "));
+    context.logger.debug(_T("{} bytes of memory has been allocated. "), v.capacity());
 
     {
         awl::io::VectorOutputStream out(v);
@@ -70,7 +70,7 @@ AWL_TEST(VtsReadWriteVectorStream)
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, v.size() * write_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     AWL_ASSERT_EQUAL(mem_size, v.size());
@@ -92,7 +92,7 @@ AWL_TEST(VtsReadWriteVectorStream)
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     {
@@ -111,7 +111,7 @@ AWL_TEST(VtsReadWriteVectorStream)
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     {
@@ -130,7 +130,7 @@ AWL_TEST(VtsReadWriteVectorStream)
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 }
 
@@ -149,7 +149,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     std::unique_ptr<uint8_t[]> p1(new uint8_t[element_count]);
@@ -163,7 +163,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 
     {
@@ -181,7 +181,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 }
 

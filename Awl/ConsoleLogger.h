@@ -22,9 +22,11 @@ namespace awl
     {
     public:
 
+        using Logger::log;
+
         ConsoleLogger(awl::ostream& out = awl::cout()) : m_out(out) {}
 
-        void log(std::string level, LogString message) override
+        void log(const std::string& level, const LogString& message) override
         {
             awl::ostringstream temp_out;
 

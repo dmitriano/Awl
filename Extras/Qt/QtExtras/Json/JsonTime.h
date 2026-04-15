@@ -52,14 +52,14 @@ namespace awl
         {
             if (!jv.isString())
             {
-                throw JsonException(awl::format() << "Expected duration as JSON string.");
+                throw JsonException(_T("Expected duration as JSON string."));
             }
 
             QString text = jv.toString().trimmed();
 
             if (text.isEmpty())
             {
-                throw JsonException(awl::format() << "Duration string is empty.");
+                throw JsonException(_T("Duration string is empty."));
             }
 
             const QString original_text = text;
@@ -92,7 +92,7 @@ namespace awl
 
             if (std::chrono::duration_cast<common_duration>(converted) != parsed)
             {
-                throwWrongDurationValue(original_text, awl::format() << "Duration precision loss.");
+                throwWrongDurationValue(original_text, _T("Duration precision loss."));
             }
 
             v = converted;
@@ -219,7 +219,7 @@ namespace awl
 
             auto make_invalid_format = [&original_text]()
             {
-                throw JsonException(awl::format() << "Invalid duration format: " << original_text);
+                throw JsonException(std::format(_T("Invalid duration format: {}"), original_text));
             };
 
             auto parse_integer = [&original_text](std::string_view sv) -> int64_t
@@ -229,7 +229,7 @@ namespace awl
 
                 if (ec != std::errc{} || ptr != sv.data() + sv.size())
                 {
-                    throw JsonException(awl::format() << "Invalid duration format: " << original_text);
+                    throw JsonException(std::format(_T("Invalid duration format: {}"), original_text));
                 }
 
                 return value;
@@ -332,7 +332,7 @@ namespace awl
                     {
                         if (token[i] != '0')
                         {
-                            throw JsonException(awl::format() << "Duration precision loss: " << original_text);
+                            throw JsonException(std::format(_T("Duration precision loss: {}"), original_text));
                         }
                     }
 
@@ -358,7 +358,7 @@ namespace awl
 
         static void throwWrongDurationValue(const QString& text, const awl::String& details)
         {
-            throw JsonException(awl::format() << "Wrong duration value " << text << ". " << details);
+            throw JsonException(std::format(_T("Wrong duration value {}. {}"), text, details));
         }
     };
 }

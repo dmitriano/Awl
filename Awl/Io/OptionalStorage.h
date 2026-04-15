@@ -94,8 +94,7 @@ namespace awl::io
                 }
                 catch (const IoException& e)
                 {
-                    m_logger.warning(awl::format() << _T("Application settings were not saved correctly. ") <<
-                        _T("Error message: ") << e.What());
+                    m_logger.warning(_T("Application settings were not saved correctly. Error message: {}"), e.What());
                 }
             }
 

@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/String.h"
+#include "Awl/StringFormat.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -135,6 +135,27 @@ namespace
             }
         }
 
+        static void TestCrossCharStdFormat()
+        {
+            const std::wstring wide_from_string = std::format(L"{}", std::string("abc"));
+            AWL_ASSERT(wide_from_string == std::wstring(L"abc"));
+
+            const std::string narrow_from_wstring = std::format("{}", std::wstring(L"abc"));
+            AWL_ASSERT(narrow_from_wstring == std::string("abc"));
+
+#ifdef AWL_QT
+
+            const QString qtext("abc");
+
+            const std::wstring wide_from_qstring = std::format(L"{}", qtext);
+            AWL_ASSERT(wide_from_qstring == std::wstring(L"abc"));
+
+            const std::string narrow_from_qstring = std::format("{}", qtext);
+            AWL_ASSERT(narrow_from_qstring == std::string("abc"));
+
+#endif
+        }
+
 #ifdef AWL_INT_128
 
         static void TestInt128Format()
@@ -229,6 +250,14 @@ AWL_TEST(StringEqual)
 
     StringTest<char>::TestEqual();
     StringTest<wchar_t>::TestEqual();
+}
+
+AWL_TEST(StringCrossCharStdFormat)
+{
+    AWL_UNUSED_CONTEXT;
+
+    StringTest<char>::TestCrossCharStdFormat();
+    StringTest<wchar_t>::TestCrossCharStdFormat();
 }
 
 #ifdef AWL_INT_128

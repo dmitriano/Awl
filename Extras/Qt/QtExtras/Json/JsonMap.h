@@ -62,7 +62,7 @@ namespace awl
                 
                 if (!new_key)
                 {
-                    throw JsonException(awl::format() << _T("Duplicate map key ") << i.key().data() << _T("."));
+                    throw JsonException(std::format(_T("Duplicate map key {}."), i.key()));
                 }
             }
         }

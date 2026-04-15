@@ -43,13 +43,13 @@ namespace awl::io
 
             if (actual_header.format != expectedHeader.format)
             {
-                throw IoError(awl::format() << _T("Wrong format. Expected: " << expectedHeader.format << ". Actual: " << actual_header.format << "."));
+                throw IoError(std::format(_T("Wrong format. Expected: {}. Actual: {}."), expectedHeader.format, actual_header.format));
             }
 
             if (actual_header.version > expectedHeader.version)
             {
-                throw IoError(awl::format() << _T("The version is greater then expected. Expected: " << expectedHeader.version << ". Actual: " <<
-                    actual_header.version << "."));
+                throw IoError(std::format(_T("The version is greater then expected. Expected: {}. Actual: {}."),
+                    expectedHeader.version, actual_header.version));
             }
 
             if (actual_header.version < expectedHeader.version)
@@ -71,7 +71,7 @@ namespace awl::io
         {
             static_cast<void>(in);
 
-            throw IoError(awl::format() << _T("Wrong version. Expected: " << expectedHeader.version << ". Actual: " << version << "."));
+            throw IoError(std::format(_T("Wrong version. Expected: {}. Actual: {}."), expectedHeader.version, version));
         }
 
     private:

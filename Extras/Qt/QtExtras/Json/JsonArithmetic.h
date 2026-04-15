@@ -49,13 +49,13 @@ namespace awl
                 val = strVal.toDouble(&ok);
                 if (!ok)
                 {
-                    throw JsonException(awl::format() << _T("Can't convert a JSON value from String to Double."));
+                    throw JsonException(_T("Can't convert a JSON value from String to Double."));
                 }
                 break;
             }
 
             default:
-                throw JsonException(awl::format() << _T("Expected value of Double or String type, actul value type: ") << TypeToString(jv.type()));
+                throw JsonException(std::format(_T("Expected value of Double or String type, actul value type: {}"), TypeToString(jv.type())));
                 break;
             }
         }

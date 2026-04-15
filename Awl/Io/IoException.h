@@ -25,7 +25,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << _T("Requested ") << requestedCount << _T(" actually read ") << actuallyReadCount << _T(" .");
+            return std::format(_T("Requested {} actually read {} ."), requestedCount, actuallyReadCount);
         }
 
     private:
@@ -44,7 +44,7 @@ namespace awl::io
 
         String What() const override
         {
-            format out;
+            awl::ostringstream out;
 
             out << _T("The stream is corrupted");
 
@@ -55,7 +55,7 @@ namespace awl::io
 
             out << _T(" .");
 
-            return out;
+            return out.str();
         }
 
     private:
@@ -102,7 +102,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << _T("Field '") << fromAString(fieldName) << _T("' not found.") << _T(" .");
+            return std::format(_T("Field '{}' not found. ."), fromAString(fieldName));
         }
 
     private:
@@ -121,7 +121,7 @@ namespace awl::io
 
         String What() const override
         {
-            return format() << _T("Expected '") << fromAString(fieldName) << _T("' type: ") << expectedType << _T(" actually read type: ") << actualType << _T(" .");
+            return std::format(_T("Expected '{}' type: {} actually read type: {} ."), fromAString(fieldName), expectedType, actualType);
         }
 
     private:

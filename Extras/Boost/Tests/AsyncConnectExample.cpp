@@ -69,7 +69,7 @@ AWL_EXAMPLE(AsyncConnect)
     {
     case 0:
         context.logger.debug("Straight callback");
-        w.asyncConnect(eps, [&context](error_code ec) { context.logger.debug(awl::format() << "Callback: " << ec.message()); });
+        w.asyncConnect(eps, [&context](error_code ec) { context.logger.debug(_T("Callback: {}"), awl::fromAString(ec.message())); });
         break;
     case 1:
         context.logger.debug("Coro await");
@@ -98,7 +98,7 @@ AWL_EXAMPLE(AsyncConnect)
 
         if (f.wait_for(20ms) == std::future_status::ready) {
             auto [ec] = f.get();
-            context.logger.debug(awl::format() << "Future resolved within 20ms: " << ec.message());
+            context.logger.debug(_T("Future resolved within 20ms: {}"), awl::fromAString(ec.message()));
         }
         break;
     }

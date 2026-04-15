@@ -48,7 +48,7 @@ namespace awl
                 }
                 catch (JsonException& e)
                 {
-                    e.append({ j_elem.type(), type_hint<T>(), awl::aformat() << index });
+                    e.append({ j_elem.type(), type_hint<T>(), std::to_string(index) });
 
                     throw e;
                 }

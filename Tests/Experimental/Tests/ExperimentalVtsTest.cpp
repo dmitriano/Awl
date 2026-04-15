@@ -57,7 +57,7 @@ namespace
         }
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-        context.logger.debug(awl::format());
+        context.logger.debug(_T(""));
     }
 }
 
@@ -151,7 +151,7 @@ AWL_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 
     helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
 
-    context.logger.debug(awl::format());
+    context.logger.debug(_T(""));
 
     AWL_ASSERT_EQUAL((awl::testing::vts_common::MeasureStreamSize(context, element_count, true)), out.GetLength());
 }
@@ -170,7 +170,7 @@ AWL_BENCHMARK(VtsMeasureSerializationVirtual)
 
     helpers::ReportCountAndSpeed(context, d, element_count, len);
 
-    context.logger.debug(awl::format());
+    context.logger.debug(_T(""));
 
     AWL_ASSERT_EQUAL((awl::testing::vts_common::MeasureStreamSize(context, element_count, true)), len);
 }
@@ -189,7 +189,7 @@ AWL_BENCHMARK(VtsMeasureSerializationFake)
 
     helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
-    context.logger.debug(awl::format());
+    context.logger.debug(_T(""));
 }
 
 AWL_TEST(VtsWriteMemoryStreamMemmove)

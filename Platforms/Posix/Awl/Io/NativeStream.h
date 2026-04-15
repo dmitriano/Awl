@@ -71,8 +71,7 @@ namespace awl::io
 
             if (static_cast<size_t>(written_count) != count)
             {
-                throw PosixException(format() << _T("Requested ") << count
-                    << _T(" bytes, but actually written ") << written_count << _T("."));
+                throw PosixException(std::format(_T("Requested {} bytes, but actually written {}."), count, written_count));
             }
         }
 
@@ -148,7 +147,7 @@ namespace awl::io
 
         if (hFile == NullHandleValue)
         {
-            throw PosixException(format() << _T("Cannot open file ')" << file_name << "' for updating."));
+            throw PosixException(std::format(_T("Cannot open file '{}' for updating."), file_name));
         }
 
         return hFile;
@@ -165,7 +164,7 @@ namespace awl::io
 
         if (hFile == NullHandleValue)
         {
-            throw PosixException(format() << _T("Cannot open file ')" << file_name << "' for reading."));
+            throw PosixException(std::format(_T("Cannot open file '{}' for reading."), file_name));
         }
 
         return hFile;

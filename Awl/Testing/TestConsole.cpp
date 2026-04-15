@@ -69,7 +69,7 @@ namespace awl::testing
 
                 if (p_link == nullptr)
                 {
-                    throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
+                    throw TestException(std::format(_T("The test '{}' does not exist."), run));
                 }
 
                 runner.runLink(p_link, context, out);

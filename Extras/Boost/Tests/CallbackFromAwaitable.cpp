@@ -85,11 +85,11 @@ AWL_TEST(CallbackFromAwaitable)
         {
             if (ec)
             {
-                context.logger.debug(awl::format() << "Error: " << ec.message());
+                context.logger.debug(_T("Error: {}"), awl::fromAString(ec.message()));
             }
             else
             {
-                context.logger.debug(awl::format() << "Value: " << value);
+                context.logger.debug(_T("Value: {}"), value);
             }
         };
 

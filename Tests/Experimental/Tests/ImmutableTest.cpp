@@ -111,12 +111,12 @@ namespace
             // Compiler error:
             // a2->x = 10;
 
-            context.logger.debug(awl::format() << a1->x << " " << a1->y);
+            context.logger.debug(_T("{} {}"), a1->x, a1->y);
 
             // Copy constructor.
             awl::immutable<A> a2 = a1;
 
-            context.logger.debug(awl::format() << a2->x << " " << a2->y);
+            context.logger.debug(_T("{} {}"), a2->x, a2->y);
 
             AWL_ASSERT(a2 == a1);
 
@@ -341,7 +341,7 @@ namespace
 {
     void func(const awl::testing::TestContext& context, awl::immutable<A> a)
     {
-        context.logger.debug(awl::format() << a->x << " " << a->y);
+        context.logger.debug(_T("{} {}"), a->x, a->y);
     }
 }
 
@@ -357,7 +357,7 @@ AWL_TEST(ImmutableException)
     {
         int x = a->x;
 
-        context.logger.debug(awl::format() << a->x);
+        context.logger.debug(_T("{}"), a->x);
     }
     catch (const std::exception& e)
     {

@@ -35,7 +35,7 @@ namespace awl::testing
 
                 if (!result.second)
                 {
-                    throw TestException(format() << _T("Duplicated option '" << name << _T("'.")));
+                    throw TestException(std::format(_T("Duplicated option '{}'."), name));
                 }
 
                 current_option = result.first;
@@ -50,7 +50,7 @@ namespace awl::testing
                 }
                 else
                 {
-                    throw TestException(format() << _T("An option name starting with '--' expected near ") << val);
+                    throw TestException(std::format(_T("An option name starting with '--' expected near {}"), val));
                 }
             }
         }

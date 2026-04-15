@@ -73,7 +73,7 @@ namespace awl::testing
         }
         else
         {
-            throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
+            throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
         }
 
         for (auto i : awl::make_count(loop_count))

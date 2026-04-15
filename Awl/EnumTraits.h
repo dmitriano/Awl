@@ -25,7 +25,7 @@ namespace awl
     [[noreturn]]
     void raise_wrong_enum_index(std::underlying_type_t<T> int_val)
     {
-        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << " enum index: " << int_val);
+        throw std::runtime_error(std::format("Wrong {} enum index: {}", EnumTraits<T>::enum_name(), int_val));
     }
 
     template <class T> requires std::is_enum_v<T>
@@ -82,7 +82,7 @@ namespace awl
 
             if (i == names.end())
             {
-                throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << "enum name: " << s);
+                throw std::runtime_error(std::format("Wrong {}enum name: {}", EnumTraits<T>::enum_name(), s));
             }
 
             return static_cast<T>(i - names.begin());
@@ -105,7 +105,7 @@ namespace awl
     [[noreturn]]
     void raise_wrong_enum_value(T val)
     {
-        throw std::runtime_error(aformat() << "Wrong " << EnumTraits<T>::enum_name() << " enum value: " << enum_to_underlying(val));
+        throw std::runtime_error(std::format("Wrong {} enum value: {}", EnumTraits<T>::enum_name(), enum_to_underlying(val)));
     }
 
     // We cast a enum value from some int and then validate it.

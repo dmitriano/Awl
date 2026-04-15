@@ -15,7 +15,7 @@ using namespace awl::io;
 
 static void Print(const TestContext & context, const awl::Exception & e)
 {
-    context.logger.debug(awl::format() << e.GetClassName() << _T(" ") << e.What());
+    context.logger.debug(_T("{} {}"), e.GetClassName(), e.What());
 }
 
 static void EncodeDecode(const TestContext &, const std::wstring sample)
@@ -34,7 +34,7 @@ AWL_TEST(DecodeString)
     {
         const char * encoded = awl::launder_cast<const char>(u8"z\u00df\u6c34\U0001f34c");
 
-        context.logger.debug(awl::format() << _T("Decoded string: ") << awl::fromACString(encoded));
+        context.logger.debug(_T("Decoded string: {}"), awl::fromACString(encoded));
     }
 
     EncodeDecode(context, L"");
@@ -60,7 +60,7 @@ AWL_TEST(ExceptionTryCatch)
     {
         AWL_ASSERT(strcmp(e.what(), typeid(TestException).name()) == 0);
 
-        context.logger.debug(awl::format() << awl::fromACString(e.what()));
+        context.logger.debug(_T("{}"), awl::fromACString(e.what()));
 
         auto * p_awl_e = dynamic_cast<const awl::Exception *>(&e);
         

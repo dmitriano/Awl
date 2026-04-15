@@ -105,7 +105,7 @@ namespace
             v.reserve(vector_size);
             AWL_ASSERT_EQUAL(vector_size, v.capacity());
 
-            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
+            context.logger.debug(_T("std::vector<{}\t"), type_name);
 
             double ratio;
 
@@ -149,9 +149,9 @@ namespace
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
+            context.logger.debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
+            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -163,7 +163,7 @@ namespace
             AWL_ATTRIBUTE(size_t, vector_size, 1000000);
             AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
-            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
+            context.logger.debug(_T("std::vector<{}\t"), type_name);
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -238,9 +238,9 @@ namespace
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
+            context.logger.debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
+            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -254,7 +254,7 @@ namespace
             AWL_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
             AWL_FLAG(show_result);
 
-            context.logger.debug(awl::format() << _T("std::vector<") << type_name << _T(">\t"));
+            context.logger.debug(_T("std::vector<{}\t"), type_name);
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -320,7 +320,7 @@ namespace
 
                 if (show_result)
                 {
-                    context.logger.debug(awl::format() << _T("\tresult=") << result << _T(", "));
+                    context.logger.debug(_T("\tresult={}, "), result);
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
@@ -335,15 +335,15 @@ namespace
 
                 if (show_result)
                 {
-                    context.logger.debug(awl::format() << _T("\tresult=") << result << _T(", "));
+                    context.logger.debug(_T("\tresult={}, "), result);
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(awl::format() << _T("\t (") << ratio << _T(")"));
+            context.logger.debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(awl::format() << _T("\tsizeof(") << type_name << _T("): ") << sizeof(T) << _T("\t"));
+            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -371,14 +371,14 @@ AWL_BENCHMARK(VectorCopy)
 
 AWL_BENCHMARK(VectorCopyAsync)
 {
-    context.logger.debug(awl::format() << _T("hardware concurrency: ") << std::thread::hardware_concurrency());
+    context.logger.debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
 
     CopyVectors<CopyVectorAsync>(context);
 }
 
 AWL_BENCHMARK(VectorSum)
 {
-    context.logger.debug(awl::format() << _T("hardware concurrency: ") << std::thread::hardware_concurrency());
+    context.logger.debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
 
     CopyVectors<SumVector>(context);
 }
