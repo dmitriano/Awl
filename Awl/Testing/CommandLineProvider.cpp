@@ -50,7 +50,8 @@ namespace awl::testing
                 }
                 else
                 {
-                    throw TestException(std::format(_T("An option name starting with '--' expected near {}"), val));
+                    throw TestException(std::format(_T("An option name starting with '--' expected near {}"),
+                        StringConvertor<Char>::convertFrom(val)));
                 }
             }
         }
