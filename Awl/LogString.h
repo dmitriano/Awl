@@ -9,6 +9,7 @@
 
 #include <source_location>
 #include <string>
+#include <utility>
 
 namespace awl
 {
@@ -29,23 +30,23 @@ namespace awl
         }
 
         LogString(std::string message, std::source_location location = std::source_location::current()) :
-            m_message(awl::fromAString(message)),
+            m_message(awl::fromAString(std::move(message))),
             m_location(location)
         {
         }
 
         LogString(std::wstring message, std::source_location location = std::source_location::current()) :
-            m_message(awl::fromWString(message)),
+            m_message(awl::fromWString(std::move(message))),
             m_location(location)
         {
         }
 
-        String& str()
+        String& str() noexcept
         {
             return m_message;
         }
 
-        const String& str() const
+        const String& str() const noexcept
         {
             return m_message;
         }

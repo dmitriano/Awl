@@ -28,6 +28,7 @@
 #include <cassert>
 #include <iterator>
 #include <optional>
+#include <utility>
 
 #ifdef _MSC_VER
 
@@ -338,14 +339,50 @@ namespace awl
         return StringConvertor<Char>::convertFrom(src.c_str());
     }
 
+    inline String fromAString(std::string&& src)
+    {
+        if constexpr (std::is_same_v<Char, char>)
+        {
+            return std::move(src);
+        }
+        else
+        {
+            return StringConvertor<Char>::convertFrom(src.c_str());
+        }
+    }
+
     inline std::string toAString(const String& src)
     {
         return StringConvertor<char>::convertFrom(src.c_str());
     }
 
+    inline std::string toAString(String&& src)
+    {
+        if constexpr (std::is_same_v<Char, char>)
+        {
+            return std::move(src);
+        }
+        else
+        {
+            return StringConvertor<char>::convertFrom(src.c_str());
+        }
+    }
+
     inline std::wstring toWString(const String& src)
     {
         return StringConvertor<wchar_t>::convertFrom(src.c_str());
+    }
+
+    inline std::wstring toWString(String&& src)
+    {
+        if constexpr (std::is_same_v<Char, wchar_t>)
+        {
+            return std::move(src);
+        }
+        else
+        {
+            return StringConvertor<wchar_t>::convertFrom(src.c_str());
+        }
     }
 
     inline String fromWCString(const wchar_t* p_src)
@@ -356,6 +393,18 @@ namespace awl
     inline String fromWString(const std::wstring& src)
     {
         return StringConvertor<Char>::convertFrom(src.c_str());
+    }
+
+    inline String fromWString(std::wstring&& src)
+    {
+        if constexpr (std::is_same_v<Char, wchar_t>)
+        {
+            return std::move(src);
+        }
+        else
+        {
+            return StringConvertor<Char>::convertFrom(src.c_str());
+        }
     }
 
     inline std::wostream& operator << (std::wostream& out, const std::string& val)
