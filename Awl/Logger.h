@@ -12,6 +12,7 @@
 
 #include <format>
 #include <source_location>
+#include <type_traits>
 #include <utility>
 
 namespace awl
@@ -38,7 +39,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void log(const std::string& level, LogFormat<Args...> fmt, Args&&... args)
+        void log(const std::string& level, std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             if (enabled(level))
             {
@@ -53,7 +54,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void debug(LogFormat<Args...> fmt, Args&&... args)
+        void debug(std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             log(LogLevel::Debug, fmt, std::forward<Args>(args)...);
         }
@@ -65,7 +66,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void trace(LogFormat<Args...> fmt, Args&&... args)
+        void trace(std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             log(LogLevel::Trace, fmt, std::forward<Args>(args)...);
         }
@@ -77,7 +78,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void info(LogFormat<Args...> fmt, Args&&... args)
+        void info(std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             log(LogLevel::Info, fmt, std::forward<Args>(args)...);
         }
@@ -89,7 +90,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void warning(LogFormat<Args...> fmt, Args&&... args)
+        void warning(std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             log(LogLevel::Warning, fmt, std::forward<Args>(args)...);
         }
@@ -101,7 +102,7 @@ namespace awl
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void error(LogFormat<Args...> fmt, Args&&... args)
+        void error(std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             log(LogLevel::Error, fmt, std::forward<Args>(args)...);
         }
