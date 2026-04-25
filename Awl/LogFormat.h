@@ -14,12 +14,12 @@
 
 namespace awl
 {
-    template <class... Args>
+    template <class Character, class... Args>
     class LogFormat
     {
     public:
 
-        using format_string = std::basic_format_string<Char, std::type_identity_t<Args>...>;
+        using format_string = std::basic_format_string<Character, std::type_identity_t<Args>...>;
 
         consteval LogFormat(format_string fmt, std::source_location location = std::source_location::current()) noexcept :
             m_fmt(fmt),
