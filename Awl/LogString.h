@@ -41,11 +41,6 @@ namespace awl
         {
         }
 
-        String& str() noexcept
-        {
-            return m_message;
-        }
-
         const String& str() const noexcept
         {
             return m_message;
