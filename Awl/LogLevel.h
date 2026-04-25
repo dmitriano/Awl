@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Awl/LogString.h"
 #include "Awl/EnumTraits.h"
+#include "Awl/String.h"
 
 #include <algorithm>
 

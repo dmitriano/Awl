@@ -36,12 +36,7 @@ namespace
             ++m_log_count;
             m_level = level;
             m_location = message.location();
-
-#ifdef AWL_QT
-            m_message = awl::StringConvertor<awl::Char>::convertFrom(message.str().toStdString().c_str());
-#else
             m_message = message.str();
-#endif
         }
 
         const std::string& level() const
@@ -111,12 +106,6 @@ AWL_TEST(Logger)
     context.logger.info(awl::String(_T("abc")));
     context.logger.info(_T("abc"));
     context.logger.info(_T("abc"));
-
-#ifdef AWL_QT
-
-    context.logger.warning(QString("abc"));
-
-#endif
 
     CaptureLogger logger;
 
