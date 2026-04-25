@@ -13,6 +13,13 @@
 
 namespace
 {
+    std::string_view fileName(const char* path)
+    {
+        const std::string_view full_path(path);
+        const size_t pos = full_path.find_last_of("/\\");
+        return pos == std::string_view::npos ? full_path : full_path.substr(pos + 1);
+    }
+
     struct CountedFormatValue
     {
         int* format_count = nullptr;
@@ -113,13 +120,13 @@ AWL_TEST(Logger)
 
     CaptureLogger logger;
 
-    const auto expected_debug_line = std::source_location::current().line() + 1;
+    const auto expected_debug_location = std::source_location::current();
     logger.debug(_T("value={}, hex={:x}"), 42, 42);
 
     AWL_ASSERT_EQUAL(awl::LogLevel::Debug, logger.level());
     AWL_ASSERT_EQUAL(std::format(_T("value={}, hex={:x}"), 42, 42), logger.message());
-    AWL_ASSERT_EQUAL(expected_debug_line, logger.location().line());
-    AWL_ASSERT(std::string_view(logger.location().file_name()).find("LoggerTest.cpp") != std::string_view::npos);
+    AWL_ASSERT_EQUAL(expected_debug_location.line() + 1, logger.location().line());
+    AWL_ASSERT(fileName(expected_debug_location.file_name()) == fileName(logger.location().file_name()));
 
     logger.error(_T("wide {}"), awl::String(_T("message")));
 
