@@ -8,6 +8,9 @@
 
 #include "Awl/Testing/UnitTest.h"
 
+#include <source_location>
+#include <string_view>
+
 namespace
 {
     struct CountedFormatValue
@@ -33,6 +36,12 @@ namespace
 #endif
         }
 
+        void log(const std::string& level, const awl::LogString& message, std::source_location location) override
+        {
+            m_location = location;
+            log(level, message);
+        }
+
         const std::string& level() const
         {
             return m_level;
@@ -41,6 +50,11 @@ namespace
         const awl::String& message() const
         {
             return m_message;
+        }
+
+        std::source_location location() const
+        {
+            return m_location;
         }
 
         int logCount() const
@@ -53,6 +67,7 @@ namespace
         int m_log_count = 0;
         std::string m_level;
         awl::String m_message;
+        std::source_location m_location;
     };
 
     class FilteredLogger : public CaptureLogger
@@ -103,10 +118,13 @@ AWL_TEST(Logger)
 
     CaptureLogger logger;
 
+    const auto expected_debug_line = std::source_location::current().line() + 1;
     logger.debug(_T("value={}, hex={:x}"), 42, 42);
 
     AWL_ASSERT_EQUAL(awl::LogLevel::Debug, logger.level());
     AWL_ASSERT_EQUAL(std::format(_T("value={}, hex={:x}"), 42, 42), logger.message());
+    AWL_ASSERT_EQUAL(expected_debug_line, logger.location().line());
+    AWL_ASSERT(std::string_view(logger.location().file_name()).find("LoggerTest.cpp") != std::string_view::npos);
 
     logger.error(_T("wide {}"), awl::String(_T("message")));
 
