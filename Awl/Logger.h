@@ -11,7 +11,6 @@
 #include "Awl/LogString.h"
 
 #include <format>
-#include <source_location>
 #include <type_traits>
 #include <utility>
 
@@ -31,25 +30,19 @@ namespace awl
 
         virtual void log(const std::string& level, const LogString& message) = 0;
 
-        virtual void log(const std::string& level, const LogString& message, std::source_location location)
-        {
-            static_cast<void>(location);
-            log(level, message);
-        }
-
         template <class... Args>
             requires (sizeof...(Args) > 0)
         void log(const std::string& level, std::type_identity_t<LogFormat<Args...>> fmt, Args&&... args)
         {
             if (enabled(level))
             {
-                log(level, LogString(std::format(fmt.format(), std::forward<Args>(args)...)), fmt.location());
+                log(level, LogString(std::format(fmt.format(), std::forward<Args>(args)...), fmt.location()));
             }
         }
 
-        void debug(const LogString& message, std::source_location location = std::source_location::current())
+        void debug(const LogString& message)
         {
-            logLasy(LogLevel::Debug, message, location);
+            logLasy(LogLevel::Debug, message);
         }
 
         template <class... Args>
@@ -59,9 +52,9 @@ namespace awl
             log(LogLevel::Debug, fmt, std::forward<Args>(args)...);
         }
 
-        void trace(const LogString& message, std::source_location location = std::source_location::current())
+        void trace(const LogString& message)
         {
-            logLasy(LogLevel::Trace, message, location);
+            logLasy(LogLevel::Trace, message);
         }
 
         template <class... Args>
@@ -71,9 +64,9 @@ namespace awl
             log(LogLevel::Trace, fmt, std::forward<Args>(args)...);
         }
 
-        void info(const LogString& message, std::source_location location = std::source_location::current())
+        void info(const LogString& message)
         {
-            logLasy(LogLevel::Info, message, location);
+            logLasy(LogLevel::Info, message);
         }
 
         template <class... Args>
@@ -83,9 +76,9 @@ namespace awl
             log(LogLevel::Info, fmt, std::forward<Args>(args)...);
         }
         
-        void warning(const LogString& message, std::source_location location = std::source_location::current())
+        void warning(const LogString& message)
         {
-            logLasy(LogLevel::Warning, message, location);
+            logLasy(LogLevel::Warning, message);
         }
 
         template <class... Args>
@@ -95,9 +88,9 @@ namespace awl
             log(LogLevel::Warning, fmt, std::forward<Args>(args)...);
         }
 
-        void error(const LogString& message, std::source_location location = std::source_location::current())
+        void error(const LogString& message)
         {
-            logLasy(LogLevel::Error, message, location);
+            logLasy(LogLevel::Error, message);
         }
 
         template <class... Args>
@@ -109,11 +102,11 @@ namespace awl
 
     private:
 
-        void logLasy(const std::string& level, const LogString& message, std::source_location location)
+        void logLasy(const std::string& level, const LogString& message)
         {
             if (enabled(level))
             {
-                log(level, message, location);
+                log(level, message);
             }
         }
     };

@@ -7,6 +7,9 @@
 
 #include "Awl/String.h"
 
+#include <source_location>
+#include <utility>
+
 namespace awl
 {
 #ifdef AWL_QT
@@ -15,15 +18,35 @@ namespace awl
     {
     public:
 
-        LogString(const char* m) : m_message(m) {}
+        LogString(const char* m, std::source_location location = std::source_location::current()) :
+            m_message(m),
+            m_location(location)
+        {
+        }
 
-        LogString(const wchar_t* m) : m_message(QString::fromWCharArray(m)) {}
+        LogString(const wchar_t* m, std::source_location location = std::source_location::current()) :
+            m_message(QString::fromWCharArray(m)),
+            m_location(location)
+        {
+        }
 
-        LogString(std::string message) : m_message(QString::fromStdString(message)) {}
+        LogString(std::string message, std::source_location location = std::source_location::current()) :
+            m_message(QString::fromStdString(message)),
+            m_location(location)
+        {
+        }
 
-        LogString(std::wstring message) : m_message(QString::fromStdWString(message)) {}
+        LogString(std::wstring message, std::source_location location = std::source_location::current()) :
+            m_message(QString::fromStdWString(message)),
+            m_location(location)
+        {
+        }
 
-        LogString(QString message) : m_message(std::move(message)) {}
+        LogString(QString message, std::source_location location = std::source_location::current()) :
+            m_message(std::move(message)),
+            m_location(location)
+        {
+        }
 
         const QString& str() const
         {
@@ -35,10 +58,16 @@ namespace awl
             return m_message;
         }
 
+        constexpr std::source_location location() const noexcept
+        {
+            return m_location;
+        }
+
     private:
 
         // Make the Logger compatible with QDebug.
         QString m_message;
+        std::source_location m_location;
     };
 
 #else
@@ -47,13 +76,29 @@ namespace awl
     {
     public:
 
-        LogString(const char* m) : m_message(awl::fromACString(m)) {}
+        LogString(const char* m, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromACString(m)),
+            m_location(location)
+        {
+        }
 
-        LogString(const wchar_t* m) : m_message(awl::fromWCString(m)) {}
+        LogString(const wchar_t* m, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromWCString(m)),
+            m_location(location)
+        {
+        }
 
-        LogString(std::string message) : m_message(awl::fromAString(message)) {}
+        LogString(std::string message, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromAString(message)),
+            m_location(location)
+        {
+        }
 
-        LogString(std::wstring message) : m_message(awl::fromWString(message)) {}
+        LogString(std::wstring message, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromWString(message)),
+            m_location(location)
+        {
+        }
 
         String& str()
         {
@@ -65,9 +110,15 @@ namespace awl
             return m_message;
         }
 
+        constexpr std::source_location location() const noexcept
+        {
+            return m_location;
+        }
+
     private:
 
         awl::String m_message;
+        std::source_location m_location;
     };
 
 #endif //AWL_QT

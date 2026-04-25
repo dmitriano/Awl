@@ -28,18 +28,13 @@ namespace
         {
             ++m_log_count;
             m_level = level;
+            m_location = message.location();
 
 #ifdef AWL_QT
             m_message = awl::StringConvertor<awl::Char>::convertFrom(message.str().toStdString().c_str());
 #else
             m_message = message.str();
 #endif
-        }
-
-        void log(const std::string& level, const awl::LogString& message, std::source_location location) override
-        {
-            m_location = location;
-            log(level, message);
         }
 
         const std::string& level() const
