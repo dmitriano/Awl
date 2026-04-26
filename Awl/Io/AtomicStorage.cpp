@@ -11,72 +11,72 @@
 
 using namespace awl::io;
 
-bool AtomicStorage::Load(Value& val)
+bool AtomicStorage::load(Value& val)
 {
-    Wait();
+    wait();
 
-    bool backup_success = LoadFromFile(val, m_backup, LogLevel::Debug);
+    bool backup_success = loadFromFile(val, m_backup, LogLevel::Debug);
 
     if (backup_success)
     {
-        m_logger.warning(_T("The settings have been loaded from backup file '{}'."), m_backup.GetFileName());
+        m_logger.warning(_T("The settings have been loaded from backup file '{}'."), m_backup.fileName());
 
-        WriteToStream(m_s, val);
+        writeToStream(m_s, val);
     }
 
-    ClearBackup();
+    clearBackup();
 
     if (backup_success)
     {
         return true;
     }
 
-    //No need to reset the data after unsuccessful read because Serializable::Read should do std::mvoe in its implementation.
+    //No need to reset the data after unsuccessful read because Serializable::read should do std::mvoe in its implementation.
 
-    bool master_success = LoadFromFile(val, m_s, LogLevel::Warning);
+    bool master_success = loadFromFile(val, m_s, LogLevel::Warning);
 
     return master_success;
 }
 
-void AtomicStorage::Save(const Value& val)
+void AtomicStorage::save(const Value& val)
 {
-    Wait();
+    wait();
     
-    WriteToStreamAndClearBackup(val);
+    writeToStreamAndClearBackup(val);
 }
 
-void AtomicStorage::StartSave(const Value& val)
+void AtomicStorage::startSave(const Value& val)
 {
     awl::FakeMutex fm;
 
-    StartSaveLocked(val, fm);
+    startSaveLocked(val, fm);
 }
 
-void AtomicStorage::StartSaveLocked(const Value& val, IMutex& mutex)
+void AtomicStorage::startSaveLocked(const Value& val, IMutex& mutex)
 {
     std::unique_lock lock(mutex);
 
     // For example, val is updated on a render thread in a video game.
     const awl::io::Snapshotable& snapshotable = dynamic_cast<const awl::io::Snapshotable&>(val);
 
-    std::shared_ptr<Snapshot> snapshot = snapshotable.MakeShanshot();
+    std::shared_ptr<Snapshot> snapshot = snapshotable.makeShanshot();
 
     lock.unlock();
 
-    Wait();
+    wait();
 
-    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::WriteSnapshotsAndClearBackup, this, std::move(snapshot)));
+    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::writeSnapshotsAndClearBackup, this, std::move(snapshot)));
 }
 
-bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)
+bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)
 {
     bool success = false;
 
     try
     {
-        ReadFromStream(s, val);
+        readFromStream(s, val);
         
-        if (s.End())
+        if (s.end())
         {
             success = true;
         }
@@ -87,20 +87,20 @@ bool AtomicStorage::LoadFromFile(Value& val, awl::io::UniqueStream& s, std::stri
     }
     catch (const awl::io::CorruptionException&)
     {
-        m_logger.log(level, std::format(_T("Corrupted settings file '{}'."), s.GetFileName()));
+        m_logger.log(level, std::format(_T("Corrupted settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::EndOfFileException&)
     {
-        m_logger.log(level, std::format(_T("Unexpected end of settings file '{}'."), s.GetFileName()));
+        m_logger.log(level, std::format(_T("Unexpected end of settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::TypeMismatchException& e)
     {
         m_logger.log(level, std::format(_T("Type mismatch error {} in the settings file '{}' Did you include all the types including those that were removed ? ."),
-            e.What(), s.GetFileName()));
+            e.message(), s.fileName()));
     }
     catch (const awl::io::IoException& e)
     {
-        m_logger.log(level, std::format(_T("General IO exception in '{}': {}"), s.GetFileName(), e.What()));
+        m_logger.log(level, std::format(_T("General IO exception in '{}': {}"), s.fileName(), e.message()));
     }
 
     return success;

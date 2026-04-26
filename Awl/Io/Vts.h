@@ -15,53 +15,53 @@ namespace awl::io
 {
     template <class T, class IStream = SequentialInputStream, class V = awl::mp::variant_from_struct<T>>
         requires sequential_input_stream<IStream>
-    void ReadV(IStream& in, T& val)
+    void readV(IStream& in, T& val)
     {
         Reader<V, IStream> ctx;
 
-        ctx.ReadOldPrototypes(in);
+        ctx.readOldPrototypes(in);
 
-        ctx.ReadV(in, val);
+        ctx.readV(in, val);
     }
 
     template <class T, class OStream = SequentialOutputStream, class V = awl::mp::variant_from_struct<T>>
         requires sequential_output_stream<OStream>
-    void WriteV(OStream& out, const T& val)
+    void writeV(OStream& out, const T& val)
     {
         Writer<V, OStream> ctx;
 
-        ctx.WriteNewPrototypes(out);
+        ctx.writeNewPrototypes(out);
 
-        ctx.WriteV(out, val);
+        ctx.writeV(out, val);
     }
 
     template <class T, class V = awl::mp::variant_from_struct<T>>
-    size_t MeasureV(const T& val)
+    size_t measureV(const T& val)
     {
         MeasureStream measure_out;
 
-        awl::io::WriteV(measure_out, val);
+        awl::io::writeV(measure_out, val);
 
-        return measure_out.GetLength();
+        return measure_out.length();
     }
 
     template <class From, class To>
-    void CopyV(const From& from_val, To& to_val)
+    void copyV(const From& from_val, To& to_val)
     {
         std::vector<uint8_t> v;
 
-        v.reserve(MeasureV(from_val));
+        v.reserve(measureV(from_val));
 
         {
             awl::io::VectorOutputStream out(v);
 
-            awl::io::WriteV(out, from_val);
+            awl::io::writeV(out, from_val);
         }
 
         {
             awl::io::VectorInputStream in(v);
 
-            awl::io::ReadV(in, to_val);
+            awl::io::readV(in, to_val);
         }
     }
 }

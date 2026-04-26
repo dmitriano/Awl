@@ -83,7 +83,7 @@ namespace awl::testing
         {
             out << std::endl << last_output.str();
 
-            out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
+            out << std::endl << _T("***************** The tests failed: ") << e.message() << std::endl;
         }
 
         // awl::static_chain<TestFunc>().clear();
@@ -102,7 +102,7 @@ namespace awl::testing
         }
         catch (const TestException& e)
         {
-            cout() << _T("The following error has occurred: ") << e.What() << std::endl;
+            cout() << _T("The following error has occurred: ") << e.message() << std::endl;
         }
 
         return 2;
@@ -149,7 +149,7 @@ namespace awl::testing
             }
             catch (const JsonException& e)
             {
-                awl::cout() << e.What() << std::endl;
+                awl::cout() << e.message() << std::endl;
 
                 return 3;
             }

@@ -64,7 +64,7 @@ namespace awl
     }
 
     template <class Struct>
-    void StructFromFile(QString file_name, Struct& val)
+    void structFromFile(QString file_name, Struct& val)
     {
         QJsonDocument jdoc = loadDocumentFromFile(file_name);
 
@@ -112,7 +112,7 @@ namespace awl
         case QJsonValue::Undefined:
             break;
         default:
-            throw JsonException(std::format(_T("Can't create a document form json value of type {}"), TypeToString(jv.type())));
+            throw JsonException(std::format(_T("Can't create a document form json value of type {}"), typeToString(jv.type())));
         }
 
         saveDocumentToFile(file_name, jdoc);

@@ -21,7 +21,7 @@ namespace awl
             {
             }
 
-            size_t Read(uint8_t * buffer, size_t count) override
+            size_t read(uint8_t * buffer, size_t count) override
             {
                 //good() returns false at the end of file.
                 m_in.read(launder_cast<char>(buffer), count);
@@ -31,7 +31,7 @@ namespace awl
                 return actually_read;
             }
 
-            bool End() override
+            bool end() override
             {
                 m_in.peek();
 
@@ -51,7 +51,7 @@ namespace awl
             {
             }
 
-            void Write(const uint8_t * buffer, size_t count) override
+            void write(const uint8_t * buffer, size_t count) override
             {
                 //he write function returns the stream itself. So in your case, it will return a reference to myfile.
                 //The stream types are convertible to bool to check its failure status.

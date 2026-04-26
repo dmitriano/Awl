@@ -33,34 +33,34 @@ namespace awl::io
             return m_hFile == other.m_hFile;
         }
 
-        size_t GetLength() const override
+        size_t length() const override
         {
             struct stat sb;
 
-            Check(::fstat(m_hFile, &sb));
+            check(::fstat(m_hFile, &sb));
             
             return static_cast<size_t>(sb.st_size);
         }
 
-        size_t GetPosition() const override
+        size_t position() const override
         {
             const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
 
-            Check(pos);
+            check(pos);
             
             return static_cast<size_t>(pos);
         }
 
-        size_t Read(uint8_t* buffer, size_t count) override
+        size_t read(uint8_t* buffer, size_t count) override
         {
             const ssize_t read_count = ::read(m_hFile, buffer, count);
 
-            Check(read_count);
+            check(read_count);
             
             return static_cast<size_t>(read_count);
         }
 
-        void Write(const uint8_t* buffer, size_t count) override
+        void write(const uint8_t* buffer, size_t count) override
         {
             const ssize_t written_count = ::write(m_hFile, buffer, count);
 
@@ -75,36 +75,36 @@ namespace awl::io
             }
         }
 
-        bool End() override
+        bool end() override
         {
-            return GetPosition() == GetLength();
+            return position() == length();
         }
 
-        void Seek(std::size_t pos, bool begin = true) override
+        void seek(std::size_t pos, bool begin = true) override
         {
-            Check(::lseek(m_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
+            check(::lseek(m_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
         }
 
-        void Move(std::ptrdiff_t offset) override
+        void move(std::ptrdiff_t offset) override
         {
-            Check(::lseek(m_hFile, static_cast<off_t>(offset), SEEK_CUR));
+            check(::lseek(m_hFile, static_cast<off_t>(offset), SEEK_CUR));
         }
 
-        void Flush() override
+        void flush() override
         {
-            Check(::fsync(m_hFile));
+            check(::fsync(m_hFile));
         }
 
-        void Truncate() override
+        void truncate() override
         {
             const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
 
-            Check(pos);
+            check(pos);
 
-            Check(::ftruncate(m_hFile, pos));
+            check(::ftruncate(m_hFile, pos));
         }
 
-        String GetFileName() const
+        String fileName() const
         {
             /*
             char buf[PATH_MAX];
@@ -120,7 +120,7 @@ namespace awl::io
     private:
 
         template <class T>
-        static void Check(T val)
+        static void check(T val)
         {
             if (val == static_cast<T>(-1))
             {
@@ -137,7 +137,7 @@ namespace awl::io
 
     inline thread_local bool openedExisting;
 
-    inline UniqueFileHandle CreateUniqueFile(const String& file_name)
+    inline UniqueFileHandle createUniqueFile(const String& file_name)
     {
         // I did not find a better way in POSIX.
         openedExisting = access(file_name.c_str(), F_OK) != -1;
@@ -153,7 +153,7 @@ namespace awl::io
         return hFile;
     }
 
-    inline bool OpenedExisting()
+    inline bool openedExisting()
     {
         return openedExisting;
     }

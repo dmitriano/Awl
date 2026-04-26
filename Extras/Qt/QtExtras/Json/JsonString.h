@@ -16,7 +16,7 @@ namespace awl
 
         void fromJson(const QJsonValue & jv, QString & val)
         {
-            EnsureType(jv, QJsonValue::String);
+            ensureType(jv, QJsonValue::String);
             val = jv.toString();
         }
 
@@ -33,7 +33,7 @@ namespace awl
 
         void fromJson(const QJsonValue & jv, std::string & val)
         {
-            EnsureType(jv, QJsonValue::String);
+            ensureType(jv, QJsonValue::String);
             val = jv.toString().toStdString();
         }
 
@@ -50,7 +50,7 @@ namespace awl
 
         void fromJson(const QJsonValue & jv, std::wstring & val)
         {
-            EnsureType(jv, QJsonValue::String);
+            ensureType(jv, QJsonValue::String);
             val = jv.toString().toStdWString();
         }
 

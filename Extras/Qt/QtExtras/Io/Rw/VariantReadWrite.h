@@ -28,17 +28,17 @@ namespace awl::mp
 namespace awl::io
 {
     template <class Stream, class Context = FakeContext>
-    inline void Read(Stream & s, QVariant & v, const Context & ctx = {})
+    inline void read(Stream & s, QVariant & v, const Context & ctx = {})
     {
         int type;
-        Read(s, type, ctx);
+        read(s, type, ctx);
         
         switch (type)
         {
             case QMetaType::Bool:
             {
                 bool val;
-                Read(s, val, ctx);
+                read(s, val, ctx);
                 v = val;
                 break;
             }
@@ -49,17 +49,17 @@ namespace awl::io
     }
 
     template <class Stream, class Context = FakeContext>
-    inline void Write(Stream & s, const QVariant & v, const Context & ctx = {})
+    inline void write(Stream & s, const QVariant & v, const Context & ctx = {})
     {
         const int type = v.typeId();
-        Write(s, type, ctx);
+        write(s, type, ctx);
 
         switch (v.typeId())
         {
             case QMetaType::Bool:
             {
                 const bool val = v.toBool();
-                Write(s, val, ctx);
+                write(s, val, ctx);
                 break;
             }
             default:

@@ -15,13 +15,13 @@ namespace awl
         {
         public:
 
-            void Write(const uint8_t * buffer, size_t count) override
+            void write(const uint8_t * buffer, size_t count) override
             {
                 static_cast<void>(buffer);
                 m_pos += count;
             }
 
-            size_t GetLength() const
+            size_t length() const
             {
                 return m_pos;
             }

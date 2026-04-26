@@ -31,7 +31,7 @@ namespace awl
 
         void append(ValueInfo info);
 
-        String What() const override;
+        String message() const override;
 
     private:
 

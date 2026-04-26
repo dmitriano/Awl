@@ -35,11 +35,11 @@ namespace awl::io
 
     protected:
 
-        bool ReadHeader(awl::io::SequentialInputStream& in) override
+        bool readHeader(awl::io::SequentialInputStream& in) override
         {
             Header actual_header;
 
-            Read(in, actual_header, LimitedContext{ formatNameLimit });
+            read(in, actual_header, LimitedContext{ formatNameLimit });
 
             if (actual_header.format != expectedHeader.format)
             {
@@ -54,7 +54,7 @@ namespace awl::io
 
             if (actual_header.version < expectedHeader.version)
             {
-                ReadOldVersion(in, actual_header.version);
+                readOldVersion(in, actual_header.version);
 
                 return false;
             }
@@ -62,12 +62,12 @@ namespace awl::io
             return true;
         }
 
-        void WriteHeader(awl::io::SequentialOutputStream& out) const override
+        void writeHeader(awl::io::SequentialOutputStream& out) const override
         {
-            Write(out, expectedHeader, LimitedContext{ formatNameLimit });
+            write(out, expectedHeader, LimitedContext{ formatNameLimit });
         }
 
-        virtual void ReadOldVersion(awl::io::SequentialInputStream& in, size_t version)
+        virtual void readOldVersion(awl::io::SequentialInputStream& in, size_t version)
         {
             static_cast<void>(in);
 

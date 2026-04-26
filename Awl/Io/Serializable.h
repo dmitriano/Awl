@@ -14,9 +14,9 @@ namespace awl::io
     {
     public:
 
-        virtual void Read(IStream& in) = 0;
+        virtual void read(IStream& in) = 0;
 
-        virtual void Write(OStream& out) const = 0;
+        virtual void write(OStream& out) const = 0;
 
         virtual ~Serializable() = default;
     };

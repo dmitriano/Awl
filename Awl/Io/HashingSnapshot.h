@@ -34,12 +34,12 @@ namespace awl::io
             m_hash(hash)
         {}
 
-        void Write(SequentialOutputStream& s) const override
+        void write(SequentialOutputStream& s) const override
         {
             HashOStream out{ s, m_blockSize, m_hash };
 
             // Write vector without leading 8 bytes containing its size.
-            out.Write(m_v.data(), m_v.size());
+            out.write(m_v.data(), m_v.size());
         }
 
     private:

@@ -31,7 +31,7 @@ namespace awl::io
         AtomicStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
             AtomicStorage(logger)
         {
-            Open(file_name, backup_name);
+            open(file_name, backup_name);
         }
 
         AtomicStorage(const AtomicStorage&) = delete;
@@ -42,55 +42,55 @@ namespace awl::io
         AtomicStorage& operator = (AtomicStorage&& other) noexcept
         {
             // We can't move m_saveFuture, because it holds this pointer.
-            Wait();
+            wait();
 
             m_s = std::move(other.m_s);
             m_backup = std::move(other.m_backup);
             return *this;
         }
 
-        bool IsEmpty() const
+        bool isEmpty() const
         {
-            assert(IsOpened());
+            assert(isOpened());
             assert(!m_saveFuture.valid());
 
-            return m_s.GetLength() == 0 && m_backup.GetLength() == 0;
+            return m_s.length() == 0 && m_backup.length() == 0;
         }
 
-        bool IsOpened() const
+        bool isOpened() const
         {
             return m_s != UniqueStream{};
         }
 
-        bool Open(const awl::String& file_name, const awl::String& backup_name)
+        bool open(const awl::String& file_name, const awl::String& backup_name)
         {
             try
             {
-                m_s = awl::io::CreateUniqueFile(file_name);
-                const bool master_existed = OpenedExisting();
+                m_s = awl::io::createUniqueFile(file_name);
+                const bool master_existed = openedExisting();
 
-                m_backup = awl::io::CreateUniqueFile(backup_name);
-                const bool backup_existed = OpenedExisting();
+                m_backup = awl::io::createUniqueFile(backup_name);
+                const bool backup_existed = openedExisting();
 
                 return master_existed || backup_existed;
             }
             catch (const IoException&)
             {
-                Close();
+                close();
 
                 throw;
             }
         }
 
-        bool Load(Value& val);
+        bool load(Value& val);
 
-        void Save(const Value& val);
+        void save(const Value& val);
 
-        void StartSave(const Value& val);
+        void startSave(const Value& val);
 
-        void StartSaveLocked(const Value& val, IMutex& mutex);
+        void startSaveLocked(const Value& val, IMutex& mutex);
 
-        void Wait()
+        void wait()
         {
             if (m_saveFuture.valid())
             {
@@ -98,9 +98,9 @@ namespace awl::io
             }
         }
 
-        void Close()
+        void close()
         {
-            Wait();
+            wait();
             
             m_s = {};
             m_backup = {};
@@ -108,59 +108,59 @@ namespace awl::io
 
     private:
 
-        static void ReadFromStream(UniqueStream& s, Value& val)
+        static void readFromStream(UniqueStream& s, Value& val)
         {
-            s.Seek(0);
+            s.seek(0);
 
-            val.Read(s);
+            val.read(s);
         }
 
         template <class Func>
-        static void WriteToStreamFunc(UniqueStream& s, Func&& func)
+        static void writeToStreamFunc(UniqueStream& s, Func&& func)
         {
-            s.Seek(0);
+            s.seek(0);
 
             func(s);
 
-            s.Truncate();
-            s.Flush();
+            s.truncate();
+            s.flush();
         }
 
-        static void WriteToStream(UniqueStream& s, const Value& val)
+        static void writeToStream(UniqueStream& s, const Value& val)
         {
-            WriteToStreamFunc(s, std::bind(&Value::Write, &val, std::ref(s)));
+            writeToStreamFunc(s, std::bind(&Value::write, &val, std::ref(s)));
         }
 
-        static void WriteSnapshot(UniqueStream& s, std::shared_ptr<Snapshot> snapshot)
+        static void writeSnapshot(UniqueStream& s, std::shared_ptr<Snapshot> snapshot)
         {
-            WriteToStreamFunc(s, std::bind(&Snapshot::Write, snapshot, std::ref(s)));
+            writeToStreamFunc(s, std::bind(&Snapshot::write, snapshot, std::ref(s)));
         }
 
-        void WriteToStreamAndClearBackup(const Value& val)
+        void writeToStreamAndClearBackup(const Value& val)
         {
-            WriteToStream(m_backup, val);
+            writeToStream(m_backup, val);
 
-            WriteToStream(m_s, val);
+            writeToStream(m_s, val);
 
-            ClearBackup();
+            clearBackup();
         }
 
-        void WriteSnapshotsAndClearBackup(std::shared_ptr<Snapshot> snapshot)
+        void writeSnapshotsAndClearBackup(std::shared_ptr<Snapshot> snapshot)
         {
-            WriteSnapshot(m_backup, snapshot);
+            writeSnapshot(m_backup, snapshot);
 
-            WriteSnapshot(m_s, snapshot);
+            writeSnapshot(m_s, snapshot);
 
-            ClearBackup();
+            clearBackup();
         }
 
-        bool LoadFromFile(Value& val, awl::io::UniqueStream& s, std::string level);
+        bool loadFromFile(Value& val, awl::io::UniqueStream& s, std::string level);
 
-        void ClearBackup()
+        void clearBackup()
         {
-            m_backup.Seek(0);
-            m_backup.Truncate();
-            m_backup.Flush();
+            m_backup.seek(0);
+            m_backup.truncate();
+            m_backup.flush();
         }
 
         Logger& m_logger;

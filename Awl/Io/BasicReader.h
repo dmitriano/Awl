@@ -27,10 +27,10 @@ namespace awl::io
 
     protected:
 
-        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
+        typename Base::StructIndexType readStructIndex(InputStream & s) const
         {
             typename Base::StructIndexType index;
-            Read(s, index);
+            read(s, index);
             return index;
         }
     };

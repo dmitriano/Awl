@@ -15,7 +15,7 @@ namespace awl::io
     {
     public:
 
-        static std::string_view GetNewName(std::string_view old_name)
+        static std::string_view newName(std::string_view old_name)
         {
             return old_name;
         }

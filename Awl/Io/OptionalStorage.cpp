@@ -9,18 +9,18 @@
 
 using namespace awl::io;
 
-bool OptionalStorage::Open(const awl::String& file_name, const awl::String& backup_name)
+bool OptionalStorage::open(const awl::String& file_name, const awl::String& backup_name)
 {
     bool existing = false;
 
     try
     {
-        existing = m_storage.Open(file_name, backup_name);
+        existing = m_storage.open(file_name, backup_name);
     }
     catch (const IoException& e)
     {
         m_logger.warning(_T("Application settings have not been loaded, from '{}' and '{}', leaving default values. Error message: {}"),
-            file_name, backup_name, e.What());
+            file_name, backup_name, e.message());
     }
 
     return existing;

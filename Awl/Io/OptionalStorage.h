@@ -25,7 +25,7 @@ namespace awl::io
         OptionalStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
             OptionalStorage(logger)
         {
-            Open(file_name, backup_name);
+            open(file_name, backup_name);
         }
 
         OptionalStorage(const OptionalStorage&) = delete;
@@ -39,54 +39,54 @@ namespace awl::io
             return *this;
         }
 
-        bool IsEmpty() const
+        bool isEmpty() const
         {
-            return m_storage.IsEmpty();
+            return m_storage.isEmpty();
         }
 
-        bool IsOpened() const
+        bool isOpened() const
         {
-            return m_storage.IsOpened();
+            return m_storage.isOpened();
         }
 
-        bool Open(const awl::String& file_name, const awl::String& backup_name);
+        bool open(const awl::String& file_name, const awl::String& backup_name);
 
-        bool Load(Value& val)
+        bool load(Value& val)
         {
-            return CallIfOpened(std::bind(&AtomicStorage::Load, std::placeholders::_1, std::ref(val)));
+            return callIfOpened(std::bind(&AtomicStorage::load, std::placeholders::_1, std::ref(val)));
         }
 
-        void Save(const Value& val)
+        void save(const Value& val)
         {
-            CallIfOpened(std::bind(&AtomicStorage::Save, std::placeholders::_1, std::ref(val)));
+            callIfOpened(std::bind(&AtomicStorage::save, std::placeholders::_1, std::ref(val)));
         }
 
-        void StartSave(const Value& val)
+        void startSave(const Value& val)
         {
-            CallIfOpened(std::bind(&AtomicStorage::StartSave, std::placeholders::_1, std::ref(val)));
+            callIfOpened(std::bind(&AtomicStorage::startSave, std::placeholders::_1, std::ref(val)));
         }
 
-        void StartSaveLocked(const Value& val, IMutex& mutex)
+        void startSaveLocked(const Value& val, IMutex& mutex)
         {
-            CallIfOpened(std::bind(&AtomicStorage::StartSaveLocked, std::placeholders::_1, std::ref(val), std::ref(mutex)));
+            callIfOpened(std::bind(&AtomicStorage::startSaveLocked, std::placeholders::_1, std::ref(val), std::ref(mutex)));
         }
 
-        void Wait()
+        void wait()
         {
-            CallIfOpened(std::bind(&AtomicStorage::Wait, std::placeholders::_1));
+            callIfOpened(std::bind(&AtomicStorage::wait, std::placeholders::_1));
         }
 
-        void Close()
+        void close()
         {
-            CallIfOpened(std::bind(&AtomicStorage::Close, std::placeholders::_1));
+            callIfOpened(std::bind(&AtomicStorage::close, std::placeholders::_1));
         }
 
     private:
 
         template <class Func>
-        auto CallIfOpened(Func func) -> std::invoke_result_t<Func, AtomicStorage*>
+        auto callIfOpened(Func func) -> std::invoke_result_t<Func, AtomicStorage*>
         {
-            if (m_storage.IsOpened())
+            if (m_storage.isOpened())
             {
                 try
                 {
@@ -94,7 +94,7 @@ namespace awl::io
                 }
                 catch (const IoException& e)
                 {
-                    m_logger.warning(_T("Application settings were not saved correctly. Error message: {}"), e.What());
+                    m_logger.warning(_T("Application settings were not saved correctly. Error message: {}"), e.message());
                 }
             }
 

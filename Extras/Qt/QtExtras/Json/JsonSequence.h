@@ -29,7 +29,7 @@ namespace awl
 
         void fromJson(const QJsonValue& jv, value_type& v)
         {
-            EnsureType(jv, QJsonValue::Array);
+            ensureType(jv, QJsonValue::Array);
             QJsonArray ja = jv.toArray();
             inserter<Container>::reserve(v, static_cast<size_t>(ja.size()));
             JsonSerializer<T> formatter;

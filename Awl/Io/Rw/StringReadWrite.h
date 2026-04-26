@@ -14,7 +14,7 @@
 
 namespace awl::io
 {
-    inline void CheckStringLimit(size_t actual_len, size_t expected_len)
+    inline void checkStringLimit(size_t actual_len, size_t expected_len)
     {
         if (actual_len > expected_len)
         {
@@ -23,11 +23,11 @@ namespace awl::io
     }
 
     template <class Context>
-    void CheckStringLimit(const Context& ctx, size_t string_length)
+    void checkStringLimit(const Context& ctx, size_t string_length)
     {
         if constexpr (limited_context<Context>)
         {
-            CheckStringLimit(string_length, ctx.max_length());
+            checkStringLimit(string_length, ctx.max_length());
         }
     }
 
@@ -39,20 +39,20 @@ namespace awl::io
         class Context = FakeContext
     >
         requires (sequential_input_stream<Stream> && std::is_arithmetic_v<Char>)
-    void Read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
+    void read(Stream & s, std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len;
 
-        Read(s, len, ctx);
+        read(s, len, ctx);
 
         const size_t string_length = len * sizeof(Char);
 
-        CheckStringLimit(ctx, string_length);
+        checkStringLimit(ctx, string_length);
 
         val.resize(len);
 
         //There is non-const version of data() since C++ 17.
-        ReadRaw(s, mutable_data_cast(val.data()), string_length);
+        readRaw(s, mutable_data_cast(val.data()), string_length);
     }
 
     template<
@@ -63,16 +63,16 @@ namespace awl::io
         class Context = FakeContext
     >
         requires (sequential_output_stream<Stream> && std::is_arithmetic_v<Char>)
-    void Write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
+    void write(Stream & s, const std::basic_string<Char, Traits, Allocator> & val, const Context & ctx = {})
     {
         typename std::basic_string<Char>::size_type len = val.length();
 
         const size_t string_length = len * sizeof(Char);
 
-        CheckStringLimit(ctx, string_length);
+        checkStringLimit(ctx, string_length);
 
-        Write(s, len, ctx);
+        write(s, len, ctx);
 
-        s.Write(const_data_cast(val.data()), string_length);
+        s.write(const_data_cast(val.data()), string_length);
     }
 }

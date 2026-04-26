@@ -38,7 +38,7 @@ namespace awl
 
         constexpr ~unique_ptr()
         {
-            Destroy();
+            destroy();
         }
 
         constexpr bool operator == (const unique_ptr& other) const noexcept
@@ -94,7 +94,7 @@ namespace awl
 
         constexpr void reset(T* p) noexcept
         {
-            Destroy();
+            destroy();
 
             m_p = p;
         }
@@ -110,7 +110,7 @@ namespace awl
 
     private:
         
-        constexpr void Destroy() noexcept
+        constexpr void destroy() noexcept
         {
             delete m_p;
         }

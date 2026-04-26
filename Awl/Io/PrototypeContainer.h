@@ -55,43 +55,43 @@ namespace awl::io
 
             static constexpr size_t typeCount = std::variant_size_v<FieldV>;
 
-            static constexpr auto MakeSequence()
+            static constexpr auto makeSequence()
             {
                 return std::make_index_sequence<typeCount>();
             }
 
             template <std::size_t index>
-            static std::string MakeName()
+            static std::string makeName()
             {
                 return mp::make_type_name<std::variant_alternative_t<index, FieldV>>();
             }
 
             template <std::size_t... index>
-            static I2nMap BuildI2nMap(std::index_sequence<index...>)
+            static I2nMap buildI2nMap(std::index_sequence<index...>)
             {
                 I2nMap tm;
-                (tm.push_back(MakeName<index>()), ...);
+                (tm.push_back(makeName<index>()), ...);
                 return tm;
             }
 
             template <std::size_t... index>
-            static N2iMap BuildN2iMap(std::index_sequence<index...>)
+            static N2iMap buildN2iMap(std::index_sequence<index...>)
             {
                 N2iMap tm;
-                (tm.emplace(MakeName<index>(), index), ...);
+                (tm.emplace(makeName<index>(), index), ...);
                 return tm;
             }
 
         public:
 
-            static I2nMap BuildI2nMap()
+            static I2nMap buildI2nMap()
             {
-                return BuildI2nMap(MakeSequence());
+                return buildI2nMap(makeSequence());
             }
 
-            static N2iMap BuildN2iMap()
+            static N2iMap buildN2iMap()
             {
-                return BuildN2iMap(MakeSequence());
+                return buildN2iMap(makeSequence());
             }
         };
 
@@ -110,7 +110,7 @@ namespace awl::io
         PrototypeContainer& operator = (PrototypeContainer&&) = delete;
 
         template <class S>
-        const AttachedPrototype<FieldV, S> & FindNewPrototype() const
+        const AttachedPrototype<FieldV, S> & newPrototype() const
         {
             constexpr size_t index = StructIndex<S>;
             return std::get<index>(newPrototypesTuple);

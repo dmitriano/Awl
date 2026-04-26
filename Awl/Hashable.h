@@ -12,7 +12,7 @@
 namespace awl
 {
     template <class T>
-    void CombineHash(std::size_t& seed, T const& v)
+    void combineHash(std::size_t& seed, T const& v)
     {
         seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
@@ -23,7 +23,7 @@ namespace awl
         static void apply(size_t& seed, Tuple const& tuple)
         {
             HashValueImpl<Tuple, Index - 1>::apply(seed, tuple);
-            CombineHash(seed, std::get<Index>(tuple));
+            combineHash(seed, std::get<Index>(tuple));
         }
     };
 
@@ -32,12 +32,12 @@ namespace awl
     {
         static void apply(size_t& seed, Tuple const& tuple)
         {
-            CombineHash(seed, std::get<0>(tuple));
+            combineHash(seed, std::get<0>(tuple));
         }
     };
 
     template <typename... Ts>
-    size_t GetTupleHash(std::tuple<Ts...> const& t)
+    size_t tupleHash(std::tuple<Ts...> const& t)
     {
         size_t seed = 0;
         HashValueImpl<std::tuple<Ts...>>::apply(seed, t);
@@ -59,7 +59,7 @@ namespace std
             for (const T & val : in)
             {
                 //Combine the hash of the current vector with the hashes of the previous ones
-                awl::CombineHash(seed, val);
+                awl::combineHash(seed, val);
             }
 
             return seed;
@@ -75,7 +75,7 @@ namespace std
         { \
             size_t operator()(const ClassName& val) const \
             { \
-                return awl::GetTupleHash(awl::object_as_tuple(val)); \
+                return awl::tupleHash(awl::object_as_tuple(val)); \
             } \
         }; \
     }

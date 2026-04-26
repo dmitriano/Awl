@@ -67,13 +67,13 @@ namespace awl
     };
 
     template <class T, class Compare>
-    constexpr ReverseCompare<T, Compare> reverse_comparer(Compare comp)
+    constexpr ReverseCompare<T, Compare> reverseComparer(Compare comp)
     {
         return ReverseCompare<T, std::remove_const_t<std::decay_t<Compare>>>(std::move(comp));
     }
 
     template <class T, class Compare>
-    constexpr TransparentReverseCompare<T, Compare> reverse_transparent_comparer(Compare comp)
+    constexpr TransparentReverseCompare<T, Compare> reverseTransparentComparer(Compare comp)
     {
         return TransparentReverseCompare<T, std::remove_const_t<std::decay_t<Compare>>>(std::move(comp));
     }

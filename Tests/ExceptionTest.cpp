@@ -15,7 +15,7 @@ using namespace awl::io;
 
 static void Print(const TestContext & context, const awl::Exception & e)
 {
-    context.logger.debug(_T("{} {}"), e.GetClassName(), e.What());
+    context.logger.debug(_T("{} {}"), e.className(), e.message());
 }
 
 static void EncodeDecode(const TestContext &, const std::wstring sample)

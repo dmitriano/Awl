@@ -80,7 +80,7 @@ namespace awl
             }
             catch (const JsonException& e)
             {
-                throwWrongDurationValue(original_text, e.What());
+                throwWrongDurationValue(original_text, e.message());
             }
 
             if (negative)

@@ -165,7 +165,7 @@ AWL_TEST(JsonReflectableExceptionTypeMismatch)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.What());
+        context.logger.debug(e.message());
     }
 }
 
@@ -194,7 +194,7 @@ AWL_TEST(JsonReflectableExceptionNull)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.What());
+        context.logger.debug(e.message());
     }
 }
 
@@ -224,7 +224,7 @@ AWL_TEST(JsonReflectableExceptionVector)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.What());
+        context.logger.debug(e.message());
     }
 }
 
@@ -259,7 +259,7 @@ AWL_TEST(JsonReflectableExceptionSet)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.What());
+        context.logger.debug(e.message());
     }
 }
 
@@ -297,7 +297,7 @@ namespace
             }
             catch (const awl::JsonException& e)
             {
-                context.logger.debug(e.What());
+                context.logger.debug(e.message());
             }
         }
     }
@@ -617,7 +617,7 @@ AWL_TEST(JsonDecimal)
         }
         catch (const awl::JsonException& e)
         {
-            context.logger.debug(e.What());
+            context.logger.debug(e.message());
         }
     }
 }

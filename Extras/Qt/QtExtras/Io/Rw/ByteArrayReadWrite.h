@@ -27,10 +27,10 @@ namespace awl::mp
 namespace awl::io
 {
     template <class Stream, class Context = FakeContext>
-    inline void Read(Stream & s, QByteArray& val, const Context & ctx = {})
+    inline void read(Stream & s, QByteArray& val, const Context & ctx = {})
     {
         size_t std_size;
-        Read(s, std_size, ctx);
+        read(s, std_size, ctx);
 
         const int size = static_cast<int>(std_size);
         
@@ -40,15 +40,15 @@ namespace awl::io
         }
 
         val.resize(size);
-        ReadRaw(s, mutable_data_cast(val.data()), std_size);
+        readRaw(s, mutable_data_cast(val.data()), std_size);
     }
 
     template <class Stream, class Context = FakeContext>
-    inline void Write(Stream & s, const QByteArray& val, const Context & ctx = {})
+    inline void write(Stream & s, const QByteArray& val, const Context & ctx = {})
     {
         const size_t std_size = static_cast<size_t>(val.size());
-        Write(s, std_size, ctx);
+        write(s, std_size, ctx);
 
-        s.Write(const_data_cast(val.data()), std_size);
+        s.write(const_data_cast(val.data()), std_size);
     }
 }

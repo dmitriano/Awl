@@ -33,7 +33,7 @@ namespace awl
 
         void fromJson(const QJsonValue& jv, QJsonObject& val)
         {
-            EnsureType(jv, QJsonValue::Object);
+            ensureType(jv, QJsonValue::Object);
             
             val = jv.toObject();
         }
@@ -51,7 +51,7 @@ namespace awl
 
         void fromJson(const QJsonValue& jv, QJsonArray& val)
         {
-            EnsureType(jv, QJsonValue::Array);
+            ensureType(jv, QJsonValue::Array);
 
             val = jv.toArray();
         }

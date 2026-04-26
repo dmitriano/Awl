@@ -19,7 +19,7 @@ namespace awl
 
         void fromJson(const QJsonValue& jv, bool& val)
         {
-            EnsureType(jv, QJsonValue::Bool);
+            ensureType(jv, QJsonValue::Bool);
             val = jv.toBool();
         }
 
@@ -55,7 +55,7 @@ namespace awl
             }
 
             default:
-                throw JsonException(std::format(_T("Expected value of Double or String type, actul value type: {}"), TypeToString(jv.type())));
+                throw JsonException(std::format(_T("Expected value of Double or String type, actul value type: {}"), typeToString(jv.type())));
                 break;
             }
         }

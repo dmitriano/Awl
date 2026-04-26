@@ -27,9 +27,9 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
-            return std::format(_T("{} Error code: {} ."), IoError::What(), dwError);
+            return std::format(_T("{} Error code: {} ."), IoError::message(), dwError);
         }
 
     private:

@@ -58,7 +58,7 @@ namespace awl
                 }
                 default:
 
-                    throw JsonException(std::format(_T("Can't convert value of type: {} to decimal."), TypeToString(jv.type())));
+                    throw JsonException(std::format(_T("Can't convert value of type: {} to decimal."), typeToString(jv.type())));
 
                     break;
             }

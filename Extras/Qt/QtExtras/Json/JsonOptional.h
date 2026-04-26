@@ -20,7 +20,7 @@ namespace awl
 
         void fromJson(const QJsonValue & jv, value_type & opt)
         {
-            if (!IsNull(jv))
+            if (!isNull(jv))
             {
                 JsonSerializer<T> formatter;
                 T val;

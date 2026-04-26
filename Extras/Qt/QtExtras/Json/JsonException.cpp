@@ -13,7 +13,7 @@
 
 using namespace awl;
 
-String JsonException::What() const
+String JsonException::message() const
 {
     //format f;
     ostringstream f;
@@ -43,7 +43,7 @@ String JsonException::What() const
 
     for (auto& info : m_path | std::views::reverse)
     {
-        f << sep << "[" << info.key << "] (" << TypeToString(info.jsonType) << "/" << info.cppType << ")";
+        f << sep << "[" << info.key << "] (" << typeToString(info.jsonType) << "/" << info.cppType << ")";
     }
 
     return f.str();

@@ -14,17 +14,17 @@ namespace awl::io
 {
     template <class Stream, typename T, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::optional<T>& opt_val, const Context & ctx = {})
+    void read(Stream & s, std::optional<T>& opt_val, const Context & ctx = {})
     {
         bool has_value;
 
-        Read(s, has_value, ctx);
+        read(s, has_value, ctx);
 
         if (has_value)
         {
             T val;
 
-            Read(s, val, ctx);
+            read(s, val, ctx);
 
             opt_val = std::move(val);
         }
@@ -32,15 +32,15 @@ namespace awl::io
 
     template <class Stream, typename T, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const std::optional<T>& opt_val, const Context & ctx = {})
+    void write(Stream & s, const std::optional<T>& opt_val, const Context & ctx = {})
     {
         const bool has_value = opt_val.has_value();
 
-        Write(s, has_value, ctx);
+        write(s, has_value, ctx);
 
         if (has_value)
         {
-            Write(s, opt_val.value(), ctx);
+            write(s, opt_val.value(), ctx);
         }
     }
 }

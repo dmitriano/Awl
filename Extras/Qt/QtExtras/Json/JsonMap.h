@@ -31,7 +31,7 @@ namespace awl
 
         void fromJson(const QJsonValue& jv, value_type& map)
         {
-            EnsureType(jv, QJsonValue::Object);
+            ensureType(jv, QJsonValue::Object);
             QJsonObject jo = jv.toObject();
             JsonSerializer<T> formatter;
 

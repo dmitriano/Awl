@@ -20,7 +20,7 @@ namespace awl
 
         void fromJson(const QJsonValue & jv, value_type& val)
         {
-            EnsureType(jv, QJsonValue::Array);
+            ensureType(jv, QJsonValue::Array);
             QJsonArray ja = jv.toArray();
 
             awl::for_each_index(val, [&ja](auto & field_val, size_t index)

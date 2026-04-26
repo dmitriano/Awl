@@ -55,12 +55,12 @@ namespace awl
 
         constexpr bool operator()(const T& val, const key_type& id) const
         {
-            return Compare<0u>(val, id);
+            return compare<0u>(val, id);
         }
 
         constexpr bool operator()(const key_type& id, const T& val) const
         {
-            return Compare<0u>(id, val);
+            return compare<0u>(id, val);
         }
 
         using is_transparent = void;
@@ -70,7 +70,7 @@ namespace awl
         using Tuple = typename InternalCompositeCompare::Tuple;
 
         template <std::size_t Index>
-        bool Compare(const T& left, const key_type& right_key) const
+        bool compare(const T& left, const key_type& right_key) const
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
             {
@@ -94,12 +94,12 @@ namespace awl
                     return false;
                 }
 
-                return Compare<Index + 1>(left, right_key);
+                return compare<Index + 1>(left, right_key);
             }
         }
 
         template <std::size_t Index>
-        bool Compare(const key_type& left_key, const T& right) const
+        bool compare(const key_type& left_key, const T& right) const
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
             {
@@ -123,7 +123,7 @@ namespace awl
                     return false;
                 }
 
-                return Compare<Index + 1>(left_key, right);
+                return compare<Index + 1>(left_key, right);
             }
         }
 
@@ -131,7 +131,7 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    constexpr TransparentCompositeCompare<T, Cs ...> compose_transparent_comparers(Cs... comp)
+    constexpr TransparentCompositeCompare<T, Cs ...> composeTransparentComparers(Cs... comp)
     {
         return TransparentCompositeCompare<T, std::remove_const_t<std::decay_t<Cs>>...>(std::move(comp) ...);
     }

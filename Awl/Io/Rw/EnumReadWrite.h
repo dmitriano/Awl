@@ -15,44 +15,44 @@ namespace awl::io
 {
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && std::is_enum_v<T>)
-    void ReadEnum(Stream& s, T& val, const Context& ctx = {})
+    void readEnum(Stream& s, T& val, const Context& ctx = {})
     {
         using Int = std::underlying_type_t<T>;
 
         Int int_val;
 
-        Read(s, int_val, ctx);
+        read(s, int_val, ctx);
 
         val = static_cast<T>(int_val);
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && std::is_enum_v<T>)
-    void WriteEnum(Stream& s, T val, const Context& ctx = {})
+    void writeEnum(Stream& s, T val, const Context& ctx = {})
     {
         using Int = std::underlying_type_t<T>;
 
         const Int int_val = static_cast<Int>(val);
 
-        Write(s, int_val, ctx);
+        write(s, int_val, ctx);
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && is_nonsequential_enum<T>)
-    void Read(Stream & s, T& val, const Context & ctx = {})
+    void read(Stream & s, T& val, const Context & ctx = {})
     {
-        ReadEnum(s, val, ctx);
+        readEnum(s, val, ctx);
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && is_nonsequential_enum<T>)
-    void Write(Stream & s, T val, const Context & ctx = {})
+    void write(Stream & s, T val, const Context & ctx = {})
     {
-        WriteEnum(s, val, ctx);
+        writeEnum(s, val, ctx);
     }
 
     template <class T> requires (std::is_enum_v<T> && is_defined_v<EnumTraits<T>>)
-    void ValidateEnum(T val)
+    void validateEnum(T val)
     {
         auto int_val = enum_to_underlying(val);
 
@@ -64,19 +64,19 @@ namespace awl::io
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && is_sequential_enum<T>)
-    void Read(Stream& s, T& val, const Context& ctx = {})
+    void read(Stream& s, T& val, const Context& ctx = {})
     {
-        ReadEnum(s, val, ctx);
+        readEnum(s, val, ctx);
 
-        ValidateEnum(val);
+        validateEnum(val);
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && is_sequential_enum<T>)
-    void Write(Stream& s, T val, const Context& ctx = {})
+    void write(Stream& s, T val, const Context& ctx = {})
     {
-        ValidateEnum(val);
+        validateEnum(val);
 
-        WriteEnum(s, val, ctx);
+        writeEnum(s, val, ctx);
     }
 }
