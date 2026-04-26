@@ -52,7 +52,7 @@ namespace
 
                 QJsonValue jmsg = jobj["msg"];
 
-                context.logger.debug(_T("Code: {}, msg: {}"), jcode.toInt(), awl::FromQString(jmsg.toString()));
+                context.logger.debug(_T("Code: {}, msg: {}"), jcode.toInt(), awl::fromQString(jmsg.toString()));
                 
                 return true;
             }
@@ -87,7 +87,7 @@ namespace
 
         jo["a"] = a_expected.a;
         jo["b"] = a_expected.b;
-        jo["c"] = awl::ToQString(a_expected.c);
+        jo["c"] = awl::toQString(a_expected.c);
         jo["d"] = a_expected.d;
 
         return jo;
@@ -124,7 +124,7 @@ AWL_TEST(JsonReflectableA)
 
     A a;
 
-    awl::FromJson(makeAJson(), a);
+    awl::fromJson(makeAJson(), a);
 
     AWL_ASSERT(a == a_expected);
 }
@@ -135,7 +135,7 @@ AWL_TEST(JsonReflectableB)
 
     B b;
 
-    awl::FromJson(makeBJson(), b);
+    awl::fromJson(makeBJson(), b);
 
     AWL_ASSERT(b == b_expected);
 }
@@ -159,7 +159,7 @@ AWL_TEST(JsonReflectableExceptionTypeMismatch)
 
     try
     {
-        awl::FromJson(b_jo, b);
+        awl::fromJson(b_jo, b);
 
         AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
@@ -188,7 +188,7 @@ AWL_TEST(JsonReflectableExceptionNull)
 
     try
     {
-        awl::FromJson(b_jo, b);
+        awl::fromJson(b_jo, b);
 
         AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
@@ -218,7 +218,7 @@ AWL_TEST(JsonReflectableExceptionVector)
 
     try
     {
-        awl::FromJson(b_jo, b);
+        awl::fromJson(b_jo, b);
 
         AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
@@ -253,7 +253,7 @@ AWL_TEST(JsonReflectableExceptionSet)
 
     try
     {
-        awl::FromJson(b_jo, b);
+        awl::fromJson(b_jo, b);
 
         AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
@@ -272,12 +272,12 @@ namespace
 
         Map expected_map{ {"a", 0}, {"b", 1}, {"c", 2} };
 
-        QJsonValue jv = awl::ToJson(expected_map);
+        QJsonValue jv = awl::toJson(expected_map);
 
         {
             Map map;
 
-            awl::FromJson(jv, map);
+            awl::fromJson(jv, map);
 
             AWL_ASSERT(map == expected_map);
         }
@@ -291,7 +291,7 @@ namespace
 
             try
             {
-                awl::FromJson(jo, map);
+                awl::fromJson(jo, map);
 
                 AWL_FAILM(_T("Exception of type JsonException was not thrown."));
             }
@@ -326,7 +326,7 @@ AWL_TEST(JsonDuration)
         for (size_t i = 0; i < values.size(); ++i)
         {
             {
-                QJsonValue jv = awl::ToJson(values[i]);
+                QJsonValue jv = awl::toJson(values[i]);
                 const QString actual_text = jv.toString();
                 const QString expected_text = to_json_values[i];
 
@@ -345,10 +345,10 @@ AWL_TEST(JsonDuration)
 
                 Duration actual{};
 
-                awl::FromJson(jv, actual);
+                awl::fromJson(jv, actual);
 
-                const QString actual_text = awl::ToJson(actual).toString();
-                const QString expected_text = awl::ToJson(values[i]).toString();
+                const QString actual_text = awl::toJson(actual).toString();
+                const QString expected_text = awl::toJson(values[i]).toString();
 
                 context.logger.debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
                     label_text,
@@ -498,14 +498,14 @@ AWL_TEST(JsonDurationWeek)
     using namespace std::chrono;
 
     hours week_1{};
-    awl::FromJson(QJsonValue("7d"), week_1);
+    awl::fromJson(QJsonValue("7d"), week_1);
     AWL_ASSERT(week_1 == hours(168));
-    AWL_ASSERT(awl::ToJson(week_1).toString() == "7d");
+    AWL_ASSERT(awl::toJson(week_1).toString() == "7d");
 
     hours week_4{};
-    awl::FromJson(QJsonValue("28d"), week_4);
+    awl::fromJson(QJsonValue("28d"), week_4);
     AWL_ASSERT(week_4 == hours(672));
-    AWL_ASSERT(awl::ToJson(week_4).toString() == "28d");
+    AWL_ASSERT(awl::toJson(week_4).toString() == "28d");
 }
 
 AWL_TEST(JsonDurationNew)
@@ -517,10 +517,10 @@ AWL_TEST(JsonDurationNew)
         const awl::String label_text = awl::fromACString(label);
 
         Duration actual{};
-        awl::FromJson(QJsonValue(input), actual);
+        awl::fromJson(QJsonValue(input), actual);
 
-        const QString actual_text = awl::ToJson(actual).toString();
-        const QString expected_text = awl::ToJson(expected).toString();
+        const QString actual_text = awl::toJson(actual).toString();
+        const QString expected_text = awl::toJson(expected).toString();
 
         context.logger.debug(std::format(_T("{} new format: input={}, actual={}, expected={}"),
             label_text,
@@ -565,7 +565,7 @@ AWL_TEST(JsonDurationInvalid)
         awl::testing::Assert::throws<awl::JsonException>([&input]()
         {
             Duration actual{};
-            awl::FromJson(QJsonValue(input), actual);
+            awl::fromJson(QJsonValue(input), actual);
         });
     };
 
@@ -590,7 +590,7 @@ AWL_TEST(JsonDecimal)
 
         Decimal d;
 
-        awl::FromJson(jv, d);
+        awl::fromJson(jv, d);
 
         AWL_ASSERT(d == Decimal(sample));
     }
@@ -598,7 +598,7 @@ AWL_TEST(JsonDecimal)
     {
         Decimal d(sample);
 
-        QJsonValue jv = awl::ToJson(d);
+        QJsonValue jv = awl::toJson(d);
 
         AWL_ASSERT(jv.type() == QJsonValue::String);
         AWL_ASSERT(jv.toString() == sample);
@@ -611,7 +611,7 @@ AWL_TEST(JsonDecimal)
 
             Decimal d;
 
-            awl::FromJson(jv, d);
+            awl::fromJson(jv, d);
 
             AWL_FAILM(_T("Exception of type JsonException was not thrown."));
         }

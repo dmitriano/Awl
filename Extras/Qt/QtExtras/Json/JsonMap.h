@@ -29,7 +29,7 @@ namespace awl
 
     public:
 
-        void FromJson(const QJsonValue& jv, value_type& map)
+        void fromJson(const QJsonValue& jv, value_type& map)
         {
             EnsureType(jv, QJsonValue::Object);
             QJsonObject jo = jv.toObject();
@@ -44,7 +44,7 @@ namespace awl
 
                 try
                 {
-                    formatter.FromJson(jvv, val);
+                    formatter.fromJson(jvv, val);
                 }
                 catch (JsonException& e)
                 {
@@ -56,7 +56,7 @@ namespace awl
                 using MapKey = typename Container::key_type;
                 MapKey map_key;
                 
-                awl::ConvertString(map_key, i.key());
+                awl::convertString(map_key, i.key());
                 
                 const bool new_key = map.insert(pair(map_key, val)).second;
                 
@@ -67,7 +67,7 @@ namespace awl
             }
         }
 
-        void ToJson(const value_type & map, QJsonValue & jv)
+        void toJson(const value_type & map, QJsonValue & jv)
         {
             QJsonObject jo;
             JsonSerializer<T> formatter;
@@ -75,9 +75,9 @@ namespace awl
             for (const auto & p : map)
             {
                 QJsonValue jv_val;
-                formatter.ToJson(p.second, jv_val);
+                formatter.toJson(p.second, jv_val);
 
-                QString key = awl::ToQString(p.first);
+                QString key = awl::toQString(p.first);
                 
                 jo[key] = jv_val;
             }

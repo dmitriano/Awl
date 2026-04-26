@@ -18,13 +18,13 @@ namespace awl
 
         using value_type = std::optional<T>;
 
-        void FromJson(const QJsonValue & jv, value_type & opt)
+        void fromJson(const QJsonValue & jv, value_type & opt)
         {
             if (!IsNull(jv))
             {
                 JsonSerializer<T> formatter;
                 T val;
-                formatter.FromJson(jv, val);
+                formatter.fromJson(jv, val);
                 opt = val;
             }
             else
@@ -33,12 +33,12 @@ namespace awl
             }
         }
 
-        void ToJson(const value_type & v, QJsonValue & jv)
+        void toJson(const value_type & v, QJsonValue & jv)
         {
             if (v.has_value())
             {
                 JsonSerializer<T> formatter;
-                formatter.ToJson(v.value(), jv);
+                formatter.toJson(v.value(), jv);
             }
             else
             {

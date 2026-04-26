@@ -68,7 +68,7 @@ namespace awl
     {
         QJsonDocument jdoc = loadDocumentFromFile(file_name);
 
-        StructFromString(jdoc, val);
+        structFromString(jdoc, val);
     }
 
     inline void saveDocumentToFile(QString file_name, const QJsonDocument& document)
@@ -96,7 +96,7 @@ namespace awl
     template <class Struct>
     void saveStructToFile(QString file_name, const Struct& val)
     {
-        QJsonValue jv = ToJson(val);
+        QJsonValue jv = toJson(val);
 
         QJsonDocument jdoc;
 

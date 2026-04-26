@@ -22,12 +22,12 @@ namespace awl
 
         using value_type = T;
 
-        void FromJson(const QJsonValue& jv, value_type& val)
+        void fromJson(const QJsonValue& jv, value_type& val)
         {
             JsonSerializer<std::string> formatter;
 
             std::string str_val;
-            formatter.FromJson(jv, str_val);
+            formatter.fromJson(jv, str_val);
 
             auto& names = awl::EnumTraits<T>::names();
 
@@ -43,7 +43,7 @@ namespace awl
             val = static_cast<T>(index);
         }
 
-        void ToJson(const value_type & val, QJsonValue & jv)
+        void toJson(const value_type & val, QJsonValue & jv)
         {
             JsonSerializer<std::string> formatter;
 
@@ -51,7 +51,7 @@ namespace awl
 
             const size_t index = static_cast<size_t>(val);
 
-            formatter.ToJson(names[index], jv);
+            formatter.toJson(names[index], jv);
         }
     };
 }

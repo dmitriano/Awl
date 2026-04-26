@@ -18,7 +18,7 @@ namespace awl
 
         using value_type = std::tuple<Args...>;
 
-        void FromJson(const QJsonValue & jv, value_type& val)
+        void fromJson(const QJsonValue & jv, value_type& val)
         {
             EnsureType(jv, QJsonValue::Array);
             QJsonArray ja = jv.toArray();
@@ -30,11 +30,11 @@ namespace awl
 
                 QJsonValue jv = ja[index];
 
-                formatter.FromJson(jv, field_val);
+                formatter.fromJson(jv, field_val);
             });
         }
 
-        void ToJson(const value_type& val, QJsonValue & jv)
+        void toJson(const value_type& val, QJsonValue & jv)
         {
             QJsonArray ja;
 
@@ -44,7 +44,7 @@ namespace awl
                 JsonSerializer<std::decay_t<decltype(field_val)>> formatter;
 
                 QJsonValue field_jv;
-                formatter.ToJson(field_val, field_jv);
+                formatter.toJson(field_val, field_jv);
                 ja.append(field_jv);
             });
 

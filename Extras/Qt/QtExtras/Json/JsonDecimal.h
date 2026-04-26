@@ -18,7 +18,7 @@ namespace awl
 
         using Decimal = awl::decimal<UInt, exp_len, DataTemplate>;
 
-        void FromJson(const QJsonValue& jv, Decimal& val)
+        void fromJson(const QJsonValue& jv, Decimal& val)
         {
             switch (jv.type())
             {
@@ -64,7 +64,7 @@ namespace awl
             }
         }
 
-        void ToJson(const Decimal& val, QJsonValue& jv)
+        void toJson(const Decimal& val, QJsonValue& jv)
         {
             std::ostringstream out;
 

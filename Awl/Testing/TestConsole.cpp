@@ -145,7 +145,7 @@ namespace awl::testing
         {
             try
             {
-                jo = loadObjectFromFile(ToQString(json_file));
+                jo = loadObjectFromFile(toQString(json_file));
             }
             catch (const JsonException& e)
             {

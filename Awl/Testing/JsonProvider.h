@@ -22,7 +22,7 @@ namespace awl::testing
 
             if (i != m_jo.end())
             {
-                serializer.FromJson(*i, val);
+                serializer.fromJson(*i, val);
 
                 return true;
             }
@@ -42,7 +42,7 @@ namespace awl::testing
 
             QJsonValue jv;
 
-            serializer.ToJson(val, jv);
+            serializer.toJson(val, jv);
 
             m_jo[name] = jv;
 

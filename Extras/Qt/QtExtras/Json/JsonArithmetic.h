@@ -17,13 +17,13 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue& jv, bool& val)
+        void fromJson(const QJsonValue& jv, bool& val)
         {
             EnsureType(jv, QJsonValue::Bool);
             val = jv.toBool();
         }
 
-        void ToJson(bool val, QJsonValue& jv)
+        void toJson(bool val, QJsonValue& jv)
         {
             jv = val;
         }
@@ -34,7 +34,7 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue& jv, T& val)
+        void fromJson(const QJsonValue& jv, T& val)
         {
             switch (jv.type())
             {
@@ -60,7 +60,7 @@ namespace awl
             }
         }
 
-        void ToJson(T val, QJsonValue& jv)
+        void toJson(T val, QJsonValue& jv)
         {
             //It can't assign directly.
             //jv.fromVariant(QVariant::fromValue(val));

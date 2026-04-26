@@ -24,7 +24,7 @@ namespace awl
 
         using value_type = std::chrono::time_point<Clock, Duration>;
 
-        void FromJson(const QJsonValue & jv, value_type & v)
+        void fromJson(const QJsonValue & jv, value_type & v)
         {
             using namespace std::chrono;
 
@@ -33,7 +33,7 @@ namespace awl
             v = value_type(milliseconds(ms_count));
         }
 
-        void ToJson(const value_type & v, QJsonValue & jv)
+        void toJson(const value_type & v, QJsonValue & jv)
         {
             using namespace std::chrono;
             jv = static_cast<double>(duration_cast<milliseconds>(v.time_since_epoch()).count());
@@ -48,7 +48,7 @@ namespace awl
         using value_type = std::chrono::duration<Rep, Period>;
         using common_duration = std::chrono::nanoseconds;
 
-        void FromJson(const QJsonValue& jv, value_type& v)
+        void fromJson(const QJsonValue& jv, value_type& v)
         {
             if (!jv.isString())
             {
@@ -98,7 +98,7 @@ namespace awl
             v = converted;
         }
 
-        void ToJson(const value_type& v, QJsonValue& jv)
+        void toJson(const value_type& v, QJsonValue& jv)
         {
             const common_duration common_value = std::chrono::duration_cast<common_duration>(v);
             jv = toExtendedFormat(common_value);

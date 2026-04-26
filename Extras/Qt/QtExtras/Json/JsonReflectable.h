@@ -18,7 +18,7 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue & jv, T & obj)
+        void fromJson(const QJsonValue & jv, T & obj)
         {
             EnsureType(jv, QJsonValue::Object);
             QJsonObject jo = jv.toObject();
@@ -38,7 +38,7 @@ namespace awl
 
                 try
                 {
-                    formatter.FromJson(key_jv, field_val);
+                    formatter.fromJson(key_jv, field_val);
                 }
                 catch (JsonException& e)
                 {
@@ -49,7 +49,7 @@ namespace awl
             });
         }
 
-        void ToJson(const T & obj, QJsonValue & jv)
+        void toJson(const T & obj, QJsonValue & jv)
         {
             QJsonObject jo;
 
@@ -60,7 +60,7 @@ namespace awl
 
                 QLatin1String key(obj.member_names()[index].c_str());
                 QJsonValue field_jv;
-                formatter.ToJson(field_val, field_jv);
+                formatter.toJson(field_val, field_jv);
                 jo[key] = field_jv;
             });
 
