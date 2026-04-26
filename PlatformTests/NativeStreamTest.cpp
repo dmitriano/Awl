@@ -47,7 +47,7 @@ AWL_TEST(NativeStream)
     }
 
     {
-        awl::io::UniqueStream in(awl::io::OpenUniqueFile(file_name));
+        awl::io::UniqueStream in(awl::io::openUniqueFile(file_name));
 
         AWL_ASSERT(in.length() == sample.size());
         AWL_ASSERT(in.position() == 0);

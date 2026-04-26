@@ -37,12 +37,12 @@ namespace awl::io
 
         size_t length() const override
         {
-            return static_cast<size_t>(GetFileSizeHelper());
+            return static_cast<size_t>(fileSizeHelper());
         }
 
         size_t position() const override
         {
-            return static_cast<size_t>(GetFilePointerHelper());
+            return static_cast<size_t>(filePointerHelper());
         }
 
         size_t read(uint8_t* buffer, size_t count) override
@@ -75,7 +75,7 @@ namespace awl::io
 
         bool end() override
         {
-            return GetFileSizeHelper() == GetFilePointerHelper();
+            return fileSizeHelper() == filePointerHelper();
         }
 
         void seek(std::size_t pos, bool begin = true) override
@@ -130,7 +130,7 @@ namespace awl::io
             }
         }
         
-        LONGLONG GetFileSizeHelper() const
+        LONGLONG fileSizeHelper() const
         {
             LARGE_INTEGER li;
 
@@ -141,7 +141,7 @@ namespace awl::io
             return li.QuadPart;
         }
 
-        LONGLONG GetFilePointerHelper() const
+        LONGLONG filePointerHelper() const
         {
             LARGE_INTEGER liOfs = { 0 };
             LARGE_INTEGER liNew = { 0 };
@@ -189,7 +189,7 @@ namespace awl::io
         return ::GetLastError() == ERROR_ALREADY_EXISTS;
     }
 
-    inline UniqueFileHandle OpenUniqueFile(const String& file_name)
+    inline UniqueFileHandle openUniqueFile(const String& file_name)
     {
         //CREATEFILE2_EXTENDED_PARAMETERS extendedParams = { 0 };
         //extendedParams.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);
