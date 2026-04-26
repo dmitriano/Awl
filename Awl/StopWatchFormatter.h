@@ -18,7 +18,7 @@ namespace std
         template <class FormatContext>
         auto format(const awl::StopWatch& val, FormatContext& ctx) const
         {
-            const std::basic_string<CharT> text = awl::duration_to_string<CharT>(val.GetElapsedTime());
+            const std::basic_string<CharT> text = awl::duration_to_string<CharT>(val.elapsedTime());
 
             return formatter<std::basic_string_view<CharT>, CharT>::format(text, ctx);
         }

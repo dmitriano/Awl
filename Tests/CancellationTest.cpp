@@ -125,7 +125,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 
                 out(std::format(_T("Worker {} has woken up within {}"), std::this_thread::get_id(), sw));
 
-                const auto elapsed = sw.GetElapsedCast<Duration>();
+                const auto elapsed = sw.elapsedCast<Duration>();
 
                 //This assert failed until I moved StopWatch to the main thread.
                 AWL_ASSERT(elapsed >= Duration(client_sleep_time));
@@ -179,7 +179,7 @@ AWL_TEST(Cancellation_SimpleSleep)
 
     awl::sleep_for(Duration(client_sleep_time), context.stopToken);
 
-    const auto elapsed = w.GetElapsedCast<Duration>();
+    const auto elapsed = w.elapsedCast<Duration>();
 
     AWL_ASSERT(elapsed.count() >= client_sleep_time);
 }
@@ -273,5 +273,5 @@ AWL_TEST(Cancellation_WatchDogThread2)
 
     context.logger.debug(_T("Elapsed: {}"), sw);
 
-    AWL_ASSERT(!sw.HasElapsed(std::chrono::seconds(sleep_time)));
+    AWL_ASSERT(!sw.hasElapsed(std::chrono::seconds(sleep_time)));
 }
