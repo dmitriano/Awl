@@ -6,6 +6,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 
 namespace awl
 {
@@ -20,6 +21,11 @@ namespace awl
         {
             return std::hash<Key>{}(val.*member);
         }
+
+        size_t operator()(const std::shared_ptr<T>& val) const
+        {
+            return std::hash<Key>{}((*val).*member);
+        }
     };
 
     template <auto member>
@@ -32,6 +38,11 @@ namespace awl
         bool operator()(const T& left, const T& right) const
         {
             return left.*member == right.*member;
+        }
+
+        bool operator()(const std::shared_ptr<T>& left, const std::shared_ptr<T>& right) const
+        {
+            return (*left).*member == (*right).*member;
         }
     };
 }
