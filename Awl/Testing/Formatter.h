@@ -138,12 +138,12 @@ namespace awl::testing
 
         static String toString(QString val)
         {
-            return FromQString<typename String::value_type>(val);
+            return fromQString<typename String::value_type>(val);
         }
 
         static QString fromString(String s)
         {
-            return ToQString(s);
+            return toQString(s);
         }
     };
 

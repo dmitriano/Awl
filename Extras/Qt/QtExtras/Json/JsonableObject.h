@@ -17,21 +17,21 @@ namespace awl
 
         JsonableObject(T& val) : m_val(val) {}
 
-        void FromJson(const QJsonValue& jv) override
+        void fromJson(const QJsonValue& jv) override
         {
             T val;
 
             //If it throws m_val does not change.
-            awl::FromJson(jv, val);
+            awl::fromJson(jv, val);
 
             m_val = std::move(val);
         }
 
-        virtual QJsonValue ToJson() const override
+        virtual QJsonValue toJson() const override
         {
             QJsonValue jv;
 
-            awl::ToJson(m_val, jv);
+            awl::toJson(m_val, jv);
 
             return jv;
         }

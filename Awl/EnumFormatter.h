@@ -5,22 +5,21 @@
 
 #pragma once
 
-#include "Awl/Time.h"
+#include "Awl/EnumTraits.h"
+#include "Awl/StringFormat.h"
 
 #include <format>
-#include <string_view>
+#include <string>
 
 namespace std
 {
-    template <class CharT>
-    struct formatter<awl::StopWatch, CharT> : formatter<std::basic_string_view<CharT>, CharT>
+    template <awl::is_sequential_enum T, class CharT>
+    struct formatter<T, CharT> : formatter<std::string, CharT>
     {
         template <class FormatContext>
-        auto format(const awl::StopWatch& val, FormatContext& ctx) const
+        auto format(T val, FormatContext& ctx) const
         {
-            const std::basic_string<CharT> text = awl::duration_to_string<CharT>(val.elapsedTime());
-
-            return formatter<std::basic_string_view<CharT>, CharT>::format(text, ctx);
+            return formatter<std::string, CharT>::format(awl::enum_to_string(val), ctx);
         }
     };
 }

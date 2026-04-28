@@ -33,7 +33,7 @@ namespace awl::io
         template <class Struct>
         struct FieldReader
         {
-            virtual void ReadField(const Reader & context, InputStream & in, Struct & val) const = 0;
+            virtual void readField(const Reader & context, InputStream & in, Struct & val) const = 0;
         };
 
         template <class Struct, size_t index>
@@ -41,24 +41,24 @@ namespace awl::io
         {
         public:
 
-            void ReadField(const Reader & context, InputStream & in, Struct & val) const override
+            void readField(const Reader & context, InputStream & in, Struct & val) const override
             {
                 auto & field_val = std::get<index>(val.as_tuple());
 
                 if constexpr (is_reflectable_v<std::remove_reference_t<decltype(field_val)>>)
                 {
-                    context.ReadV(in, field_val);
+                    context.readV(in, field_val);
                 }
                 else
                 {
-                    Read(in, field_val, context);
+                    read(in, field_val, context);
                 }
             }
         };
 
         struct FieldSkipper
         {
-            virtual void SkipField(const Reader & context, InputStream & in) const = 0;
+            virtual void skipField(const Reader & context, InputStream & in) const = 0;
         };
 
         template <class Field>
@@ -66,11 +66,11 @@ namespace awl::io
         {
         public:
 
-            void SkipField(const Reader & context, InputStream & in) const override
+            void skipField(const Reader & context, InputStream & in) const override
             {
                 // It is the only place where Field type is required to be default constructable.
                 Field val;
-                context.ReadV(in, val);
+                context.readV(in, val);
             }
         };
 
@@ -80,19 +80,19 @@ namespace awl::io
             static constexpr size_t fieldCount = std::tuple_size_v<typename tuplizable_traits<Struct>::Tie>;
 
             template <std::size_t... index>
-            static auto MakeTuple(std::index_sequence<index...>)
+            static auto makeTuple(std::index_sequence<index...>)
             {
                 return std::make_tuple(FieldReaderImpl<Struct, index>()...);
             }
 
-            static auto MakeTuple()
+            static auto makeTuple()
             {
-                return MakeTuple(std::make_index_sequence<fieldCount>());
+                return makeTuple(std::make_index_sequence<fieldCount>());
             }
         };
 
         template <class Struct>
-        using FieldReaderTuple = decltype(FieldReaderTupleCreator<Struct>::MakeTuple());
+        using FieldReaderTuple = decltype(FieldReaderTupleCreator<Struct>::makeTuple());
 
         template <class Struct>
         using FieldReaderArray = std::array<const FieldReader<Struct> *, FieldReaderTupleCreator<Struct>::fieldCount>;
@@ -129,12 +129,12 @@ namespace awl::io
             readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
             skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_cast<FieldSkipper>(skipperTuple)),
-            typeMap(Base::TypeMapBuilder::BuildI2nMap())
+            typeMap(Base::TypeMapBuilder::buildI2nMap())
         {
         }
 
         //Makes the new and old prototypes identical.
-        void Initialize()
+        void initialize()
         {
             //Type map is trivial, so we do not use it.
 
@@ -150,11 +150,11 @@ namespace awl::io
         //but when type name changes, type_map parameter can be used.
         //Tt can be {{"QString"}, {"sequence<int8_t>"}}, for example.
         template <class Stream>
-        void ReadOldPrototypes(Stream& s, std::unordered_map<std::string, std::string> type_map = {})
+        void readOldPrototypes(Stream& s, std::unordered_map<std::string, std::string> type_map = {})
         {
             Metadata meta;
             
-            Read(s, meta);
+            read(s, meta);
 
             for (std::string& type_name : meta.typeNames)
             {
@@ -166,23 +166,23 @@ namespace awl::io
                 }
             }
 
-            AttachMetadata(meta);
+            attachMetadata(meta);
         }
 
-        void AttachMetadata(Metadata & meta)
+        void attachMetadata(Metadata & meta)
         {
             const typename Base::I2nMap old_tm = meta.typeNames;
 
             assert(oldPrototypes.empty());
             std::vector<DetachedPrototype> protos = meta.prototypes;
 
-            typename Base::N2iMap new_tm = Base::TypeMapBuilder::BuildN2iMap();
+            typename Base::N2iMap new_tm = Base::TypeMapBuilder::buildN2iMap();
 
             for (DetachedPrototype & old_proto : protos)
             {
-                for (size_t old_index = 0; old_index < old_proto.GetCount(); ++old_index)
+                for (size_t old_index = 0; old_index < old_proto.count(); ++old_index)
                 {
-                    const auto old_field = old_proto.GetField(old_index);
+                    const auto old_field = old_proto.field(old_index);
 
                     if (old_field.type != Field::NoType)
                     {
@@ -210,7 +210,7 @@ namespace awl::io
                             throw TypeMismatchException(std::string(old_field.name), old_field.type, Field::NoType);
                         }
 
-                        old_proto.SetFieldType(old_index, new_type);
+                        old_proto.setFieldType(old_index, new_type);
                     }
                 }
             }
@@ -218,38 +218,38 @@ namespace awl::io
             oldPrototypes = protos;
         }
 
-        void ClearPrototypes()
+        void clearPrototypes()
         {
             oldPrototypes.clear();
             protoMaps.clear();
         }
 
         template<class Struct>
-        void ReadV(InputStream & s, Struct & val) const
+        void readV(InputStream & s, Struct & val) const
         {
             if constexpr (is_reflectable_v<Struct>)
             {
-                typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
+                typename Base::StructIndexType old_struct_index = readStructIndex(s);
 
-                const std::vector<size_t> name_map = this->template FindProtoMap<Struct>(old_struct_index);
+                const std::vector<size_t> name_map = this->template protoMap<Struct>(old_struct_index);
 
                 //An empty map means either an empty structure or equal prototypes
                 //(the prototypes of empty structures are equal).
                 if (name_map.empty())
                 {
                     //Read in the same way we write it.
-                    ReadTuplizable(s, val);
+                    readTuplizable(s, val);
                 }
                 else
                 {
-                    auto & new_proto = this->template FindNewPrototype<Struct>();
+                    auto & new_proto = this->template newPrototype<Struct>();
                     const DetachedPrototype & old_proto = oldPrototypes[old_struct_index];
 
-                    assert(name_map.size() == old_proto.GetCount());
+                    assert(name_map.size() == old_proto.count());
 
                     for (size_t old_index = 0; old_index < name_map.size(); ++old_index)
                     {
-                        const Field old_field = old_proto.GetField(old_index);
+                        const Field old_field = old_proto.field(old_index);
 
                         const size_t new_index = name_map[old_index];
 
@@ -260,60 +260,60 @@ namespace awl::io
                                 throw FieldNotFoundException(std::string(old_field.name));
                             }
 
-                            SkipField(s, old_field);
+                            skipField(s, old_field);
                         }
                         else
                         {
-                            const auto new_field = new_proto.GetField(new_index);
+                            const auto new_field = new_proto.field(new_index);
 
                             //The names are equal if a structure contains vector<A> and set<A>, for example.
-                            if (!AreTypesEqual(old_field.type, new_field.type))
+                            if (!areTypesEqual(old_field.type, new_field.type))
                             {
                                 throw TypeMismatchException(std::string(new_field.name), new_field.type, old_field.type);
                             }
 
                             //We read by index, not by type, so we call ReadField for both structures and fields.
-                            auto & readers = this->template FindFieldReaders<Struct>();
-                            readers[new_index]->ReadField(*this, s, val);
+                            auto & readers = this->template fieldReaders<Struct>();
+                            readers[new_index]->readField(*this, s, val);
                         }
                     }
                 }
             }
             else if constexpr (is_tuplizable_v<Struct>)
             {
-                ReadTuplizable(s, val);
+                readTuplizable(s, val);
             }
             else
             {
-                Read(s, val, *this);
+                read(s, val, *this);
             }
         }
 
-        void SkipField(InputStream & s, Field old_field) const
+        void skipField(InputStream & s, Field old_field) const
         {
             if (old_field.type != Field::NoType)
             {
                 //Skip by type.
-                auto & skippers = this->GetFieldSkippers();
-                skippers[old_field.type]->SkipField(*this, s);
+                auto & skippers = this->fieldSkippers();
+                skippers[old_field.type]->skipField(*this, s);
             }
             else
             {
                 //The common routine for skipping structures.
-                SkipStruct(s);
+                skipStruct(s);
             }
         }
 
-        void SkipStruct(InputStream & s) const
+        void skipStruct(InputStream & s) const
         {
-            typename Base::StructIndexType old_struct_index = ReadStructIndex(s);
+            typename Base::StructIndexType old_struct_index = readStructIndex(s);
             const DetachedPrototype & old_proto = oldPrototypes[old_struct_index];
 
-            for (size_t old_index = 0; old_index < old_proto.GetCount(); ++old_index)
+            for (size_t old_index = 0; old_index < old_proto.count(); ++old_index)
             {
-                const auto old_field = old_proto.GetField(old_index);
+                const auto old_field = old_proto.field(old_index);
 
-                SkipField(s, old_field);
+                skipField(s, old_field);
             }
         }
 
@@ -323,37 +323,37 @@ namespace awl::io
     private:
 
         template <class S>
-        auto & FindFieldReaders() const
+        auto & fieldReaders() const
         {
             constexpr size_t index = Base::template StructIndex<S>;
             auto & holder = std::get<index>(readerArrays);
             return holder.a;
         }
 
-        const SkipperArray & GetFieldSkippers() const
+        const SkipperArray & fieldSkippers() const
         {
             return skipperArray;
         }
 
-        typename Base::StructIndexType ReadStructIndex(InputStream & s) const
+        typename Base::StructIndexType readStructIndex(InputStream & s) const
         {
-            typename Base::StructIndexType index = Base::ReadStructIndex(s);
+            typename Base::StructIndexType index = Base::readStructIndex(s);
             assert(index < oldPrototypes.size());
             return index;
         }
 
         template<class Struct>
-        void ReadTuplizable(InputStream & s, Struct & val) const
+        void readTuplizable(InputStream & s, Struct & val) const
         {
             for_each(object_as_tuple(val), [this, &s](auto& field_val)
             {
                 //A tuplizable structure field can be serializable.
-                this->ReadV(s, field_val);
+                this->readV(s, field_val);
             });
         }
 
         template<class Struct>
-        std::vector<size_t> FindProtoMap(typename Base::StructIndexType old_struct_index) const
+        std::vector<size_t> protoMap(typename Base::StructIndexType old_struct_index) const
         {
             assert(old_struct_index < oldPrototypes.size());
 
@@ -384,40 +384,40 @@ namespace awl::io
             pm = ProtoMap{};
             assert(pm.has_value());
             pm->newStructIndex = new_index;
-            pm->fieldMap = MakeProtoMap<Struct>(old_struct_index, new_index);
+            pm->fieldMap = makeProtoMap<Struct>(old_struct_index, new_index);
 
             return pm->fieldMap;
         }
 
         template<class Struct>
-        std::vector<size_t> MakeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
+        std::vector<size_t> makeProtoMap(typename Base::StructIndexType old_struct_index, typename Base::StructIndexType new_struct_index) const
         {
-            return MapPrototypes<Struct>(oldPrototypes[old_struct_index], *(this->newPrototypes[new_struct_index]));
+            return mapPrototypes<Struct>(oldPrototypes[old_struct_index], *(this->newPrototypes[new_struct_index]));
         }
 
         template<class Struct>
-        std::vector<size_t> MapPrototypes(const Prototype & left, const Prototype & right) const
+        std::vector<size_t> mapPrototypes(const Prototype & left, const Prototype & right) const
         {
             std::vector<size_t> v;
-            v.resize(left.GetCount());
+            v.resize(left.count());
 
-            for (size_t old_index = 0; old_index < left.GetCount(); ++old_index)
+            for (size_t old_index = 0; old_index < left.count(); ++old_index)
             {
                 v[old_index] = Prototype::NoIndex;
 
-                const auto old_field = left.GetField(old_index);
+                const auto old_field = left.field(old_index);
 
-                for (size_t new_index = 0; new_index < right.GetCount(); ++new_index)
+                for (size_t new_index = 0; new_index < right.count(); ++new_index)
                 {
-                    const auto new_field = right.GetField(new_index);
+                    const auto new_field = right.field(new_index);
 
                     // The user renamed a field and specialized FieldMap template class.
-                    const std::string_view probably_renamed = FieldMap<Struct>::GetNewName(old_field.name);
+                    const std::string_view probably_renamed = FieldMap<Struct>::newName(old_field.name);
 
                     if (new_field.name == probably_renamed)
                     {
                         //Check if the types are correct.
-                        CheckTypesCompatible(old_field.type, new_field.type);
+                        checkTypesCompatible(old_field.type, new_field.type);
 
                         v[old_index] = new_index;
                         break;
@@ -427,7 +427,7 @@ namespace awl::io
 
             //If a field is added to the end of a structure the vector is trivial,
             //but the count of the fields is different.
-            if (left.GetCount() == right.GetCount())
+            if (left.count() == right.count())
             {
                 auto range = awl::make_count(v.size());
                 if (std::equal(v.begin(), v.end(), range.begin(), range.end()))
@@ -443,14 +443,14 @@ namespace awl::io
             return v;
         }
 
-        void CheckTypesCompatible(size_t old_type, size_t new_type) const
+        void checkTypesCompatible(size_t old_type, size_t new_type) const
         {
             if (old_type != new_type)
             {
                 if (old_type != Prototype::NoIndex && new_type != Prototype::NoIndex)
                 {
                     //It is possible that the indices are not equal but names are.
-                    if (!AreTypeNamesEqual(old_type, new_type))
+                    if (!areTypeNamesEqual(old_type, new_type))
                     {
                         throw IoError(_T("Type mismatch."));
                     }
@@ -463,12 +463,12 @@ namespace awl::io
             }
         }
 
-        bool AreTypesEqual(size_t old_type, size_t new_type) const
+        bool areTypesEqual(size_t old_type, size_t new_type) const
         {
-            return old_type == new_type || AreTypeNamesEqual(old_type, new_type);
+            return old_type == new_type || areTypeNamesEqual(old_type, new_type);
         }
 
-        bool AreTypeNamesEqual(size_t old_type, size_t new_type) const
+        bool areTypeNamesEqual(size_t old_type, size_t new_type) const
         {
             const std::string & old_name = typeMap[old_type];
             const std::string & new_name = typeMap[new_type];

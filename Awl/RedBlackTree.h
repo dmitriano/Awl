@@ -31,18 +31,18 @@ namespace awl::helpers
         std::size_t count;
 
         //The number of the elements in the left subtree.
-        size_t GetLeftCount() const
+        size_t leftCount() const
         {
             return this->left != nullptr ? this->left->count + 1 : 0;
         }
 
         //The number of the elements in the right subtree.
-        size_t GetRightCount() const
+        size_t rightCount() const
         {
             return this->right != nullptr ? this->right->count + 1 : 0;
         }
 
-        void UpdateCount()
+        void updateCount()
         {
             //Save the old value to check if it changed.
             const std::size_t old_count = this->count;
@@ -61,33 +61,33 @@ namespace awl::helpers
 
             if (this->count != old_count && this->parent != nullptr)
             {
-                this->parent->UpdateCount();
+                this->parent->updateCount();
             }
         }
 
-        void SetParent(Node* p)
+        void setParent(Node* p)
         {
             this->parent = p;
 
             if (this->parent != nullptr)
             {
-                this->parent->UpdateCount();
+                this->parent->updateCount();
             }
         }
 
-        void SetLeft(Node* l)
+        void setLeft(Node* l)
         {
             this->left = l;
-            UpdateCount();
+            updateCount();
         }
 
-        void SetRight(Node* r)
+        void setRight(Node* r)
         {
             this->right = r;
-            UpdateCount();
+            updateCount();
         }
 
-        void ClearRelations()
+        void clearRelations()
         {
             *this = {};
         }
@@ -113,16 +113,16 @@ namespace awl::helpers
         }
 
         template <class Key>
-        Node * FindNodeByKey(const Key & key) const
+        Node * findNodeByKey(const Key & key) const
         {
             auto accum = [](Node *) {};
 
-            return FindNodeByKey(key, accum, accum);
+            return findNodeByKey(key, accum, accum);
         }
 
         //p_parent is a node to which a new node is added.
         template <class Key>
-        Node * FindNodeByKey(const Key & key, Node ** p_parent) const
+        Node * findNodeByKey(const Key & key, Node ** p_parent) const
         {
             if (p_parent != nullptr)
             {
@@ -133,14 +133,14 @@ namespace awl::helpers
                     *p_parent = x;
                 };
 
-                return FindNodeByKey(key, accum, accum);
+                return findNodeByKey(key, accum, accum);
             }
 
-            return FindNodeByKey(key);
+            return findNodeByKey(key);
         }
 
         template <class Key, class AccumulateLeft, class AccumulateRight>
-        Node * FindNodeByKey(const Key & key, AccumulateLeft && accum_left, AccumulateRight && accum_right) const
+        Node * findNodeByKey(const Key & key, AccumulateLeft && accum_left, AccumulateRight && accum_right) const
         {
             Node * x = m_root;
 
@@ -167,26 +167,26 @@ namespace awl::helpers
         }
 
         template <class Key>
-        std::tuple<Node *, size_t> FindIndexByKey(const Key & key) const
+        std::tuple<Node *, size_t> indexByKey(const Key & key) const
         {
             size_t parent_rank = 0;
             const size_t size = this->size();
 
-            Node * found_node = FindNodeByKey(key,
+            Node * found_node = findNodeByKey(key,
                 [](Node *)
                 {
                 },
                 [&parent_rank, size](Node * node)
                 {
                     //The parent and its children are at the left side.
-                    parent_rank += node->GetLeftCount() + 1;
+                    parent_rank += node->leftCount() + 1;
                     assert(parent_rank <= size);
                 }
             );
 
             if (found_node != nullptr)
             {
-                const size_t index = found_node->GetLeftCount() + parent_rank;
+                const size_t index = found_node->leftCount() + parent_rank;
                 assert(index < size);
                 return std::make_tuple(found_node, index);
             }
@@ -196,7 +196,7 @@ namespace awl::helpers
 
         //Returns an iterator pointing to the first element that is not less than (i.e. greater or equal to) key.
         template <class Key>
-        std::tuple<Node *, bool> FindBoundByKey(const Key & key) const
+        std::tuple<Node *, bool> boundByKey(const Key & key) const
         {
             Node * x = m_root;
             //the last found element greater than x
@@ -224,7 +224,7 @@ namespace awl::helpers
             return std::make_tuple(greater, false);
         }
 
-        Node * FindNodeByIndex(size_t index) const
+        Node * findNodeByIndex(size_t index) const
         {
             Node * x = m_root;
             size_t i = index;
@@ -232,7 +232,7 @@ namespace awl::helpers
             //walk down the tree
             while (x != nullptr)
             {
-                const size_t rank = x->GetLeftCount();
+                const size_t rank = x->leftCount();
 
                 if (i < rank)
                 {
@@ -252,9 +252,9 @@ namespace awl::helpers
             return nullptr;
         }
 
-        size_t IndexOfNode(const Node * node) const
+        size_t indexOfNode(const Node * node) const
         {
-            size_t index = node->GetLeftCount();
+            size_t index = node->leftCount();
 
             const Node * x = node;
 
@@ -269,7 +269,7 @@ namespace awl::helpers
 
                 if (x == parent->right)
                 {
-                    index += parent->GetLeftCount() + 1;
+                    index += parent->leftCount() + 1;
                 }
 
                 x = parent;
@@ -279,7 +279,7 @@ namespace awl::helpers
         }
 
         //The only function that requires this to be Node *.
-        void CopyFrom(Node* this_node, Node* other)
+        void copyFrom(Node* this_node, Node* other)
         {
             this_node->count = other->count;
 
@@ -302,20 +302,20 @@ namespace awl::helpers
             {
                 if (other->parent->left == other)
                 {
-                    other->parent->SetLeft(this_node);
+                    other->parent->setLeft(this_node);
                 }
                 else
                 {
-                    other->parent->SetRight(this_node);
+                    other->parent->setRight(this_node);
                 }
             }
 
             this_node->color = other->color;
-            this_node->SetParent(other->parent);
+            this_node->setParent(other->parent);
         }
 
         //Inserts a node that does not exist to the specified parent.
-        void InsertNode(Node * node, Node * parent)
+        void insertNode(Node * node, Node * parent)
         {
             node->parent = parent;
 
@@ -327,21 +327,21 @@ namespace awl::helpers
             {
                 if (m_comp(node->value(), parent->value()))
                 {
-                    parent->SetLeft(node);
+                    parent->setLeft(node);
                 }
                 else
                 {
-                    //They cannot be equal, because we passed the parent in FindNodeByKey(...).
+                    //They cannot be equal, because we passed the parent in findNodeByKey(...).
                     assert(m_comp(parent->value(), node->value()));
-                    parent->SetRight(node);
+                    parent->setRight(node);
                 }
             }
             node->color = Color::Red;
-            BalanceAfterInsert(node);
+            balanceAfterInsert(node);
             m_root->color = Color::Black;
 
             //Insert newly added node to the list.
-            Node * pred = GetPredecessor(node);
+            Node * pred = predecessor(node);
             if (pred != nullptr)
             {
                 assert(m_comp(pred->value(), node->value()));
@@ -355,7 +355,7 @@ namespace awl::helpers
         }
 
         //Returns the pointer to the smallest node greater than x.
-        Node * GetSuccessor(Node * x)
+        Node * successor(Node * x)
         {
             Node * y;
 
@@ -382,7 +382,7 @@ namespace awl::helpers
         }
 
         //Returns the pointer to the largest node smaller than x.
-        Node * GetPredecessor(Node * x)
+        Node * predecessor(Node * x)
         {
             Node * y;
 
@@ -421,7 +421,7 @@ namespace awl::helpers
         
         We assume that neither X or Y is NULL
         */
-        void RotateLeft(Node * x)
+        void rotateLeft(Node * x)
         {
             Node * y = x->right;
 
@@ -453,7 +453,7 @@ namespace awl::helpers
             // Set X's parent to be Y
             x->parent = y;
 
-            x->UpdateCount();
+            x->updateCount();
         }
 
         /*
@@ -469,7 +469,7 @@ namespace awl::helpers
         
         We assume that neither X or Y is NULL
         */
-        void RotateRight(Node * y)
+        void rotateRight(Node * y)
         {
             Node * x = y->left;
 
@@ -501,11 +501,11 @@ namespace awl::helpers
             // Set Y's parent to be X
             y->parent = x;
 
-            y->UpdateCount();
+            y->updateCount();
         }
 
         //Balance tree past inserting
-        void BalanceAfterInsert(Node * z)
+        void balanceAfterInsert(Node * z)
         {
             //Having added a red node, we must now walk back up the tree balancing
             //it, by a series of rotations and changing of colours
@@ -540,7 +540,7 @@ namespace awl::helpers
                         {
                             //Move up to our parent
                             x = x->parent;
-                            RotateLeft(x);
+                            rotateLeft(x);
                         }
 
                         /* make our parent black */
@@ -548,7 +548,7 @@ namespace awl::helpers
                         /* make our grandparent red */
                         x->parent->parent->color = Color::Red;
                         /* right rotate our grandparent */
-                        RotateRight(x->parent->parent);
+                        rotateRight(x->parent->parent);
                     }
                 }
                 else
@@ -569,12 +569,12 @@ namespace awl::helpers
                         if (x == x->parent->left)
                         {
                             x = x->parent;
-                            RotateRight(x);
+                            rotateRight(x);
                         }
 
                         x->parent->color = Color::Black;
                         x->parent->parent->color = Color::Red;
-                        RotateLeft(x->parent->parent);
+                        rotateLeft(x->parent->parent);
                     }
                 }
             }
@@ -582,7 +582,7 @@ namespace awl::helpers
         }
 
         // Delete the node z, and free up the space
-        void RemoveNode(Node * z)
+        void removeNode(Node * z)
         {
             Node * x;
             Node * y;
@@ -590,7 +590,7 @@ namespace awl::helpers
             if (z->left == nullptr || z->right == nullptr)
                 y = z;
             else
-                y = GetSuccessor(z);
+                y = successor(z);
 
             if (y->left != nullptr)
                 x = y->left;
@@ -598,22 +598,22 @@ namespace awl::helpers
                 x = y->right;
 
             if (x != nullptr)
-                x->SetParent(y->parent);
+                x->setParent(y->parent);
 
             if (y->parent == nullptr)
                 m_root = x;
             else
             {
                 if (y == y->parent->left)
-                    y->parent->SetLeft(x);
+                    y->parent->setLeft(x);
                 else
-                    y->parent->SetRight(x);
+                    y->parent->setRight(x);
             }
 
             if (y != z)
             {
                 //we must replace 'z' with 'y' node
-                CopyFrom(y, z);
+                copyFrom(y, z);
 
                 if (z == m_root)
                     m_root = y;
@@ -624,11 +624,11 @@ namespace awl::helpers
             }
 
             if (y->color == Color::Black && x != nullptr)
-                BalanceAfterRemove(x);
+                balanceAfterRemove(x);
         }
 
         // Restores the reb-black properties after a delete.
-        void BalanceAfterRemove(Node * x)
+        void balanceAfterRemove(Node * x)
         {
             Node * w;
 
@@ -647,7 +647,7 @@ namespace awl::helpers
                     {
                         w->color = Color::Black;
                         x->parent->color = Color::Red;
-                        RotateLeft(x->parent);
+                        rotateLeft(x->parent);
                         w = x->parent->right;
                     }
 
@@ -670,7 +670,7 @@ namespace awl::helpers
                             if (w->left != nullptr)
                                 w->left->color = Color::Black;
                             w->color = Color::Red;
-                            RotateRight(w);
+                            rotateRight(w);
                             w = x->parent->right;
                         }
 
@@ -678,7 +678,7 @@ namespace awl::helpers
                         x->parent->color = Color::Black;
                         if (w->right != nullptr)
                             w->right->color = Color::Black;
-                        RotateLeft(x->parent);
+                        rotateLeft(x->parent);
                         x = m_root;
                     }
                 }
@@ -695,7 +695,7 @@ namespace awl::helpers
                     {
                         w->color = Color::Black;
                         x->parent->color = Color::Red;
-                        RotateRight(x->parent);
+                        rotateRight(x->parent);
                         w = x->parent->left;
                     }
 
@@ -718,7 +718,7 @@ namespace awl::helpers
                             if (w->right != nullptr)
                                 w->right->color = Color::Black;
                             w->color = Color::Red;
-                            RotateLeft(w);
+                            rotateLeft(w);
                             w = x->parent->left;
                         }
 
@@ -726,7 +726,7 @@ namespace awl::helpers
                         x->parent->color = Color::Black;
                         if (w->left != nullptr)
                             w->left->color = Color::Black;
-                        RotateRight(x->parent);
+                        rotateRight(x->parent);
                         x = m_root;
                     }
                 }

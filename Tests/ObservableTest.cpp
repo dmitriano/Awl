@@ -283,12 +283,12 @@ AWL_TEST(Observable_ForwardArgs)
 
 namespace
 {
-    struct IConditionCheck
+    struct IConditioncheck
     {
-        virtual bool Check(int value) = 0;
+        virtual bool check(int value) = 0;
     };
 
-    class ConditionHandler : public awl::Observer<IConditionCheck>
+    class ConditionHandler : public awl::Observer<IConditioncheck>
     {
     public:
 
@@ -297,7 +297,7 @@ namespace
         {
         }
 
-        bool Check(int value) override
+        bool check(int value) override
         {
             ++(*pCount);
             *pLastValue = value;
@@ -311,13 +311,13 @@ namespace
         int* pLastValue = nullptr;
     };
 
-    class ConditionObservable : public awl::Observable<IConditionCheck>
+    class ConditionObservable : public awl::Observable<IConditioncheck>
     {
     public:
 
         bool checkAll(int value)
         {
-            return notifyWhileTrue(&IConditionCheck::Check, value);
+            return notifyWhileTrue(&IConditioncheck::check, value);
         }
     };
 }

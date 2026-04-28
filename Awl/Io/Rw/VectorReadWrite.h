@@ -15,44 +15,44 @@ namespace awl::io
 {
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value)
-    void ReadVector(Stream & s, Container & v, const Context & ctx = {})
+    void readVector(Stream & s, Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        ReadRaw(s, mutable_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
+        readRaw(s, mutable_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value)
-    void WriteVector(Stream & s, const Container & v, const Context & ctx = {})
+    void writeVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        s.Write(const_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
+        s.write(const_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     //vector<string>, for example.
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && std::is_class<typename Container::value_type>::value)
-    void ReadVector(Stream & s, Container & v, const Context & ctx = {})
+    void readVector(Stream & s, Container & v, const Context & ctx = {})
     {
         for (auto & elem : v)
         {
-            Read(s, elem, ctx);
+            read(s, elem, ctx);
         }
     }
 
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && std::is_class<typename Container::value_type>::value)
-    void WriteVector(Stream & s, const Container & v, const Context & ctx = {})
+    void writeVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         for (const auto & elem : v)
         {
-            Write(s, elem, ctx);
+            write(s, elem, ctx);
         }
     }
 
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && std::is_same<typename Container::value_type, bool>::value)
-    void ReadVector(Stream & s, Container & x, const Context & ctx = {})
+    void readVector(Stream & s, Container & x, const Context & ctx = {})
     {
         typename Container::size_type n = x.size();
 
@@ -60,7 +60,7 @@ namespace awl::io
         {
             uint8_t aggr;
 
-            Read(s, aggr, ctx);
+            read(s, aggr, ctx);
 
             for (uint8_t mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
             {
@@ -71,7 +71,7 @@ namespace awl::io
 
     template <class Stream, class Container, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && std::is_same<typename Container::value_type, bool>::value)
-    void WriteVector(Stream & s, const Container & x, const Context & ctx = {})
+    void writeVector(Stream & s, const Container & x, const Context & ctx = {})
     {
         typename Container::size_type n = x.size();
 
@@ -87,46 +87,46 @@ namespace awl::io
                 }
             }
 
-            Write(s, aggr, ctx);
+            write(s, aggr, ctx);
         }
     }
 
     template <class Stream, class T, class Allocator = std::allocator<T>, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
+    void read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size;
 
-        Read(s, size, ctx);
+        read(s, size, ctx);
 
         v.resize(size);
 
-        ReadVector(s, v, ctx);
+        readVector(s, v, ctx);
     }
 
     template <class Stream, class T, class Allocator = std::allocator<T>, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const std::vector<T, Allocator> & v, const Context & ctx = {})
+    void write(Stream & s, const std::vector<T, Allocator> & v, const Context & ctx = {})
     {
         typename std::vector<T, Allocator>::size_type size = v.size();
 
-        Write(s, size, ctx);
+        write(s, size, ctx);
 
-        WriteVector(s, v, ctx);
+        writeVector(s, v, ctx);
     }
 
     //std::array has no specialization for bool type, but we save std::array<bool, N> in the same format as std::vector<bool>.
     template <class Stream, typename T, std::size_t N, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
+    void read(Stream & s, std::array<T, N> & v, const Context & ctx = {})
     {
-        ReadVector(s, v, ctx);
+        readVector(s, v, ctx);
     }
 
     template <class Stream, typename T, std::size_t N, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
+    void write(Stream & s, const std::array<T, N> & v, const Context & ctx = {})
     {
-        WriteVector(s, v, ctx);
+        writeVector(s, v, ctx);
     }
 }

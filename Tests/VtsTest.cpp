@@ -219,7 +219,7 @@ AWL_TEST(VtsDeletedType)
     E1 e1 = { "abc", { 1, 2, 3 } };
     E2 e2 = { { 1, 2, 3 }, 1 };
 
-    awl::io::CopyV(e1, e2);
+    awl::io::copyV(e1, e2);
 
     AWL_ASSERT(e2.b == e1.b);
     AWL_ASSERT(e2.c == 1);

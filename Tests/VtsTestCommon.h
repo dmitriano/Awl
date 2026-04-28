@@ -40,16 +40,16 @@ namespace awl::testing::vts_common
         Writer ctx;
 
         {
-            auto& a1_proto = ctx.template FindNewPrototype<vts_data::v1::A>();
-            AWL_ASSERT(a1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v1::A>::Tie>);
+            auto& a1_proto = ctx.template newPrototype<vts_data::v1::A>();
+            AWL_ASSERT(a1_proto.count() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v1::A>::Tie>);
 
-            auto& b1_proto = ctx.template FindNewPrototype<vts_data::v1::B>();
-            AWL_ASSERT(b1_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v1::B>::Tie>);
+            auto& b1_proto = ctx.template newPrototype<vts_data::v1::B>();
+            AWL_ASSERT(b1_proto.count() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v1::B>::Tie>);
         }
 
         if (with_metadata)
         {
-            ctx.WriteNewPrototypes(out);
+            ctx.writeNewPrototypes(out);
         }
 
         awl::StopWatch w;
@@ -57,8 +57,8 @@ namespace awl::testing::vts_common
         for (size_t i : awl::make_count(element_count))
         {
             static_cast<void>(i);
-            ctx.WriteV(out, vts_data::v1::a_expected);
-            ctx.WriteV(out, vts_data::v1::b_expected);
+            ctx.writeV(out, vts_data::v1::a_expected);
+            ctx.writeV(out, vts_data::v1::b_expected);
         }
 
         return w;
@@ -70,7 +70,7 @@ namespace awl::testing::vts_common
         {
             // Skip metadata.
             Reader ctx;
-            ctx.ReadOldPrototypes(in);
+            ctx.readOldPrototypes(in);
         }
 
         awl::io::PlainReader<typename Reader::Variant, typename Reader::InputStream> ctx;
@@ -82,15 +82,15 @@ namespace awl::testing::vts_common
             static_cast<void>(i);
 
             vts_data::v1::A a1;
-            ctx.ReadV(in, a1);
+            ctx.readV(in, a1);
             AWL_ASSERT(a1 == vts_data::v1::a_expected);
 
             vts_data::v1::B b1;
-            ctx.ReadV(in, b1);
+            ctx.readV(in, b1);
             AWL_ASSERT(b1 == vts_data::v1::b_expected);
         }
 
-        AWL_ASSERT(in.End());
+        AWL_ASSERT(in.end());
 
         return w;
     }
@@ -99,7 +99,7 @@ namespace awl::testing::vts_common
     Duration ReadDataV1(typename Reader::InputStream& in, size_t element_count)
     {
         Reader ctx;
-        ctx.ReadOldPrototypes(in);
+        ctx.readOldPrototypes(in);
 
         awl::StopWatch w;
 
@@ -108,15 +108,15 @@ namespace awl::testing::vts_common
             static_cast<void>(i);
 
             vts_data::v1::A a1;
-            ctx.ReadV(in, a1);
+            ctx.readV(in, a1);
             AWL_ASSERT(a1 == vts_data::v1::a_expected);
 
             vts_data::v1::B b1;
-            ctx.ReadV(in, b1);
+            ctx.readV(in, b1);
             AWL_ASSERT(b1 == vts_data::v1::b_expected);
         }
 
-        AWL_ASSERT(in.End());
+        AWL_ASSERT(in.end());
 
         return w;
     }
@@ -125,14 +125,14 @@ namespace awl::testing::vts_common
     Duration ReadDataV2(typename Reader::InputStream& in, size_t element_count)
     {
         Reader ctx;
-        ctx.ReadOldPrototypes(in);
+        ctx.readOldPrototypes(in);
 
         {
-            auto& a2_proto = ctx.template FindNewPrototype<vts_data::v2::A>();
-            AWL_ASSERT(a2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v2::A>::Tie>);
+            auto& a2_proto = ctx.template newPrototype<vts_data::v2::A>();
+            AWL_ASSERT(a2_proto.count() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v2::A>::Tie>);
 
-            auto& b2_proto = ctx.template FindNewPrototype<vts_data::v2::B>();
-            AWL_ASSERT(b2_proto.GetCount() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v2::B>::Tie>);
+            auto& b2_proto = ctx.template newPrototype<vts_data::v2::B>();
+            AWL_ASSERT(b2_proto.count() == std::tuple_size_v<awl::tuplizable_traits<vts_data::v2::B>::Tie>);
         }
 
         awl::StopWatch w;
@@ -142,24 +142,24 @@ namespace awl::testing::vts_common
             static_cast<void>(i);
 
             vts_data::v2::A a2;
-            ctx.ReadV(in, a2);
+            ctx.readV(in, a2);
             AWL_ASSERT(a2 == vts_data::v2::a_expected);
 
             // Version 1 data has v2::B so the condition is true.
             vts_data::v2::B b2;
-            ctx.ReadV(in, b2);
+            ctx.readV(in, b2);
             AWL_ASSERT(b2 == vts_data::v2::b_expected);
 
             // An example of how to read data that may not exist in a previous version.
             if (false)
             {
                 vts_data::v2::C c2;
-                ctx.ReadV(in, c2);
+                ctx.readV(in, c2);
                 AWL_ASSERT(c2 == vts_data::v2::c_expected);
             }
         }
 
-        AWL_ASSERT(in.End());
+        AWL_ASSERT(in.end());
 
         return w;
     }
@@ -174,7 +174,7 @@ namespace awl::testing::vts_common
         {
             awl::io::MeasureStream out;
             WriteDataV1<OldMeasureWriter>(out, 0, true);
-            meta_size = out.GetLength();
+            meta_size = out.length();
         }
 
         size_t block_size = 0;
@@ -182,7 +182,7 @@ namespace awl::testing::vts_common
         {
             awl::io::MeasureStream out;
             WriteDataV1<OldMeasureWriter>(out, 1, false);
-            block_size = out.GetLength();
+            block_size = out.length();
         }
 
         const size_t mem_size = meta_size + block_size * element_count;

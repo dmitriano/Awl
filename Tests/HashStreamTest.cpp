@@ -59,7 +59,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         for (size_t i = 0; i < sample_count; ++i)
         {
-            Write(hout, sample);
+            write(hout, sample);
         }
 
         if (!corrupt)
@@ -86,7 +86,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         for (size_t i = 0; i < sample_count; ++i)
         {
-            Read(hin, result);
+            read(hin, result);
 
             AWL_ASSERTM(sample == result, _T("read/write mismatch."));
 
@@ -102,8 +102,8 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
             context.logger.debug(_T(""));
         }
 
-        AWL_ASSERT(in.End());
-        AWL_ASSERT(hin.End());
+        AWL_ASSERT(in.end());
+        AWL_ASSERT(hin.end());
     }
 }
 
@@ -141,7 +141,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         for (size_t i = 0; i < sample_count; ++i)
         {
-            Write(redirected_out, sample);
+            write(redirected_out, sample);
         }
 
         if (!corrupt)
@@ -179,7 +179,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         for (size_t i = 0; i < sample_count; ++i)
         {
-            Read(redirected_in, result);
+            read(redirected_in, result);
 
             AWL_ASSERTM(sample == result, _T("read/write mismatch."));
 
@@ -195,8 +195,8 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
             context.logger.debug(_T(""));
         }
 
-        AWL_ASSERT(in.End());
-        AWL_ASSERT(hin.End());
+        AWL_ASSERT(in.end());
+        AWL_ASSERT(hin.end());
     }
 
     std::filesystem::remove(file_name);

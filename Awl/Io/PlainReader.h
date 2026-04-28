@@ -25,23 +25,23 @@ namespace awl::io
 
         //Reads entire object tree assuming all the prototypes are equal.
         template<class Struct>
-        void ReadV(InputStream & s, Struct & val) const
+        void readV(InputStream & s, Struct & val) const
         {
             if constexpr (is_reflectable_v<Struct>)
             {
-                this->ReadStructIndex(s);
+                this->readStructIndex(s);
             }
 
             if constexpr (is_tuplizable_v<Struct>)
             {
                 for_each(object_as_tuple(val), [this, &s](auto& field)
                 {
-                    this->ReadV(s, field);
+                    this->readV(s, field);
                 });
             }
             else
             {
-                Read(s, val, *this);
+                read(s, val, *this);
             }
         }
     };

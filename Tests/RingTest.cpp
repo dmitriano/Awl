@@ -72,7 +72,7 @@ namespace
             m_v.erase(m_v.begin(), m_v.end() - m_r.size());
         }
 
-        void Compare()
+        void compare()
         {
             CompareContainers(m_r, m_v);
             CompareContainers<const decltype(m_r), const decltype(m_v)>(m_r, m_v);
@@ -80,13 +80,13 @@ namespace
 
         void RunAll()
         {
-            Compare();
+            compare();
 
             do
             {
                 m_v.pop_front();
                 m_r.pop_front();
-                Compare();
+                compare();
             }
             while (!m_r.empty());
         }

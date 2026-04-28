@@ -41,7 +41,7 @@ namespace awl
         {
             m_used.push_back(p);
 
-            return MakePointer(p);
+            return makePointer(p);
         }
 
         ~object_pool()
@@ -70,20 +70,20 @@ namespace awl
                 p_this->m_used.erase(p);
                 //p->pooled_object::exclude();
                 p_this->m_free.push_back(p);
-                p->Finalize();
+                p->finalize();
             }
         };
 
         friend Deleter;
         
-        auto MakeDeleter()
+        auto makeDeleter()
         {
             return Deleter{ this };
         }
 
-        std::shared_ptr<T> MakePointer(T* p)
+        std::shared_ptr<T> makePointer(T* p)
         {
-            return std::shared_ptr<T>(p, MakeDeleter());
+            return std::shared_ptr<T>(p, makeDeleter());
         }
 
         using List = awl::quick_list<T, pooled_object_link>;

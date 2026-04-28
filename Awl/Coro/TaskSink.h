@@ -6,7 +6,7 @@ namespace awl
     {
     public:
 
-        virtual void OnFinished() = 0;
+        virtual void onFinished() = 0;
     };
 
     template <class Key, class Value>
@@ -14,6 +14,6 @@ namespace awl
     {
     public:
 
-        virtual void OnFinished(const Key& key, const Value& value) = 0;
+        virtual void onFinished(const Key& key, const Value& value) = 0;
     };
 }

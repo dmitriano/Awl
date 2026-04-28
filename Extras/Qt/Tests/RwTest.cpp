@@ -14,21 +14,21 @@ namespace
     const char sample[] = "some string";
 
     template <class T>
-    void Write(std::vector<uint8_t>& v, const T& val)
+    void write(std::vector<uint8_t>& v, const T& val)
     {
         awl::io::VectorOutputStream out(v);
 
-        awl::io::Write(out, val);
+        awl::io::write(out, val);
     }
 
     template <class T>
-    void Read(const std::vector<uint8_t>& v, const T& expected)
+    void read(const std::vector<uint8_t>& v, const T& expected)
     {
         awl::io::VectorInputStream in(v);
 
         T val;
 
-        awl::io::Read(in, val);
+        awl::io::read(in, val);
 
         AWL_ASSERT(val == expected);
     }
@@ -41,14 +41,14 @@ AWL_TEST(RwQtString)
     {
         std::vector<uint8_t> v;
 
-        Write(v, std::string(sample));
-        Read(v, QString(sample));
+        write(v, std::string(sample));
+        read(v, QString(sample));
     }
 
     {
         std::vector<uint8_t> v;
 
-        Write(v, QString(sample));
-        Read(v, std::string(sample));
+        write(v, QString(sample));
+        read(v, std::string(sample));
     }
 }

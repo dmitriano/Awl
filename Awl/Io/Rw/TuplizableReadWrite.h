@@ -18,65 +18,65 @@ namespace awl::io
 
     template<class Stream, typename ... Fields, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void ReadEach(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
+    void readEach(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
     {
-        for_each(val, [&s, &ctx](auto& field) { Read(s, field, ctx); });
+        for_each(val, [&s, &ctx](auto& field) { read(s, field, ctx); });
     }
 
     template<class Stream, typename ... Fields, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void WriteEach(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
+    void writeEach(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
     {
-        for_each(val, [&s, &ctx](auto& field) { Write(s, field, ctx); });
+        for_each(val, [&s, &ctx](auto& field) { write(s, field, ctx); });
     }
 
     //A tuple of references is passed by value.
     template<class Stream, typename ... Fields, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
+    void read(Stream & s, std::tuple<Fields& ...> val, const Context & ctx = {})
     {
-        ReadEach(s, val, ctx);
+        readEach(s, val, ctx);
     }
 
     //A tuple of values is passed by reference. Cannot figure out why this does not compile with VC2017.
     //template<class Stream, typename ... Fields>
-    //void Read(Stream & s, std::tuple<Fields ...> & val)
+    //void read(Stream & s, std::tuple<Fields ...> & val)
     //{
-    //    ReadEach(s, val);
+    //    readEach(s, val);
     //}
 
     template<class Stream, typename ... Fields, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
+    void write(Stream & s, const std::tuple<Fields& ...> & val, const Context & ctx = {})
     {
-        WriteEach(s, val, ctx);
+        writeEach(s, val, ctx);
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_input_stream<Stream> && is_tuplizable_v<T>)
-    void Read(Stream & s, T & val, const Context & ctx = {})
+    void read(Stream & s, T & val, const Context & ctx = {})
     {
         if constexpr (vts_read_context<Context, Stream, T>)
         {
-            ctx.ReadV(s, val);
+            ctx.readV(s, val);
         }
         else
         {
-            Read(s, object_as_tuple(val), ctx);
+            read(s, object_as_tuple(val), ctx);
         }
     }
 
     template <class Stream, typename T, class Context = FakeContext>
         requires (sequential_output_stream<Stream> && is_tuplizable_v<T>)
-    void Write(Stream & s, const T & val, const Context & ctx = {})
+    void write(Stream & s, const T & val, const Context & ctx = {})
     {
         if constexpr (vts_write_context<Context, Stream, T>)
         {
-            ctx.WriteV(s, val);
+            ctx.writeV(s, val);
         }
         else
         {
-            Write(s, object_as_tuple(val), ctx);
+            write(s, object_as_tuple(val), ctx);
         }
     }
 }

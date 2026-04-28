@@ -124,7 +124,7 @@ namespace
 
             for (size_t i = 0; ; ++i)
             {
-                if (sw.HasElapsed(workDuration))
+                if (sw.hasElapsed(workDuration))
                 {
                     break;
                 }

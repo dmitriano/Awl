@@ -49,7 +49,7 @@ namespace
             context.logger.debug(_T("The user has changed Rotation\n"));
         }
 
-        updateQueue.Push([](GameScene & scene)
+        updateQueue.push([](GameScene & scene)
         {
             scene.Rotation = 2;
         });
@@ -60,7 +60,7 @@ namespace
             context.logger.debug(_T("The user has changed PerspectiveMode\n"));
         }
 
-        updateQueue.Push([](GameScene & scene)
+        updateQueue.push([](GameScene & scene)
         {
             scene.PerspectiveMode = true;
         });
@@ -70,13 +70,13 @@ namespace
     {
         GameScene scene;
 
-        AWL_ASSERTM_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
+        AWL_ASSERTM_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before applyUpdates() is called."));
 
         scene.Draw(context);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(17));
 
-        updateQueue.ApplyUpdates(scene);
+        updateQueue.applyUpdates(scene);
 
         AWL_ASSERTM_TRUE(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 

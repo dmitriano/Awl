@@ -25,7 +25,7 @@ namespace awl::mp
     namespace helpers
     {
         template <size_t val>
-        constexpr size_t GetNumberLength()
+        constexpr size_t numberLength()
         {
             size_t i = 0;
             size_t n = val;
@@ -39,12 +39,12 @@ namespace awl::mp
             return i;
         }
 
-        static_assert(GetNumberLength<0>() == 0);
-        static_assert(GetNumberLength<5>() == 1);
-        static_assert(GetNumberLength<35>() == 2);
+        static_assert(numberLength<0>() == 0);
+        static_assert(numberLength<5>() == 1);
+        static_assert(numberLength<35>() == 2);
 
         template <size_t val>
-        constexpr std::string FormatNumber()
+        constexpr std::string formatNumber()
         {
             if constexpr (val == 0)
             {
@@ -52,7 +52,7 @@ namespace awl::mp
             }
             else
             {
-                constexpr size_t N = GetNumberLength<val>();
+                constexpr size_t N = numberLength<val>();
                 std::string buf;
                 buf.resize(N);
 
@@ -67,16 +67,16 @@ namespace awl::mp
             }
         }
 
-        static_assert(FormatNumber<5>().size() == 1);
+        static_assert(formatNumber<5>().size() == 1);
         static_assert(std::string("5").size() == 1);
-        static_assert(FormatNumber<5>() == std::string("5"));
-        static_assert(FormatNumber<0>() == std::string("0"));
-        static_assert(FormatNumber<35>() == std::string("35"));
+        static_assert(formatNumber<5>() == std::string("5"));
+        static_assert(formatNumber<0>() == std::string("0"));
+        static_assert(formatNumber<35>() == std::string("35"));
 
         template <class T, std::enable_if_t<std::is_arithmetic<T>{}, bool > = true >
-        constexpr auto GetArithmeticSize()
+        constexpr auto arithmeticSize()
         {
-            return FormatNumber<sizeof(T) * 8>();
+            return formatNumber<sizeof(T) * 8>();
         }
     }
 
@@ -96,7 +96,7 @@ namespace awl::mp
 
         static constexpr std::string name()
         {
-            auto suffix = helpers::GetArithmeticSize<T>() + std::string("_t");
+            auto suffix = helpers::arithmeticSize<T>() + std::string("_t");
 
             if constexpr (std::is_integral_v<T>)
             {
@@ -198,7 +198,7 @@ namespace awl::mp
 
         static constexpr std::string name()
         {
-            return std::string("array<") + make_type_name<T>() + std::string(", ") + helpers::FormatNumber<N>() + std::string(">");
+            return std::string("array<") + make_type_name<T>() + std::string(", ") + helpers::formatNumber<N>() + std::string(">");
         }
     };
 
@@ -255,7 +255,7 @@ namespace awl::mp
             }
             else
             {
-                return std::string("decimal<") + make_type_name<UInt>() + std::string(", ") + helpers::FormatNumber<exp_len>() + std::string(">");
+                return std::string("decimal<") + make_type_name<UInt>() + std::string(", ") + helpers::formatNumber<exp_len>() + std::string(">");
             }
         }
     };

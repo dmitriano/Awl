@@ -27,9 +27,9 @@ namespace awl
         using value_type = Container;
         using T = typename Container::value_type;
 
-        void FromJson(const QJsonValue& jv, value_type& v)
+        void fromJson(const QJsonValue& jv, value_type& v)
         {
-            EnsureType(jv, QJsonValue::Array);
+            ensureType(jv, QJsonValue::Array);
             QJsonArray ja = jv.toArray();
             inserter<Container>::reserve(v, static_cast<size_t>(ja.size()));
             JsonSerializer<T> formatter;
@@ -44,7 +44,7 @@ namespace awl
 
                 try
                 {
-                    formatter.FromJson(j_elem, val);
+                    formatter.fromJson(j_elem, val);
                 }
                 catch (JsonException& e)
                 {
@@ -59,7 +59,7 @@ namespace awl
             }
         }
 
-        void ToJson(const value_type& set, QJsonValue& jv)
+        void toJson(const value_type& set, QJsonValue& jv)
         {
             QJsonArray ja;
             JsonSerializer<T> formatter;
@@ -67,7 +67,7 @@ namespace awl
             for (const T& elem : set)
             {
                 QJsonValue elem_jv;
-                formatter.ToJson(elem, elem_jv);
+                formatter.toJson(elem, elem_jv);
                 ja.append(elem_jv);
             }
 

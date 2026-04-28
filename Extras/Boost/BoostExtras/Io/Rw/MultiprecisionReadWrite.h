@@ -21,12 +21,12 @@ namespace awl::io
     }
     
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
-    void Read(Stream & s, boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
+    void read(Stream & s, boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
     {
         using Number = boost::multiprecision::number<Backend, ExpressionTemplates>;
 
         std::uint8_t size;
-        Read(s, size, ctx);
+        read(s, size, ctx);
 
         const bool negative = size & detail::signMask;
 
@@ -36,7 +36,7 @@ namespace awl::io
         boost::container::small_vector<std::uint8_t, awl::helpers::multiprecision_descriptor<Number>::size> v(size);
 
         //We read exactly size bytes here.
-        ReadVector(s, v, ctx);
+        readVector(s, v, ctx);
 
         import_bits(val, v.begin(), v.end());
 
@@ -47,7 +47,7 @@ namespace awl::io
     }
 
     template <class Stream, class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class Context = FakeContext>
-    void Write(Stream & s, const boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
+    void write(Stream & s, const boost::multiprecision::number<Backend, ExpressionTemplates>& val, const Context & ctx = {})
     {
         using Number = boost::multiprecision::number<Backend, ExpressionTemplates>;
 
@@ -68,8 +68,8 @@ namespace awl::io
             size |= detail::signMask;
         }
         
-        Write(s, size, ctx);
+        write(s, size, ctx);
 
-        WriteVector(s, v, ctx);
+        writeVector(s, v, ctx);
     }
 }

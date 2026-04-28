@@ -23,7 +23,7 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
             return std::format(_T("Requested {} actually read {} ."), requestedCount, actuallyReadCount);
         }
@@ -42,7 +42,7 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
             awl::ostringstream out;
 
@@ -86,7 +86,7 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
             return theMessage;
         }
@@ -100,7 +100,7 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
             return std::format(_T("Field '{}' not found. ."), fromAString(fieldName));
         }
@@ -119,7 +119,7 @@ namespace awl::io
         {
         }
 
-        String What() const override
+        String message() const override
         {
             return std::format(_T("Expected '{}' type: {} actually read type: {} ."), fromAString(fieldName), expectedType, actualType);
         }

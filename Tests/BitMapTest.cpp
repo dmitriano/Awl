@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/BitMap.h"
+#include "Awl/EnumFormatter.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -34,6 +35,8 @@ AWL_TEST(BitMapWithEnumTraits)
     using namespace BitMapTest;
 
     AWL_ASSERT(std::ranges::equal(awl::EnumTraits<Vehicle>::names(), expected_names));
+    AWL_ASSERT_EQUAL("Train", std::format("{}", Vehicle::Train));
+    AWL_ASSERT_EQUAL(L"Train", std::format(L"{}", Vehicle::Train));
 
     constexpr awl::bitmap<Vehicle> car{ Vehicle::Car };
 

@@ -17,20 +17,20 @@ namespace awl::io
 
     template <class Stream, class Clock, class Duration, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::chrono::time_point<Clock, Duration> & val, const Context & ctx = {})
+    void read(Stream & s, std::chrono::time_point<Clock, Duration> & val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
         int64_t ns_count;
 
-        Read(s, ns_count, ctx);
+        read(s, ns_count, ctx);
 
         val = std::chrono::time_point<Clock, Duration>(duration_cast<Duration>(nanoseconds(ns_count)));
     }
 
     template <class Stream, class Clock, class Duration, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, std::chrono::time_point<Clock, Duration> val, const Context & ctx = {})
+    void write(Stream & s, std::chrono::time_point<Clock, Duration> val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
@@ -38,25 +38,25 @@ namespace awl::io
 
         const int64_t ns_count = ns.count();
 
-        Write(s, ns_count, ctx);
+        write(s, ns_count, ctx);
     }
 
     template <class Stream, class Rep, class Period, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::chrono::duration<Rep, Period> & val, const Context & ctx = {})
+    void read(Stream & s, std::chrono::duration<Rep, Period> & val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
         int64_t ns_count;
 
-        Read(s, ns_count, ctx);
+        read(s, ns_count, ctx);
 
         val = duration_cast<std::chrono::duration<Rep, Period>>(nanoseconds(ns_count));
     }
 
     template <class Stream, class Rep, class Period, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, std::chrono::duration<Rep, Period> val, const Context & ctx = {})
+    void write(Stream & s, std::chrono::duration<Rep, Period> val, const Context & ctx = {})
     {
         using namespace std::chrono;
 
@@ -64,6 +64,6 @@ namespace awl::io
 
         const int64_t ns_count = ns.count();
 
-        Write(s, ns_count, ctx);
+        write(s, ns_count, ctx);
     }
 }

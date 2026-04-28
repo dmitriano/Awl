@@ -51,7 +51,7 @@ namespace awl
 
     public:
 
-        void ClearPending()
+        void clearPending()
         {
             std::lock_guard<std::recursive_mutex> lock(queueMutex);
 
@@ -61,7 +61,7 @@ namespace awl
         }
 
         //called by UI thread to propagate changes to render thread
-        void Push(const std::function<void(Args ...)> & func)
+        void push(const std::function<void(Args ...)> & func)
         {
             std::lock_guard<std::recursive_mutex> lock(queueMutex);
 
@@ -82,10 +82,10 @@ namespace awl
         }
 
         //called by render thread to apply changes queued by UI thread
-        void ApplyUpdates(Args ... args)
+        void applyUpdates(Args ... args)
         {
             //if an exception is thrown, the queue stays in a valid state, but remaining updates are lost
-            auto guard = awl::make_scope_guard( [this]() { PrepareData();}, [this]() { FreeData();});
+            auto guard = awl::make_scope_guard( [this]() { prepareData();}, [this]() { freeData();});
 
             //we do not lock anything while applying the changes
             //so Push can be called while ApplyUpdates is still executed
@@ -103,23 +103,23 @@ namespace awl
         //should be handled in GameField.Click(...) function for each certain 
         //case/event, but not for the entire queue.
 
-        //updateQueue.PrepareData();
-        //if (!updateQueue.IsEmpty())
+        //updateQueue.prepareData();
+        //if (!updateQueue.isEmpty())
         //{
         //	//Field is unable to handle the user input while some action is in progress
         //	//so we stop all the actions before processing the updates
         //	pField->CompletePhantoms();
-        //	updateQueue.ApplyUpdates(*pSceneRenderer.get());
+        //	updateQueue.applyUpdates(*pSceneRenderer.get());
         //}
-        //updateQueue.FreeData();
+        //updateQueue.freeData();
 
-        //should be called on render thread after PrepareData()
-        //bool IsEmpty()
+        //should be called on render thread after prepareData()
+        //bool isEmpty()
         //{
         //	return renderingMessages.empty();
         //}
 
-        void PrepareData()
+        void prepareData()
         {
             std::lock_guard<std::recursive_mutex> lock(queueMutex);
 
@@ -128,7 +128,7 @@ namespace awl
             renderingMessages = std::move(pendingMessages);
         }
 
-        void FreeData()
+        void freeData()
         {
             std::lock_guard<std::recursive_mutex> lock(queueMutex);
 
@@ -142,7 +142,7 @@ namespace awl
             freeBlocks.push_back(renderingMessages);
         }
 
-        //an update can queue another updates by calling Push() while it is processed, so the mutex is recursive
+        //an update can queue another updates by calling push() while it is processed, so the mutex is recursive
         std::recursive_mutex queueMutex;
 
         //messages (changes) queued by UI thread while rendering operation is in progress

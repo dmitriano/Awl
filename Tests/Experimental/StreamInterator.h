@@ -23,7 +23,7 @@ namespace awl::io
 
 			OutputElement& operator = (T&& val)
 			{
-				Write(*p_out, std::forward<T>(val), *p_context);
+				write(*p_out, std::forward<T>(val), *p_context);
 			}
 
 		private:

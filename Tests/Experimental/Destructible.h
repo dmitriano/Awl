@@ -40,7 +40,7 @@ namespace awl
             new(address()) T(std::forward<T>(t));
         }
 
-        void Destroy()
+        void destroy()
         {
             get()->T::~T();
         }

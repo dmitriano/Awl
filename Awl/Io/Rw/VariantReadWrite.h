@@ -19,7 +19,7 @@ namespace awl::io
         template <class V, class Stream, class Context>
         struct VariantAlternativeReader
         {
-            virtual void ReadAlternative(Stream & in, V & v, const Context & ctx) const = 0;
+            virtual void readAlternative(Stream & in, V & v, const Context & ctx) const = 0;
         };
 
         template <class V, class Stream, class Context, size_t index>
@@ -27,12 +27,12 @@ namespace awl::io
         {
         public:
 
-            void ReadAlternative(Stream & in, V & v, const Context & ctx) const override
+            void readAlternative(Stream & in, V & v, const Context & ctx) const override
             {
                 using T = std::variant_alternative_t<index, V>;
                 
                 T val;
-                Read(in, val, ctx);
+                read(in, val, ctx);
                 v = val;
             }
         };
@@ -47,24 +47,24 @@ namespace awl::io
 
         public:
 
-            static void ReadVariant(Stream & in, V & v, const Context & ctx)
+            static void readVariant(Stream & in, V & v, const Context & ctx)
             {
                 static auto vrt = transform_v2ti<V, AlternativeReaderImpl>();
                 static auto vra = tuple_cast<VariantAlternativeReader<V, Stream, Context>>(vrt);
 
                 std::size_t index;
-                Read(in, index, ctx);
+                read(in, index, ctx);
 
                 assert(index < std::variant_size_v<V>);
 
-                vra[index]->ReadAlternative(in, v, ctx);
+                vra[index]->readAlternative(in, v, ctx);
             }
         };
 
         template <class V, class Stream, class Context>
         struct VariantAlternativeWriter
         {
-            virtual void WriteAlternative(Stream & out, const V & v, const Context & ctx) const = 0;
+            virtual void writeAlternative(Stream & out, const V & v, const Context & ctx) const = 0;
         };
 
         template <class V, class Stream, class Context, size_t index>
@@ -72,12 +72,12 @@ namespace awl::io
         {
         public:
 
-            void WriteAlternative(Stream & out, const V & v, const Context & ctx) const override
+            void writeAlternative(Stream & out, const V & v, const Context & ctx) const override
             {
                 using T = std::variant_alternative_t<index, V>;
 
                 const T & val = std::get<index>(v);
-                Write(out, val, ctx);
+                write(out, val, ctx);
             }
         };
 
@@ -91,34 +91,34 @@ namespace awl::io
 
         public:
 
-            static void WriteVariant(Stream & out, const V & v, const Context & ctx)
+            static void writeVariant(Stream & out, const V & v, const Context & ctx)
             {
                 static auto vrt = transform_v2ti<V, AlternativeWriterImpl>();
                 static auto vra = tuple_cast<VariantAlternativeWriter<V, Stream, Context>>(vrt);
 
                 const std::size_t index = v.index();
-                Write(out, index, ctx);
+                write(out, index, ctx);
 
-                vra[index]->WriteAlternative(out, v, ctx);
+                vra[index]->writeAlternative(out, v, ctx);
             }
         };
     }
     
     template <class Stream, typename... Ts, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    void Read(Stream & s, std::variant<Ts...> & v, const Context & ctx = {})
+    void read(Stream & s, std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
 
-        impl::VariantReader<V, Stream, Context>::ReadVariant(s, v, ctx);
+        impl::VariantReader<V, Stream, Context>::readVariant(s, v, ctx);
     }
 
     template <class Stream, typename... Ts, class Context = FakeContext>
         requires sequential_output_stream<Stream>
-    void Write(Stream & s, const std::variant<Ts...> & v, const Context & ctx = {})
+    void write(Stream & s, const std::variant<Ts...> & v, const Context & ctx = {})
     {
         using V = std::variant<Ts...>;
 
-        impl::VariantWriter<V, Stream, Context>::WriteVariant(s, v, ctx);
+        impl::VariantWriter<V, Stream, Context>::writeVariant(s, v, ctx);
     }
 }

@@ -27,27 +27,27 @@ namespace awl::io
         {
             auto [master_name, backup_name] = append_extensions(file_name);
 
-            return m_storage.Open(master_name, backup_name);
+            return m_storage.open(master_name, backup_name);
         }
 
         bool load()
         {
-            return m_storage.Load(m_serializable);
+            return m_storage.load(m_serializable);
         }
 
         void save()
         {
-            m_storage.StartSave(m_serializable);
+            m_storage.startSave(m_serializable);
         }
 
         void wait()
         {
-            m_storage.Wait();
+            m_storage.wait();
         }
 
         void close()
         {
-            m_storage.Close();
+            m_storage.close();
         }
 
         void remove(const awl::String& file_name)
@@ -74,7 +74,7 @@ namespace awl::io
 
         bool is_open() const noexcept
         {
-            return m_storage.IsOpened();
+            return m_storage.isOpened();
         }
 
         const T& operator * () const noexcept

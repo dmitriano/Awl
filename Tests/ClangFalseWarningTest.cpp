@@ -33,7 +33,7 @@ namespace
     public:
 
         template<class Struct>
-        void ReadV(Struct& val) const
+        void readV(Struct& val) const
         {
             if constexpr (is_specialization_v<Struct, std::tuple>)
             {
@@ -41,7 +41,7 @@ namespace
                 {
                     //A false warining with Android CLang 17.0.2 from NDK 26.0.10792818:
                     //lambda capture 'this' is not used [-Wunused-lambda-capture]
-                    ReadV(field);
+                    readV(field);
                 });
             }
             else
@@ -59,5 +59,5 @@ AWL_TEST(CLangFalseWarning)
     TestReader reader;
 
     std::tuple<int> a(1);
-    reader.ReadV(a);
+    reader.readV(a);
 }

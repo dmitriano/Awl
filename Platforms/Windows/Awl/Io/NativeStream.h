@@ -35,28 +35,28 @@ namespace awl::io
             return !operator == (other);
         }
 
-        size_t GetLength() const override
+        size_t length() const override
         {
-            return static_cast<size_t>(GetFileSizeHelper());
+            return static_cast<size_t>(fileSizeHelper());
         }
 
-        size_t GetPosition() const override
+        size_t position() const override
         {
-            return static_cast<size_t>(GetFilePointerHelper());
+            return static_cast<size_t>(filePointerHelper());
         }
 
-        size_t Read(uint8_t* buffer, size_t count) override
+        size_t read(uint8_t* buffer, size_t count) override
         {
             const DWORD nNumberOfBytesToRead = static_cast<DWORD>(count);
             assert(nNumberOfBytesToRead == count);
             DWORD NumberOfBytesRead = 0;
 
-            Check(::ReadFile(m_hFile, buffer, nNumberOfBytesToRead, &NumberOfBytesRead, NULL) != FALSE);
+            check(::ReadFile(m_hFile, buffer, nNumberOfBytesToRead, &NumberOfBytesRead, NULL) != FALSE);
 
             return NumberOfBytesRead;
         }
 
-        void Write(const uint8_t* buffer, size_t count) override
+        void write(const uint8_t* buffer, size_t count) override
         {
             const DWORD nNumberOfBytesToWrite = static_cast<DWORD>(count);
             assert(nNumberOfBytesToWrite == count);
@@ -73,40 +73,40 @@ namespace awl::io
             }
         }
 
-        bool End() override
+        bool end() override
         {
-            return GetFileSizeHelper() == GetFilePointerHelper();
+            return fileSizeHelper() == filePointerHelper();
         }
 
-        void Seek(std::size_t pos, bool begin = true) override
+        void seek(std::size_t pos, bool begin = true) override
         {
             LARGE_INTEGER li;
 
             li.QuadPart = pos;
 
-            Check(::SetFilePointerEx(m_hFile, li, NULL, begin ? FILE_BEGIN : FILE_END) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(m_hFile, li, NULL, begin ? FILE_BEGIN : FILE_END) != INVALID_SET_FILE_POINTER);
         }
 
-        void Move(std::ptrdiff_t offset) override
+        void move(std::ptrdiff_t offset) override
         {
             LARGE_INTEGER li;
 
             li.QuadPart = offset;
 
-            Check(::SetFilePointerEx(m_hFile, li, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(m_hFile, li, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
         }
 
-        void Flush() override
+        void flush() override
         {
-            Check(::FlushFileBuffers(m_hFile) != FALSE);
+            check(::FlushFileBuffers(m_hFile) != FALSE);
         }
 
-        void Truncate() override
+        void truncate() override
         {
-            Check(::SetEndOfFile(m_hFile) != FALSE);
+            check(::SetEndOfFile(m_hFile) != FALSE);
         }
 
-        String GetFileName() const
+        String fileName() const
         {
             TCHAR buf[MAX_PATH];
             // It is not clear what is the difference with FILE_NAME_NORMALIZED.
@@ -122,7 +122,7 @@ namespace awl::io
 
     private:
 
-        static void Check(bool success)
+        static void check(bool success)
         {
             if (!success)
             {
@@ -130,23 +130,23 @@ namespace awl::io
             }
         }
         
-        LONGLONG GetFileSizeHelper() const
+        LONGLONG fileSizeHelper() const
         {
             LARGE_INTEGER li;
 
             li.QuadPart = 0;
 
-            Check(::GetFileSizeEx(m_hFile, &li) != FALSE);
+            check(::GetFileSizeEx(m_hFile, &li) != FALSE);
 
             return li.QuadPart;
         }
 
-        LONGLONG GetFilePointerHelper() const
+        LONGLONG filePointerHelper() const
         {
             LARGE_INTEGER liOfs = { 0 };
             LARGE_INTEGER liNew = { 0 };
 
-            Check(::SetFilePointerEx(m_hFile, liOfs, &liNew, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(m_hFile, liOfs, &liNew, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
 
             return liNew.QuadPart;
         }
@@ -158,7 +158,7 @@ namespace awl::io
     
     using SharedStream = WinStream<SharedFileHandle>;
 
-    inline UniqueFileHandle CreateUniqueFile(const String& file_name)
+    inline UniqueFileHandle createUniqueFile(const String& file_name)
     {
         //CREATEFILE2_EXTENDED_PARAMETERS extendedParams = { 0 };
         //extendedParams.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);
@@ -184,12 +184,12 @@ namespace awl::io
         return hFile;
     }
 
-    inline bool OpenedExisting()
+    inline bool openedExisting()
     {
         return ::GetLastError() == ERROR_ALREADY_EXISTS;
     }
 
-    inline UniqueFileHandle OpenUniqueFile(const String& file_name)
+    inline UniqueFileHandle openUniqueFile(const String& file_name)
     {
         //CREATEFILE2_EXTENDED_PARAMETERS extendedParams = { 0 };
         //extendedParams.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);

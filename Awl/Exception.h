@@ -16,14 +16,14 @@ namespace awl
     {
     public:
 
-        String GetClassName() const
+        String className() const
         {
             return fromACString(what());
         }
         
-        virtual String What() const
+        virtual String message() const
         {
-            return GetClassName();
+            return className();
         }
 
         const char * what() const noexcept override
@@ -48,7 +48,7 @@ namespace awl
         {
         }
 
-        String What() const override
+        String message() const override
         {
             return theMessage;
         }

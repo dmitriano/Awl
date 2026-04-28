@@ -16,7 +16,7 @@ namespace awl
     {
     public:
 
-        virtual void Finalize()
+        virtual void finalize()
         {
         }
 

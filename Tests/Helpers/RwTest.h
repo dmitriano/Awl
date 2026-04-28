@@ -26,7 +26,7 @@ namespace awl::testing::helpers
 
         for (size_t i = 0; i < iteration_count; ++i)
         {
-            Write(out, sample);
+            write(out, sample);
         }
 
         VectorInputStream in(reusable_v);
@@ -35,7 +35,7 @@ namespace awl::testing::helpers
         {
             T result;
 
-            Read(in, result);
+            read(in, result);
 
             if constexpr (is_pointer_v<T>)
             {
@@ -48,6 +48,6 @@ namespace awl::testing::helpers
             }
         }
 
-        AWL_ASSERT(in.End());
+        AWL_ASSERT(in.end());
     }
 }

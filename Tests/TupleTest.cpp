@@ -19,12 +19,12 @@ namespace
 {
     struct Writer
     {
-        virtual void Write(std::ostream & out) const = 0;
+        virtual void write(std::ostream & out) const = 0;
     };
 
     struct Reader
     {
-        virtual void Read(std::istream & in) const = 0;
+        virtual void read(std::istream & in) const = 0;
     };
 
     template <class Field>
@@ -36,7 +36,7 @@ namespace
         {
         }
 
-        void Write(std::ostream & out) const override
+        void write(std::ostream & out) const override
         {
             out << m_field << " ";
         }
@@ -55,7 +55,7 @@ namespace
         {
         }
 
-        void Read(std::istream & in) const override
+        void read(std::istream & in) const override
         {
             in >> m_field;
         }
@@ -80,7 +80,7 @@ AWL_TEST(TupleTransform)
 
     for (const auto * p_writer : writers)
     {
-        p_writer->Write(out);
+        p_writer->write(out);
     }
 
     std::string result = out.str();
@@ -97,7 +97,7 @@ AWL_TEST(TupleTransform)
     
     for (auto * p_reader : readers)
     {
-        p_reader->Read(in);
+        p_reader->read(in);
     }
 
     AWL_ASSERT(t1 == t);

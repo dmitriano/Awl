@@ -41,7 +41,7 @@ namespace awl
 
         single_iterator& operator++ ()
         {
-            this->MoveNext();
+            this->moveNext();
 
             return *this;
         }
@@ -50,7 +50,7 @@ namespace awl
         {
             single_iterator tmp = *this;
 
-            this->MoveNext();
+            this->moveNext();
 
             return tmp;
         }
@@ -76,7 +76,7 @@ namespace awl
         //! Results in undefined behavior if the iterator is end().
         T* cur() const { return static_cast<T*>(pCur); }
 
-        void MoveNext() { pCur = pCur->next(); }
+        void moveNext() { pCur = pCur->next(); }
 
         Link* link() const { return pCur; }
 

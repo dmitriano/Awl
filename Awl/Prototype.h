@@ -31,9 +31,9 @@ namespace awl
     {
     public:
 
-        virtual Field GetField(size_t index) const = 0;
+        virtual Field field(size_t index) const = 0;
 
-        virtual size_t GetCount() const = 0;
+        virtual size_t count() const = 0;
 
         virtual ~Prototype() {}
 
@@ -86,13 +86,13 @@ namespace awl
             assert(m_types.size() == S::member_names().size());
         }
 
-        Field GetField(size_t index) const override
+        Field field(size_t index) const override
         {
-            assert(index < GetCount());
+            assert(index < count());
             return { S::member_names()[index], m_types[index] };
         }
 
-        size_t GetCount() const override
+        size_t count() const override
         {
             return m_types.size();
         }
@@ -123,30 +123,30 @@ namespace awl
 
         explicit DetachedPrototype(const Prototype & ap)
         {
-            m_fields.resize(ap.GetCount());
-            for (size_t i = 0; i < ap.GetCount(); ++i)
+            m_fields.resize(ap.count());
+            for (size_t i = 0; i < ap.count(); ++i)
             {
-                const Field field = ap.GetField(i);
+                const Field field = ap.field(i);
                 m_fields[i] = {std::string(field.name), field.type};
             }
         }
 
-        Field GetField(size_t index) const override
+        Field field(size_t index) const override
         {
-            assert(index < GetCount());
+            assert(index < count());
             const FieldContainer & m = m_fields[index];
             return { m.name, m.type };
         }
 
-        size_t GetCount() const override
+        size_t count() const override
         {
             return m_fields.size();
         }
 
         //For type map
-        void SetFieldType(size_t index, size_t type)
+        void setFieldType(size_t index, size_t type)
         {
-            assert(index < GetCount());
+            assert(index < count());
             assert(type != Field::NoType);
             assert(m_fields[index].type != Field::NoType);
 
