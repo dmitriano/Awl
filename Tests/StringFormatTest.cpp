@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/StringFormat.h"
+#include "Awl/OptionalFormatter.h"
 
 #include "Awl/Testing/UnitTest.h"
 
@@ -156,6 +157,17 @@ namespace
 #endif
         }
 
+        static void TestOptionalStdFormat()
+        {
+            const std::optional<int> int_val = 7;
+            AWL_ASSERT(std::format("{}", int_val) == std::string("7"));
+            AWL_ASSERT(std::format(L"{}", int_val) == std::wstring(L"7"));
+
+            const std::optional<int> empty_int;
+            AWL_ASSERT(std::format("{}", empty_int) == std::string("null"));
+            AWL_ASSERT(std::format(L"{}", empty_int) == std::wstring(L"null"));
+        }
+
 #ifdef AWL_INT_128
 
         static void TestInt128Format()
@@ -258,6 +270,14 @@ AWL_TEST(StringCrossCharStdFormat)
 
     StringTest<char>::TestCrossCharStdFormat();
     StringTest<wchar_t>::TestCrossCharStdFormat();
+}
+
+AWL_TEST(StringOptionalStdFormat)
+{
+    AWL_UNUSED_CONTEXT;
+
+    StringTest<char>::TestOptionalStdFormat();
+    StringTest<wchar_t>::TestOptionalStdFormat();
 }
 
 #ifdef AWL_INT_128
