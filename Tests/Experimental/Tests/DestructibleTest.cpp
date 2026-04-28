@@ -25,7 +25,7 @@ AWL_TEST(Destructible)
     {
         awl::Destructible<A> da(value);
 
-        auto guard = awl::make_scope_guard([&da]() { da.Destroy();  });
+        auto guard = awl::make_scope_guard([&da]() { da.destroy();  });
 
         AWL_ASSERT(*da == A(value));
     }

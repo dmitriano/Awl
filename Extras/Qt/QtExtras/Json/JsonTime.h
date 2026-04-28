@@ -24,7 +24,7 @@ namespace awl
 
         using value_type = std::chrono::time_point<Clock, Duration>;
 
-        void FromJson(const QJsonValue & jv, value_type & v)
+        void fromJson(const QJsonValue & jv, value_type & v)
         {
             using namespace std::chrono;
 
@@ -33,7 +33,7 @@ namespace awl
             v = value_type(milliseconds(ms_count));
         }
 
-        void ToJson(const value_type & v, QJsonValue & jv)
+        void toJson(const value_type & v, QJsonValue & jv)
         {
             using namespace std::chrono;
             jv = static_cast<double>(duration_cast<milliseconds>(v.time_since_epoch()).count());
@@ -48,18 +48,18 @@ namespace awl
         using value_type = std::chrono::duration<Rep, Period>;
         using common_duration = std::chrono::nanoseconds;
 
-        void FromJson(const QJsonValue& jv, value_type& v)
+        void fromJson(const QJsonValue& jv, value_type& v)
         {
             if (!jv.isString())
             {
-                throw JsonException(awl::format() << "Expected duration as JSON string.");
+                throw JsonException(_T("Expected duration as JSON string."));
             }
 
             QString text = jv.toString().trimmed();
 
             if (text.isEmpty())
             {
-                throw JsonException(awl::format() << "Duration string is empty.");
+                throw JsonException(_T("Duration string is empty."));
             }
 
             const QString original_text = text;
@@ -80,7 +80,7 @@ namespace awl
             }
             catch (const JsonException& e)
             {
-                throwWrongDurationValue(original_text, e.What());
+                throwWrongDurationValue(original_text, e.message());
             }
 
             if (negative)
@@ -92,13 +92,13 @@ namespace awl
 
             if (std::chrono::duration_cast<common_duration>(converted) != parsed)
             {
-                throwWrongDurationValue(original_text, awl::format() << "Duration precision loss.");
+                throwWrongDurationValue(original_text, _T("Duration precision loss."));
             }
 
             v = converted;
         }
 
-        void ToJson(const value_type& v, QJsonValue& jv)
+        void toJson(const value_type& v, QJsonValue& jv)
         {
             const common_duration common_value = std::chrono::duration_cast<common_duration>(v);
             jv = toExtendedFormat(common_value);
@@ -219,7 +219,7 @@ namespace awl
 
             auto make_invalid_format = [&original_text]()
             {
-                throw JsonException(awl::format() << "Invalid duration format: " << original_text);
+                throw JsonException(std::format(_T("Invalid duration format: {}"), original_text));
             };
 
             auto parse_integer = [&original_text](std::string_view sv) -> int64_t
@@ -229,7 +229,7 @@ namespace awl
 
                 if (ec != std::errc{} || ptr != sv.data() + sv.size())
                 {
-                    throw JsonException(awl::format() << "Invalid duration format: " << original_text);
+                    throw JsonException(std::format(_T("Invalid duration format: {}"), original_text));
                 }
 
                 return value;
@@ -332,7 +332,7 @@ namespace awl
                     {
                         if (token[i] != '0')
                         {
-                            throw JsonException(awl::format() << "Duration precision loss: " << original_text);
+                            throw JsonException(std::format(_T("Duration precision loss: {}"), original_text));
                         }
                     }
 
@@ -358,7 +358,7 @@ namespace awl
 
         static void throwWrongDurationValue(const QString& text, const awl::String& details)
         {
-            throw JsonException(awl::format() << "Wrong duration value " << text << ". " << details);
+            throw JsonException(std::format(_T("Wrong duration value {}. {}"), text, details));
         }
     };
 }

@@ -30,32 +30,32 @@ namespace awl
 
         constexpr bitmap() = default;
 
-        constexpr bitmap(std::initializer_list<Enum> values) : m_bits(MakeLong(values))
+        constexpr bitmap(std::initializer_list<Enum> values) : m_bits(makeLong(values))
         {
             //for (Enum v : values)
             //{
-            //    m_bits |= Enum2Bits(v);
+            //    m_bits |= enum2Bits(v);
             //}
         }
 
         constexpr bitmap operator|(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits |= Enum2Bits(value);
+            bm.m_bits |= enum2Bits(value);
             return bm;
         }
 
         constexpr bitmap operator&(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits &= Enum2Bits(value);
+            bm.m_bits &= enum2Bits(value);
             return bm;
         }
 
         constexpr bitmap operator^(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits ^= Enum2Bits(value);
+            bm.m_bits ^= enum2Bits(value);
             return bm;
         }
 
@@ -68,19 +68,19 @@ namespace awl
 
         constexpr bitmap& operator|=(Enum value)
         {
-            m_bits |= Enum2Bits(value);
+            m_bits |= enum2Bits(value);
             return *this;
         }
 
         constexpr bitmap& operator&=(Enum value)
         {
-            m_bits &= Enum2Bits(value);
+            m_bits &= enum2Bits(value);
             return *this;
         }
 
         constexpr bitmap& operator^=(Enum value)
         {
-            m_bits ^= Enum2Bits(value);
+            m_bits ^= enum2Bits(value);
             return *this;
         }
 
@@ -125,7 +125,7 @@ namespace awl
 
         constexpr bool test(Enum value) const
         {
-            return m_bits.test(Enum2Index(value));
+            return m_bits.test(enum2Index(value));
         }
 
         constexpr bool any() const { return m_bits.any(); }
@@ -136,19 +136,19 @@ namespace awl
         
         constexpr bitmap& set(Enum value, bool b)
         {
-            m_bits.set(Enum2Index(value), b);
+            m_bits.set(enum2Index(value), b);
 
             return *this;
         }
 
         constexpr bool operator[](Enum value) const
         {
-            return m_bits[Enum2Index(value)];
+            return m_bits[enum2Index(value)];
         }
 
         auto operator[](Enum value)
         {
-            return m_bits[Enum2Index(value)];
+            return m_bits[enum2Index(value)];
         }
 
         size_type count() const
@@ -175,25 +175,25 @@ namespace awl
 
     private:
 
-        static constexpr size_type Enum2Index(Enum value)
+        static constexpr size_type enum2Index(Enum value)
         {
             return static_cast<size_type>(value);
         }
 
-        static constexpr BitSet Enum2Bits(Enum value)
+        static constexpr BitSet enum2Bits(Enum value)
         {
             BitSet bits;
-            bits.set(Enum2Index(value));
+            bits.set(enum2Index(value));
             return bits;
         }
 
-        static constexpr unsigned long long MakeLong(std::initializer_list<Enum> values)
+        static constexpr unsigned long long makeLong(std::initializer_list<Enum> values)
         {
             unsigned long long val = 0ull;
 
             for (Enum v : values)
             {
-                val |= (1ull << Enum2Index(v));
+                val |= (1ull << enum2Index(v));
             }
 
             return val;

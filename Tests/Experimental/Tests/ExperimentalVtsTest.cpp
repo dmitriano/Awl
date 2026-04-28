@@ -51,13 +51,13 @@ namespace
             total_d += awl::testing::vts_common::WriteDataV1<Writer>(out, element_count, false);
 
             AWL_ASSERT_EQUAL(mem_size, out.GetCapacity());
-            AWL_ASSERT_EQUAL(mem_size, out.GetLength());
+            AWL_ASSERT_EQUAL(mem_size, out.length());
 
             out.Reset();
         }
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * iteration_count, mem_size * iteration_count);
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 }
 
@@ -85,8 +85,8 @@ AWL_TEST(VtsReadWriteTrivialMemoryStream)
 
             total_d += awl::testing::vts_common::WriteDataV1<OldTrivialWriter>(out, element_count, true);
 
-            AWL_ASSERT_EQUAL(mem_size, out.GetLength());
-            AWL_ASSERT(in.End());
+            AWL_ASSERT_EQUAL(mem_size, out.length());
+            AWL_ASSERT(in.end());
 
             out.Reset();
         }
@@ -147,13 +147,13 @@ AWL_BENCHMARK(VtsMeasureSerializationInlinedVirtual)
 
     auto d = awl::testing::vts_common::WriteDataV1<OldMeasureWriter>(out, element_count, true);
 
-    context.logger.debug(_T("Test data has been written. "));
+    context.logger->debug(_T("Test data has been written. "));
 
-    helpers::ReportCountAndSpeed(context, d, element_count, out.GetLength());
+    helpers::ReportCountAndSpeed(context, d, element_count, out.length());
 
-    context.logger.debug(awl::format());
+    context.logger->debug(_T(""));
 
-    AWL_ASSERT_EQUAL((awl::testing::vts_common::MeasureStreamSize(context, element_count, true)), out.GetLength());
+    AWL_ASSERT_EQUAL((awl::testing::vts_common::MeasureStreamSize(context, element_count, true)), out.length());
 }
 
 AWL_BENCHMARK(VtsMeasureSerializationVirtual)
@@ -164,13 +164,13 @@ AWL_BENCHMARK(VtsMeasureSerializationVirtual)
 
     auto d = awl::testing::vts_common::WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
-    context.logger.debug(_T("Test data has been written. "));
+    context.logger->debug(_T("Test data has been written. "));
 
-    size_t len = (dynamic_cast<awl::io::MeasureStream&>(*p_out)).GetLength();
+    size_t len = (dynamic_cast<awl::io::MeasureStream&>(*p_out)).length();
 
     helpers::ReportCountAndSpeed(context, d, element_count, len);
 
-    context.logger.debug(awl::format());
+    context.logger->debug(_T(""));
 
     AWL_ASSERT_EQUAL((awl::testing::vts_common::MeasureStreamSize(context, element_count, true)), len);
 }
@@ -185,11 +185,11 @@ AWL_BENCHMARK(VtsMeasureSerializationFake)
 
     auto d = awl::testing::vts_common::WriteDataV1<OldVirtualWriter>(*p_out, element_count, true);
 
-    context.logger.debug(_T("Test data has been written. "));
+    context.logger->debug(_T("Test data has been written. "));
 
     helpers::ReportCountAndSpeed(context, d, element_count, mem_size);
 
-    context.logger.debug(awl::format());
+    context.logger->debug(_T(""));
 }
 
 AWL_TEST(VtsWriteMemoryStreamMemmove)

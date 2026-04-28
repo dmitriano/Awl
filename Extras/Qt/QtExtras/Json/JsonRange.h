@@ -16,7 +16,7 @@
 namespace awl
 {
     template <std::ranges::range Range>
-    QJsonArray RangeToJson(const Range& r)
+    QJsonArray rangeToJson(const Range& r)
     {
         using T = std::ranges::range_value_t<Range>;
 
@@ -28,7 +28,7 @@ namespace awl
         {
             QJsonValue j_val;
 
-            formatter.ToJson(val, j_val);
+            formatter.toJson(val, j_val);
 
             ja.append(j_val);
         }

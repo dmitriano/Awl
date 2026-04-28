@@ -25,12 +25,12 @@ namespace awl
             {
             }
 
-            bool End() override
+            bool end() override
             {
                 return m_i == m_v.end();
             }
 
-            size_t Read(uint8_t * buffer, size_t count) override
+            size_t read(uint8_t * buffer, size_t count) override
             {
                 auto diff = m_v.end() - m_i;
 
@@ -78,7 +78,7 @@ namespace awl
             {
             }
 
-            void Write(const uint8_t * buffer, size_t count) override
+            void write(const uint8_t * buffer, size_t count) override
             {
                 m_v.insert(m_v.end(), buffer, buffer + count);
             }

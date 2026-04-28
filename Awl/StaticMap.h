@@ -72,7 +72,7 @@ namespace awl
                     {
                         if (internal_find(links, p_link->name()) != nullptr)
                         {
-                            throw std::runtime_error(aformat() << "Static link '" << p_link->name() << " already exists.");
+                            throw std::runtime_error(std::format("Static link '{}' already exists.", p_link->name()));
                         }
 
                         links.push_back(p_link);

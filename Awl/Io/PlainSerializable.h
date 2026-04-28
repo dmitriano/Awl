@@ -17,7 +17,7 @@ namespace awl::io
 
         PlainSerializable(T& val) : m_val(val) {}
 
-        void Read(IStream& s) override
+        void read(IStream& s) override
         {
             if constexpr (atomic)
             {
@@ -25,20 +25,20 @@ namespace awl::io
                 // All the fields should be read.
                 T val;
 
-                awl::io::Read(s, val);
+                awl::io::read(s, val);
 
                 //If Read throws m_val does not change.
                 m_val = std::move(val);
             }
             else
             {
-                awl::io::Read(s, m_val);
+                awl::io::read(s, m_val);
             }
         }
 
-        void Write(OStream& s) const override
+        void write(OStream& s) const override
         {
-            awl::io::Write(s, m_val);
+            awl::io::write(s, m_val);
         }
 
     private:

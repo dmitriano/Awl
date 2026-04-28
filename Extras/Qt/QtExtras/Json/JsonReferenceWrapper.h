@@ -18,18 +18,18 @@ namespace awl
 
         using value_type = std::reference_wrapper<T>;
 
-        void FromJson(const QJsonValue & jv, value_type & v)
+        void fromJson(const QJsonValue & jv, value_type & v)
         {
             JsonSerializer<T> formatter;
             T val;
-            formatter.FromJson(jv, val);
+            formatter.fromJson(jv, val);
             v = val;
         }
 
-        void ToJson(const value_type & v, QJsonValue & jv)
+        void toJson(const value_type & v, QJsonValue & jv)
         {
             JsonSerializer<T> formatter;
-            formatter.ToJson(v.get(), jv);
+            formatter.toJson(v.get(), jv);
         }
     };
 }

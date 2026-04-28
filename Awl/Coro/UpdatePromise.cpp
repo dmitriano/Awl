@@ -30,7 +30,7 @@ void UpdatePromise::unhandled_exception() noexcept
         }
         catch (const awl::Exception& e)
         {
-            out << "of type '" << e.what() << "', Message: " << e.What();
+            out << "of type '" << e.what() << "', Message: " << e.message();
         }
         catch (const std::exception& e)
         {

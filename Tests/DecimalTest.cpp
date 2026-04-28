@@ -741,9 +741,9 @@ AWL_EXAMPLE(DecimalBinanceValues)
     
     constexpr uint64_t max_uint = std::numeric_limits<uint64_t>::max();
 
-    context.logger.debug(awl::format() << _T("uint64_t max: ") << max_uint << ", decimal digits: " << static_cast<size_t>(std::log10(max_uint)));
+    context.logger->debug(_T("uint64_t max: {}, decimal digits: {}"), max_uint, static_cast<size_t>(std::log10(max_uint)));
 
-    context.logger.debug(awl::format() << _T("max decimal man: ") << Decimal64::max_mantissa() << _T(", max decimal exp: ") << Decimal64::max_exponent());
+    context.logger->debug(_T("max decimal man: {}, max decimal exp: {}"), Decimal64::max_mantissa(), Decimal64::max_exponent());
 
     test.CheckConstructorTrows("8426879770.74001051"sv); //BTC day volume
 
@@ -764,7 +764,7 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
     const Decimal64 src_area = square(src_side);
 
-    context.logger.debug(awl::format() << _T("Src. side: ") << src_side << _T(", src. area: ") << src_area);
+    context.logger->debug(_T("Src. side: {}, src. area: {}"), src_side, src_area);
 
     {
         const Decimal64 a("0.85");
@@ -773,7 +773,7 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
         const Decimal64 area = awl::multiply((awl::multiply(a, b) + awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
 
-        context.logger.debug(awl::format() << "area #1: " << area);
+        context.logger->debug(_T("area #1: {}"), area);
     }
 
     {
@@ -783,7 +783,7 @@ AWL_EXAMPLE(DecimalSimpleCalculation)
 
         const Decimal64 area = awl::multiply(a, b) + awl::multiply((awl::multiply(b, c) + awl::multiply(a, c)), Decimal64("2"));
 
-        context.logger.debug(awl::format() << "area #2: " << area);
+        context.logger->debug(_T("area #2: {}"), area);
     }
 }
 
@@ -797,7 +797,7 @@ AWL_EXAMPLE(DecimalEmpty)
     }
     catch (const std::runtime_error& e)
     {
-        context.logger.debug(e.what());
+        context.logger->debug(e.what());
     }
 
     try
@@ -808,7 +808,7 @@ AWL_EXAMPLE(DecimalEmpty)
     }
     catch (const std::runtime_error& e)
     {
-        context.logger.debug(e.what());
+        context.logger->debug(e.what());
     }
 
     try
@@ -819,7 +819,7 @@ AWL_EXAMPLE(DecimalEmpty)
     }
     catch (const std::runtime_error& e)
     {
-        context.logger.debug(e.what());
+        context.logger->debug(e.what());
     }
 }
 
@@ -852,7 +852,7 @@ AWL_EXAMPLE(DecimalWrongCharactes)
     }
     catch (const std::runtime_error& e)
     {
-        context.logger.debug(e.what());
+        context.logger->debug(e.what());
     }
 
     try
@@ -863,6 +863,6 @@ AWL_EXAMPLE(DecimalWrongCharactes)
     }
     catch (const std::runtime_error& e)
     {
-        context.logger.debug(e.what());
+        context.logger->debug(e.what());
     }
 }

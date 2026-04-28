@@ -22,7 +22,7 @@ namespace awl::testing
 
             if (i != m_jo.end())
             {
-                serializer.FromJson(*i, val);
+                serializer.fromJson(*i, val);
 
                 return true;
             }
@@ -35,14 +35,14 @@ namespace awl::testing
         {
             if (m_jo.contains(name))
             {
-                throw JsonException(awl::format() << "Attribute '" << name << "' is already set.");
+                throw JsonException(std::format(_T("Attribute '{}' is already set."), awl::fromACString(name)));
             }
 
             JsonSerializer<T> serializer;
 
             QJsonValue jv;
 
-            serializer.ToJson(val, jv);
+            serializer.toJson(val, jv);
 
             m_jo[name] = jv;
 

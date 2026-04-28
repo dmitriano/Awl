@@ -157,6 +157,6 @@ namespace awl
 /*
 AWL_TEST(TypeName)
 {
-    context.logger.debug(awl::format() << awl::FromACString(awl::type_info<int>().name()));
+    context.logger->debug(_T("{}"), awl::fromACString(awl::type_info<int>().name()));
 }
 */

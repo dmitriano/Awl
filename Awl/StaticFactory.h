@@ -29,7 +29,7 @@ namespace awl
 
         if (p_link == nullptr)
         {
-            throw FactoryException(format() << "Factory function '" << name << "' not found.");
+            throw FactoryException(std::format(_T("Factory function '{}' not found."), awl::fromACString(name)));
         }
 
         FuncPtr func = p_link->value();

@@ -36,7 +36,7 @@ namespace awl
 
         private:
 
-            void OnFinished() override
+            void onFinished() override
             {
                 m_any = true;
 
@@ -74,7 +74,7 @@ namespace awl
 
         private:
 
-            void OnFinished() override
+            void onFinished() override
             {
                 if (empty())
                 {
@@ -138,7 +138,7 @@ namespace awl
 
             UpdateTask m_task;
 
-            void OnFinished() override;
+            void onFinished() override;
         };
 
         friend Handler;

@@ -124,11 +124,11 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             }
         }
 
-        awl::format prefix;
+        awl::ostringstream prefix;
 
         if (type_name == nullptr)
         {
-            prefix << awl::FromACString(typeid(hash).name());
+            prefix << awl::fromACString(typeid(hash).name());
         }
         else
         {
@@ -137,7 +137,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
 
         prefix << _T(": ");
 
-        context.logger.debug(prefix);
+        context.logger->debug(prefix.str());
 
         ReportSpeed(context, w, vector_size * iteration_count * sizeof(uint8_t));
 
@@ -146,7 +146,7 @@ static void CalcHash(const TestContext & context, const awl::Char * type_name = 
             // operator << is defined in FormattingHelpers.h in awl::testing::helpers namespace.
             awl::ostringstream out;
             out << _T(" Hash : ") << val;
-            context.logger.debug(out.str());
+            context.logger->debug(out.str());
         }
     }
 }

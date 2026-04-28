@@ -27,7 +27,7 @@ namespace awl::io
 
         VersionTolerantSerializable(T& val) : m_val(val) {}
 
-        void Read(IStream& in) override
+        void read(IStream& in) override
         {
             if constexpr (atomic)
             {
@@ -36,7 +36,7 @@ namespace awl::io
                     // Initialize newly added fields with default values.
                     T val = {};
 
-                    Read(in, val);
+                    read(in, val);
 
                     //If Read throws m_val does not change.
                     m_val = std::move(val);
@@ -50,22 +50,22 @@ namespace awl::io
                     {
                         MeasureStream measure_out;
 
-                        io::Write(measure_out, m_val);
+                        io::write(measure_out, m_val);
 
-                        v.reserve(measure_out.GetLength());
+                        v.reserve(measure_out.length());
                     }
 
                     // Save old value with a plain serialization.
-                    WriteSnapshot(v);
+                    writeSnapshot(v);
 
                     try
                     {
-                        Read(in, m_val);
+                        read(in, m_val);
                     }
                     catch (const IoException&)
                     {
                         // Restore old value.
-                        ReadSnapshot(v);
+                        readSnapshot(v);
 
                         throw;
                     }
@@ -73,40 +73,40 @@ namespace awl::io
             }
             else
             {
-                Read(in, m_val);
+                read(in, m_val);
             }
         }
 
-        void Write(OStream& out) const override
+        void write(OStream& out) const override
         {
             Writer ctx;
 
-            ctx.WriteNewPrototypes(out);
-            ctx.WriteV(out, m_val);
+            ctx.writeNewPrototypes(out);
+            ctx.writeV(out, m_val);
         }
 
     protected:
 
-        void WriteSnapshot(std::vector<uint8_t>& v) noexcept
+        void writeSnapshot(std::vector<uint8_t>& v) noexcept
         {
             VectorOutputStream v_out(v);
 
-            io::Write(v_out, m_val);
+            io::write(v_out, m_val);
         }
 
-        void ReadSnapshot(const std::vector<uint8_t>& v) noexcept
+        void readSnapshot(const std::vector<uint8_t>& v) noexcept
         {
             VectorInputStream v_in(v);
 
-            io::Read(v_in, m_val);
+            io::read(v_in, m_val);
         }
 
-        void Read(IStream& in, T& val)
+        void read(IStream& in, T& val)
         {
             Reader ctx;
-            ctx.ReadOldPrototypes(in);
+            ctx.readOldPrototypes(in);
 
-            ctx.ReadV(in, val);
+            ctx.readV(in, val);
         }
 
         T& m_val;

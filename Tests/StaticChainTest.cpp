@@ -28,7 +28,7 @@ AWL_TEST(StaticChainInt)
     // Test variable_static_chain()
     for (X val = 0; val < 3; ++val)
     {
-        awl::StaticLink<X>* p_link = awl::variable_static_chain<X>().find(awl::aformat() << val);
+        awl::StaticLink<X>* p_link = awl::variable_static_chain<X>().find(std::to_string(val));
 
         AWL_ASSERT(p_link != nullptr);
         AWL_ASSERT(p_link->value() == val);
@@ -37,7 +37,7 @@ AWL_TEST(StaticChainInt)
 
     for (X val = 0; val < 3; ++val)
     {
-        const awl::StaticLink<X>* p_link = awl::static_chain<X>().find(awl::aformat() << val);
+        const awl::StaticLink<X>* p_link = awl::static_chain<X>().find(std::to_string(val));
 
         AWL_ASSERT(p_link != nullptr);
         AWL_ASSERT(p_link->value() == val + 1);
@@ -96,12 +96,12 @@ namespace
 {
     std::string CreateA(int val)
     {
-        return awl::aformat() << "A" << val;
+        return std::format("A{}", val);
     }
 
     std::string CreateB(int val)
     {
-        return awl::aformat() << "B" << val;
+        return std::format("B{}", val);
     }
 
     AWL_REGISTER_FACTORY(CreateA, a1)

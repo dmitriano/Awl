@@ -6,62 +6,49 @@
 #pragma once
 
 #include "Awl/String.h"
-#include "Awl/LogString.h"
-
-#include <type_traits>
-
-namespace awl
+namespace std
 {
-    template <class C>
-    class basic_format
+    template <>
+    struct formatter<std::string, wchar_t> : formatter<wstring_view, wchar_t>
     {
-    public:
-        
-        template <typename T>
-        basic_format & operator << (const T & val)
+        auto format(const std::string& val, wformat_context& ctx) const
         {
-            // All the users operators << should be declared
-            // prior to the call site or in the global namespace (at least in GCC)
-            // or in the namespace where T is defined.
-            m_out << val;
-            return *this;
+            const std::wstring text = awl::decodeString(val.c_str());
+            return formatter<wstring_view, wchar_t>::format(text, ctx);
         }
+    };
 
-        std::basic_string<C> str() const { return m_out.str(); }
-
-        operator std::basic_string<C>() const { return str(); }
+    template <>
+    struct formatter<std::wstring, char> : formatter<string_view, char>
+    {
+        auto format(const std::wstring& val, format_context& ctx) const
+        {
+            const std::string text = awl::encodeString(val.c_str());
+            return formatter<string_view, char>::format(text, ctx);
+        }
+    };
 
 #ifdef AWL_QT
 
-        // Allow QT apps use this formatter.
-        operator QString() const
+    template <>
+    struct formatter<QString, char> : formatter<string_view, char>
+    {
+        auto format(const QString& val, format_context& ctx) const
         {
-            if constexpr (std::is_same_v<C, char>)
-            {
-                return QString::fromStdString(str());
-            }
-            else
-            {
-                return QString::fromStdWString(str());
-            }
+            const std::string text = val.toStdString();
+            return formatter<string_view, char>::format(text, ctx);
         }
-
-#endif
-
-        operator LogString() const
-        {
-            return str();
-        }
-
-        // std::endl flushes the output buffer but '\n' doesn't.
-        static constexpr C endl = static_cast<C>('\n');
-
-    private:
-        
-        std::basic_ostringstream<C> m_out;
     };
 
-    using format = basic_format<Char>;
-    using aformat = basic_format<char>;
-    using wformat = basic_format<wchar_t>;
+    template <>
+    struct formatter<QString, wchar_t> : formatter<wstring_view, wchar_t>
+    {
+        auto format(const QString& val, wformat_context& ctx) const
+        {
+            const std::wstring text = val.toStdWString();
+            return formatter<wstring_view, wchar_t>::format(text, ctx);
+        }
+    };
+
+#endif
 }

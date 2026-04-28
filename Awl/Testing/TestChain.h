@@ -68,7 +68,7 @@ namespace awl::testing
 
         Logger& logger() const
         {
-            return context.logger;
+            return *context.logger;
         }
 
         void print(awl::LogString message) const

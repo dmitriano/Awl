@@ -15,12 +15,12 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue & jv, QJsonValue & val)
+        void fromJson(const QJsonValue & jv, QJsonValue & val)
         {
             val = jv;
         }
 
-        void ToJson(const QJsonValue & val, QJsonValue & jv)
+        void toJson(const QJsonValue & val, QJsonValue & jv)
         {
             jv = val;
         }
@@ -31,14 +31,14 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue& jv, QJsonObject& val)
+        void fromJson(const QJsonValue& jv, QJsonObject& val)
         {
-            EnsureType(jv, QJsonValue::Object);
+            ensureType(jv, QJsonValue::Object);
             
             val = jv.toObject();
         }
 
-        void ToJson(const QJsonObject& val, QJsonValue& jv)
+        void toJson(const QJsonObject& val, QJsonValue& jv)
         {
             jv = val;
         }
@@ -49,14 +49,14 @@ namespace awl
     {
     public:
 
-        void FromJson(const QJsonValue& jv, QJsonArray& val)
+        void fromJson(const QJsonValue& jv, QJsonArray& val)
         {
-            EnsureType(jv, QJsonValue::Array);
+            ensureType(jv, QJsonValue::Array);
 
             val = jv.toArray();
         }
 
-        void ToJson(const QJsonObject& val, QJsonValue& jv)
+        void toJson(const QJsonObject& val, QJsonValue& jv)
         {
             jv = val;
         }

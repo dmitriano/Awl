@@ -39,12 +39,12 @@ namespace awl
 
         T & operator * () const
         {
-            return GetValue();
+            return value();
         }
 
         T * operator -> () const
         {
-            return &GetValue();
+            return &value();
         }
 
         single_node_iterator & operator++ ()
@@ -81,7 +81,7 @@ namespace awl
     
     private:
 
-        T & GetValue() const
+        T & value() const
         {
             Node * p_node = *m_i;
 

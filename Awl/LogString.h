@@ -7,68 +7,53 @@
 
 #include "Awl/String.h"
 
+#include <source_location>
+#include <string>
+#include <utility>
+
 namespace awl
 {
-#ifdef AWL_QT
-
     class LogString
     {
     public:
 
-        LogString(const char* m) : m_message(m) {}
+        LogString(const char* m, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromACString(m)),
+            m_location(location)
+        {
+        }
 
-        LogString(const wchar_t* m) : m_message(QString::fromWCharArray(m)) {}
+        LogString(const wchar_t* m, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromWCString(m)),
+            m_location(location)
+        {
+        }
 
-        LogString(std::string message) : m_message(QString::fromStdString(message)) {}
+        LogString(std::string message, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromAString(std::move(message))),
+            m_location(location)
+        {
+        }
 
-        LogString(std::wstring message) : m_message(QString::fromStdWString(message)) {}
+        LogString(std::wstring message, std::source_location location = std::source_location::current()) :
+            m_message(awl::fromWString(std::move(message))),
+            m_location(location)
+        {
+        }
 
-        LogString(QString message) : m_message(std::move(message)) {}
-
-        const QString& str() const
+        const String& str() const noexcept
         {
             return m_message;
         }
 
-        QString& str()
+        constexpr std::source_location location() const noexcept
         {
-            return m_message;
-        }
-
-    private:
-
-        // Make the Logger compatible with QDebug.
-        QString m_message;
-    };
-
-#else
-
-    class LogString
-    {
-    public:
-
-        LogString(const char* m) : m_message(awl::FromACString(m)) {}
-
-        LogString(const wchar_t* m) : m_message(awl::FromWCString(m)) {}
-
-        LogString(std::string message) : m_message(awl::FromAString(message)) {}
-
-        LogString(std::wstring message) : m_message(awl::FromWString(message)) {}
-
-        String& str()
-        {
-            return m_message;
-        }
-
-        const String& str() const
-        {
-            return m_message;
+            return m_location;
         }
 
     private:
 
         awl::String m_message;
+        std::source_location m_location;
     };
-
-#endif //AWL_QT
 }

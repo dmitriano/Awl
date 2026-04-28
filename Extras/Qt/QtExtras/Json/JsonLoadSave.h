@@ -25,7 +25,7 @@ namespace awl
 
         if (!file.open(QFile::ReadOnly))
         {
-            throw JsonException(awl::format() << _T("Cannot open input file '") << file.fileName() << "'.");
+            throw JsonException(std::format(_T("Cannot open input file '{}'."), file.fileName()));
         }
 
         QByteArray content = file.readAll();
@@ -41,7 +41,7 @@ namespace awl
 
         if (!document.isArray())
         {
-            throw JsonException(awl::format() << _T("JSON array expected in file '") << file_name << "'.");
+            throw JsonException(std::format(_T("JSON array expected in file '{}'."), file_name));
         }
 
         QJsonArray ja = document.array();
@@ -55,7 +55,7 @@ namespace awl
 
         if (!document.isObject())
         {
-            throw JsonException(awl::format() << _T("JSON object expected in file '") << file_name << "'.");
+            throw JsonException(std::format(_T("JSON object expected in file '{}'."), file_name));
         }
 
         QJsonObject jo = document.object();
@@ -64,11 +64,11 @@ namespace awl
     }
 
     template <class Struct>
-    void StructFromFile(QString file_name, Struct& val)
+    void structFromFile(QString file_name, Struct& val)
     {
         QJsonDocument jdoc = loadDocumentFromFile(file_name);
 
-        StructFromString(jdoc, val);
+        structFromString(jdoc, val);
     }
 
     inline void saveDocumentToFile(QString file_name, const QJsonDocument& document)
@@ -77,7 +77,7 @@ namespace awl
 
         if (!file.open(QFile::WriteOnly))
         {
-            throw JsonException(awl::format() << _T("Cannot open file '") << file.fileName() << "' for writing.");
+            throw JsonException(std::format(_T("Cannot open file '{}' for writing."), file.fileName()));
         }
 
         file.write(document.toJson());
@@ -96,7 +96,7 @@ namespace awl
     template <class Struct>
     void saveStructToFile(QString file_name, const Struct& val)
     {
-        QJsonValue jv = ToJson(val);
+        QJsonValue jv = toJson(val);
 
         QJsonDocument jdoc;
 
@@ -112,7 +112,7 @@ namespace awl
         case QJsonValue::Undefined:
             break;
         default:
-            throw JsonException(awl::format() << "Can't create a document form json value of type " << TypeToString(jv.type()));
+            throw JsonException(std::format(_T("Can't create a document form json value of type {}"), typeToString(jv.type())));
         }
 
         saveDocumentToFile(file_name, jdoc);

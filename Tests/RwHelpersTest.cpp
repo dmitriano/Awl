@@ -271,7 +271,7 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 
     for (size_t i = 0; i < iteration_count; ++i)
     {
-        WriteVector(out, sample);
+        writeVector(out, sample);
     }
 
     VectorInputStream in(v);
@@ -282,12 +282,12 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 
         result.resize(sample.size());
 
-        ReadVector(in, result);
+        readVector(in, result);
 
         AWL_ASSERT(sample == result);
     }
 
-    AWL_ASSERT(in.End());
+    AWL_ASSERT(in.end());
 }
 
 AWL_TEST(IoVectorReadWrite)

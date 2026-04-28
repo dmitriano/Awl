@@ -37,22 +37,22 @@ namespace awl
 
             constexpr bool operator()(const ValueSet & left, const ValueSet & right) const
             {
-                return GetForeignKey(left) < GetForeignKey(right);
+                return foreignKey(left) < foreignKey(right);
             }
 
             constexpr bool operator()(const ValueSet& val, const ForeignKey & id) const
             {
-                return GetForeignKey(val) < id;
+                return foreignKey(val) < id;
             }
 
             constexpr bool operator()(const ForeignKey & id, const ValueSet& val) const
             {
-                return id < GetForeignKey(val);
+                return id < foreignKey(val);
             }
 
         private:
 
-            constexpr ForeignKey GetForeignKey(const ValueSet & vs) const
+            constexpr ForeignKey foreignKey(const ValueSet & vs) const
             {
                 assert(!vs.empty());
                 return foreignKeyGetter(*vs.front());
@@ -150,7 +150,7 @@ namespace awl
 
     private:
 
-        static constexpr Pointer ValueToPointer(const T& val)
+        static constexpr Pointer valueToPointer(const T& val)
         {
             if constexpr (is_copyable_pointer_v<T>)
             {
@@ -178,14 +178,14 @@ namespace awl
             if (i != m_set.end())
             {
                 ValueSet & vs = *i;
-                const bool is_new = vs.insert(ValueToPointer(val)).second;
+                const bool is_new = vs.insert(valueToPointer(val)).second;
                 assert(is_new);
                 static_cast<void>(is_new);
             }
             else
             {
                 ValueSet vs{ PrimaryCompare{primaryKeyGetter} };
-                vs.insert(ValueToPointer(val));
+                vs.insert(valueToPointer(val));
                 const bool is_new = m_set.insert(std::move(vs)).second;
                 assert(is_new);
                 static_cast<void>(is_new);

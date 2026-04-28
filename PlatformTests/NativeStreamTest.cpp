@@ -33,60 +33,60 @@ AWL_TEST(NativeStream)
     const std::vector<uint8_t> sample = {'A', 'B', 'C', 'D'};
 
     {
-        awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
+        awl::io::UniqueStream s(awl::io::createUniqueFile(file_name));
 
-        AWL_ASSERT(s.GetLength() == 0);
-        AWL_ASSERT(s.GetPosition() == 0);
-        AWL_ASSERT(s.End());
+        AWL_ASSERT(s.length() == 0);
+        AWL_ASSERT(s.position() == 0);
+        AWL_ASSERT(s.end());
 
-        s.Write(sample.data(), sample.size());
+        s.write(sample.data(), sample.size());
 
-        AWL_ASSERT(s.GetLength() == sample.size());
+        AWL_ASSERT(s.length() == sample.size());
 
-        AWL_ASSERT(s.End());
+        AWL_ASSERT(s.end());
     }
 
     {
-        awl::io::UniqueStream in(awl::io::OpenUniqueFile(file_name));
+        awl::io::UniqueStream in(awl::io::openUniqueFile(file_name));
 
-        AWL_ASSERT(in.GetLength() == sample.size());
-        AWL_ASSERT(in.GetPosition() == 0);
+        AWL_ASSERT(in.length() == sample.size());
+        AWL_ASSERT(in.position() == 0);
 
         std::vector<uint8_t> actual(sample.size());
 
-        AWL_ASSERT(in.Read(actual.data(), sample.size()) == sample.size());
+        AWL_ASSERT(in.read(actual.data(), sample.size()) == sample.size());
 
-        AWL_ASSERT(in.GetLength() == sample.size());
-        AWL_ASSERT(in.GetPosition() == sample.size());
-        AWL_ASSERT(in.End());
+        AWL_ASSERT(in.length() == sample.size());
+        AWL_ASSERT(in.position() == sample.size());
+        AWL_ASSERT(in.end());
 
         AWL_ASSERT(actual == sample);
     }
 
     {
-        awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
+        awl::io::UniqueStream s(awl::io::createUniqueFile(file_name));
 
-        AWL_ASSERT(s.GetLength() == sample.size());
-        AWL_ASSERT(s.GetPosition() == 0);
+        AWL_ASSERT(s.length() == sample.size());
+        AWL_ASSERT(s.position() == 0);
 
         AWL_ATTRIBUTE(std::size_t, pos, 3);
 
-        s.Seek(pos);
-        AWL_ASSERT(s.GetPosition() == pos);
-        s.Truncate();
-        AWL_ASSERT_EQUAL(pos, s.GetPosition());
-        AWL_ASSERT_EQUAL(pos, s.GetLength());
-        AWL_ASSERT(s.End());
+        s.seek(pos);
+        AWL_ASSERT(s.position() == pos);
+        s.truncate();
+        AWL_ASSERT_EQUAL(pos, s.position());
+        AWL_ASSERT_EQUAL(pos, s.length());
+        AWL_ASSERT(s.end());
 
-        s.Seek(0);
+        s.seek(0);
 
         std::vector<uint8_t> actual(pos);
 
-        AWL_ASSERT(s.Read(actual.data(), actual.size()) == actual.size());
+        AWL_ASSERT(s.read(actual.data(), actual.size()) == actual.size());
 
-        AWL_ASSERT(s.GetLength() == actual.size());
-        AWL_ASSERT(s.GetPosition() == actual.size());
-        AWL_ASSERT(s.End());
+        AWL_ASSERT(s.length() == actual.size());
+        AWL_ASSERT(s.position() == actual.size());
+        AWL_ASSERT(s.end());
 
         AWL_ASSERT(std::ranges::equal(sample | std::ranges::views::take(pos), actual));
     }
@@ -96,7 +96,7 @@ AWL_TEST(NativeStreamFileName)
 {
     auto guard = awl::make_scope_guard(RemoveFile);
 
-    awl::io::UniqueStream s(awl::io::CreateUniqueFile(file_name));
+    awl::io::UniqueStream s(awl::io::createUniqueFile(file_name));
 
-    context.logger.debug(awl::format() << s.GetFileName());
+    context.logger->debug(_T("{}"), s.fileName());
 }

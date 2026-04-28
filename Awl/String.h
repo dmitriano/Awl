@@ -28,6 +28,7 @@
 #include <cassert>
 #include <iterator>
 #include <optional>
+#include <utility>
 
 #ifdef _MSC_VER
 
@@ -89,22 +90,22 @@ namespace awl
         return string_from_ascii<Char>(arr);
     }
 
-    inline auto StrLen(const char* s)
+    inline auto strLen(const char* s)
     {
         return std::strlen(s);
     }
 
-    inline auto StrLen(const wchar_t* s)
+    inline auto strLen(const wchar_t* s)
     {
         return std::wcslen(s);
     }
 
-    inline auto StrCmp(const char* left, const char* right)
+    inline auto strCmp(const char* left, const char* right)
     {
         return std::strcmp(left, right);
     }
 
-    inline auto StrCmp(const wchar_t* left, const wchar_t* right)
+    inline auto strCmp(const wchar_t* left, const wchar_t* right)
     {
         return std::wcscmp(left, right);
     }
@@ -116,7 +117,7 @@ namespace awl
         bool operator()(const Ch* left, const Ch* right) const
         {
             //Returns negative value if left appears before right in lexicographical order.
-            return StrCmp(left, right) < 0;
+            return strCmp(left, right) < 0;
         }
     };
 
@@ -125,12 +126,12 @@ namespace awl
     {
         bool operator()(const Ch* left, const Ch* right) const
         {
-            return StrCmp(left, right) == 0;
+            return strCmp(left, right) == 0;
         }
     };
 
     template <typename Ch>
-    int StrCmpI(const Ch* left, const Ch* right)
+    int strCmpI(const Ch* left, const Ch* right)
     {
         const Ch* l = left;
         const Ch* r = right;
@@ -158,7 +159,7 @@ namespace awl
     {
         bool operator()(const Ch* left, const Ch* right) const
         {
-            return StrCmpI(left, right) < 0;
+            return strCmpI(left, right) < 0;
         }
     };
 
@@ -167,7 +168,7 @@ namespace awl
     {
         bool operator()(const Ch* left, const Ch* right) const
         {
-            return StrCmpI(left, right) == 0;
+            return strCmpI(left, right) == 0;
         }
     };
 
@@ -224,7 +225,7 @@ namespace awl
         const size_t error;
     };
 
-    inline std::string EncodeString(const wchar_t* wstr)
+    inline std::string encodeString(const wchar_t* wstr)
     {
         std::mbstate_t state = std::mbstate_t();
 
@@ -249,7 +250,7 @@ namespace awl
         return mbstr;
     }
 
-    inline std::wstring DecodeString(const char* mbstr)
+    inline std::wstring decodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
 
@@ -276,7 +277,7 @@ namespace awl
 
 #else
 
-    inline std::string EncodeString(const wchar_t* wstr)
+    inline std::string encodeString(const wchar_t* wstr)
     {
         std::mbstate_t state = std::mbstate_t();
         //This length does not include the terminating zero.
@@ -286,7 +287,7 @@ namespace awl
         return mbstr;
     }
 
-    inline std::wstring DecodeString(const char* mbstr)
+    inline std::wstring decodeString(const char* mbstr)
     {
         std::mbstate_t state = std::mbstate_t();
         //This length does not include the terminating zero.
@@ -303,7 +304,7 @@ namespace awl
     template <class Ch>
     struct StringConvertor
     {
-        static std::basic_string<Ch> ConvertFrom(const char* p_src)
+        static std::basic_string<Ch> convertFrom(const char* p_src)
         {
             if constexpr (std::is_same_v<Ch, char>)
             {
@@ -311,11 +312,11 @@ namespace awl
             }
             else
             {
-                return DecodeString(p_src);
+                return decodeString(p_src);
             }
         }
 
-        static std::basic_string<Ch> ConvertFrom(const wchar_t* p_src)
+        static std::basic_string<Ch> convertFrom(const wchar_t* p_src)
         {
             if constexpr (std::is_same_v<Ch, wchar_t>)
             {
@@ -323,49 +324,101 @@ namespace awl
             }
             else
             {
-                return EncodeString(p_src);
+                return encodeString(p_src);
             }
         }
     };
 
-    inline String FromACString(const char* p_src)
+    template <class ToCh, class FromCh>
+    struct StringMoveConvertor
     {
-        return StringConvertor<Char>::ConvertFrom(p_src);
+        static std::basic_string<ToCh> convertFrom(std::basic_string<FromCh>&& src)
+        {
+            if constexpr (std::is_same_v<ToCh, FromCh>)
+            {
+                return std::move(src);
+            }
+            else
+            {
+                return StringConvertor<ToCh>::convertFrom(src.c_str());
+            }
+        }
+    };
+
+    inline String fromACString(const char* p_src)
+    {
+        return StringConvertor<Char>::convertFrom(p_src);
     }
 
-    inline String FromAString(const std::string& src)
+    inline String fromAString(const std::string& src)
     {
-        return StringConvertor<Char>::ConvertFrom(src.c_str());
+        return StringConvertor<Char>::convertFrom(src.c_str());
     }
 
-    inline std::string ToAString(const String& src)
+    inline String fromAString(std::string&& src)
     {
-        return StringConvertor<char>::ConvertFrom(src.c_str());
+        return StringMoveConvertor<Char, char>::convertFrom(std::move(src));
     }
 
-    inline std::wstring ToWString(const String& src)
+    inline std::string toAString(const String& src)
     {
-        return StringConvertor<wchar_t>::ConvertFrom(src.c_str());
+        return StringConvertor<char>::convertFrom(src.c_str());
     }
 
-    inline String FromWCString(const wchar_t* p_src)
+    inline std::string toAString(String&& src)
     {
-        return StringConvertor<Char>::ConvertFrom(p_src);
+        return StringMoveConvertor<char, Char>::convertFrom(std::move(src));
     }
 
-    inline String FromWString(const std::wstring& src)
+    inline std::wstring toWString(const String& src)
     {
-        return StringConvertor<Char>::ConvertFrom(src.c_str());
+        return StringConvertor<wchar_t>::convertFrom(src.c_str());
+    }
+
+    inline std::wstring toWString(String&& src)
+    {
+        return StringMoveConvertor<wchar_t, Char>::convertFrom(std::move(src));
+    }
+
+    inline String fromWCString(const wchar_t* p_src)
+    {
+        return StringConvertor<Char>::convertFrom(p_src);
+    }
+
+    inline String fromWString(const std::wstring& src)
+    {
+        return StringConvertor<Char>::convertFrom(src.c_str());
+    }
+
+    inline String fromWString(std::wstring&& src)
+    {
+        return StringMoveConvertor<Char, wchar_t>::convertFrom(std::move(src));
     }
 
     inline std::wostream& operator << (std::wostream& out, const std::string& val)
     {
-        return out << DecodeString(val.c_str());
+        return out << decodeString(val.c_str());
     }
 
     inline std::wostream& operator << (std::wostream& out, const char* val)
     {
-        return out << DecodeString(val);
+        return out << decodeString(val);
+    }
+
+    inline std::ostream& operator << (std::ostream& out, wchar_t val)
+    {
+        const wchar_t text[] = { val, L'\0' };
+        return out << encodeString(text);
+    }
+
+    inline std::ostream& operator << (std::ostream& out, const std::wstring& val)
+    {
+        return out << encodeString(val.c_str());
+    }
+
+    inline std::ostream& operator << (std::ostream& out, const wchar_t* val)
+    {
+        return out << encodeString(val);
     }
 
     template<typename Char, class T>
@@ -420,29 +473,6 @@ inline std::wistream& operator >> (std::wistream& in, QString& val)
     return in;
 }
 
-namespace std
-{
-    template <>
-    struct formatter<QString, char> : formatter<string_view, char>
-    {
-        auto format(const QString& val, format_context& ctx) const
-        {
-            const std::string text = val.toStdString();
-            return formatter<string_view, char>::format(text, ctx);
-        }
-    };
-
-    template <>
-    struct formatter<QString, wchar_t> : formatter<wstring_view, wchar_t>
-    {
-        auto format(const QString& val, wformat_context& ctx) const
-        {
-            const std::wstring text = val.toStdWString();
-            return formatter<wstring_view, wchar_t>::format(text, ctx);
-        }
-    };
-}
-
 #endif //AWL_QT
 
 #ifdef AWL_BOOST
@@ -460,7 +490,7 @@ namespace boost::multiprecision
 
         a_out << val;
 
-        return out << awl::StringConvertor<wchar_t>::ConvertFrom(a_out.str().c_str());
+        return out << awl::StringConvertor<wchar_t>::convertFrom(a_out.str().c_str());
     }
 }
 

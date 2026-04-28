@@ -32,7 +32,7 @@ namespace awl
 
             Value m_value;
 
-            void OnFinished() override
+            void onFinished() override
             {
                 const std::size_t index = this - pThis->m_handlers.data();
 
@@ -44,7 +44,7 @@ namespace awl
 
                 pThis->m_handlers.erase(pThis->m_handlers.begin() + index);
 
-                pThis->notify(&MappedTaskSink<Key, Value>::OnFinished, temp_key, temp_value);
+                pThis->notify(&MappedTaskSink<Key, Value>::onFinished, temp_key, temp_value);
             }
         };
 

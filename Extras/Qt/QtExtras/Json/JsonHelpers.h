@@ -15,7 +15,7 @@
 
 namespace awl
 {
-    inline String TypeToString(QJsonValue::Type t)
+    inline String typeToString(QJsonValue::Type t)
     {
         switch (t)
         {
@@ -28,39 +28,39 @@ namespace awl
             case QJsonValue::Undefined: return _T("Undefined");
         }
 
-        throw JsonException(format() << _T("Wrong type value: ") << t << _T("."));
+        throw JsonException(std::format(_T("Wrong type value: {}."), static_cast<int>(t)));
     }
         
-    inline void EnsureType(const QJsonValue& jv, QJsonValue::Type t)
+    inline void ensureType(const QJsonValue& jv, QJsonValue::Type t)
     {
         if (jv.type() != t)
         {
-            throw JsonException(format() << _T("Expected value type: ") << TypeToString(t) << _T(", actul value type: ") << TypeToString(jv.type()));
+            throw JsonException(std::format(_T("Expected value type: {}, actul value type: {}"), typeToString(t), typeToString(jv.type())));
         }
     }
     
-    inline bool IsNull(const QJsonValue& jv)
+    inline bool isNull(const QJsonValue& jv)
     {
         return jv.isUndefined() || jv.isNull();
     }
 
     inline QJsonObject asObject(const QJsonValue& jv)
     {
-        awl::EnsureType(jv, QJsonValue::Object);
+        awl::ensureType(jv, QJsonValue::Object);
 
         return jv.toObject();
     }
 
     inline QJsonArray asArray(const QJsonValue& jv)
     {
-        awl::EnsureType(jv, QJsonValue::Array);
+        awl::ensureType(jv, QJsonValue::Array);
 
         return jv.toArray();
     }
 
     inline QString asString(const QJsonValue& jv)
     {
-        awl::EnsureType(jv, QJsonValue::String);
+        awl::ensureType(jv, QJsonValue::String);
 
         return jv.toString();
     }
@@ -73,7 +73,7 @@ namespace awl
 
         try
         {
-            awl::EnsureType(jv, QJsonValue::Object);
+            awl::ensureType(jv, QJsonValue::Object);
 
             return jv.toObject();
         }
@@ -91,7 +91,7 @@ namespace awl
 
         try
         {
-            awl::EnsureType(jv, QJsonValue::Array);
+            awl::ensureType(jv, QJsonValue::Array);
 
             return jv.toArray();
         }
@@ -109,7 +109,7 @@ namespace awl
 
         try
         {
-            awl::EnsureType(jv, QJsonValue::String);
+            awl::ensureType(jv, QJsonValue::String);
 
             return jv.toString();
         }

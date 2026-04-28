@@ -53,7 +53,7 @@ namespace awl::testing
                 else
                 {
                     // The attribute is found, but we can't parse it.
-                    throw GeneralException(awl::format() << "Attribute '" << name << "' is not supported by CommandLineProvider.");
+                    throw GeneralException(std::format(_T("Attribute '{}' is not supported by CommandLineProvider."), awl::fromACString(name)));
                 }
             }
 

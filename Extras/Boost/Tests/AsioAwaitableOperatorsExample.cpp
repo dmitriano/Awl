@@ -1,4 +1,4 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 #include "Awl/String.h"
 #include "Awl/StringFormat.h"
 
@@ -56,7 +56,7 @@ AWL_TEST(AsioAwaitableOperators)
                     status = "failed";
                 }
 
-                context.logger.debug(awl::format() << caption << ' ' << status << " at " << (now() - start) / 1.0ms << "ms");
+                context.logger->debug(_T("{} {} at {}ms"), caption, awl::fromACString(status), (now() - start) / 1.0ms);
             };
     };
 

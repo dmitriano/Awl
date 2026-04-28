@@ -128,7 +128,7 @@ namespace awl
     template <class C>
     std::basic_ostream<C>& operator << (std::basic_ostream<C>& out, const StopWatch& sw)
     {
-        format_duration(out, sw.GetElapsedTime(), default_duration_part_count);
+        format_duration(out, sw.elapsedTime(), default_duration_part_count);
         
         return out;
     }

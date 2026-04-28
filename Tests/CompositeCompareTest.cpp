@@ -99,16 +99,16 @@ AWL_TEST(CompositeCompareMoveAssign)
     }
 
     {
-        auto comp1 = awl::compose_comparers<X>(a_comp, b_comp);
-        auto comp2 = awl::compose_comparers<X>(a1_comp, b_comp);
+        auto comp1 = awl::composeComparers<X>(a_comp, b_comp);
+        auto comp2 = awl::composeComparers<X>(a1_comp, b_comp);
 
         comp1 = std::move(comp2);
         comp2 = comp1;
     }
 
     {
-        auto comp1 = awl::compose_transparent_comparers<X>(a_comp, b_comp);
-        auto comp2 = awl::compose_transparent_comparers<X>(a1_comp, b_comp);
+        auto comp1 = awl::composeTransparentComparers<X>(a_comp, b_comp);
+        auto comp2 = awl::composeTransparentComparers<X>(a1_comp, b_comp);
 
         comp1 = std::move(comp2);
         comp2 = comp1;
@@ -120,7 +120,7 @@ AWL_TEST(CompositeCompare)
     AWL_UNUSED_CONTEXT;
 
     //auto comp = awl::CompositeCompare<X, ACompare, BCompare>(ACompare(), BCompare());
-    auto comp = awl::compose_comparers<X>(a_comp, b_comp);
+    auto comp = awl::composeComparers<X>(a_comp, b_comp);
 
     using Compare = decltype(comp);
 
@@ -145,7 +145,7 @@ AWL_TEST(TransparentCompositeCompareTrivialStructure)
 {
     AWL_UNUSED_CONTEXT;
 
-    auto comp = awl::compose_transparent_comparers<X>(a_comp, b_comp);
+    auto comp = awl::composeTransparentComparers<X>(a_comp, b_comp);
 
     using Compare = decltype(comp);
 

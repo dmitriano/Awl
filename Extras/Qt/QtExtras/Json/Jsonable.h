@@ -13,9 +13,9 @@ namespace awl
     {
     public:
 
-        virtual void FromJson(const QJsonValue& jv) = 0;
+        virtual void fromJson(const QJsonValue& jv) = 0;
 
-        virtual QJsonValue ToJson() const = 0;
+        virtual QJsonValue toJson() const = 0;
 
         virtual ~Jsonable() = default;
     };

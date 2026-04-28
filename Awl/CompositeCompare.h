@@ -26,7 +26,7 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return Compare<0u>(left, right);
+            return compare<0u>(left, right);
         }
 
     private:
@@ -34,7 +34,7 @@ namespace awl
         using Tuple = std::tuple<std::decay_t<Cs>...>;
 
         template <std::size_t Index>
-        bool Compare(const T& left, const T& right) const
+        bool compare(const T& left, const T& right) const
         {
             if constexpr (Index == std::tuple_size_v<Tuple>)
             {
@@ -56,7 +56,7 @@ namespace awl
                     return false;
                 }
 
-                return Compare<Index + 1>(left, right);
+                return compare<Index + 1>(left, right);
             }
         }
 
@@ -67,7 +67,7 @@ namespace awl
     };
 
     template <class T, class ... Cs>
-    constexpr CompositeCompare<T, Cs ...> compose_comparers(Cs... comp)
+    constexpr CompositeCompare<T, Cs ...> composeComparers(Cs... comp)
     {
         return CompositeCompare<T, std::remove_const_t<std::decay_t<Cs>>...>(std::move(comp) ...);
     }

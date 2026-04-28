@@ -125,7 +125,7 @@ namespace awl
 
         std::pair<iterator, bool> insert(Node* node)
         {
-            return UniversalInsert(node);
+            return universalInsert(node);
         }
 
         bool empty() const
@@ -141,67 +141,67 @@ namespace awl
         template <class Key>
         const_iterator find(const Key& key) const
         {
-            return NodeToConstIterator(m_tree.FindNodeByKey(key));
+            return nodeToConstIterator(m_tree.findNodeByKey(key));
         }
 
         template <class Key>
         iterator find(const Key& key)
         {
-            return NodeToIterator(m_tree.FindNodeByKey(key));
+            return nodeToIterator(m_tree.findNodeByKey(key));
         }
 
-        //Calculating the index requires the iteration from the root
+        //calculating the index requires the iteration from the root
         //and the calculation the sum of number of the elements in the left subtrees
         //of the parent nodes.
         template <class Key>
         std::tuple<const_iterator, size_type> find2(const Key& key) const
         {
-            auto [node, index] = FindIndexByKey(key);
+            auto [node, index] = indexByKey(key);
 
-            return std::make_tuple(NodeToConstIterator(node), index);
+            return std::make_tuple(nodeToConstIterator(node), index);
         }
 
         template <class Key>
         std::tuple<iterator, size_type> find2(const Key& key)
         {
-            auto [node, index] = m_tree.FindIndexByKey(key);
+            auto [node, index] = m_tree.indexByKey(key);
 
-            return std::make_tuple(NodeToIterator(node), index);
+            return std::make_tuple(nodeToIterator(node), index);
         }
 
         //With size() and greater it returns end().
         const_iterator find_by_index(size_type pos) const
         {
-            return NodeToConstIterator(m_tree.FindNodeByIndex(pos));
+            return nodeToConstIterator(m_tree.findNodeByIndex(pos));
         }
 
         iterator find_by_index(size_type pos)
         {
-            return NodeToIterator(m_tree.FindNodeByIndex(pos));
+            return nodeToIterator(m_tree.findNodeByIndex(pos));
         }
 
         template <class Key>
         bool contains(const Key& key) const
         {
-            return m_tree.FindNodeByKey(key) != nullptr;
+            return m_tree.findNodeByKey(key) != nullptr;
         }
 
         template <class Key>
         const_iterator lower_bound(const Key& key) const
         {
-            return NodeToConstIterator(std::get<0>(m_tree.FindBoundByKey(key)));
+            return nodeToConstIterator(std::get<0>(m_tree.boundByKey(key)));
         }
 
         template <class Key>
         iterator lower_bound(const Key& key)
         {
-            return NodeToIterator(std::get<0>(m_tree.FindBoundByKey(key)));
+            return nodeToIterator(std::get<0>(m_tree.boundByKey(key)));
         }
 
         template <class Key>
         const_iterator upper_bound(const Key& key) const
         {
-            auto [node, equal] = m_tree.FindBoundByKey(key);
+            auto [node, equal] = m_tree.boundByKey(key);
 
             if (equal)
             {
@@ -209,13 +209,13 @@ namespace awl
                 return const_iterator(++typename List::const_iterator(node));
             }
 
-            return NodeToConstIterator(node);
+            return nodeToConstIterator(node);
         }
 
         template <class Key>
         iterator upper_bound(const Key& key)
         {
-            auto [node, equal] = m_tree.FindBoundByKey(key);
+            auto [node, equal] = m_tree.boundByKey(key);
 
             if (equal)
             {
@@ -223,28 +223,28 @@ namespace awl
                 return iterator(++typename List::iterator(node));
             }
 
-            return NodeToIterator(node);
+            return nodeToIterator(node);
         }
 
         reference operator[](size_type pos)
         {
-            return m_tree.FindNodeByIndex(pos)->m_val;
+            return m_tree.findNodeByIndex(pos)->m_val;
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_tree.FindNodeByIndex(pos)->m_val;
+            return m_tree.findNodeByIndex(pos)->m_val;
         }
 
         reference at(size_type pos)
         {
-            CheckPosition(pos);
+            checkPosition(pos);
             return (*this)[pos];
         }
 
         const_reference at(size_type pos) const
         {
-            CheckPosition(pos);
+            checkPosition(pos);
             return (*this)[pos];
         }
 
@@ -252,18 +252,18 @@ namespace awl
         //an insertion or deletion will invalidate it.
         size_type index_of(iterator i) const
         {
-            return m_tree.IndexOfNode(*i.m_i);
+            return m_tree.indexOfNode(*i.m_i);
         }
 
         size_type index_of(const_iterator i) const
         {
-            return m_tree.IndexOfNode(*i.m_i);
+            return m_tree.indexOfNode(*i.m_i);
         }
 
         template <class Key>
         size_type index_of(const Key& key) const
         {
-            auto [node, index] = m_tree.FindIndexByKey(key);
+            auto [node, index] = m_tree.indexByKey(key);
 
             if (node == nullptr)
             {
@@ -278,7 +278,7 @@ namespace awl
         {
             Node* z = *i.m_i;
 
-            m_tree.RemoveNode(z);
+            m_tree.removeNode(z);
         }
 
         //Retutns the number of removed elements.
@@ -324,7 +324,7 @@ namespace awl
 
     private:
 
-        const_iterator NodeToConstIterator(const Node* node) const
+        const_iterator nodeToConstIterator(const Node* node) const
         {
             if (node != nullptr)
             {
@@ -334,7 +334,7 @@ namespace awl
             return end();
         }
 
-        iterator NodeToIterator(Node* node)
+        iterator nodeToIterator(Node* node)
         {
             if (node != nullptr)
             {
@@ -344,25 +344,25 @@ namespace awl
             return end();
         }
 
-        std::pair<iterator, bool> UniversalInsert(Node* node)
+        std::pair<iterator, bool> universalInsert(Node* node)
         {
             Node * parent;
-            Node * existing_node = m_tree.FindNodeByKey(node->value(), &parent);
+            Node * existing_node = m_tree.findNodeByKey(node->value(), &parent);
             const bool exists = existing_node != nullptr;
 
             if (!exists)
             {
-                m_tree.InsertNode(node, parent);
+                m_tree.insertNode(node, parent);
             }
 
             return std::make_pair(iterator(typename List::iterator(node)), !exists);
         }
 
-        void CheckPosition(size_type pos) const
+        void checkPosition(size_type pos) const
         {
             if (!(pos < size()))
             {
-                throw std::out_of_range(aformat() << "Index " << pos << " is out of range [0, " << size() << "].");
+                throw std::out_of_range(std::format("Index {} is out of range [0, {}].", pos, size()));
             }
         }
 

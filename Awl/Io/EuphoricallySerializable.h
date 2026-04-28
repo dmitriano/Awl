@@ -52,45 +52,45 @@ namespace awl::io
             measure_vts(val)
         {}
 
-        std::shared_ptr<Snapshot> MakeShanshot() const override
+        std::shared_ptr<Snapshot> makeShanshot() const override
         {
             std::vector<uint8_t> v;
 
             {
                 VectorOutputStream out(v);
 
-                this->WriteHeader(out);
+                this->writeHeader(out);
 
                 std::size_t header_len = v.size();
 
-                const size_t content_len = MeasureContent();
+                const size_t content_len = measureContent();
 
                 const size_t len = header_len + content_len;
 
                 v.reserve(len);
 
-                WriteContent(out);
+                writeContent(out);
 
                 assert(v.size() == len);
             }
 
-            return BaseHashing::MakeShanshotHelper(std::move(v));
+            return BaseHashing::makeShanshotHelper(std::move(v));
         }
 
     private:
 
-        std::size_t MeasureContent() const
+        std::size_t measureContent() const
         {
             MeasureStream out;
 
-            measure_vts.Write(out);
+            measure_vts.write(out);
 
-            return out.GetLength();
+            return out.length();
         }
 
-        void WriteContent(VectorOutputStream& out) const
+        void writeContent(VectorOutputStream& out) const
         {
-            vector_vts.Write(out);
+            vector_vts.write(out);
         }
 
         VersionTolerantSerializable<T, VectorInputStream, VectorOutputStream, true, V> vector_vts;

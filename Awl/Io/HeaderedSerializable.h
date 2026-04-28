@@ -35,26 +35,26 @@ namespace awl::io
 
     protected:
 
-        bool ReadHeader(awl::io::SequentialInputStream& in) override
+        bool readHeader(awl::io::SequentialInputStream& in) override
         {
             Header actual_header;
 
-            Read(in, actual_header, LimitedContext{ formatNameLimit });
+            read(in, actual_header, LimitedContext{ formatNameLimit });
 
             if (actual_header.format != expectedHeader.format)
             {
-                throw IoError(awl::format() << _T("Wrong format. Expected: " << expectedHeader.format << ". Actual: " << actual_header.format << "."));
+                throw IoError(std::format(_T("Wrong format. Expected: {}. Actual: {}."), expectedHeader.format, actual_header.format));
             }
 
             if (actual_header.version > expectedHeader.version)
             {
-                throw IoError(awl::format() << _T("The version is greater then expected. Expected: " << expectedHeader.version << ". Actual: " <<
-                    actual_header.version << "."));
+                throw IoError(std::format(_T("The version is greater then expected. Expected: {}. Actual: {}."),
+                    expectedHeader.version, actual_header.version));
             }
 
             if (actual_header.version < expectedHeader.version)
             {
-                ReadOldVersion(in, actual_header.version);
+                readOldVersion(in, actual_header.version);
 
                 return false;
             }
@@ -62,16 +62,16 @@ namespace awl::io
             return true;
         }
 
-        void WriteHeader(awl::io::SequentialOutputStream& out) const override
+        void writeHeader(awl::io::SequentialOutputStream& out) const override
         {
-            Write(out, expectedHeader, LimitedContext{ formatNameLimit });
+            write(out, expectedHeader, LimitedContext{ formatNameLimit });
         }
 
-        virtual void ReadOldVersion(awl::io::SequentialInputStream& in, size_t version)
+        virtual void readOldVersion(awl::io::SequentialInputStream& in, size_t version)
         {
             static_cast<void>(in);
 
-            throw IoError(awl::format() << _T("Wrong version. Expected: " << expectedHeader.version << ". Actual: " << version << "."));
+            throw IoError(std::format(_T("Wrong version. Expected: {}. Actual: {}."), expectedHeader.version, version));
         }
 
     private:

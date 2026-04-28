@@ -18,18 +18,18 @@ namespace awl
 
         using value_type = std::atomic<T>;
 
-        void FromJson(const QJsonValue& jv, value_type& atomic_val)
+        void fromJson(const QJsonValue& jv, value_type& atomic_val)
         {
             JsonSerializer<T> formatter;
             T val;
-            formatter.FromJson(jv, val);
+            formatter.fromJson(jv, val);
             atomic_val = val;
         }
 
-        void ToJson(const value_type & atomic_val, QJsonValue & jv)
+        void toJson(const value_type & atomic_val, QJsonValue & jv)
         {
             JsonSerializer<T> formatter;
-            formatter.ToJson(atomic_val.load(), jv);
+            formatter.toJson(atomic_val.load(), jv);
         }
     };
 }

@@ -18,7 +18,7 @@ namespace awl
 
         using Decimal = awl::decimal<UInt, exp_len, DataTemplate>;
 
-        void FromJson(const QJsonValue& jv, Decimal& val)
+        void fromJson(const QJsonValue& jv, Decimal& val)
         {
             switch (jv.type())
             {
@@ -32,7 +32,7 @@ namespace awl
                     }
                     catch (const std::runtime_error&)
                     {
-                        throw JsonException(awl::format() << "Can't convert '" << text << "' to decimal.");
+                        throw JsonException(std::format(_T("Can't convert '{}' to decimal."), text));
                     }
 
                     break;
@@ -58,13 +58,13 @@ namespace awl
                 }
                 default:
 
-                    throw JsonException(awl::format() << _T("Can't convert value of type: ") << TypeToString(jv.type()) << _T(" to decimal."));
+                    throw JsonException(std::format(_T("Can't convert value of type: {} to decimal."), typeToString(jv.type())));
 
                     break;
             }
         }
 
-        void ToJson(const Decimal& val, QJsonValue& jv)
+        void toJson(const Decimal& val, QJsonValue& jv)
         {
             std::ostringstream out;
 

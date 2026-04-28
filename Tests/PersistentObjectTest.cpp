@@ -74,7 +74,7 @@ namespace
     template <class Storage, class String>
     void WriteStorage(const awl::testing::TestContext& context)
     {
-        Container<Storage, String> container(context.logger);
+        Container<Storage, String> container(*context.logger);
 
         container.persistentObject.open(settings_file_name);
 
@@ -88,7 +88,7 @@ namespace
     template <class Storage, class String>
     void ReadStorage(const awl::testing::TestContext& context)
     {
-        Container<Storage, String> container(context.logger);
+        Container<Storage, String> container(*context.logger);
 
         container.persistentObject.open(settings_file_name);
 

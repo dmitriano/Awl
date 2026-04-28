@@ -35,7 +35,7 @@ namespace awl::io
         //To make this look better and get gid of switch operator we would probably define
         //the specialization of Read/Write functions not only for the type
         //but also for the stream.
-        constexpr void Write(const uint8_t * buffer, size_t count)
+        constexpr void write(const uint8_t * buffer, size_t count)
         {
             switch (count)
             {
@@ -67,7 +67,7 @@ namespace awl::io
             return m_size;
         }
 
-        size_t GetLength() const
+        size_t length() const
         {
             return m_p - pBuf;
         }
@@ -98,9 +98,9 @@ namespace awl::io
             std::memset(pBuf.get(), 0u, m_size);
         }
 
-        void Write(const uint8_t * buffer, size_t count) override
+        void write(const uint8_t * buffer, size_t count) override
         {
-            assert(GetLength() + count <= m_size);
+            assert(length() + count <= m_size);
             std::memmove(m_p, buffer, count);
             //std::copy(buffer, buffer + count, m_p);
             m_p += count;
@@ -111,7 +111,7 @@ namespace awl::io
             return m_size;
         }
 
-        size_t GetLength() const
+        size_t length() const
         {
             assert(pBuf.get() <= m_p);
             return m_p - pBuf.get();
@@ -138,7 +138,7 @@ namespace awl::io
     {
     public:
 
-        void Write(const uint8_t * buffer, size_t count) override
+        void write(const uint8_t * buffer, size_t count) override
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated
@@ -146,7 +146,7 @@ namespace awl::io
             m_pos = m_pos + count;
         }
 
-        size_t GetLength() const
+        size_t length() const
         {
             return m_pos;
         }
@@ -163,7 +163,7 @@ namespace awl::io
     {
     public:
 
-        void Write(const uint8_t * buffer, size_t count)
+        void write(const uint8_t * buffer, size_t count)
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated
@@ -171,7 +171,7 @@ namespace awl::io
             m_pos = m_pos + count;
         }
 
-        size_t GetLength() const
+        size_t length() const
         {
             return m_pos;
         }

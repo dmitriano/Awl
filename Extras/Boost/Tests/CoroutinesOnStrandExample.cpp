@@ -62,11 +62,7 @@ namespace
 
             auto after = std::this_thread::get_id();
 
-            logger().debug(awl::format()
-                << "#" << m_index
-                << " first awaited second on thread " << before
-                << " and resumed on thread " << after
-                << ", result = " << value);
+            logger().debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), m_index, before, after, value);
         }
 
         awaitable<void> print()
@@ -80,7 +76,7 @@ namespace
 
         void log(const char* caption) const
         {
-            logger().debug(awl::format() << "#" << m_index << " " << caption << " on thread " << std::this_thread::get_id());
+            logger().debug(_T("#{} {} on thread {}"), m_index, awl::fromACString(caption), std::this_thread::get_id());
         }
 
         awaitable<int> runSecondStage()
@@ -128,7 +124,7 @@ namespace
 
             for (size_t i = 0; ; ++i)
             {
-                if (sw.HasElapsed(workDuration))
+                if (sw.hasElapsed(workDuration))
                 {
                     break;
                 }
@@ -141,7 +137,7 @@ namespace
 
                 if (actual != sample)
                 {
-                    logger().error(awl::format() << "#" << m_index << " " << "Data Race! Stored " << sample << ", but loaded " << actual);
+                    logger().error(_T("#{} Data Race! Stored {}, but loaded {}"), m_index, sample.load(), actual);
                 }
             }
 
@@ -168,7 +164,7 @@ namespace
 
         awl::Logger& logger() const
         {
-            return context.get().logger;
+            return *context.get().logger;
         }
 
         std::reference_wrapper<const awl::testing::TestContext> context;
@@ -187,11 +183,11 @@ namespace
         {
             if (strand)
             {
-                context.logger.debug("Using Strand.");
+                context.logger->debug("Using Strand.");
             }
             else
             {
-                context.logger.debug("Using Thread Pool without a Strand.");
+                context.logger->debug("Using Thread Pool without a Strand.");
             }
         }
 
@@ -258,7 +254,7 @@ AWL_EXAMPLE(CoroutinesOnStrand)
     // Spawn all the coroutines on the strand.
     AWL_FLAG(spawn_on_strand);
 
-    context.logger.debug(awl::format() << "Thread count: " << thread_count);
+    context.logger->debug(_T("Thread count: {}"), thread_count);
 
     asio::thread_pool pool(thread_count);
 

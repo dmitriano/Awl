@@ -33,29 +33,29 @@ namespace awl
             {
             }
 
-            bool End() override
+            bool end() override
             {
-                return InternalEnd();
+                return internalEnd();
             }
 
-            size_t Read(uint8_t * buffer, size_t count) override;
+            size_t read(uint8_t * buffer, size_t count) override;
 
         private:
 
-            bool InternalEnd()
+            bool internalEnd()
             {
-                PeekBuf();
+                peekBuf();
 
                 return m_i == m_block.end();
             }
             
-            void PeekBuf()
+            void peekBuf()
             {
                 if (m_i == m_block.end())
                 {
                     m_block.resize(blockSize);
 
-                    const size_t actually_read = m_in.Read(m_block.data(), blockSize);
+                    const size_t actually_read = m_in.read(m_block.data(), blockSize);
 
                     if (actually_read == 0)
                     {
@@ -96,7 +96,7 @@ namespace awl
                 }
             }
 
-            void FlushBuf(uint8_t * buffer, size_t & flushed_count, size_t count)
+            void flushBuf(uint8_t * buffer, size_t & flushed_count, size_t count)
             {
                 assert(m_i <= m_block.end());
                 
@@ -128,13 +128,13 @@ namespace awl
         };
 
         template <class Hash, class UnderlyingStream>
-        size_t HashInputStream<Hash, UnderlyingStream>::Read(uint8_t * buffer, size_t count)
+        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, size_t count)
         {
             size_t flushed_count = 0;
 
             while (true)
             {
-                FlushBuf(buffer, flushed_count, count);
+                flushBuf(buffer, flushed_count, count);
 
                 assert(flushed_count <= count);
 
@@ -143,7 +143,7 @@ namespace awl
                     break;
                 }
 
-                if (InternalEnd())
+                if (internalEnd())
                 {
                     break;
                 }
@@ -173,14 +173,14 @@ namespace awl
 
             ~HashOutputStream()
             {
-                Flush();
+                flush();
             }
 
-            void Write(const uint8_t * buffer, size_t count) override;
+            void write(const uint8_t * buffer, size_t count) override;
 
         private:
 
-            void Flush()
+            void flush()
             {
                 if (!m_v.empty())
                 {
@@ -188,7 +188,7 @@ namespace awl
 
                     m_v.insert(m_v.end(), val.begin(), val.end());
 
-                    m_out.Write(m_v.data(), m_v.size());
+                    m_out.write(m_v.data(), m_v.size());
 
                     m_v.clear();
                 }
@@ -204,7 +204,7 @@ namespace awl
         };
 
         template <class Hash, class UnderlyingStream>
-        void HashOutputStream<Hash, UnderlyingStream>::Write(const uint8_t * buffer, size_t count)
+        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, size_t count)
         {
             assert(m_v.size() < blockSize - Hash::size());
 
@@ -224,7 +224,7 @@ namespace awl
 
                 if (m_v.size() == blockSize - Hash::size())
                 {
-                    Flush();
+                    flush();
                 }
 
                 written_cont += insert_count;

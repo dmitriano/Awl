@@ -13,7 +13,7 @@
  * Xor_In: 0xffffffffffffffff
  * Reflected_Out: True
  * Xor_Out: 0x0
- * Check("123456789"): 0xe9c6d914c4b8d9ca
+ * check("123456789"): 0xe9c6d914c4b8d9ca
  *
  * Copyright (c) 2012, Salvatore Sanfilippo <antirez at gmail dot com>
  * All rights reserved.
@@ -70,7 +70,7 @@ namespace awl::crypto
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    Calc(crc, static_cast<uint8_t>(*i));
+                    calc(crc, static_cast<uint8_t>(*i));
                 }
                 else
                 {
@@ -78,7 +78,7 @@ namespace awl::crypto
 
                     for (size_t j = 0; j < bytes.size(); ++j)
                     {
-                        Calc(crc, bytes[j]);
+                        calc(crc, bytes[j]);
                     }
                 }
             }
@@ -222,7 +222,7 @@ namespace awl::crypto
 
         uint64_t m_seed;
 
-        static constexpr void Calc(uint64_t & crc, uint8_t byte)
+        static constexpr void calc(uint64_t & crc, uint8_t byte)
         {
             crc = crc64_tab[static_cast<uint8_t>(crc) ^ byte] ^ (crc >> 8);
         }

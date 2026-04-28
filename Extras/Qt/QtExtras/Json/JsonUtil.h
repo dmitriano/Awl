@@ -17,29 +17,29 @@
 namespace awl
 {
     template <class T>
-    void FromJson(const QJsonValue& jv, T& val)
+    void fromJson(const QJsonValue& jv, T& val)
     {
-        JsonSerializer<T>().FromJson(jv, val);
+        JsonSerializer<T>().fromJson(jv, val);
     }
 
     template <class T>
-    void ToJson(const T& val, QJsonValue& jv)
+    void toJson(const T& val, QJsonValue& jv)
     {
-        JsonSerializer<T>().ToJson(val, jv);
+        JsonSerializer<T>().toJson(val, jv);
     }
 
     template <class T>
-    QJsonValue ToJson(const T& val)
+    QJsonValue toJson(const T& val)
     {
         QJsonValue jv;
 
-        JsonSerializer<T>().ToJson(val, jv);
+        JsonSerializer<T>().toJson(val, jv);
 
         return jv;
     }
 
     template <class Struct>
-    void StructFromString(const QJsonDocument& jdoc, Struct& val)
+    void structFromString(const QJsonDocument& jdoc, Struct& val)
     {
         QJsonValue jval;
 
@@ -58,18 +58,18 @@ namespace awl
             throw JsonException(_T("The document is empty."));
         }
 
-        FromJson(jval, val);
+        fromJson(jval, val);
     }
 
     template <class Struct>
-    void StructFromString(const QString& message, Struct& val)
+    void structFromString(const QString& message, Struct& val)
     {
         QJsonDocument jdoc = QJsonDocument::fromJson(message.toUtf8());
 
-        StructFromString(jdoc, val);
+        structFromString(jdoc, val);
     }
 
-    inline void MergeJsonObjects(QJsonObject& to, const QJsonObject& from)
+    inline void mergeJsonObjects(QJsonObject& to, const QJsonObject& from)
     {
         for (auto it = from.constBegin(); it != from.constEnd(); ++it)
         {
@@ -77,32 +77,32 @@ namespace awl
         }
     }
 
-    inline QString JsonToString(const QJsonDocument& jdoc)
+    inline QString jsonToString(const QJsonDocument& jdoc)
     {
         const QByteArray bytes = jdoc.toJson();
 
         return QString::fromUtf8(bytes);
     }
 
-    inline QString JsonToString(const QJsonObject& jo)
+    inline QString jsonToString(const QJsonObject& jo)
     {
-        return JsonToString(QJsonDocument(jo));
+        return jsonToString(QJsonDocument(jo));
     }
 
-    inline QString JsonToString(const QJsonArray& ja)
+    inline QString jsonToString(const QJsonArray& ja)
     {
-        return JsonToString(QJsonDocument(ja));
+        return jsonToString(QJsonDocument(ja));
     }
 
-    inline QString JsonToString(const QJsonValue& jv)
+    inline QString jsonToString(const QJsonValue& jv)
     {
         if (jv.isObject())
         {
-            return JsonToString(jv.toObject());
+            return jsonToString(jv.toObject());
         }
         else if (jv.isArray())
         {
-            return JsonToString(jv.toArray());
+            return jsonToString(jv.toArray());
         }
         else
         {
@@ -111,10 +111,10 @@ namespace awl
     }
 
     template <class Struct>
-    QString StructToString(const Struct& val)
+    QString structToString(const Struct& val)
     {
-        QJsonValue jv = ToJson(val);
+        QJsonValue jv = toJson(val);
 
-        return JsonToString(jv);
+        return jsonToString(jv);
     }
 }

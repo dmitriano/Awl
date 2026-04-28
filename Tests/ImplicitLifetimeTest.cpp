@@ -104,7 +104,7 @@ AWL_EXAMPLE(ImplicitLifetimeVector)
 {
     AWL_ATTRIBUTE(size_t, offset, 0);
 
-    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B));
+    context.logger->debug(_T("sizeof(B): {}"), sizeof(B));
 
     std::vector<uint8_t> v(sizeof(B) + offset, 0);
 
@@ -113,19 +113,19 @@ AWL_EXAMPLE(ImplicitLifetimeVector)
     p->x = 1;
     p->y = 'a';
 
-    context.logger.debug(awl::format() << p->x << " " << p->y << " " << v[offset + 4]);
+    context.logger->debug(_T("{} {} {}"), p->x, p->y, v[offset + 4]);
 
     v[offset + 0] = 10;
     v[offset + 4] = 66;
 
-    context.logger.debug(awl::format() << p->x << " " << p->y);
+    context.logger->debug(_T("{} {}"), p->x, p->y);
 }
 
 AWL_EXAMPLE(ImplicitLifetimeCalloc)
 {
     AWL_ATTRIBUTE(size_t, offset, 0);
 
-    context.logger.debug(awl::format() << "sizeof(B): " << sizeof(B) << ", alignof(B): " << alignof(B));
+    context.logger->debug(_T("sizeof(B): {}, alignof(B): {}"), sizeof(B), alignof(B));
 
     void* p1 = calloc(1, sizeof(B) + offset);
 
@@ -134,7 +134,7 @@ AWL_EXAMPLE(ImplicitLifetimeCalloc)
     p->x = 1;
     p->y = 'a';
 
-    context.logger.debug(awl::format() << p->x << " " << p->y);
+    context.logger->debug(_T("{} {}"), p->x, p->y);
 
     free(p1);
 }
@@ -149,11 +149,11 @@ AWL_EXAMPLE(ImplicitLifetimePlacementNew)
     p->x = 10;
     p->c = 'a';
 
-    context.logger.debug(awl::format() << p->x << " " << buf[4]);
+    context.logger->debug(_T("{} {}"), p->x, buf[4]);
 
     // An object of type char, unsigned char, or std::byte may be used to access the object representation of any object.
     // A char, unsigned char, or std::byte array may be used to manipulate the object representation of any object.
     buf[4] = 'b';
 
-    context.logger.debug(awl::format() << p->x << " " << p->c);
+    context.logger->debug(_T("{} {}"), p->x, p->c);
 }

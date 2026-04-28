@@ -17,13 +17,13 @@ namespace awl
         {
         public:
 
-            virtual size_t GetPosition() const = 0;
+            virtual size_t position() const = 0;
 
-            virtual void Seek(std::size_t pos, bool begin = true) = 0;
+            virtual void seek(std::size_t pos, bool begin = true) = 0;
 
-            virtual void Move(std::ptrdiff_t offset) = 0;
+            virtual void move(std::ptrdiff_t offset) = 0;
 
-            virtual size_t GetLength() const = 0;
+            virtual size_t length() const = 0;
 
             virtual ~StreamPointer() = default;
         };
@@ -36,9 +36,9 @@ namespace awl
         {
         public:
 
-            virtual void Flush() = 0;
+            virtual void flush() = 0;
 
-            virtual void Truncate() = 0;
+            virtual void truncate() = 0;
         };
 
         class IoStream : public InputStream, public OutputStream

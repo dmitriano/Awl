@@ -29,23 +29,23 @@ namespace awl::io
             delete[] pBuf;
         }
 
-        constexpr bool End()
+        constexpr bool end()
         {
-            return GetLength() == m_size;
+            return length() == m_size;
         }
 
-        constexpr size_t Read(uint8_t * buffer, size_t count)
+        constexpr size_t read(uint8_t * buffer, size_t count)
         {
-            const size_t available_count = m_size - GetLength();
+            const size_t available_count = m_size - length();
             const size_t read_count = std::min(count, available_count);
             StdCopy(m_p, m_p + read_count, buffer);
             m_p += read_count;
             return read_count;
         }
 
-        constexpr void Write(const uint8_t * buffer, size_t count)
+        constexpr void write(const uint8_t * buffer, size_t count)
         {
-            assert(GetLength() + count <= m_size);
+            assert(length() + count <= m_size);
             //std::memmove(m_p, buffer, count);
             StdCopy(buffer, buffer + count, m_p);
             m_p += count;
@@ -56,7 +56,7 @@ namespace awl::io
             return m_size;
         }
 
-        constexpr size_t GetLength() const
+        constexpr size_t length() const
         {
             assert(pBuf <= m_p);
             return static_cast<size_t>(m_p - pBuf);
@@ -74,18 +74,18 @@ namespace awl::io
 
         template <typename T>
             requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-        friend void Write(TrivialMemoryStream& s, T val)
+        friend void write(TrivialMemoryStream& s, T val)
         {
-            assert(s.GetLength() + sizeof(val) <= s.m_size);
+            assert(s.length() + sizeof(val) <= s.m_size);
             std::memcpy(s.m_p, awl::const_data_cast(&val), sizeof(val));
             s.m_p += sizeof(val);
         }
 
         template <typename T>
             requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
-        friend void Read(TrivialMemoryStream& s, T& val)
+        friend void read(TrivialMemoryStream& s, T& val)
         {
-            assert(s.GetLength() + sizeof(val) <= s.m_size);
+            assert(s.length() + sizeof(val) <= s.m_size);
             std::memcpy(awl::mutable_data_cast(&val), s.m_p, sizeof(val));
             s.m_p += sizeof(val);
         }

@@ -392,6 +392,6 @@ namespace awl
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>>
     using observable_vector_set = basic_observable_set<vector_set<T, Compare, Allocator>, Compare, Allocator>;
 
-    template <class T, class Hash = std::hash<T>, class Allocator = std::allocator<T>>
-    using observable_unordered_set = basic_observable_set<std::unordered_set<T, Hash, std::equal_to<T>, Allocator>, Hash, Allocator>;
+    template <class T, class Hash = std::hash<T>, class KeyEqual = std::equal_to<T>, class Allocator = std::allocator<T>>
+    using observable_unordered_set = basic_observable_set<std::unordered_set<T, Hash, KeyEqual, Allocator>, Hash, Allocator>;
 }

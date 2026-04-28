@@ -108,7 +108,7 @@ namespace
                 if (e.code() == boost::asio::experimental::error::channel_closed)
                     print("VectorChannel closed, exiting handler");
                 else
-                    print(awl::format() << "Receive error: " << e.code().message());
+                    print(std::format(_T("Receive error: {}"), awl::fromAString(e.code().message())));
             }
 
             m_outputChan.close();
@@ -449,7 +449,7 @@ namespace
                 }
                 else
                 {
-                    print(awl::format() << "Receive error: " << e.code().message());
+                    print(std::format(_T("Receive error: {}"), awl::fromAString(e.code().message())));
 
                     throw;
                 }

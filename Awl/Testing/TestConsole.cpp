@@ -26,6 +26,7 @@ namespace awl::testing
 {
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
+        m_logger(std::make_shared<ConsoleLogger>()),
         m_ap(provider),
         m_context{ m_logger, std::move(stop_token), m_ap, m_typeProvider}
     {
@@ -69,7 +70,7 @@ namespace awl::testing
 
                 if (p_link == nullptr)
                 {
-                    throw TestException(format() << _T("The test '" << run << _T(" does not exist.")));
+                    throw TestException(std::format(_T("The test '{}' does not exist."), run));
                 }
 
                 runner.runLink(p_link, context, out);
@@ -83,7 +84,7 @@ namespace awl::testing
         {
             out << std::endl << last_output.str();
 
-            out << std::endl << _T("***************** The tests failed: ") << e.What() << std::endl;
+            out << std::endl << _T("***************** The tests failed: ") << e.message() << std::endl;
         }
 
         // awl::static_chain<TestFunc>().clear();
@@ -102,7 +103,7 @@ namespace awl::testing
         }
         catch (const TestException& e)
         {
-            cout() << _T("The following error has occurred: ") << e.What() << std::endl;
+            cout() << _T("The following error has occurred: ") << e.message() << std::endl;
         }
 
         return 2;
@@ -145,11 +146,11 @@ namespace awl::testing
         {
             try
             {
-                jo = loadObjectFromFile(ToQString(json_file));
+                jo = loadObjectFromFile(toQString(json_file));
             }
             catch (const JsonException& e)
             {
-                awl::cout() << e.What() << std::endl;
+                awl::cout() << e.message() << std::endl;
 
                 return 3;
             }

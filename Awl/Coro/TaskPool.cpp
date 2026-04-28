@@ -33,7 +33,7 @@ void TaskPool::cancel()
 
         m_handlers.clear();
 
-        notify(&TaskSink::OnFinished);
+        notify(&TaskSink::onFinished);
     }
 }
 
@@ -44,13 +44,13 @@ UpdateTask TaskPool::wait_all_task_experimental()
         UpdateTask task = std::move(m_handlers.back().m_task);
 
         // The vector contains an empty task and
-        // and OnFinished() should delete it correctly.
+        // and onFinished() should delete it correctly.
         // BUG: This task is not cancelled by TaskPool::cancel().
         co_await task;
     }
 }
 
-void TaskPool::Handler::OnFinished()
+void TaskPool::Handler::onFinished()
 {
     // The handler is going to be deleted, save its members.
     TaskPool* saved_this = pThis;
@@ -64,5 +64,5 @@ void TaskPool::Handler::OnFinished()
     handlers.erase(handlers.begin() + index);
 
     // For wait_any().
-    saved_this->notify(&TaskSink::OnFinished);
+    saved_this->notify(&TaskSink::onFinished);
 }

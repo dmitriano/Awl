@@ -50,7 +50,7 @@ AWL_TEST(VtsReadWriteVectorStream)
     std::vector<uint8_t> v;
     v.reserve(mem_size);
 
-    context.logger.debug(awl::format() << v.capacity() << _T(" bytes of memory has been allocated. "));
+    context.logger->debug(_T("{} bytes of memory has been allocated. "), v.capacity());
 
     {
         awl::io::VectorOutputStream out(v);
@@ -66,11 +66,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += awl::testing::vts_common::WriteDataV1<OldVectorWriter>(out, element_count, true);
         }
 
-        context.logger.debug(_T("Test data has been written. "));
+        context.logger->debug(_T("Test data has been written. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * write_count, v.size() * write_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 
     AWL_ASSERT_EQUAL(mem_size, v.size());
@@ -88,11 +88,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += awl::testing::vts_common::ReadDataPlain<OldVectorReader>(in, element_count);
         }
 
-        context.logger.debug(_T("Plain data has been read. "));
+        context.logger->debug(_T("Plain data has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 
     {
@@ -107,11 +107,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += awl::testing::vts_common::ReadDataV1<OldVectorReader>(in, element_count);
         }
 
-        context.logger.debug(_T("Version 1 has been read. "));
+        context.logger->debug(_T("Version 1 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 
     {
@@ -126,11 +126,11 @@ AWL_TEST(VtsReadWriteVectorStream)
             total_d += awl::testing::vts_common::ReadDataV2<NewVectorReader>(in, element_count);
         }
 
-        context.logger.debug(_T("Version 2 has been read. "));
+        context.logger->debug(_T("Version 2 has been read. "));
 
         helpers::ReportCountAndSpeed(context, total_d, element_count * read_count, v.size() * read_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 }
 
@@ -141,7 +141,7 @@ AWL_BENCHMARK(VtsMemSetMove)
     std::unique_ptr<uint8_t[]> p(new uint8_t[element_count]);
 
     {
-        context.logger.debug(_T("std::memset: "));
+        context.logger->debug(_T("std::memset: "));
 
         awl::StopWatch w;
 
@@ -149,13 +149,13 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 
     std::unique_ptr<uint8_t[]> p1(new uint8_t[element_count]);
 
     {
-        context.logger.debug(_T("std::memmove: "));
+        context.logger->debug(_T("std::memmove: "));
 
         awl::StopWatch w;
 
@@ -163,11 +163,11 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 
     {
-        context.logger.debug(_T("vector<uint8_t>::insert: "));
+        context.logger->debug(_T("vector<uint8_t>::insert: "));
 
         std::vector<uint8_t> v;
         v.reserve(element_count);
@@ -181,7 +181,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 
         helpers::ReportSpeed(context, w, element_count);
 
-        context.logger.debug(awl::format());
+        context.logger->debug(_T(""));
     }
 }
 
@@ -219,7 +219,7 @@ AWL_TEST(VtsDeletedType)
     E1 e1 = { "abc", { 1, 2, 3 } };
     E2 e2 = { { 1, 2, 3 }, 1 };
 
-    awl::io::CopyV(e1, e2);
+    awl::io::copyV(e1, e2);
 
     AWL_ASSERT(e2.b == e1.b);
     AWL_ASSERT(e2.c == 1);

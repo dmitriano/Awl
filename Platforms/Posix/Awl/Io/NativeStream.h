@@ -33,34 +33,34 @@ namespace awl::io
             return m_hFile == other.m_hFile;
         }
 
-        size_t GetLength() const override
+        size_t length() const override
         {
             struct stat sb;
 
-            Check(::fstat(m_hFile, &sb));
+            check(::fstat(m_hFile, &sb));
             
             return static_cast<size_t>(sb.st_size);
         }
 
-        size_t GetPosition() const override
+        size_t position() const override
         {
             const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
 
-            Check(pos);
+            check(pos);
             
             return static_cast<size_t>(pos);
         }
 
-        size_t Read(uint8_t* buffer, size_t count) override
+        size_t read(uint8_t* buffer, size_t count) override
         {
             const ssize_t read_count = ::read(m_hFile, buffer, count);
 
-            Check(read_count);
+            check(read_count);
             
             return static_cast<size_t>(read_count);
         }
 
-        void Write(const uint8_t* buffer, size_t count) override
+        void write(const uint8_t* buffer, size_t count) override
         {
             const ssize_t written_count = ::write(m_hFile, buffer, count);
 
@@ -71,41 +71,40 @@ namespace awl::io
 
             if (static_cast<size_t>(written_count) != count)
             {
-                throw PosixException(format() << _T("Requested ") << count
-                    << _T(" bytes, but actually written ") << written_count << _T("."));
+                throw PosixException(std::format(_T("Requested {} bytes, but actually written {}."), count, written_count));
             }
         }
 
-        bool End() override
+        bool end() override
         {
-            return GetPosition() == GetLength();
+            return position() == length();
         }
 
-        void Seek(std::size_t pos, bool begin = true) override
+        void seek(std::size_t pos, bool begin = true) override
         {
-            Check(::lseek(m_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
+            check(::lseek(m_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
         }
 
-        void Move(std::ptrdiff_t offset) override
+        void move(std::ptrdiff_t offset) override
         {
-            Check(::lseek(m_hFile, static_cast<off_t>(offset), SEEK_CUR));
+            check(::lseek(m_hFile, static_cast<off_t>(offset), SEEK_CUR));
         }
 
-        void Flush() override
+        void flush() override
         {
-            Check(::fsync(m_hFile));
+            check(::fsync(m_hFile));
         }
 
-        void Truncate() override
+        void truncate() override
         {
             const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
 
-            Check(pos);
+            check(pos);
 
-            Check(::ftruncate(m_hFile, pos));
+            check(::ftruncate(m_hFile, pos));
         }
 
-        String GetFileName() const
+        String fileName() const
         {
             /*
             char buf[PATH_MAX];
@@ -121,7 +120,7 @@ namespace awl::io
     private:
 
         template <class T>
-        static void Check(T val)
+        static void check(T val)
         {
             if (val == static_cast<T>(-1))
             {
@@ -136,36 +135,36 @@ namespace awl::io
     
     using SharedStream = PosixStream<SharedFileHandle>;
 
-    inline thread_local bool openedExisting;
+    inline thread_local bool openedExistingFlag;
 
-    inline UniqueFileHandle CreateUniqueFile(const String& file_name)
+    inline UniqueFileHandle createUniqueFile(const String& file_name)
     {
         // I did not find a better way in POSIX.
-        openedExisting = access(file_name.c_str(), F_OK) != -1;
+        openedExistingFlag = access(file_name.c_str(), F_OK) != -1;
         
         // user readable and writable
         HANDLE hFile = ::open(file_name.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
         if (hFile == NullHandleValue)
         {
-            throw PosixException(format() << _T("Cannot open file ')" << file_name << "' for updating."));
+            throw PosixException(std::format(_T("Cannot open file '{}' for updating."), file_name));
         }
 
         return hFile;
     }
 
-    inline bool OpenedExisting()
+    inline bool openedExisting()
     {
-        return openedExisting;
+        return openedExistingFlag;
     }
 
-    inline UniqueFileHandle OpenUniqueFile(const String& file_name)
+    inline UniqueFileHandle openUniqueFile(const String& file_name)
     {
         HANDLE hFile = ::open(file_name.c_str(), O_RDONLY);
 
         if (hFile == NullHandleValue)
         {
-            throw PosixException(format() << _T("Cannot open file ')" << file_name << "' for reading."));
+            throw PosixException(std::format(_T("Cannot open file '{}' for reading."), file_name));
         }
 
         return hFile;

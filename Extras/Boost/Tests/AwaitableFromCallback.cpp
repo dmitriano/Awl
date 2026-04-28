@@ -1,4 +1,4 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
@@ -18,7 +18,7 @@ namespace
 
         // -------------------------------------------
         // Legacy-style async operation (no std::function!)
-        // Accepts any completion handler — can be move-only
+        // Accepts any completion handler � can be move-only
         // -------------------------------------------
         template <class CompletionHandler>
         void asyncProcess(CompletionHandler&& handler)
@@ -58,7 +58,7 @@ namespace
         {}
 
         // -------------------------------------------
-        // Adapter: convert async_legacy_op → awaitable<int>
+        // Adapter: convert async_legacy_op > awaitable<int>
         // -------------------------------------------
         asio::awaitable<int> asyncProcess()
         {
@@ -108,13 +108,13 @@ namespace
         {
             int v = co_await processor.asyncProcess();
 
-            context.logger.debug(awl::format() << "Result = " << v);
+            context.logger->debug(_T("Result = {}"), v);
         }
 
         {
             int v = co_await processor.asyncProcessOnThread();
 
-            context.logger.debug(awl::format() << "Result = " << v);
+            context.logger->debug(_T("Result = {}"), v);
         }
     }
 }

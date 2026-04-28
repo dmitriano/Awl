@@ -36,7 +36,7 @@ namespace
     {
         TestLock lock(testMutex);
 
-        context.logger.debug(awl::format() << _T("Drawing the scene with the following settings: Rotation=") << static_cast<int>(Rotation) << _T(" PerspectiveMode=") << (PerspectiveMode ? "true" : "false"));
+        context.logger->debug(_T("Drawing the scene with the following settings: Rotation={} PerspectiveMode={}"), static_cast<int>(Rotation), PerspectiveMode);
     }
 
     awl::UpdateQueue<GameScene &> updateQueue;
@@ -46,10 +46,10 @@ namespace
         {
             TestLock lock(testMutex);
 
-            context.logger.debug(_T("The user has changed Rotation\n"));
+            context.logger->debug(_T("The user has changed Rotation\n"));
         }
 
-        updateQueue.Push([](GameScene & scene)
+        updateQueue.push([](GameScene & scene)
         {
             scene.Rotation = 2;
         });
@@ -57,10 +57,10 @@ namespace
         {
             TestLock lock(testMutex);
 
-            context.logger.debug(_T("The user has changed PerspectiveMode\n"));
+            context.logger->debug(_T("The user has changed PerspectiveMode\n"));
         }
 
-        updateQueue.Push([](GameScene & scene)
+        updateQueue.push([](GameScene & scene)
         {
             scene.PerspectiveMode = true;
         });
@@ -70,13 +70,13 @@ namespace
     {
         GameScene scene;
 
-        AWL_ASSERTM_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before ApplyUpdates() is called."));
+        AWL_ASSERTM_TRUE(scene.Rotation == 0 && !scene.PerspectiveMode, _T("Updates have been applyed before applyUpdates() is called."));
 
         scene.Draw(context);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(17));
 
-        updateQueue.ApplyUpdates(scene);
+        updateQueue.applyUpdates(scene);
 
         AWL_ASSERTM_TRUE(scene.Rotation == 2 && scene.PerspectiveMode, _T("Updates have not been applyed."));
 

@@ -33,35 +33,35 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger.error("transfer: connection closed (stream truncated)");
+                context.logger->error("transfer: connection closed (stream truncated)");
             }
             else if (e.code() == boost::asio::error::eof)
             {
-                context.logger.error("transfer: EOF");
+                context.logger->error("transfer: EOF");
             }
             else if (e.code() == asio::error::connection_reset)
             {
-                context.logger.error("transfer: Connection Reset.");
+                context.logger->error("transfer: Connection Reset.");
             }
             else if (
                 e.code() == boost::system::errc::operation_canceled
                 || e.code() == boost::asio::error::operation_aborted)
             {
-                context.logger.error("transfer: Operation cancelled.");
+                context.logger->error("transfer: Operation cancelled.");
             }
             else if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
             {
-                context.logger.error("transfer Windows Error: WSAECONNRESET.");
+                context.logger->error("transfer Windows Error: WSAECONNRESET.");
             }
             else
             {
-                context.logger.error(awl::format() << "transfer boost::system::system_error: " << e.what());
+                context.logger->error(_T("transfer boost::system::system_error: {}"), awl::fromACString(e.what()));
             }
         }
         catch (std::exception& e)
         {
             // Any exception = stop proxying
-            context.logger.error(awl::format() << "transfer std::exception: " << e.what());
+            context.logger->error(_T("transfer std::exception: {}"), awl::fromACString(e.what()));
         }
     }
 
@@ -130,16 +130,16 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger.error("handle_client: connection closed (stream truncated)");
+                context.logger->error("handle_client: connection closed (stream truncated)");
             }
             else
             {
-                context.logger.error(awl::format() << "handle_client exception: " << e.what());
+                context.logger->error(_T("handle_client exception: {}"), awl::fromACString(e.what()));
             }
         }
         catch (const std::exception& e)
         {
-            context.logger.error(awl::format() << "handle_client exception: " << e.what());
+            context.logger->error(_T("handle_client exception: {}"), awl::fromACString(e.what()));
         }
     }
 
@@ -168,11 +168,11 @@ namespace
         }
         catch (const boost::system::system_error& e)
         {
-            context.logger.error(awl::format() << "runProxy boost::system::system_error: " << e.what());
+            context.logger->error(_T("runProxy boost::system::system_error: {}"), awl::fromACString(e.what()));
         }
         catch (const std::exception& e)
         {
-            context.logger.error(awl::format() << "runProxy std::exception: " << e.what());
+            context.logger->error(_T("runProxy std::exception: {}"), awl::fromACString(e.what()));
         }
     }
 }

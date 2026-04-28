@@ -19,6 +19,7 @@
 #include <functional>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 namespace awl::testing
 {
@@ -37,7 +38,7 @@ namespace awl::testing
         // Used for simulating an app crash.
         AWL_FLAG(terminate);
 
-        out << FromACString(p_test_link->name());
+        out << fromACString(p_test_link->name());
 
         size_t loop_count = loop;
 
@@ -73,7 +74,7 @@ namespace awl::testing
         }
         else
         {
-            throw TestException(format() << _T("Not a valid 'output' parameter value: '") << output << _T("'."));
+            throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
         }
 
         for (auto i : awl::make_count(loop_count))
@@ -117,7 +118,7 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
 
-            ConsoleLogger logger(*p_out);
+            auto logger = std::make_shared<ConsoleLogger>(*p_out);
             
             const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 

@@ -12,6 +12,8 @@
 #include "Awl/IntRange.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Time.h"
+#include "Awl/CppStd/ThreadIdFormatter.h"
+#include "Awl/StopWatchFormatter.h"
 
 AWL_TEST(Cancellation_NegativeTimeDiff)
 {
@@ -49,10 +51,10 @@ AWL_TEST(Cancellation_InterruptibleSleep)
     {
         std::lock_guard lock(m);
 
-        context.logger.debug(text);
+        context.logger->debug(text);
     };
 
-    out(awl::format() << _T("Main thread ") << std::this_thread::get_id());
+    out(std::format(_T("Main thread {}"), std::this_thread::get_id()));
 
     std::exception_ptr ex_ptr = nullptr;
 
@@ -72,7 +74,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
             });
         }
 
-        out(awl::format() << _T("Client ") << std::this_thread::get_id() << _T(" started "));
+        out(std::format(_T("Client {} started "), std::this_thread::get_id()));
 
         //Is not called because client thread is already finished.
         std::stop_callback stop_wait
@@ -80,7 +82,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
             token,
             [&out]()
             {
-                out(awl::format() << _T("Client stop callback on thread ") << std::this_thread::get_id());
+                out(std::format(_T("Client stop callback on thread {}"), std::this_thread::get_id()));
             }
         };
 
@@ -88,7 +90,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
 
         awl::sleep_for(Duration(client_sleep_time), token);
 
-        out(awl::format() << _T("Client has woken up within ") << sw << _T(" and finished."));
+        out(std::format(_T("Client has woken up within {} and finished."), sw));
     });
 
     const std::stop_token token = client.get_stop_token();
@@ -107,7 +109,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
         {
             try
             {
-                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" started "));
+                out(std::format(_T("Worker {} started "), std::this_thread::get_id()));
 
                 //Is not called because client thread is already finished.
                 std::stop_callback stop_wait
@@ -115,15 +117,15 @@ AWL_TEST(Cancellation_InterruptibleSleep)
                     token,
                     [&out]()
                     {
-                        out(awl::format() << _T("Worker stop callback on thread ") << std::this_thread::get_id());
+                        out(std::format(_T("Worker stop callback on thread {}"), std::this_thread::get_id()));
                     }
                 };
 
                 awl::sleep_for(Duration(worker_sleep_time), token);
 
-                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" has woken up within ") << sw);
+                out(std::format(_T("Worker {} has woken up within {}"), std::this_thread::get_id(), sw));
 
-                const auto elapsed = sw.GetElapsedCast<Duration>();
+                const auto elapsed = sw.elapsedCast<Duration>();
 
                 //This assert failed until I moved StopWatch to the main thread.
                 AWL_ASSERT(elapsed >= Duration(client_sleep_time));
@@ -131,11 +133,11 @@ AWL_TEST(Cancellation_InterruptibleSleep)
                 //Ctrl+Z on Linux causes this assertion to fail.
                 AWL_ASSERT(elapsed < Duration(worker_sleep_time));
 
-                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" succeeded."));
+                out(std::format(_T("Worker {} succeeded."), std::this_thread::get_id()));
             }
             catch (const std::exception&)
             {
-                out(awl::format() << _T("Worker ") << std::this_thread::get_id() << _T(" failed."));
+                out(std::format(_T("Worker {} failed."), std::this_thread::get_id()));
 
                 if (ex_ptr == nullptr)
                 {
@@ -177,7 +179,7 @@ AWL_TEST(Cancellation_SimpleSleep)
 
     awl::sleep_for(Duration(client_sleep_time), context.stopToken);
 
-    const auto elapsed = w.GetElapsedCast<Duration>();
+    const auto elapsed = w.elapsedCast<Duration>();
 
     AWL_ASSERT(elapsed.count() >= client_sleep_time);
 }
@@ -195,11 +197,11 @@ AWL_TEST(Cancellation_JThread)
 
             if (stoken.stop_requested())
             {
-                context.logger.debug("Sleepy worker is requested to stop\n");
+                context.logger->debug("Sleepy worker is requested to stop\n");
                 return;
             }
 
-            context.logger.debug("Sleepy worker goes back to sleep\n");
+            context.logger->debug("Sleepy worker goes back to sleep\n");
         }
     });
 
@@ -214,15 +216,15 @@ AWL_TEST(Cancellation_JThread)
 
         if (stoken.stop_requested())
         {
-            context.logger.debug("Waiting worker is requested to stop\n");
+            context.logger->debug("Waiting worker is requested to stop\n");
         }
     });
 
     // std::jthread::request_stop() can be called explicitly:
-    context.logger.debug("Requesting stop of sleepy worker\n");
+    context.logger->debug("Requesting stop of sleepy worker\n");
     sleepy_worker.request_stop();
     sleepy_worker.join();
-    context.logger.debug("Sleepy worker joined\n");
+    context.logger->debug("Sleepy worker joined\n");
 
     // Or automatically using RAII:
     // waiting_worker's destructor will call request_stop()
@@ -269,7 +271,7 @@ AWL_TEST(Cancellation_WatchDogThread2)
         watch_dog_thread.join();
     }
 
-    context.logger.debug(awl::format() << "Elapsed: " << sw);
+    context.logger->debug(_T("Elapsed: {}"), sw);
 
-    AWL_ASSERT(!sw.HasElapsed(std::chrono::seconds(sleep_time)));
+    AWL_ASSERT(!sw.hasElapsed(std::chrono::seconds(sleep_time)));
 }

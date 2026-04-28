@@ -38,32 +38,32 @@ namespace awl::io
             m_hash(hash)
         {}
 
-        void Read(IStream& s) override
+        void read(IStream& s) override
         {
             HashIStream in{ s, m_blockSize, m_hash };
 
-            if (ReadHeader(in))
+            if (readHeader(in))
             {
-                m_val.Read(in);
+                m_val.read(in);
             }
         }
 
-        void Write(OStream& s) const override
+        void write(OStream& s) const override
         {
             HashOStream out{ s, m_blockSize, m_hash };
 
-            WriteHeader(out);
+            writeHeader(out);
 
-            m_val.Write(out);
+            m_val.write(out);
         }
 
     protected:
 
-        virtual bool ReadHeader(awl::io::SequentialInputStream&) { return true; }
+        virtual bool readHeader(awl::io::SequentialInputStream&) { return true; }
 
-        virtual void WriteHeader(awl::io::SequentialOutputStream&) const {}
+        virtual void writeHeader(awl::io::SequentialOutputStream&) const {}
 
-        std::shared_ptr<Snapshot> MakeShanshotHelper(std::vector<uint8_t> v) const
+        std::shared_ptr<Snapshot> makeShanshotHelper(std::vector<uint8_t> v) const
         {
             return std::make_shared<HashingSnapshot<Hash>>(std::move(v), m_blockSize, m_hash);
         }
