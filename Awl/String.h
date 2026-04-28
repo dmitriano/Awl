@@ -405,6 +405,22 @@ namespace awl
         return out << decodeString(val);
     }
 
+    inline std::ostream& operator << (std::ostream& out, wchar_t val)
+    {
+        const wchar_t text[] = { val, L'\0' };
+        return out << encodeString(text);
+    }
+
+    inline std::ostream& operator << (std::ostream& out, const std::wstring& val)
+    {
+        return out << encodeString(val.c_str());
+    }
+
+    inline std::ostream& operator << (std::ostream& out, const wchar_t* val)
+    {
+        return out << encodeString(val);
+    }
+
     template<typename Char, class T>
     std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& out, const std::optional<T>& val)
     {
