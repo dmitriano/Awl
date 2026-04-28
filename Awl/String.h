@@ -329,6 +329,22 @@ namespace awl
         }
     };
 
+    template <class ToCh, class FromCh>
+    struct StringMoveConvertor
+    {
+        static std::basic_string<ToCh> convertFrom(std::basic_string<FromCh>&& src)
+        {
+            if constexpr (std::is_same_v<ToCh, FromCh>)
+            {
+                return std::move(src);
+            }
+            else
+            {
+                return StringConvertor<ToCh>::convertFrom(src.c_str());
+            }
+        }
+    };
+
     inline String fromACString(const char* p_src)
     {
         return StringConvertor<Char>::convertFrom(p_src);
@@ -341,14 +357,7 @@ namespace awl
 
     inline String fromAString(std::string&& src)
     {
-        if constexpr (std::is_same_v<Char, char>)
-        {
-            return std::move(src);
-        }
-        else
-        {
-            return StringConvertor<Char>::convertFrom(src.c_str());
-        }
+        return StringMoveConvertor<Char, char>::convertFrom(std::move(src));
     }
 
     inline std::string toAString(const String& src)
@@ -358,14 +367,7 @@ namespace awl
 
     inline std::string toAString(String&& src)
     {
-        if constexpr (std::is_same_v<Char, char>)
-        {
-            return std::move(src);
-        }
-        else
-        {
-            return StringConvertor<char>::convertFrom(src.c_str());
-        }
+        return StringMoveConvertor<char, Char>::convertFrom(std::move(src));
     }
 
     inline std::wstring toWString(const String& src)
@@ -375,14 +377,7 @@ namespace awl
 
     inline std::wstring toWString(String&& src)
     {
-        if constexpr (std::is_same_v<Char, wchar_t>)
-        {
-            return std::move(src);
-        }
-        else
-        {
-            return StringConvertor<wchar_t>::convertFrom(src.c_str());
-        }
+        return StringMoveConvertor<wchar_t, Char>::convertFrom(std::move(src));
     }
 
     inline String fromWCString(const wchar_t* p_src)
@@ -397,14 +392,7 @@ namespace awl
 
     inline String fromWString(std::wstring&& src)
     {
-        if constexpr (std::is_same_v<Char, wchar_t>)
-        {
-            return std::move(src);
-        }
-        else
-        {
-            return StringConvertor<Char>::convertFrom(src.c_str());
-        }
+        return StringMoveConvertor<Char, wchar_t>::convertFrom(std::move(src));
     }
 
     inline std::wostream& operator << (std::wostream& out, const std::string& val)
