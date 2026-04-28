@@ -189,10 +189,10 @@ namespace awl::testing::vts_common
 
         if (include_meta)
         {
-            context.logger.debug(_T("Meta size: {}, "), meta_size);
+            context.logger->debug(_T("Meta size: {}, "), meta_size);
         }
 
-        context.logger.debug(_T("block size: {}, allocating {} bytes of memory."), block_size, mem_size);
+        context.logger->debug(_T("block size: {}, allocating {} bytes of memory."), block_size, mem_size);
 
         return mem_size;
     }

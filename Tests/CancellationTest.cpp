@@ -51,7 +51,7 @@ AWL_TEST(Cancellation_InterruptibleSleep)
     {
         std::lock_guard lock(m);
 
-        context.logger.debug(text);
+        context.logger->debug(text);
     };
 
     out(std::format(_T("Main thread {}"), std::this_thread::get_id()));
@@ -197,11 +197,11 @@ AWL_TEST(Cancellation_JThread)
 
             if (stoken.stop_requested())
             {
-                context.logger.debug("Sleepy worker is requested to stop\n");
+                context.logger->debug("Sleepy worker is requested to stop\n");
                 return;
             }
 
-            context.logger.debug("Sleepy worker goes back to sleep\n");
+            context.logger->debug("Sleepy worker goes back to sleep\n");
         }
     });
 
@@ -216,15 +216,15 @@ AWL_TEST(Cancellation_JThread)
 
         if (stoken.stop_requested())
         {
-            context.logger.debug("Waiting worker is requested to stop\n");
+            context.logger->debug("Waiting worker is requested to stop\n");
         }
     });
 
     // std::jthread::request_stop() can be called explicitly:
-    context.logger.debug("Requesting stop of sleepy worker\n");
+    context.logger->debug("Requesting stop of sleepy worker\n");
     sleepy_worker.request_stop();
     sleepy_worker.join();
-    context.logger.debug("Sleepy worker joined\n");
+    context.logger->debug("Sleepy worker joined\n");
 
     // Or automatically using RAII:
     // waiting_worker's destructor will call request_stop()
@@ -271,7 +271,7 @@ AWL_TEST(Cancellation_WatchDogThread2)
         watch_dog_thread.join();
     }
 
-    context.logger.debug(_T("Elapsed: {}"), sw);
+    context.logger->debug(_T("Elapsed: {}"), sw);
 
     AWL_ASSERT(!sw.hasElapsed(std::chrono::seconds(sleep_time)));
 }

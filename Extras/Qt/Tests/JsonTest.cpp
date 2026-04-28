@@ -52,7 +52,7 @@ namespace
 
                 QJsonValue jmsg = jobj["msg"];
 
-                context.logger.debug(_T("Code: {}, msg: {}"), jcode.toInt(), awl::fromQString(jmsg.toString()));
+                context.logger->debug(_T("Code: {}, msg: {}"), jcode.toInt(), awl::fromQString(jmsg.toString()));
                 
                 return true;
             }
@@ -165,7 +165,7 @@ AWL_TEST(JsonReflectableExceptionTypeMismatch)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.message());
+        context.logger->debug(e.message());
     }
 }
 
@@ -194,7 +194,7 @@ AWL_TEST(JsonReflectableExceptionNull)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.message());
+        context.logger->debug(e.message());
     }
 }
 
@@ -224,7 +224,7 @@ AWL_TEST(JsonReflectableExceptionVector)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.message());
+        context.logger->debug(e.message());
     }
 }
 
@@ -259,7 +259,7 @@ AWL_TEST(JsonReflectableExceptionSet)
     }
     catch (const awl::JsonException& e)
     {
-        context.logger.debug(e.message());
+        context.logger->debug(e.message());
     }
 }
 
@@ -297,7 +297,7 @@ namespace
             }
             catch (const awl::JsonException& e)
             {
-                context.logger.debug(e.message());
+                context.logger->debug(e.message());
             }
         }
     }
@@ -330,7 +330,7 @@ AWL_TEST(JsonDuration)
                 const QString actual_text = jv.toString();
                 const QString expected_text = to_json_values[i];
 
-                context.logger.debug(std::format(_T("{} to_json case {}: actual={}, expected={}"),
+                context.logger->debug(std::format(_T("{} to_json case {}: actual={}, expected={}"),
                     label_text,
                     i,
                     actual_text,
@@ -350,7 +350,7 @@ AWL_TEST(JsonDuration)
                 const QString actual_text = awl::toJson(actual).toString();
                 const QString expected_text = awl::toJson(values[i]).toString();
 
-                context.logger.debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
+                context.logger->debug(std::format(_T("{} from_json case {}: input={}, actual={}, expected={}"),
                     label_text,
                     i,
                     from_json_values[i],
@@ -522,7 +522,7 @@ AWL_TEST(JsonDurationNew)
         const QString actual_text = awl::toJson(actual).toString();
         const QString expected_text = awl::toJson(expected).toString();
 
-        context.logger.debug(std::format(_T("{} new format: input={}, actual={}, expected={}"),
+        context.logger->debug(std::format(_T("{} new format: input={}, actual={}, expected={}"),
             label_text,
             input,
             actual_text,
@@ -558,7 +558,7 @@ AWL_TEST(JsonDurationInvalid)
     {
         const awl::String label_text = awl::fromACString(label);
 
-        context.logger.debug(std::format(_T("{} invalid input: {}"),
+        context.logger->debug(std::format(_T("{} invalid input: {}"),
             label_text,
             input));
 
@@ -617,7 +617,7 @@ AWL_TEST(JsonDecimal)
         }
         catch (const awl::JsonException& e)
         {
-            context.logger.debug(e.message());
+            context.logger->debug(e.message());
         }
     }
 }

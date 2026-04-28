@@ -19,6 +19,9 @@
 
 #include "Awl/Testing/CompositeProvider.h"
 
+#include <cassert>
+#include <memory>
+
 namespace awl::testing
 {
     template <class ... Ps>
@@ -26,12 +29,14 @@ namespace awl::testing
     {
         using AttributeProvider = CompositeProvider<Ps...>;
 
-        CompositeTestContext(Logger& logger, const std::stop_token stop_token,
+        CompositeTestContext(std::shared_ptr<Logger> logger, const std::stop_token stop_token,
             AttributeProvider& attribute_provider, const TypeProvider& type_provider) :
-            logger(logger), stopToken(stop_token), attributeProvider(attribute_provider), typeProvider(type_provider)
-        {}
+            logger(std::move(logger)), stopToken(stop_token), attributeProvider(attribute_provider), typeProvider(type_provider)
+        {
+            assert(this->logger != nullptr);
+        }
 
-        Logger& logger;
+        std::shared_ptr<Logger> logger;
 
         const std::stop_token stopToken;
 
@@ -46,9 +51,9 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(Logger& logger, const std::stop_token stop_token,
+        TestContext(std::shared_ptr<Logger> logger, const std::stop_token stop_token,
             AttributeProvider& attribute_provider, const TypeProvider& type_provider, QObject* worker = nullptr) :
-            Base(logger, stop_token, attribute_provider, type_provider),
+            Base(std::move(logger), stop_token, attribute_provider, type_provider),
             worker(worker)
         {}
 

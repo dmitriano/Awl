@@ -98,5 +98,5 @@ AWL_TEST(NativeStreamFileName)
 
     awl::io::UniqueStream s(awl::io::createUniqueFile(file_name));
 
-    context.logger.debug(_T("{}"), s.fileName());
+    context.logger->debug(_T("{}"), s.fileName());
 }

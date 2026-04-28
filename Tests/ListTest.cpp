@@ -125,7 +125,7 @@ namespace
 
             ~Printer()
             {
-                context.logger.debug(message.str());
+                context.logger->debug(message.str());
             }
 
             void PrintElement(const Element * e) const
@@ -308,7 +308,7 @@ namespace
                 AWL_FAILM(_T("Element 1 not found."));
             }
 
-            context.logger.debug(_T("The found element is: {}"), i->Value);
+            context.logger->debug(_T("The found element is: {}"), i->Value);
 
             i = std::find_if(list.begin(), list.end(), [](const Element * e) -> bool { return e->Value == 25; });
 
@@ -724,19 +724,19 @@ namespace
             context(ctx),
             m_len(len)
         {
-            context.get().logger.debug(_T("Vertex constructor {}"), m_len);
+            context.get().logger->debug(_T("Vertex constructor {}"), m_len);
         }
 
         ~Vertex()
         {
-            context.get().logger.debug(_T("Vertex destructor {}, included: {}"), m_len, IsIncluded());
+            context.get().logger->debug(_T("Vertex destructor {}, included: {}"), m_len, IsIncluded());
         }
 
         Vertex(const Vertex& other) :
             context(other.context),
             m_len(other.m_len)
         {
-            context.get().logger.debug(_T("Vertex copy constructor {}"), m_len);
+            context.get().logger->debug(_T("Vertex copy constructor {}"), m_len);
         }
 
         Vertex(Vertex&& other) = default;

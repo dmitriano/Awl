@@ -24,7 +24,7 @@ AWL_TEST(StringFormatQt)
     AWL_ASSERT(a_str == sample);
     AWL_ASSERT(a_str == sample);
 
-    context.logger.debug(_T("{}, {}"), a_str, w_str);
+    context.logger->debug(_T("{}, {}"), a_str, w_str);
 }
 
 #endif //AWL_QT

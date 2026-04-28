@@ -30,7 +30,7 @@ namespace awl::testing::helpers
     {
         if (d == std::chrono::steady_clock::duration::zero())
         {
-            context.logger.debug(_T("ZERO TIME"));
+            context.logger->debug(_T("ZERO TIME"));
             return std::numeric_limits<double>::infinity();
         }
 
@@ -41,7 +41,7 @@ namespace awl::testing::helpers
 
         const double value = std::forward<Func>(func)(message, time);
 
-        context.logger.debug(message.str());
+        context.logger->debug(message.str());
 
         return value;
     }
@@ -87,7 +87,7 @@ namespace awl::testing::helpers
     {
         if (d == std::chrono::steady_clock::duration::zero())
         {
-            context.logger.debug(_T("ZERO TIME"));
+            context.logger->debug(_T("ZERO TIME"));
             return;
         }
 
@@ -116,6 +116,6 @@ namespace awl::testing::helpers
 
         message << std::fixed << std::setprecision(2) << size_speed << _T(" MB/sec");
 
-        context.logger.debug(message.str());
+        context.logger->debug(message.str());
     }
 }

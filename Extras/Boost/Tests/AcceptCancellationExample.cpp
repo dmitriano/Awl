@@ -20,7 +20,7 @@ namespace
     {
         auto ex = co_await asio::this_coro::executor;
 
-        context.logger.debug(_T("Waiting for a client on {}..."), acceptor.local_endpoint());
+        context.logger->debug(_T("Waiting for a client on {}..."), acceptor.local_endpoint());
 
         // Bind the external cancellation slot specifically to async_accept.
         // In Boost 1.89 this is the correct way to hook your own signal.
@@ -28,7 +28,7 @@ namespace
             co_await acceptor.async_accept(
                 asio::bind_cancellation_slot(cancel_signal.slot(), use_awaitable));
 
-        context.logger.debug(_T("Client connected from {}"), socket.remote_endpoint());
+        context.logger->debug(_T("Client connected from {}"), socket.remote_endpoint());
 
         co_return socket;
     }
@@ -43,7 +43,7 @@ namespace
         t.expires_after(3s);
         co_await t.async_wait(use_awaitable);
 
-        context.logger.debug("No client yet — sending cancellation signal...");
+        context.logger->debug("No client yet — sending cancellation signal...");
         cancel_signal.emit(asio::cancellation_type::all);
     }
 
@@ -66,7 +66,7 @@ namespace
         {
             // async_accept completes with operation_aborted when cancelled
             if (e.code() == asio::error::operation_aborted)
-                context.logger.debug("Accept operation was cancelled.");
+                context.logger->debug("Accept operation was cancelled.");
             else
                 throw;
         }
@@ -85,6 +85,6 @@ AWL_EXAMPLE(AcceptCancellation)
     }
     catch (const std::exception& e)
     {
-        context.logger.error(_T("Exception: {}"), awl::fromACString(e.what()));
+        context.logger->error(_T("Exception: {}"), awl::fromACString(e.what()));
     }
 }

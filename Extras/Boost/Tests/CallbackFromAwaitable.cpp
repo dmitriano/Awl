@@ -1,4 +1,4 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
@@ -85,11 +85,11 @@ AWL_TEST(CallbackFromAwaitable)
         {
             if (ec)
             {
-                context.logger.debug(_T("Error: {}"), awl::fromAString(ec.message()));
+                context.logger->debug(_T("Error: {}"), awl::fromAString(ec.message()));
             }
             else
             {
-                context.logger.debug(_T("Value: {}"), value);
+                context.logger->debug(_T("Value: {}"), value);
             }
         };
 

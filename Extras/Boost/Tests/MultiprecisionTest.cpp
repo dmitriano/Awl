@@ -48,14 +48,14 @@ AWL_EXAMPLE(MultiprecisionSize)
 
     size_t size = sizeof(max);
 
-    context.logger.debug(_T("max: {}\nsize: {}"), max, size);
+    context.logger->debug(_T("max: {}\nsize: {}"), max, size);
 }
 
 AWL_EXAMPLE(MultiprecisionDecimalConstants)
 {
     using Constants = awl::helpers::DecimalConstants<bmp::uint128_t, 4, 16>;
 
-    context.logger.debug(_T("man_len: {}"), Constants::man_len);
+    context.logger->debug(_T("man_len: {}"), Constants::man_len);
 }
 
 AWL_EXAMPLE(MultiprecisionDecFloat)
@@ -78,7 +78,7 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
         const Decimal a(number);
         const double b = std::stod(number);
 
-        context.logger.debug(_T("sizeof(Decimal): {}\nboost:\t{}\ndouble:\t{:f}\ncast:\t{:f}"),
+        context.logger->debug(_T("sizeof(Decimal): {}\nboost:\t{}\ndouble:\t{:f}\ncast:\t{:f}"),
             sizeof(Decimal), fixed_string(a), b, static_cast<double>(a));
 
         Decimal a_sum = 0;
@@ -94,7 +94,7 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
         const Decimal a_product = a * iter_count;
         const double b_product = b * iter_count;
 
-        context.logger.debug(_T("decimal sum: {}\ndecimal product: {}\ndouble sum: {}\ndouble product: {}"),
+        context.logger->debug(_T("decimal sum: {}\ndecimal product: {}\ndouble sum: {}\ndouble product: {}"),
             a_sum, a_product, b_sum, b_product);
 
         AWL_ASSERT(a_sum == a_product);
@@ -103,14 +103,14 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
         {
             Decimal a_quotient = a;
 
-            context.logger.debug(_T("decimal quotient: "));
+            context.logger->debug(_T("decimal quotient: "));
 
             //while (a_quotient != 0)
             for (size_t i = 0; i < div_count; ++i)
             {
                 a_quotient /= 10;
 
-                context.logger.debug(_T("{}"), a_quotient);
+                context.logger->debug(_T("{}"), a_quotient);
             }
         }
 
@@ -129,13 +129,13 @@ AWL_EXAMPLE(MultiprecisionDecFloat)
 
                 Decimal sum = a_square + a_sqrt;
 
-                context.logger.debug(_T("square: {}\nsqrt: {}\nsquare + sqrt: {}"), a_square, a_sqrt, sum);
+                context.logger->debug(_T("square: {}\nsqrt: {}\nsquare + sqrt: {}"), a_square, a_sqrt, sum);
             }
         }
     }
     catch (const std::exception& e)
     {
-        context.logger.debug(_T("Exception: {}"), awl::fromACString(e.what()));
+        context.logger->debug(_T("Exception: {}"), awl::fromACString(e.what()));
 
         AWL_FAIL;
     }
@@ -178,13 +178,13 @@ AWL_EXAMPLE(MultiprecisionDecimalData)
     
     awl::MultiprecisionDecimalData<UInt, 4> d(true, 2, 105);
 
-    context.logger.debug(_T("{}, {}"), d.man(), d.exp());
+    context.logger->debug(_T("{}, {}"), d.man(), d.exp());
 
     d.set_man(UInt(105) * UInt(10));
     
     d.set_exp(3);
 
-    context.logger.debug(_T("{}, {}"), d.man(), d.exp());
+    context.logger->debug(_T("{}, {}"), d.man(), d.exp());
 }
 
 namespace
@@ -214,7 +214,7 @@ namespace
 
         message << '\n';
 
-        context.logger.debug(message.str());
+        context.logger->debug(message.str());
     }
 }
 
@@ -252,7 +252,7 @@ namespace
             i.backend().negate();
         }
 
-        context.logger.debug(_T("number: {}\nsign:{}"), i, i.sign());
+        context.logger->debug(_T("number: {}\nsign:{}"), i, i.sign());
 
         // export into 8-bit unsigned values, most significant bit first:
         std::vector<uint8_t> v;

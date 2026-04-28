@@ -40,7 +40,7 @@ namespace awl::testing
 
         bool runTests();
             
-        ConsoleLogger m_logger;
+        std::shared_ptr<ConsoleLogger> m_logger;
 
         Provider& m_ap;
         TypeProvider m_typeProvider;

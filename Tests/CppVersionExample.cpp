@@ -21,5 +21,5 @@ AWL_EXAMPLE(CppVersion)
     else if constexpr (__cplusplus >= 199711L) message << "C++98\n";
     else message << "pre-standard C++\n";
 
-    context.logger.debug(message.str());
+    context.logger->debug(message.str());
 }

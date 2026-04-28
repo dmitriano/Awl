@@ -36,7 +36,7 @@ namespace
     {
         TestLock lock(testMutex);
 
-        context.logger.debug(_T("Drawing the scene with the following settings: Rotation={} PerspectiveMode={}"), static_cast<int>(Rotation), PerspectiveMode);
+        context.logger->debug(_T("Drawing the scene with the following settings: Rotation={} PerspectiveMode={}"), static_cast<int>(Rotation), PerspectiveMode);
     }
 
     awl::UpdateQueue<GameScene &> updateQueue;
@@ -46,7 +46,7 @@ namespace
         {
             TestLock lock(testMutex);
 
-            context.logger.debug(_T("The user has changed Rotation\n"));
+            context.logger->debug(_T("The user has changed Rotation\n"));
         }
 
         updateQueue.push([](GameScene & scene)
@@ -57,7 +57,7 @@ namespace
         {
             TestLock lock(testMutex);
 
-            context.logger.debug(_T("The user has changed PerspectiveMode\n"));
+            context.logger->debug(_T("The user has changed PerspectiveMode\n"));
         }
 
         updateQueue.push([](GameScene & scene)

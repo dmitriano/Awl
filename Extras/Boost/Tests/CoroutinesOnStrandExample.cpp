@@ -164,7 +164,7 @@ namespace
 
         awl::Logger& logger() const
         {
-            return context.get().logger;
+            return *context.get().logger;
         }
 
         std::reference_wrapper<const awl::testing::TestContext> context;
@@ -183,11 +183,11 @@ namespace
         {
             if (strand)
             {
-                context.logger.debug("Using Strand.");
+                context.logger->debug("Using Strand.");
             }
             else
             {
-                context.logger.debug("Using Thread Pool without a Strand.");
+                context.logger->debug("Using Thread Pool without a Strand.");
             }
         }
 
@@ -254,7 +254,7 @@ AWL_EXAMPLE(CoroutinesOnStrand)
     // Spawn all the coroutines on the strand.
     AWL_FLAG(spawn_on_strand);
 
-    context.logger.debug(_T("Thread count: {}"), thread_count);
+    context.logger->debug(_T("Thread count: {}"), thread_count);
 
     asio::thread_pool pool(thread_count);
 

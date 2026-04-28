@@ -226,7 +226,7 @@ namespace
 
         out << _T("]");
 
-        ctx.logger.debug(out.str());
+        ctx.logger->debug(out.str());
     }
 }
 
@@ -306,7 +306,7 @@ AWL_TEST(VectorSetRandom)
                 message << _T(" not found.");
             }
 
-            context.logger.debug(message.str());
+            context.logger->debug(message.str());
 
             AWL_ASSERT(my_result == std_result);
 

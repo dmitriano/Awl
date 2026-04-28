@@ -64,7 +64,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         if (!corrupt)
         {
-            context.logger.debug(_T("Write speed: "));
+            context.logger->debug(_T("Write speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
         }
@@ -95,11 +95,11 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
 
         if (!corrupt)
         {
-            context.logger.debug(_T(" Read speed: "));
+            context.logger->debug(_T(" Read speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
 
-            context.logger.debug(_T(""));
+            context.logger->debug(_T(""));
         }
 
         AWL_ASSERT(in.end());
@@ -146,7 +146,7 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         if (!corrupt)
         {
-            context.logger.debug(_T("Write speed: "));
+            context.logger->debug(_T("Write speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
         }
@@ -188,11 +188,11 @@ static void TestOnFile(const TestContext & context, Hash hash, const T & sample,
 
         if (!corrupt)
         {
-            context.logger.debug(_T(" Read speed: "));
+            context.logger->debug(_T(" Read speed: "));
 
             helpers::ReportSpeed(context, w, total_size);
 
-            context.logger.debug(_T(""));
+            context.logger->debug(_T(""));
         }
 
         AWL_ASSERT(in.end());

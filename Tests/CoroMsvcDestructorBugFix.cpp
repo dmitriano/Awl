@@ -178,29 +178,29 @@ namespace
     {
         using namespace std::chrono_literals;
 
-        context.logger.debug(_T("TestTimerAwait started."));
+        context.logger->debug(_T("TestTimerAwait started."));
 
         co_await 1s;
 
-        context.logger.debug(_T("TestTimerAwait finished."));
+        context.logger->debug(_T("TestTimerAwait finished."));
     }
 
     UpdateTask TestNestedTask(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
-        context.logger.debug(_T("TestNestedTask started."));
+        context.logger->debug(_T("TestNestedTask started."));
 
         auto task = TestTimerAwait(context);
 
         co_await 2s;
 
-        context.logger.debug(_T("Time interval has elapsed."));
+        context.logger->debug(_T("Time interval has elapsed."));
 
         //We can't wait for a destroyed task.
         //co_await task;
 
-        context.logger.debug(_T("TestNestedTask finished."));
+        context.logger->debug(_T("TestNestedTask finished."));
     }
 }
 

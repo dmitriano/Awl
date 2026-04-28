@@ -105,7 +105,7 @@ namespace
             v.reserve(vector_size);
             AWL_ASSERT_EQUAL(vector_size, v.capacity());
 
-            context.logger.debug(_T("std::vector<{}\t"), type_name);
+            context.logger->debug(_T("std::vector<{}\t"), type_name);
 
             double ratio;
 
@@ -124,7 +124,7 @@ namespace
                     v.resize(0);
                 }
 
-                context.logger.debug(_T("copy: "));
+                context.logger->debug(_T("copy: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
             }
@@ -144,14 +144,14 @@ namespace
                     v.resize(0);
                 }
 
-                context.logger.debug(_T("\tinsert: "));
+                context.logger->debug(_T("\tinsert: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(_T("\t ({})"), ratio);
+            context.logger->debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
+            context.logger->debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -163,7 +163,7 @@ namespace
             AWL_ATTRIBUTE(size_t, vector_size, 1000000);
             AWL_ATTRIBUTE(size_t, iteration_count, 1);
 
-            context.logger.debug(_T("std::vector<{}\t"), type_name);
+            context.logger->debug(_T("std::vector<{}\t"), type_name);
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -177,7 +177,7 @@ namespace
             }
             catch (const std::bad_alloc&)
             {
-                context.logger.debug("Too long vector. Can't allocate memory.");
+                context.logger->debug("Too long vector. Can't allocate memory.");
 
                 return;
             }
@@ -223,7 +223,7 @@ namespace
 
                 std::for_each(futures.begin(), futures.end(), [](std::future<void>& f) { f.get(); });
 
-                context.logger.debug(_T("async: "));
+                context.logger->debug(_T("async: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
             }
@@ -233,14 +233,14 @@ namespace
 
                 copy(0, vector_size);
 
-                context.logger.debug(_T("\tsync: "));
+                context.logger->debug(_T("\tsync: "));
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(_T("\t ({})"), ratio);
+            context.logger->debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
+            context.logger->debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -254,7 +254,7 @@ namespace
             AWL_ATTRIBUTE(size_t, thread_count, std::thread::hardware_concurrency());
             AWL_FLAG(show_result);
 
-            context.logger.debug(_T("std::vector<{}\t"), type_name);
+            context.logger->debug(_T("std::vector<{}\t"), type_name);
 
             std::unique_ptr<T[]> p_buffer;
 
@@ -264,7 +264,7 @@ namespace
             }
             catch (const std::bad_alloc&)
             {
-                context.logger.debug("Too long vector. Can't allocate memory.");
+                context.logger->debug("Too long vector. Can't allocate memory.");
 
                 return;
             }
@@ -316,11 +316,11 @@ namespace
                 
                 const double result = std::accumulate(range.begin(), range.end(), 0.0);
 
-                context.logger.debug(_T("\tasync: "));
+                context.logger->debug(_T("\tasync: "));
 
                 if (show_result)
                 {
-                    context.logger.debug(_T("\tresult={}, "), result);
+                    context.logger->debug(_T("\tresult={}, "), result);
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T));
@@ -331,19 +331,19 @@ namespace
 
                 const double result = sum(0, vector_size);
 
-                context.logger.debug(_T("\tsync: "));
+                context.logger->debug(_T("\tsync: "));
 
                 if (show_result)
                 {
-                    context.logger.debug(_T("\tresult={}, "), result);
+                    context.logger->debug(_T("\tresult={}, "), result);
                 }
 
                 ratio = helpers::ReportSpeed(context, w, vector_size * iteration_count * sizeof(T)) / ratio;
             }
 
-            context.logger.debug(_T("\t ({})"), ratio);
+            context.logger->debug(_T("\t ({})"), ratio);
 
-            context.logger.debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
+            context.logger->debug(_T("\tsizeof({}): {}\t"), type_name, sizeof(T));
         }
     };
 
@@ -371,14 +371,14 @@ AWL_BENCHMARK(VectorCopy)
 
 AWL_BENCHMARK(VectorCopyAsync)
 {
-    context.logger.debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
+    context.logger->debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
 
     CopyVectors<CopyVectorAsync>(context);
 }
 
 AWL_BENCHMARK(VectorSum)
 {
-    context.logger.debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
+    context.logger->debug(_T("hardware concurrency: {}"), std::thread::hardware_concurrency());
 
     CopyVectors<SumVector>(context);
 }

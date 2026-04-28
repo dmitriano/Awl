@@ -48,18 +48,18 @@ namespace
 
         for (auto [n, j] : gen)
         {
-            context.logger.debug(_T("fib({})={}"), n, j);
+            context.logger->debug(_T("fib({})={}"), n, j);
         }
     }
 }
 
 AWL_EXAMPLE(CoroGeneratorFibonacci)
 {
-    context.logger.debug("Short Fibonacci sequence: \n");
+    context.logger->debug("Short Fibonacci sequence: \n");
     
     PrintFibonacci(context, 5);
 
-    context.logger.debug("Long Fibonacci sequence: \n");
+    context.logger->debug("Long Fibonacci sequence: \n");
 
     try
     {
@@ -67,10 +67,10 @@ AWL_EXAMPLE(CoroGeneratorFibonacci)
     }
     catch (const std::exception& ex)
     {
-        context.logger.debug(_T("Exception: {}\n"), awl::fromACString(ex.what()));
+        context.logger->debug(_T("Exception: {}\n"), awl::fromACString(ex.what()));
     }
     catch (...)
     {
-        context.logger.debug("Unknown exception.\n");
+        context.logger->debug("Unknown exception.\n");
     }
 }

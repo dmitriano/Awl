@@ -1,4 +1,4 @@
-﻿#include "Awl/StringFormat.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
@@ -68,37 +68,37 @@ AWL_EXAMPLE(AsyncConnect)
     switch (select % 4)
     {
     case 0:
-        context.logger.debug("Straight callback");
-        w.asyncConnect(eps, [&context](error_code ec) { context.logger.debug(_T("Callback: {}"), awl::fromAString(ec.message())); });
+        context.logger->debug("Straight callback");
+        w.asyncConnect(eps, [&context](error_code ec) { context.logger->debug(_T("Callback: {}"), awl::fromAString(ec.message())); });
         break;
     case 1:
-        context.logger.debug("Coro await");
+        context.logger->debug("Coro await");
         asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             co_await w.asyncConnect(eps);
-            context.logger.debug("Coro connected");
+            context.logger->debug("Coro connected");
         },
         asio::detached);
         break;
     case 2:
-        context.logger.debug("Coro await with promise");
+        context.logger->debug("Coro await with promise");
         asio::co_spawn(ioc, [&] -> asio::awaitable<void>
         {
             auto p = w.asyncConnect(eps, asio::experimental::use_promise);
-            context.logger.debug("Doing some other time consuming stuff as well");
+            context.logger->debug("Doing some other time consuming stuff as well");
 
             co_await p(asio::deferred);
-            context.logger.debug("Coro with promise connected");
+            context.logger->debug("Coro with promise connected");
         },
         asio::detached);
         break;
     case 3: {
-        context.logger.debug("Custom completion token with adaptors");
+        context.logger->debug("Custom completion token with adaptors");
         auto f = w.asyncConnect(eps, asio::as_tuple(asio::use_future));
 
         if (f.wait_for(20ms) == std::future_status::ready) {
             auto [ec] = f.get();
-            context.logger.debug(_T("Future resolved within 20ms: {}"), awl::fromAString(ec.message()));
+            context.logger->debug(_T("Future resolved within 20ms: {}"), awl::fromAString(ec.message()));
         }
         break;
     }

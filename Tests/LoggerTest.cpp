@@ -95,17 +95,17 @@ namespace std
 AWL_TEST(Logger)
 {
     // Check if it comiles with all the strings.
-    context.logger.debug("abc");
-    context.logger.debug(std::string("abc"));
-    context.logger.debug("abc");
+    context.logger->debug("abc");
+    context.logger->debug(std::string("abc"));
+    context.logger->debug("abc");
 
-    context.logger.trace(L"abc");
-    context.logger.trace(std::wstring(L"abc"));
-    context.logger.trace(L"abc");
+    context.logger->trace(L"abc");
+    context.logger->trace(std::wstring(L"abc"));
+    context.logger->trace(L"abc");
 
-    context.logger.info(awl::String(_T("abc")));
-    context.logger.info(_T("abc"));
-    context.logger.info(_T("abc"));
+    context.logger->info(awl::String(_T("abc")));
+    context.logger->info(_T("abc"));
+    context.logger->info(_T("abc"));
 
     CaptureLogger logger;
 

@@ -19,6 +19,7 @@
 #include <functional>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 namespace awl::testing
 {
@@ -117,7 +118,7 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
 
-            ConsoleLogger logger(*p_out);
+            auto logger = std::make_shared<ConsoleLogger>(*p_out);
             
             const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 

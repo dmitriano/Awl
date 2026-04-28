@@ -1,4 +1,4 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
 #include <boost/asio.hpp>
@@ -39,7 +39,7 @@ namespace
             for (int i = 1; i <= 5; ++i)
             {
                 std::string msg = "Message " + std::to_string(i);
-                context.logger.debug(_T("Producing: {}"), msg);
+                context.logger->debug(_T("Producing: {}"), msg);
 
                 // Send the message asynchronously to the channel
                 co_await ch.async_send({}, msg, use_awaitable);
@@ -60,16 +60,16 @@ namespace
                 {
                     // Receive a message asynchronously from the channel
                     std::string msg = co_await ch.async_receive(asio::use_awaitable);
-                    context.logger.debug(_T("Consumed: {}"), msg);
+                    context.logger->debug(_T("Consumed: {}"), msg);
                 }
             }
             catch (const boost::system::system_error& e)
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
-                    context.logger.debug("Channel closed, exiting consumer");
+                    context.logger->debug("Channel closed, exiting consumer");
                 else
-                    context.logger.debug(_T("Receive error: {}"), awl::fromAString(e.code().message()));
+                    context.logger->debug(_T("Receive error: {}"), awl::fromAString(e.code().message()));
             }
         }
     };

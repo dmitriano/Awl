@@ -95,7 +95,7 @@ AWL_TEST(AtomicStoragePlain)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = context.logger;
+    auto& logger = *context.logger;
 
     using Value = awl::io::PlainSerializable<v2::B, HashInputStream, HashOutputStream>;
 
@@ -159,7 +159,7 @@ AWL_TEST(AtomicStorageVts)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = context.logger;
+    auto& logger = *context.logger;
 
     {
         {
@@ -242,7 +242,7 @@ AWL_TEST(AtomicStorageMove)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = context.logger;
+    auto& logger = *context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
 
@@ -270,7 +270,7 @@ AWL_TEST(AtomicStorageSave)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = context.logger;
+    auto& logger = *context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
     AWL_ASSERT(storage.isEmpty());
@@ -301,7 +301,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        auto& logger = context.logger;
+        auto& logger = *context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWL_ASSERT(storage.isEmpty());
@@ -418,7 +418,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        auto& logger = context.logger;
+        auto& logger = *context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWL_ASSERT(storage.isEmpty());
@@ -488,7 +488,7 @@ AWL_TEST(Shapshot)
 
     AWL_ASSERT(actual_v == expected_v);
 
-    context.logger.debug(_T("Snapshot size: {} bytes"), actual_v.size());
+    context.logger->debug(_T("Snapshot size: {} bytes"), actual_v.size());
     // context.out << _T("Hash size: ") << actual_v.size() - snapshot.size() << _T(" bytes") << std::endl;
 }
 
@@ -638,7 +638,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = context.logger;
+    auto& logger = *context.logger;
 
     SomeState state{ 0u, {} };
 
@@ -684,7 +684,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
         stream_size = measure_out.length();
 
-        context.logger.debug(_T("Stream Size: {} bytes."), stream_size);
+        context.logger->debug(_T("Stream Size: {} bytes."), stream_size);
     }
 
     if (vector_stream)
@@ -724,7 +724,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
             helpers::ReportCount(context, w, write_count);
 
-            context.logger.debug(_T(""));
+            context.logger->debug(_T(""));
 
             storage.load(*p_val);
 
@@ -732,6 +732,6 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
         }
 
         // File Size should be equal to Stream Size printed above.
-        context.logger.debug(_T("File Size: {} bytes."), fs::file_size(master_name));
+        context.logger->debug(_T("File Size: {} bytes."), fs::file_size(master_name));
     }
 }

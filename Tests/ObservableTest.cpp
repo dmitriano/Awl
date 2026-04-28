@@ -43,7 +43,7 @@ namespace
 
     void ChangeHandler::ItChanged(int param, awl::String val)
     {
-        pContext->logger.debug(_T("It has changed {} {}"), param, val);
+        pContext->logger->debug(_T("It has changed {} {}"), param, val);
 
         if (param == 2)
         {
@@ -247,7 +247,7 @@ namespace
 
         void SomeHanderFunc(const awl::String & val)
         {
-            context.logger.debug(_T("The value is: {}"), val);
+            context.logger->debug(_T("The value is: {}"), val);
         }
 
     private:

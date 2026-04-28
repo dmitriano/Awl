@@ -15,5 +15,5 @@ AWL_TEST(QtMixReleaseDebug)
 
     const std::string val = qstr.toStdString();
 
-    context.logger.debug(val);
+    context.logger->debug(val);
 }

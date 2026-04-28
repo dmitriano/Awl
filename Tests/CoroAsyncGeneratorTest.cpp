@@ -68,7 +68,7 @@ namespace
             }
         }
 
-        context.logger.debug(line.str());
+        context.logger->debug(line.str());
     }
 
     awl::UpdateTask test(const awl::testing::TestContext& context)
@@ -85,7 +85,7 @@ namespace
         }
         catch (const std::exception& ex)
         {
-            context.logger.debug(_T("\nException: {}"), awl::fromACString(ex.what()));
+            context.logger->debug(_T("\nException: {}"), awl::fromACString(ex.what()));
         }
         catch (...)
         {
@@ -119,7 +119,7 @@ AWL_TEST(CoroControllerCancel)
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    context.logger.debug(_T(""));
+    context.logger->debug(_T(""));
 
     // This invalidates timeQueue.
     controller.cancel();
@@ -154,7 +154,7 @@ namespace
     {
         co_await 100ms;
 
-        context.logger.debug(_T("{} finished"), id);
+        context.logger->debug(_T("{} finished"), id);
     }
 }
 
@@ -175,11 +175,11 @@ namespace awl
         {
             RegisterTasks(context, controller);
 
-            context.logger.debug("wait_any() started");
+            context.logger->debug("wait_any() started");
 
             co_await controller.wait_any();
 
-            context.logger.debug("wait_any() finished");
+            context.logger->debug("wait_any() finished");
 
             AWL_ASSERT_EQUAL(actual_N, controller.task_count());
 
@@ -192,7 +192,7 @@ namespace awl
                 co_await controller.wait_all();
             }
 
-            context.logger.debug("wait_all() finished");
+            context.logger->debug("wait_all() finished");
 
             AWL_ASSERT_EQUAL(0u, controller.task_count());
         }
