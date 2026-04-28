@@ -12,6 +12,7 @@
 #include "Awl/Io/Snapshotable.h"
 #include <future>
 #include <cassert>
+#include <memory>
 
 namespace awl::io
 {
@@ -26,10 +27,13 @@ namespace awl::io
 
     public:
 
-        AtomicStorage(Logger& logger) : m_logger(logger) {}
+        explicit AtomicStorage(std::shared_ptr<Logger> logger) : m_logger(std::move(logger))
+        {
+            assert(m_logger != nullptr);
+        }
 
-        AtomicStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
-            AtomicStorage(logger)
+        AtomicStorage(std::shared_ptr<Logger> logger, const awl::String& file_name, const awl::String& backup_name) :
+            AtomicStorage(std::move(logger))
         {
             open(file_name, backup_name);
         }
@@ -163,7 +167,7 @@ namespace awl::io
             m_backup.flush();
         }
 
-        Logger& m_logger;
+        std::shared_ptr<Logger> m_logger;
 
         UniqueStream m_s;
         UniqueStream m_backup;

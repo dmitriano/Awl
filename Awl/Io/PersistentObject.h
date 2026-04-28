@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <mutex>
+#include <memory>
 
 namespace awl::io
 {
@@ -16,11 +17,11 @@ namespace awl::io
     {
     public:
 
-        PersistentObject(awl::Logger& logger, Header header, size_t block_size = defaultBlockSize,
+        PersistentObject(std::shared_ptr<awl::Logger> logger, Header header, size_t block_size = defaultBlockSize,
             Hash hash = {}, size_t format_name_limit = 64u)
         :
             m_serializable(std::move(header), m_val, block_size, std::move(hash), format_name_limit),
-            m_storage(logger)
+            m_storage(std::move(logger))
         {}
 
         bool open(const awl::String& file_name)

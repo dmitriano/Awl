@@ -5,6 +5,8 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Exception.h"
 
+#include <memory>
+
 using namespace awl;
 
 UpdateTask UpdatePromise::get_return_object()
@@ -14,11 +16,11 @@ UpdateTask UpdatePromise::get_return_object()
 
 void UpdatePromise::unhandled_exception() noexcept
 {
-    const awl::StaticLink<awl::Logger&>* p_link = awl::static_chain<awl::Logger&>().find("Application");
+    const awl::StaticLink<std::shared_ptr<awl::Logger>>* p_link = awl::static_chain<std::shared_ptr<awl::Logger>>().find("Application");
 
     if (p_link != nullptr)
     {
-        awl::Logger& logger = p_link->value();
+        const std::shared_ptr<awl::Logger>& logger = p_link->value();
 
         awl::ostringstream out;
 
@@ -37,7 +39,7 @@ void UpdatePromise::unhandled_exception() noexcept
             out << "of type derived from std::exception, Message: '" << e.what();
         }
 
-        logger.error(out.str());
+        logger->error(out.str());
     }
 
     std::terminate();

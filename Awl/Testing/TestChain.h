@@ -66,14 +66,14 @@ namespace awl::testing
 
     protected:
 
-        Logger& logger() const
+        const std::shared_ptr<Logger>& logger() const
         {
-            return *context.logger;
+            return context.logger;
         }
 
         void print(awl::LogString message) const
         {
-            logger().debug(message);
+            logger()->debug(message);
         }
 
         const awl::testing::TestContext& context;

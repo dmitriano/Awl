@@ -19,7 +19,7 @@ bool AtomicStorage::load(Value& val)
 
     if (backup_success)
     {
-        m_logger.warning(_T("The settings have been loaded from backup file '{}'."), m_backup.fileName());
+        m_logger->warning(_T("The settings have been loaded from backup file '{}'."), m_backup.fileName());
 
         writeToStream(m_s, val);
     }
@@ -82,25 +82,25 @@ bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, std::stri
         }
         else
         {
-            m_logger.log(level, "Some data at the end of the settings file remained unread.");
+            m_logger->log(level, "Some data at the end of the settings file remained unread.");
         }
     }
     catch (const awl::io::CorruptionException&)
     {
-        m_logger.log(level, std::format(_T("Corrupted settings file '{}'."), s.fileName()));
+        m_logger->log(level, std::format(_T("Corrupted settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::EndOfFileException&)
     {
-        m_logger.log(level, std::format(_T("Unexpected end of settings file '{}'."), s.fileName()));
+        m_logger->log(level, std::format(_T("Unexpected end of settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::TypeMismatchException& e)
     {
-        m_logger.log(level, std::format(_T("Type mismatch error {} in the settings file '{}' Did you include all the types including those that were removed ? ."),
+        m_logger->log(level, std::format(_T("Type mismatch error {} in the settings file '{}' Did you include all the types including those that were removed ? ."),
             e.message(), s.fileName()));
     }
     catch (const awl::io::IoException& e)
     {
-        m_logger.log(level, std::format(_T("General IO exception in '{}': {}"), s.fileName(), e.message()));
+        m_logger->log(level, std::format(_T("General IO exception in '{}': {}"), s.fileName(), e.message()));
     }
 
     return success;

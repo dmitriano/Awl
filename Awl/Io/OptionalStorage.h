@@ -17,13 +17,13 @@ namespace awl::io
 
     public:
 
-        OptionalStorage(Logger& logger) : 
-            m_logger(logger),
-            m_storage(logger)
+        explicit OptionalStorage(std::shared_ptr<Logger> logger) :
+            m_logger(std::move(logger)),
+            m_storage(m_logger)
         {}
 
-        OptionalStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
-            OptionalStorage(logger)
+        OptionalStorage(std::shared_ptr<Logger> logger, const awl::String& file_name, const awl::String& backup_name) :
+            OptionalStorage(std::move(logger))
         {
             open(file_name, backup_name);
         }
@@ -94,7 +94,7 @@ namespace awl::io
                 }
                 catch (const IoException& e)
                 {
-                    m_logger.warning(_T("Application settings were not saved correctly. Error message: {}"), e.message());
+                    m_logger->warning(_T("Application settings were not saved correctly. Error message: {}"), e.message());
                 }
             }
 
@@ -109,7 +109,7 @@ namespace awl::io
             }
         }
 
-        Logger& m_logger;
+        std::shared_ptr<Logger> m_logger;
         AtomicStorage m_storage;
     };
 }

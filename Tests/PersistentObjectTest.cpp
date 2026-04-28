@@ -62,8 +62,8 @@ namespace
     template <class Storage, class String>
     struct Container
     {
-        Container(awl::Logger& logger) :
-            persistentObject(logger, awl::io::Header{ "Test Settings", 1u })
+        Container(std::shared_ptr<awl::Logger> logger) :
+            persistentObject(std::move(logger), awl::io::Header{ "Test Settings", 1u })
         {}
 
         awl::io::PersistentObject<Settings<String>, Storage> persistentObject;
@@ -74,7 +74,7 @@ namespace
     template <class Storage, class String>
     void WriteStorage(const awl::testing::TestContext& context)
     {
-        Container<Storage, String> container(*context.logger);
+        Container<Storage, String> container(context.logger);
 
         container.persistentObject.open(settings_file_name);
 
@@ -88,7 +88,7 @@ namespace
     template <class Storage, class String>
     void ReadStorage(const awl::testing::TestContext& context)
     {
-        Container<Storage, String> container(*context.logger);
+        Container<Storage, String> container(context.logger);
 
         container.persistentObject.open(settings_file_name);
 

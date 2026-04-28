@@ -62,7 +62,7 @@ namespace
 
             auto after = std::this_thread::get_id();
 
-            logger().debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), m_index, before, after, value);
+            logger()->debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), m_index, before, after, value);
         }
 
         awaitable<void> print()
@@ -76,7 +76,7 @@ namespace
 
         void log(const char* caption) const
         {
-            logger().debug(_T("#{} {} on thread {}"), m_index, awl::fromACString(caption), std::this_thread::get_id());
+            logger()->debug(_T("#{} {} on thread {}"), m_index, awl::fromACString(caption), std::this_thread::get_id());
         }
 
         awaitable<int> runSecondStage()
@@ -137,7 +137,7 @@ namespace
 
                 if (actual != sample)
                 {
-                    logger().error(_T("#{} Data Race! Stored {}, but loaded {}"), m_index, sample.load(), actual);
+                    logger()->error(_T("#{} Data Race! Stored {}, but loaded {}"), m_index, sample.load(), actual);
                 }
             }
 
@@ -162,9 +162,9 @@ namespace
             return executor;
         }
 
-        awl::Logger& logger() const
+        const std::shared_ptr<awl::Logger>& logger() const
         {
-            return *context.get().logger;
+            return context.get().logger;
         }
 
         std::reference_wrapper<const awl::testing::TestContext> context;
