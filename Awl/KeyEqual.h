@@ -5,14 +5,12 @@
 
 #pragma once
 
-#include <cstddef>
-#include <functional>
 #include <type_traits>
 
 namespace awl
 {
     template <class T, class GetKey>
-    class KeyHash
+    class KeyEqual
     {
     private:
         using Key = std::remove_cvref_t<typename GetKey::value_type>;
@@ -20,14 +18,24 @@ namespace awl
     public:
         using is_transparent = void;
 
-        std::size_t operator()(const T& val) const
+        bool operator()(const T& left, const T& right) const
         {
-            return std::hash<Key>{}(m_getKey(val));
+            return m_getKey(left) == m_getKey(right);
         }
 
-        std::size_t operator()(const Key& key) const
+        bool operator()(const T& left, const Key& right) const
         {
-            return std::hash<Key>{}(key);
+            return m_getKey(left) == right;
+        }
+
+        bool operator()(const Key& left, const T& right) const
+        {
+            return left == m_getKey(right);
+        }
+
+        bool operator()(const Key& left, const Key& right) const
+        {
+            return left == right;
         }
 
     private:
