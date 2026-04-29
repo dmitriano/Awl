@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Awl/Coro/Task.h"
 #include "Awl/Observer.h"
 
 #include <concepts>
@@ -71,7 +72,7 @@ namespace awl
         void notify(void (IObserver::* func)(Params ...), const Args& ... args)
             requires (std::invocable<decltype(func), IObserver*, const Args&...>)
         {
-            notifyLoop([&](ObserverElement* p_observer)
+            forEach([&](ObserverElement* p_observer)
             {
                 (static_cast<IObserver*>(p_observer)->*func)(args ...);
                 return true;
@@ -89,19 +90,31 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return notifyLoop([&](ObserverElement* p_observer)
+            return forEach([&](ObserverElement* p_observer)
             {
                 return (static_cast<IObserver*>(p_observer)->*func)(args ...);
             });
+        }
+
+        template<typename ...Params, typename ... Args>
+        Task<void> notifyAsync(Task<void> (IObserver::* func)(Params ...), Args ... args)
+            requires (std::invocable<decltype(func), IObserver*, Args&...>)
+        {
+            for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+            {
+                ObserverElement* p_observer = *(i++);
+
+                co_await (static_cast<IObserver*>(p_observer)->*func)(args ...);
+            }
         }
 
         friend Enclosing;
 
     private:
 
-        // notifyLoop is not const because observers may unsubscribe or destroy themselves during notification.
+        // Not const: observers may unsubscribe or destroy themselves during notification.
         template <class Callable>
-        bool notifyLoop(Callable&& call)
+        bool forEach(Callable&& call)
             requires (
                 std::invocable<Callable&, ObserverElement*> &&
                 std::convertible_to<std::invoke_result_t<Callable&, ObserverElement*>, bool>

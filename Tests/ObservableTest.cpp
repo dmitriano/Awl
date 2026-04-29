@@ -9,6 +9,9 @@
 #include "Awl/Observable.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/Formatter.h"
+#include "Awl/Testing/TimeQueue.h"
+
+#include <vector>
 
 using namespace awl::testing;
 
@@ -378,4 +381,85 @@ AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
     AWL_ASSERT_EQUAL(1, count2);
     AWL_ASSERT_EQUAL(7, last1);
     AWL_ASSERT_EQUAL(7, last2);
+}
+
+namespace
+{
+    using awl::testing::operator co_await;
+    using namespace std::chrono_literals;
+
+    struct IAsyncNotify
+    {
+        virtual awl::Task<void> changed(int value) = 0;
+    };
+
+    class AsyncHandler : public awl::Observer<IAsyncNotify>
+    {
+    public:
+        AsyncHandler(int tag, std::vector<int>* p_events, bool defer = false) :
+            m_tag(tag),
+            m_events(p_events),
+            m_defer(defer)
+        {
+        }
+
+        awl::Task<void> changed(int value) override
+        {
+            if (m_defer)
+            {
+                co_await 1ms;
+            }
+
+            m_events->push_back(m_tag * 1000 + value);
+            co_return;
+        }
+
+    private:
+        int m_tag = 0;
+        std::vector<int>* m_events = nullptr;
+        bool m_defer = false;
+    };
+
+    class AsyncObservable : public awl::Observable<IAsyncNotify>
+    {
+    public:
+        awl::Task<int> setValueAsync(int value)
+        {
+            co_await notifyAsync(&IAsyncNotify::changed, value);
+            co_return value;
+        }
+    };
+}
+
+AWL_TEST(Observable_NotifyAsync)
+{
+    AWL_UNUSED_CONTEXT;
+
+    AsyncObservable observable;
+    std::vector<int> events;
+
+    AsyncHandler handler1(1, &events, true);
+    AsyncHandler handler2(2, &events, true);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    awl::Task<int> task = observable.setValueAsync(7);
+
+    AWL_ASSERT(!task.is_ready());
+    AWL_ASSERT_EQUAL(0u, events.size());
+
+    awl::testing::timeQueue.loop(1);
+
+    AWL_ASSERT(!task.is_ready());
+    AWL_ASSERT_EQUAL(1u, events.size());
+    AWL_ASSERT_EQUAL(1007, events[0]);
+
+    awl::testing::timeQueue.loop();
+
+    AWL_ASSERT(task.is_ready());
+    AWL_ASSERT_EQUAL(7, task.get());
+
+    AWL_ASSERT_EQUAL(2u, events.size());
+    AWL_ASSERT_EQUAL(2007, events[1]);
 }
