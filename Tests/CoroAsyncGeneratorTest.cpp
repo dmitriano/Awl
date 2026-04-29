@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Coro/UpdateTask.h"
-#include "Awl/Coro/ProcessTask.h"
+#include "Awl/Coro/Task.h"
 #include "Awl/Coro/TaskPool.h"
 #include "Awl/Coro/AsyncGenerator.h"
 
@@ -36,7 +36,7 @@ namespace
         }
     }
 
-    awl::ProcessTask<void> print(const awl::testing::TestContext& context, int count, std::optional<int> limit = {})
+    awl::Task<void> print(const awl::testing::TestContext& context, int count, std::optional<int> limit = {})
     {
         //Unfortunately, 'for co_await' syntax is not approved for C++20 (I hope for now!) and instead of an elegant code we have to write
         //old school for loop with previously captured by rvalue generator.

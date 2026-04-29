@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Coro/ProcessTask.h"
+#include "Awl/Coro/Task.h"
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
@@ -14,7 +14,7 @@ namespace
     using awl::testing::operator co_await;
     using namespace std::chrono_literals;
 
-    awl::ProcessTask<int> wait_n(const awl::testing::TestContext& context, int n)
+    awl::Task<int> wait_n(const awl::testing::TestContext& context, int n)
     {
         context.logger->debug(_T("before wait {}\n"), n);
         co_await std::chrono::seconds(n);
@@ -22,7 +22,7 @@ namespace
         co_return n;
     }
 
-    awl::ProcessTask<int> test(const awl::testing::TestContext& context)
+    awl::Task<int> test(const awl::testing::TestContext& context)
     {
         for (auto c : "hello world\n")
         {
@@ -42,7 +42,7 @@ namespace
         co_return co_await w1 + r;
     }
 
-    awl::ProcessTask<int> wait_0(const awl::testing::TestContext& context)
+    awl::Task<int> wait_0(const awl::testing::TestContext& context)
     {
         co_return co_await wait_n(context, 0);
     }
