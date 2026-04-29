@@ -85,8 +85,8 @@ namespace awl
         template<typename Result, typename ...Params, typename ... Args>
         bool notifyWhileTrue(Result(IObserver::* func)(Params ...), const Args& ... args)
             requires (
-        std::is_convertible_v<Result, bool>&&
-            std::invocable<decltype(func), IObserver*, const Args&...>
+                std::is_convertible_v<Result, bool>&&
+                    std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
             return notifyLoop([&](ObserverElement* p_observer)
@@ -99,6 +99,7 @@ namespace awl
 
     private:
 
+        // notifyLoop is not const because observers may unsubscribe or destroy themselves during notification.
         template <class Callable>
         bool notifyLoop(Callable&& call)
             requires (
