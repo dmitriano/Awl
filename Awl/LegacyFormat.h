@@ -8,6 +8,7 @@
 #include "Awl/String.h"
 #include "Awl/LogString.h"
 
+#include <source_location>
 #include <type_traits>
 
 namespace awl
@@ -16,6 +17,10 @@ namespace awl
     class basic_format
     {
     public:
+        basic_format(std::source_location location = std::source_location::current()) noexcept :
+            m_location(location)
+        {
+        }
         
         template <typename T>
         basic_format & operator << (const T & val)
@@ -50,7 +55,7 @@ namespace awl
 
         operator LogString() const
         {
-            return str();
+            return LogString(str(), m_location);
         }
 
         // std::endl flushes the output buffer but '\n' doesn't.
@@ -59,6 +64,7 @@ namespace awl
     private:
         
         std::basic_ostringstream<C> m_out;
+        std::source_location m_location;
     };
 
     using format = basic_format<Char>;
