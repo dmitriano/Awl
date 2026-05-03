@@ -9,6 +9,7 @@
 #include "Awl/LogFormat.h"
 #include "Awl/LogLevel.h"
 #include "Awl/LogString.h"
+#include "Awl/StringFormat.h"
 
 #include <format>
 #include <type_traits>
