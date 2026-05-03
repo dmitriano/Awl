@@ -178,7 +178,7 @@ namespace awl
 
         void clear() noexcept
         {
-            m_slots.clear();
+            container_type().swap(m_slots);
         }
 
         bool empty() const noexcept
