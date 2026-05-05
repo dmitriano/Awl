@@ -3,7 +3,9 @@
 #include "Awl/EnumTraits.h"
 
 #include <array>
+#include <concepts>
 #include <cstddef>
+#include <utility>
 
 namespace awl
 {
@@ -24,6 +26,34 @@ namespace awl
         using const_iterator = typename array_type::const_iterator;
         using reverse_iterator = typename array_type::reverse_iterator;
         using const_reverse_iterator = typename array_type::const_reverse_iterator;
+
+        enum_array() = default;
+
+        enum_array(const enum_array&) = default;
+
+        enum_array(enum_array&&) = default;
+
+        enum_array& operator=(const enum_array&) = default;
+
+        enum_array& operator=(enum_array&&) = default;
+
+        enum_array(const array_type& items) :
+            m_items(items)
+        {
+        }
+
+        enum_array(array_type&& items) :
+            m_items(std::move(items))
+        {
+        }
+
+        template <class... Args>
+            requires (sizeof...(Args) > 0 && sizeof...(Args) <= EnumTraits<Enum>::count() &&
+                (std::constructible_from<value_type, Args&&> && ...))
+        enum_array(Args&&... args) :
+            m_items{ std::forward<Args>(args)... }
+        {
+        }
 
         reference at(enum_type index)
         {
