@@ -41,7 +41,7 @@ namespace awl::testing
         }
     };
 
-    template <typename C, typename T> requires awl::is_sequential_enum<T>
+    template <typename C, typename T> requires awl::sequential_enum<T>
     class BasicFormatter<C, T> : public std::true_type
     {
     public:

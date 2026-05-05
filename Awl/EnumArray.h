@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    template <is_sequential_enum Enum, class T>
+    template <sequential_enum Enum, class T>
     class enum_array
     {
     public:
