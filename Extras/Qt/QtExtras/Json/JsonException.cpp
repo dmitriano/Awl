@@ -31,7 +31,7 @@ String JsonException::message() const
 
     f << "\n";
 
-    f << "Message: '" << theMessage << "'";
+    f << "Message: '" << m_message << "'";
 
     f << "\n";
 
