@@ -11,7 +11,9 @@
 #include "Awl/String.h"
 
 #include <chrono>
+#include <string>
 #include <string_view>
+#include <utility>
 
 #if defined(__APPLE__)
 #include <ctime>
@@ -25,7 +27,17 @@ namespace awl
 
         using Logger::log;
 
-        ConsoleLogger(awl::ostream& out = awl::cout()) : m_out(out) {}
+        ConsoleLogger(
+            awl::ostream& out = awl::cout(),
+            std::string min_level = LogLevel::Debug) :
+            m_out(out),
+            m_minSeverity(log_level_severity(std::move(min_level)))
+        {}
+
+        bool enabled(const std::string& level) const override
+        {
+            return log_level_severity(level) >= m_minSeverity;
+        }
 
         void log(const std::string& level, const LogString& message) override
         {
@@ -66,5 +78,6 @@ namespace awl
         }
 
         awl::ostream& m_out;
+        std::size_t m_minSeverity;
     };
 }

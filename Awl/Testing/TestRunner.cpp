@@ -31,6 +31,7 @@ namespace awl::testing
     void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
+        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Debug);
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
@@ -77,6 +78,11 @@ namespace awl::testing
             throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
         }
 
+        if (!is_log_level(log_level))
+        {
+            throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
+        }
+
         for (auto i : awl::make_count(loop_count))
         {
             static_cast<void>(i);
@@ -118,7 +124,7 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
 
-            auto logger = std::make_shared<ConsoleLogger>(*p_out);
+            auto logger = std::make_shared<ConsoleLogger>(*p_out, log_level);
             
             const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 

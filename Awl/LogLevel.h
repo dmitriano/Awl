@@ -9,6 +9,7 @@
 #include "Awl/String.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace awl
 {
@@ -42,5 +43,10 @@ namespace awl
             std::bind(StringInsensitiveEqual<char>(), level, std::placeholders::_1));
 
         return static_cast<std::size_t>(i - names.begin());
+    }
+
+    inline bool is_log_level(std::string level)
+    {
+        return log_level_severity(std::move(level)) < EnumTraits<KnownLogLevel>::count();
     }
 }

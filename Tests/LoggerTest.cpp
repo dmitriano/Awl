@@ -143,4 +143,13 @@ AWL_TEST(Logger)
 
     AWL_ASSERT_EQUAL(0, format_count);
     AWL_ASSERT_EQUAL(initial_log_count, filtered_logger.logCount());
+
+    awl::ostringstream out;
+    awl::ConsoleLogger console_logger(out, awl::LogLevel::Info);
+
+    AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Debug));
+    AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Trace));
+    AWL_ASSERT(console_logger.enabled(awl::LogLevel::Info));
+    AWL_ASSERT(console_logger.enabled(awl::LogLevel::Warning));
+    AWL_ASSERT(console_logger.enabled(awl::LogLevel::Error));
 }
