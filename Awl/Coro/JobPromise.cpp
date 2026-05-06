@@ -1,4 +1,4 @@
-#include "Awl/Coro/UpdatePromise.h"
+#include "Awl/Coro/JobPromise.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Logger.h"
 #include "Awl/StaticChain.h"
@@ -9,12 +9,12 @@
 
 using namespace awl;
 
-Job UpdatePromise::get_return_object()
+Job JobPromise::get_return_object()
 {
-    return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
+    return { std::coroutine_handle<JobPromise>::from_promise(*this) };
 }
 
-void UpdatePromise::unhandled_exception() noexcept
+void JobPromise::unhandled_exception() noexcept
 {
     const awl::StaticLink<std::shared_ptr<awl::Logger>>* p_link = awl::static_chain<std::shared_ptr<awl::Logger>>().find("Application");
 

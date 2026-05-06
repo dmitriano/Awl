@@ -11,7 +11,7 @@ namespace awl
     struct Task;
 
     template<typename T>
-    class ProcessPromise
+    class TaskPromise
     {
     public:
 
@@ -77,9 +77,9 @@ namespace awl
                     return false;
                 }
 
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<ProcessPromise> h) noexcept
+                std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
                 {
-                    ProcessPromise& promise = h.promise();
+                    TaskPromise& promise = h.promise();
 
                     // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                     // nothing
@@ -94,7 +94,7 @@ namespace awl
     };
 
     template<>
-    class ProcessPromise<void>
+    class TaskPromise<void>
     {
     public:
 
@@ -155,9 +155,9 @@ namespace awl
                     return false;
                 }
 
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<ProcessPromise> h) noexcept
+                std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
                 {
-                    ProcessPromise& promise = h.promise();
+                    TaskPromise& promise = h.promise();
 
                     // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                     // nothing
@@ -175,7 +175,7 @@ namespace awl
     struct Task
     {
         // declare promise type
-        using promise_type = ProcessPromise<T>;
+        using promise_type = TaskPromise<T>;
 
         Task() : m_h(nullptr) {}
         
@@ -240,14 +240,14 @@ namespace awl
     };
 
     template<typename T>
-    Task<T> ProcessPromise<T>::get_return_object()
+    Task<T> TaskPromise<T>::get_return_object()
     {
-        return { std::coroutine_handle<ProcessPromise>::from_promise(*this) };
+        return { std::coroutine_handle<TaskPromise>::from_promise(*this) };
     }
 
-    inline Task<void> ProcessPromise<void>::get_return_object()
+    inline Task<void> TaskPromise<void>::get_return_object()
     {
-        return { std::coroutine_handle<ProcessPromise>::from_promise(*this) };
+        return { std::coroutine_handle<TaskPromise>::from_promise(*this) };
     }
 
     // also we can await other Task<T>
@@ -268,7 +268,7 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<ProcessPromise<T>> m_h;
+            std::coroutine_handle<TaskPromise<T>> m_h;
 
             // check if this Task already has value computed
             bool await_ready()

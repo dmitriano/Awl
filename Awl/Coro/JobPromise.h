@@ -11,7 +11,7 @@ namespace awl
 {
     class Job;
 
-    struct UpdatePromise : Observable<TaskSink>
+    struct JobPromise : Observable<TaskSink>
     {
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
@@ -52,15 +52,15 @@ namespace awl
 
                 // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                 // nothing
-                //std::coroutine_handle<> await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                //std::coroutine_handle<> await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 //{
-                //    UpdatePromise& promise = h.promise();
+                //    JobPromise& promise = h.promise();
 
                 //    return promise.m_awaitingCoroutine ? promise.m_awaitingCoroutine : std::noop_coroutine();
                 //}
-                void await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                void await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 {
-                    UpdatePromise& promise = h.promise();
+                    JobPromise& promise = h.promise();
 
                     auto coro = promise.m_awaitingCoroutine;
 

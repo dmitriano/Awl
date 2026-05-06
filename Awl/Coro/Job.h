@@ -5,7 +5,7 @@
 #include <utility>
 #include <cassert>
 
-#include "Awl/Coro/UpdatePromise.h"
+#include "Awl/Coro/JobPromise.h"
 #include "Awl/QuickLink.h"
 
 namespace awl
@@ -15,7 +15,7 @@ namespace awl
     public:
 
         // declare promise type
-        using promise_type = UpdatePromise;
+        using promise_type = JobPromise;
 
         Job() : m_h(nullptr) {}
         
@@ -75,7 +75,7 @@ namespace awl
 
             struct task_awaitable
             {
-                std::coroutine_handle<UpdatePromise> m_h;
+                std::coroutine_handle<JobPromise> m_h;
 
                 // check if this Job already has value computed
                 bool await_ready()

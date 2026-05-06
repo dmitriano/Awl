@@ -15,13 +15,13 @@
 namespace
 {
     //template <bool owning>
-    struct UpdatePromise;
+    struct JobPromise;
 
     //template <bool owning>
     struct Job
     {
         // declare promise type
-        using promise_type = UpdatePromise;
+        using promise_type = JobPromise;
 
         Job(std::coroutine_handle<promise_type> handle) :
             handle(handle)
@@ -55,7 +55,7 @@ namespace
         std::coroutine_handle<promise_type> handle;
     };
 
-    struct UpdatePromise
+    struct JobPromise
     {
         std::coroutine_handle<> m_awaitingCoroutine;
 
@@ -84,7 +84,7 @@ namespace
 
                 // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                 // nothing
-                //std::coroutine_handle<> await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                //std::coroutine_handle<> await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 //{
                 //    std::coroutine_handle<> val = m_awaitingCoroutine ? m_awaitingCoroutine : std::noop_coroutine();
 
@@ -99,7 +99,7 @@ namespace
                 //the value false resumes the current coroutine.
                 //if await_suspend returns a coroutine handle for some other coroutine, that handle is resumed (by a call to handle.resume())
                 //(note this may chain to eventually cause the current coroutine to resume)
-                void await_suspend(std::coroutine_handle<UpdatePromise> h) noexcept
+                void await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 {
                     auto coro = h.promise().m_awaitingCoroutine;
                     
@@ -140,7 +140,7 @@ namespace
 
             struct task_awaitable
             {
-                std::coroutine_handle<UpdatePromise> handle;
+                std::coroutine_handle<JobPromise> handle;
 
                 // check if this Job already has value computed
                 bool await_ready()
@@ -165,9 +165,9 @@ namespace
         }
     };
 
-    inline Job UpdatePromise::get_return_object()
+    inline Job JobPromise::get_return_object()
     {
-        return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
+        return { std::coroutine_handle<JobPromise>::from_promise(*this) };
     }
 
     // example
