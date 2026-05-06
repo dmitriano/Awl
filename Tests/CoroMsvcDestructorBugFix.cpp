@@ -18,38 +18,38 @@ namespace
     struct UpdatePromise;
 
     //template <bool owning>
-    struct UpdateTask
+    struct Job
     {
         // declare promise type
         using promise_type = UpdatePromise;
 
-        UpdateTask(std::coroutine_handle<promise_type> handle) : 
+        Job(std::coroutine_handle<promise_type> handle) :
             handle(handle)
         {
-            std::cout << "UpdateTask constructor." << std::endl;
+            std::cout << "Job constructor." << std::endl;
         }
 
-        UpdateTask(const UpdateTask&) = delete;
+        Job(const Job&) = delete;
         
-        UpdateTask(UpdateTask&& other) : handle(other.handle)
+        Job(Job&& other) : handle(other.handle)
         {
-            std::cout << "UpdateTask move constructor." << std::endl;
+            std::cout << "Job move constructor." << std::endl;
         }
 
-        UpdateTask& operator = (const UpdateTask&) = delete;
+        Job& operator = (const Job&) = delete;
 
-        UpdateTask& operator = (const UpdateTask&& other)
+        Job& operator = (const Job&& other)
         {
             handle = other.handle;
 
-            std::cout << "UpdateTask move assignment." << std::endl;
+            std::cout << "Job move assignment." << std::endl;
 
             return *this;
         }
 
-        ~UpdateTask()
+        ~Job()
         {
-            std::cout << "UpdateTask destructor." << std::endl;
+            std::cout << "Job destructor." << std::endl;
         }
 
         std::coroutine_handle<promise_type> handle;
@@ -59,7 +59,7 @@ namespace
     {
         std::coroutine_handle<> m_awaitingCoroutine;
 
-        UpdateTask get_return_object();
+        Job get_return_object();
 
         std::suspend_never initial_suspend()
         {
@@ -125,8 +125,8 @@ namespace
             return awl::testing::TimeAwaitable{ awl::testing::timeQueue, d };
         }
 
-        // also we can await other UpdateTask<T>
-        auto await_transform(const UpdateTask& update_task)
+        // also we can await other Job<T>
+        auto await_transform(const Job& update_task)
         {
             if (!update_task.handle)
             {
@@ -142,14 +142,14 @@ namespace
             {
                 std::coroutine_handle<UpdatePromise> handle;
 
-                // check if this UpdateTask already has value computed
+                // check if this Job already has value computed
                 bool await_ready()
                 {
                     return handle.done();
                 }
 
                 // h - is a handle to coroutine that calls co_await
-                // store coroutine handle to be resumed after computing UpdateTask value
+                // store coroutine handle to be resumed after computing Job value
                 void await_suspend(std::coroutine_handle<> h)
                 {
                     handle.promise().m_awaitingCoroutine = h;
@@ -165,7 +165,7 @@ namespace
         }
     };
 
-    inline UpdateTask UpdatePromise::get_return_object()
+    inline Job UpdatePromise::get_return_object()
     {
         return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
     }
@@ -174,7 +174,7 @@ namespace
 
     using namespace std::chrono_literals;
 
-    UpdateTask TestTimerAwait(awl::testing::TestContext context)
+    Job TestTimerAwait(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
@@ -185,7 +185,7 @@ namespace
         context.logger->debug(_T("TestTimerAwait finished."));
     }
 
-    UpdateTask TestNestedTask(awl::testing::TestContext context)
+    Job TestNestedTask(awl::testing::TestContext context)
     {
         using namespace std::chrono_literals;
 
@@ -205,15 +205,15 @@ namespace
 }
 
 //The correct output ends with two destructor calls:
-//UpdateTask constructor.
+//Job constructor.
 //TestNestedTask started.
-//UpdateTask constructor.
+//Job constructor.
 //TestTimerAwait started.
 //TestTimerAwait finished.
 //Time interval has elapsed.
 //TestNestedTask finished.
-//UpdateTask destructor.
-//UpdateTask destructor.
+//Job destructor.
+//Job destructor.
 AWL_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
 {
     auto task = TestNestedTask(context);

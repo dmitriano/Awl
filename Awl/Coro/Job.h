@@ -10,20 +10,20 @@
 
 namespace awl
 {
-    class UpdateTask
+    class Job
     {
     public:
 
         // declare promise type
         using promise_type = UpdatePromise;
 
-        UpdateTask() : m_h(nullptr) {}
+        Job() : m_h(nullptr) {}
         
-        UpdateTask(std::coroutine_handle<promise_type> m_h) : m_h(m_h) {}
+        Job(std::coroutine_handle<promise_type> m_h) : m_h(m_h) {}
 
-        UpdateTask(UpdateTask&& other) noexcept : m_h(std::exchange(other.m_h, nullptr)) {}
+        Job(Job&& other) noexcept : m_h(std::exchange(other.m_h, nullptr)) {}
 
-        UpdateTask& operator=(UpdateTask&& other) noexcept
+        Job& operator=(Job&& other) noexcept
         {
             free();
 
@@ -32,9 +32,9 @@ namespace awl
             return *this;
         }
 
-        bool operator == (const UpdateTask& other) const = default;
+        bool operator == (const Job& other) const = default;
 
-        ~UpdateTask()
+        ~Job()
         {
             free();
         }
@@ -59,15 +59,15 @@ namespace awl
             return m_h.done();
         }
 
-        friend auto operator co_await(const UpdateTask& update_task) noexcept
+        friend auto operator co_await(const Job& job) noexcept
         {
-            if (!update_task.m_h)
+            if (!job.m_h)
             {
                 //coroutine without promise awaited
                 std::terminate();
             }
 
-            if (update_task.m_h.promise().m_awaitingCoroutine)
+            if (job.m_h.promise().m_awaitingCoroutine)
             {
                 //coroutine already awaited
                 std::terminate();
@@ -77,14 +77,14 @@ namespace awl
             {
                 std::coroutine_handle<UpdatePromise> m_h;
 
-                // check if this UpdateTask already has value computed
+                // check if this Job already has value computed
                 bool await_ready()
                 {
                     return m_h.done();
                 }
 
                 // h - is a handle to coroutine that calls co_await
-                // store coroutine handle to be resumed after computing UpdateTask value
+                // store coroutine handle to be resumed after computing Job value
                 void await_suspend(std::coroutine_handle<> h)
                 {
                     m_h.promise().m_awaitingCoroutine = h;
@@ -96,7 +96,7 @@ namespace awl
                 }
             };
 
-            return task_awaitable{ update_task.m_h };
+            return task_awaitable{ job.m_h };
         }
 
         void subscribe(awl::Observer<TaskSink>* p_sink)
@@ -104,7 +104,7 @@ namespace awl
             // The promise is owned at this point.
             assert(m_h != nullptr);
 
-            UpdateTask::promise_type& promise = m_h.promise();
+            Job::promise_type& promise = m_h.promise();
 
             promise.subscribe(p_sink);
         }

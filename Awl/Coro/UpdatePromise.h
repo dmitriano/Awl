@@ -9,7 +9,7 @@
 
 namespace awl
 {
-    class UpdateTask;
+    class Job;
 
     struct UpdatePromise : Observable<TaskSink>
     {
@@ -17,16 +17,16 @@ namespace awl
         // we need to store it in order to resume it later when value of this coroutine will be computed
         std::coroutine_handle<> m_awaitingCoroutine;
 
-        // UpdateTask is async result of our coroutine
+        // Job is async result of our coroutine
         // it is created before execution of the coroutine body
         // it can be either co_awaited inside another coroutine
         // or used via special interface for extracting values (is_ready and get)
-        UpdateTask get_return_object();
+        Job get_return_object();
 
         // there are two kinds of coroutines:
         // 1. eager - that start its execution immediately
         // 2. lazy - that start its execution only after 'co_await'ing on them
-        // here I used eager coroutine UpdateTask
+        // here I used eager coroutine Job
         // eager: do not suspend before running coroutine body
         std::suspend_never initial_suspend() noexcept
         {
@@ -37,7 +37,7 @@ namespace awl
 
         // when final suspend is executed 'value' is already set
         // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
-        // otherwise promise object would be destroyed (together with stored value) and one couldn't access UpdateTask result
+        // otherwise promise object would be destroyed (together with stored value) and one couldn't access Job result
         // value
         auto final_suspend() noexcept
         {
@@ -64,7 +64,7 @@ namespace awl
 
                     auto coro = promise.m_awaitingCoroutine;
 
-                    // The Promise is always owned by UpdateTask,
+                    // The Promise is always owned by Job,
                     // so we do not call h.destroy() here.
                     promise.notify(&TaskSink::onFinished);
 

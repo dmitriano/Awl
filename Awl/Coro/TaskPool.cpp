@@ -7,7 +7,7 @@
 
 using namespace awl;
 
-void TaskPool::spawn(UpdateTask&& task)
+void TaskPool::spawn(Job&& task)
 {
     // A couroutine has executed as a regular function.
     // (It did not co_await).
@@ -37,11 +37,11 @@ void TaskPool::cancel()
     }
 }
 
-UpdateTask TaskPool::wait_all_task_experimental()
+Job TaskPool::wait_all_task_experimental()
 {
     while (!m_handlers.empty())
     {
-        UpdateTask task = std::move(m_handlers.back().m_task);
+        Job task = std::move(m_handlers.back().m_task);
 
         // The vector contains an empty task and
         // and onFinished() should delete it correctly.

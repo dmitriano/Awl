@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/Coro/TaskSink.h"
-#include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/Job.h"
 #include "Awl/Observable.h"
 
 #include <vector>
@@ -96,7 +96,7 @@ namespace awl
 
     public:
 
-        void spawn(UpdateTask&& task);
+        void spawn(Job&& task);
 
         std::size_t task_count() const
         {
@@ -122,21 +122,21 @@ namespace awl
 
     private:
 
-        UpdateTask wait_all_task_experimental();
+        Job wait_all_task_experimental();
 
         friend class ControllerTest;
 
         // Handlers do not need virtual destructor.
         struct Handler final : Observer<TaskSink>
         {
-            Handler(TaskPool* p_this, UpdateTask&& task) :
+            Handler(TaskPool* p_this, Job&& task) :
                 pThis(p_this),
                 m_task(std::move(task))
             {}
 
             TaskPool* pThis;
 
-            UpdateTask m_task;
+            Job m_task;
 
             void onFinished() override;
         };

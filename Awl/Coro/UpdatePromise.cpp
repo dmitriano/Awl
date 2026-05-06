@@ -1,5 +1,5 @@
 #include "Awl/Coro/UpdatePromise.h"
-#include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/Job.h"
 #include "Awl/Logger.h"
 #include "Awl/StaticChain.h"
 #include "Awl/StringFormat.h"
@@ -9,7 +9,7 @@
 
 using namespace awl;
 
-UpdateTask UpdatePromise::get_return_object()
+Job UpdatePromise::get_return_object()
 {
     return { std::coroutine_handle<UpdatePromise>::from_promise(*this) };
 }
@@ -24,7 +24,7 @@ void UpdatePromise::unhandled_exception() noexcept
 
         awl::ostringstream out;
 
-        out << "Unhandled exception in UpdateTask ";
+        out << "Unhandled exception in Job ";
 
         try
         {

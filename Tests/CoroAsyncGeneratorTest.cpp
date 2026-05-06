@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/Job.h"
 #include "Awl/Coro/Task.h"
 #include "Awl/Coro/TaskPool.h"
 #include "Awl/Coro/AsyncGenerator.h"
@@ -71,7 +71,7 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::UpdateTask test(const awl::testing::TestContext& context)
+    awl::Job test(const awl::testing::TestContext& context)
     {
         co_await print(context, 3);
 
@@ -96,7 +96,7 @@ namespace
 
 AWL_TEST(CoroAsyncGeneratorOwned)
 {
-    awl::UpdateTask task = test(context);
+    awl::Job task = test(context);
 
     AWL_ASSERT(!task.done());
 
@@ -150,7 +150,7 @@ AWL_TEST(CoroControllerRegistered)
 
 namespace
 {
-    awl::UpdateTask PrintFinished(const awl::testing::TestContext& context, int id)
+    awl::Job PrintFinished(const awl::testing::TestContext& context, int id)
     {
         co_await 100ms;
 
@@ -164,14 +164,14 @@ namespace awl
     {
     public:
 
-        static awl::UpdateTask TestWaitAllTask(const awl::testing::TestContext& context, awl::TaskPool& controller)
+        static awl::Job TestWaitAllTask(const awl::testing::TestContext& context, awl::TaskPool& controller)
         {
             RegisterTasks(context, controller);
 
             co_await controller.wait_all_task_experimental();
         }
 
-        static awl::UpdateTask TestWait(const awl::testing::TestContext& context, awl::TaskPool& controller, bool all_task = false, std::size_t actual_N = 2)
+        static awl::Job TestWait(const awl::testing::TestContext& context, awl::TaskPool& controller, bool all_task = false, std::size_t actual_N = 2)
         {
             RegisterTasks(context, controller);
 
@@ -214,7 +214,7 @@ AWL_TEST(CoroControllerWaitAllTask)
 {
     awl::TaskPool controller;
 
-    awl::UpdateTask task = awl::ControllerTest::TestWaitAllTask(context, controller);
+    awl::Job task = awl::ControllerTest::TestWaitAllTask(context, controller);
 
     awl::testing::timeQueue.loop(1);
 
@@ -237,7 +237,7 @@ AWL_TEST(CoroControllerWait)
 {
     awl::TaskPool controller;
 
-    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller);
+    awl::Job task = awl::ControllerTest::TestWait(context, controller);
 
     awl::testing::timeQueue.loop();
 
@@ -250,7 +250,7 @@ AWL_TEST(CoroControllerCancelWait1)
 
     awl::TaskPool controller;
 
-    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task, 0);
+    awl::Job task = awl::ControllerTest::TestWait(context, controller, all_task, 0);
 
     controller.cancel();
 
@@ -267,7 +267,7 @@ AWL_TEST(CoroControllerCancelWait2)
 
     awl::TaskPool controller;
 
-    awl::UpdateTask task = awl::ControllerTest::TestWait(context, controller, all_task);
+    awl::Job task = awl::ControllerTest::TestWait(context, controller, all_task);
 
     awl::testing::timeQueue.loop(1);
 

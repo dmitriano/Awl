@@ -4,7 +4,7 @@
 
 #include "Awl/Coro/TaskPool.h"
 #include "Awl/Coro/TaskSink.h"
-#include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/Job.h"
 #include "Awl/Observable.h"
 #include "Awl/KeyCompare.h"
 
@@ -52,7 +52,7 @@ namespace awl
 
     public:
 
-        void spawn(UpdateTask&& task, Key key, Value value)
+        void spawn(Job&& task, Key key, Value value)
         {
             // A couroutine has executed as a regular function.
             if (!task.done())
