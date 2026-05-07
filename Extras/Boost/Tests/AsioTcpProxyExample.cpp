@@ -8,6 +8,8 @@
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/multiple_exceptions.hpp>
 #include <openssl/ssl.h>
+#include <atomic>
+#include <chrono>
 #include <iomanip>
 #include <memory>
 #include <mutex>
@@ -24,6 +26,37 @@ namespace
         bool tcp_nodelay;
         bool linger;
         int linger_timeout;
+    };
+
+    struct ProxyStats
+    {
+        std::atomic_uint64_t active_sessions = 0;
+        std::atomic_uint64_t active_upstream_handshakes = 0;
+        std::atomic_uint64_t refused_total = 0;
+        std::atomic_uint64_t refused_interval = 0;
+        std::atomic_uint64_t reset_total = 0;
+        std::atomic_uint64_t reset_interval = 0;
+    };
+
+    class AtomicCounterGuard
+    {
+    public:
+        explicit AtomicCounterGuard(std::atomic_uint64_t& counter) :
+            counter_(counter)
+        {
+            counter_.fetch_add(1, std::memory_order_relaxed);
+        }
+
+        ~AtomicCounterGuard()
+        {
+            counter_.fetch_sub(1, std::memory_order_relaxed);
+        }
+
+        AtomicCounterGuard(const AtomicCounterGuard&) = delete;
+        AtomicCounterGuard& operator=(const AtomicCounterGuard&) = delete;
+
+    private:
+        std::atomic_uint64_t& counter_;
     };
 
     void set_socket_options(
@@ -141,6 +174,70 @@ namespace
         }
     }
 
+    void count_network_exception(const boost::system::error_code& code, const std::shared_ptr<ProxyStats>& stats)
+    {
+        if (code == asio::error::connection_refused)
+        {
+            stats->refused_total.fetch_add(1, std::memory_order_relaxed);
+            stats->refused_interval.fetch_add(1, std::memory_order_relaxed);
+        }
+        else if (code == asio::error::connection_reset)
+        {
+            stats->reset_total.fetch_add(1, std::memory_order_relaxed);
+            stats->reset_interval.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+
+    void count_exception(std::exception_ptr exception, const std::shared_ptr<ProxyStats>& stats)
+    {
+        if (!exception)
+        {
+            return;
+        }
+
+        try
+        {
+            std::rethrow_exception(exception);
+        }
+        catch (const boost::system::system_error& e)
+        {
+            count_network_exception(e.code(), stats);
+        }
+        catch (const boost::asio::multiple_exceptions& e)
+        {
+            count_exception(e.first_exception(), stats);
+        }
+        catch (...)
+        {
+        }
+    }
+
+    asio::awaitable<void> log_proxy_stats(
+        std::shared_ptr<ProxyStats> stats,
+        const awl::testing::TestContext& context)
+    {
+        auto exec = co_await asio::this_coro::executor;
+        asio::steady_timer timer(exec);
+
+        while (true)
+        {
+            timer.expires_after(std::chrono::seconds(1));
+            co_await timer.async_wait(asio::use_awaitable);
+
+            const auto refused = stats->refused_interval.exchange(0, std::memory_order_relaxed);
+            const auto reset = stats->reset_interval.exchange(0, std::memory_order_relaxed);
+
+            context.logger->trace(
+                "proxy stats: active_sessions={}, active_upstream_handshakes={}, refused/s={}, refused_total={}, reset/s={}, reset_total={}",
+                stats->active_sessions.load(std::memory_order_relaxed),
+                stats->active_upstream_handshakes.load(std::memory_order_relaxed),
+                refused,
+                stats->refused_total.load(std::memory_order_relaxed),
+                reset,
+                stats->reset_total.load(std::memory_order_relaxed));
+        }
+    }
+
     asio::awaitable<void> transfer(
         ssl::stream<tcp::socket>& from,
         ssl::stream<tcp::socket>& to,
@@ -236,11 +333,14 @@ namespace
         ssl::stream<tcp::socket> client_ssl,
         std::shared_ptr<ssl::context> server_ctx,
         std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
+        std::shared_ptr<ProxyStats> stats,
         const std::string& target_host,
         const std::string& target_port,
         SocketOptions socket_options,
         const awl::testing::TestContext& context)
     {
+        AtomicCounterGuard active_session(stats->active_sessions);
+
         try
         {
             // Get the current coroutine executor
@@ -254,6 +354,8 @@ namespace
 
             auto connect_server = [&]() -> asio::awaitable<void>
             {
+                AtomicCounterGuard active_upstream_handshake(stats->active_upstream_handshakes);
+
                 co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
                 set_socket_options(server_ssl.next_layer(), socket_options, context, "server socket");
                 tls_client_session_cache->apply(server_ssl, context);
@@ -272,6 +374,8 @@ namespace
         }
         catch (const boost::system::system_error& e)
         {
+            count_network_exception(e.code(), stats);
+
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
@@ -284,6 +388,7 @@ namespace
         }
         catch (const boost::asio::multiple_exceptions& e)
         {
+            count_exception(e.first_exception(), stats);
             const std::string first_exception = describe_exception(e.first_exception());
             context.logger->error(
                 _T("handle_client exception: {}; first nested exception: {}"),
@@ -301,6 +406,7 @@ namespace
         std::shared_ptr<ssl::context> client_ctx,
         std::shared_ptr<ssl::context> server_ctx,
         std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
+        std::shared_ptr<ProxyStats> stats,
         const std::string& target_host, const std::string& target_port,
         SocketOptions socket_options,
         const awl::testing::TestContext& context)
@@ -328,6 +434,7 @@ namespace
                         std::move(client_ssl),
                         server_ctx,
                         tls_client_session_cache,
+                        stats,
                         target_host,
                         target_port,
                         socket_options,
@@ -393,12 +500,15 @@ AWL_EXAMPLE(AsioTcpProxy)
     server_ctx->set_default_verify_paths();
     SSL_CTX_set_session_cache_mode(server_ctx->native_handle(), SSL_SESS_CACHE_CLIENT);
     auto tls_client_session_cache = std::make_shared<TlsClientSessionCache>();
+    auto stats = std::make_shared<ProxyStats>();
 
     auto pos = target.find(':');
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
     asio::thread_pool ioc(thread_count);
+
+    asio::co_spawn(ioc, log_proxy_stats(stats, context), asio::detached);
 
     asio::co_spawn(
         ioc,
@@ -407,6 +517,7 @@ AWL_EXAMPLE(AsioTcpProxy)
             std::move(client_ctx),
             std::move(server_ctx),
             std::move(tls_client_session_cache),
+            stats,
             target_host,
             target_port,
             socket_options,
