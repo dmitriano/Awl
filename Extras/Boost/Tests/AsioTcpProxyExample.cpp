@@ -93,6 +93,11 @@ namespace
             {
                 context.logger->trace("transfer Windows Error: WSAECONNRESET.");
             }
+            else if (e.code() == boost::system::errc::broken_pipe)
+            {
+                // The peer can close while the opposite transfer coroutine is still writing.
+                context.logger->trace("transfer: Broken pipe.");
+            }
             else
             {
                 context.logger->error(_T("transfer boost::system::system_error: {}"), awl::fromACString(e.what()));
