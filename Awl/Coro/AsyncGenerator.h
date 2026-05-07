@@ -117,7 +117,6 @@ namespace awl
         private:
 
             std::coroutine_handle<> m_consumer;
-
         };
 
         inline async_generator_yield_operation async_generator_promise_base::final_suspend() noexcept
@@ -164,7 +163,6 @@ namespace awl
 
             async_generator_promise_base* m_promise;
             std::coroutine_handle<> m_producerCoroutine;
-
         };
 
         template<typename T>
@@ -193,7 +191,6 @@ namespace awl
             {
                 return *static_cast<T*>(m_currentValue);
             }
-
         };
 
         template<typename T>
@@ -215,7 +212,6 @@ namespace awl
             {
                 return std::move(*static_cast<T*>(m_currentValue));
             }
-
         };
 
         template<typename T>
@@ -234,7 +230,6 @@ namespace awl
         private:
 
             async_generator_iterator<T>& m_iterator;
-
         };
 
         template<typename T>
@@ -288,7 +283,6 @@ namespace awl
             friend class async_generator_increment_operation<T>;
 
             handle_type m_coroutine;
-
         };
 
         template<typename T>
@@ -413,7 +407,6 @@ namespace awl
     private:
 
         std::coroutine_handle<promise_type> m_coroutine;
-
     };
 
     template<typename T>

@@ -83,5 +83,4 @@ namespace awl::testing
 
         std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
     };
-
 }

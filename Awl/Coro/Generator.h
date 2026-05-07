@@ -232,7 +232,6 @@ namespace awl
         }
 
         std::coroutine_handle<promise_type> m_coroutine;
-
     };
 
     template<typename T>
