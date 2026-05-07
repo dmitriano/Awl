@@ -6,7 +6,9 @@
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
+#include <openssl/ssl.h>
 #include <iomanip>
+#include <memory>
 
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
@@ -14,6 +16,44 @@ using tcp = asio::ip::tcp;
 
 namespace
 {
+    struct SocketOptions
+    {
+        bool tcp_nodelay;
+        bool linger;
+        int linger_timeout;
+    };
+
+    void set_socket_options(
+        tcp::socket& socket,
+        const SocketOptions& options,
+        const awl::testing::TestContext& context,
+        const char* socket_name)
+    {
+        boost::system::error_code ec;
+
+        socket.set_option(tcp::no_delay(options.tcp_nodelay), ec);
+        if (ec)
+        {
+            context.logger->error("{}: failed to set TCP_NODELAY: {}", socket_name, ec.message());
+        }
+
+        if (options.linger)
+        {
+            socket.set_option(asio::socket_base::linger(true, options.linger_timeout), ec);
+            if (ec)
+            {
+                context.logger->error("{}: failed to set SO_LINGER: {}", socket_name, ec.message());
+            }
+        }
+    }
+
+    void close_socket(tcp::socket& socket)
+    {
+        boost::system::error_code ignored_ec;
+        socket.shutdown(tcp::socket::shutdown_both, ignored_ec);
+        socket.close(ignored_ec);
+    }
+
     asio::awaitable<void> transfer(
         ssl::stream<tcp::socket>& from,
         ssl::stream<tcp::socket>& to,
@@ -33,25 +73,25 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger->error("transfer: connection closed (stream truncated)");
+                context.logger->debug("transfer: connection closed (stream truncated)");
             }
             else if (e.code() == boost::asio::error::eof)
             {
-                context.logger->error("transfer: EOF");
+                context.logger->debug("transfer: EOF");
             }
             else if (e.code() == asio::error::connection_reset)
             {
-                context.logger->error("transfer: Connection Reset.");
+                context.logger->debug("transfer: Connection Reset.");
             }
             else if (
                 e.code() == boost::system::errc::operation_canceled
                 || e.code() == boost::asio::error::operation_aborted)
             {
-                context.logger->error("transfer: Operation cancelled.");
+                context.logger->debug("transfer: Operation cancelled.");
             }
             else if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
             {
-                context.logger->error("transfer Windows Error: WSAECONNRESET.");
+                context.logger->debug("transfer Windows Error: WSAECONNRESET.");
             }
             else
             {
@@ -72,8 +112,10 @@ namespace
     {
         using namespace boost::asio::experimental::awaitable_operators;
 
-        // it calls wait_for_one_error()
-        co_await(transfer(client_ssl, server_ssl, context) && transfer(server_ssl, client_ssl, context));
+        co_await(transfer(client_ssl, server_ssl, context) || transfer(server_ssl, client_ssl, context));
+
+        close_socket(client_ssl.next_layer());
+        close_socket(server_ssl.next_layer());
     }
         
     [[maybe_unused]]
@@ -100,15 +142,14 @@ namespace
     // Handling a single client
     asio::awaitable<void> handle_client(
         ssl::stream<tcp::socket> client_ssl,
+        std::shared_ptr<ssl::context> server_ctx,
         const std::string& target_host,
         const std::string& target_port,
+        const SocketOptions& socket_options,
         const awl::testing::TestContext& context)
     {
         try
         {
-            // TLS handshake with the client (proxy acts as a server)
-            co_await client_ssl.async_handshake(ssl::stream_base::server, asio::use_awaitable);
-
             // Get the current coroutine executor
             auto exec = co_await asio::this_coro::executor;
 
@@ -116,12 +157,21 @@ namespace
             tcp::resolver resolver(exec);
             auto endpoints = co_await resolver.async_resolve(target_host, target_port, asio::use_awaitable);
 
-            ssl::context server_ctx(ssl::context::tlsv12_client);
-            server_ctx.set_default_verify_paths();
+            ssl::stream<tcp::socket> server_ssl(exec, *server_ctx);
 
-            ssl::stream<tcp::socket> server_ssl(exec, server_ctx);
-            co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
-            co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
+            auto connect_server = [&]() -> asio::awaitable<void>
+            {
+                co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
+                set_socket_options(server_ssl.next_layer(), socket_options, context, "server socket");
+                co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
+            };
+
+            using namespace boost::asio::experimental::awaitable_operators;
+
+            // The proxy can connect to DC while the client-side TLS handshake is in progress.
+            co_await(
+                client_ssl.async_handshake(ssl::stream_base::server, asio::use_awaitable)
+                && connect_server());
 
             co_await bidirectional_transfer(client_ssl, server_ssl, context);
         }
@@ -130,7 +180,7 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger->error("handle_client: connection closed (stream truncated)");
+                context.logger->debug("handle_client: connection closed (stream truncated)");
             }
             else
             {
@@ -143,8 +193,12 @@ namespace
         }
     }
 
-    asio::awaitable<void> runProxy(tcp::endpoint listen_endpoint, ssl::context client_ctx,
+    asio::awaitable<void> runProxy(
+        tcp::endpoint listen_endpoint,
+        std::shared_ptr<ssl::context> client_ctx,
+        std::shared_ptr<ssl::context> server_ctx,
         const std::string& target_host, const std::string& target_port,
+        const SocketOptions& socket_options,
         const awl::testing::TestContext& context)
     {
         try
@@ -156,12 +210,20 @@ namespace
             while (true)
             {
                 tcp::socket sock = co_await acceptor.async_accept(asio::use_awaitable);
-                ssl::stream<tcp::socket> client_ssl(std::move(sock), client_ctx);
+                set_socket_options(sock, socket_options, context, "client socket");
+
+                ssl::stream<tcp::socket> client_ssl(std::move(sock), *client_ctx);
 
                 // Launch a background coroutine to handle the client
                 co_spawn(
                     exec,
-                    handle_client(std::move(client_ssl), target_host, target_port, context),
+                    handle_client(
+                        std::move(client_ssl),
+                        server_ctx,
+                        target_host,
+                        target_port,
+                        socket_options,
+                        context),
                     asio::detached
                 );
             }
@@ -192,30 +254,53 @@ AWL_EXAMPLE(AsioTcpProxy)
     AWL_ATTRIBUTE(std::string, cert_file, "ldap.crt");
     AWL_ATTRIBUTE(std::string, key_file, "ldap.key");
     AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
+    AWL_ATTRIBUTE(unsigned int, thread_count, 1);
+    AWL_ATTRIBUTE(bool, tcp_nodelay, true);
+    AWL_ATTRIBUTE(bool, linger, true);
+    AWL_ATTRIBUTE(int, linger_timeout, 0);
+
+    const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
 
     // SSL context for the client side (proxy acts as a server)
-    ssl::context client_ctx(ssl::context::tlsv12_server);
+    auto client_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_server);
 
-    client_ctx.set_options(
+    client_ctx->set_options(
         ssl::context::default_workarounds
         | ssl::context::no_sslv2
         | ssl::context::no_sslv3
         | ssl::context::single_dh_use
     );
 
-    client_ctx.use_certificate_chain_file(cert_file);
-    client_ctx.use_private_key_file(key_file, ssl::context::pem);
+    client_ctx->use_certificate_chain_file(cert_file);
+    client_ctx->use_private_key_file(key_file, ssl::context::pem);
+
+    const unsigned char session_id_context[] = "awl-asio-tcp-proxy";
+    SSL_CTX_set_session_cache_mode(client_ctx->native_handle(), SSL_SESS_CACHE_SERVER);
+    SSL_CTX_set_session_id_context(
+        client_ctx->native_handle(),
+        session_id_context,
+        sizeof(session_id_context) - 1);
+
+    auto server_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_client);
+    server_ctx->set_default_verify_paths();
+    SSL_CTX_set_session_cache_mode(server_ctx->native_handle(), SSL_SESS_CACHE_CLIENT);
 
     auto pos = target.find(':');
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
-    asio::thread_pool ioc(1);
+    asio::thread_pool ioc(thread_count);
 
     asio::co_spawn(
         ioc,
-        runProxy(tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)), std::move(client_ctx),
-            target_host, target_port, context),
+        runProxy(
+            tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)),
+            std::move(client_ctx),
+            std::move(server_ctx),
+            target_host,
+            target_port,
+            socket_options,
+            context),
         asio::detached);
 
     ioc.join();
