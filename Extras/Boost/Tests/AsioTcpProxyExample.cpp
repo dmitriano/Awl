@@ -73,25 +73,25 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger->debug("transfer: connection closed (stream truncated)");
+                context.logger->trace("transfer: connection closed (stream truncated)");
             }
             else if (e.code() == boost::asio::error::eof)
             {
-                context.logger->debug("transfer: EOF");
+                context.logger->trace("transfer: EOF");
             }
             else if (e.code() == asio::error::connection_reset)
             {
-                context.logger->debug("transfer: Connection Reset.");
+                context.logger->trace("transfer: Connection Reset.");
             }
             else if (
                 e.code() == boost::system::errc::operation_canceled
                 || e.code() == boost::asio::error::operation_aborted)
             {
-                context.logger->debug("transfer: Operation cancelled.");
+                context.logger->trace("transfer: Operation cancelled.");
             }
             else if (e.code().category() == boost::system::system_category() && e.code().value() == 10054)
             {
-                context.logger->debug("transfer Windows Error: WSAECONNRESET.");
+                context.logger->trace("transfer Windows Error: WSAECONNRESET.");
             }
             else
             {
@@ -145,7 +145,7 @@ namespace
         std::shared_ptr<ssl::context> server_ctx,
         const std::string& target_host,
         const std::string& target_port,
-        const SocketOptions& socket_options,
+        SocketOptions socket_options,
         const awl::testing::TestContext& context)
     {
         try
@@ -180,7 +180,7 @@ namespace
             if (e.code() == boost::asio::ssl::error::stream_truncated)
             {
                 // Normal termination: SSL shutdown was not sent
-                context.logger->debug("handle_client: connection closed (stream truncated)");
+                context.logger->trace("handle_client: connection closed (stream truncated)");
             }
             else
             {
@@ -198,7 +198,7 @@ namespace
         std::shared_ptr<ssl::context> client_ctx,
         std::shared_ptr<ssl::context> server_ctx,
         const std::string& target_host, const std::string& target_port,
-        const SocketOptions& socket_options,
+        SocketOptions socket_options,
         const awl::testing::TestContext& context)
     {
         try
@@ -209,14 +209,17 @@ namespace
 
             while (true)
             {
-                tcp::socket sock = co_await acceptor.async_accept(asio::use_awaitable);
+                auto session_exec = asio::make_strand(exec);
+                tcp::socket sock(session_exec);
+
+                co_await acceptor.async_accept(sock, asio::use_awaitable);
                 set_socket_options(sock, socket_options, context, "client socket");
 
                 ssl::stream<tcp::socket> client_ssl(std::move(sock), *client_ctx);
 
                 // Launch a background coroutine to handle the client
                 co_spawn(
-                    exec,
+                    session_exec,
                     handle_client(
                         std::move(client_ssl),
                         server_ctx,
