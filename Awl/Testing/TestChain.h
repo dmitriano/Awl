@@ -85,3 +85,9 @@ AWL_TEST(test_class_name) \
 { \
     test_class_name{ context }.run(); \
 }
+
+#define AWL_EXAMPLE_CLASS(test_class_name) \
+AWL_EXAMPLE(test_class_name) \
+{ \
+    test_class_name{ context }.run(); \
+}
