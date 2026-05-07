@@ -385,7 +385,6 @@ AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
 
 namespace
 {
-    using awl::testing::operator co_await;
     using namespace std::chrono_literals;
 
     struct IAsyncNotify
@@ -396,7 +395,12 @@ namespace
     class AsyncHandler : public awl::Observer<IAsyncNotify>
     {
     public:
-        AsyncHandler(int tag, std::vector<int>* p_events, bool defer = false) :
+        AsyncHandler(
+            awl::IDelayedExecutor& delayed_executor,
+            int tag,
+            std::vector<int>* p_events,
+            bool defer = false) :
+            m_delayedExecutor(delayed_executor),
             m_tag(tag),
             m_events(p_events),
             m_defer(defer)
@@ -407,7 +411,7 @@ namespace
         {
             if (m_defer)
             {
-                co_await 1ms;
+                co_await awl::TimeAwaitable(m_delayedExecutor, 1ms);
             }
 
             m_events->push_back(m_tag * 1000 + value);
@@ -415,6 +419,7 @@ namespace
         }
 
     private:
+        awl::IDelayedExecutor& m_delayedExecutor;
         int m_tag = 0;
         std::vector<int>* m_events = nullptr;
         bool m_defer = false;
@@ -436,10 +441,11 @@ AWL_TEST(Observable_NotifyAsync)
     AWL_UNUSED_CONTEXT;
 
     AsyncObservable observable;
+    awl::testing::TimeQueue time_queue;
     std::vector<int> events;
 
-    AsyncHandler handler1(1, &events, true);
-    AsyncHandler handler2(2, &events, true);
+    AsyncHandler handler1(time_queue, 1, &events, true);
+    AsyncHandler handler2(time_queue, 2, &events, true);
 
     observable.subscribe(&handler1);
     observable.subscribe(&handler2);
@@ -449,13 +455,13 @@ AWL_TEST(Observable_NotifyAsync)
     AWL_ASSERT(!task.is_ready());
     AWL_ASSERT_EQUAL(0u, events.size());
 
-    awl::testing::timeQueue.loop(1);
+    time_queue.loop(1);
 
     AWL_ASSERT(!task.is_ready());
     AWL_ASSERT_EQUAL(1u, events.size());
     AWL_ASSERT_EQUAL(1007, events[0]);
 
-    awl::testing::timeQueue.loop();
+    time_queue.loop();
 
     AWL_ASSERT(task.is_ready());
     AWL_ASSERT_EQUAL(7, task.get());

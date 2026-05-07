@@ -84,12 +84,4 @@ namespace awl::testing
         std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
     };
 
-    using TimeAwaitable = awl::TimeAwaitable;
-
-    inline awl::testing::TimeQueue timeQueue;
-
-    inline TimeAwaitable operator co_await(std::chrono::nanoseconds d) noexcept
-    {
-        return TimeAwaitable(timeQueue, d);
-    }
 }

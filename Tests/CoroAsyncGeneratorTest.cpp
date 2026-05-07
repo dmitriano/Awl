@@ -17,15 +17,14 @@
 
 namespace
 {
-    using awl::testing::operator co_await;
     using namespace std::chrono_literals;
 
-    awl::async_generator<int> gen(int count)
+    awl::async_generator<int> gen(awl::IDelayedExecutor& delayed_executor, int count)
     {
         for (int i = 0; i < count; ++i)
         {
             // std::generator has deleted await_transform()
-            co_await 100ms;
+            co_await awl::TimeAwaitable(delayed_executor, 100ms);
 
             if (i > 5)
             {
@@ -36,13 +35,17 @@ namespace
         }
     }
 
-    awl::Task<void> print(const awl::testing::TestContext& context, int count, std::optional<int> limit = {})
+    awl::Task<void> print(
+        const awl::testing::TestContext& context,
+        awl::IDelayedExecutor& delayed_executor,
+        int count,
+        std::optional<int> limit = {})
     {
         //Unfortunately, 'for co_await' syntax is not approved for C++20 (I hope for now!) and instead of an elegant code we have to write
         //old school for loop with previously captured by rvalue generator.
         //for co_await(int i : gen())
 
-        auto g = gen(count);
+        auto g = gen(delayed_executor, count);
 
         int n = 0;
 
@@ -71,15 +74,15 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::Job test(const awl::testing::TestContext& context)
+    awl::Job test(const awl::testing::TestContext& context, awl::IDelayedExecutor& delayed_executor)
     {
-        co_await print(context, 3);
+        co_await print(context, delayed_executor, 3);
 
-        co_await print(context, 10, 2);
+        co_await print(context, delayed_executor, 10, 2);
 
         try
         {
-            co_await print(context, 10);
+            co_await print(context, delayed_executor, 10);
 
             AWL_FAILM(_T("AsyncGenerator did not throw."));
         }
@@ -96,53 +99,57 @@ namespace
 
 AWL_TEST(CoroAsyncGeneratorOwned)
 {
-    awl::Job task = test(context);
+    awl::testing::TimeQueue time_queue;
+
+    awl::Job task = test(context, time_queue);
 
     AWL_ASSERT(!task.done());
 
-    awl::testing::timeQueue.loop(3);
+    time_queue.loop(3);
 
     AWL_ASSERT(!task.done());
 
-    awl::testing::timeQueue.loop();
+    time_queue.loop();
 
     AWL_ASSERT(task.done());
 }
 
 AWL_TEST(CoroControllerCancel)
 {
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    controller.spawn(test(context));
+    controller.spawn(test(context, time_queue));
 
-    awl::testing::timeQueue.loop(3);
+    time_queue.loop(3);
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
     context.logger->debug(_T(""));
 
-    // This invalidates timeQueue.
+    // This invalidates time_queue.
     controller.cancel();
 
     AWL_ASSERT_EQUAL(0u, controller.task_count());
 
-    awl::testing::timeQueue.clear();
+    time_queue.clear();
 }
 
 AWL_TEST(CoroControllerRegistered)
 {
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    controller.spawn(test(context));
+    controller.spawn(test(context, time_queue));
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    awl::testing::timeQueue.loop(3);
+    time_queue.loop(3);
 
     // The task is still in the list.
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    awl::testing::timeQueue.loop();
+    time_queue.loop();
 
     // The task has removed itself automatically from the list.
     AWL_ASSERT_EQUAL(0u, controller.task_count());
@@ -150,9 +157,12 @@ AWL_TEST(CoroControllerRegistered)
 
 namespace
 {
-    awl::Job PrintFinished(const awl::testing::TestContext& context, int id)
+    awl::Job PrintFinished(
+        const awl::testing::TestContext& context,
+        awl::IDelayedExecutor& delayed_executor,
+        int id)
     {
-        co_await 100ms;
+        co_await awl::TimeAwaitable(delayed_executor, 100ms);
 
         context.logger->debug(_T("{} finished"), id);
     }
@@ -164,16 +174,24 @@ namespace awl
     {
     public:
 
-        static awl::Job TestWaitAllTask(const awl::testing::TestContext& context, awl::TaskPool& controller)
+        static awl::Job TestWaitAllTask(
+            const awl::testing::TestContext& context,
+            awl::IDelayedExecutor& delayed_executor,
+            awl::TaskPool& controller)
         {
-            RegisterTasks(context, controller);
+            RegisterTasks(context, delayed_executor, controller);
 
             co_await controller.wait_all_task_experimental();
         }
 
-        static awl::Job TestWait(const awl::testing::TestContext& context, awl::TaskPool& controller, bool all_task = false, std::size_t actual_N = 2)
+        static awl::Job TestWait(
+            const awl::testing::TestContext& context,
+            awl::IDelayedExecutor& delayed_executor,
+            awl::TaskPool& controller,
+            bool all_task = false,
+            std::size_t actual_N = 2)
         {
-            RegisterTasks(context, controller);
+            RegisterTasks(context, delayed_executor, controller);
 
             context.logger->debug("wait_any() started");
 
@@ -199,11 +217,14 @@ namespace awl
 
     private:
 
-        static void RegisterTasks(const awl::testing::TestContext& context, awl::TaskPool& controller)
+        static void RegisterTasks(
+            const awl::testing::TestContext& context,
+            awl::IDelayedExecutor& delayed_executor,
+            awl::TaskPool& controller)
         {
-            controller.spawn(PrintFinished(context, 1));
-            controller.spawn(PrintFinished(context, 2));
-            controller.spawn(PrintFinished(context, 3));
+            controller.spawn(PrintFinished(context, delayed_executor, 1));
+            controller.spawn(PrintFinished(context, delayed_executor, 2));
+            controller.spawn(PrintFinished(context, delayed_executor, 3));
 
             AWL_ASSERT_EQUAL(3u, controller.task_count());
         }
@@ -212,34 +233,36 @@ namespace awl
 
 AWL_TEST(CoroControllerWaitAllTask)
 {
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    awl::Job task = awl::ControllerTest::TestWaitAllTask(context, controller);
+    awl::Job task = awl::ControllerTest::TestWaitAllTask(context, time_queue, controller);
 
-    awl::testing::timeQueue.loop(1);
+    time_queue.loop(1);
 
     AWL_ASSERT_EQUAL(2u, controller.task_count());
 
-    awl::testing::timeQueue.loop(1);
+    time_queue.loop(1);
 
     AWL_ASSERT_EQUAL(1u, controller.task_count());
 
-    awl::testing::timeQueue.loop(1);
+    time_queue.loop(1);
 
     AWL_ASSERT_EQUAL(0u, controller.task_count());
 
-    AWL_ASSERT(awl::testing::timeQueue.empty());
+    AWL_ASSERT(time_queue.empty());
 
     AWL_ASSERT(task.done());
 }
 
 AWL_TEST(CoroControllerWait)
 {
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    awl::Job task = awl::ControllerTest::TestWait(context, controller);
+    awl::Job task = awl::ControllerTest::TestWait(context, time_queue, controller);
 
-    awl::testing::timeQueue.loop();
+    time_queue.loop();
 
     AWL_ASSERT(task.done());
 }
@@ -248,15 +271,16 @@ AWL_TEST(CoroControllerCancelWait1)
 {
     AWL_FLAG(all_task);
 
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    awl::Job task = awl::ControllerTest::TestWait(context, controller, all_task, 0);
+    awl::Job task = awl::ControllerTest::TestWait(context, time_queue, controller, all_task, 0);
 
     controller.cancel();
 
     AWL_ASSERT(task.done());
 
-    awl::testing::timeQueue.clear();
+    time_queue.clear();
 }
 
 // Fails with all_task=true
@@ -265,15 +289,16 @@ AWL_TEST(CoroControllerCancelWait2)
 {
     AWL_FLAG(all_task);
 
+    awl::testing::TimeQueue time_queue;
     awl::TaskPool controller;
 
-    awl::Job task = awl::ControllerTest::TestWait(context, controller, all_task);
+    awl::Job task = awl::ControllerTest::TestWait(context, time_queue, controller, all_task);
 
-    awl::testing::timeQueue.loop(1);
+    time_queue.loop(1);
 
     controller.cancel();
 
     AWL_ASSERT(task.done());
 
-    awl::testing::timeQueue.clear();
+    time_queue.clear();
 }

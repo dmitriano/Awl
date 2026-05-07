@@ -119,10 +119,9 @@ namespace
 
         void return_void() {}
 
-        // use `co_await std::chrono::seconds{n}` to wait specified amount of time
-        auto await_transform(std::chrono::milliseconds d)
+        auto await_transform(awl::TimeAwaitable awaitable)
         {
-            return awl::testing::TimeAwaitable{ awl::testing::timeQueue, d };
+            return awaitable;
         }
 
         // also we can await other Job<T>
@@ -174,26 +173,26 @@ namespace
 
     using namespace std::chrono_literals;
 
-    Job TestTimerAwait(awl::testing::TestContext context)
+    Job TestTimerAwait(awl::testing::TestContext context, awl::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestTimerAwait started."));
 
-        co_await 1s;
+        co_await awl::TimeAwaitable(delayed_executor, 1s);
 
         context.logger->debug(_T("TestTimerAwait finished."));
     }
 
-    Job TestNestedTask(awl::testing::TestContext context)
+    Job TestNestedTask(awl::testing::TestContext context, awl::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestNestedTask started."));
 
-        auto task = TestTimerAwait(context);
+        auto task = TestTimerAwait(context, delayed_executor);
 
-        co_await 2s;
+        co_await awl::TimeAwaitable(delayed_executor, 2s);
 
         context.logger->debug(_T("Time interval has elapsed."));
 
@@ -216,7 +215,9 @@ namespace
 //Job destructor.
 AWL_UNSTABLE_EXAMPLE(CoroMsvcDestructorBugFix)
 {
-    auto task = TestNestedTask(context);
+    awl::testing::TimeQueue time_queue;
 
-    awl::testing::timeQueue.loop();
+    auto task = TestNestedTask(context, time_queue);
+
+    time_queue.loop();
 }
