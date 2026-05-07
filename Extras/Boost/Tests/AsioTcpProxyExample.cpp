@@ -6,9 +6,12 @@
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/multiple_exceptions.hpp>
 #include <openssl/ssl.h>
 #include <iomanip>
 #include <memory>
+#include <mutex>
+#include <string>
 
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
@@ -52,6 +55,90 @@ namespace
         boost::system::error_code ignored_ec;
         socket.shutdown(tcp::socket::shutdown_both, ignored_ec);
         socket.close(ignored_ec);
+    }
+
+    class TlsClientSessionCache
+    {
+    public:
+        void apply(ssl::stream<tcp::socket>& stream, const awl::testing::TestContext& context)
+        {
+            auto session = copy();
+            if (!session)
+            {
+                return;
+            }
+
+            const int result = SSL_set_session(stream.native_handle(), session.get());
+            context.logger->trace("TLS upstream session reuse requested: {}", result != 0);
+        }
+
+        void store(ssl::stream<tcp::socket>& stream, const awl::testing::TestContext& context)
+        {
+            SSL_SESSION* session = SSL_get1_session(stream.native_handle());
+            if (session == nullptr)
+            {
+                return;
+            }
+
+            std::lock_guard lock(mutex_);
+            session_.reset(session);
+            context.logger->trace("TLS upstream session cached. Reused: {}", SSL_session_reused(stream.native_handle()) != 0);
+        }
+
+    private:
+        struct SslSessionDeleter
+        {
+            void operator()(SSL_SESSION* session) const noexcept
+            {
+                SSL_SESSION_free(session);
+            }
+        };
+
+        using SslSessionPtr = std::unique_ptr<SSL_SESSION, SslSessionDeleter>;
+
+        SslSessionPtr copy()
+        {
+            std::lock_guard lock(mutex_);
+            if (!session_)
+            {
+                return nullptr;
+            }
+
+            if (SSL_SESSION_up_ref(session_.get()) != 1)
+            {
+                return nullptr;
+            }
+
+            return SslSessionPtr(session_.get());
+        }
+
+        std::mutex mutex_;
+        SslSessionPtr session_;
+    };
+
+    std::string describe_exception(std::exception_ptr exception)
+    {
+        if (!exception)
+        {
+            return "empty exception";
+        }
+
+        try
+        {
+            std::rethrow_exception(exception);
+        }
+        catch (const boost::asio::multiple_exceptions& e)
+        {
+            return std::string(e.what()) + "; first nested exception: " + describe_exception(e.first_exception());
+        }
+        catch (const std::exception& e)
+        {
+            return e.what();
+        }
+        catch (...)
+        {
+            return "unknown non-standard exception";
+        }
     }
 
     asio::awaitable<void> transfer(
@@ -148,6 +235,7 @@ namespace
     asio::awaitable<void> handle_client(
         ssl::stream<tcp::socket> client_ssl,
         std::shared_ptr<ssl::context> server_ctx,
+        std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
         const std::string& target_host,
         const std::string& target_port,
         SocketOptions socket_options,
@@ -168,7 +256,9 @@ namespace
             {
                 co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
                 set_socket_options(server_ssl.next_layer(), socket_options, context, "server socket");
+                tls_client_session_cache->apply(server_ssl, context);
                 co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
+                tls_client_session_cache->store(server_ssl, context);
             };
 
             using namespace boost::asio::experimental::awaitable_operators;
@@ -192,6 +282,14 @@ namespace
                 context.logger->error(_T("handle_client exception: {}"), awl::fromACString(e.what()));
             }
         }
+        catch (const boost::asio::multiple_exceptions& e)
+        {
+            const std::string first_exception = describe_exception(e.first_exception());
+            context.logger->error(
+                _T("handle_client exception: {}; first nested exception: {}"),
+                awl::fromACString(e.what()),
+                awl::fromACString(first_exception.c_str()));
+        }
         catch (const std::exception& e)
         {
             context.logger->error(_T("handle_client exception: {}"), awl::fromACString(e.what()));
@@ -202,6 +300,7 @@ namespace
         tcp::endpoint listen_endpoint,
         std::shared_ptr<ssl::context> client_ctx,
         std::shared_ptr<ssl::context> server_ctx,
+        std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
         const std::string& target_host, const std::string& target_port,
         SocketOptions socket_options,
         const awl::testing::TestContext& context)
@@ -228,6 +327,7 @@ namespace
                     handle_client(
                         std::move(client_ssl),
                         server_ctx,
+                        tls_client_session_cache,
                         target_host,
                         target_port,
                         socket_options,
@@ -292,6 +392,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     auto server_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_client);
     server_ctx->set_default_verify_paths();
     SSL_CTX_set_session_cache_mode(server_ctx->native_handle(), SSL_SESS_CACHE_CLIENT);
+    auto tls_client_session_cache = std::make_shared<TlsClientSessionCache>();
 
     auto pos = target.find(':');
     const std::string target_host = target.substr(0, pos);
@@ -305,6 +406,7 @@ AWL_EXAMPLE(AsioTcpProxy)
             tcp::endpoint(tcp::v4(), static_cast<unsigned short>(listen_port)),
             std::move(client_ctx),
             std::move(server_ctx),
+            std::move(tls_client_session_cache),
             target_host,
             target_port,
             socket_options,
