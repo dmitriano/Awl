@@ -10,13 +10,19 @@
 #include <coroutine>
 #include <limits>
 
+#include "Awl/Coro/TimeAwaitable.h"
 #include "Awl/KeyCompare.h"
 
 namespace awl::testing
 {
-    class TimeQueue
+    class TimeQueue : public awl::IDelayedExecutor
     {
     public:
+
+        void executeAfter(std::coroutine_handle<> handle, std::chrono::nanoseconds delay) override
+        {
+            push(handle, delay);
+        }
 
         void push(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
         {
@@ -78,35 +84,7 @@ namespace awl::testing
         std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
     };
 
-    class TimeAwaitable
-    {
-    public:
-
-        TimeAwaitable(TimeQueue& time_queue, std::chrono::nanoseconds d) :
-            timeQueue(time_queue),
-            m_d(d)
-        {
-        }
-
-        bool await_ready()
-        {
-            return m_d <= std::chrono::nanoseconds(0);
-        }
-
-        // h is a handler for current coroutine which is suspended
-        void await_suspend(std::coroutine_handle<> h)
-        {
-            // submit suspended coroutine to be resumed after timeout
-            timeQueue.push(h, m_d);
-        }
-
-        void await_resume() {}
-
-    private:
-
-        TimeQueue& timeQueue;
-        std::chrono::nanoseconds m_d;
-    };
+    using TimeAwaitable = awl::TimeAwaitable;
 
     inline awl::testing::TimeQueue timeQueue;
 
