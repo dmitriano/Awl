@@ -396,7 +396,7 @@ namespace
     {
     public:
         AsyncHandler(
-            awl::IDelayedExecutor& delayed_executor,
+            awl::coro::IDelayedExecutor& delayed_executor,
             int tag,
             std::vector<int>* p_events,
             bool defer = false) :
@@ -411,7 +411,7 @@ namespace
         {
             if (m_defer)
             {
-                co_await awl::TimeAwaitable(m_delayedExecutor, 1ms);
+                co_await awl::coro::DelayedAwaitable(m_delayedExecutor, 1ms);
             }
 
             m_events->push_back(m_tag * 1000 + value);
@@ -419,7 +419,7 @@ namespace
         }
 
     private:
-        awl::IDelayedExecutor& m_delayedExecutor;
+        awl::coro::IDelayedExecutor& m_delayedExecutor;
         int m_tag = 0;
         std::vector<int>* m_events = nullptr;
         bool m_defer = false;

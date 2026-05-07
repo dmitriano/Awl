@@ -19,12 +19,12 @@ namespace
 {
     using namespace std::chrono_literals;
 
-    awl::async_generator<int> gen(awl::IDelayedExecutor& delayed_executor, int count)
+    awl::async_generator<int> gen(awl::coro::IDelayedExecutor& delayed_executor, int count)
     {
         for (int i = 0; i < count; ++i)
         {
             // std::generator has deleted await_transform()
-            co_await awl::TimeAwaitable(delayed_executor, 100ms);
+            co_await awl::coro::DelayedAwaitable(delayed_executor, 100ms);
 
             if (i > 5)
             {
@@ -37,7 +37,7 @@ namespace
 
     awl::Task<void> print(
         const awl::testing::TestContext& context,
-        awl::IDelayedExecutor& delayed_executor,
+        awl::coro::IDelayedExecutor& delayed_executor,
         int count,
         std::optional<int> limit = {})
     {
@@ -74,7 +74,7 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::Job test(const awl::testing::TestContext& context, awl::IDelayedExecutor& delayed_executor)
+    awl::Job test(const awl::testing::TestContext& context, awl::coro::IDelayedExecutor& delayed_executor)
     {
         co_await print(context, delayed_executor, 3);
 
@@ -159,10 +159,10 @@ namespace
 {
     awl::Job PrintFinished(
         const awl::testing::TestContext& context,
-        awl::IDelayedExecutor& delayed_executor,
+        awl::coro::IDelayedExecutor& delayed_executor,
         int id)
     {
-        co_await awl::TimeAwaitable(delayed_executor, 100ms);
+        co_await awl::coro::DelayedAwaitable(delayed_executor, 100ms);
 
         context.logger->debug(_T("{} finished"), id);
     }
@@ -176,7 +176,7 @@ namespace awl
 
         static awl::Job TestWaitAllTask(
             const awl::testing::TestContext& context,
-            awl::IDelayedExecutor& delayed_executor,
+            awl::coro::IDelayedExecutor& delayed_executor,
             awl::TaskPool& controller)
         {
             RegisterTasks(context, delayed_executor, controller);
@@ -186,7 +186,7 @@ namespace awl
 
         static awl::Job TestWait(
             const awl::testing::TestContext& context,
-            awl::IDelayedExecutor& delayed_executor,
+            awl::coro::IDelayedExecutor& delayed_executor,
             awl::TaskPool& controller,
             bool all_task = false,
             std::size_t actual_N = 2)
@@ -219,7 +219,7 @@ namespace awl
 
         static void RegisterTasks(
             const awl::testing::TestContext& context,
-            awl::IDelayedExecutor& delayed_executor,
+            awl::coro::IDelayedExecutor& delayed_executor,
             awl::TaskPool& controller)
         {
             controller.spawn(PrintFinished(context, delayed_executor, 1));

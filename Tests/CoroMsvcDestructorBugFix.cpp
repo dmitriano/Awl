@@ -119,7 +119,7 @@ namespace
 
         void return_void() {}
 
-        auto await_transform(awl::TimeAwaitable awaitable)
+        auto await_transform(awl::coro::DelayedAwaitable awaitable)
         {
             return awaitable;
         }
@@ -173,18 +173,18 @@ namespace
 
     using namespace std::chrono_literals;
 
-    Job TestTimerAwait(awl::testing::TestContext context, awl::IDelayedExecutor& delayed_executor)
+    Job TestTimerAwait(awl::testing::TestContext context, awl::coro::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestTimerAwait started."));
 
-        co_await awl::TimeAwaitable(delayed_executor, 1s);
+        co_await awl::coro::DelayedAwaitable(delayed_executor, 1s);
 
         context.logger->debug(_T("TestTimerAwait finished."));
     }
 
-    Job TestNestedTask(awl::testing::TestContext context, awl::IDelayedExecutor& delayed_executor)
+    Job TestNestedTask(awl::testing::TestContext context, awl::coro::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
@@ -192,7 +192,7 @@ namespace
 
         auto task = TestTimerAwait(context, delayed_executor);
 
-        co_await awl::TimeAwaitable(delayed_executor, 2s);
+        co_await awl::coro::DelayedAwaitable(delayed_executor, 2s);
 
         context.logger->debug(_T("Time interval has elapsed."));
 

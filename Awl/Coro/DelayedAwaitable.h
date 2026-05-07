@@ -7,13 +7,13 @@
 
 #include "Awl/Coro/IDelayedExecutor.h"
 
-namespace awl
+namespace awl::coro
 {
-    class TimeAwaitable
+    class DelayedAwaitable
     {
     public:
 
-        TimeAwaitable(IDelayedExecutor& executor, std::chrono::nanoseconds delay) :
+        DelayedAwaitable(IDelayedExecutor& executor, std::chrono::nanoseconds delay) :
             m_executor(executor),
             m_delay(delay)
         {

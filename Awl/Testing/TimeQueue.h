@@ -10,12 +10,12 @@
 #include <coroutine>
 #include <limits>
 
-#include "Awl/Coro/TimeAwaitable.h"
+#include "Awl/Coro/DelayedAwaitable.h"
 #include "Awl/KeyCompare.h"
 
 namespace awl::testing
 {
-    class TimeQueue : public awl::IDelayedExecutor
+    class TimeQueue : public awl::coro::IDelayedExecutor
     {
     public:
 
