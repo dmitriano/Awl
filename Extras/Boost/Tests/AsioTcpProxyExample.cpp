@@ -6,6 +6,7 @@
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/concurrent_channel.hpp>
 #include <boost/asio/multiple_exceptions.hpp>
 #include <openssl/ssl.h>
 #include <atomic>
@@ -31,6 +32,7 @@ namespace
     struct ProxyStats
     {
         std::atomic_uint64_t active_sessions = 0;
+        std::atomic_uint64_t upstream_waiters = 0;
         std::atomic_uint64_t active_upstream_handshakes = 0;
         std::atomic_uint64_t refused_total = 0;
         std::atomic_uint64_t refused_interval = 0;
@@ -57,6 +59,92 @@ namespace
 
     private:
         std::atomic_uint64_t& counter_;
+    };
+
+    class UpstreamConcurrencyLimiter
+    {
+    public:
+        UpstreamConcurrencyLimiter(asio::any_io_executor executor, unsigned int limit) :
+            limit_(limit),
+            channel_(std::move(executor), limit == 0 ? 1 : limit)
+        {
+            for (unsigned int i = 0; i < limit_; ++i)
+            {
+                channel_.try_send(boost::system::error_code{});
+            }
+        }
+
+        bool enabled() const
+        {
+            return limit_ != 0;
+        }
+
+        asio::awaitable<void> acquire()
+        {
+            if (!enabled())
+            {
+                co_return;
+            }
+
+            co_await channel_.async_receive(asio::use_awaitable);
+        }
+
+        void release()
+        {
+            if (enabled())
+            {
+                [[maybe_unused]] const bool sent = channel_.try_send(boost::system::error_code{});
+            }
+        }
+
+    private:
+        unsigned int limit_;
+        boost::asio::experimental::concurrent_channel<void(boost::system::error_code)> channel_;
+    };
+
+    class UpstreamConcurrencyPermit
+    {
+    public:
+        explicit UpstreamConcurrencyPermit(std::shared_ptr<UpstreamConcurrencyLimiter> limiter) :
+            limiter_(std::move(limiter))
+        {
+        }
+
+        ~UpstreamConcurrencyPermit()
+        {
+            release();
+        }
+
+        UpstreamConcurrencyPermit(const UpstreamConcurrencyPermit&) = delete;
+        UpstreamConcurrencyPermit& operator=(const UpstreamConcurrencyPermit&) = delete;
+
+        UpstreamConcurrencyPermit(UpstreamConcurrencyPermit&& other) noexcept :
+            limiter_(std::move(other.limiter_))
+        {
+        }
+
+        UpstreamConcurrencyPermit& operator=(UpstreamConcurrencyPermit&& other) noexcept
+        {
+            if (this != &other)
+            {
+                release();
+                limiter_ = std::move(other.limiter_);
+            }
+
+            return *this;
+        }
+
+    private:
+        void release()
+        {
+            if (limiter_)
+            {
+                limiter_->release();
+                limiter_.reset();
+            }
+        }
+
+        std::shared_ptr<UpstreamConcurrencyLimiter> limiter_;
     };
 
     void set_socket_options(
@@ -228,8 +316,9 @@ namespace
             const auto reset = stats->reset_interval.exchange(0, std::memory_order_relaxed);
 
             context.logger->trace(
-                "proxy stats: active_sessions={}, active_upstream_handshakes={}, refused/s={}, refused_total={}, reset/s={}, reset_total={}",
+                "proxy stats: active_sessions={}, upstream_waiters={}, active_upstream_handshakes={}, refused/s={}, refused_total={}, reset/s={}, reset_total={}",
                 stats->active_sessions.load(std::memory_order_relaxed),
+                stats->upstream_waiters.load(std::memory_order_relaxed),
                 stats->active_upstream_handshakes.load(std::memory_order_relaxed),
                 refused,
                 stats->refused_total.load(std::memory_order_relaxed),
@@ -333,6 +422,7 @@ namespace
         ssl::stream<tcp::socket> client_ssl,
         std::shared_ptr<ssl::context> server_ctx,
         std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
+        std::shared_ptr<UpstreamConcurrencyLimiter> upstream_concurrency_limiter,
         std::shared_ptr<ProxyStats> stats,
         const std::string& target_host,
         const std::string& target_port,
@@ -354,6 +444,12 @@ namespace
 
             auto connect_server = [&]() -> asio::awaitable<void>
             {
+                {
+                    AtomicCounterGuard upstream_waiter(stats->upstream_waiters);
+                    co_await upstream_concurrency_limiter->acquire();
+                }
+
+                UpstreamConcurrencyPermit upstream_permit(upstream_concurrency_limiter);
                 AtomicCounterGuard active_upstream_handshake(stats->active_upstream_handshakes);
 
                 co_await asio::async_connect(server_ssl.next_layer(), endpoints, asio::use_awaitable);
@@ -406,6 +502,7 @@ namespace
         std::shared_ptr<ssl::context> client_ctx,
         std::shared_ptr<ssl::context> server_ctx,
         std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
+        std::shared_ptr<UpstreamConcurrencyLimiter> upstream_concurrency_limiter,
         std::shared_ptr<ProxyStats> stats,
         const std::string& target_host, const std::string& target_port,
         SocketOptions socket_options,
@@ -434,6 +531,7 @@ namespace
                         std::move(client_ssl),
                         server_ctx,
                         tls_client_session_cache,
+                        upstream_concurrency_limiter,
                         stats,
                         target_host,
                         target_port,
@@ -473,6 +571,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     AWL_ATTRIBUTE(bool, tcp_nodelay, true);
     AWL_ATTRIBUTE(bool, linger, true);
     AWL_ATTRIBUTE(int, linger_timeout, 0);
+    AWL_ATTRIBUTE(unsigned int, upstream_concurrency_limit, 256);
 
     const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
 
@@ -507,6 +606,8 @@ AWL_EXAMPLE(AsioTcpProxy)
     const std::string target_port = target.substr(pos + 1);
 
     asio::thread_pool ioc(thread_count);
+    auto upstream_concurrency_limiter =
+        std::make_shared<UpstreamConcurrencyLimiter>(ioc.get_executor(), upstream_concurrency_limit);
 
     asio::co_spawn(ioc, log_proxy_stats(stats, context), asio::detached);
 
@@ -517,6 +618,7 @@ AWL_EXAMPLE(AsioTcpProxy)
             std::move(client_ctx),
             std::move(server_ctx),
             std::move(tls_client_session_cache),
+            std::move(upstream_concurrency_limiter),
             stats,
             target_host,
             target_port,
