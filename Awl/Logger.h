@@ -22,8 +22,6 @@ namespace awl
     {
     public:
 
-        virtual ~Logger() = default;
-
         virtual bool enabled(const std::string& level) const
         {
             static_cast<void>(level);
