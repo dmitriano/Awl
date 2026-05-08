@@ -9,6 +9,7 @@
 
 #include "Awl/Testing/UnitTest.h"
 
+#include <memory>
 #include <source_location>
 #include <string_view>
 
@@ -38,6 +39,12 @@ namespace
             m_level = level;
             m_location = message.location();
             m_message = message.str();
+        }
+
+        std::shared_ptr<awl::Logger> createLogger(std::string source) const override
+        {
+            static_cast<void>(source);
+            return std::make_shared<CaptureLogger>();
         }
 
         const std::string& level() const
@@ -169,4 +176,10 @@ AWL_TEST(Logger)
 
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
+
+    auto root_logger = std::make_shared<awl::ConsoleLogger>(out, awl::LogLevel::Info, "Root");
+    std::shared_ptr<awl::Logger> child_logger = root_logger->createLogger("Child");
+    child_logger->info("source message");
+
+    AWL_ASSERT(out.str().find(_T("Root.Child")) != awl::String::npos);
 }

@@ -5,8 +5,10 @@
 
 #include <chrono>
 #include <source_location>
+#include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #if defined(__APPLE__)
 #include <ctime>
@@ -20,15 +22,55 @@ namespace
         const size_t pos = full_path.find_last_of("/\\");
         return pos == std::string_view::npos ? full_path : full_path.substr(pos + 1);
     }
+
+    std::string joinSource(const std::vector<std::string>& source)
+    {
+        std::string result;
+
+        for (const std::string& segment : source)
+        {
+            if (segment.empty())
+            {
+                continue;
+            }
+
+            if (!result.empty())
+            {
+                result.push_back('.');
+            }
+
+            result.append(segment);
+        }
+
+        return result;
+    }
 }
 
 namespace awl
 {
     ConsoleLogger::ConsoleLogger(
         awl::ostream& out,
-        std::string min_level) :
+        std::string min_level,
+        std::string source) :
         m_out(out),
-        m_minSeverity(log_level_severity(std::move(min_level)))
+        m_minLevel(std::move(min_level)),
+        m_minSeverity(log_level_severity(m_minLevel)),
+        m_source()
+    {
+        if (!source.empty())
+        {
+            m_source.push_back(std::move(source));
+        }
+    }
+
+    ConsoleLogger::ConsoleLogger(
+        awl::ostream& out,
+        std::string min_level,
+        std::vector<std::string> source) :
+        m_out(out),
+        m_minLevel(std::move(min_level)),
+        m_minSeverity(log_level_severity(m_minLevel)),
+        m_source(std::move(source))
     {
     }
 
@@ -53,16 +95,38 @@ namespace awl
         temp_out << std::chrono::system_clock::now();
 #endif
 
+        temp_out << _T('\t') << level;
+
+        const std::string source = joinSource(m_source);
+
+        if (!source.empty())
+        {
+            temp_out << _T('\t') << awl::fromAString(source);
+        }
+
         temp_out << _T('\t')
-                 << level
-                 << _T('\t')
-                 << awl::fromAString(std::string(fileName(location.file_name())))
-                 << _T(':')
-                 << location.line()
-                 << _T('\t')
-                 << message.str()
-                 << _T('\n');
+            << awl::fromAString(std::string(fileName(location.file_name())))
+            << _T(':')
+            << location.line()
+            << _T('\t')
+            << message.str()
+            << _T('\n');
 
         m_out << temp_out.str();
+    }
+
+    std::shared_ptr<Logger> ConsoleLogger::createLogger(std::string source) const
+    {
+        std::vector<std::string> child_source = m_source;
+
+        if (!source.empty())
+        {
+            child_source.push_back(std::move(source));
+        }
+
+        return std::shared_ptr<Logger>(new ConsoleLogger(
+            m_out,
+            m_minLevel,
+            std::move(child_source)));
     }
 }

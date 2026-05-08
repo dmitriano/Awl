@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Awl/ILoggerFactory.h"
 #include "Awl/String.h"
 #include "Awl/LogFormat.h"
 #include "Awl/LogLevel.h"
@@ -17,7 +18,7 @@
 
 namespace awl
 {
-    class Logger
+    class Logger : public ILoggerFactory
     {
     public:
 
