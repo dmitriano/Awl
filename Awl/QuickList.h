@@ -16,14 +16,10 @@
 namespace awl
 {
     template <class T, class Link, class Derived>
-    class forward_list : public basic_single_list<T, Link, Derived>
-    {
-    };
+    class forward_list : public basic_single_list<T, Link, Derived> {};
 
     template <class T, class Link, class Derived>
-    class backward_list : public basic_single_list<T, Link, Derived>
-    {
-    };
+    class backward_list : public basic_single_list<T, Link, Derived> {};
 
     //! Doubly linked list consisting of two singly linked lists.
     template < class T, class DLink = quick_link>

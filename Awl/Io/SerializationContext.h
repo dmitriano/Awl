@@ -27,9 +27,7 @@ namespace awl::io
         { std::as_const(t).writeV(std::declval<Stream&>(), std::declval<const Val&>()) } -> std::same_as<void>;
     };
 
-    class FakeContext
-    {
-    };
+    class FakeContext {};
 
     class LimitedContext
     {

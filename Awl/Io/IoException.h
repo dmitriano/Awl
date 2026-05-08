@@ -10,9 +10,7 @@
 
 namespace awl::io
 {
-    class IoException : public Exception
-    {
-    };
+    class IoException : public Exception {};
 
     class EndOfFileException : public IoException
     {
@@ -63,13 +61,9 @@ namespace awl::io
         const size_t m_pos;
     };
 
-    class ReadFailException : public IoException
-    {
-    };
+    class ReadFailException : public IoException {};
 
-    class WriteFailException : public IoException
-    {
-    };
+    class WriteFailException : public IoException {};
 
     //The exception indicating a general IO error in the user code.
     //When the user does an IO operation he throws IoError (or an exception of another type derived from IoException)

@@ -56,11 +56,7 @@ namespace
     static_assert(std::is_standard_layout_v<awl::forward_link<LinkA>>);
     static_assert(std::is_standard_layout_v<awl::backward_link<LinkA>>);
 
-    class CompositeLink :
-        public LinkA,
-        public LinkB,
-        public awl::quick_link
-    {};
+    class CompositeLink : public LinkA, public LinkB, public awl::quick_link {};
 
     class Element : public CompositeLink
     {

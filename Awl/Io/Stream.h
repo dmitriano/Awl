@@ -28,9 +28,7 @@ namespace awl
             virtual ~StreamPointer() = default;
         };
 
-        class InputStream : public SequentialInputStream, public virtual StreamPointer
-        {
-        };
+        class InputStream : public SequentialInputStream, public virtual StreamPointer {};
 
         class OutputStream : public SequentialOutputStream, public virtual StreamPointer
         {
@@ -41,8 +39,6 @@ namespace awl
             virtual void truncate() = 0;
         };
 
-        class IoStream : public InputStream, public OutputStream
-        {
-        };
+        class IoStream : public InputStream, public OutputStream {};
     }
 }
