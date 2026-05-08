@@ -31,7 +31,7 @@ namespace awl::testing
     void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
-        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Debug);
+        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 

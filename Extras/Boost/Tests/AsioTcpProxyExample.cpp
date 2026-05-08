@@ -518,7 +518,7 @@ namespace
             const auto upstream_timeout =
                 stats->upstream_timeout_interval.exchange(0, std::memory_order_relaxed);
 
-            context.logger->trace(
+            context.logger->info(
                 "proxy stats: active_sessions={}, upstream_waiters={}, active_upstream_handshakes={}, refused/s={}, refused_total={}, reset/s={}, reset_total={}, rejected_by_proxy/s={}, rejected_by_proxy_total={}, upstream_timeout/s={}, upstream_timeout_total={}",
                 stats->active_sessions.load(std::memory_order_relaxed),
                 stats->upstream_waiters.load(std::memory_order_relaxed),
