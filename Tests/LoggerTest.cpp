@@ -152,4 +152,9 @@ AWL_TEST(Logger)
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Info));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Warning));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Error));
+
+    awl::ConsoleLogger debug_logger(out, awl::LogLevel::Debug);
+
+    AWL_ASSERT_FALSE(debug_logger.enabled(awl::LogLevel::Trace));
+    AWL_ASSERT(debug_logger.enabled(awl::LogLevel::Debug));
 }

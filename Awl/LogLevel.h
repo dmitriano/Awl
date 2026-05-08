@@ -14,8 +14,8 @@
 namespace awl
 {
     AWL_SEQUENTIAL_ENUM(KnownLogLevel,
-        Debug,
         Trace,
+        Debug,
         Info,
         Warning,
         Error
@@ -28,8 +28,8 @@ namespace awl
 {
     struct LogLevel
     {
-        static inline const std::string Debug = enum_to_string(KnownLogLevel::Debug);
         static inline const std::string Trace = enum_to_string(KnownLogLevel::Trace);
+        static inline const std::string Debug = enum_to_string(KnownLogLevel::Debug);
         static inline const std::string Info = enum_to_string(KnownLogLevel::Info);
         static inline const std::string Warning = enum_to_string(KnownLogLevel::Warning);
         static inline const std::string Error = enum_to_string(KnownLogLevel::Error);
