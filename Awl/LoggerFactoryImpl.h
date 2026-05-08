@@ -8,13 +8,26 @@
 
 namespace awl
 {
-    template <class Derived, class Base>
+    template <class Base>
     class LoggerFactoryImpl : public Base
     {
     public:
+        explicit LoggerFactoryImpl(std::shared_ptr<Logger> logger) :
+            m_logger(std::move(logger))
+        {}
+
         std::shared_ptr<Logger> createLogger(std::string source) const override
         {
-            return static_cast<const Derived&>(*this).m_logger->createLogger(std::move(source));
+            return logger()->createLogger(std::move(source));
         }
+
+    protected:
+        const std::shared_ptr<Logger>& logger() const
+        {
+            return m_logger;
+        }
+
+    private:
+        const std::shared_ptr<Logger> m_logger;
     };
 }
