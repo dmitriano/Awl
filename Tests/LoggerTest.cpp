@@ -35,7 +35,7 @@ namespace
 
         void log(const std::string& level, const awl::LogString& message) override
         {
-            ++_log_count;
+            ++_logCount;
             _level = level;
             _location = message.location();
             _message = message.str();
@@ -64,12 +64,12 @@ namespace
 
         int logCount() const
         {
-            return _log_count;
+            return _logCount;
         }
 
     private:
 
-        int _log_count = 0;
+        int _logCount = 0;
         std::string _level;
         awl::String _message;
         std::source_location _location;
