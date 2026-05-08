@@ -922,12 +922,12 @@ AWL_EXAMPLE(AsioTcpProxy)
     AWL_ATTRIBUTE(std::string, cert_file, "ldap.crt");
     AWL_ATTRIBUTE(std::string, key_file, "ldap.key");
     AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
-    AWL_ATTRIBUTE(unsigned int, thread_count, 1);
+    AWL_ATTRIBUTE(unsigned int, thread_count, 4);
     AWL_ATTRIBUTE(bool, tcp_nodelay, true);
     AWL_ATTRIBUTE(bool, linger, true);
     AWL_ATTRIBUTE(int, linger_timeout, 0);
-    AWL_ATTRIBUTE(unsigned int, upstream_concurrency_limit, 256);
-    AWL_ATTRIBUTE(unsigned int, max_upstream_waiters, 200);
+    AWL_ATTRIBUTE(unsigned int, upstream_concurrency_limit, 200);
+    AWL_ATTRIBUTE(unsigned int, max_upstream_waiters, 50);
     AWL_ATTRIBUTE(unsigned int, upstream_handshake_timeout_ms, 3000);
 
     const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
