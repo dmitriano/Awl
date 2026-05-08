@@ -18,7 +18,9 @@ namespace awl
         Debug,
         Info,
         Warning,
-        Error
+        Error,
+        Critical,
+        Off
     )
 }
 
@@ -33,6 +35,8 @@ namespace awl
         static inline const std::string Info = enum_to_string(KnownLogLevel::Info);
         static inline const std::string Warning = enum_to_string(KnownLogLevel::Warning);
         static inline const std::string Error = enum_to_string(KnownLogLevel::Error);
+        static inline const std::string Critical = enum_to_string(KnownLogLevel::Critical);
+        static inline const std::string Off = enum_to_string(KnownLogLevel::Off);
     };
 
     inline std::size_t log_level_severity(std::string level)

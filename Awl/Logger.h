@@ -140,6 +140,25 @@ namespace awl
             log(LogLevel::Error, fmt, std::forward<Args>(args)...);
         }
 
+        void critical(const LogString& message)
+        {
+            logLasy(LogLevel::Critical, message);
+        }
+
+        template <class... Args>
+            requires (sizeof...(Args) > 0)
+        void critical(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        {
+            log(LogLevel::Critical, fmt, std::forward<Args>(args)...);
+        }
+
+        template <class... Args>
+            requires (sizeof...(Args) > 0)
+        void critical(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        {
+            log(LogLevel::Critical, fmt, std::forward<Args>(args)...);
+        }
+
     private:
 
         template <class Character, class... Args>

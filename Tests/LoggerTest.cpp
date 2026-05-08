@@ -107,6 +107,7 @@ AWL_TEST(Logger)
     context.logger->info(awl::String(_T("abc")));
     context.logger->info(_T("abc"));
     context.logger->info(_T("abc"));
+    context.logger->critical("abc");
 
     CaptureLogger logger;
 
@@ -152,9 +153,20 @@ AWL_TEST(Logger)
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Info));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Warning));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Error));
+    AWL_ASSERT(console_logger.enabled(awl::LogLevel::Critical));
 
     awl::ConsoleLogger debug_logger(out, awl::LogLevel::Debug);
 
     AWL_ASSERT_FALSE(debug_logger.enabled(awl::LogLevel::Trace));
     AWL_ASSERT(debug_logger.enabled(awl::LogLevel::Debug));
+
+    awl::ConsoleLogger critical_logger(out, awl::LogLevel::Critical);
+
+    AWL_ASSERT_FALSE(critical_logger.enabled(awl::LogLevel::Error));
+    AWL_ASSERT(critical_logger.enabled(awl::LogLevel::Critical));
+
+    awl::ConsoleLogger off_logger(out, awl::LogLevel::Off);
+
+    AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Error));
+    AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
 }
