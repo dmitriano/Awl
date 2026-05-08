@@ -20,8 +20,10 @@ namespace awl
     class forward_link : public base_single_link<forward_link<DLink>>
     {
     protected:
+
         forward_link() {}
     public:
+
         forward_link(forward_link * n) : base_single_link<forward_link<DLink>>(n) {}
     };
 

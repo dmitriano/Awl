@@ -17,6 +17,7 @@ namespace awl
     class basic_format
     {
     public:
+
         basic_format(std::source_location location = std::source_location::current()) noexcept :
             m_location(location)
         {}

@@ -418,6 +418,7 @@ namespace awl
             }
 
         private:
+
             const void* object_ptr() const noexcept
             {
                 std::shared_ptr<WeakObject> p_locked = m_object.lock();

@@ -32,6 +32,7 @@ namespace awl
         std::shared_ptr<Logger> createLogger(std::string source) const override;
 
     private:
+
         ConsoleLogger(
             awl::ostream& out,
             std::string min_level,

@@ -20,6 +20,7 @@ namespace std {
 class jthread
 {
   public:
+
     //***************************************** 
     //* standardized API:
     //***************************************** 
@@ -74,6 +75,7 @@ class jthread
   //***************************************** 
 
   private:
+
     //*** API for the starting thread:
     stop_source _stopSource;                   // stop_source for started thread
     ::std::thread _thread{};                   // started thread (if any)

@@ -13,9 +13,11 @@ namespace awl
     class KeyEqual
     {
     private:
+
         using Key = std::remove_cvref_t<typename GetKey::value_type>;
 
     public:
+
         using is_transparent = void;
 
         bool operator()(const T& left, const T& right) const
@@ -39,6 +41,7 @@ namespace awl
         }
 
     private:
+
         GetKey m_getKey;
     };
 }

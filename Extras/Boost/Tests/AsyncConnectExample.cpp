@@ -15,6 +15,7 @@ namespace
 {
     class SocketWrapper {
     private:
+
         using SslStream = asio::ssl::stream<tcp::socket>;
 
     public:

@@ -30,6 +30,7 @@ namespace awl::io
     class BasicSharedHandle
     {
     public:
+
         using handle_type = HANDLE;
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
@@ -171,6 +172,7 @@ namespace awl::io
         }
 
     private:
+
         static constexpr bool duplicateNoexcept = std::is_nothrow_invocable_v<const duplicator_type&, HANDLE>;
 
         static HANDLE null() noexcept

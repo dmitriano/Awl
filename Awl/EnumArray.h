@@ -13,6 +13,7 @@ namespace awl
     class enum_array
     {
     public:
+
         using enum_type = Enum;
         using array_type = std::array<T, EnumTraits<Enum>::count()>;
         using value_type = typename array_type::value_type;
@@ -208,6 +209,7 @@ namespace awl
         }
 
     private:
+
         array_type m_items = {};
     };
 }

@@ -105,6 +105,7 @@ namespace awl
         }
 
     private:
+
         static QString toExtendedFormat(common_duration v)
         {
             bool negative = v < common_duration::zero();

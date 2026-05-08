@@ -392,6 +392,7 @@ namespace
     class AsyncHandler : public awl::Observer<IAsyncNotify>
     {
     public:
+
         AsyncHandler(
             awl::coro::IDelayedExecutor& delayed_executor,
             int tag,
@@ -415,6 +416,7 @@ namespace
         }
 
     private:
+
         awl::coro::IDelayedExecutor& m_delayedExecutor;
         int m_tag = 0;
         std::vector<int>* m_events = nullptr;
@@ -424,6 +426,7 @@ namespace
     class AsyncObservable : public awl::Observable<IAsyncNotify>
     {
     public:
+
         awl::Task<int> setValueAsync(int value)
         {
             co_await notifyAsync(&IAsyncNotify::changed, value);

@@ -39,6 +39,7 @@ struct __stop_callback_base {
   }
 
  protected:
+
   // it shall only by us who deletes this
   // (workaround for virtual __execute() and destructor)
   ~__stop_callback_base() = default;
@@ -46,6 +47,7 @@ struct __stop_callback_base {
 
 struct __stop_state {
  public:
+
   void __add_token_reference() noexcept {
     __state_.fetch_add(__token_ref_increment, std::memory_order_relaxed);
   }
@@ -221,6 +223,7 @@ struct __stop_state {
   }
 
  private:
+
   static bool __is_locked(std::uint64_t __state) noexcept {
     return (__state & __locked_flag) != 0;
   }
@@ -324,6 +327,7 @@ inline constexpr nostopstate_t nostopstate{};
 
 class stop_token {
  public:
+
   // construct:
   // - TODO: explicit?
   stop_token() noexcept
@@ -387,6 +391,7 @@ class stop_token {
   }
 
  private:
+
   friend class stop_source;
   template <typename _Callback>
   friend class stop_callback;
@@ -407,6 +412,7 @@ class stop_token {
 
 class stop_source {
  public:
+
   stop_source() : __state_(new __stop_state()) {}
 
   explicit stop_source(nostopstate_t) noexcept : __state_(nullptr) {}
@@ -476,6 +482,7 @@ class stop_source {
   }
 
  private:
+
   __stop_state* __state_;
 };
 
@@ -488,6 +495,7 @@ template <typename _Callback>
 // requires Destructible<_Callback> && Invocable<_Callback>
 class [[nodiscard]] stop_callback : private __stop_callback_base {
  public:
+
   using callback_type = _Callback;
 
   template <
@@ -541,6 +549,7 @@ class [[nodiscard]] stop_callback : private __stop_callback_base {
   stop_callback(stop_callback&&) = delete;
 
  private:
+
   void __execute() noexcept {
     // Executed in a noexcept context
     // If it throws then we call std::terminate().

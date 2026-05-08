@@ -12,6 +12,7 @@ namespace awl
     class LoggerFactoryImpl : public Base
     {
     public:
+
         explicit LoggerFactoryImpl(std::shared_ptr<Logger> logger) :
             m_logger(std::move(logger))
         {}
@@ -22,12 +23,14 @@ namespace awl
         }
 
     protected:
+
         const std::shared_ptr<Logger>& logger() const
         {
             return m_logger;
         }
 
     private:
+
         const std::shared_ptr<Logger> m_logger;
     };
 }

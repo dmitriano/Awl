@@ -32,6 +32,7 @@ namespace awl
             class NullBuffer : public std::basic_streambuf<Char>
             {
             public:
+
                 int overflow(int c) { return c; }
             };
 

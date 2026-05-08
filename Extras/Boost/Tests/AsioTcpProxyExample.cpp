@@ -49,6 +49,7 @@ namespace
     class AtomicCounterGuard
     {
     public:
+
         explicit AtomicCounterGuard(std::atomic_uint64_t& counter) :
             counter_(counter)
         {
@@ -64,12 +65,14 @@ namespace
         AtomicCounterGuard& operator=(const AtomicCounterGuard&) = delete;
 
     private:
+
         std::atomic_uint64_t& counter_;
     };
 
     class UpstreamQueueFullException : public std::exception
     {
     public:
+
         const char* what() const noexcept override
         {
             return "upstream queue is full";
@@ -79,6 +82,7 @@ namespace
     class UpstreamHandshakeTimeoutException : public std::exception
     {
     public:
+
         const char* what() const noexcept override
         {
             return "upstream connect/handshake timeout";
@@ -126,6 +130,7 @@ namespace
     class UpstreamConcurrencyLimiter
     {
     public:
+
         UpstreamConcurrencyLimiter(asio::any_io_executor executor, unsigned int limit) :
             limit_(limit),
             channel_(std::move(executor), limit == 0 ? 1 : limit)
@@ -160,6 +165,7 @@ namespace
         }
 
     private:
+
         unsigned int limit_;
         boost::asio::experimental::concurrent_channel<void(boost::system::error_code)> channel_;
     };
@@ -167,6 +173,7 @@ namespace
     class UpstreamConcurrencyPermit
     {
     public:
+
         explicit UpstreamConcurrencyPermit(std::shared_ptr<UpstreamConcurrencyLimiter> limiter) :
             limiter_(std::move(limiter))
         {}
@@ -195,6 +202,7 @@ namespace
         }
 
     private:
+
         void release()
         {
             if (limiter_)
@@ -301,6 +309,7 @@ namespace
     class TlsClientSessionCache
     {
     public:
+
         void apply(ssl::stream<tcp::socket>& stream, const awl::testing::TestContext& context)
         {
             auto session = copy();
@@ -327,6 +336,7 @@ namespace
         }
 
     private:
+
         struct SslSessionDeleter
         {
             void operator()(SSL_SESSION* session) const noexcept

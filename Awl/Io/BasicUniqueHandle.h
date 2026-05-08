@@ -26,6 +26,7 @@ namespace awl::io
     class BasicUniqueHandle
     {
     public:
+
         using handle_type = HANDLE;
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
@@ -139,6 +140,7 @@ namespace awl::io
         }
 
     private:
+
         static HANDLE null() noexcept
         {
             return null_getter_type::null();

@@ -15,9 +15,11 @@ namespace awl
     class KeyHash
     {
     private:
+
         using Key = std::remove_cvref_t<typename GetKey::value_type>;
 
     public:
+
         using is_transparent = void;
 
         std::size_t operator()(const T& val) const
@@ -31,6 +33,7 @@ namespace awl
         }
 
     private:
+
         GetKey m_getKey;
     };
 }
