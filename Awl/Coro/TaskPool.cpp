@@ -13,25 +13,25 @@ void TaskPool::spawn(Job&& task)
     // (It did not co_await).
     if (!task.done())
     {
-        m_handlers.emplace_back(this, std::move(task));
+        _handlers.emplace_back(this, std::move(task));
 
-        Handler& handler = m_handlers.back();
+        Handler& handler = _handlers.back();
 
-        handler.m_task.subscribe(&handler);
+        handler._task.subscribe(&handler);
     }
 }
 
 void TaskPool::cancel()
 {
     // Do not notify awaiters if nothing changed.
-    if (!m_handlers.empty())
+    if (!_handlers.empty())
     {
-        for (Handler& handler : m_handlers)
+        for (Handler& handler : _handlers)
         {
             handler.unsubscribeSelf();
         }
 
-        m_handlers.clear();
+        _handlers.clear();
 
         notify(&TaskSink::onFinished);
     }
@@ -39,9 +39,9 @@ void TaskPool::cancel()
 
 Job TaskPool::wait_all_task_experimental()
 {
-    while (!m_handlers.empty())
+    while (!_handlers.empty())
     {
-        Job task = std::move(m_handlers.back().m_task);
+        Job task = std::move(_handlers.back()._task);
 
         // The vector contains an empty task and
         // and onFinished() should delete it correctly.
@@ -55,7 +55,7 @@ void TaskPool::Handler::onFinished()
     // The handler is going to be deleted, save its members.
     TaskPool* saved_this = pThis;
 
-    std::vector<Handler>& handlers = saved_this->m_handlers;
+    std::vector<Handler>& handlers = saved_this->_handlers;
 
     const std::size_t index = this - handlers.data();
 

@@ -52,14 +52,14 @@ namespace awl
         awl::ostream& out,
         std::string min_level,
         std::string source) :
-        m_out(out),
-        m_minLevel(std::move(min_level)),
-        m_minSeverity(log_level_severity(m_minLevel)),
-        m_source()
+        _out(out),
+        _minLevel(std::move(min_level)),
+        _minSeverity(log_level_severity(_minLevel)),
+        _source()
     {
         if (!source.empty())
         {
-            m_source.push_back(std::move(source));
+            _source.push_back(std::move(source));
         }
     }
 
@@ -67,15 +67,15 @@ namespace awl
         awl::ostream& out,
         std::string min_level,
         std::vector<std::string> source) :
-        m_out(out),
-        m_minLevel(std::move(min_level)),
-        m_minSeverity(log_level_severity(m_minLevel)),
-        m_source(std::move(source))
+        _out(out),
+        _minLevel(std::move(min_level)),
+        _minSeverity(log_level_severity(_minLevel)),
+        _source(std::move(source))
     {}
 
     bool ConsoleLogger::enabled(const std::string& level) const
     {
-        return log_level_severity(level) >= m_minSeverity;
+        return log_level_severity(level) >= _minSeverity;
     }
 
     void ConsoleLogger::log(const std::string& level, const LogString& message)
@@ -96,7 +96,7 @@ namespace awl
 
         temp_out << _T('\t') << level;
 
-        const std::string source = joinSource(m_source);
+        const std::string source = joinSource(_source);
 
         if (!source.empty())
         {
@@ -111,12 +111,12 @@ namespace awl
             << message.str()
             << _T('\n');
 
-        m_out << temp_out.str();
+        _out << temp_out.str();
     }
 
     std::shared_ptr<Logger> ConsoleLogger::createLogger(std::string source) const
     {
-        std::vector<std::string> child_source = m_source;
+        std::vector<std::string> child_source = _source;
 
         if (!source.empty())
         {
@@ -124,8 +124,8 @@ namespace awl
         }
 
         return std::shared_ptr<Logger>(new ConsoleLogger(
-            m_out,
-            m_minLevel,
+            _out,
+            _minLevel,
             std::move(child_source)));
     }
 }

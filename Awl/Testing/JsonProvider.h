@@ -11,16 +11,16 @@ namespace awl::testing
     {
     public:
 
-        JsonProvider(QJsonObject& jo) : m_jo(jo) {}
+        JsonProvider(QJsonObject& jo) : _jo(jo) {}
 
         template <class T>
         bool tryGet(const char* name, T& val)
         {
-            auto i = m_jo.find(name);
+            auto i = _jo.find(name);
 
             JsonSerializer<T> serializer;
 
-            if (i != m_jo.end())
+            if (i != _jo.end())
             {
                 serializer.fromJson(*i, val);
 
@@ -33,7 +33,7 @@ namespace awl::testing
         template <class T>
         void set(const char* name, const T& val)
         {
-            if (m_jo.contains(name))
+            if (_jo.contains(name))
             {
                 throw JsonException(std::format(_T("Attribute '{}' is already set."), awl::fromACString(name)));
             }
@@ -44,27 +44,27 @@ namespace awl::testing
 
             serializer.toJson(val, jv);
 
-            m_jo[name] = jv;
+            _jo[name] = jv;
 
-            m_dirty = true;
+            _dirty = true;
         }
 
         // Quick fix. Clear the attributes from the previous test.
         void clear()
         {
-            m_jo = {};
+            _jo = {};
         }
 
         bool isDirty() const
         {
-            return m_dirty;
+            return _dirty;
         }
 
     private:
 
-        QJsonObject& m_jo;
+        QJsonObject& _jo;
 
-        bool m_dirty = false;
+        bool _dirty = false;
     };
 
     static_assert(attribute_provider<JsonProvider>);

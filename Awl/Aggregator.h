@@ -26,15 +26,15 @@ namespace awl
 
     public:
 
-        aggregator(Func func) : m_func(std::move(func)), m_cancelled(false)
+        aggregator(Func func) : _func(std::move(func)), _cancelled(false)
         {}
 
         template <std::size_t i>
         void set(std::tuple_element_t<i, Tuple> val)
         {
-            std::get<i>(m_values) = std::move(val);
+            std::get<i>(_values) = std::move(val);
 
-            if (all() && !m_cancelled)
+            if (all() && !_cancelled)
             {
                 call(std::make_index_sequence<std::tuple_size_v<Tuple>>());
             }
@@ -44,7 +44,7 @@ namespace awl
         {
             bool found = false;
 
-            for_each(m_values, [&found](const auto& opt)
+            for_each(_values, [&found](const auto& opt)
             {
                 if (!opt)
                 {
@@ -57,7 +57,7 @@ namespace awl
 
         constexpr void cancel()
         {
-            m_cancelled = true;
+            _cancelled = true;
         }
 
     private:
@@ -65,14 +65,14 @@ namespace awl
         template <std::size_t... index>
         constexpr void call(std::index_sequence<index...>)
         {
-            m_func(std::move(*std::get<index>(m_values))...);
+            _func(std::move(*std::get<index>(_values))...);
         }
 
-        OptionalTuple m_values;
+        OptionalTuple _values;
         
-        Func m_func;
+        Func _func;
 
-        bool m_cancelled;
+        bool _cancelled;
     };
 
     template <class... Ts>

@@ -27,9 +27,9 @@ namespace awl::io
 
     public:
 
-        explicit AtomicStorage(std::shared_ptr<Logger> logger) : m_logger(std::move(logger))
+        explicit AtomicStorage(std::shared_ptr<Logger> logger) : _logger(std::move(logger))
         {
-            assert(m_logger != nullptr);
+            assert(_logger != nullptr);
         }
 
         AtomicStorage(std::shared_ptr<Logger> logger, const awl::String& file_name, const awl::String& backup_name) :
@@ -45,35 +45,35 @@ namespace awl::io
 
         AtomicStorage& operator = (AtomicStorage&& other) noexcept
         {
-            // We can't move m_saveFuture, because it holds this pointer.
+            // We can't move _saveFuture, because it holds this pointer.
             wait();
 
-            m_s = std::move(other.m_s);
-            m_backup = std::move(other.m_backup);
+            _s = std::move(other._s);
+            _backup = std::move(other._backup);
             return *this;
         }
 
         bool isEmpty() const
         {
             assert(isOpened());
-            assert(!m_saveFuture.valid());
+            assert(!_saveFuture.valid());
 
-            return m_s.length() == 0 && m_backup.length() == 0;
+            return _s.length() == 0 && _backup.length() == 0;
         }
 
         bool isOpened() const
         {
-            return m_s != UniqueStream{};
+            return _s != UniqueStream{};
         }
 
         bool open(const awl::String& file_name, const awl::String& backup_name)
         {
             try
             {
-                m_s = awl::io::createUniqueFile(file_name);
+                _s = awl::io::createUniqueFile(file_name);
                 const bool master_existed = openedExisting();
 
-                m_backup = awl::io::createUniqueFile(backup_name);
+                _backup = awl::io::createUniqueFile(backup_name);
                 const bool backup_existed = openedExisting();
 
                 return master_existed || backup_existed;
@@ -96,9 +96,9 @@ namespace awl::io
 
         void wait()
         {
-            if (m_saveFuture.valid())
+            if (_saveFuture.valid())
             {
-                m_saveFuture.get();
+                _saveFuture.get();
             }
         }
 
@@ -106,8 +106,8 @@ namespace awl::io
         {
             wait();
             
-            m_s = {};
-            m_backup = {};
+            _s = {};
+            _backup = {};
         }
 
     private:
@@ -142,18 +142,18 @@ namespace awl::io
 
         void writeToStreamAndClearBackup(const Value& val)
         {
-            writeToStream(m_backup, val);
+            writeToStream(_backup, val);
 
-            writeToStream(m_s, val);
+            writeToStream(_s, val);
 
             clearBackup();
         }
 
         void writeSnapshotsAndClearBackup(std::shared_ptr<Snapshot> snapshot)
         {
-            writeSnapshot(m_backup, snapshot);
+            writeSnapshot(_backup, snapshot);
 
-            writeSnapshot(m_s, snapshot);
+            writeSnapshot(_s, snapshot);
 
             clearBackup();
         }
@@ -162,16 +162,16 @@ namespace awl::io
 
         void clearBackup()
         {
-            m_backup.seek(0);
-            m_backup.truncate();
-            m_backup.flush();
+            _backup.seek(0);
+            _backup.truncate();
+            _backup.flush();
         }
 
-        std::shared_ptr<Logger> m_logger;
+        std::shared_ptr<Logger> _logger;
 
-        UniqueStream m_s;
-        UniqueStream m_backup;
+        UniqueStream _s;
+        UniqueStream _backup;
 
-        std::future<void> m_saveFuture;
+        std::future<void> _saveFuture;
     };
 }

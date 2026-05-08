@@ -14,7 +14,7 @@ namespace awl
     public:
 
         explicit LoggerFactoryImpl(std::shared_ptr<Logger> logger) :
-            m_logger(std::move(logger))
+            _logger(std::move(logger))
         {}
 
         std::shared_ptr<Logger> createLogger(std::string source) const override
@@ -26,11 +26,11 @@ namespace awl
 
         const std::shared_ptr<Logger>& logger() const
         {
-            return m_logger;
+            return _logger;
         }
 
     private:
 
-        const std::shared_ptr<Logger> m_logger;
+        const std::shared_ptr<Logger> _logger;
     };
 }

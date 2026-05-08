@@ -44,11 +44,11 @@ namespace awl
                 InsertExisting(static_cast<int>(i + 1));
             }
 
-            Set::Node * pn3 = set.m_tree.findNodeByKey(3);
+            Set::Node * pn3 = set._tree.findNodeByKey(3);
             AWL_ASSERT(pn3 != nullptr);
             AWL_ASSERT(pn3->value() == 3);
 
-            Set::Node * pn7 = set.m_tree.findNodeByKey(7);
+            Set::Node * pn7 = set._tree.findNodeByKey(7);
             AWL_ASSERT(pn7 == nullptr);
 
             {
@@ -61,8 +61,8 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    AWL_ASSERT(set.m_tree.predecessor(x) == predecessor);
-                    AWL_ASSERT(set.m_tree.successor(x) == successor);
+                    AWL_ASSERT(set._tree.predecessor(x) == predecessor);
+                    AWL_ASSERT(set._tree.successor(x) == successor);
                 }
             }
 
@@ -72,18 +72,18 @@ namespace awl
             AWL_ASSERT_EQUAL(1, set.front());
             AWL_ASSERT_EQUAL(nN->value(), set.back());
 
-            set.m_tree.removeNode(n1);
-            AWL_ASSERT(set.m_tree.m_root == n2);
-            set.m_tree.removeNode(n2);
-            AWL_ASSERT(set.m_tree.m_root == n4);
-            set.m_tree.removeNode(n4);
-            AWL_ASSERT(set.m_tree.m_root == n5);
-            set.m_tree.removeNode(n3);
-            AWL_ASSERT(set.m_tree.m_root == n5);
-            set.m_tree.removeNode(n5);
-            AWL_ASSERT(set.m_tree.m_root == nN);
-            set.m_tree.removeNode(nN);
-            AWL_ASSERT(set.m_tree.m_root == nullptr);
+            set._tree.removeNode(n1);
+            AWL_ASSERT(set._tree._root == n2);
+            set._tree.removeNode(n2);
+            AWL_ASSERT(set._tree._root == n4);
+            set._tree.removeNode(n4);
+            AWL_ASSERT(set._tree._root == n5);
+            set._tree.removeNode(n3);
+            AWL_ASSERT(set._tree._root == n5);
+            set._tree.removeNode(n5);
+            AWL_ASSERT(set._tree._root == nN);
+            set._tree.removeNode(nN);
+            AWL_ASSERT(set._tree._root == nullptr);
         }
 
     private:
@@ -92,7 +92,7 @@ namespace awl
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
             AWL_ASSERT(p.second);
-            return *p.first.m_i;
+            return *p.first._i;
         }
 
         void InsertExisting(int val)
@@ -127,24 +127,24 @@ namespace
         TestAllocator() = default;
 
         template <class Q>
-        TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
+        TestAllocator(const TestAllocator<Q> & other) : _alloc(other._alloc)
         {}
 
         T* allocate(std::size_t n)
         {
             memory_size += n * sizeof(T);
-            return m_alloc.allocate(n);
+            return _alloc.allocate(n);
         }
 
         void deallocate(T* p, std::size_t n)
         {
             memory_size -= n * sizeof(T);
-            return m_alloc.deallocate(p, n);
+            return _alloc.deallocate(p, n);
         }
 
     private:
 
-        std::allocator<T> m_alloc;
+        std::allocator<T> _alloc;
 
         template <class Q>
         friend class TestAllocator;

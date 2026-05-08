@@ -41,7 +41,7 @@ namespace awl
             using reference = E &;
             using pointer = E *;
 
-            ring_iterator() : m_pRing(nullptr), m_pos(0) {}
+            ring_iterator() : _pRing(nullptr), _pos(0) {}
             
             ring_iterator(const ring_iterator& other) = default;
             ring_iterator(ring_iterator&& other) = default;
@@ -49,9 +49,9 @@ namespace awl
             ring_iterator& operator = (const ring_iterator& other) = default;
             ring_iterator& operator = (ring_iterator&& other) = default;
 
-            pointer operator-> () const { return container().template address<E>(m_pos); }
+            pointer operator-> () const { return container().template address<E>(_pos); }
 
-            reference operator* () const { return *container().template address<E>(m_pos); }
+            reference operator* () const { return *container().template address<E>(_pos); }
 
             ring_iterator & operator++ ()
             {
@@ -87,7 +87,7 @@ namespace awl
 
             ring_iterator & operator += (difference_type diff)
             {
-                m_pos += diff;
+                _pos += diff;
 
                 return *this;
             }
@@ -99,7 +99,7 @@ namespace awl
 
             ring_iterator operator + (difference_type diff) const
             {
-                ring_iterator i(container(), m_pos + diff);
+                ring_iterator i(container(), _pos + diff);
                 
                 return i;
             }
@@ -116,7 +116,7 @@ namespace awl
 
             bool operator == (const ring_iterator & other) const
             {
-                return m_pos == other.m_pos;
+                return _pos == other._pos;
             }
 
             bool operator != (const ring_iterator & other)  const
@@ -126,44 +126,44 @@ namespace awl
 
             bool operator < (const ring_iterator & other) const
             {
-                return m_pos < other.m_pos;
+                return _pos < other._pos;
             }
 
             operator ring_iterator<const E>() const
             {
-                return ring_iterator<const E>(container(), m_pos);
+                return ring_iterator<const E>(container(), _pos);
             }
 
         private:
 
-            ring_iterator(const ring & r, std::size_t pos) : m_pRing(&r), m_pos(pos)
+            ring_iterator(const ring & r, std::size_t pos) : _pRing(&r), _pos(pos)
             {}
 
             void move_next()
             {
-                ++m_pos;
+                ++_pos;
             }
 
             void move_prev()
             {
-                --m_pos;
+                --_pos;
             }
 
             const ring& container() const
             {
-                return *m_pRing;
+                return *_pRing;
             }
 
             difference_type position() const
             {
-                return static_cast<difference_type>(m_pos);
+                return static_cast<difference_type>(_pos);
             }
 
-            const ring * m_pRing;
+            const ring * _pRing;
             
             //It can't be a pointer because there is no
             //end pointer in a circular buffer, so we use an index.
-            std::size_t m_pos;
+            std::size_t _pos;
 
             friend ring;
         };
@@ -175,13 +175,13 @@ namespace awl
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        ring(Allocator alloc = {}) : m_alloc(alloc),
-            m_buf(nullptr)
+        ring(Allocator alloc = {}) : _alloc(alloc),
+            _buf(nullptr)
         {}
 
-        ring(size_type cap, Allocator alloc = {}) : m_alloc(alloc),
-            m_buf(m_alloc.allocate(cap)), m_capacity(cap),
-            m_data(m_buf), m_size(0)
+        ring(size_type cap, Allocator alloc = {}) : _alloc(alloc),
+            _buf(_alloc.allocate(cap)), _capacity(cap),
+            _data(_buf), _size(0)
         {
             assert(cap != 0);
         }
@@ -201,7 +201,7 @@ namespace awl
         ring & operator = (const ring & other)
         {
             //Not an assignment to itself.
-            if (m_buf != other.m_buf)
+            if (_buf != other._buf)
             {
                 free();
 
@@ -214,7 +214,7 @@ namespace awl
         ring & operator = (ring && other) noexcept
         {
             //Not an assignment to itself.
-            if (m_buf != other.m_buf)
+            if (_buf != other._buf)
             {
                 free();
 
@@ -240,11 +240,11 @@ namespace awl
         {
             assert(cap != 0);
 
-            T * buf = m_alloc.allocate(cap);
+            T * buf = _alloc.allocate(cap);
 
             size_type min_size;
             
-            if (m_buf != nullptr)
+            if (_buf != nullptr)
             {
                 min_size = std::min(cap, size());
 
@@ -260,30 +260,30 @@ namespace awl
                 min_size = 0;
             }
 
-            m_buf = buf;
-            m_capacity = cap;
+            _buf = buf;
+            _capacity = cap;
 
-            m_data = m_buf;
-            m_size = min_size;
+            _data = _buf;
+            _size = min_size;
         }
 
         void clear()
         {
-            assert(m_buf != nullptr);
+            assert(_buf != nullptr);
 
             while(!empty())
             {
                 pop_front();
             }
 
-            m_data = m_buf;
-            m_size = 0;
+            _data = _buf;
+            _size = 0;
         }
 
-        reference front() { assert(!empty()); return *m_data; }
+        reference front() { assert(!empty()); return *_data; }
         reference back() { assert(!empty()); return *last<T>(); }
 
-        const_reference front() const { assert(!empty()); return *m_data; }
+        const_reference front() const { assert(!empty()); return *_data; }
         const_reference back() const { assert(!empty()); return *last<const T>();}
 
         void push_front(const value_type & val)
@@ -310,11 +310,11 @@ namespace awl
         {
             assert(!empty());
 
-            m_data->~T();
+            _data->~T();
             
-            m_data = next(m_data);
+            _data = next(_data);
 
-            --m_size;
+            --_size;
         }
 
         void pop_back()
@@ -323,22 +323,22 @@ namespace awl
 
             last<T>()->~T();
 
-            --m_size;
+            --_size;
         }
 
         size_type size() const
         {
-            return m_size;
+            return _size;
         }
         
         size_type capacity() const
         {
-            return m_capacity;
+            return _capacity;
         }
         
         bool empty() const
         {
-            return m_size == 0;
+            return _size == 0;
         }
         
         bool full() const
@@ -374,9 +374,9 @@ namespace awl
         const_iterator begin() const { return cbegin(); }
         const_iterator cbegin() const { return ring_iterator<const T>(*this, 0u); }
 
-        iterator end() { return ring_iterator<T>(*this, m_size); }
+        iterator end() { return ring_iterator<T>(*this, _size); }
         const_iterator end() const { return cend(); }
-        const_iterator cend() const { return ring_iterator<const T>(*this, m_size);}
+        const_iterator cend() const { return ring_iterator<const T>(*this, _size);}
 
         reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
         const_reverse_iterator rbegin() const { return crbegin(); }
@@ -410,9 +410,9 @@ namespace awl
         template <class E>
         bool adjust_underflow(E *& p) const
         {
-            if (p < m_buf)
+            if (p < _buf)
             {
-                const difference_type diff = m_buf - p;
+                const difference_type diff = _buf - p;
 
                 p = buf_end() - diff;
 
@@ -429,7 +429,7 @@ namespace awl
             {
                 const difference_type diff = p - buf_end();
 
-                p = m_buf + diff;
+                p = _buf + diff;
 
                 return true;
             }
@@ -440,7 +440,7 @@ namespace awl
         template <class E>
         E * address(std::size_t pos) const
         {
-            E * p = m_data + pos;
+            E * p = _data + pos;
 
             adjust_overflow(p);
 
@@ -449,7 +449,7 @@ namespace awl
 
         T * buf_end() const
         {
-            return m_buf + capacity();
+            return _buf + capacity();
         }
 
         template <class E>
@@ -459,7 +459,7 @@ namespace awl
         }
 
         //The address where we write the next element.
-        //If the buffer is full it is equal to m_data.
+        //If the buffer is full it is equal to _data.
         T * data_end() const
         {
             return address<T>(size());
@@ -473,7 +473,7 @@ namespace awl
             
             if (p_next == buf_end())
             {
-                return m_buf;
+                return _buf;
             }
 
             return p_next;
@@ -483,7 +483,7 @@ namespace awl
         {
             T * p_prev = p;
 
-            if (p_prev == m_buf)
+            if (p_prev == _buf)
             {
                 p_prev = buf_end();
             }
@@ -499,15 +499,15 @@ namespace awl
 
             if (full())
             {
-                assert(m_data == p_write);
+                assert(_data == p_write);
 
-                m_data->~T();
+                _data->~T();
 
-                m_data = next(m_data);
+                _data = next(_data);
             }
             else
             {
-                ++m_size;
+                ++_size;
             }
 
             return p_write;
@@ -517,53 +517,53 @@ namespace awl
         {
             const bool saved_full = full();
             
-            m_data = prev(m_data);
+            _data = prev(_data);
 
             if (saved_full)
             {
-                m_data->~T();
+                _data->~T();
             }
             else
             {
-                ++m_size;
+                ++_size;
             }
 
-            return m_data;
+            return _data;
         }
 
         void free()
         {
-            if (m_buf != nullptr)
+            if (_buf != nullptr)
             {
                 clear();
 
-                m_alloc.deallocate(m_buf, capacity());
+                _alloc.deallocate(_buf, capacity());
 
-                m_buf = nullptr;
+                _buf = nullptr;
             }
         }
 
         void release()
         {
-            m_buf = nullptr;
+            _buf = nullptr;
         }
 
         void attach(const ring & other)
         {
-            m_capacity = other.m_capacity;
-            m_buf = other.m_buf;
+            _capacity = other._capacity;
+            _buf = other._buf;
 
-            m_data = other.m_data;
-            m_size = other.m_size;
+            _data = other._data;
+            _size = other._size;
         }
 
         void copy(const ring & other)
         {
-            m_capacity = other.m_capacity;
-            m_buf = m_alloc.allocate(m_capacity);
+            _capacity = other._capacity;
+            _buf = _alloc.allocate(_capacity);
 
-            m_data = m_buf;
-            m_size = 0;
+            _data = _buf;
+            _size = 0;
 
             for (const T & val : other)
             {
@@ -571,13 +571,13 @@ namespace awl
             }
         }
 
-        Allocator m_alloc;
+        Allocator _alloc;
 
-        T * m_buf;
-        std::size_t m_capacity;
+        T * _buf;
+        std::size_t _capacity;
 
-        T * m_data;
-        std::size_t m_size;
+        T * _data;
+        std::size_t _size;
 
         template <class E>
         friend class ring_iterator;

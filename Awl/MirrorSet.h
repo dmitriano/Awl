@@ -37,7 +37,7 @@ namespace awl
 
         mirror_set() = default;
         
-        mirror_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
+        mirror_set(Compare comp, const Allocator& alloc = Allocator()) : _set(comp, alloc)
         {}
 
         mirror_set(const mirror_set& other) = delete;
@@ -50,7 +50,7 @@ namespace awl
 
         bool operator == (const mirror_set& other) const
         {
-            return m_set == other.m_set;
+            return _set == other._set;
         }
 
         bool operator != (const mirror_set& other) const
@@ -83,105 +83,105 @@ namespace awl
             src_set.subscribe(this);
         }
 
-        const T & front() const { return m_set.front(); }
+        const T & front() const { return _set.front(); }
 
-        const T & back() const { return m_set.back(); }
+        const T & back() const { return _set.back(); }
 
-        const_iterator begin() const { return m_set.begin(); }
+        const_iterator begin() const { return _set.begin(); }
 
-        const_iterator end() const { return m_set.end(); }
+        const_iterator end() const { return _set.end(); }
 
-        const_reverse_iterator rbegin() const { return m_set.rbegin(); }
+        const_reverse_iterator rbegin() const { return _set.rbegin(); }
 
-        const_reverse_iterator rend() const { return m_set.rend(); }
+        const_reverse_iterator rend() const { return _set.rend(); }
 
         bool empty() const
         {
-            return m_set.empty();
+            return _set.empty();
         }
 
         size_type size() const
         {
-            return m_set.size();
+            return _set.size();
         }
 
         template <class Key>
         iterator find(const Key & key)
         {
-            return m_set.find(key);
+            return _set.find(key);
         }
 
         template <class Key>
         bool contains(const Key & key) const
         {
-            return m_set.contains(key);
+            return _set.contains(key);
         }
 
         template <class Key>
         const_iterator lower_bound(const Key & key) const
         {
-            return m_set.lower_bound(key);
+            return _set.lower_bound(key);
         }
 
         template <class Key>
         const_iterator upper_bound(const Key & key) const
         {
-            return m_set.upper_bound(key);
+            return _set.upper_bound(key);
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_set[pos];
+            return _set[pos];
         }
 
         const_reference at(size_type pos) const
         {
-            return m_set.at(pos);
+            return _set.at(pos);
         }
 
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            return m_set.index_of(key);
+            return _set.index_of(key);
         }
 
         template <class Key>
         const_iterator find(const Key & key) const
         {
-            return m_set.find(key);
+            return _set.find(key);
         }
 
         auto value_comp() const
         {
-            return m_set.value_comp();
+            return _set.value_comp();
         }
 
         //Not quite correct - it should compare keys, but not values.
         auto key_comp() const
         {
-            return m_set.key_comp();
+            return _set.key_comp();
         }
 
         allocator_type get_allocator() const
         {
-            return m_set.get_allocator();
+            return _set.get_allocator();
         }
 
         void subscribe(InternalObserver* p_observer) const
         {
-            m_set.subscribe(p_observer);
+            _set.subscribe(p_observer);
         }
 
         void unsubscribe(InternalObserver* p_observer) const
         {
-            m_set.unsubscribe(p_observer);
+            _set.unsubscribe(p_observer);
         }
 
     private:
 
         void onAdded(const T& val) override
         {
-            if (!m_set.insert(val).second)
+            if (!_set.insert(val).second)
             {
                 throw std::runtime_error("Duplicate add notification.");
             }
@@ -189,7 +189,7 @@ namespace awl
 
         void onRemoving(const T& val) override
         {
-            if (m_set.erase(val) == 0)
+            if (_set.erase(val) == 0)
             {
                 throw std::runtime_error("False remove notification.");
             }
@@ -197,9 +197,9 @@ namespace awl
 
         void onClearing() override
         {
-            m_set.clear();
+            _set.clear();
         }
 
-        InternalSet m_set;
+        InternalSet _set;
     };
 }

@@ -30,16 +30,16 @@ namespace awl
         using object_type = T;
         using value_type = Field;
 
-        constexpr field_getter(Field T::* p) : m_p(p) {}
+        constexpr field_getter(Field T::* p) : _p(p) {}
 
         constexpr const Field& operator() (const T & val) const
         {
-            return val.*m_p;
+            return val.*_p;
         }
     
     private:
 
-        Field T::* m_p;
+        Field T::* _p;
     };
     
     template <class T, class ReturnType>
@@ -55,16 +55,16 @@ namespace awl
 
         using MyFuncPtr = FuncPtr<T, ReturnType>;
 
-        constexpr func_getter(MyFuncPtr p) : m_p(p) {}
+        constexpr func_getter(MyFuncPtr p) : _p(p) {}
 
         constexpr ReturnType operator() (const T& val) const
         {
-            return (val.*m_p)();
+            return (val.*_p)();
         }
 
     private:
 
-        MyFuncPtr m_p;
+        MyFuncPtr _p;
     };
 
     template <class T, class Field>

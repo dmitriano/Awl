@@ -57,7 +57,7 @@ namespace
 
     struct JobPromise
     {
-        std::coroutine_handle<> m_awaitingCoroutine;
+        std::coroutine_handle<> _awaitingCoroutine;
 
         Job get_return_object();
 
@@ -86,7 +86,7 @@ namespace
                 // nothing
                 //std::coroutine_handle<> await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 //{
-                //    std::coroutine_handle<> val = m_awaitingCoroutine ? m_awaitingCoroutine : std::noop_coroutine();
+                //    std::coroutine_handle<> val = _awaitingCoroutine ? _awaitingCoroutine : std::noop_coroutine();
 
                 //    h.destroy();
 
@@ -101,7 +101,7 @@ namespace
                 //(note this may chain to eventually cause the current coroutine to resume)
                 void await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 {
-                    auto coro = h.promise().m_awaitingCoroutine;
+                    auto coro = h.promise()._awaitingCoroutine;
                     
                     h.destroy();
 
@@ -132,7 +132,7 @@ namespace
                 throw std::runtime_error("coroutine without promise awaited");
             }
 
-            if (update_task.handle.promise().m_awaitingCoroutine)
+            if (update_task.handle.promise()._awaitingCoroutine)
             {
                 throw std::runtime_error("coroutine already awaited");
             }
@@ -151,7 +151,7 @@ namespace
                 // store coroutine handle to be resumed after computing Job value
                 void await_suspend(std::coroutine_handle<> h)
                 {
-                    handle.promise().m_awaitingCoroutine = h;
+                    handle.promise()._awaitingCoroutine = h;
                 }
 
                 // when ready return value to a consumer

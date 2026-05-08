@@ -33,19 +33,19 @@ namespace awl::testing
 
         const TestContext& context() const
         {
-            return m_context;
+            return _context;
         }
 
     private:
 
         bool runTests();
             
-        std::shared_ptr<ConsoleLogger> m_logger;
+        std::shared_ptr<ConsoleLogger> _logger;
 
-        Provider& m_ap;
-        TypeProvider m_typeProvider;
+        Provider& _ap;
+        TypeProvider _typeProvider;
 
-        TestContext m_context;
+        TestContext _context;
     };
 
     int run();

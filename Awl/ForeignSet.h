@@ -67,7 +67,7 @@ namespace awl
     public:
 
         foreign_set(PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
-            m_set(fk_getter),
+            _set(fk_getter),
             primaryKeyGetter(pk_getter),
             foreignKeyGetter(fk_getter)
         {}
@@ -98,54 +98,54 @@ namespace awl
         using key_compare = typename MultiSet::key_compare;
         using value_compare = typename MultiSet::value_compare;
 
-        const ValueSet & front() const { return m_set.front(); }
-        const ValueSet & back() const { return m_set.back(); }
+        const ValueSet & front() const { return _set.front(); }
+        const ValueSet & back() const { return _set.back(); }
 
-        const_iterator begin() const { return m_set.begin(); }
-        const_iterator end() const { return m_set.end(); }
-        const_reverse_iterator rbegin() const { return m_set.rbegin(); }
-        const_reverse_iterator rend() const { return m_set.rend(); }
+        const_iterator begin() const { return _set.begin(); }
+        const_iterator end() const { return _set.end(); }
+        const_reverse_iterator rbegin() const { return _set.rbegin(); }
+        const_reverse_iterator rend() const { return _set.rend(); }
 
         bool empty() const
         {
-            return m_set.empty();
+            return _set.empty();
         }
 
         size_type size() const
         {
-            return m_set.size();
+            return _set.size();
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_set[pos];
+            return _set[pos];
         }
 
         const_reference at(size_type pos) const
         {
-            return m_set.at(pos);
+            return _set.at(pos);
         }
 
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            return m_set.index_of(key);
+            return _set.index_of(key);
         }
 
         template <class Key>
         const_iterator find(const Key & key) const
         {
-            return m_set.find(key);
+            return _set.find(key);
         }
 
         void subscribe(MultiSetObserver* p_observer) const
         {
-            m_set.subscribe(p_observer);
+            _set.subscribe(p_observer);
         }
 
         void unsubscribe(MultiSetObserver* p_observer) const
         {
-            m_set.unsubscribe(p_observer);
+            _set.unsubscribe(p_observer);
         }
 
     private:
@@ -173,9 +173,9 @@ namespace awl
         {
             auto& val_ref = *object_address(val);
 
-            auto i = m_set.find(foreignKeyGetter(val_ref));
+            auto i = _set.find(foreignKeyGetter(val_ref));
 
-            if (i != m_set.end())
+            if (i != _set.end())
             {
                 ValueSet & vs = *i;
                 const bool is_new = vs.insert(valueToPointer(val)).second;
@@ -186,7 +186,7 @@ namespace awl
             {
                 ValueSet vs{ PrimaryCompare{primaryKeyGetter} };
                 vs.insert(valueToPointer(val));
-                const bool is_new = m_set.insert(std::move(vs)).second;
+                const bool is_new = _set.insert(std::move(vs)).second;
                 assert(is_new);
                 static_cast<void>(is_new);
             }
@@ -196,9 +196,9 @@ namespace awl
         {
             auto& val_ref = *object_address(val);
             
-            auto i = m_set.find(foreignKeyGetter(val_ref));
+            auto i = _set.find(foreignKeyGetter(val_ref));
 
-            assert(i != m_set.end());
+            assert(i != _set.end());
 
             ValueSet & vs = *i;
 
@@ -209,7 +209,7 @@ namespace awl
                 assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val_ref));
                 
                 //vs destructor will fire 'onClearing'.
-                m_set.erase(vs);
+                _set.erase(vs);
             }
             else
             {
@@ -223,10 +223,10 @@ namespace awl
 
         void onClearing() override
         {
-            m_set.clear();
+            _set.clear();
         }
 
-        MultiSet m_set;
+        MultiSet _set;
 
         PrimaryKeyGetter primaryKeyGetter;
         ForeignKeyGetter foreignKeyGetter;

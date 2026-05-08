@@ -38,9 +38,9 @@ namespace awl
             std::string min_level,
             std::vector<std::string> source);
 
-        awl::ostream& m_out;
-        std::string m_minLevel;
-        std::size_t m_minSeverity;
-        std::vector<std::string> m_source;
+        awl::ostream& _out;
+        std::string _minLevel;
+        std::size_t _minSeverity;
+        std::vector<std::string> _source;
     };
 }

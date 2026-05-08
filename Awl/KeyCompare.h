@@ -32,7 +32,7 @@ namespace awl
         
         constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
             getKey(std::move(get_key)),
-            m_comp(std::move(comp))
+            _comp(std::move(comp))
         {}
 
         //KeyCompare(const KeyCompare&) = default;
@@ -42,17 +42,17 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return m_comp(getKey(left), getKey(right));
+            return _comp(getKey(left), getKey(right));
         }
 
         constexpr bool operator()(const T& val, const key_type & id) const
         {
-            return m_comp(getKey(val), id);
+            return _comp(getKey(val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T& val) const
         {
-            return m_comp(id, getKey(val));
+            return _comp(id, getKey(val));
         }
 
         using is_transparent = void;
@@ -61,7 +61,7 @@ namespace awl
 
         GetKey getKey;
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class GetKey, class Compare>
@@ -77,7 +77,7 @@ namespace awl
 
         constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
             getKey(std::move(get_key)),
-            m_comp(std::move(comp))
+            _comp(std::move(comp))
         {}
 
         //KeyCompare(const KeyCompare&) = default;
@@ -87,24 +87,24 @@ namespace awl
 
         constexpr bool operator()(const T * left, const T * right) const
         {
-            return m_comp(getKey(*left), getKey(*right));
+            return _comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const T * val, const key_type & id) const
         {
-            return m_comp(getKey(*val), id);
+            return _comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T * val) const
         {
-            return m_comp(id, getKey(*val));
+            return _comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class GetKey, class Compare>
@@ -120,7 +120,7 @@ namespace awl
 
         constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
             getKey(std::move(get_key)),
-            m_comp(std::move(comp))
+            _comp(std::move(comp))
         {}
 
         //KeyCompare(const KeyCompare&) = default;
@@ -130,24 +130,24 @@ namespace awl
 
         constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
         {
-            return m_comp(getKey(*left), getKey(*right));
+            return _comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const std::shared_ptr<T> & val, const key_type & id) const
         {
-            return m_comp(getKey(*val), id);
+            return _comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::shared_ptr<T> & val) const
         {
-            return m_comp(id, getKey(*val));
+            return _comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class Deleter, class GetKey, class Compare>
@@ -163,29 +163,29 @@ namespace awl
 
         constexpr KeyCompare(GetKey get_key, Compare comp = {}) :
             getKey(std::move(get_key)),
-            m_comp(std::move(comp))
+            _comp(std::move(comp))
         {}
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & left, const std::unique_ptr<T, Deleter> & right) const
         {
-            return m_comp(getKey(*left), getKey(*right));
+            return _comp(getKey(*left), getKey(*right));
         }
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & val, const key_type & id) const
         {
-            return m_comp(getKey(*val), id);
+            return _comp(getKey(*val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::unique_ptr<T, Deleter> & val) const
         {
-            return m_comp(id, getKey(*val));
+            return _comp(id, getKey(*val));
         }
 
     private:
 
         GetKey getKey;
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class Field, class Compare = std::less<void>>
@@ -232,20 +232,20 @@ namespace awl
     public:
 
         projected_equal_to(Field field, Proj proj) :
-            m_proj(proj),
-            m_field(std::move(field))
+            _proj(proj),
+            _field(std::move(field))
         {}
 
         // object_val can be of type std::shared_ptr, for example.
         bool operator() (const auto& object_val) const
         {
-            return std::invoke(m_proj, object_val) == m_field;
+            return std::invoke(_proj, object_val) == _field;
         }
 
     private:
 
-        Proj m_proj;
-        Field m_field;
+        Proj _proj;
+        Field _field;
     };
 
     template <class Value, class Field>

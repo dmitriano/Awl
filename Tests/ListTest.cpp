@@ -465,17 +465,17 @@ namespace
     struct SingleElement : public awl::single_link
     {
         SingleElement(std::string name, int val) :
-            m_name(std::move(name)),
-            m_val(val)
+            _name(std::move(name)),
+            _val(val)
         {}
 
-        const char* name() const { return m_name.c_str(); }
+        const char* name() const { return _name.c_str(); }
 
-        int value() const { return m_val; }
+        int value() const { return _val; }
 
-        std::string m_name;
+        std::string _name;
 
-        int m_val;
+        int _val;
     };
 
     static_assert(!std::is_copy_assignable_v<SingleElement>);
@@ -487,12 +487,12 @@ namespace
 
     struct SimpleElement : SingleElement
     {
-        SimpleElement() : SingleElement(std::to_string(m_count), m_count)
+        SimpleElement() : SingleElement(std::to_string(_count), _count)
         {
-            ++m_count;
+            ++_count;
         }
 
-        static inline int m_count = 0;
+        static inline int _count = 0;
     };
 
     static_assert(!std::is_copy_assignable_v<SimpleElement>);
@@ -717,21 +717,21 @@ namespace
 
         Vertex(const awl::testing::TestContext& ctx, int len) :
             context(ctx),
-            m_len(len)
+            _len(len)
         {
-            context.get().logger->debug(_T("Vertex constructor {}"), m_len);
+            context.get().logger->debug(_T("Vertex constructor {}"), _len);
         }
 
         ~Vertex()
         {
-            context.get().logger->debug(_T("Vertex destructor {}, included: {}"), m_len, IsIncluded());
+            context.get().logger->debug(_T("Vertex destructor {}, included: {}"), _len, IsIncluded());
         }
 
         Vertex(const Vertex& other) :
             context(other.context),
-            m_len(other.m_len)
+            _len(other._len)
         {
-            context.get().logger->debug(_T("Vertex copy constructor {}"), m_len);
+            context.get().logger->debug(_T("Vertex copy constructor {}"), _len);
         }
 
         Vertex(Vertex&& other) = default;
@@ -739,7 +739,7 @@ namespace
         Vertex& operator = (const Vertex& other)
         {
             context = other.context;
-            m_len = other.m_len;
+            _len = other._len;
             safe_exclude();
             return *this;
         }
@@ -753,7 +753,7 @@ namespace
 
         std::reference_wrapper<const awl::testing::TestContext> context;
 
-        int m_len;
+        int _len;
     };
 
     using VertexList = awl::quick_list<Vertex>;
@@ -784,7 +784,7 @@ AWL_TEST(List_GameGraph1)
 
             if (!v.IsIncluded())
             {
-                v.m_len = static_cast<int>(index);
+                v._len = static_cast<int>(index);
 
                 list.push_back(std::addressof(v));
 
@@ -813,7 +813,7 @@ AWL_TEST(List_GameGraph2)
 
             Vertex& v = vertices.back();
 
-            v.m_len = static_cast<int>(i);
+            v._len = static_cast<int>(i);
 
             list.push_back(std::addressof(v));
         }
@@ -839,7 +839,7 @@ AWL_TEST(List_GameGraph3)
 
             Vertex& v = vertices.front();
 
-            v.m_len = static_cast<int>(i);
+            v._len = static_cast<int>(i);
 
             list.push_back(std::addressof(v));
         }

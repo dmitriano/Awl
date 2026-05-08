@@ -24,7 +24,7 @@ namespace awl
 
         std::size_t operator()(const T& val) const
         {
-            return std::hash<Key>{}(m_getKey(val));
+            return std::hash<Key>{}(_getKey(val));
         }
 
         std::size_t operator()(const Key& key) const
@@ -34,6 +34,6 @@ namespace awl
 
     private:
 
-        GetKey m_getKey;
+        GetKey _getKey;
     };
 }

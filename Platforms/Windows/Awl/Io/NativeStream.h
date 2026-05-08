@@ -21,12 +21,12 @@ namespace awl::io
 
         WinStream() = default;
 
-        WinStream(FileHandle&& h) : m_hFile(std::forward<FileHandle>(h))
+        WinStream(FileHandle&& h) : _hFile(std::forward<FileHandle>(h))
         {}
 
         bool operator == (const WinStream& other) const
         {
-            return m_hFile == other.m_hFile;
+            return _hFile == other._hFile;
         }
 
         bool operator != (const WinStream& other) const
@@ -50,7 +50,7 @@ namespace awl::io
             assert(nNumberOfBytesToRead == count);
             DWORD NumberOfBytesRead = 0;
 
-            check(::ReadFile(m_hFile, buffer, nNumberOfBytesToRead, &NumberOfBytesRead, NULL) != FALSE);
+            check(::ReadFile(_hFile, buffer, nNumberOfBytesToRead, &NumberOfBytesRead, NULL) != FALSE);
 
             return NumberOfBytesRead;
         }
@@ -61,7 +61,7 @@ namespace awl::io
             assert(nNumberOfBytesToWrite == count);
             DWORD NumberOfBytesWritten = 0;
 
-            if (::WriteFile(m_hFile, buffer, nNumberOfBytesToWrite, &NumberOfBytesWritten, NULL) == FALSE)
+            if (::WriteFile(_hFile, buffer, nNumberOfBytesToWrite, &NumberOfBytesWritten, NULL) == FALSE)
             {
                 throw Win32Exception(_T("::WriteFile failed. This may indicate that the disk is full. Win32 Error: "));
             }
@@ -83,7 +83,7 @@ namespace awl::io
 
             li.QuadPart = pos;
 
-            check(::SetFilePointerEx(m_hFile, li, NULL, begin ? FILE_BEGIN : FILE_END) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(_hFile, li, NULL, begin ? FILE_BEGIN : FILE_END) != INVALID_SET_FILE_POINTER);
         }
 
         void move(std::ptrdiff_t offset) override
@@ -92,24 +92,24 @@ namespace awl::io
 
             li.QuadPart = offset;
 
-            check(::SetFilePointerEx(m_hFile, li, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(_hFile, li, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
         }
 
         void flush() override
         {
-            check(::FlushFileBuffers(m_hFile) != FALSE);
+            check(::FlushFileBuffers(_hFile) != FALSE);
         }
 
         void truncate() override
         {
-            check(::SetEndOfFile(m_hFile) != FALSE);
+            check(::SetEndOfFile(_hFile) != FALSE);
         }
 
         String fileName() const
         {
             TCHAR buf[MAX_PATH];
             // It is not clear what is the difference with FILE_NAME_NORMALIZED.
-            const DWORD len = GetFinalPathNameByHandle(m_hFile, buf, MAX_PATH, FILE_NAME_OPENED);
+            const DWORD len = GetFinalPathNameByHandle(_hFile, buf, MAX_PATH, FILE_NAME_OPENED);
 
             if (len > MAX_PATH)
             {
@@ -135,7 +135,7 @@ namespace awl::io
 
             li.QuadPart = 0;
 
-            check(::GetFileSizeEx(m_hFile, &li) != FALSE);
+            check(::GetFileSizeEx(_hFile, &li) != FALSE);
 
             return li.QuadPart;
         }
@@ -145,12 +145,12 @@ namespace awl::io
             LARGE_INTEGER liOfs = { 0 };
             LARGE_INTEGER liNew = { 0 };
 
-            check(::SetFilePointerEx(m_hFile, liOfs, &liNew, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
+            check(::SetFilePointerEx(_hFile, liOfs, &liNew, FILE_CURRENT) != INVALID_SET_FILE_POINTER);
 
             return liNew.QuadPart;
         }
 
-        FileHandle m_hFile;
+        FileHandle _hFile;
     };
 
     using UniqueStream = WinStream<UniqueFileHandle>;

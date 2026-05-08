@@ -34,7 +34,7 @@ namespace awl
 
         double_iterator() : double_iterator(nullptr) {}
         
-        double_iterator(DLink * p) : m_p(p) {}
+        double_iterator(DLink * p) : _p(p) {}
 
         //Casting the iterator with static_cast<DLink*>(*i) is UB if i == end().
         double_iterator(single_iterator<T, ForwardLink> i) : double_iterator(static_cast<DLink*>(i.link())) {}
@@ -79,7 +79,7 @@ namespace awl
 
         bool operator == (const double_iterator & r) const
         {
-            return this->m_p == r.m_p;
+            return this->_p == r._p;
         }
 
         //bool operator != (const double_iterator & r)  const
@@ -90,40 +90,40 @@ namespace awl
         //Construction of const_iterator from iterator
         operator ConstIterator () const
         {
-            return ConstIterator(m_p);
+            return ConstIterator(_p);
         }
 
         //Should I support this?
         //operator ReverseIterator () const
         //{
-        //    return ReverseIterator(m_p);
+        //    return ReverseIterator(_p);
         //}
     
     private:
 
         T * cur() const
         {
-            return static_cast<T *>(m_p);
+            return static_cast<T *>(_p);
         }
 
         void move_next()
         {
-            ForwardLink * p_link = static_cast<ForwardLink *>(m_p);
+            ForwardLink * p_link = static_cast<ForwardLink *>(_p);
 
             ForwardLink * p_next = p_link->next();
 
-            m_p = static_cast<DLink *>(p_next);
+            _p = static_cast<DLink *>(p_next);
         }
 
         void move_prev()
         {
-            BackwardLink * p_link = static_cast<BackwardLink *>(m_p);
+            BackwardLink * p_link = static_cast<BackwardLink *>(_p);
 
             BackwardLink * p_next = p_link->next();
 
-            m_p = static_cast<DLink *>(p_next);
+            _p = static_cast<DLink *>(p_next);
         }
 
-        DLink * m_p;
+        DLink * _p;
     };
 }

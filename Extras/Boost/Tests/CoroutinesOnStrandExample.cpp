@@ -43,8 +43,8 @@ namespace
         : 
             context(std::cref(context)),
             executor(executor),
-            m_index(index),
-            m_val(val),
+            _index(index),
+            _val(val),
             workDuration(work_duration)
         {}
 
@@ -62,7 +62,7 @@ namespace
 
             auto after = std::this_thread::get_id();
 
-            logger()->debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), m_index, before, after, value);
+            logger()->debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), _index, before, after, value);
         }
 
         awaitable<void> print()
@@ -76,7 +76,7 @@ namespace
 
         void log(const char* caption) const
         {
-            logger()->debug(_T("#{} {} on thread {}"), m_index, awl::fromACString(caption), std::this_thread::get_id());
+            logger()->debug(_T("#{} {} on thread {}"), _index, awl::fromACString(caption), std::this_thread::get_id());
         }
 
         awaitable<int> runSecondStage()
@@ -131,13 +131,13 @@ namespace
 
                 Value sample = i;
 
-                m_val.store(sample);
+                _val.store(sample);
 
-                const size_t actual = m_val.load();
+                const size_t actual = _val.load();
 
                 if (actual != sample)
                 {
-                    logger()->error(_T("#{} Data Race! Stored {}, but loaded {}"), m_index, sample.load(), actual);
+                    logger()->error(_T("#{} Data Race! Stored {}, but loaded {}"), _index, sample.load(), actual);
                 }
             }
 
@@ -169,8 +169,8 @@ namespace
 
         std::reference_wrapper<const awl::testing::TestContext> context;
         asio::any_io_executor executor;
-        const std::size_t m_index;
-        Value& m_val;
+        const std::size_t _index;
+        Value& _val;
         const std::chrono::milliseconds workDuration;
     };
 

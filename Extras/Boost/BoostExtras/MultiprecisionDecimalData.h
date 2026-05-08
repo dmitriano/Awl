@@ -43,44 +43,44 @@ namespace awl
 
         constexpr bool positive() const
         {
-            return (m_val & signMask) == 0;
+            return (_val & signMask) == 0;
         }
 
         constexpr void set_positive(bool pos)
         {
-            m_val = (m_val & ~signMask) | (pos ? 0x0 : 0x1);
+            _val = (_val & ~signMask) | (pos ? 0x0 : 0x1);
         }
 
         constexpr uint8_t exp() const
         {
-            return static_cast<uint8_t>((m_val & expMask) >> 1);
+            return static_cast<uint8_t>((_val & expMask) >> 1);
         }
 
         constexpr void set_exp(uint8_t val)
         {
-            m_val = (m_val & ~expMask) | (UInt(val) << 1);
+            _val = (_val & ~expMask) | (UInt(val) << 1);
         }
 
         constexpr UInt man() const
         {
-            return m_val >> (Constants::exp_len + 1);
+            return _val >> (Constants::exp_len + 1);
         }
 
         constexpr void set_man(UInt val)
         {
-            m_val = (m_val & ~manMask) | (UInt(val) << (Constants::exp_len + 1));
+            _val = (_val & ~manMask) | (UInt(val) << (Constants::exp_len + 1));
         }
 
         static constexpr MultiprecisionDecimalData from_bits(Rep val)
         {
             MultiprecisionDecimalData a;
-            a.m_val = val;
+            a._val = val;
             return a;
         }
 
         constexpr Rep to_bits() const
         {
-            return m_val;
+            return _val;
         }
 
     private:
@@ -91,6 +91,6 @@ namespace awl
 
         static constexpr UInt manMask = UInt(-1) & ~(expMask | signMask);
 
-        UInt m_val;
+        UInt _val;
     };
 }

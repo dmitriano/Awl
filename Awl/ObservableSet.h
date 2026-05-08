@@ -106,11 +106,11 @@ namespace awl
 
         basic_observable_set() = default;
         
-        basic_observable_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
+        basic_observable_set(Compare comp, const Allocator& alloc = Allocator()) : _set(comp, alloc)
         {}
 
         //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
-        // basic_observable_set(const basic_observable_set & other) : InternalObservable{}, m_set(other.m_set)
+        // basic_observable_set(const basic_observable_set & other) : InternalObservable{}, _set(other._set)
         // {
         // }
 
@@ -120,7 +120,7 @@ namespace awl
         //do not fire a notification because the content was not changed.
         basic_observable_set(basic_observable_set && other) = default;
 
-        basic_observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
+        basic_observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : _set(init, comp, alloc)
         {}
 
         basic_observable_set(std::initializer_list<value_type> init, const Allocator& alloc)
@@ -133,13 +133,13 @@ namespace awl
         //so with move assignment one set becomes another set with its content and subscribers.
         basic_observable_set& operator = (basic_observable_set&& other) noexcept
         {
-            if (!m_set.empty())
+            if (!_set.empty())
             {
                 notifyClearing();
             }
 
-            m_set = std::move(other.m_set);
-            m_observable = std::move(other.m_observable);
+            _set = std::move(other._set);
+            _observable = std::move(other._observable);
 
             return *this;
         }
@@ -150,8 +150,8 @@ namespace awl
             clear();
 
             other.notifyClearing();
-            m_set = std::move(other.m_set);
-            other.m_set.clear();
+            _set = std::move(other._set);
+            other._set.clear();
 
             for (const value_type & elem : *this)
             {
@@ -161,7 +161,7 @@ namespace awl
 
         ~basic_observable_set()
         {
-            if (!m_set.empty())
+            if (!_set.empty())
             {
                 notifyClearing();
             }
@@ -169,7 +169,7 @@ namespace awl
 
         bool operator == (const basic_observable_set & other) const
         {
-            return m_set == other.m_set;
+            return _set == other._set;
         }
 
         bool operator != (const basic_observable_set & other) const
@@ -177,34 +177,34 @@ namespace awl
             return !operator == (other);
         }
 
-        value_type & front() { return m_set.front(); }
-        const value_type & front() const { return m_set.front(); }
+        value_type & front() { return _set.front(); }
+        const value_type & front() const { return _set.front(); }
 
-        value_type & back() { return m_set.back(); }
-        const value_type & back() const { return m_set.back(); }
+        value_type & back() { return _set.back(); }
+        const value_type & back() const { return _set.back(); }
 
-        iterator begin() { return m_set.begin(); }
-        const_iterator begin() const { return m_set.begin(); }
+        iterator begin() { return _set.begin(); }
+        const_iterator begin() const { return _set.begin(); }
 
-        iterator end() { return m_set.end(); }
-        const_iterator end() const { return m_set.end(); }
+        iterator end() { return _set.end(); }
+        const_iterator end() const { return _set.end(); }
 
-        reverse_iterator rbegin() { return m_set.rbegin(); }
-        const_reverse_iterator rbegin() const { return m_set.rbegin(); }
+        reverse_iterator rbegin() { return _set.rbegin(); }
+        const_reverse_iterator rbegin() const { return _set.rbegin(); }
 
-        reverse_iterator rend() { return m_set.rend(); }
-        const_reverse_iterator rend() const { return m_set.rend(); }
+        reverse_iterator rend() { return _set.rend(); }
+        const_reverse_iterator rend() const { return _set.rend(); }
 
         std::pair<iterator, bool> insert(const value_type & value)
         {
-            const std::pair<iterator, bool> result = m_set.insert(value);
+            const std::pair<iterator, bool> result = _set.insert(value);
             notifyAdded(result);
             return result;
         }
 
         std::pair<iterator, bool> insert(value_type && value)
         {
-            const std::pair<iterator, bool> result = m_set.insert(std::move(value));
+            const std::pair<iterator, bool> result = _set.insert(std::move(value));
             notifyAdded(result);
             return result;
         }
@@ -212,94 +212,94 @@ namespace awl
         template <class... Args>
         std::pair<iterator, bool> emplace(Args&&... args)
         {
-            const std::pair<iterator, bool> result = m_set.insert(std::forward<Args>(args) ...);
+            const std::pair<iterator, bool> result = _set.insert(std::forward<Args>(args) ...);
             notifyAdded(result);
             return result;
         }
 
         bool empty() const
         {
-            return m_set.empty();
+            return _set.empty();
         }
 
         size_type size() const
         {
-            return m_set.size();
+            return _set.size();
         }
 
         template <class Key>
         iterator find(const Key & key)
         {
-            return m_set.find(key);
+            return _set.find(key);
         }
 
         template <class Key>
         bool contains(const Key & key) const
         {
-            return m_set.contains(key);
+            return _set.contains(key);
         }
 
         template <class Key>
         const_iterator lower_bound(const Key & key) const
         {
-            return m_set.lower_bound(key);
+            return _set.lower_bound(key);
         }
 
         template <class Key>
         iterator lower_bound(const Key & key)
         {
-            return m_set.lower_bound(key);
+            return _set.lower_bound(key);
         }
 
         template <class Key>
         const_iterator upper_bound(const Key & key) const
         {
-            return m_set.upper_bound(key);
+            return _set.upper_bound(key);
         }
 
         template <class Key>
         iterator upper_bound(const Key & key)
         {
-            return m_set.upper_bound(key);
+            return _set.upper_bound(key);
         }
 
         reference operator[](size_type pos)
         {
-            return m_set[pos];
+            return _set[pos];
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_set[pos];
+            return _set[pos];
         }
 
         reference at(size_type pos)
         {
-            return m_set.at(pos);
+            return _set.at(pos);
         }
 
         const_reference at(size_type pos) const
         {
-            return m_set.at(pos);
+            return _set.at(pos);
         }
 
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            return m_set.index_of(key);
+            return _set.index_of(key);
         }
 
         template <class Key>
         const_iterator find(const Key & key) const
         {
-            return m_set.find(key);
+            return _set.find(key);
         }
 
         //TODO: It should return an iterator pointing to the next element.
         void erase(iterator i)
         {
             notifyRemoving(i);
-            m_set.erase(i);
+            _set.erase(i);
         }
 
         template <class Key>
@@ -318,37 +318,37 @@ namespace awl
 
         void clear()
         {
-            if (!m_set.empty())
+            if (!_set.empty())
             {
-                m_observable.notify(&INotifySetChanged<value_type>::onClearing);
-                m_set.clear();
+                _observable.notify(&INotifySetChanged<value_type>::onClearing);
+                _set.clear();
             }
         }
 
         auto value_comp() const
         {
-            return m_set.value_comp();
+            return _set.value_comp();
         }
 
         //Not quite correct - it should compare keys, but not values.
         auto key_comp() const
         {
-            return m_set.key_comp();
+            return _set.key_comp();
         }
 
         allocator_type get_allocator() const
         {
-            return m_set.get_allocator();
+            return _set.get_allocator();
         }
 
         void subscribe(InternalObserver* p_observer) const
         {
-            m_observable.subscribe(p_observer);
+            _observable.subscribe(p_observer);
         }
 
         void unsubscribe(InternalObserver* p_observer) const
         {
-            m_observable.unsubscribe(p_observer);
+            _observable.unsubscribe(p_observer);
         }
 
     private:
@@ -363,12 +363,12 @@ namespace awl
 
         void notifyAdded(const value_type& val)
         {
-            m_observable.notify(&INotifySetChanged<value_type>::onAdded, val);
+            _observable.notify(&INotifySetChanged<value_type>::onAdded, val);
         }
 
         void notifyRemoving(const value_type & val)
         {
-            m_observable.notify(&INotifySetChanged<value_type>::onRemoving, val);
+            _observable.notify(&INotifySetChanged<value_type>::onRemoving, val);
         }
 
         void notifyRemoving(const iterator& i)
@@ -378,12 +378,12 @@ namespace awl
 
         void notifyClearing()
         {
-            m_observable.notify(&INotifySetChanged<value_type>::onClearing);
+            _observable.notify(&INotifySetChanged<value_type>::onClearing);
         }
 
-        InternalSet m_set;
+        InternalSet _set;
 
-        mutable InternalObservable m_observable;
+        mutable InternalObservable _observable;
     };
 
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>>

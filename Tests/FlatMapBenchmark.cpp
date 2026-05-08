@@ -68,23 +68,23 @@ namespace
 
         std::pair<iterator, bool> insert(const value_type& val)
         {
-            auto i = std::lower_bound(m_v.begin(), m_v.end(), val, 
+            auto i = std::lower_bound(_v.begin(), _v.end(), val, 
                 awl::member_compare<&value_type::first, key_compare>{});
 
-            if (i != m_v.end() && i->first == val.first)
+            if (i != _v.end() && i->first == val.first)
             {
                 return { i, false };
             }
 
-            return { m_v.insert(i, val), true };
+            return { _v.insert(i, val), true };
         }
 
         void clear()
         {
-            m_v.clear();
+            _v.clear();
         }
 
-        std::vector<value_type> m_v;
+        std::vector<value_type> _v;
     };
 }
 
@@ -100,11 +100,11 @@ AWL_TEST(FlatMapOrder)
     m.insert(std::make_pair(30, 4));
     m.insert(std::make_pair(10, 2));
 
-    AWL_ASSERT_EQUAL(m.m_v.size(), static_cast<size_t>(5));
+    AWL_ASSERT_EQUAL(m._v.size(), static_cast<size_t>(5));
     
-    for (size_t i = 0; i < m.m_v.size(); ++i)
+    for (size_t i = 0; i < m._v.size(); ++i)
     {
-        AWL_ASSERT_EQUAL(m.m_v[i].second, i);
+        AWL_ASSERT_EQUAL(m._v[i].second, i);
     }
 }
 

@@ -50,52 +50,52 @@ namespace awl
 
         constexpr BuiltinDecimalData() : BuiltinDecimalData(true, 0, 0) {}
         
-        constexpr BuiltinDecimalData(bool sign, uint8_t exp, UInt man) : m_data(sign, exp, man) {}
+        constexpr BuiltinDecimalData(bool sign, uint8_t exp, UInt man) : _data(sign, exp, man) {}
 
         constexpr bool positive() const
         {
-            return m_data.pack.sign == 0;
+            return _data.pack.sign == 0;
         }
 
         constexpr void set_positive(bool val)
         {
-            m_data.pack.sign = val ? 0u : 1u;
+            _data.pack.sign = val ? 0u : 1u;
         }
 
         constexpr uint8_t exp() const
         {
-            return m_data.pack.exp;
+            return _data.pack.exp;
         }
 
         constexpr void set_exp(UInt val)
         {
-            m_data.pack.exp = val;
+            _data.pack.exp = val;
         }
 
         constexpr UInt man() const
         {
-            return m_data.pack.man;
+            return _data.pack.man;
         }
 
         constexpr void set_man(UInt val)
         {
-            m_data.pack.man = val;
+            _data.pack.man = val;
         }
 
         static constexpr BuiltinDecimalData from_bits(Rep val)
         {
             BuiltinDecimalData a;
-            a.m_data.rep = val;
+            a._data.rep = val;
             return a;
         }
 
         constexpr Rep to_bits() const
         {
-            return m_data.rep;
+            return _data.rep;
         }
 
     private:
 
-        Data m_data;
+        Data _data;
     };
 }

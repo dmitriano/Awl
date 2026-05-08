@@ -15,7 +15,7 @@ namespace awl::io
     {
     public:
 
-        PlainSerializable(T& val) : m_val(val) {}
+        PlainSerializable(T& val) : _val(val) {}
 
         void read(IStream& s) override
         {
@@ -27,22 +27,22 @@ namespace awl::io
 
                 awl::io::read(s, val);
 
-                //If Read throws m_val does not change.
-                m_val = std::move(val);
+                //If Read throws _val does not change.
+                _val = std::move(val);
             }
             else
             {
-                awl::io::read(s, m_val);
+                awl::io::read(s, _val);
             }
         }
 
         void write(OStream& s) const override
         {
-            awl::io::write(s, m_val);
+            awl::io::write(s, _val);
         }
 
     private:
 
-        T& m_val;
+        T& _val;
     };
 }

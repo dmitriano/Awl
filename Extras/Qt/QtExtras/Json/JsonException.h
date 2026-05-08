@@ -35,6 +35,6 @@ namespace awl
 
     private:
 
-        std::vector<ValueInfo> m_path;
+        std::vector<ValueInfo> _path;
     };
 }

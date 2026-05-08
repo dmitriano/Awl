@@ -25,19 +25,19 @@ namespace awl::crypto
             return Hash::size();
         }
 
-        explicit constexpr FixedHash(Hash h = {}) : m_hash(h)
+        explicit constexpr FixedHash(Hash h = {}) : _hash(h)
         {}
 
         template <typename C>
         constexpr value_type operator()(const std::basic_string<C>& str) const
         {
-            return m_hash(str.begin(), str.end());
+            return _hash(str.begin(), str.end());
         }
 
         template <typename C>
         constexpr value_type operator()(const std::basic_string_view<C>& str) const
         {
-            return m_hash(str.begin(), str.end());
+            return _hash(str.begin(), str.end());
         }
 
         template <typename C, size_t N>
@@ -47,18 +47,18 @@ namespace awl::crypto
 
             constexpr size_t length = N - 1;
 
-            return m_hash(s, s + length);
+            return _hash(s, s + length);
         }
 
         template <class I>
         constexpr value_type operator()(I begin, I end) const
         {
-            return m_hash(begin, end);
+            return _hash(begin, end);
         }
 
     private:
 
-        Hash m_hash;
+        Hash _hash;
     };
 
     using FixedHash64 = FixedHash<awl::crypto::Int64Hash>;

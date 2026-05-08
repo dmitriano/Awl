@@ -68,30 +68,30 @@ namespace
     {
     public:
 
-        AWL_TUPLIZABLE(m_set, m_v, m_a, m_hset, m_bm, m_bs, m_u8, m_b, m_dec)
+        AWL_TUPLIZABLE(_set, _v, _a, _hset, _bm, _bs, _u8, _b, _dec)
 
     private:
 
-        std::set<int> m_set;
-        std::vector<int> m_v;
-        std::array<char, 3> m_a;
+        std::set<int> _set;
+        std::vector<int> _v;
+        std::array<char, 3> _a;
 
-        awl::vector_set<int> m_hset;
+        awl::vector_set<int> _hset;
         
         //It is not copyable.
-        //awl::observable_vector_set<int> m_oset;
+        //awl::observable_vector_set<int> _oset;
 
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
         
-        GameLevelBitMap m_bm;
+        GameLevelBitMap _bm;
 
-        std::bitset<3> m_bs;
+        std::bitset<3> _bs;
 
-        std::optional<uint32_t> m_u8;
+        std::optional<uint32_t> _u8;
 
-        bool m_b;
+        bool _b;
         
-        Decimal64 m_dec;
+        Decimal64 _dec;
 
         friend B MakeBSample();
     };
@@ -102,16 +102,16 @@ namespace
     {
         B b;
         
-        b.m_set = { 0, 1, 2 };
-        b.m_v = { 3, 4 };
-        b.m_a = { 'a', 'b', 'c' };
-        b.m_hset = { 3, 4, 5 };
-        //m_oset{ 6, 7, 8 };
-        b.m_bm = { B::GameLevel::Professional };
-        b.m_bs = 3ul;
-        b.m_u8 = 25u;
-        b.m_b = true;
-        b.m_dec = Decimal64("123.4567890"sv);
+        b._set = { 0, 1, 2 };
+        b._v = { 3, 4 };
+        b._a = { 'a', 'b', 'c' };
+        b._hset = { 3, 4, 5 };
+        //_oset{ 6, 7, 8 };
+        b._bm = { B::GameLevel::Professional };
+        b._bs = 3ul;
+        b._u8 = 25u;
+        b._b = true;
+        b._dec = Decimal64("123.4567890"sv);
 
         return b;
     }

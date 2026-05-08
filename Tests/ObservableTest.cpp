@@ -294,19 +294,19 @@ namespace
     public:
 
         ConditionHandler(bool result, int* p_count, int* p_last_value)
-            : m_result(result), pCount(p_count), pLastValue(p_last_value)
+            : _result(result), pCount(p_count), pLastValue(p_last_value)
         {}
 
         bool check(int value) override
         {
             ++(*pCount);
             *pLastValue = value;
-            return m_result;
+            return _result;
         }
 
     private:
 
-        bool m_result;
+        bool _result;
         int* pCount = nullptr;
         int* pLastValue = nullptr;
     };
@@ -398,29 +398,29 @@ namespace
             int tag,
             std::vector<int>* p_events,
             bool defer = false) :
-            m_delayedExecutor(delayed_executor),
-            m_tag(tag),
-            m_events(p_events),
-            m_defer(defer)
+            _delayedExecutor(delayed_executor),
+            _tag(tag),
+            _events(p_events),
+            _defer(defer)
         {}
 
         awl::Task<void> changed(int value) override
         {
-            if (m_defer)
+            if (_defer)
             {
-                co_await awl::coro::DelayedAwaitable(m_delayedExecutor, 1ms);
+                co_await awl::coro::DelayedAwaitable(_delayedExecutor, 1ms);
             }
 
-            m_events->push_back(m_tag * 1000 + value);
+            _events->push_back(_tag * 1000 + value);
             co_return;
         }
 
     private:
 
-        awl::coro::IDelayedExecutor& m_delayedExecutor;
-        int m_tag = 0;
-        std::vector<int>* m_events = nullptr;
-        bool m_defer = false;
+        awl::coro::IDelayedExecutor& _delayedExecutor;
+        int _tag = 0;
+        std::vector<int>* _events = nullptr;
+        bool _defer = false;
     };
 
     class AsyncObservable : public awl::Observable<IAsyncNotify>

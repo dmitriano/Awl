@@ -23,13 +23,13 @@ namespace awl
 
             bool await_ready()
             {
-                return m_any;
+                return _any;
             }
 
             // h is a handler for current coroutine which is suspended
             void await_suspend(std::coroutine_handle<> h)
             {
-                m_h = h;
+                _h = h;
             }
 
             void await_resume() {}
@@ -38,14 +38,14 @@ namespace awl
 
             void onFinished() override
             {
-                m_any = true;
+                _any = true;
 
-                m_h.resume();
+                _h.resume();
             }
 
-            bool m_any = false;
+            bool _any = false;
 
-            std::coroutine_handle<> m_h;
+            std::coroutine_handle<> _h;
         };
 
         friend AnyAwaitable;
@@ -67,7 +67,7 @@ namespace awl
             // h is a handler for current coroutine which is suspended
             void await_suspend(std::coroutine_handle<> h)
             {
-                m_h = h;
+                _h = h;
             }
 
             void await_resume() {}
@@ -78,7 +78,7 @@ namespace awl
             {
                 if (empty())
                 {
-                    m_h.resume();
+                    _h.resume();
                 }
             }
 
@@ -89,7 +89,7 @@ namespace awl
 
             TaskPool* const pThis;
 
-            std::coroutine_handle<> m_h;
+            std::coroutine_handle<> _h;
         };
 
         friend AllAwaitable;
@@ -100,12 +100,12 @@ namespace awl
 
         std::size_t task_count() const
         {
-            return m_handlers.size();
+            return _handlers.size();
         }
 
         bool empty() const
         {
-            return m_handlers.empty();
+            return _handlers.empty();
         }
 
         void cancel();
@@ -131,12 +131,12 @@ namespace awl
         {
             Handler(TaskPool* p_this, Job&& task) :
                 pThis(p_this),
-                m_task(std::move(task))
+                _task(std::move(task))
             {}
 
             TaskPool* pThis;
 
-            Job m_task;
+            Job _task;
 
             void onFinished() override;
         };
@@ -145,6 +145,6 @@ namespace awl
 
         // The tasks remove themself automatically from the vector
         // when their promises are destroyed.
-        std::vector<Handler> m_handlers;
+        std::vector<Handler> _handlers;
     };
 }

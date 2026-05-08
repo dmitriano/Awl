@@ -33,36 +33,36 @@ namespace awl
         {
             using Link = helpers::RedBlackLink<Node>;
 
-            Node(const T & v) : Link{}, m_val(v)
+            Node(const T & v) : Link{}, _val(v)
             {}
 
-            Node(T && v) : Link{}, m_val(std::move(v))
+            Node(T && v) : Link{}, _val(std::move(v))
             {}
 
             template <class... Args>
-            Node(Args&&... args) : Link{}, m_val(std::forward<Args>(args) ...)
+            Node(Args&&... args) : Link{}, _val(std::forward<Args>(args) ...)
             {}
 
             const T& value() const
             {
-                return m_val;
+                return _val;
             }
 
-            T m_val;
+            T _val;
         };
 
         using NodeAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<Node>;
 
         Node * createNode(const T & val)
         {
-            Node * node = m_nodeAlloc.allocate(1);
+            Node * node = _nodeAlloc.allocate(1);
             new (node) Node(val);
             return node;
         }
 
         Node * createNode(T && val)
         {
-            Node * node = m_nodeAlloc.allocate(1);
+            Node * node = _nodeAlloc.allocate(1);
             new (node) Node(std::move(val));
             return node;
         }
@@ -70,7 +70,7 @@ namespace awl
         template <class... Args>
         Node * createNode(Args&&... args)
         {
-            Node * node = m_nodeAlloc.allocate(1);
+            Node * node = _nodeAlloc.allocate(1);
             new (node) Node(std::forward<Args>(args) ...);
             return node;
         }
@@ -78,7 +78,7 @@ namespace awl
         void destroyNode(Node * node)
         {
             node->~Node();
-            m_nodeAlloc.deallocate(node, 1);
+            _nodeAlloc.deallocate(node, 1);
         }
 
         struct NodeDeleter
@@ -107,36 +107,36 @@ namespace awl
         using const_reference = const value_type &;
 
         using iterator = double_node_iterator<Node, quick_link, typename quick_link::ForwardLink, typename quick_link::BackwardLink,
-            T, &Node::m_val, vector_set>;
+            T, &Node::_val, vector_set>;
 
         using const_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::ForwardLink, const typename quick_link::BackwardLink,
-            const T, &Node::m_val, vector_set>;
+            const T, &Node::_val, vector_set>;
 
         using reverse_iterator = double_node_iterator<Node, quick_link, typename quick_link::BackwardLink, typename quick_link::ForwardLink,
-            T, &Node::m_val, vector_set>;
+            T, &Node::_val, vector_set>;
 
         using const_reverse_iterator = double_node_iterator<const Node, const quick_link, const typename quick_link::BackwardLink, const typename quick_link::ForwardLink,
-            const T, &Node::m_val, vector_set>;
+            const T, &Node::_val, vector_set>;
 
         using allocator_type = Allocator;
         using key_compare = Compare;
         using value_compare = Compare;
 
-        vector_set() : m_tree(Compare{}), m_nodeAlloc(m_alloc) {}
+        vector_set() : _tree(Compare{}), _nodeAlloc(_alloc) {}
 
-        vector_set(Compare comp, const Allocator& alloc = Allocator()) : m_tree(comp), m_alloc(alloc), m_nodeAlloc(m_alloc) {}
+        vector_set(Compare comp, const Allocator& alloc = Allocator()) : _tree(comp), _alloc(alloc), _nodeAlloc(_alloc) {}
 
-        vector_set(const vector_set& other) : m_tree(other.m_tree.m_comp), m_alloc(other.m_alloc), m_nodeAlloc(other.m_nodeAlloc)
+        vector_set(const vector_set& other) : _tree(other._tree._comp), _alloc(other._alloc), _nodeAlloc(other._nodeAlloc)
         {
             copyElements(other);
         }
 
-        vector_set(vector_set&& other) noexcept : m_tree(std::move(other.m_tree)), m_alloc(std::move(other.m_alloc)), m_nodeAlloc(std::move(other.m_nodeAlloc))
+        vector_set(vector_set&& other) noexcept : _tree(std::move(other._tree)), _alloc(std::move(other._alloc)), _nodeAlloc(std::move(other._nodeAlloc))
         {
-            other.m_tree.m_root = nullptr;
+            other._tree._root = nullptr;
         }
 
-        vector_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_tree(comp), m_alloc(alloc)
+        vector_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : _tree(comp), _alloc(alloc)
         {
             //It is not clear how to move the elemetns from std::initializer_list,
             //see https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
@@ -174,7 +174,7 @@ namespace awl
         {
             clear();
             //Should we copy the allocator?
-            m_tree.m_comp = other.m_tree.m_comp;
+            _tree._comp = other._tree._comp;
             copyElements(other);
             return *this;
         }
@@ -182,10 +182,10 @@ namespace awl
         vector_set & operator = (vector_set && other) noexcept
         {
             clear();
-            m_tree = std::move(other.m_tree);
-            m_alloc = std::move(other.m_alloc);
-            m_nodeAlloc = std::move(other.m_nodeAlloc);
-            other.m_tree.m_root = nullptr;
+            _tree = std::move(other._tree);
+            _alloc = std::move(other._alloc);
+            _nodeAlloc = std::move(other._nodeAlloc);
+            other._tree._root = nullptr;
             return *this;
         }
 
@@ -196,7 +196,7 @@ namespace awl
                 const_iterator i = begin();
                 for (const value_type & val : other)
                 {
-                    if (m_tree.m_comp(val, *i) || m_tree.m_comp(*i, val))
+                    if (_tree._comp(val, *i) || _tree._comp(*i, val))
                     {
                         return false;
                     }
@@ -215,32 +215,32 @@ namespace awl
             return !operator == (other);
         }
 
-        T & front() { return m_tree.m_list.front()->m_val; }
-        const T & front() const { return m_tree.m_list.front()->m_val; }
+        T & front() { return _tree._list.front()->_val; }
+        const T & front() const { return _tree._list.front()->_val; }
 
-        T & back() { return m_tree.m_list.back()->m_val; }
-        const T & back() const { return m_tree.m_list.back()->m_val; }
+        T & back() { return _tree._list.back()->_val; }
+        const T & back() const { return _tree._list.back()->_val; }
 
-        iterator begin() { return m_tree.m_list.begin(); }
-        const_iterator begin() const { return m_tree.m_list.begin(); }
+        iterator begin() { return _tree._list.begin(); }
+        const_iterator begin() const { return _tree._list.begin(); }
 
-        iterator end() { return m_tree.m_list.end(); }
-        const_iterator end() const { return m_tree.m_list.end(); }
+        iterator end() { return _tree._list.end(); }
+        const_iterator end() const { return _tree._list.end(); }
 
-        reverse_iterator rbegin() { return m_tree.m_list.rbegin(); }
-        const_reverse_iterator rbegin() const { return m_tree.m_list.rbegin(); }
+        reverse_iterator rbegin() { return _tree._list.rbegin(); }
+        const_reverse_iterator rbegin() const { return _tree._list.rbegin(); }
 
-        reverse_iterator rend() { return m_tree.m_list.rend(); }
-        const_reverse_iterator rend() const { return m_tree.m_list.rend(); }
+        reverse_iterator rend() { return _tree._list.rend(); }
+        const_reverse_iterator rend() const { return _tree._list.rend(); }
 
-        std::pair<iterator, bool> insert(const value_type & m_val)
+        std::pair<iterator, bool> insert(const value_type & _val)
         {
-            return universalInsert(m_val);
+            return universalInsert(_val);
         }
 
-        std::pair<iterator, bool> insert(value_type && m_val)
+        std::pair<iterator, bool> insert(value_type && _val)
         {
-            return universalInsert(std::move(m_val));
+            return universalInsert(std::move(_val));
         }
 
         template <class... Args>
@@ -248,13 +248,13 @@ namespace awl
         {
             Node * parent;
             NodeHolder val_node(createNode(std::forward<Args>(args) ...), NodeDeleter{this});
-            Node * node = m_tree.findNodeByKey(val_node->m_val, &parent);
+            Node * node = _tree.findNodeByKey(val_node->_val, &parent);
             const bool exists = node != nullptr;
 
             if (!exists)
             {
                 node = val_node.release();
-                m_tree.insertNode(node, parent);
+                _tree.insertNode(node, parent);
             }
 
             return std::make_pair(iterator(typename List::iterator(node)), !exists);
@@ -262,24 +262,24 @@ namespace awl
 
         bool empty() const
         {
-            return m_tree.empty();
+            return _tree.empty();
         }
 
         size_type size() const
         {
-            return m_tree.size();
+            return _tree.size();
         }
 
         template <class Key>
         const_iterator find(const Key & key) const
         {
-            return nodeToConstIterator(m_tree.findNodeByKey(key));
+            return nodeToConstIterator(_tree.findNodeByKey(key));
         }
 
         template <class Key>
         iterator find(const Key & key)
         {
-            return nodeToIterator(m_tree.findNodeByKey(key));
+            return nodeToIterator(_tree.findNodeByKey(key));
         }
 
         //calculating the index requires the iteration from the root
@@ -296,7 +296,7 @@ namespace awl
         template <class Key>
         std::tuple<iterator, size_type> find2(const Key & key)
         {
-            auto [node, index] = m_tree.indexByKey(key);
+            auto [node, index] = _tree.indexByKey(key);
 
             return std::make_tuple(nodeToIterator(node), index);
         }
@@ -304,36 +304,36 @@ namespace awl
         //With size() and greater it returns end().
         const_iterator find_by_index(size_type pos) const
         {
-            return nodeToConstIterator(m_tree.findNodeByIndex(pos));
+            return nodeToConstIterator(_tree.findNodeByIndex(pos));
         }
 
         iterator find_by_index(size_type pos)
         {
-            return nodeToIterator(m_tree.findNodeByIndex(pos));
+            return nodeToIterator(_tree.findNodeByIndex(pos));
         }
 
         template <class Key>
         bool contains(const Key & key) const
         {
-            return m_tree.findNodeByKey(key) != nullptr;
+            return _tree.findNodeByKey(key) != nullptr;
         }
 
         template <class Key>
         const_iterator lower_bound(const Key & key) const
         {
-            return nodeToConstIterator(std::get<0>(m_tree.boundByKey(key)));
+            return nodeToConstIterator(std::get<0>(_tree.boundByKey(key)));
         }
 
         template <class Key>
         iterator lower_bound(const Key & key)
         {
-            return nodeToIterator(std::get<0>(m_tree.boundByKey(key)));
+            return nodeToIterator(std::get<0>(_tree.boundByKey(key)));
         }
 
         template <class Key>
         const_iterator upper_bound(const Key & key) const
         {
-            auto [node, equal] = m_tree.boundByKey(key);
+            auto [node, equal] = _tree.boundByKey(key);
 
             if (equal)
             {
@@ -347,7 +347,7 @@ namespace awl
         template <class Key>
         iterator upper_bound(const Key & key)
         {
-            auto [node, equal] = m_tree.boundByKey(key);
+            auto [node, equal] = _tree.boundByKey(key);
 
             if (equal)
             {
@@ -360,12 +360,12 @@ namespace awl
 
         reference operator[](size_type pos)
         {
-            return m_tree.findNodeByIndex(pos)->m_val;
+            return _tree.findNodeByIndex(pos)->_val;
         }
 
         const_reference operator[](size_type pos) const
         {
-            return m_tree.findNodeByIndex(pos)->m_val;
+            return _tree.findNodeByIndex(pos)->_val;
         }
 
         reference at(size_type pos)
@@ -384,18 +384,18 @@ namespace awl
         //an insertion or deletion will invalidate it.
         size_type index_of(iterator i) const
         {
-            return m_tree.indexOfNode(*i.m_i);
+            return _tree.indexOfNode(*i._i);
         }
 
         size_type index_of(const_iterator i) const
         {
-            return m_tree.indexOfNode(*i.m_i);
+            return _tree.indexOfNode(*i._i);
         }
 
         template <class Key>
         size_type index_of(const Key & key) const
         {
-            auto [node, index] = m_tree.indexByKey(key);
+            auto [node, index] = _tree.indexByKey(key);
 
             if (node == nullptr)
             {
@@ -408,9 +408,9 @@ namespace awl
         //TODO: It should return an iterator pointing to the next element.
         void erase(iterator i)
         {
-            Node* z = *i.m_i;
+            Node* z = *i._i;
 
-            m_tree.removeNode(z);
+            _tree.removeNode(z);
 
             //Remove the node from the list.
             destroyNode(z);
@@ -433,29 +433,29 @@ namespace awl
 
         void clear()
         {
-            while (!m_tree.m_list.empty())
+            while (!_tree._list.empty())
             {
                 //We destroy the node that is still included to the list.
-                destroyNode(m_tree.m_list.front());
+                destroyNode(_tree._list.front());
             }
 
-            m_tree.m_root = nullptr;
+            _tree._root = nullptr;
         }
 
         auto value_comp() const
         {
-            return m_tree.m_comp;
+            return _tree._comp;
         }
 
         //Not quite correct - it should compare keys, but not values.
         auto key_comp() const
         {
-            return m_tree.m_comp;
+            return _tree._comp;
         }
 
         allocator_type get_allocator() const
         {
-            return m_alloc;
+            return _alloc;
         }
 
     private:
@@ -484,13 +484,13 @@ namespace awl
         std::pair<iterator, bool> universalInsert(V && val)
         {
             Node * parent;
-            Node * node = m_tree.findNodeByKey(val, &parent);
+            Node * node = _tree.findNodeByKey(val, &parent);
             const bool exists = node != nullptr;
 
             if (!exists)
             {
                 node = createNode(std::forward<V>(val));
-                m_tree.insertNode(node, parent);
+                _tree.insertNode(node, parent);
             }
 
             return std::make_pair(iterator(typename List::iterator(node)), !exists);
@@ -512,10 +512,10 @@ namespace awl
             }
         }
 
-        helpers::RedBlackTree<Node, T, Compare> m_tree;
+        helpers::RedBlackTree<Node, T, Compare> _tree;
 
-        Allocator m_alloc;
-        NodeAllocator m_nodeAlloc;
+        Allocator _alloc;
+        NodeAllocator _nodeAlloc;
 
         friend class VectorSetTest;
     };

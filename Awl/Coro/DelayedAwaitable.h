@@ -14,18 +14,18 @@ namespace awl::coro
     public:
 
         DelayedAwaitable(IDelayedExecutor& executor, std::chrono::nanoseconds delay) :
-            m_executor(executor),
-            m_delay(delay)
+            _executor(executor),
+            _delay(delay)
         {}
 
         bool await_ready() const noexcept
         {
-            return m_delay <= std::chrono::nanoseconds(0);
+            return _delay <= std::chrono::nanoseconds(0);
         }
 
         void await_suspend(std::coroutine_handle<> handle)
         {
-            m_executor.executeAfter(handle, m_delay);
+            _executor.executeAfter(handle, _delay);
         }
 
         void await_resume() const noexcept
@@ -33,7 +33,7 @@ namespace awl::coro
 
     private:
 
-        IDelayedExecutor& m_executor;
-        std::chrono::nanoseconds m_delay;
+        IDelayedExecutor& _executor;
+        std::chrono::nanoseconds _delay;
     };
 }

@@ -20,35 +20,35 @@ namespace awl::io
         PersistentObject(std::shared_ptr<awl::Logger> logger, Header header, size_t block_size = defaultBlockSize,
             Hash hash = {}, size_t format_name_limit = 64u)
         :
-            m_serializable(std::move(header), m_val, block_size, std::move(hash), format_name_limit),
-            m_storage(std::move(logger))
+            _serializable(std::move(header), _val, block_size, std::move(hash), format_name_limit),
+            _storage(std::move(logger))
         {}
 
         bool open(const awl::String& file_name)
         {
             auto [master_name, backup_name] = append_extensions(file_name);
 
-            return m_storage.open(master_name, backup_name);
+            return _storage.open(master_name, backup_name);
         }
 
         bool load()
         {
-            return m_storage.load(m_serializable);
+            return _storage.load(_serializable);
         }
 
         void save()
         {
-            m_storage.startSave(m_serializable);
+            _storage.startSave(_serializable);
         }
 
         void wait()
         {
-            m_storage.wait();
+            _storage.wait();
         }
 
         void close()
         {
-            m_storage.close();
+            _storage.close();
         }
 
         void remove(const awl::String& file_name)
@@ -65,37 +65,37 @@ namespace awl::io
 
         const T& value() const noexcept
         {
-            return m_val;
+            return _val;
         }
 
         T& value() noexcept
         {
-            return m_val;
+            return _val;
         }
 
         bool is_open() const noexcept
         {
-            return m_storage.isOpened();
+            return _storage.isOpened();
         }
 
         const T& operator * () const noexcept
         {
-            return m_val;
+            return _val;
         }
 
         T& operator * () noexcept
         {
-            return m_val;
+            return _val;
         }
 
         const T* operator -> () const noexcept
         {
-            return &m_val;
+            return &_val;
         }
 
         T* operator -> () noexcept
         {
-            return &m_val;
+            return &_val;
         }
 
     private:
@@ -108,13 +108,13 @@ namespace awl::io
             return std::make_tuple(master_name, backup_name);
         }
 
-        std::mutex m_mutex;
+        std::mutex _mutex;
 
-        T m_val;
+        T _val;
 
-        HeaderedSerializable<T, SequentialInputStream, SequentialOutputStream, Hash, V> m_serializable;
+        HeaderedSerializable<T, SequentialInputStream, SequentialOutputStream, Hash, V> _serializable;
 
-        Storage m_storage;
+        Storage _storage;
     };
 
     template <class T, class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>

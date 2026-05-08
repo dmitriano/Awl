@@ -17,20 +17,20 @@ namespace awl
 
         // value to be computed
         // when Task is not completed (coroutine didn't co_return anything yet) value is empty
-        std::optional<T> m_value;
-        std::exception_ptr m_exception;
+        std::optional<T> _value;
+        std::exception_ptr _exception;
 
         void rethrow() const
         {
-            if (m_exception)
+            if (_exception)
             {
-                std::rethrow_exception(m_exception);
+                std::rethrow_exception(_exception);
             }
         }
 
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
-        std::coroutine_handle<> m_awaitingCoroutine;
+        std::coroutine_handle<> _awaitingCoroutine;
 
         // Task is async result of our coroutine
         // it is created before execution of the coroutine body
@@ -53,13 +53,13 @@ namespace awl
         {
             rethrow();
             
-            m_value = std::move(val);
+            _value = std::move(val);
         }
 
         void unhandled_exception() noexcept
         {
             // alternatively we can store current exeption in std::exception_ptr to rethrow it later
-            m_exception = std::current_exception();
+            _exception = std::current_exception();
         }
 
         // when final suspend is executed 'value' is already set
@@ -83,7 +83,7 @@ namespace awl
 
                     // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                     // nothing
-                    return promise.m_awaitingCoroutine ? promise.m_awaitingCoroutine : std::noop_coroutine();
+                    return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
                 }
                 
                 void await_resume() noexcept {}
@@ -98,19 +98,19 @@ namespace awl
     {
     public:
 
-        std::exception_ptr m_exception;
+        std::exception_ptr _exception;
 
         void rethrow() const
         {
-            if (m_exception)
+            if (_exception)
             {
-                std::rethrow_exception(m_exception);
+                std::rethrow_exception(_exception);
             }
         }
 
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
-        std::coroutine_handle<> m_awaitingCoroutine;
+        std::coroutine_handle<> _awaitingCoroutine;
 
         // Task is async result of our coroutine
         // it is created before execution of the coroutine body
@@ -137,7 +137,7 @@ namespace awl
         void unhandled_exception()
         {
             // alternatively we can store current exeption in std::exception_ptr to rethrow it later
-            m_exception = std::current_exception();
+            _exception = std::current_exception();
         }
 
         // when final suspend is executed 'value' is already set
@@ -161,7 +161,7 @@ namespace awl
 
                     // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
                     // nothing
-                    return promise.m_awaitingCoroutine ? promise.m_awaitingCoroutine : std::noop_coroutine();
+                    return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
                 }
 
                 void await_resume() noexcept {}
@@ -177,17 +177,17 @@ namespace awl
         // declare promise type
         using promise_type = TaskPromise<T>;
 
-        Task() : m_h(nullptr) {}
+        Task() : _h(nullptr) {}
         
-        Task(std::coroutine_handle<promise_type> handle) noexcept : m_h(handle) {}
+        Task(std::coroutine_handle<promise_type> handle) noexcept : _h(handle) {}
 
-        Task(Task&& other) noexcept : m_h(std::exchange(other.m_h, nullptr)) {}
+        Task(Task&& other) noexcept : _h(std::exchange(other._h, nullptr)) {}
 
         Task& operator=(Task&& other) noexcept
         {
             free();
 
-            m_h = std::exchange(other.m_h, nullptr);
+            _h = std::exchange(other._h, nullptr);
 
             return *this;
         }
@@ -203,23 +203,23 @@ namespace awl
         {
             check_handle();
 
-            m_h.promise().rethrow();
+            _h.promise().rethrow();
 
-            return m_h.promise().m_value.has_value();
+            return _h.promise()._value.has_value();
         }
 
         T get()
         {
             check_handle();
             
-            m_h.promise().rethrow();
+            _h.promise().rethrow();
 
-            return std::move(*m_h.promise().m_value);
+            return std::move(*_h.promise()._value);
         }
 
         void check_handle() const
         {
-            if (!m_h)
+            if (!_h)
             {
                 //Uninitialized Task without promise
                 std::terminate();
@@ -228,15 +228,15 @@ namespace awl
 
         void free()
         {
-            if (m_h)
+            if (_h)
             {
-                m_h.destroy();
+                _h.destroy();
 
-                m_h = nullptr;
+                _h = nullptr;
             }
         }
 
-        std::coroutine_handle<promise_type> m_h;
+        std::coroutine_handle<promise_type> _h;
     };
 
     template<typename T>
@@ -254,13 +254,13 @@ namespace awl
     template<typename T>
     auto operator co_await(const Task<T>& task) noexcept
     {
-        if (!task.m_h)
+        if (!task._h)
         {
             //coroutine without promise awaited
             std::terminate();
         }
 
-        if (task.m_h.promise().m_awaitingCoroutine)
+        if (task._h.promise()._awaitingCoroutine)
         {
             //coroutine already awaited
             std::terminate();
@@ -268,12 +268,12 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<TaskPromise<T>> m_h;
+            std::coroutine_handle<TaskPromise<T>> _h;
 
             // check if this Task already has value computed
             bool await_ready()
             {
-                return m_h.done();
+                return _h.done();
                 //return handle.promise().value.has_value();
             }
 
@@ -281,21 +281,21 @@ namespace awl
             // store coroutine handle to be resumed after computing Task value
             void await_suspend(std::coroutine_handle<> h)
             {
-                m_h.promise().m_awaitingCoroutine = h;
+                _h.promise()._awaitingCoroutine = h;
             }
 
             // when ready return value to a consumer
             auto await_resume()
             {
-                m_h.promise().rethrow();
+                _h.promise().rethrow();
 
                 if constexpr (!std::is_same_v<T, void>)
                 {
-                    return std::move(*(m_h.promise().m_value));
+                    return std::move(*(_h.promise()._value));
                 }
             }
         };
 
-        return task_awaitable{ task.m_h };
+        return task_awaitable{ task._h };
     }
 }

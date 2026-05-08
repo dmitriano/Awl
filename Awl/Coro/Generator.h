@@ -41,19 +41,19 @@ namespace awl
                 std::enable_if_t<!std::is_rvalue_reference<U>::value, int> = 0>
             std::suspend_always yield_value(std::remove_reference_t<T>& value) noexcept
             {
-                m_value = std::addressof(value);
+                _value = std::addressof(value);
                 return {};
             }
 
             std::suspend_always yield_value(std::remove_reference_t<T>&& value) noexcept
             {
-                m_value = std::addressof(value);
+                _value = std::addressof(value);
                 return {};
             }
 
             void unhandled_exception()
             {
-                m_exception = std::current_exception();
+                _exception = std::current_exception();
             }
 
             void return_void()
@@ -61,7 +61,7 @@ namespace awl
 
             reference_type value() const noexcept
             {
-                return static_cast<reference_type>(*m_value);
+                return static_cast<reference_type>(*_value);
             }
 
             // Don't allow any use of 'co_await' inside the generator coroutine.
@@ -70,16 +70,16 @@ namespace awl
 
             void rethrow_if_exception()
             {
-                if (m_exception)
+                if (_exception)
                 {
-                    std::rethrow_exception(m_exception);
+                    std::rethrow_exception(_exception);
                 }
             }
 
         private:
 
-            pointer_type m_value;
-            std::exception_ptr m_exception;
+            pointer_type _value;
+            std::exception_ptr _exception;
         };
 
         struct generator_sentinel {};
@@ -100,16 +100,16 @@ namespace awl
 
             // Iterator needs to be default-constructible to satisfy the Range concept.
             generator_iterator() noexcept
-                : m_coroutine(nullptr)
+                : _coroutine(nullptr)
             {}
 
             explicit generator_iterator(coroutine_handle coroutine) noexcept
-                : m_coroutine(coroutine)
+                : _coroutine(coroutine)
             {}
 
             friend bool operator==(const generator_iterator& it, generator_sentinel) noexcept
             {
-                return !it.m_coroutine || it.m_coroutine.done();
+                return !it._coroutine || it._coroutine.done();
             }
 
             friend bool operator!=(const generator_iterator& it, generator_sentinel s) noexcept
@@ -129,10 +129,10 @@ namespace awl
 
             generator_iterator& operator++()
             {
-                m_coroutine.resume();
-                if (m_coroutine.done())
+                _coroutine.resume();
+                if (_coroutine.done())
                 {
-                    m_coroutine.promise().rethrow_if_exception();
+                    _coroutine.promise().rethrow_if_exception();
                 }
 
                 return *this;
@@ -146,7 +146,7 @@ namespace awl
 
             reference operator*() const noexcept
             {
-                return m_coroutine.promise().value();
+                return _coroutine.promise().value();
             }
 
             pointer operator->() const noexcept
@@ -156,7 +156,7 @@ namespace awl
 
         private:
 
-            coroutine_handle m_coroutine;
+            coroutine_handle _coroutine;
         };
     }
 
@@ -169,22 +169,22 @@ namespace awl
         using iterator = detail::generator_iterator<T>;
 
         generator() noexcept
-            : m_coroutine(nullptr)
+            : _coroutine(nullptr)
         {}
 
         generator(generator&& other) noexcept
-            : m_coroutine(other.m_coroutine)
+            : _coroutine(other._coroutine)
         {
-            other.m_coroutine = nullptr;
+            other._coroutine = nullptr;
         }
 
         generator(const generator& other) = delete;
 
         ~generator()
         {
-            if (m_coroutine)
+            if (_coroutine)
             {
-                m_coroutine.destroy();
+                _coroutine.destroy();
             }
         }
 
@@ -196,16 +196,16 @@ namespace awl
 
         iterator begin()
         {
-            if (m_coroutine)
+            if (_coroutine)
             {
-                m_coroutine.resume();
-                if (m_coroutine.done())
+                _coroutine.resume();
+                if (_coroutine.done())
                 {
-                    m_coroutine.promise().rethrow_if_exception();
+                    _coroutine.promise().rethrow_if_exception();
                 }
             }
 
-            return iterator{ m_coroutine };
+            return iterator{ _coroutine };
         }
 
         detail::generator_sentinel end() noexcept
@@ -215,7 +215,7 @@ namespace awl
 
         void swap(generator& other) noexcept
         {
-            std::swap(m_coroutine, other.m_coroutine);
+            std::swap(_coroutine, other._coroutine);
         }
 
     private:
@@ -223,10 +223,10 @@ namespace awl
         friend class detail::generator_promise<T>;
 
         explicit generator(std::coroutine_handle<promise_type> coroutine) noexcept
-            : m_coroutine(coroutine)
+            : _coroutine(coroutine)
         {}
 
-        std::coroutine_handle<promise_type> m_coroutine;
+        std::coroutine_handle<promise_type> _coroutine;
     };
 
     template<typename T>

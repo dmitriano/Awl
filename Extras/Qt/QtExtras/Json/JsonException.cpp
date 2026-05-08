@@ -23,7 +23,7 @@ String JsonException::message() const
     {
         separator sep(_T("->"));
 
-        for (const std::string& key : m_path | std::views::reverse | std::views::transform(std::mem_fn(&ValueInfo::key)))
+        for (const std::string& key : _path | std::views::reverse | std::views::transform(std::mem_fn(&ValueInfo::key)))
         {
             f << sep << key;
         }
@@ -31,7 +31,7 @@ String JsonException::message() const
 
     f << "\n";
 
-    f << "Message: '" << m_message << "'";
+    f << "Message: '" << _message << "'";
 
     f << "\n";
 
@@ -41,7 +41,7 @@ String JsonException::message() const
 
     separator sep(_T("\n"));
 
-    for (auto& info : m_path | std::views::reverse)
+    for (auto& info : _path | std::views::reverse)
     {
         f << sep << "[" << info.key << "] (" << typeToString(info.jsonType) << "/" << info.cppType << ")";
     }
@@ -51,10 +51,10 @@ String JsonException::message() const
 
 JsonException::JsonException(String message, ValueInfo info) : GeneralException(std::move(message))
 {
-    m_path.push_back(std::move(info));
+    _path.push_back(std::move(info));
 }
 
 void JsonException::append(ValueInfo info)
 {
-    m_path.push_back(std::move(info));
+    _path.push_back(std::move(info));
 }

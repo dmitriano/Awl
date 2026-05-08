@@ -31,27 +31,27 @@ namespace awl
 
         typename LinkVector::const_iterator begin() const
         {
-            return m_links.begin();
+            return _links.begin();
         }
 
         typename LinkVector::const_iterator end() const
         {
-            return m_links.end();
+            return _links.end();
         }
 
         typename std::size_t size() const
         {
-            return m_links.size();
+            return _links.size();
         }
 
         bool empty() const
         {
-            return m_links.empty();
+            return _links.empty();
         }
 
         const StaticLink<T>* find(const char* name) const
         {
-            return internal_find(m_links, name);
+            return internal_find(_links, name);
         }
 
         const StaticLink<T>* find(const std::string& name) const
@@ -121,8 +121,8 @@ namespace awl
             return *i;
         }
 
-        explicit StaticMap(LinkVector links) : m_links(std::move(links)) {}
+        explicit StaticMap(LinkVector links) : _links(std::move(links)) {}
 
-        LinkVector m_links;
+        LinkVector _links;
     };
 }

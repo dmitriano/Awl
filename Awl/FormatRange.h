@@ -18,7 +18,7 @@ namespace awl
     {
     public:
 
-        format_range(R& r) : m_r(r) {}
+        format_range(R& r) : _r(r) {}
 
         template<typename Char>
         friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& out, const format_range& fr)
@@ -27,7 +27,7 @@ namespace awl
 
             awl::basic_separator<Char> sep(',');
 
-            for (const std::ranges::range_value_t<R>& val : fr.m_r)
+            for (const std::ranges::range_value_t<R>& val : fr._r)
             {
                 out << sep << val;
             }
@@ -39,6 +39,6 @@ namespace awl
 
     private:
 
-        R& m_r;
+        R& _r;
     };
 }

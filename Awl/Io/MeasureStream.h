@@ -18,17 +18,17 @@ namespace awl
             void write(const uint8_t * buffer, size_t count) override
             {
                 static_cast<void>(buffer);
-                m_pos += count;
+                _pos += count;
             }
 
             size_t length() const
             {
-                return m_pos;
+                return _pos;
             }
 
         private:
 
-            size_t m_pos = 0;
+            size_t _pos = 0;
         };
     }
 }

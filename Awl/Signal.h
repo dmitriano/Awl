@@ -36,9 +36,9 @@ namespace awl
 
         void subscribe(Slot slot)
         {
-            if (std::find(m_slots.begin(), m_slots.end(), slot) == m_slots.end())
+            if (std::find(_slots.begin(), _slots.end(), slot) == _slots.end())
             {
-                m_slots.push_back(std::move(slot));
+                _slots.push_back(std::move(slot));
             }
         }
 
@@ -80,14 +80,14 @@ namespace awl
 
         bool unsubscribe(const Slot& slot)
         {
-            const auto it = std::find(m_slots.begin(), m_slots.end(), slot);
+            const auto it = std::find(_slots.begin(), _slots.end(), slot);
 
-            if (it == m_slots.end())
+            if (it == _slots.end())
             {
                 return false;
             }
 
-            auto last = m_slots.end();
+            auto last = _slots.end();
             --last;
 
             if (it != last)
@@ -95,7 +95,7 @@ namespace awl
                 *it = std::move(*last);
             }
 
-            m_slots.pop_back();
+            _slots.pop_back();
             return true;
         }
 
@@ -144,9 +144,9 @@ namespace awl
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
         {
-            auto i = m_slots.begin();
+            auto i = _slots.begin();
 
-            while (i != m_slots.end())
+            while (i != _slots.end())
             {
                 auto guard = i->lock();
 
@@ -157,7 +157,7 @@ namespace awl
                 }
                 else
                 {
-                    auto last = m_slots.end();
+                    auto last = _slots.end();
                     --last;
                     const bool removing_last = (i == last);
 
@@ -166,11 +166,11 @@ namespace awl
                         *i = std::move(*last);
                     }
 
-                    m_slots.pop_back();
+                    _slots.pop_back();
 
                     if (removing_last)
                     {
-                        i = m_slots.end();
+                        i = _slots.end();
                     }
                 }
             }
@@ -178,21 +178,21 @@ namespace awl
 
         void clear() noexcept
         {
-            container_type().swap(m_slots);
+            container_type().swap(_slots);
         }
 
         bool empty() const noexcept
         {
-            return m_slots.empty();
+            return _slots.empty();
         }
 
         std::size_t size() const noexcept
         {
-            return m_slots.size();
+            return _slots.size();
         }
 
     private:
 
-        mutable container_type m_slots;
+        mutable container_type _slots;
     };
 }

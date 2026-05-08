@@ -19,7 +19,7 @@ namespace awl
     public:
 
         basic_format(std::source_location location = std::source_location::current()) noexcept :
-            m_location(location)
+            _location(location)
         {}
         
         template <typename T>
@@ -28,11 +28,11 @@ namespace awl
             // All the users operators << should be declared
             // prior to the call site or in the global namespace (at least in GCC)
             // or in the namespace where T is defined.
-            m_out << val;
+            _out << val;
             return *this;
         }
 
-        std::basic_string<C> str() const { return m_out.str(); }
+        std::basic_string<C> str() const { return _out.str(); }
 
         operator std::basic_string<C>() const { return str(); }
 
@@ -55,7 +55,7 @@ namespace awl
 
         operator LogString() const
         {
-            return LogString(str(), m_location);
+            return LogString(str(), _location);
         }
 
         // std::endl flushes the output buffer but '\n' doesn't.
@@ -63,8 +63,8 @@ namespace awl
 
     private:
         
-        std::basic_ostringstream<C> m_out;
-        std::source_location m_location;
+        std::basic_ostringstream<C> _out;
+        std::source_location _location;
     };
 
     using format = basic_format<Char>;

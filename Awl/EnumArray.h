@@ -39,177 +39,177 @@ namespace awl
         enum_array& operator=(enum_array&&) = default;
 
         enum_array(const array_type& items) :
-            m_items(items)
+            _items(items)
         {}
 
         enum_array(array_type&& items) :
-            m_items(std::move(items))
+            _items(std::move(items))
         {}
 
         template <class... Args>
             requires (sizeof...(Args) > 0 && sizeof...(Args) <= EnumTraits<Enum>::count() &&
                 (std::constructible_from<value_type, Args&&> && ...))
         enum_array(Args&&... args) :
-            m_items{ std::forward<Args>(args)... }
+            _items{ std::forward<Args>(args)... }
         {}
 
         reference at(enum_type index)
         {
-            return m_items.at(enum_to_index(index));
+            return _items.at(enum_to_index(index));
         }
 
         const_reference at(enum_type index) const
         {
-            return m_items.at(enum_to_index(index));
+            return _items.at(enum_to_index(index));
         }
 
         reference at(size_type index)
         {
-            return m_items.at(index);
+            return _items.at(index);
         }
 
         const_reference at(size_type index) const
         {
-            return m_items.at(index);
+            return _items.at(index);
         }
 
         reference operator[](enum_type index)
         {
-            return m_items[enum_to_index(index)];
+            return _items[enum_to_index(index)];
         }
 
         const_reference operator[](enum_type index) const
         {
-            return m_items[enum_to_index(index)];
+            return _items[enum_to_index(index)];
         }
 
         reference operator[](size_type index)
         {
-            return m_items[index];
+            return _items[index];
         }
 
         const_reference operator[](size_type index) const
         {
-            return m_items[index];
+            return _items[index];
         }
 
         reference front()
         {
-            return m_items.front();
+            return _items.front();
         }
 
         const_reference front() const
         {
-            return m_items.front();
+            return _items.front();
         }
 
         reference back()
         {
-            return m_items.back();
+            return _items.back();
         }
 
         const_reference back() const
         {
-            return m_items.back();
+            return _items.back();
         }
 
         pointer data() noexcept
         {
-            return m_items.data();
+            return _items.data();
         }
 
         const_pointer data() const noexcept
         {
-            return m_items.data();
+            return _items.data();
         }
 
         iterator begin()
         {
-            return m_items.begin();
+            return _items.begin();
         }
 
         const_iterator begin() const
         {
-            return m_items.begin();
+            return _items.begin();
         }
 
         const_iterator cbegin() const
         {
-            return m_items.cbegin();
+            return _items.cbegin();
         }
 
         iterator end()
         {
-            return m_items.end();
+            return _items.end();
         }
 
         const_iterator end() const
         {
-            return m_items.end();
+            return _items.end();
         }
 
         const_iterator cend() const
         {
-            return m_items.cend();
+            return _items.cend();
         }
 
         reverse_iterator rbegin()
         {
-            return m_items.rbegin();
+            return _items.rbegin();
         }
 
         const_reverse_iterator rbegin() const
         {
-            return m_items.rbegin();
+            return _items.rbegin();
         }
 
         const_reverse_iterator crbegin() const
         {
-            return m_items.crbegin();
+            return _items.crbegin();
         }
 
         reverse_iterator rend()
         {
-            return m_items.rend();
+            return _items.rend();
         }
 
         const_reverse_iterator rend() const
         {
-            return m_items.rend();
+            return _items.rend();
         }
 
         const_reverse_iterator crend() const
         {
-            return m_items.crend();
+            return _items.crend();
         }
 
         bool empty() const
         {
-            return m_items.empty();
+            return _items.empty();
         }
 
         size_type size() const
         {
-            return m_items.size();
+            return _items.size();
         }
 
         size_type max_size() const
         {
-            return m_items.max_size();
+            return _items.max_size();
         }
 
         void fill(const value_type& value)
         {
-            m_items.fill(value);
+            _items.fill(value);
         }
 
-        void swap(enum_array& other) noexcept(noexcept(m_items.swap(other.m_items)))
+        void swap(enum_array& other) noexcept(noexcept(_items.swap(other._items)))
         {
-            m_items.swap(other.m_items);
+            _items.swap(other._items);
         }
 
     private:
 
-        array_type m_items = {};
+        array_type _items = {};
     };
 }

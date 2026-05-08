@@ -26,15 +26,15 @@ namespace awl::testing
 {
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
-        m_logger(std::make_shared<ConsoleLogger>()),
-        m_ap(provider),
-        m_context{ m_logger, std::move(stop_token), m_ap, m_typeProvider}
+        _logger(std::make_shared<ConsoleLogger>()),
+        _ap(provider),
+        _context{ _logger, std::move(stop_token), _ap, _typeProvider}
     {}
 
     template <attribute_provider Provider>
     bool TestConsole<Provider>::runTests()
     {
-        TestContext& context = m_context;
+        TestContext& context = _context;
 
         awl::ostream& out = awl::cout();
         

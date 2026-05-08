@@ -19,9 +19,9 @@ namespace awl::io
     {
     public:
 
-        TrivialMemoryStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
+        TrivialMemoryStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf)
         {
-            std::memset(pBuf, 0u, m_size);
+            std::memset(pBuf, 0u, _size);
         }
 
         ~TrivialMemoryStream()
@@ -31,44 +31,44 @@ namespace awl::io
 
         constexpr bool end()
         {
-            return length() == m_size;
+            return length() == _size;
         }
 
         constexpr size_t read(uint8_t * buffer, size_t count)
         {
-            const size_t available_count = m_size - length();
+            const size_t available_count = _size - length();
             const size_t read_count = std::min(count, available_count);
-            StdCopy(m_p, m_p + read_count, buffer);
-            m_p += read_count;
+            StdCopy(_p, _p + read_count, buffer);
+            _p += read_count;
             return read_count;
         }
 
         constexpr void write(const uint8_t * buffer, size_t count)
         {
-            assert(length() + count <= m_size);
-            //std::memmove(m_p, buffer, count);
-            StdCopy(buffer, buffer + count, m_p);
-            m_p += count;
+            assert(length() + count <= _size);
+            //std::memmove(_p, buffer, count);
+            StdCopy(buffer, buffer + count, _p);
+            _p += count;
         }
 
         constexpr size_t GetCapacity() const
         {
-            return m_size;
+            return _size;
         }
 
         constexpr size_t length() const
         {
-            assert(pBuf <= m_p);
-            return static_cast<size_t>(m_p - pBuf);
+            assert(pBuf <= _p);
+            return static_cast<size_t>(_p - pBuf);
         }
 
         void Reset()
         {
-            m_p = pBuf;
+            _p = pBuf;
         }
 
         const uint8_t * begin() const { return pBuf; }
-        const uint8_t * end() const { return pBuf + m_size; }
+        const uint8_t * end() const { return pBuf + _size; }
 
     private:
 
@@ -76,22 +76,22 @@ namespace awl::io
             requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
         friend void write(TrivialMemoryStream& s, T val)
         {
-            assert(s.length() + sizeof(val) <= s.m_size);
-            std::memcpy(s.m_p, awl::const_data_cast(&val), sizeof(val));
-            s.m_p += sizeof(val);
+            assert(s.length() + sizeof(val) <= s._size);
+            std::memcpy(s._p, awl::const_data_cast(&val), sizeof(val));
+            s._p += sizeof(val);
         }
 
         template <typename T>
             requires (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
         friend void read(TrivialMemoryStream& s, T& val)
         {
-            assert(s.length() + sizeof(val) <= s.m_size);
-            std::memcpy(awl::mutable_data_cast(&val), s.m_p, sizeof(val));
-            s.m_p += sizeof(val);
+            assert(s.length() + sizeof(val) <= s._size);
+            std::memcpy(awl::mutable_data_cast(&val), s._p, sizeof(val));
+            s._p += sizeof(val);
         }
 
-        const size_t m_size;
+        const size_t _size;
         uint8_t * pBuf;
-        uint8_t * m_p;
+        uint8_t * _p;
     };
 }

@@ -24,26 +24,26 @@ namespace awl::io
 
         PosixStream() = default;
 
-        PosixStream(FileHandle&& h) : m_hFile(std::forward<FileHandle>(h))
+        PosixStream(FileHandle&& h) : _hFile(std::forward<FileHandle>(h))
         {}
 
         bool operator == (const PosixStream& other) const
         {
-            return m_hFile == other.m_hFile;
+            return _hFile == other._hFile;
         }
 
         size_t length() const override
         {
             struct stat sb;
 
-            check(::fstat(m_hFile, &sb));
+            check(::fstat(_hFile, &sb));
             
             return static_cast<size_t>(sb.st_size);
         }
 
         size_t position() const override
         {
-            const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
+            const off_t pos = ::lseek(_hFile, 0, SEEK_CUR);
 
             check(pos);
             
@@ -52,7 +52,7 @@ namespace awl::io
 
         size_t read(uint8_t* buffer, size_t count) override
         {
-            const ssize_t read_count = ::read(m_hFile, buffer, count);
+            const ssize_t read_count = ::read(_hFile, buffer, count);
 
             check(read_count);
             
@@ -61,7 +61,7 @@ namespace awl::io
 
         void write(const uint8_t* buffer, size_t count) override
         {
-            const ssize_t written_count = ::write(m_hFile, buffer, count);
+            const ssize_t written_count = ::write(_hFile, buffer, count);
 
             if (written_count == static_cast<ssize_t>(-1))
             {
@@ -81,33 +81,33 @@ namespace awl::io
 
         void seek(std::size_t pos, bool begin = true) override
         {
-            check(::lseek(m_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
+            check(::lseek(_hFile, static_cast<off_t>(pos), begin ? SEEK_SET : SEEK_END));
         }
 
         void move(std::ptrdiff_t offset) override
         {
-            check(::lseek(m_hFile, static_cast<off_t>(offset), SEEK_CUR));
+            check(::lseek(_hFile, static_cast<off_t>(offset), SEEK_CUR));
         }
 
         void flush() override
         {
-            check(::fsync(m_hFile));
+            check(::fsync(_hFile));
         }
 
         void truncate() override
         {
-            const off_t pos = ::lseek(m_hFile, 0, SEEK_CUR);
+            const off_t pos = ::lseek(_hFile, 0, SEEK_CUR);
 
             check(pos);
 
-            check(::ftruncate(m_hFile, pos));
+            check(::ftruncate(_hFile, pos));
         }
 
         String fileName() const
         {
             /*
             char buf[PATH_MAX];
-            if (fcntl(m_hFile, F_GETPATH, buf) != -1)
+            if (fcntl(_hFile, F_GETPATH, buf) != -1)
             {
                 return buf;
             }
@@ -127,7 +127,7 @@ namespace awl::io
             }
         }
         
-        FileHandle m_hFile;
+        FileHandle _hFile;
     };
 
     using UniqueStream = PosixStream<UniqueFileHandle>;

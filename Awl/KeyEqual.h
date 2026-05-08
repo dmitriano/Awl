@@ -22,17 +22,17 @@ namespace awl
 
         bool operator()(const T& left, const T& right) const
         {
-            return m_getKey(left) == m_getKey(right);
+            return _getKey(left) == _getKey(right);
         }
 
         bool operator()(const T& left, const Key& right) const
         {
-            return m_getKey(left) == right;
+            return _getKey(left) == right;
         }
 
         bool operator()(const Key& left, const T& right) const
         {
-            return left == m_getKey(right);
+            return left == _getKey(right);
         }
 
         bool operator()(const Key& left, const Key& right) const
@@ -42,6 +42,6 @@ namespace awl
 
     private:
 
-        GetKey m_getKey;
+        GetKey _getKey;
     };
 }

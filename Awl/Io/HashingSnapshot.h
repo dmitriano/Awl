@@ -29,23 +29,23 @@ namespace awl::io
     public:
 
         HashingSnapshot(Value val, size_t block_size = defaultBlockSize, Hash hash = {}) :
-            m_v(std::move(val)),
-            m_blockSize(block_size),
-            m_hash(hash)
+            _v(std::move(val)),
+            _blockSize(block_size),
+            _hash(hash)
         {}
 
         void write(SequentialOutputStream& s) const override
         {
-            HashOStream out{ s, m_blockSize, m_hash };
+            HashOStream out{ s, _blockSize, _hash };
 
             // Write vector without leading 8 bytes containing its size.
-            out.write(m_v.data(), m_v.size());
+            out.write(_v.data(), _v.size());
         }
 
     private:
 
-        Value m_v;
-        size_t m_blockSize;
-        Hash m_hash;
+        Value _v;
+        size_t _blockSize;
+        Hash _hash;
     };
 }

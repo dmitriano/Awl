@@ -135,7 +135,7 @@ namespace awl
         [[maybe_unused]] static constexpr char EnumNameString[] = #EnumName; \
         static constexpr size_type Count = Last; \
         /*I was unable to make std::vector constexpr even in MSVC 19.29.30133, probably we need to wait a bit.*/ \
-        static inline const awl::helpers::MemberList m_ml{#__VA_ARGS__}; \
+        static inline const awl::helpers::MemberList _ml{#__VA_ARGS__}; \
     };
 
 //This awl::EnumTraits should be specialized at the global namespace level.
@@ -155,6 +155,6 @@ namespace awl
         } \
         static const awl::helpers::MemberList& names() \
         { \
-            return ns::EnumName##Traits::m_ml; \
+            return ns::EnumName##Traits::_ml; \
         } \
     };

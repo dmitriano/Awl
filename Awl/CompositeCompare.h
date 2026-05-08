@@ -22,7 +22,7 @@ namespace awl
         CompositeCompare() = default;
 
         //A template parameter pack cannot have a default argument.
-        constexpr CompositeCompare(Cs... comp) : m_comps(std::move(comp) ...) {}
+        constexpr CompositeCompare(Cs... comp) : _comps(std::move(comp) ...) {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {
@@ -44,7 +44,7 @@ namespace awl
             }
             else
             {
-                auto& comp = std::get<Index>(m_comps);
+                auto& comp = std::get<Index>(_comps);
 
                 if (comp(left, right))
                 {
@@ -60,7 +60,7 @@ namespace awl
             }
         }
 
-        Tuple m_comps;
+        Tuple _comps;
 
         template <class T1, class ... Cs1>
         friend class TransparentCompositeCompare;

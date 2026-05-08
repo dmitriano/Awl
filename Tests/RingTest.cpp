@@ -67,15 +67,15 @@ namespace
     {
     public:
 
-        Test(std::deque<T> v, awl::ring<T> r) : m_v(std::move(v)), m_r(std::move(r))
+        Test(std::deque<T> v, awl::ring<T> r) : _v(std::move(v)), _r(std::move(r))
         {
-            m_v.erase(m_v.begin(), m_v.end() - m_r.size());
+            _v.erase(_v.begin(), _v.end() - _r.size());
         }
 
         void compare()
         {
-            CompareContainers(m_r, m_v);
-            CompareContainers<const decltype(m_r), const decltype(m_v)>(m_r, m_v);
+            CompareContainers(_r, _v);
+            CompareContainers<const decltype(_r), const decltype(_v)>(_r, _v);
         }
 
         void RunAll()
@@ -84,17 +84,17 @@ namespace
 
             do
             {
-                m_v.pop_front();
-                m_r.pop_front();
+                _v.pop_front();
+                _r.pop_front();
                 compare();
             }
-            while (!m_r.empty());
+            while (!_r.empty());
         }
 
     private:
 
-        std::deque<T> m_v;
-        awl::ring<T> m_r;
+        std::deque<T> _v;
+        awl::ring<T> _r;
     };
 
     using A = awl::testing::helpers::NonCopyable;

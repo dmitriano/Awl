@@ -31,7 +31,7 @@ namespace awl
         public:
 
             async_generator_promise_base() noexcept
-                : m_exception(nullptr)
+                : _exception(nullptr)
             {
                 // Other variables left intentionally uninitialised as they're
                 // only referenced in certain states by which time they should
@@ -50,7 +50,7 @@ namespace awl
 
             void unhandled_exception() noexcept
             {
-                m_exception = std::current_exception();
+                _exception = std::current_exception();
             }
 
             void return_void() noexcept
@@ -62,14 +62,14 @@ namespace awl
             /// i.e. Either a begin() or iterator::operator++() operation.
             bool finished() const noexcept
             {
-                return m_currentValue == nullptr;
+                return _currentValue == nullptr;
             }
 
             void rethrow_if_unhandled_exception()
             {
-                if (m_exception)
+                if (_exception)
                 {
-                    std::rethrow_exception(std::move(m_exception));
+                    std::rethrow_exception(std::move(_exception));
                 }
             }
 
@@ -82,13 +82,13 @@ namespace awl
             friend class async_generator_yield_operation;
             friend class async_generator_advance_operation;
 
-            std::exception_ptr m_exception;
+            std::exception_ptr _exception;
 
-            std::coroutine_handle<> m_consumerCoroutine;
+            std::coroutine_handle<> _consumerCoroutine;
 
         protected:
 
-            void* m_currentValue;
+            void* _currentValue;
         };
 
         class async_generator_yield_operation final
@@ -96,7 +96,7 @@ namespace awl
         public:
 
             async_generator_yield_operation(std::coroutine_handle<> consumer) noexcept
-                : m_consumer(consumer)
+                : _consumer(consumer)
             {}
 
             bool await_ready() const noexcept
@@ -107,25 +107,25 @@ namespace awl
             std::coroutine_handle<>
                 await_suspend([[maybe_unused]] std::coroutine_handle<> producer) noexcept
             {
-                return m_consumer;
+                return _consumer;
             }
 
             void await_resume() noexcept {}
 
         private:
 
-            std::coroutine_handle<> m_consumer;
+            std::coroutine_handle<> _consumer;
         };
 
         inline async_generator_yield_operation async_generator_promise_base::final_suspend() noexcept
         {
-            m_currentValue = nullptr;
+            _currentValue = nullptr;
             return internal_yield_value();
         }
 
         inline async_generator_yield_operation async_generator_promise_base::internal_yield_value() noexcept
         {
-            return async_generator_yield_operation{ m_consumerCoroutine };
+            return async_generator_yield_operation{ _consumerCoroutine };
         }
 
         class async_generator_advance_operation
@@ -133,15 +133,15 @@ namespace awl
         protected:
 
             async_generator_advance_operation(std::nullptr_t) noexcept
-                : m_promise(nullptr)
-                , m_producerCoroutine(nullptr)
+                : _promise(nullptr)
+                , _producerCoroutine(nullptr)
             {}
 
             async_generator_advance_operation(
                 async_generator_promise_base& promise,
                 std::coroutine_handle<> producerCoroutine) noexcept
-                : m_promise(std::addressof(promise))
-                , m_producerCoroutine(producerCoroutine)
+                : _promise(std::addressof(promise))
+                , _producerCoroutine(producerCoroutine)
             {}
 
         public:
@@ -151,14 +151,14 @@ namespace awl
             std::coroutine_handle<>
                 await_suspend(std::coroutine_handle<> consumerCoroutine) noexcept
             {
-                m_promise->m_consumerCoroutine = consumerCoroutine;
-                return m_producerCoroutine;
+                _promise->_consumerCoroutine = consumerCoroutine;
+                return _producerCoroutine;
             }
 
         protected:
 
-            async_generator_promise_base* m_promise;
-            std::coroutine_handle<> m_producerCoroutine;
+            async_generator_promise_base* _promise;
+            std::coroutine_handle<> _producerCoroutine;
         };
 
         template<typename T>
@@ -174,7 +174,7 @@ namespace awl
 
             async_generator_yield_operation yield_value(value_type& value) noexcept
             {
-                m_currentValue = std::addressof(value);
+                _currentValue = std::addressof(value);
                 return internal_yield_value();
             }
 
@@ -185,7 +185,7 @@ namespace awl
 
             T& value() const noexcept
             {
-                return *static_cast<T*>(m_currentValue);
+                return *static_cast<T*>(_currentValue);
             }
         };
 
@@ -200,13 +200,13 @@ namespace awl
 
             async_generator_yield_operation yield_value(T&& value) noexcept
             {
-                m_currentValue = std::addressof(value);
+                _currentValue = std::addressof(value);
                 return internal_yield_value();
             }
 
             T&& value() const noexcept
             {
-                return std::move(*static_cast<T*>(m_currentValue));
+                return std::move(*static_cast<T*>(_currentValue));
             }
         };
 
@@ -216,15 +216,15 @@ namespace awl
         public:
 
             async_generator_increment_operation(async_generator_iterator<T>& iterator) noexcept
-                : async_generator_advance_operation(iterator.m_coroutine.promise(), iterator.m_coroutine)
-                , m_iterator(iterator)
+                : async_generator_advance_operation(iterator._coroutine.promise(), iterator._coroutine)
+                , _iterator(iterator)
             {}
 
             async_generator_iterator<T>& await_resume();
 
         private:
 
-            async_generator_iterator<T>& m_iterator;
+            async_generator_iterator<T>& _iterator;
         };
 
         template<typename T>
@@ -244,11 +244,11 @@ namespace awl
             using pointer = std::add_pointer_t<value_type>;
 
             async_generator_iterator(std::nullptr_t) noexcept
-                : m_coroutine(nullptr)
+                : _coroutine(nullptr)
             {}
 
             async_generator_iterator(handle_type coroutine) noexcept
-                : m_coroutine(coroutine)
+                : _coroutine(coroutine)
             {}
 
             async_generator_increment_operation<T> operator++() noexcept
@@ -258,12 +258,12 @@ namespace awl
 
             reference operator*() const noexcept
             {
-                return m_coroutine.promise().value();
+                return _coroutine.promise().value();
             }
 
             bool operator==(const async_generator_iterator& other) const noexcept
             {
-                return m_coroutine == other.m_coroutine;
+                return _coroutine == other._coroutine;
             }
 
             bool operator!=(const async_generator_iterator& other) const noexcept
@@ -275,20 +275,20 @@ namespace awl
 
             friend class async_generator_increment_operation<T>;
 
-            handle_type m_coroutine;
+            handle_type _coroutine;
         };
 
         template<typename T>
         async_generator_iterator<T>& async_generator_increment_operation<T>::await_resume()
         {
-            if (m_promise->finished())
+            if (_promise->finished())
             {
                 // Update iterator to end()
-                m_iterator = async_generator_iterator<T>{ nullptr };
-                m_promise->rethrow_if_unhandled_exception();
+                _iterator = async_generator_iterator<T>{ nullptr };
+                _promise->rethrow_if_unhandled_exception();
             }
 
-            return m_iterator;
+            return _iterator;
         }
 
         template<typename T>
@@ -309,25 +309,25 @@ namespace awl
 
             bool await_ready() const noexcept
             {
-                return m_promise == nullptr || async_generator_advance_operation::await_ready();
+                return _promise == nullptr || async_generator_advance_operation::await_ready();
             }
 
             async_generator_iterator<T> await_resume()
             {
-                if (m_promise == nullptr)
+                if (_promise == nullptr)
                 {
                     // Called begin() on the empty generator.
                     return async_generator_iterator<T>{ nullptr };
                 }
-                else if (m_promise->finished())
+                else if (_promise->finished())
                 {
                     // Completed without yielding any values.
-                    m_promise->rethrow_if_unhandled_exception();
+                    _promise->rethrow_if_unhandled_exception();
                     return async_generator_iterator<T>{ nullptr };
                 }
 
                 return async_generator_iterator<T>{
-                    handle_type::from_promise(*static_cast<promise_type*>(m_promise))
+                    handle_type::from_promise(*static_cast<promise_type*>(_promise))
                 };
             }
         };
@@ -342,24 +342,24 @@ namespace awl
         using iterator = detail::async_generator_iterator<T>;
 
         async_generator() noexcept
-            : m_coroutine(nullptr)
+            : _coroutine(nullptr)
         {}
 
         explicit async_generator(promise_type& promise) noexcept
-            : m_coroutine(std::coroutine_handle<promise_type>::from_promise(promise))
+            : _coroutine(std::coroutine_handle<promise_type>::from_promise(promise))
         {}
 
         async_generator(async_generator&& other) noexcept
-            : m_coroutine(other.m_coroutine)
+            : _coroutine(other._coroutine)
         {
-            other.m_coroutine = nullptr;
+            other._coroutine = nullptr;
         }
 
         ~async_generator()
         {
-            if (m_coroutine)
+            if (_coroutine)
             {
-                m_coroutine.destroy();
+                _coroutine.destroy();
             }
         }
 
@@ -375,12 +375,12 @@ namespace awl
 
         auto begin() noexcept
         {
-            if (!m_coroutine)
+            if (!_coroutine)
             {
                 return detail::async_generator_begin_operation<T>{ nullptr };
             }
 
-            return detail::async_generator_begin_operation<T>{ m_coroutine };
+            return detail::async_generator_begin_operation<T>{ _coroutine };
         }
 
         auto end() noexcept
@@ -390,12 +390,12 @@ namespace awl
 
         void swap(async_generator& other) noexcept
         {
-            std::swap(m_coroutine, other.m_coroutine);
+            std::swap(_coroutine, other._coroutine);
         }
 
     private:
 
-        std::coroutine_handle<promise_type> m_coroutine;
+        std::coroutine_handle<promise_type> _coroutine;
     };
 
     template<typename T>

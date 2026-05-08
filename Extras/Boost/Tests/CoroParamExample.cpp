@@ -14,62 +14,62 @@ namespace
     {
     public:
 
-        Param(int val) : m_val(val)
+        Param(int val) : _val(val)
         {
-            std::cout << "Param constructor " << m_val << std::endl;
+            std::cout << "Param constructor " << _val << std::endl;
         }
 
-        Param(const Param& other) : m_val(other.m_val)
+        Param(const Param& other) : _val(other._val)
         {
-            std::cout << "Param copy constructor " << m_val << std::endl;
+            std::cout << "Param copy constructor " << _val << std::endl;
         }
 
-        Param(Param&& other) noexcept : m_val(other.m_val)
+        Param(Param&& other) noexcept : _val(other._val)
         {
-            std::cout << "Param move constructor " << m_val << std::endl;
+            std::cout << "Param move constructor " << _val << std::endl;
         }
 
         Param& operator= (const Param& other)
         {
-            m_val = other.m_val;
+            _val = other._val;
 
-            std::cout << "Param copy assignment operator " << m_val << std::endl;
+            std::cout << "Param copy assignment operator " << _val << std::endl;
 
             return *this;
         }
 
         Param& operator= (Param&& other) noexcept
         {
-            m_val = other.m_val;
+            _val = other._val;
 
-            std::cout << "Param move assignment operator " << m_val << std::endl;
+            std::cout << "Param move assignment operator " << _val << std::endl;
 
             return *this;
         }
 
         void func() const
         {
-            std::cout << "Param func " << m_val << std::endl;
+            std::cout << "Param func " << _val << std::endl;
         }
 
         ~Param()
         {
-            std::cout << "Param destructor " << m_val << std::endl;
+            std::cout << "Param destructor " << _val << std::endl;
         }
 
         int value() const
         {
-            return m_val;
+            return _val;
         }
 
         void setValue(int val)
         {
-            m_val = val;
+            _val = val;
         }
 
     private:
 
-        int m_val;
+        int _val;
     };
 
     void simpleFunc(Param param)

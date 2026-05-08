@@ -35,10 +35,10 @@ namespace
 
         void log(const std::string& level, const awl::LogString& message) override
         {
-            ++m_log_count;
-            m_level = level;
-            m_location = message.location();
-            m_message = message.str();
+            ++_log_count;
+            _level = level;
+            _location = message.location();
+            _message = message.str();
         }
 
         std::shared_ptr<awl::Logger> createLogger(std::string source) const override
@@ -49,30 +49,30 @@ namespace
 
         const std::string& level() const
         {
-            return m_level;
+            return _level;
         }
 
         const awl::String& message() const
         {
-            return m_message;
+            return _message;
         }
 
         std::source_location location() const
         {
-            return m_location;
+            return _location;
         }
 
         int logCount() const
         {
-            return m_log_count;
+            return _log_count;
         }
 
     private:
 
-        int m_log_count = 0;
-        std::string m_level;
-        awl::String m_message;
-        std::source_location m_location;
+        int _log_count = 0;
+        std::string _level;
+        awl::String _message;
+        std::source_location _location;
     };
 
     class FilteredLogger : public CaptureLogger

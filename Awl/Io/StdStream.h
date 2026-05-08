@@ -17,36 +17,36 @@ namespace awl
         {
         public:
 
-            StdInputStream(std::istream & in) : m_in(in)
+            StdInputStream(std::istream & in) : _in(in)
             {}
 
             size_t read(uint8_t * buffer, size_t count) override
             {
                 //good() returns false at the end of file.
-                m_in.read(launder_cast<char>(buffer), count);
+                _in.read(launder_cast<char>(buffer), count);
 
-                const size_t actually_read = m_in.gcount();
+                const size_t actually_read = _in.gcount();
 
                 return actually_read;
             }
 
             bool end() override
             {
-                m_in.peek();
+                _in.peek();
 
-                return m_in.eof();
+                return _in.eof();
             }
 
         protected:
 
-            std::istream & m_in;
+            std::istream & _in;
         };
 
         class StdOutputStream : public SequentialOutputStream
         {
         public:
 
-            StdOutputStream(std::ostream & out) : m_out(out)
+            StdOutputStream(std::ostream & out) : _out(out)
             {}
 
             void write(const uint8_t * buffer, size_t count) override
@@ -54,7 +54,7 @@ namespace awl
                 //he write function returns the stream itself. So in your case, it will return a reference to myfile.
                 //The stream types are convertible to bool to check its failure status.
                 
-                if (!m_out.write(launder_cast<const char>(buffer), count))
+                if (!_out.write(launder_cast<const char>(buffer), count))
                 {
                     throw WriteFailException();
                 }
@@ -62,7 +62,7 @@ namespace awl
 
         protected:
 
-            std::ostream & m_out;
+            std::ostream & _out;
         };
     }
 }

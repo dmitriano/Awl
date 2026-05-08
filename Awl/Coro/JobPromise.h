@@ -15,7 +15,7 @@ namespace awl
     {
         // corouine that awaiting this coroutine value
         // we need to store it in order to resume it later when value of this coroutine will be computed
-        std::coroutine_handle<> m_awaitingCoroutine;
+        std::coroutine_handle<> _awaitingCoroutine;
 
         // Job is async result of our coroutine
         // it is created before execution of the coroutine body
@@ -56,13 +56,13 @@ namespace awl
                 //{
                 //    JobPromise& promise = h.promise();
 
-                //    return promise.m_awaitingCoroutine ? promise.m_awaitingCoroutine : std::noop_coroutine();
+                //    return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
                 //}
                 void await_suspend(std::coroutine_handle<JobPromise> h) noexcept
                 {
                     JobPromise& promise = h.promise();
 
-                    auto coro = promise.m_awaitingCoroutine;
+                    auto coro = promise._awaitingCoroutine;
 
                     // The Promise is always owned by Job,
                     // so we do not call h.destroy() here.

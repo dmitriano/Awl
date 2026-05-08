@@ -13,18 +13,18 @@ namespace
     public:
 
         LegacyProcessor(asio::any_io_executor executor) :
-            m_executor(std::move(executor))
+            _executor(std::move(executor))
         {}
 
         // -------------------------------------------
         // Legacy-style async operation (no std::function!)
-        // Accepts any completion handler — can be move-only
+        // Accepts any completion handler ï¿½ can be move-only
         // -------------------------------------------
         template <class CompletionHandler>
         void asyncProcess(CompletionHandler&& handler)
         {
             // Simulate asynchronous work by posting the handler
-            asio::post(m_executor,
+            asio::post(_executor,
                 [h = std::forward<CompletionHandler>(handler)]() mutable {
                     // Call the handler once the "operation" is complete
                     std::move(h)(error_code{}, 42);
@@ -46,7 +46,7 @@ namespace
 
     private:
 
-        asio::any_io_executor m_executor;
+        asio::any_io_executor _executor;
     };
 
     class ModernProcessor
@@ -54,7 +54,7 @@ namespace
     public:
 
         ModernProcessor(asio::any_io_executor executor) :
-            m_processor(std::move(executor))
+            _processor(std::move(executor))
         {}
 
         // -------------------------------------------
@@ -69,7 +69,7 @@ namespace
             >(
                 // Initiator: calls the legacy function with the handler provided by Asio
                 [this](auto&& completion_handler) {
-                    m_processor.asyncProcess(std::forward<decltype(completion_handler)>(completion_handler));
+                    _processor.asyncProcess(std::forward<decltype(completion_handler)>(completion_handler));
                 },
                 asio::use_awaitable
             );
@@ -84,7 +84,7 @@ namespace
             >(
                 // Initiator: calls the legacy function with the handler provided by Asio
                 [this](auto&& completion_handler) {
-                    m_processor.asyncProcessOnThread(std::forward<decltype(completion_handler)>(completion_handler));
+                    _processor.asyncProcessOnThread(std::forward<decltype(completion_handler)>(completion_handler));
                 },
                 asio::use_awaitable
             );
@@ -92,7 +92,7 @@ namespace
 
     private:
 
-        LegacyProcessor m_processor;
+        LegacyProcessor _processor;
     };
 
     // -------------------------------------------

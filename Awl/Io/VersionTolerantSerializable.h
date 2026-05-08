@@ -25,7 +25,7 @@ namespace awl::io
 
     public:
 
-        VersionTolerantSerializable(T& val) : m_val(val) {}
+        VersionTolerantSerializable(T& val) : _val(val) {}
 
         void read(IStream& in) override
         {
@@ -38,8 +38,8 @@ namespace awl::io
 
                     read(in, val);
 
-                    //If Read throws m_val does not change.
-                    m_val = std::move(val);
+                    //If Read throws _val does not change.
+                    _val = std::move(val);
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace awl::io
                     {
                         MeasureStream measure_out;
 
-                        io::write(measure_out, m_val);
+                        io::write(measure_out, _val);
 
                         v.reserve(measure_out.length());
                     }
@@ -60,7 +60,7 @@ namespace awl::io
 
                     try
                     {
-                        read(in, m_val);
+                        read(in, _val);
                     }
                     catch (const IoException&)
                     {
@@ -73,7 +73,7 @@ namespace awl::io
             }
             else
             {
-                read(in, m_val);
+                read(in, _val);
             }
         }
 
@@ -82,7 +82,7 @@ namespace awl::io
             Writer ctx;
 
             ctx.writeNewPrototypes(out);
-            ctx.writeV(out, m_val);
+            ctx.writeV(out, _val);
         }
 
     protected:
@@ -91,14 +91,14 @@ namespace awl::io
         {
             VectorOutputStream v_out(v);
 
-            io::write(v_out, m_val);
+            io::write(v_out, _val);
         }
 
         void readSnapshot(const std::vector<uint8_t>& v) noexcept
         {
             VectorInputStream v_in(v);
 
-            io::read(v_in, m_val);
+            io::read(v_in, _val);
         }
 
         void read(IStream& in, T& val)
@@ -109,6 +109,6 @@ namespace awl::io
             ctx.readV(in, val);
         }
 
-        T& m_val;
+        T& _val;
     };
 }

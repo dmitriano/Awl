@@ -26,7 +26,7 @@ namespace awl::testing
 
         void push(std::coroutine_handle<> handle, std::chrono::nanoseconds timeout)
         {
-            m_tasks.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
+            _tasks.push(Task{ std::chrono::steady_clock::now() + timeout, handle });
         }
 
         // Resumes n times.
@@ -34,16 +34,16 @@ namespace awl::testing
         {
             std::size_t i = 0;
 
-            while (!m_tasks.empty())
+            while (!_tasks.empty())
             {
-                auto& timer = m_tasks.top();
+                auto& timer = _tasks.top();
                 // if it is time to run a coroutine
                 if (timer.targetTime < std::chrono::steady_clock::now())
                 {
                     if (i++ < n)
                     {
                         auto handle = timer.handle;
-                        m_tasks.pop();
+                        _tasks.pop();
                         handle.resume();
                     }
                     else
@@ -60,14 +60,14 @@ namespace awl::testing
 
         bool empty() const
         {
-            return m_tasks.empty();
+            return _tasks.empty();
         }
 
         void clear()
         {
-            while (!m_tasks.empty())
+            while (!_tasks.empty())
             {
-                m_tasks.pop();
+                _tasks.pop();
             }
         }
 
@@ -81,6 +81,6 @@ namespace awl::testing
 
         using Compare = member_compare<&Task::targetTime>;
 
-        std::priority_queue<Task, std::vector<Task>, Compare> m_tasks;
+        std::priority_queue<Task, std::vector<Task>, Compare> _tasks;
     };
 }

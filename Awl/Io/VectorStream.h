@@ -21,17 +21,17 @@ namespace awl
         {
         public:
 
-            VectorInputStream(const std::vector<uint8_t> & v) : m_v(v), m_i(m_v.begin())
+            VectorInputStream(const std::vector<uint8_t> & v) : _v(v), _i(_v.begin())
             {}
 
             bool end() override
             {
-                return m_i == m_v.end();
+                return _i == _v.end();
             }
 
             size_t read(uint8_t * buffer, size_t count) override
             {
-                auto diff = m_v.end() - m_i;
+                auto diff = _v.end() - _i;
 
                 assert(diff >= 0);
 
@@ -40,50 +40,50 @@ namespace awl
                 const size_t read_count = std::min(available, count);
                 
                 //Can be slow with uint8_t.
-                //std::copy(m_i, end, stdext::make_checked_array_iterator(buffer, count));
+                //std::copy(_i, end, stdext::make_checked_array_iterator(buffer, count));
 
                 //This results in an assert if diff == 0
-                //const uint8_t * src = &(*m_i);
+                //const uint8_t * src = &(*_i);
 
                 //Do not call std::memcpy with zero length to avoid GCC Address Sanitizer warnings.
                 if (read_count != 0)
                 {
-                    auto pos = m_i - m_v.begin();
+                    auto pos = _i - _v.begin();
 
-                    const uint8_t* src = m_v.data() + pos;
+                    const uint8_t* src = _v.data() + pos;
 
                     std::memcpy(buffer, src, read_count * sizeof(uint8_t));
                 }
 
-                auto end = m_i + read_count;
+                auto end = _i + read_count;
 
-                m_i = end;
+                _i = end;
 
                 return read_count;
             }
 
         private:
 
-            const std::vector<uint8_t> & m_v;
+            const std::vector<uint8_t> & _v;
 
-            std::vector<uint8_t>::const_iterator m_i;
+            std::vector<uint8_t>::const_iterator _i;
         };
 
         class VectorOutputStream : public SequentialOutputStream
         {
         public:
 
-            VectorOutputStream(std::vector<uint8_t> & v) : m_v(v)
+            VectorOutputStream(std::vector<uint8_t> & v) : _v(v)
             {}
 
             void write(const uint8_t * buffer, size_t count) override
             {
-                m_v.insert(m_v.end(), buffer, buffer + count);
+                _v.insert(_v.end(), buffer, buffer + count);
             }
 
         private:
 
-            std::vector<uint8_t> & m_v;
+            std::vector<uint8_t> & _v;
         };
     }
 }

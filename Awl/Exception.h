@@ -42,21 +42,21 @@ namespace awl
     {
     protected:
 
-        const String m_message;
+        const String _message;
 
     public:
 
         explicit GeneralException(std::string message) :
-            m_message(fromAString(std::move(message)))
+            _message(fromAString(std::move(message)))
         {}
 
         explicit GeneralException(std::wstring message) :
-            m_message(fromWString(std::move(message)))
+            _message(fromWString(std::move(message)))
         {}
 
         String message() const override
         {
-            return m_message;
+            return _message;
         }
     };
 }

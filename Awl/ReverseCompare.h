@@ -15,17 +15,17 @@ namespace awl
         //The same as Container::value_type, for example std::shared_ptr<A>.
         using value_type = T;
 
-        constexpr ReverseCompare(Compare comp = Compare()) : m_comp(std::move(comp))
+        constexpr ReverseCompare(Compare comp = Compare()) : _comp(std::move(comp))
         {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return m_comp(right, left);
+            return _comp(right, left);
         }
 
     private:
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class Compare>
@@ -39,29 +39,29 @@ namespace awl
         //The type of the key for heterogeneous lookup.
         using key_type = typename Compare::key_type;
 
-        constexpr TransparentReverseCompare(Compare comp = Compare()) : m_comp(std::move(comp))
+        constexpr TransparentReverseCompare(Compare comp = Compare()) : _comp(std::move(comp))
         {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return m_comp(right, left);
+            return _comp(right, left);
         }
 
         constexpr bool operator()(const T& val, const key_type& id) const
         {
-            return m_comp(id, val);
+            return _comp(id, val);
         }
 
         constexpr bool operator()(const key_type& id, const T& val) const
         {
-            return m_comp(val, id);
+            return _comp(val, id);
         }
 
         using is_transparent = void;
 
     private:
 
-        Compare m_comp;
+        Compare _comp;
     };
 
     template <class T, class Compare>

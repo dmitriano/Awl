@@ -37,20 +37,20 @@ namespace awl
 
         Observable(const Observable& other) = delete;
 
-        Observable(Observable&& other) : m_observers(std::move(other.m_observers)) {}
+        Observable(Observable&& other) : _observers(std::move(other._observers)) {}
 
         Observable& operator = (const Observable& other) = delete;
 
         Observable& operator = (Observable&& other) noexcept
         {
             clearObservers();
-            m_observers = std::move(other.m_observers);
+            _observers = std::move(other._observers);
             return *this;
         }
 
         void subscribe(ObserverElement* p_observer)
         {
-            m_observers.push_back(p_observer);
+            _observers.push_back(p_observer);
         }
 
         void unsubscribe(ObserverElement* p_observer)
@@ -60,12 +60,12 @@ namespace awl
 
         bool empty() const
         {
-            return m_observers.empty();
+            return _observers.empty();
         }
 
         auto size() const
         {
-            return m_observers.size();
+            return _observers.size();
         }
 
     protected:
@@ -102,7 +102,7 @@ namespace awl
                 std::convertible_to<std::invoke_result_t<Callable&, ObserverElement*>, bool>
             )
         {
-            for (typename ObserverList::iterator i = m_observers.begin(); i != m_observers.end(); )
+            for (typename ObserverList::iterator i = _observers.begin(); i != _observers.end(); )
             {
                 ObserverElement* p_observer = *(i++);
 
@@ -117,12 +117,12 @@ namespace awl
 
         void clearObservers()
         {
-            while (!m_observers.empty())
+            while (!_observers.empty())
             {
-                m_observers.pop_front();
+                _observers.pop_front();
             }
         }
 
-        ObserverList m_observers;
+        ObserverList _observers;
     };
 }
