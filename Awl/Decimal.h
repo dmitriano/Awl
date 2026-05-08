@@ -48,12 +48,10 @@ namespace awl
         using Rep = typename Data::Rep;
 
         constexpr decimal()
-        {
-        }
+        {}
 
         explicit constexpr decimal(uint8_t digits) : m_data(true, digits, 0)
-        {
-        }
+        {}
 
         //We do not normalize it in the constructor.
         constexpr decimal(Int man, uint8_t digits) : decimal(digits)
@@ -69,8 +67,7 @@ namespace awl
 
         template <class C>
         constexpr explicit decimal(const C* fixed_string) : decimal(std::basic_string_view<C>(fixed_string))
-        {
-        }
+        {}
 
         decimal(const decimal& other) = default;
         decimal(decimal&& other) = default;

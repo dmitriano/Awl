@@ -37,38 +37,33 @@ namespace awl::io
 
         BasicSharedHandle() noexcept
             : BasicSharedHandle(null())
-        {
-        }
+        {}
 
         BasicSharedHandle(HANDLE h) noexcept
             : m_h(h)
             , m_deleter()
             , m_duplicator()
-        {
-        }
+        {}
 
         BasicSharedHandle(HANDLE h, const deleter_type& deleter, const duplicator_type& duplicator)
             noexcept
             : m_h(h)
             , m_deleter(deleter)
             , m_duplicator(duplicator)
-        {
-        }
+        {}
 
         BasicSharedHandle(BasicSharedHandle&& other) noexcept
             : m_h(other.release())
             , m_deleter(other.m_deleter)
             , m_duplicator(other.m_duplicator)
-        {
-        }
+        {}
 
         BasicSharedHandle(const BasicSharedHandle& other)
             noexcept(duplicateNoexcept)
             : m_h(other.duplicate(other.m_h))
             , m_deleter(other.m_deleter)
             , m_duplicator(other.m_duplicator)
-        {
-        }
+        {}
 
         ~BasicSharedHandle()
         {

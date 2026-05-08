@@ -16,8 +16,7 @@ namespace awl::coro
         DelayedAwaitable(IDelayedExecutor& executor, std::chrono::nanoseconds delay) :
             m_executor(executor),
             m_delay(delay)
-        {
-        }
+        {}
 
         bool await_ready() const noexcept
         {
@@ -30,8 +29,7 @@ namespace awl::coro
         }
 
         void await_resume() const noexcept
-        {
-        }
+        {}
 
     private:
 

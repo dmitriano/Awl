@@ -156,8 +156,7 @@ namespace
 
                 // when ready return value to a consumer
                 auto await_resume()
-                {
-                }
+                {}
             };
 
             return task_awaitable{ update_task.handle };

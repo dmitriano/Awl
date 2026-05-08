@@ -25,8 +25,7 @@ namespace awl::io
         PosixStream() = default;
 
         PosixStream(FileHandle&& h) : m_hFile(std::forward<FileHandle>(h))
-        {
-        }
+        {}
 
         bool operator == (const PosixStream& other) const
         {

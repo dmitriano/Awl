@@ -29,8 +29,7 @@ namespace
         ChangeHandler() = default;
         
         ChangeHandler(const TestContext & c) : pContext(&c)
-        {
-        }
+        {}
 
         void ItChanged(int param, awl::String val) override;
 
@@ -245,8 +244,7 @@ namespace
     public:
 
         ChangeHandler2(const TestContext & c) : context(c)
-        {
-        }
+        {}
 
         void SomeHanderFunc(const awl::String & val)
         {
@@ -297,8 +295,7 @@ namespace
 
         ConditionHandler(bool result, int* p_count, int* p_last_value)
             : m_result(result), pCount(p_count), pLastValue(p_last_value)
-        {
-        }
+        {}
 
         bool check(int value) override
         {
@@ -404,8 +401,7 @@ namespace
             m_tag(tag),
             m_events(p_events),
             m_defer(defer)
-        {
-        }
+        {}
 
         awl::Task<void> changed(int value) override
         {

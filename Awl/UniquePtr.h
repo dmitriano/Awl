@@ -22,12 +22,10 @@ namespace awl
     public:
         
         constexpr unique_ptr() noexcept : m_p(nullptr)
-        {
-        }
+        {}
 
         explicit constexpr unique_ptr(T * p) noexcept : m_p(p)
-        {
-        }
+        {}
 
         unique_ptr(const unique_ptr& other) = delete;
 

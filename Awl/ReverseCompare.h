@@ -16,8 +16,7 @@ namespace awl
         using value_type = T;
 
         constexpr ReverseCompare(Compare comp = Compare()) : m_comp(std::move(comp))
-        {
-        }
+        {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {
@@ -41,8 +40,7 @@ namespace awl
         using key_type = typename Compare::key_type;
 
         constexpr TransparentReverseCompare(Compare comp = Compare()) : m_comp(std::move(comp))
-        {
-        }
+        {}
 
         constexpr bool operator()(const T& left, const T& right) const
         {

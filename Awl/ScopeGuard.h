@@ -16,8 +16,7 @@ namespace awl
     public:
 
         scope_guard(Lambda f, bool e = true) : free(std::move(f)), engaged(e)
-        {
-        }
+        {}
 
         scope_guard(const scope_guard &) = delete;
 

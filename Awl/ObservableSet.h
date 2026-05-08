@@ -107,8 +107,7 @@ namespace awl
         basic_observable_set() = default;
         
         basic_observable_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
-        {
-        }
+        {}
 
         //It is not clear enough what to do with the observers if we copy the set. We can leave them empty as an option.
         // basic_observable_set(const basic_observable_set & other) : InternalObservable{}, m_set(other.m_set)
@@ -122,13 +121,11 @@ namespace awl
         basic_observable_set(basic_observable_set && other) = default;
 
         basic_observable_set(std::initializer_list<value_type> init, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) : m_set(init, comp, alloc)
-        {
-        }
+        {}
 
         basic_observable_set(std::initializer_list<value_type> init, const Allocator& alloc)
             : basic_observable_set(init, Compare(), alloc)
-        {
-        }
+        {}
 
         basic_observable_set & operator = (const basic_observable_set & other) = delete;
 

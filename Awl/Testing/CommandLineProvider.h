@@ -77,8 +77,7 @@ namespace awl::testing
         struct Option
         {
             Option() : val(nullptr), usage(0)
-            {
-            }
+            {}
 
             Option(const CmdChar* val_ptr) : Option()
             {

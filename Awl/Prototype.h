@@ -118,8 +118,7 @@ namespace awl
         DetachedPrototype() = default;
         
         explicit DetachedPrototype(std::vector<FieldContainer> fields) : m_fields(std::move(fields))
-        {
-        }
+        {}
 
         explicit DetachedPrototype(const Prototype & ap)
         {

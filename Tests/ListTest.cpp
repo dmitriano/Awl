@@ -467,8 +467,7 @@ namespace
         SingleElement(std::string name, int val) :
             m_name(std::move(name)),
             m_val(val)
-        {
-        }
+        {}
 
         const char* name() const { return m_name.c_str(); }
 

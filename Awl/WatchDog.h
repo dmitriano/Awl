@@ -24,8 +24,7 @@ namespace awl
             m_thread(std::bind(&watch_dog::thread_proc, this, std::placeholders::_1)),
             m_callback(m_token, std::bind(&watch_dog::callback_proc, this)),
             m_log(log)
-        {
-        }
+        {}
 
         std::stop_token get_token() const
         {

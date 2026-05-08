@@ -22,8 +22,7 @@ namespace awl::io
         WinStream() = default;
 
         WinStream(FileHandle&& h) : m_hFile(std::forward<FileHandle>(h))
-        {
-        }
+        {}
 
         bool operator == (const WinStream& other) const
         {

@@ -22,8 +22,7 @@ namespace awl
         public:
 
             VectorInputStream(const std::vector<uint8_t> & v) : m_v(v), m_i(m_v.begin())
-            {
-            }
+            {}
 
             bool end() override
             {
@@ -75,8 +74,7 @@ namespace awl
         public:
 
             VectorOutputStream(std::vector<uint8_t> & v) : m_v(v)
-            {
-            }
+            {}
 
             void write(const uint8_t * buffer, size_t count) override
             {

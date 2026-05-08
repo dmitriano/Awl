@@ -56,8 +56,7 @@ namespace awl
         }
 
         ~Destructible()
-        {
-        }
+        {}
     
     private:
         

@@ -104,8 +104,7 @@ namespace awl::io
 
             FieldReaderArrayHolder(const FieldReaderTuple<Struct> & t) :
                 a(tuple_cast<const FieldReader<Struct>>(t))
-            {
-            }
+            {}
 
             FieldReaderArray<Struct> a;
         };
@@ -130,8 +129,7 @@ namespace awl::io
             skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
             skipperArray(tuple_cast<FieldSkipper>(skipperTuple)),
             typeMap(Base::TypeMapBuilder::buildI2nMap())
-        {
-        }
+        {}
 
         //Makes the new and old prototypes identical.
         void initialize()

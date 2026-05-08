@@ -74,8 +74,7 @@ namespace
             type(std::move(t)),
             name(std::move(n)),
             col(p)
-        {
-        }
+        {}
 
         std::string type;
         std::string name;

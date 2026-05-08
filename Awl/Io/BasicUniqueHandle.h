@@ -32,26 +32,22 @@ namespace awl::io
 
         BasicUniqueHandle() noexcept
             : BasicUniqueHandle(null())
-        {
-        }
+        {}
 
         BasicUniqueHandle(HANDLE h) noexcept
             : m_h(h)
             , m_deleter()
-        {
-        }
+        {}
 
         BasicUniqueHandle(HANDLE h, const deleter_type& deleter) noexcept
             : m_h(h)
             , m_deleter(deleter)
-        {
-        }
+        {}
 
         BasicUniqueHandle(HANDLE h, deleter_type&& deleter) noexcept
             : m_h(h)
             , m_deleter(std::move(deleter))
-        {
-        }
+        {}
 
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 

@@ -98,8 +98,7 @@ namespace awl::io
         PrototypeContainer() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_cast<Prototype>(newPrototypesTuple))
-        {
-        }
+        {}
 
     public:
 

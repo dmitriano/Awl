@@ -18,8 +18,7 @@ namespace awl::io
 
         EndOfFileException(size_t requested_count, size_t actually_read_count) :
             requestedCount(requested_count), actuallyReadCount(actually_read_count)
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -37,8 +36,7 @@ namespace awl::io
     public:
 
         CorruptionException(size_t pos = -1) : m_pos(pos)
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -77,8 +75,7 @@ namespace awl::io
     public:
 
         explicit IoError(String message) : theMessage(std::move(message))
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -91,8 +88,7 @@ namespace awl::io
     public:
 
         FieldNotFoundException(std::string name) : fieldName(name)
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -110,8 +106,7 @@ namespace awl::io
 
         TypeMismatchException(std::string name, size_t actual, size_t expected) :
             fieldName(name), actualType(actual), expectedType(expected)
-        {
-        }
+        {}
 
         String message() const override
         {

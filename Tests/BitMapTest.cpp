@@ -107,8 +107,7 @@ namespace BitMapTest1
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
 
         A(GameLevelBitMap bm) : m_bm(bm)
-        {
-        }
+        {}
 
         GameLevelBitMap m_bm;
 

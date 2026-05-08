@@ -71,8 +71,7 @@ namespace awl
         m_minLevel(std::move(min_level)),
         m_minSeverity(log_level_severity(m_minLevel)),
         m_source(std::move(source))
-    {
-    }
+    {}
 
     bool ConsoleLogger::enabled(const std::string& level) const
     {

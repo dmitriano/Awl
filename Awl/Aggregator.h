@@ -27,8 +27,7 @@ namespace awl
     public:
 
         aggregator(Func func) : m_func(std::move(func)), m_cancelled(false)
-        {
-        }
+        {}
 
         template <std::size_t i>
         void set(std::tuple_element_t<i, Tuple> val)

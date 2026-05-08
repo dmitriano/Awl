@@ -35,12 +35,10 @@ namespace
     public:
 
         ElementClass() : i(0), x(12.0), y(77.0)
-        {
-        }
+        {}
 
         ElementClass(int val) : i(val), x(val * 12.0), y(val * 77.0)
-        {
-        }
+        {}
 
         double ToReal() const
         {

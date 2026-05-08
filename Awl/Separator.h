@@ -20,8 +20,7 @@ namespace awl
         }
 
         basic_separator(std::basic_string<C> s) : m_sep(s)
-        {
-        }
+        {}
 
         bool first() const
         {

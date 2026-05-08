@@ -33,8 +33,7 @@ namespace
     public:
 
         FieldWriter(const Field & field) : m_field(field)
-        {
-        }
+        {}
 
         void write(std::ostream & out) const override
         {
@@ -52,8 +51,7 @@ namespace
     public:
 
         FieldReader(Field & field) : m_field(field)
-        {
-        }
+        {}
 
         void read(std::istream & in) const override
         {

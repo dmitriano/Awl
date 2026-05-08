@@ -207,8 +207,7 @@ namespace awl
     public:
 
         string_encoding_error(size_t e) : error(e)
-        {
-        }
+        {}
 
         const char* what() const throw() override
         {

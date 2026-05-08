@@ -157,8 +157,7 @@ namespace awl
     public:
 
         single_list() : Null(&Null)
-        {
-        }
+        {}
 
     private:
 

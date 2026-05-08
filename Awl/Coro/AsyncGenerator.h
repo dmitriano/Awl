@@ -54,8 +54,7 @@ namespace awl
             }
 
             void return_void() noexcept
-            {
-            }
+            {}
 
             /// Query if the generator has reached the end of the sequence.
             ///
@@ -98,8 +97,7 @@ namespace awl
 
             async_generator_yield_operation(std::coroutine_handle<> consumer) noexcept
                 : m_consumer(consumer)
-            {
-            }
+            {}
 
             bool await_ready() const noexcept
             {
@@ -137,16 +135,14 @@ namespace awl
             async_generator_advance_operation(std::nullptr_t) noexcept
                 : m_promise(nullptr)
                 , m_producerCoroutine(nullptr)
-            {
-            }
+            {}
 
             async_generator_advance_operation(
                 async_generator_promise_base& promise,
                 std::coroutine_handle<> producerCoroutine) noexcept
                 : m_promise(std::addressof(promise))
                 , m_producerCoroutine(producerCoroutine)
-            {
-            }
+            {}
 
         public:
 
@@ -222,8 +218,7 @@ namespace awl
             async_generator_increment_operation(async_generator_iterator<T>& iterator) noexcept
                 : async_generator_advance_operation(iterator.m_coroutine.promise(), iterator.m_coroutine)
                 , m_iterator(iterator)
-            {
-            }
+            {}
 
             async_generator_iterator<T>& await_resume();
 
@@ -250,13 +245,11 @@ namespace awl
 
             async_generator_iterator(std::nullptr_t) noexcept
                 : m_coroutine(nullptr)
-            {
-            }
+            {}
 
             async_generator_iterator(handle_type coroutine) noexcept
                 : m_coroutine(coroutine)
-            {
-            }
+            {}
 
             async_generator_increment_operation<T> operator++() noexcept
             {
@@ -308,13 +301,11 @@ namespace awl
 
             async_generator_begin_operation(std::nullptr_t) noexcept
                 : async_generator_advance_operation(nullptr)
-            {
-            }
+            {}
 
             async_generator_begin_operation(handle_type producerCoroutine) noexcept
                 : async_generator_advance_operation(producerCoroutine.promise(), producerCoroutine)
-            {
-            }
+            {}
 
             bool await_ready() const noexcept
             {
@@ -352,13 +343,11 @@ namespace awl
 
         async_generator() noexcept
             : m_coroutine(nullptr)
-        {
-        }
+        {}
 
         explicit async_generator(promise_type& promise) noexcept
             : m_coroutine(std::coroutine_handle<promise_type>::from_promise(promise))
-        {
-        }
+        {}
 
         async_generator(async_generator&& other) noexcept
             : m_coroutine(other.m_coroutine)

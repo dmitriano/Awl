@@ -67,8 +67,7 @@ namespace
     {
         ObserverA(int x, std::string y) :
             A(std::move(x), std::move(y))
-        {
-        }
+        {}
 
         bool operator ==(const UniqueA& other) const
         {

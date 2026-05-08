@@ -19,8 +19,7 @@ namespace awl
     public:
         basic_format(std::source_location location = std::source_location::current()) noexcept :
             m_location(location)
-        {
-        }
+        {}
         
         template <typename T>
         basic_format & operator << (const T & val)

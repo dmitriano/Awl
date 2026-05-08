@@ -115,8 +115,7 @@ inline jthread::jthread(Callable&& cb, Args&&... args)
                ::std::forward<Callable>(cb),  // pass callable
                ::std::forward<Args>(args)...  // pass arguments for callable
            }
-{
-}
+{}
 
 // move assignment operator:
 inline jthread& jthread::operator=(jthread&& t) noexcept {

@@ -20,26 +20,22 @@ namespace awl
         LogString(const char* m, std::source_location location = std::source_location::current()) :
             m_message(awl::fromACString(m)),
             m_location(location)
-        {
-        }
+        {}
 
         LogString(const wchar_t* m, std::source_location location = std::source_location::current()) :
             m_message(awl::fromWCString(m)),
             m_location(location)
-        {
-        }
+        {}
 
         LogString(std::string message, std::source_location location = std::source_location::current()) :
             m_message(awl::fromAString(std::move(message))),
             m_location(location)
-        {
-        }
+        {}
 
         LogString(std::wstring message, std::source_location location = std::source_location::current()) :
             m_message(awl::fromWString(std::move(message))),
             m_location(location)
-        {
-        }
+        {}
 
         const String& str() const noexcept
         {

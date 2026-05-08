@@ -57,8 +57,7 @@ namespace awl
             }
 
             void return_void()
-            {
-            }
+            {}
 
             reference_type value() const noexcept
             {
@@ -102,13 +101,11 @@ namespace awl
             // Iterator needs to be default-constructible to satisfy the Range concept.
             generator_iterator() noexcept
                 : m_coroutine(nullptr)
-            {
-            }
+            {}
 
             explicit generator_iterator(coroutine_handle coroutine) noexcept
                 : m_coroutine(coroutine)
-            {
-            }
+            {}
 
             friend bool operator==(const generator_iterator& it, generator_sentinel) noexcept
             {
@@ -173,8 +170,7 @@ namespace awl
 
         generator() noexcept
             : m_coroutine(nullptr)
-        {
-        }
+        {}
 
         generator(generator&& other) noexcept
             : m_coroutine(other.m_coroutine)
@@ -228,8 +224,7 @@ namespace awl
 
         explicit generator(std::coroutine_handle<promise_type> coroutine) noexcept
             : m_coroutine(coroutine)
-        {
-        }
+        {}
 
         std::coroutine_handle<promise_type> m_coroutine;
     };

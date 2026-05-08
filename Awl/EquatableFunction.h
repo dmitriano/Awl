@@ -65,8 +65,7 @@ namespace awl
             invocation_guard(const Invocable* p_invocable, std::shared_ptr<void> owner)
                 : m_invocable(p_invocable)
                 , m_owner(std::move(owner))
-            {
-            }
+            {}
 
             const Invocable* m_invocable = nullptr;
             std::shared_ptr<void> m_owner;
@@ -77,8 +76,7 @@ namespace awl
         equatable_function() = default;
 
         equatable_function(std::nullptr_t) noexcept
-        {
-        }
+        {}
 
         equatable_function(const equatable_function& other)
         {
@@ -341,8 +339,7 @@ namespace awl
             ErasedLambda(std::uint64_t id, std::function<Result(Args...)> func)
                 : m_id(id)
                 , m_func(std::move(func))
-            {
-            }
+            {}
 
             bool operator==(const ErasedLambda& other) const noexcept
             {
@@ -378,8 +375,7 @@ namespace awl
             ErasedWeak(WeakPtr p_object, Member member)
                 : m_object(std::move(p_object))
                 , m_member(member)
-            {
-            }
+            {}
 
             bool operator==(const ErasedWeak& other) const
             {
@@ -445,8 +441,7 @@ namespace awl
             ErasedShared(SharedPtr p_object, Member member)
                 : m_object(std::move(p_object))
                 , m_member(member)
-            {
-            }
+            {}
 
             bool operator==(const ErasedShared& other) const = default;
 
@@ -488,8 +483,7 @@ namespace awl
             ErasedMember(ObjectPtr p_object, Member member)
                 : m_object(p_object)
                 , m_member(member)
-            {
-            }
+            {}
 
             bool operator==(const ErasedMember& other) const = default;
 

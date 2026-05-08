@@ -27,8 +27,7 @@ namespace
         }
 
         void on_empty()
-        {
-        }
+        {}
 
         bool test_value(int value) const
         {

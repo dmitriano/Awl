@@ -135,8 +135,7 @@ namespace awl
 
             MyIterator(Container* p_map, Iterator i, Key offset = 0) :
                 m_pMap(p_map), m_i(i), m_offset(offset)
-            {
-            }
+            {}
 
             void move_next()
             {

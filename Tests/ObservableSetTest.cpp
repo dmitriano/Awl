@@ -23,8 +23,7 @@ namespace
         A() = default;
 
         explicit A(size_t k) : key(k), attribute(k + 1)
-        {
-        }
+        {}
 
         size_t key;
         size_t attribute;

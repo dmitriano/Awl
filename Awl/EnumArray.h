@@ -39,21 +39,18 @@ namespace awl
 
         enum_array(const array_type& items) :
             m_items(items)
-        {
-        }
+        {}
 
         enum_array(array_type&& items) :
             m_items(std::move(items))
-        {
-        }
+        {}
 
         template <class... Args>
             requires (sizeof...(Args) > 0 && sizeof...(Args) <= EnumTraits<Enum>::count() &&
                 (std::constructible_from<value_type, Args&&> && ...))
         enum_array(Args&&... args) :
             m_items{ std::forward<Args>(args)... }
-        {
-        }
+        {}
 
         reference at(enum_type index)
         {

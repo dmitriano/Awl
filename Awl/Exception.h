@@ -48,13 +48,11 @@ namespace awl
 
         explicit GeneralException(std::string message) :
             m_message(fromAString(std::move(message)))
-        {
-        }
+        {}
 
         explicit GeneralException(std::wstring message) :
             m_message(fromWString(std::move(message)))
-        {
-        }
+        {}
 
         String message() const override
         {

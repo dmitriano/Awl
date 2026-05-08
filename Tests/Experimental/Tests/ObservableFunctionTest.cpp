@@ -42,8 +42,7 @@ namespace
         FunctionAndPredicateOwner()
             : functionHandler(std::bind(&FunctionAndPredicateOwner::onFunction, this, std::placeholders::_1))
             , predicateHandler(std::bind(&FunctionAndPredicateOwner::onPredicate, this, std::placeholders::_1))
-        {
-        }
+        {}
 
         void onFunction(int value)
         {

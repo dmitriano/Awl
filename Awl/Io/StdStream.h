@@ -18,8 +18,7 @@ namespace awl
         public:
 
             StdInputStream(std::istream & in) : m_in(in)
-            {
-            }
+            {}
 
             size_t read(uint8_t * buffer, size_t count) override
             {
@@ -48,8 +47,7 @@ namespace awl
         public:
 
             StdOutputStream(std::ostream & out) : m_out(out)
-            {
-            }
+            {}
 
             void write(const uint8_t * buffer, size_t count) override
             {

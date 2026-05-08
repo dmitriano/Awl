@@ -83,8 +83,7 @@ namespace awl
         basic_quick_link(basic_quick_link* next, basic_quick_link* prev) :
             ForwardLink(next),
             BackwardLink(prev)
-        {
-        }
+        {}
 
         basic_quick_link(const basic_quick_link& other) = delete;
 

@@ -30,7 +30,6 @@ void cvIWait (std::stop_token sToken, int id,
       if (sToken.stop_requested()) {
         throw "interrupted";
       }
-
     }
     if (sToken.stop_requested()) {
       std::string msg = "\ncvIWait(" + std::to_string(id) + "): interrupted";

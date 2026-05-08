@@ -17,8 +17,7 @@ namespace awl
     public:
 
         virtual void finalize()
-        {
-        }
+        {}
 
         virtual ~pooled_object() = default;
     };

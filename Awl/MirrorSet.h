@@ -38,8 +38,7 @@ namespace awl
         mirror_set() = default;
         
         mirror_set(Compare comp, const Allocator& alloc = Allocator()) : m_set(comp, alloc)
-        {
-        }
+        {}
 
         mirror_set(const mirror_set& other) = delete;
 

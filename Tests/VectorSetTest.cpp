@@ -128,8 +128,7 @@ namespace
 
         template <class Q>
         TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
-        {
-        }
+        {}
 
         T* allocate(std::size_t n)
         {
@@ -436,8 +435,7 @@ namespace
         A() = default;
 
         explicit A(size_t k) : key(k), attribute(k + 1)
-        {
-        }
+        {}
 
         size_t key;
         size_t attribute;
@@ -624,8 +622,7 @@ namespace
     public:
 
         B(int k) : key(k)
-        {
-        }
+        {}
 
         B(const B &) = delete;
         B(B &&) = default;

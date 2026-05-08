@@ -30,8 +30,7 @@ namespace awl
             }
 
             HashInputStream(UnderlyingStream& in, Hash hash) : HashInputStream(in, defaultBlockSize, hash)
-            {
-            }
+            {}
 
             bool end() override
             {
@@ -168,8 +167,7 @@ namespace awl
             }
 
             HashOutputStream(UnderlyingStream& out, Hash hash) : HashOutputStream(out, defaultBlockSize, hash)
-            {
-            }
+            {}
 
             ~HashOutputStream()
             {

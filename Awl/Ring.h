@@ -137,8 +137,7 @@ namespace awl
         private:
 
             ring_iterator(const ring & r, std::size_t pos) : m_pRing(&r), m_pos(pos)
-            {
-            }
+            {}
 
             void move_next()
             {
@@ -178,8 +177,7 @@ namespace awl
 
         ring(Allocator alloc = {}) : m_alloc(alloc),
             m_buf(nullptr)
-        {
-        }
+        {}
 
         ring(size_type cap, Allocator alloc = {}) : m_alloc(alloc),
             m_buf(m_alloc.allocate(cap)), m_capacity(cap),

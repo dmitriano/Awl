@@ -169,8 +169,7 @@ namespace
     public:
         explicit UpstreamConcurrencyPermit(std::shared_ptr<UpstreamConcurrencyLimiter> limiter) :
             limiter_(std::move(limiter))
-        {
-        }
+        {}
 
         ~UpstreamConcurrencyPermit()
         {
@@ -182,8 +181,7 @@ namespace
 
         UpstreamConcurrencyPermit(UpstreamConcurrencyPermit&& other) noexcept :
             limiter_(std::move(other.limiter_))
-        {
-        }
+        {}
 
         UpstreamConcurrencyPermit& operator=(UpstreamConcurrencyPermit&& other) noexcept
         {
@@ -673,8 +671,7 @@ namespace
                     {
                         explicit ReservedWaiterGuard(std::atomic_uint64_t& counter) :
                             counter_(counter)
-                        {
-                        }
+                        {}
 
                         ~ReservedWaiterGuard()
                         {

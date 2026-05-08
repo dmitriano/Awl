@@ -23,8 +23,7 @@ namespace awl
 
         explicit Observer(Function function) :
             m_function(std::move(function))
-        {
-        }
+        {}
 
         Observer(const Observer& other) = delete;
 

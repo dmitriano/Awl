@@ -29,8 +29,7 @@ namespace awl::testing
         m_logger(std::make_shared<ConsoleLogger>()),
         m_ap(provider),
         m_context{ m_logger, std::move(stop_token), m_ap, m_typeProvider}
-    {
-    }
+    {}
 
     template <attribute_provider Provider>
     bool TestConsole<Provider>::runTests()

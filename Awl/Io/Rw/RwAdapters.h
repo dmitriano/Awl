@@ -26,8 +26,7 @@ namespace awl
                 using size_type = std::size_t;
 
                 explicit BitSetAdapter(BitSet & v) : m_bits(v)
-                {
-                }
+                {}
 
                 size_type size() const
                 {
@@ -58,8 +57,7 @@ namespace awl
                 using size_type = typename BitMap::size_type;
 
                 explicit BitMapAdapter(BitMap & v) : m_bm(v)
-                {
-                }
+                {}
 
                 size_type size() const
                 {

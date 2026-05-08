@@ -34,17 +34,14 @@ namespace awl
             using Link = helpers::RedBlackLink<Node>;
 
             Node(const T & v) : Link{}, m_val(v)
-            {
-            }
+            {}
 
             Node(T && v) : Link{}, m_val(std::move(v))
-            {
-            }
+            {}
 
             template <class... Args>
             Node(Args&&... args) : Link{}, m_val(std::forward<Args>(args) ...)
-            {
-            }
+            {}
 
             const T& value() const
             {
@@ -152,8 +149,7 @@ namespace awl
 
         vector_set(std::initializer_list<value_type> init, const Allocator& alloc)
             : vector_set(init, Compare(), alloc)
-        {
-        }
+        {}
 
         template <class InputIt>
         vector_set(InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator()) :
@@ -167,8 +163,7 @@ namespace awl
         template <class InputIt>
         vector_set(InputIt first, InputIt last, const Allocator& alloc = Allocator()) :
             vector_set(first, last, Compare(), alloc)
-        {
-        }
+        {}
 
         ~vector_set()
         {

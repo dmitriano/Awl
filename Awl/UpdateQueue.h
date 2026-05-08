@@ -19,8 +19,7 @@ namespace awl
         struct Message : public awl::quick_link
         {
             Message(const std::function<void(Args ...)> & func) : Func(func)
-            {
-            }
+            {}
 
             std::function<void(Args ...)> Func;
         };
