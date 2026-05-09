@@ -17,6 +17,20 @@ namespace awl
         _loggers.push_back(std::move(logger));
     }
 
+    bool CompositeLogger::removeLogger(const std::shared_ptr<ILogger>& logger)
+    {
+        auto i = std::ranges::find(_loggers, logger);
+
+        if (i == _loggers.end())
+        {
+            return false;
+        }
+
+        _loggers.erase(i);
+
+        return true;
+    }
+
     bool CompositeLogger::enabled(const std::string& level) const
     {
         using namespace std::placeholders;

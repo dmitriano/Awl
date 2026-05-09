@@ -25,27 +25,6 @@ namespace
         return pos == std::string_view::npos ? full_path : full_path.substr(pos + 1);
     }
 
-    std::string joinSource(const std::vector<std::string>& source)
-    {
-        std::string result;
-
-        for (const std::string& segment : source)
-        {
-            if (segment.empty())
-            {
-                continue;
-            }
-
-            if (!result.empty())
-            {
-                result.push_back('.');
-            }
-
-            result.append(segment);
-        }
-
-        return result;
-    }
 }
 
 namespace awl
@@ -110,12 +89,7 @@ namespace awl
 
         temp_out << separator << level;
 
-        const std::string source = joinSource(_source);
-
-        if (!source.empty())
-        {
-            temp_out << separator << awl::fromAString(source);
-        }
+        printSource(temp_out, separator);
 
         temp_out << separator
             << awl::fromAString(std::string(fileName(location.file_name())))
@@ -126,6 +100,33 @@ namespace awl
             << _T('\n');
 
         _out << temp_out.str();
+    }
+
+    bool ConsoleLogger::printSource(awl::ostream& out, Char separator) const
+    {
+        bool printed = false;
+
+        for (const std::string& segment : _source)
+        {
+            if (segment.empty())
+            {
+                continue;
+            }
+
+            if (printed)
+            {
+                out << _T('.');
+            }
+            else
+            {
+                out << separator;
+            }
+
+            out << awl::fromAString(segment);
+            printed = true;
+        }
+
+        return printed;
     }
 
     std::shared_ptr<ILogger> ConsoleLogger::createLogger(std::string source) const

@@ -40,6 +40,8 @@ namespace awl
             std::string level,
             bool allow_custom_level);
 
+        bool printSource(awl::ostream& out, Char separator) const;
+
         awl::ostream& _out;
         std::string _level;
         std::size_t _severity;

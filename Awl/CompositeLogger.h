@@ -23,6 +23,8 @@ namespace awl
 
         void addLogger(std::shared_ptr<ILogger> logger);
 
+        bool removeLogger(const std::shared_ptr<ILogger>& logger);
+
         bool enabled(const std::string& level) const override;
 
         std::shared_ptr<ILogger> createLogger(std::string source) const override;

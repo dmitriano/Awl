@@ -318,6 +318,15 @@ AWL_TEST(CompositeLogger)
     AWL_ASSERT_EQUAL(awl::LogLevel::Error, enabled_logger->level());
     AWL_ASSERT_EQUAL(_T("composite 42"), enabled_logger->message());
 
+    AWL_ASSERT(logger.removeLogger(enabled_logger));
+    AWL_ASSERT_FALSE(logger.removeLogger(enabled_logger));
+
+    logger.error("after remove");
+
+    AWL_ASSERT_EQUAL(1, enabled_logger->logCount());
+    AWL_ASSERT_EQUAL(2, skipped_logger->logCount());
+    AWL_ASSERT_EQUAL(_T("after remove"), skipped_logger->message());
+
     auto capture_logger = std::make_shared<CaptureLogger>();
     awl::CompositeLogger parent_logger({ capture_logger });
     std::shared_ptr<awl::ILogger> child_logger = parent_logger.createLogger("Child");
