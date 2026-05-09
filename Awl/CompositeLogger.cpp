@@ -17,12 +17,12 @@ namespace awl
         return _loggers.notifyUntil(&ILogger::enabled, level);
     }
 
-    void CompositeLogger::log(const std::string& level, const LogString& message)
+    void CompositeLogger::doLog(const std::string& level, const LogString& message)
     {
-        _loggers.notify(
-            static_cast<void (ILogger::*)(const std::string&, const LogString&)>(&ILogger::log),
-            level,
-            message);
+        _loggers.forEach([&](ILogger& logger)
+        {
+            logger.log(level, message);
+        });
     }
 
     std::shared_ptr<ILogger> CompositeLogger::createLogger(std::string source) const

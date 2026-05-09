@@ -28,7 +28,10 @@ namespace awl
             return true;
         }
 
-        virtual void log(const std::string& level, const LogString& message) = 0;
+        void log(const std::string& level, const LogString& message)
+        {
+            doLog(level, message);
+        }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
@@ -157,6 +160,10 @@ namespace awl
         {
             log(LogLevel::Critical, fmt, std::forward<Args>(args)...);
         }
+
+    protected:
+
+        virtual void doLog(const std::string& level, const LogString& message) = 0;
 
     private:
 

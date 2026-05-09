@@ -18,8 +18,6 @@ namespace awl
     {
     public:
 
-        using ILogger::log;
-
         ConsoleLogger(
             awl::ostream& out = awl::cout(),
             std::string min_level = LogLevel::Debug,
@@ -27,9 +25,11 @@ namespace awl
 
         bool enabled(const std::string& level) const override;
 
-        void log(const std::string& level, const LogString& message) override;
-
         std::shared_ptr<ILogger> createLogger(std::string source) const override;
+
+    protected:
+
+        void doLog(const std::string& level, const LogString& message) override;
 
     private:
 

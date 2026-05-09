@@ -32,16 +32,6 @@ namespace
     {
     public:
 
-        using awl::ILogger::log;
-
-        void log(const std::string& level, const awl::LogString& message) override
-        {
-            ++_logCount;
-            _level = level;
-            _location = message.location();
-            _message = message.str();
-        }
-
         std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
         {
             static_cast<void>(source);
@@ -74,6 +64,16 @@ namespace
         std::string _level;
         awl::String _message;
         std::source_location _location;
+
+    protected:
+
+        void doLog(const std::string& level, const awl::LogString& message) override
+        {
+            ++_logCount;
+            _level = level;
+            _location = message.location();
+            _message = message.str();
+        }
     };
 
     class FilteredLogger : public CaptureLogger
@@ -90,8 +90,6 @@ namespace
     {
     public:
 
-        using awl::ILogger::log;
-
         explicit CompositeTestLogger(bool enabled) :
             _enabled(enabled)
         {}
@@ -101,13 +99,6 @@ namespace
             ++_enabledCallCount;
             _enabledLevel = level;
             return _enabled;
-        }
-
-        void log(const std::string& level, const awl::LogString& message) override
-        {
-            ++_logCount;
-            _level = level;
-            _message = message.str();
         }
 
         std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
@@ -149,6 +140,15 @@ namespace
         int _logCount = 0;
         std::string _level;
         awl::String _message;
+
+    protected:
+
+        void doLog(const std::string& level, const awl::LogString& message) override
+        {
+            ++_logCount;
+            _level = level;
+            _message = message.str();
+        }
     };
 }
 

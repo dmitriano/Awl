@@ -78,7 +78,7 @@ namespace awl
         return log_level_severity(level) >= _minSeverity;
     }
 
-    void ConsoleLogger::log(const std::string& level, const LogString& message)
+    void ConsoleLogger::doLog(const std::string& level, const LogString& message)
     {
         awl::ostringstream temp_out;
         const std::source_location location = message.location();
