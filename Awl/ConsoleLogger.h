@@ -18,10 +18,10 @@ namespace awl
     {
     public:
 
-        ConsoleLogger(
+        explicit ConsoleLogger(
+            std::string source,
             awl::ostream& out = awl::cout(),
-            std::string min_level = LogLevel::Debug,
-            std::string source = {});
+            std::string level = LogLevel::Debug);
 
         bool enabled(const std::string& level) const override;
 
@@ -34,13 +34,13 @@ namespace awl
     private:
 
         ConsoleLogger(
+            std::vector<std::string> source,
             awl::ostream& out,
-            std::string min_level,
-            std::vector<std::string> source);
+            std::string level);
 
         awl::ostream& _out;
-        std::string _minLevel;
-        std::size_t _minSeverity;
+        std::string _level;
+        std::size_t _severity;
         std::vector<std::string> _source;
     };
 }

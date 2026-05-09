@@ -49,33 +49,28 @@ namespace
 namespace awl
 {
     ConsoleLogger::ConsoleLogger(
+        std::string source,
         awl::ostream& out,
-        std::string min_level,
-        std::string source) :
+        std::string level) :
         _out(out),
-        _minLevel(std::move(min_level)),
-        _minSeverity(log_level_severity(_minLevel)),
-        _source()
-    {
-        if (!source.empty())
-        {
-            _source.push_back(std::move(source));
-        }
-    }
+        _level(std::move(level)),
+        _severity(log_level_severity(_level)),
+        _source{ std::move(source) }
+    {}
 
     ConsoleLogger::ConsoleLogger(
+        std::vector<std::string> source,
         awl::ostream& out,
-        std::string min_level,
-        std::vector<std::string> source) :
+        std::string level) :
         _out(out),
-        _minLevel(std::move(min_level)),
-        _minSeverity(log_level_severity(_minLevel)),
+        _level(std::move(level)),
+        _severity(log_level_severity(_level)),
         _source(std::move(source))
     {}
 
     bool ConsoleLogger::enabled(const std::string& level) const
     {
-        return log_level_severity(level) >= _minSeverity;
+        return log_level_severity(level) >= _severity;
     }
 
     void ConsoleLogger::doLog(const std::string& level, const LogString& message)
@@ -124,8 +119,8 @@ namespace awl
         }
 
         return std::shared_ptr<ILogger>(new ConsoleLogger(
+            std::move(child_source),
             _out,
-            _minLevel,
-            std::move(child_source)));
+            _level));
     }
 }

@@ -239,7 +239,7 @@ AWL_TEST(ILogger)
     AWL_ASSERT_EQUAL(initial_log_count, filtered_logger.logCount());
 
     awl::ostringstream out;
-    awl::ConsoleLogger console_logger(out, awl::LogLevel::Info);
+    awl::ConsoleLogger console_logger("Test", out, awl::LogLevel::Info);
 
     AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Debug));
     AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Trace));
@@ -248,22 +248,22 @@ AWL_TEST(ILogger)
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Critical));
 
-    awl::ConsoleLogger debug_logger(out, awl::LogLevel::Debug);
+    awl::ConsoleLogger debug_logger("Test", out, awl::LogLevel::Debug);
 
     AWL_ASSERT_FALSE(debug_logger.enabled(awl::LogLevel::Trace));
     AWL_ASSERT(debug_logger.enabled(awl::LogLevel::Debug));
 
-    awl::ConsoleLogger critical_logger(out, awl::LogLevel::Critical);
+    awl::ConsoleLogger critical_logger("Test", out, awl::LogLevel::Critical);
 
     AWL_ASSERT_FALSE(critical_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT(critical_logger.enabled(awl::LogLevel::Critical));
 
-    awl::ConsoleLogger off_logger(out, awl::LogLevel::Off);
+    awl::ConsoleLogger off_logger("Test", out, awl::LogLevel::Off);
 
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
 
-    auto root_logger = std::make_shared<awl::ConsoleLogger>(out, awl::LogLevel::Info, "Root");
+    auto root_logger = std::make_shared<awl::ConsoleLogger>("Root", out, awl::LogLevel::Info);
     std::shared_ptr<awl::ILogger> child_logger = root_logger->createLogger("Child");
     child_logger->info("source message");
 
