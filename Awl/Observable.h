@@ -75,7 +75,6 @@ namespace awl
             forEach([&](IObserver& observer)
             {
                 (observer.*func)(args ...);
-                return true;
             });
         }
 
@@ -90,7 +89,7 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return forEach([&](IObserver& observer)
+            return forEachWhile([&](IObserver& observer)
             {
                 return (observer.*func)(args ...);
             });
@@ -114,7 +113,21 @@ namespace awl
 
         // Not const: observers may unsubscribe or destroy themselves during notification.
         template <class Callable>
-        bool forEach(Callable&& call)
+        void forEach(Callable&& call)
+            requires (
+                std::invocable<Callable&, IObserver&> &&
+                std::same_as<std::invoke_result_t<Callable&, IObserver&>, void>
+            )
+        {
+            forEachWhile([&](IObserver& observer)
+            {
+                call(observer);
+                return true;
+            });
+        }
+
+        template <class Callable>
+        bool forEachWhile(Callable&& call)
             requires (
                 std::invocable<Callable&, IObserver&> &&
                 std::convertible_to<std::invoke_result_t<Callable&, IObserver&>, bool>
