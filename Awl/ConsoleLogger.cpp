@@ -108,6 +108,8 @@ namespace awl
 
         if (!_out)
         {
+            // Windows console streams can fail on valid Unicode market symbols.
+            // See doc/fixes/2026-05-09-console-logger-unicode-stream-state.md.
             _out.clear();
         }
     }
