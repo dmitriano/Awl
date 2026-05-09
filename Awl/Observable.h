@@ -172,6 +172,7 @@ namespace awl
             }
         }
 
+        // Do not make this mutable: const notification could create a false impression of thread safety.
         ObserverList _observers;
     };
 }
