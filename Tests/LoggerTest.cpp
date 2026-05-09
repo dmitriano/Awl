@@ -13,6 +13,7 @@
 #include <memory>
 #include <source_location>
 #include <string_view>
+#include <vector>
 
 namespace
 {
@@ -32,10 +33,17 @@ namespace
     {
     public:
 
+        CaptureLogger() = default;
+
+        explicit CaptureLogger(std::string source) :
+            _source(std::move(source))
+        {}
+
         std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
         {
-            static_cast<void>(source);
-            return std::make_shared<CaptureLogger>();
+            auto child = std::make_shared<CaptureLogger>(std::move(source));
+            _children.push_back(child);
+            return child;
         }
 
         const std::string& level() const
@@ -58,8 +66,20 @@ namespace
             return _logCount;
         }
 
+        const std::string& source() const
+        {
+            return _source;
+        }
+
+        const std::shared_ptr<CaptureLogger>& child(size_t index) const
+        {
+            return _children[index];
+        }
+
     private:
 
+        std::string _source;
+        mutable std::vector<std::shared_ptr<CaptureLogger>> _children;
         int _logCount = 0;
         std::string _level;
         awl::String _message;
@@ -86,7 +106,7 @@ namespace
         }
     };
 
-    class CompositeTestLogger : public awl::Observer<awl::ILogger>
+    class CompositeTestLogger : public awl::ILogger
     {
     public:
 
@@ -254,41 +274,44 @@ AWL_TEST(CompositeLogger)
 {
     AWL_UNUSED_CONTEXT;
 
-    CompositeTestLogger disabled_logger(false);
-    CompositeTestLogger enabled_logger(true);
-    CompositeTestLogger skipped_logger(true);
+    auto disabled_logger = std::make_shared<CompositeTestLogger>(false);
+    auto enabled_logger = std::make_shared<CompositeTestLogger>(true);
+    auto skipped_logger = std::make_shared<CompositeTestLogger>(true);
     awl::CompositeLogger logger;
 
     AWL_ASSERT_FALSE(logger.enabled(awl::LogLevel::Info));
 
-    logger.subscribe(&disabled_logger);
-    logger.subscribe(&enabled_logger);
-    logger.subscribe(&skipped_logger);
+    logger.addLogger(disabled_logger);
+    logger.addLogger(enabled_logger);
+    logger.addLogger(skipped_logger);
 
     AWL_ASSERT(logger.enabled(awl::LogLevel::Warning));
-    AWL_ASSERT_EQUAL(1, disabled_logger.enabledCallCount());
-    AWL_ASSERT_EQUAL(1, enabled_logger.enabledCallCount());
-    AWL_ASSERT_EQUAL(0, skipped_logger.enabledCallCount());
-    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, disabled_logger.enabledLevel());
-    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, enabled_logger.enabledLevel());
+    AWL_ASSERT_EQUAL(1, disabled_logger->enabledCallCount());
+    AWL_ASSERT_EQUAL(1, enabled_logger->enabledCallCount());
+    AWL_ASSERT_EQUAL(0, skipped_logger->enabledCallCount());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, disabled_logger->enabledLevel());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, enabled_logger->enabledLevel());
 
     logger.error("composite {}", 42);
 
-    AWL_ASSERT_EQUAL(1, disabled_logger.logCount());
-    AWL_ASSERT_EQUAL(1, enabled_logger.logCount());
-    AWL_ASSERT_EQUAL(1, skipped_logger.logCount());
-    AWL_ASSERT_EQUAL(awl::LogLevel::Error, disabled_logger.level());
-    AWL_ASSERT_EQUAL(_T("composite 42"), disabled_logger.message());
-    AWL_ASSERT_EQUAL(awl::LogLevel::Error, enabled_logger.level());
-    AWL_ASSERT_EQUAL(_T("composite 42"), enabled_logger.message());
+    AWL_ASSERT_EQUAL(1, disabled_logger->logCount());
+    AWL_ASSERT_EQUAL(1, enabled_logger->logCount());
+    AWL_ASSERT_EQUAL(1, skipped_logger->logCount());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Error, disabled_logger->level());
+    AWL_ASSERT_EQUAL(_T("composite 42"), disabled_logger->message());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Error, enabled_logger->level());
+    AWL_ASSERT_EQUAL(_T("composite 42"), enabled_logger->message());
 
-    logger.unsubscribe(&enabled_logger);
+    auto capture_logger = std::make_shared<CaptureLogger>();
+    awl::CompositeLogger parent_logger({ capture_logger });
+    std::shared_ptr<awl::ILogger> child_logger = parent_logger.createLogger("Child");
 
-    logger.info("after unsubscribe");
+    AWL_ASSERT(child_logger != nullptr);
 
-    AWL_ASSERT_EQUAL(2, disabled_logger.logCount());
-    AWL_ASSERT_EQUAL(1, enabled_logger.logCount());
-    AWL_ASSERT_EQUAL(2, skipped_logger.logCount());
+    child_logger->info("child message");
 
-    AWL_ASSERT(logger.createLogger("Child") == nullptr);
+    AWL_ASSERT_EQUAL(0, capture_logger->logCount());
+    AWL_ASSERT_EQUAL("Child", capture_logger->child(0)->source());
+    AWL_ASSERT_EQUAL(1, capture_logger->child(0)->logCount());
+    AWL_ASSERT_EQUAL(_T("child message"), capture_logger->child(0)->message());
 }

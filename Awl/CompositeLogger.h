@@ -6,10 +6,10 @@
 #pragma once
 
 #include "Awl/ILogger.h"
-#include "Awl/Observable.h"
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace awl
 {
@@ -17,11 +17,11 @@ namespace awl
     {
     public:
 
-        using LoggerObserver = Observer<ILogger>;
+        CompositeLogger() = default;
 
-        void subscribe(LoggerObserver* p_logger);
+        explicit CompositeLogger(std::vector<std::shared_ptr<ILogger>> loggers);
 
-        void unsubscribe(LoggerObserver* p_logger);
+        void addLogger(std::shared_ptr<ILogger> logger);
 
         bool enabled(const std::string& level) const override;
 
@@ -33,6 +33,6 @@ namespace awl
 
     private:
 
-        mutable Observable<ILogger, CompositeLogger> _loggers;
+        std::vector<std::shared_ptr<ILogger>> _loggers;
     };
 }
