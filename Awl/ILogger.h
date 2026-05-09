@@ -30,7 +30,7 @@ namespace awl
 
         void log(const std::string& level, const LogString& message)
         {
-            doLog(level, message);
+            logLazy(level, message);
         }
 
         template <class... Args>
@@ -49,7 +49,7 @@ namespace awl
 
         void debug(const LogString& message)
         {
-            logLasy(LogLevel::Debug, message);
+            logLazy(LogLevel::Debug, message);
         }
 
         template <class... Args>
@@ -68,7 +68,7 @@ namespace awl
 
         void trace(const LogString& message)
         {
-            logLasy(LogLevel::Trace, message);
+            logLazy(LogLevel::Trace, message);
         }
 
         template <class... Args>
@@ -87,7 +87,7 @@ namespace awl
 
         void info(const LogString& message)
         {
-            logLasy(LogLevel::Info, message);
+            logLazy(LogLevel::Info, message);
         }
 
         template <class... Args>
@@ -106,7 +106,7 @@ namespace awl
 
         void warning(const LogString& message)
         {
-            logLasy(LogLevel::Warning, message);
+            logLazy(LogLevel::Warning, message);
         }
 
         template <class... Args>
@@ -125,7 +125,7 @@ namespace awl
 
         void error(const LogString& message)
         {
-            logLasy(LogLevel::Error, message);
+            logLazy(LogLevel::Error, message);
         }
 
         template <class... Args>
@@ -144,7 +144,7 @@ namespace awl
 
         void critical(const LogString& message)
         {
-            logLasy(LogLevel::Critical, message);
+            logLazy(LogLevel::Critical, message);
         }
 
         template <class... Args>
@@ -177,11 +177,11 @@ namespace awl
             }
         }
 
-        void logLasy(const std::string& level, const LogString& message)
+        void logLazy(const std::string& level, const LogString& message)
         {
             if (enabled(level))
             {
-                log(level, message);
+                doLog(level, message);
             }
         }
     };

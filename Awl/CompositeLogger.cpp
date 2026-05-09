@@ -1,6 +1,7 @@
 #include "Awl/CompositeLogger.h"
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <ranges>
 #include <utility>
@@ -18,10 +19,11 @@ namespace awl
 
     bool CompositeLogger::enabled(const std::string& level) const
     {
-        return std::ranges::any_of(_loggers, [&](const std::shared_ptr<ILogger>& logger)
-        {
-            return logger->enabled(level);
-        });
+        using namespace std::placeholders;
+
+        return std::ranges::any_of(
+            _loggers,
+            std::bind(&ILogger::enabled, _1, std::cref(level)));
     }
 
     void CompositeLogger::doLog(const std::string& level, const LogString& message)
@@ -37,10 +39,12 @@ namespace awl
         std::vector<std::shared_ptr<ILogger>> child_loggers;
         child_loggers.reserve(_loggers.size());
 
-        std::ranges::transform(_loggers, std::back_inserter(child_loggers), [&](const std::shared_ptr<ILogger>& logger)
-        {
-            return logger->createLogger(source);
-        });
+        using namespace std::placeholders;
+
+        std::ranges::transform(
+            _loggers,
+            std::back_inserter(child_loggers),
+            std::bind(&ILogger::createLogger, _1, std::cref(source)));
 
         return std::make_shared<CompositeLogger>(std::move(child_loggers));
     }

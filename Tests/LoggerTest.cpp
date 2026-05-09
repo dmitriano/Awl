@@ -76,15 +76,6 @@ namespace
             return _children[index];
         }
 
-    private:
-
-        std::string _source;
-        mutable std::vector<std::shared_ptr<CaptureLogger>> _children;
-        int _logCount = 0;
-        std::string _level;
-        awl::String _message;
-        std::source_location _location;
-
     protected:
 
         void doLog(const std::string& level, const awl::LogString& message) override
@@ -94,6 +85,15 @@ namespace
             _location = message.location();
             _message = message.str();
         }
+
+    private:
+
+        std::string _source;
+        mutable std::vector<std::shared_ptr<CaptureLogger>> _children;
+        int _logCount = 0;
+        std::string _level;
+        awl::String _message;
+        std::source_location _location;
     };
 
     class FilteredLogger : public CaptureLogger
@@ -152,15 +152,6 @@ namespace
             return _message;
         }
 
-    private:
-
-        bool _enabled;
-        mutable int _enabledCallCount = 0;
-        mutable std::string _enabledLevel;
-        int _logCount = 0;
-        std::string _level;
-        awl::String _message;
-
     protected:
 
         void doLog(const std::string& level, const awl::LogString& message) override
@@ -169,6 +160,15 @@ namespace
             _level = level;
             _message = message.str();
         }
+
+    private:
+
+        bool _enabled;
+        mutable int _enabledCallCount = 0;
+        mutable std::string _enabledLevel;
+        int _logCount = 0;
+        std::string _level;
+        awl::String _message;
     };
 }
 
@@ -294,11 +294,9 @@ AWL_TEST(CompositeLogger)
 
     logger.error("composite {}", 42);
 
-    AWL_ASSERT_EQUAL(1, disabled_logger->logCount());
+    AWL_ASSERT_EQUAL(0, disabled_logger->logCount());
     AWL_ASSERT_EQUAL(1, enabled_logger->logCount());
     AWL_ASSERT_EQUAL(1, skipped_logger->logCount());
-    AWL_ASSERT_EQUAL(awl::LogLevel::Error, disabled_logger->level());
-    AWL_ASSERT_EQUAL(_T("composite 42"), disabled_logger->message());
     AWL_ASSERT_EQUAL(awl::LogLevel::Error, enabled_logger->level());
     AWL_ASSERT_EQUAL(_T("composite 42"), enabled_logger->message());
 
