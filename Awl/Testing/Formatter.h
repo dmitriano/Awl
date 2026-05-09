@@ -13,6 +13,9 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/Inserter.h"
 #include "Awl/EnumTraits.h"
+#include "Awl/String.h"
+
+#include <optional>
 
 namespace awl::testing
 {
@@ -74,6 +77,41 @@ namespace awl::testing
         static T fromString(String s)
         {
             return StringConvertor<typename T::value_type>::convertFrom(s.c_str());
+        }
+    };
+
+    template <typename C, typename T> requires BasicFormatter<C, T>::value
+    class BasicFormatter<C, std::optional<T>> : public std::true_type
+    {
+    public:
+
+        using String = std::basic_string<C>;
+
+        static String toString(const std::optional<T>& val)
+        {
+            if (!val)
+            {
+                return nullString();
+            }
+
+            return BasicFormatter<C, T>::toString(*val);
+        }
+
+        static std::optional<T> fromString(const String& s)
+        {
+            if (CStringInsensitiveEqual<C>()(s.c_str(), nullString().c_str()))
+            {
+                return {};
+            }
+
+            return BasicFormatter<C, T>::fromString(s);
+        }
+
+    private:
+
+        static String nullString()
+        {
+            return StringConvertor<C>::convertFrom("null");
         }
     };
 
