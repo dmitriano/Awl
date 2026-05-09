@@ -8,7 +8,7 @@
 
 namespace awl
 {
-    class TaskPool : public Observable<TaskSink>
+    class JobGroup : public Observable<TaskSink>
     {
     private:
 
@@ -54,7 +54,7 @@ namespace awl
         {
         public:
 
-            AllAwaitable(TaskPool* p_this) : pThis(p_this)
+            AllAwaitable(JobGroup* p_this) : pThis(p_this)
             {
                 pThis->subscribe(this);
             }
@@ -87,7 +87,7 @@ namespace awl
                 return pThis->empty();
             }
 
-            TaskPool* const pThis;
+            JobGroup* const pThis;
 
             std::coroutine_handle<> _h;
         };
@@ -122,19 +122,19 @@ namespace awl
 
     private:
 
-        Job wait_all_task_experimental();
+        Job wait_all_jobs_experimental();
 
-        friend class ControllerTest;
+        friend class JobGroupTestAccess;
 
         // Handlers do not need virtual destructor.
         struct Handler final : Observer<TaskSink>
         {
-            Handler(TaskPool* p_this, Job&& task) :
+            Handler(JobGroup* p_this, Job&& task) :
                 pThis(p_this),
                 _task(std::move(task))
             {}
 
-            TaskPool* pThis;
+            JobGroup* pThis;
 
             Job _task;
 
@@ -143,7 +143,7 @@ namespace awl
 
         friend Handler;
 
-        // The tasks remove themself automatically from the vector
+        // The tasks remove themselves automatically from the vector
         // when their promises are destroyed.
         std::vector<Handler> _handlers;
     };

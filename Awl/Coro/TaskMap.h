@@ -1,8 +1,6 @@
 #pragma once
 
-#pragma once
-
-#include "Awl/Coro/TaskPool.h"
+#include "Awl/Coro/JobGroup.h"
 #include "Awl/Coro/TaskSink.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Observable.h"
@@ -54,7 +52,7 @@ namespace awl
 
         void spawn(Job&& task, Key key, Value value)
         {
-            // A couroutine has executed as a regular function.
+            // A coroutine has executed as a regular function.
             if (!task.done())
             {
                 assert(!contains(key));
@@ -66,32 +64,32 @@ namespace awl
                 task.subscribe(&handler);
             }
 
-            _pool.spawn(std::move(task));
+            _jobs.spawn(std::move(task));
         }
 
         std::size_t task_count() const
         {
-            return _pool.task_count();
+            return _jobs.task_count();
         }
 
         bool empty() const
         {
-            return _pool.empty();
+            return _jobs.empty();
         }
 
         void cancel()
         {
-            _pool.cancel();
+            _jobs.cancel();
         }
 
         auto wait_all()
         {
-            return _pool.wait_all();
+            return _jobs.wait_all();
         }
 
         auto wait_any()
         {
-            return _pool.wait_any();
+            return _jobs.wait_any();
         }
 
         const Value* find(const Key& key) const
@@ -123,9 +121,9 @@ namespace awl
 
     private:
 
-        TaskPool _pool;
+        JobGroup _jobs;
 
-        // The tasks remove themself automatically from the vector
+        // The tasks remove themselves automatically from the vector
         // when their promises are destroyed.
         std::vector<Handler> _handlers;
     };

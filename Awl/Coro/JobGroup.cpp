@@ -1,4 +1,4 @@
-#include "Awl/Coro/TaskPool.h"
+#include "Awl/Coro/JobGroup.h"
 
 #include <cassert>
 #include <ranges>
@@ -7,9 +7,9 @@
 
 using namespace awl;
 
-void TaskPool::spawn(Job&& task)
+void JobGroup::spawn(Job&& task)
 {
-    // A couroutine has executed as a regular function.
+    // A coroutine has executed as a regular function.
     // (It did not co_await).
     if (!task.done())
     {
@@ -21,7 +21,7 @@ void TaskPool::spawn(Job&& task)
     }
 }
 
-void TaskPool::cancel()
+void JobGroup::cancel()
 {
     // Do not notify awaiters if nothing changed.
     if (!_handlers.empty())
@@ -37,23 +37,23 @@ void TaskPool::cancel()
     }
 }
 
-Job TaskPool::wait_all_task_experimental()
+Job JobGroup::wait_all_jobs_experimental()
 {
     while (!_handlers.empty())
     {
         Job task = std::move(_handlers.back()._task);
 
         // The vector contains an empty task and
-        // and onFinished() should delete it correctly.
-        // BUG: This task is not cancelled by TaskPool::cancel().
+        // onFinished() should delete it correctly.
+        // BUG: This task is not cancelled by JobGroup::cancel().
         co_await task;
     }
 }
 
-void TaskPool::Handler::onFinished()
+void JobGroup::Handler::onFinished()
 {
     // The handler is going to be deleted, save its members.
-    TaskPool* saved_this = pThis;
+    JobGroup* saved_this = pThis;
 
     std::vector<Handler>& handlers = saved_this->_handlers;
 
