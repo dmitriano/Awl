@@ -10,7 +10,7 @@
 
 namespace awl
 {
-    class Logger;
+    class ILogger;
 
     class ILoggerFactory
     {
@@ -18,6 +18,6 @@ namespace awl
 
         virtual ~ILoggerFactory() = default;
 
-        virtual std::shared_ptr<Logger> createLogger(std::string source) const = 0;
+        virtual std::shared_ptr<ILogger> createLogger(std::string source) const = 0;
     };
 }

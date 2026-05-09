@@ -66,7 +66,7 @@ namespace awl::testing
 
     protected:
 
-        const std::shared_ptr<Logger>& logger() const
+        const std::shared_ptr<ILogger>& logger() const
         {
             return context.logger;
         }

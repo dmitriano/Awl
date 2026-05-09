@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Awl/Logger.h"
+#include "Awl/ILogger.h"
 #include "Awl/OptionalMutex.h"
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
@@ -27,12 +27,12 @@ namespace awl::io
 
     public:
 
-        explicit AtomicStorage(std::shared_ptr<Logger> logger) : _logger(std::move(logger))
+        explicit AtomicStorage(std::shared_ptr<ILogger> logger) : _logger(std::move(logger))
         {
             assert(_logger != nullptr);
         }
 
-        AtomicStorage(std::shared_ptr<Logger> logger, const awl::String& file_name, const awl::String& backup_name) :
+        AtomicStorage(std::shared_ptr<ILogger> logger, const awl::String& file_name, const awl::String& backup_name) :
             AtomicStorage(std::move(logger))
         {
             open(file_name, backup_name);
@@ -167,7 +167,7 @@ namespace awl::io
             _backup.flush();
         }
 
-        std::shared_ptr<Logger> _logger;
+        std::shared_ptr<ILogger> _logger;
 
         UniqueStream _s;
         UniqueStream _backup;

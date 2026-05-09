@@ -114,7 +114,7 @@ namespace awl
         _out << temp_out.str();
     }
 
-    std::shared_ptr<Logger> ConsoleLogger::createLogger(std::string source) const
+    std::shared_ptr<ILogger> ConsoleLogger::createLogger(std::string source) const
     {
         std::vector<std::string> child_source = _source;
 
@@ -123,7 +123,7 @@ namespace awl
             child_source.push_back(std::move(source));
         }
 
-        return std::shared_ptr<Logger>(new ConsoleLogger(
+        return std::shared_ptr<ILogger>(new ConsoleLogger(
             _out,
             _minLevel,
             std::move(child_source)));

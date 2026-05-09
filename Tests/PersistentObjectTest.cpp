@@ -62,7 +62,7 @@ namespace
     template <class Storage, class String>
     struct Container
     {
-        Container(std::shared_ptr<awl::Logger> logger) :
+        Container(std::shared_ptr<awl::ILogger> logger) :
             persistentObject(std::move(logger), awl::io::Header{ "Test Settings", 1u })
         {}
 

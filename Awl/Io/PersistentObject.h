@@ -4,7 +4,7 @@
 #include "Awl/Io/AtomicStorage.h"
 #include "Awl/Io/OptionalStorage.h"
 #include "Awl/Mp/Mp.h"
-#include "Awl/Logger.h"
+#include "Awl/ILogger.h"
 
 #include <filesystem>
 #include <mutex>
@@ -17,7 +17,7 @@ namespace awl::io
     {
     public:
 
-        PersistentObject(std::shared_ptr<awl::Logger> logger, Header header, size_t block_size = defaultBlockSize,
+        PersistentObject(std::shared_ptr<awl::ILogger> logger, Header header, size_t block_size = defaultBlockSize,
             Hash hash = {}, size_t format_name_limit = 64u)
         :
             _serializable(std::move(header), _val, block_size, std::move(hash), format_name_limit),

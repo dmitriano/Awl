@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Awl/Logger.h"
+#include "Awl/ILogger.h"
 
 #include <memory>
 #include <string>
@@ -13,24 +13,24 @@ namespace awl
     {
     public:
 
-        explicit LoggerFactoryImpl(std::shared_ptr<Logger> logger) :
+        explicit LoggerFactoryImpl(std::shared_ptr<ILogger> logger) :
             _logger(std::move(logger))
         {}
 
-        std::shared_ptr<Logger> createLogger(std::string source) const override
+        std::shared_ptr<ILogger> createLogger(std::string source) const override
         {
             return logger()->createLogger(std::move(source));
         }
 
     protected:
 
-        const std::shared_ptr<Logger>& logger() const
+        const std::shared_ptr<ILogger>& logger() const
         {
             return _logger;
         }
 
     private:
 
-        const std::shared_ptr<Logger> _logger;
+        const std::shared_ptr<ILogger> _logger;
     };
 }

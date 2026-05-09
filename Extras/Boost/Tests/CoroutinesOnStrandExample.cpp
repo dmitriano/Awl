@@ -162,7 +162,7 @@ namespace
             return executor;
         }
 
-        const std::shared_ptr<awl::Logger>& logger() const
+        const std::shared_ptr<awl::ILogger>& logger() const
         {
             return context.get().logger;
         }

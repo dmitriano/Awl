@@ -17,12 +17,12 @@ namespace awl::io
 
     public:
 
-        explicit OptionalStorage(std::shared_ptr<Logger> logger) :
+        explicit OptionalStorage(std::shared_ptr<ILogger> logger) :
             _logger(std::move(logger)),
             _storage(_logger)
         {}
 
-        OptionalStorage(std::shared_ptr<Logger> logger, const awl::String& file_name, const awl::String& backup_name) :
+        OptionalStorage(std::shared_ptr<ILogger> logger, const awl::String& file_name, const awl::String& backup_name) :
             OptionalStorage(std::move(logger))
         {
             open(file_name, backup_name);
@@ -109,7 +109,7 @@ namespace awl::io
             }
         }
 
-        std::shared_ptr<Logger> _logger;
+        std::shared_ptr<ILogger> _logger;
         AtomicStorage _storage;
     };
 }

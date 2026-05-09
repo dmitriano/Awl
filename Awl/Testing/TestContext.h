@@ -7,7 +7,7 @@
 
 #include "Awl/String.h"
 #include "Awl/Sleep.h"
-#include "Awl/Logger.h"
+#include "Awl/ILogger.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/TypeProvider.h"
@@ -29,14 +29,14 @@ namespace awl::testing
     {
         using AttributeProvider = CompositeProvider<Ps...>;
 
-        CompositeTestContext(std::shared_ptr<Logger> logger, const std::stop_token stop_token,
+        CompositeTestContext(std::shared_ptr<ILogger> logger, const std::stop_token stop_token,
             AttributeProvider& attribute_provider, const TypeProvider& type_provider) :
             logger(std::move(logger)), stopToken(stop_token), attributeProvider(attribute_provider), typeProvider(type_provider)
         {
             assert(this->logger != nullptr);
         }
 
-        std::shared_ptr<Logger> logger;
+        std::shared_ptr<ILogger> logger;
 
         const std::stop_token stopToken;
 
@@ -51,7 +51,7 @@ namespace awl::testing
     {
         using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
-        TestContext(std::shared_ptr<Logger> logger, const std::stop_token stop_token,
+        TestContext(std::shared_ptr<ILogger> logger, const std::stop_token stop_token,
             AttributeProvider& attribute_provider, const TypeProvider& type_provider, QObject* worker = nullptr) :
             Base(std::move(logger), stop_token, attribute_provider, type_provider),
             worker(worker)

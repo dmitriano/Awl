@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Logger.h"
+#include "ILogger.h"
 #include "Awl/StdConsole.h"
 
 #include <memory>
@@ -14,11 +14,11 @@
 
 namespace awl
 {
-    class ConsoleLogger : public Logger
+    class ConsoleLogger : public ILogger
     {
     public:
 
-        using Logger::log;
+        using ILogger::log;
 
         ConsoleLogger(
             awl::ostream& out = awl::cout(),
@@ -29,7 +29,7 @@ namespace awl
 
         void log(const std::string& level, const LogString& message) override;
 
-        std::shared_ptr<Logger> createLogger(std::string source) const override;
+        std::shared_ptr<ILogger> createLogger(std::string source) const override;
 
     private:
 

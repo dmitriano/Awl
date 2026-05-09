@@ -232,7 +232,7 @@ AWL_TEST(AtomicStorageVts)
 
 namespace
 {
-    awl::io::AtomicStorage MakeStorage(std::shared_ptr<awl::Logger> logger)
+    awl::io::AtomicStorage MakeStorage(std::shared_ptr<awl::ILogger> logger)
     {
         return awl::io::AtomicStorage(logger, master_name, backup_name);
     }

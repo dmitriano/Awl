@@ -1,6 +1,6 @@
 #include "Awl/Coro/JobPromise.h"
 #include "Awl/Coro/Job.h"
-#include "Awl/Logger.h"
+#include "Awl/ILogger.h"
 #include "Awl/StaticChain.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Exception.h"
@@ -16,11 +16,11 @@ Job JobPromise::get_return_object()
 
 void JobPromise::unhandled_exception() noexcept
 {
-    const awl::StaticLink<std::shared_ptr<awl::Logger>>* p_link = awl::static_chain<std::shared_ptr<awl::Logger>>().find("Application");
+    const awl::StaticLink<std::shared_ptr<awl::ILogger>>* p_link = awl::static_chain<std::shared_ptr<awl::ILogger>>().find("Application");
 
     if (p_link != nullptr)
     {
-        const std::shared_ptr<awl::Logger>& logger = p_link->value();
+        const std::shared_ptr<awl::ILogger>& logger = p_link->value();
 
         awl::ostringstream out;
 

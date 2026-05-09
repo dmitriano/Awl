@@ -27,11 +27,11 @@ namespace
         int* format_count = nullptr;
     };
 
-    class CaptureLogger : public awl::Logger
+    class CaptureLogger : public awl::ILogger
     {
     public:
 
-        using awl::Logger::log;
+        using awl::ILogger::log;
 
         void log(const std::string& level, const awl::LogString& message) override
         {
@@ -41,7 +41,7 @@ namespace
             _message = message.str();
         }
 
-        std::shared_ptr<awl::Logger> createLogger(std::string source) const override
+        std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
         {
             static_cast<void>(source);
             return std::make_shared<CaptureLogger>();
@@ -100,7 +100,7 @@ namespace std
     };
 }
 
-AWL_TEST(Logger)
+AWL_TEST(ILogger)
 {
     // Check if it comiles with all the strings.
     context.logger->debug("abc");
@@ -178,7 +178,7 @@ AWL_TEST(Logger)
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
 
     auto root_logger = std::make_shared<awl::ConsoleLogger>(out, awl::LogLevel::Info, "Root");
-    std::shared_ptr<awl::Logger> child_logger = root_logger->createLogger("Child");
+    std::shared_ptr<awl::ILogger> child_logger = root_logger->createLogger("Child");
     child_logger->info("source message");
 
     AWL_ASSERT(out.str().find(_T("Root.Child")) != awl::String::npos);

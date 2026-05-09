@@ -18,7 +18,7 @@
 
 namespace awl
 {
-    class Logger : public ILoggerFactory
+    class ILogger : public ILoggerFactory
     {
     public:
 
