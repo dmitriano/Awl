@@ -13,7 +13,7 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
 #include "Awl/WatchDog.h"
-#include "Awl/ConsoleLogger.h"
+#include "Awl/StdStreamLogger.h"
 
 #include <thread>
 #include <functional>
@@ -124,7 +124,7 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
 
-            auto logger = std::make_shared<ConsoleLogger>(p_test_link->name(), *p_out, log_level);
+            auto logger = std::make_shared<StdStreamLogger>(p_test_link->name(), *p_out, log_level);
             
             const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 

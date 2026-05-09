@@ -14,11 +14,11 @@
 
 namespace awl
 {
-    class ConsoleLogger : public ILogger
+    class StdStreamLogger : public ILogger
     {
     public:
 
-        explicit ConsoleLogger(
+        explicit StdStreamLogger(
             std::string source,
             awl::ostream& out = awl::cout(),
             std::string level = LogLevel::Trace,
@@ -34,7 +34,7 @@ namespace awl
 
     private:
 
-        ConsoleLogger(
+        StdStreamLogger(
             std::vector<std::string> source,
             awl::ostream& out,
             std::string level,

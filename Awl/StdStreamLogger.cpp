@@ -1,4 +1,4 @@
-#include "Awl/ConsoleLogger.h"
+#include "Awl/StdStreamLogger.h"
 
 #include "Awl/String.h"
 #include "Awl/Time.h"
@@ -29,7 +29,7 @@ namespace
 
 namespace awl
 {
-    ConsoleLogger::ConsoleLogger(
+    StdStreamLogger::StdStreamLogger(
         std::string source,
         awl::ostream& out,
         std::string level,
@@ -41,7 +41,7 @@ namespace awl
         _source{ std::move(source) }
     {}
 
-    ConsoleLogger::ConsoleLogger(
+    StdStreamLogger::StdStreamLogger(
         std::vector<std::string> source,
         awl::ostream& out,
         std::string level,
@@ -53,7 +53,7 @@ namespace awl
         _source(std::move(source))
     {}
 
-    bool ConsoleLogger::enabled(const std::string& level) const
+    bool StdStreamLogger::enabled(const std::string& level) const
     {
         const std::size_t severity = logLevelSeverity(level);
 
@@ -70,7 +70,7 @@ namespace awl
         return severity >= _severity;
     }
 
-    void ConsoleLogger::doLog(const std::string& level, const LogString& message)
+    void StdStreamLogger::doLog(const std::string& level, const LogString& message)
     {
         awl::ostringstream temp_out;
         const std::source_location location = message.location();
@@ -114,7 +114,7 @@ namespace awl
         }
     }
 
-    void ConsoleLogger::printSource(awl::ostream& out) const
+    void StdStreamLogger::printSource(awl::ostream& out) const
     {
         bool first = true;
 
@@ -130,14 +130,14 @@ namespace awl
         }
     }
 
-    std::shared_ptr<ILogger> ConsoleLogger::createLogger(std::string source) const
+    std::shared_ptr<ILogger> StdStreamLogger::createLogger(std::string source) const
     {
         assert(!source.empty());
 
         std::vector<std::string> child_source = _source;
         child_source.push_back(std::move(source));
 
-        return std::shared_ptr<ILogger>(new ConsoleLogger(
+        return std::shared_ptr<ILogger>(new StdStreamLogger(
             std::move(child_source),
             _out,
             _level,
