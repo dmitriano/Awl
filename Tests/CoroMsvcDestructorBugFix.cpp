@@ -8,9 +8,8 @@
 #include "Awl/StringFormat.h"
 
 #include <coroutine>
+#include <memory>
 #include <optional>
-
-#include <iostream>
 
 namespace
 {
@@ -23,41 +22,30 @@ namespace
         // declare promise type
         using promise_type = JobPromise;
 
-        Job(std::coroutine_handle<promise_type> handle) :
-            handle(handle)
-        {
-            std::cout << "Job constructor." << std::endl;
-        }
+        Job(std::coroutine_handle<promise_type> handle);
 
         Job(const Job&) = delete;
         
-        Job(Job&& other) : handle(other.handle)
-        {
-            std::cout << "Job move constructor." << std::endl;
-        }
+        Job(Job&& other);
 
         Job& operator = (const Job&) = delete;
 
-        Job& operator = (const Job&& other)
-        {
-            handle = other.handle;
+        Job& operator = (const Job&& other);
 
-            std::cout << "Job move assignment." << std::endl;
-
-            return *this;
-        }
-
-        ~Job()
-        {
-            std::cout << "Job destructor." << std::endl;
-        }
+        ~Job();
 
         std::coroutine_handle<promise_type> handle;
+        std::shared_ptr<awl::ILogger> logger;
     };
 
     struct JobPromise
     {
+        JobPromise(awl::testing::TestContext context, awl::coro::IDelayedExecutor&) :
+            _logger(std::move(context.logger))
+        {}
+
         std::coroutine_handle<> _awaitingCoroutine;
+        std::shared_ptr<awl::ILogger> _logger;
 
         Job get_return_object();
 
@@ -168,6 +156,35 @@ namespace
         return { std::coroutine_handle<JobPromise>::from_promise(*this) };
     }
 
+    inline Job::Job(std::coroutine_handle<promise_type> handle) :
+        handle(handle),
+        logger(handle.promise()._logger)
+    {
+        logger->debug("Job constructor.");
+    }
+
+    inline Job::Job(Job&& other) :
+        handle(other.handle),
+        logger(std::move(other.logger))
+    {
+        logger->debug("Job move constructor.");
+    }
+
+    inline Job& Job::operator = (const Job&& other)
+    {
+        handle = other.handle;
+        logger = other.logger;
+
+        logger->debug("Job move assignment.");
+
+        return *this;
+    }
+
+    inline Job::~Job()
+    {
+        logger->debug("Job destructor.");
+    }
+
     // example
 
     using namespace std::chrono_literals;
@@ -202,7 +219,7 @@ namespace
     }
 }
 
-//The correct output ends with two destructor calls:
+//The correct logger output ends with two destructor calls:
 //Job constructor.
 //TestNestedTask started.
 //Job constructor.
