@@ -9,6 +9,7 @@
 #include "Awl/Observer.h"
 
 #include <concepts>
+#include <functional>
 #include <type_traits>
 #include <utility>
 
@@ -89,10 +90,7 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return forEachWhile([&](IObserver& observer)
-            {
-                return (observer.*func)(args ...);
-            });
+            return notifyWhileImpl(func, args ...);
         }
 
         template<typename Result, typename ...Params, typename ... Args>
@@ -102,10 +100,7 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return forEachWhile([&](IObserver& observer)
-            {
-                return (observer.*func)(args ...);
-            });
+            return notifyWhileImpl(func, args ...);
         }
 
         template<typename Result, typename ...Params, typename ... Args>
@@ -115,10 +110,7 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return !forEachWhile([&](IObserver& observer)
-            {
-                return !static_cast<bool>((observer.*func)(args ...));
-            });
+            return notifyUntilImpl(func, args ...);
         }
 
         template<typename Result, typename ...Params, typename ... Args>
@@ -128,10 +120,7 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return !forEachWhile([&](IObserver& observer)
-            {
-                return !static_cast<bool>((observer.*func)(args ...));
-            });
+            return notifyUntilImpl(func, args ...);
         }
 
         template<typename ...Params, typename ... Args>
@@ -149,6 +138,24 @@ namespace awl
     private:
 
         friend Enclosing;
+
+        template <class Func, typename ...Args>
+        bool notifyWhileImpl(Func func, const Args& ... args)
+        {
+            return forEachWhile([&](IObserver& observer)
+            {
+                return std::invoke(func, observer, args ...);
+            });
+        }
+
+        template <class Func, typename ...Args>
+        bool notifyUntilImpl(Func func, const Args& ... args)
+        {
+            return !forEachWhile([&](IObserver& observer)
+            {
+                return !static_cast<bool>(std::invoke(func, observer, args ...));
+            });
+        }
 
         // Not const: observers may unsubscribe or destroy themselves during notification.
         template <class Callable>
