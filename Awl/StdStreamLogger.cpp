@@ -29,12 +29,23 @@ namespace
 
 namespace awl
 {
+    struct StdStreamLogger::StreamState
+    {
+        explicit StreamState(std::shared_ptr<awl::ostream> stream) :
+            out(std::move(stream))
+        {}
+
+        std::shared_ptr<awl::ostream> out;
+        awl::ostringstream delayedOutput;
+        bool delayed = false;
+    };
+
     StdStreamLogger::StdStreamLogger(
         std::string source,
         std::shared_ptr<awl::ostream> out,
         std::string level,
         bool allow_custom_level) :
-        _out(std::move(out)),
+        _state(std::make_shared<StreamState>(std::move(out))),
         _level(std::move(level)),
         _severity(logLevelSeverity(_level)),
         _allowCustomLevel(allow_custom_level),
@@ -43,10 +54,10 @@ namespace awl
 
     StdStreamLogger::StdStreamLogger(
         std::vector<std::string> source,
-        std::shared_ptr<awl::ostream> out,
+        std::shared_ptr<StreamState> state,
         std::string level,
         bool allow_custom_level) :
-        _out(std::move(out)),
+        _state(std::move(state)),
         _level(std::move(level)),
         _severity(logLevelSeverity(_level)),
         _allowCustomLevel(allow_custom_level),
@@ -61,6 +72,41 @@ namespace awl
     std::shared_ptr<awl::ostream> StdStreamLogger::coutStream()
     {
         return wrapStream(awl::cout());
+    }
+
+    void StdStreamLogger::delay()
+    {
+        clearDelayed();
+        _state->delayed = true;
+    }
+
+    void StdStreamLogger::flushDelayed()
+    {
+        _state->delayed = false;
+
+        const String output = _state->delayedOutput.str();
+        _state->delayedOutput.str(String());
+        _state->delayedOutput.clear();
+
+        if (!output.empty())
+        {
+            *_state->out << output;
+            _state->out->flush();
+
+            if (!*_state->out)
+            {
+                // Windows console streams can fail on valid Unicode market symbols.
+                // See doc/fixes/2026-05-09-console-logger-unicode-stream-state.md.
+                _state->out->clear();
+            }
+        }
+    }
+
+    void StdStreamLogger::clearDelayed()
+    {
+        _state->delayed = false;
+        _state->delayedOutput.str(String());
+        _state->delayedOutput.clear();
     }
 
     bool StdStreamLogger::enabled(const std::string& level) const
@@ -113,14 +159,20 @@ namespace awl
             << message.str()
             << _T('\n');
 
-        *_out << temp_out.str();
-        _out->flush();
+        if (_state->delayed)
+        {
+            _state->delayedOutput << temp_out.str();
+            return;
+        }
 
-        if (!*_out)
+        *_state->out << temp_out.str();
+        _state->out->flush();
+
+        if (!*_state->out)
         {
             // Windows console streams can fail on valid Unicode market symbols.
             // See doc/fixes/2026-05-09-console-logger-unicode-stream-state.md.
-            _out->clear();
+            _state->out->clear();
         }
     }
 
@@ -149,7 +201,7 @@ namespace awl
 
         return std::shared_ptr<ILogger>(new StdStreamLogger(
             std::move(child_source),
-            _out,
+            _state,
             _level,
             _allowCustomLevel));
     }

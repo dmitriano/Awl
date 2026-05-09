@@ -28,6 +28,12 @@ namespace awl
 
         static std::shared_ptr<awl::ostream> coutStream();
 
+        void delay();
+
+        void flushDelayed();
+
+        void clearDelayed();
+
         bool enabled(const std::string& level) const override;
 
         std::shared_ptr<ILogger> createLogger(std::string source) const override;
@@ -38,15 +44,17 @@ namespace awl
 
     private:
 
+        struct StreamState;
+
         StdStreamLogger(
             std::vector<std::string> source,
-            std::shared_ptr<awl::ostream> out,
+            std::shared_ptr<StreamState> state,
             std::string level,
             bool allow_custom_level);
 
         void printSource(awl::ostream& out) const;
 
-        std::shared_ptr<awl::ostream> _out;
+        std::shared_ptr<StreamState> _state;
         std::string _level;
         std::size_t _severity;
         bool _allowCustomLevel;

@@ -7,6 +7,8 @@
 
 #include "Awl/Testing/TestChain.h"
 
+#include <functional>
+
 namespace awl 
 {
     namespace testing 
@@ -15,18 +17,16 @@ namespace awl
         {
         public:
 
-            TestRunner(ostringstream& last_output);
+            TestRunner() = default;
 
-            String getLastOutput() const
-            {
-                return lastOutput.str();
-            }
+            TestRunner(std::function<void()> delay_output, std::function<void()> clear_output);
 
             void runLink(const TestLink* p_test_link, const TestContext& context);
 
         private:
 
-            ostringstream& lastOutput;
+            std::function<void()> _delayOutput;
+            std::function<void()> _clearOutput;
         };
     }
 }

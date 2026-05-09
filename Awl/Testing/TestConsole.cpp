@@ -27,6 +27,7 @@
 #include <optional>
 #include <set>
 #include <regex>
+#include <vector>
 
 namespace awl::testing
 {
@@ -39,6 +40,12 @@ namespace awl::testing
 {
     namespace
     {
+        struct TestConsoleLogger
+        {
+            std::shared_ptr<CompositeLogger> logger;
+            std::vector<std::shared_ptr<StdStreamLogger>> delayedLoggers;
+        };
+
         std::shared_ptr<CompositeLogger> makeStdoutLogger(const std::string& log_level)
         {
             auto logger = std::make_shared<CompositeLogger>();
@@ -50,9 +57,10 @@ namespace awl::testing
         }
 
         void addFileLogger(
-            const std::shared_ptr<CompositeLogger>& logger,
+            TestConsoleLogger& console_logger,
             const std::optional<std::string>& log_file,
-            const std::string& log_level)
+            const std::string& log_level,
+            bool delayed)
         {
             if (!log_file)
             {
@@ -68,43 +76,85 @@ namespace awl::testing
                 throw TestException(std::format("Cannot open log file '{}'.", *log_file));
             }
 
-            logger->addLogger(std::make_shared<StdStreamLogger>(
+            auto logger = std::make_shared<StdStreamLogger>(
                 "TestConsole",
                 file_out,
-                log_level));
+                log_level);
+
+            console_logger.logger->addLogger(logger);
+
+            if (delayed)
+            {
+                console_logger.delayedLoggers.push_back(logger);
+            }
         }
 
-        std::shared_ptr<CompositeLogger> makeTestConsoleLogger(
+        void addStdoutLogger(
+            TestConsoleLogger& console_logger,
+            const std::string& log_level,
+            bool delayed)
+        {
+            auto logger = std::make_shared<StdStreamLogger>(
+                "TestConsole",
+                StdStreamLogger::coutStream(),
+                log_level);
+
+            console_logger.logger->addLogger(logger);
+
+            if (delayed)
+            {
+                console_logger.delayedLoggers.push_back(logger);
+            }
+        }
+
+        void delayLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->delay();
+            }
+        }
+
+        void flushDelayedLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->flushDelayed();
+            }
+        }
+
+        void clearDelayedLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->clearDelayed();
+            }
+        }
+
+        TestConsoleLogger makeTestConsoleLogger(
             TestOutput output,
             const std::string& log_level,
-            const std::optional<std::string>& log_file,
-            ostringstream& last_output)
+            const std::optional<std::string>& log_file)
         {
-            auto logger = std::make_shared<CompositeLogger>();
+            TestConsoleLogger console_logger{ std::make_shared<CompositeLogger>(), {} };
 
             switch (output)
             {
             case TestOutput::All:
-                logger->addLogger(std::make_shared<StdStreamLogger>(
-                    "TestConsole",
-                    StdStreamLogger::coutStream(),
-                    log_level));
+                addStdoutLogger(console_logger, log_level, false);
                 break;
 
             case TestOutput::Failed:
-                logger->addLogger(std::make_shared<StdStreamLogger>(
-                    "TestConsole",
-                    StdStreamLogger::wrapStream(last_output),
-                    log_level));
+                addStdoutLogger(console_logger, log_level, true);
                 break;
 
             case TestOutput::Null:
                 break;
             }
 
-            addFileLogger(logger, log_file, log_level);
+            addFileLogger(console_logger, log_file, log_level, output == TestOutput::Failed);
 
-            return logger;
+            return console_logger;
         }
     }
 
@@ -132,13 +182,21 @@ namespace awl::testing
 
         bool passed = false;
 
-        ostringstream last_output;
-        _logger = makeTestConsoleLogger(output, log_level, log_file, last_output);
+        TestConsoleLogger console_logger = makeTestConsoleLogger(output, log_level, log_file);
+        _logger = console_logger.logger;
         context.logger = _logger;
 
         try
         {
-            TestRunner runner(last_output);
+            TestRunner runner(
+                [&console_logger]
+                {
+                    delayLoggers(console_logger.delayedLoggers);
+                },
+                [&console_logger]
+                {
+                    clearDelayedLoggers(console_logger.delayedLoggers);
+                });
 
             if (run.empty())
             {
@@ -173,18 +231,8 @@ namespace awl::testing
         }
         catch (const awl::testing::TestException& e)
         {
-            if (output == TestOutput::Failed && !last_output.str().empty())
-            {
-                // In failed-output mode the console log is buffered; replay the formatted records before the final failure summary.
-                awl::cout() << std::endl << last_output.str();
-            }
-
+            flushDelayedLoggers(console_logger.delayedLoggers);
             context.logger->error(_T("The tests failed: {}"), e.message());
-
-            if (output == TestOutput::Failed)
-            {
-                awl::cout() << _T("The tests failed: ") << e.message() << std::endl;
-            }
         }
 
         // awl::static_chain<TestFunc>().clear();

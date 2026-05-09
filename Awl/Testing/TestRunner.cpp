@@ -38,8 +38,9 @@ namespace
 
 namespace awl::testing
 {
-    TestRunner::TestRunner(ostringstream& last_output) :
-        lastOutput(last_output)
+    TestRunner::TestRunner(std::function<void()> delay_output, std::function<void()> clear_output) :
+        _delayOutput(std::move(delay_output)),
+        _clearOutput(std::move(clear_output))
     {}
 
     void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context)
@@ -103,11 +104,19 @@ namespace awl::testing
 
             awl::StopWatch sw;
 
+            if (_delayOutput)
+            {
+                _delayOutput();
+            }
+
             p_test_link->value()(temp_context);
 
+            if (_clearOutput)
+            {
+                _clearOutput();
+            }
+
             context.logger->info(_T("{} passed within {}."), test_name, toString(sw));
-            lastOutput.str(String());
-            lastOutput.clear();
 
             // Clear the attributes from the passed test.
             context.attributeProvider.clear();
