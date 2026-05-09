@@ -8,8 +8,8 @@
 
 namespace awl
 {
-    template <class... Bases>
-    class LoggerFactoryImpl : public Bases...
+    template <class... Interfaces>
+    class LoggerFactoryImpl : public Interfaces...
     {
     public:
 
