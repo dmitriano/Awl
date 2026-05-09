@@ -5,6 +5,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <tuple>
 #include <utility>
 
 namespace awl
@@ -51,6 +52,12 @@ namespace awl
                 (std::constructible_from<value_type, Args&&> && ...))
         enum_array(Args&&... args) :
             _items{ std::forward<Args>(args)... }
+        {}
+
+        template <class... Args>
+            requires (sizeof...(Args) > 0 && sizeof...(Args) <= EnumTraits<Enum>::count())
+        enum_array(std::in_place_t, Args&&... args) :
+            _items{ std::make_from_tuple<value_type>(std::forward<Args>(args))... }
         {}
 
         reference at(enum_type index)
