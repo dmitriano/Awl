@@ -11,6 +11,7 @@
 
 #include "Awl/StdConsole.h"
 #include "Awl/CompositeLogger.h"
+#include "Awl/EnumTraits.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
@@ -26,6 +27,13 @@
 #include <optional>
 #include <set>
 #include <regex>
+
+namespace awl::testing
+{
+    AWL_SEQUENTIAL_ENUM(TestOutput, Failed, All, Null)
+}
+
+AWL_ENUM_TRAITS(awl::testing, TestOutput)
 
 namespace awl::testing
 {
@@ -67,30 +75,31 @@ namespace awl::testing
         }
 
         std::shared_ptr<CompositeLogger> makeTestConsoleLogger(
-            const String& output,
+            TestOutput output,
             const std::string& log_level,
             const std::optional<std::string>& log_file,
             ostringstream& last_output)
         {
             auto logger = std::make_shared<CompositeLogger>();
 
-            if (output == _T("all"))
+            switch (output)
             {
+            case TestOutput::All:
                 logger->addLogger(std::make_shared<StdStreamLogger>(
                     "TestConsole",
                     StdStreamLogger::coutStream(),
                     log_level));
-            }
-            else if (output == _T("failed"))
-            {
+                break;
+
+            case TestOutput::Failed:
                 logger->addLogger(std::make_shared<StdStreamLogger>(
                     "TestConsole",
                     StdStreamLogger::wrapStream(last_output),
                     log_level));
-            }
-            else if (output != _T("null"))
-            {
-                throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
+                break;
+
+            case TestOutput::Null:
+                break;
             }
 
             addFileLogger(logger, log_file, log_level);
@@ -111,7 +120,7 @@ namespace awl::testing
     {
         TestContext& context = _context;
         
-        AWL_ATTRIBUTE(String, output, _T("failed"));
+        AWL_ATTRIBUTE(TestOutput, output, TestOutput::Failed);
         AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
         AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(std::string, run, {});
@@ -164,11 +173,17 @@ namespace awl::testing
         }
         catch (const awl::testing::TestException& e)
         {
+            if (output == TestOutput::Failed && !last_output.str().empty())
+            {
+                // In failed-output mode the console log is buffered; replay the formatted records before the final failure summary.
+                awl::cout() << std::endl << last_output.str();
+            }
+
             context.logger->error(_T("The tests failed: {}"), e.message());
 
-            if (output == _T("failed") && !last_output.str().empty())
+            if (output == TestOutput::Failed)
             {
-                awl::cout() << std::endl << last_output.str();
+                awl::cout() << _T("The tests failed: ") << e.message() << std::endl;
             }
         }
 

@@ -58,7 +58,7 @@ namespace awl::testing
 
         static T fromString(const String& s)
         {
-            return awl::enum_from_string<T>(StringConvertor<char>::convertFrom(s.c_str()));
+            return awl::enum_from_string_i<T>(StringConvertor<char>::convertFrom(s.c_str()));
         }
     };
 
