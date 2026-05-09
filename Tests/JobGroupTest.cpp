@@ -10,6 +10,13 @@
 #include "Awl/Testing/TimeQueue.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <type_traits>
+
+static_assert(!std::is_copy_constructible_v<awl::JobGroup>);
+static_assert(!std::is_copy_assignable_v<awl::JobGroup>);
+static_assert(std::is_move_constructible_v<awl::JobGroup>);
+static_assert(std::is_move_assignable_v<awl::JobGroup>);
+
 namespace
 {
     using namespace std::chrono_literals;
@@ -150,6 +157,39 @@ AWL_TEST(JobGroupWaitAnyThenWaitAll)
     time_queue.loop();
 
     AWL_ASSERT(task.done());
+}
+
+AWL_TEST(JobGroupMoveConstruct)
+{
+    awl::testing::TimeQueue time_queue;
+    awl::JobGroup jobs;
+
+    spawnThreeJobs(context, time_queue, jobs);
+
+    awl::JobGroup moved_jobs(std::move(jobs));
+
+    AWL_ASSERT_EQUAL(3u, moved_jobs.task_count());
+
+    time_queue.loop();
+
+    AWL_ASSERT_EQUAL(0u, moved_jobs.task_count());
+}
+
+AWL_TEST(JobGroupMoveAssign)
+{
+    awl::testing::TimeQueue time_queue;
+    awl::JobGroup jobs;
+    awl::JobGroup moved_jobs;
+
+    spawnThreeJobs(context, time_queue, jobs);
+
+    moved_jobs = std::move(jobs);
+
+    AWL_ASSERT_EQUAL(3u, moved_jobs.task_count());
+
+    time_queue.loop();
+
+    AWL_ASSERT_EQUAL(0u, moved_jobs.task_count());
 }
 
 AWL_TEST(JobGroupCancelBeforeWaiting)

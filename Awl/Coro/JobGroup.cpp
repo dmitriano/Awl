@@ -7,6 +7,22 @@
 
 using namespace awl;
 
+JobGroup::JobGroup(JobGroup&& other) noexcept :
+    Observable<TaskSink>(std::move(other)),
+    _handlers(std::move(other._handlers))
+{
+    updateHandlersOwner();
+}
+
+JobGroup& JobGroup::operator = (JobGroup&& other) noexcept
+{
+    Observable<TaskSink>::operator = (std::move(other));
+    _handlers = std::move(other._handlers);
+    updateHandlersOwner();
+
+    return *this;
+}
+
 void JobGroup::spawn(Job&& task)
 {
     // A coroutine has executed as a regular function.
@@ -34,6 +50,14 @@ void JobGroup::cancel()
         _handlers.clear();
 
         notify(&TaskSink::onFinished);
+    }
+}
+
+void JobGroup::updateHandlersOwner()
+{
+    for (Handler& handler : _handlers)
+    {
+        handler.pThis = this;
     }
 }
 

@@ -96,6 +96,16 @@ namespace awl
 
     public:
 
+        JobGroup() = default;
+
+        JobGroup(const JobGroup& other) = delete;
+
+        JobGroup(JobGroup&& other) noexcept;
+
+        JobGroup& operator = (const JobGroup& other) = delete;
+
+        JobGroup& operator = (JobGroup&& other) noexcept;
+
         void spawn(Job&& task);
 
         std::size_t task_count() const
@@ -121,6 +131,8 @@ namespace awl
         }
 
     private:
+
+        void updateHandlersOwner();
 
         Job wait_all_jobs_experimental();
 
