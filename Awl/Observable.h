@@ -72,9 +72,9 @@ namespace awl
         void notify(void (IObserver::* func)(Params ...), const Args& ... args)
             requires (std::invocable<decltype(func), IObserver*, const Args&...>)
         {
-            forEach([&](ObserverElement* p_observer)
+            forEach([&](IObserver& observer)
             {
-                (static_cast<IObserver*>(p_observer)->*func)(args ...);
+                (observer.*func)(args ...);
                 return true;
             });
         }
@@ -90,9 +90,9 @@ namespace awl
                     std::invocable<decltype(func), IObserver*, const Args&...>
             )
         {
-            return forEach([&](ObserverElement* p_observer)
+            return forEach([&](IObserver& observer)
             {
-                return (static_cast<IObserver*>(p_observer)->*func)(args ...);
+                return (observer.*func)(args ...);
             });
         }
 
@@ -116,8 +116,8 @@ namespace awl
         template <class Callable>
         bool forEach(Callable&& call)
             requires (
-                std::invocable<Callable&, ObserverElement*> &&
-                std::convertible_to<std::invoke_result_t<Callable&, ObserverElement*>, bool>
+                std::invocable<Callable&, IObserver&> &&
+                std::convertible_to<std::invoke_result_t<Callable&, IObserver&>, bool>
             )
         {
             for (typename ObserverList::iterator i = _observers.begin(); i != _observers.end(); )
@@ -125,7 +125,7 @@ namespace awl
                 //p_observer can delete itself or unsubscribe while iterating over the list so we use postfix ++
                 ObserverElement* p_observer = *(i++);
 
-                if (!static_cast<bool>(call(p_observer)))
+                if (!static_cast<bool>(call(*static_cast<IObserver*>(p_observer))))
                 {
                     return false;
                 }
