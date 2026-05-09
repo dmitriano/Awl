@@ -315,14 +315,19 @@ namespace
     {
     public:
 
-        bool checkAll(int value)
+        bool checkWhile(int value)
         {
-            return notifyWhileTrue(&IConditioncheck::check, value);
+            return notifyWhile(&IConditioncheck::check, value);
+        }
+
+        bool checkUntil(int value)
+        {
+            return notifyUntil(&IConditioncheck::check, value);
         }
     };
 }
 
-AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
+AWL_TEST(Observable_NotifyWhile_StopsOnFalse)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -343,9 +348,9 @@ AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
     observable.subscribe(&handler2);
     observable.subscribe(&handler3);
 
-    const bool result = observable.checkAll(42);
+    const bool result = observable.checkWhile(42);
 
-    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at first false."));
+    AWL_ASSERTM_FALSE(result, _T("notifyWhile should stop at first false."));
     AWL_ASSERT_EQUAL(1, count1);
     AWL_ASSERT_EQUAL(1, count2);
     AWL_ASSERT_EQUAL(0, count3);
@@ -354,7 +359,7 @@ AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
     AWL_ASSERT_EQUAL(0, last3);
 }
 
-AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
+AWL_TEST(Observable_NotifyWhile_AllTrue)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -371,13 +376,71 @@ AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
     observable.subscribe(&handler1);
     observable.subscribe(&handler2);
 
-    const bool result = observable.checkAll(7);
+    const bool result = observable.checkWhile(7);
 
-    AWL_ASSERTM_TRUE(result, _T("notifyWhileTrue should return true when all observers return true."));
+    AWL_ASSERTM_TRUE(result, _T("notifyWhile should return true when all observers return true."));
     AWL_ASSERT_EQUAL(1, count1);
     AWL_ASSERT_EQUAL(1, count2);
     AWL_ASSERT_EQUAL(7, last1);
     AWL_ASSERT_EQUAL(7, last2);
+}
+
+AWL_TEST(Observable_NotifyUntil_StopsOnTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int count3 = 0;
+    int last1 = 0;
+    int last2 = 0;
+    int last3 = 0;
+
+    ConditionHandler handler1(false, &count1, &last1);
+    ConditionHandler handler2(true, &count2, &last2);
+    ConditionHandler handler3(false, &count3, &last3);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.checkUntil(11);
+
+    AWL_ASSERTM_TRUE(result, _T("notifyUntil should stop at first true."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(0, count3);
+    AWL_ASSERT_EQUAL(11, last1);
+    AWL_ASSERT_EQUAL(11, last2);
+    AWL_ASSERT_EQUAL(0, last3);
+}
+
+AWL_TEST(Observable_NotifyUntil_AllFalse)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int last1 = 0;
+    int last2 = 0;
+
+    ConditionHandler handler1(false, &count1, &last1);
+    ConditionHandler handler2(false, &count2, &last2);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    const bool result = observable.checkUntil(13);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyUntil should return false when all observers return false."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(13, last1);
+    AWL_ASSERT_EQUAL(13, last2);
 }
 
 namespace

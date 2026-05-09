@@ -82,13 +82,26 @@ namespace awl
         }
 
         template<typename ... Args>
-        bool notifyWhileTrue(const Args& ... args)
+        bool notifyWhile(const Args& ... args)
             requires (
                 std::is_convertible_v<Result, bool> &&
                 std::invocable<Function&, const Args&...>
             )
         {
             return notifyLoopImpl([&](ObserverElement* p_observer) { return p_observer->function()(args ...); });
+        }
+
+        template<typename ... Args>
+        bool notifyUntil(const Args& ... args)
+            requires (
+                std::is_convertible_v<Result, bool> &&
+                std::invocable<Function&, const Args&...>
+            )
+        {
+            return !notifyLoopImpl([&](ObserverElement* p_observer)
+            {
+                return !static_cast<bool>(p_observer->function()(args ...));
+            });
         }
 
         friend Enclosing;
