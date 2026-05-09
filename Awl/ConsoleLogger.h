@@ -21,7 +21,8 @@ namespace awl
         explicit ConsoleLogger(
             std::string source,
             awl::ostream& out = awl::cout(),
-            std::string level = LogLevel::Debug);
+            std::string level = LogLevel::Trace,
+            bool allow_custom_level = false);
 
         bool enabled(const std::string& level) const override;
 
@@ -36,11 +37,13 @@ namespace awl
         ConsoleLogger(
             std::vector<std::string> source,
             awl::ostream& out,
-            std::string level);
+            std::string level,
+            bool allow_custom_level);
 
         awl::ostream& _out;
         std::string _level;
         std::size_t _severity;
+        bool _allowCustomLevel;
         std::vector<std::string> _source;
     };
 }

@@ -39,7 +39,7 @@ namespace awl
         static inline const std::string Off = enum_to_string(KnownLogLevel::Off);
     };
 
-    inline std::size_t log_level_severity(std::string level)
+    inline std::size_t logLevelSeverity(std::string level)
     {
         auto& names = EnumTraits<KnownLogLevel>::names();
 
@@ -49,8 +49,8 @@ namespace awl
         return static_cast<std::size_t>(i - names.begin());
     }
 
-    inline bool is_log_level(std::string level)
+    inline bool isLogLevel(std::string level)
     {
-        return log_level_severity(std::move(level)) < EnumTraits<KnownLogLevel>::count();
+        return logLevelSeverity(std::move(level)) < EnumTraits<KnownLogLevel>::count();
     }
 }

@@ -78,7 +78,7 @@ namespace awl::testing
             throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
         }
 
-        if (!is_log_level(log_level))
+        if (!isLogLevel(log_level))
         {
             throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
         }

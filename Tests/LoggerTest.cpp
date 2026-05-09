@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <source_location>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -239,6 +240,14 @@ AWL_TEST(ILogger)
     AWL_ASSERT_EQUAL(initial_log_count, filtered_logger.logCount());
 
     awl::ostringstream out;
+    awl::ConsoleLogger default_logger("Test", out);
+
+    AWL_ASSERT(default_logger.enabled(awl::LogLevel::Trace));
+    awl::testing::Assert::throws<std::runtime_error>([&default_logger]()
+    {
+        default_logger.enabled("Custom");
+    });
+
     awl::ConsoleLogger console_logger("Test", out, awl::LogLevel::Info);
 
     AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Debug));
@@ -262,6 +271,15 @@ AWL_TEST(ILogger)
 
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
+
+    awl::ConsoleLogger custom_logger("Test", out, awl::LogLevel::Info, true);
+
+    AWL_ASSERT(custom_logger.enabled("Custom"));
+    AWL_ASSERT(custom_logger.createLogger("Child")->enabled("Custom"));
+
+    awl::ConsoleLogger custom_off_logger("Test", out, awl::LogLevel::Off, true);
+
+    AWL_ASSERT(custom_off_logger.enabled("Custom"));
 
     auto root_logger = std::make_shared<awl::ConsoleLogger>("Root", out, awl::LogLevel::Info);
     std::shared_ptr<awl::ILogger> child_logger = root_logger->createLogger("Child");

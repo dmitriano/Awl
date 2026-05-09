@@ -4,6 +4,8 @@
 #include "Awl/Time.h"
 
 #include <chrono>
+#include <format>
+#include <stdexcept>
 #include <source_location>
 #include <string>
 #include <string_view>
@@ -51,26 +53,42 @@ namespace awl
     ConsoleLogger::ConsoleLogger(
         std::string source,
         awl::ostream& out,
-        std::string level) :
+        std::string level,
+        bool allow_custom_level) :
         _out(out),
         _level(std::move(level)),
-        _severity(log_level_severity(_level)),
+        _severity(logLevelSeverity(_level)),
+        _allowCustomLevel(allow_custom_level),
         _source{ std::move(source) }
     {}
 
     ConsoleLogger::ConsoleLogger(
         std::vector<std::string> source,
         awl::ostream& out,
-        std::string level) :
+        std::string level,
+        bool allow_custom_level) :
         _out(out),
         _level(std::move(level)),
-        _severity(log_level_severity(_level)),
+        _severity(logLevelSeverity(_level)),
+        _allowCustomLevel(allow_custom_level),
         _source(std::move(source))
     {}
 
     bool ConsoleLogger::enabled(const std::string& level) const
     {
-        return log_level_severity(level) >= _severity;
+        const std::size_t severity = logLevelSeverity(level);
+
+        if (severity >= EnumTraits<KnownLogLevel>::count())
+        {
+            if (!_allowCustomLevel)
+            {
+                throw std::runtime_error(std::format("Unknown log level: '{}'.", level));
+            }
+
+            return true;
+        }
+
+        return severity >= _severity;
     }
 
     void ConsoleLogger::doLog(const std::string& level, const LogString& message)
@@ -121,6 +139,7 @@ namespace awl
         return std::shared_ptr<ILogger>(new ConsoleLogger(
             std::move(child_source),
             _out,
-            _level));
+            _level,
+            _allowCustomLevel));
     }
 }
