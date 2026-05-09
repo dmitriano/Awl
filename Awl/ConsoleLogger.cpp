@@ -104,6 +104,12 @@ namespace awl
             << _T('\n');
 
         _out << temp_out.str();
+        _out.flush();
+
+        if (!_out)
+        {
+            _out.clear();
+        }
     }
 
     void ConsoleLogger::printSource(awl::ostream& out) const
