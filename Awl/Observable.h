@@ -96,7 +96,33 @@ namespace awl
         }
 
         template<typename Result, typename ...Params, typename ... Args>
+        bool notifyWhile(Result(IObserver::* func)(Params ...) const, const Args& ... args)
+            requires (
+                std::is_convertible_v<Result, bool>&&
+                    std::invocable<decltype(func), IObserver*, const Args&...>
+            )
+        {
+            return forEachWhile([&](IObserver& observer)
+            {
+                return (observer.*func)(args ...);
+            });
+        }
+
+        template<typename Result, typename ...Params, typename ... Args>
         bool notifyUntil(Result(IObserver::* func)(Params ...), const Args& ... args)
+            requires (
+                std::is_convertible_v<Result, bool>&&
+                    std::invocable<decltype(func), IObserver*, const Args&...>
+            )
+        {
+            return !forEachWhile([&](IObserver& observer)
+            {
+                return !static_cast<bool>((observer.*func)(args ...));
+            });
+        }
+
+        template<typename Result, typename ...Params, typename ... Args>
+        bool notifyUntil(Result(IObserver::* func)(Params ...) const, const Args& ... args)
             requires (
                 std::is_convertible_v<Result, bool>&&
                     std::invocable<decltype(func), IObserver*, const Args&...>

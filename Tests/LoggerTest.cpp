@@ -3,6 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Awl/CompositeLogger.h"
 #include "Awl/ConsoleLogger.h"
 #include "Awl/LegacyFormat.h"
 #include "Awl/StringFormat.h"
@@ -83,6 +84,71 @@ namespace
         {
             return level != awl::LogLevel::Debug;
         }
+    };
+
+    class CompositeTestLogger : public awl::Observer<awl::ILogger>
+    {
+    public:
+
+        using awl::ILogger::log;
+
+        explicit CompositeTestLogger(bool enabled) :
+            _enabled(enabled)
+        {}
+
+        bool enabled(const std::string& level) const override
+        {
+            ++_enabledCallCount;
+            _enabledLevel = level;
+            return _enabled;
+        }
+
+        void log(const std::string& level, const awl::LogString& message) override
+        {
+            ++_logCount;
+            _level = level;
+            _message = message.str();
+        }
+
+        std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
+        {
+            static_cast<void>(source);
+            return nullptr;
+        }
+
+        int enabledCallCount() const
+        {
+            return _enabledCallCount;
+        }
+
+        int logCount() const
+        {
+            return _logCount;
+        }
+
+        const std::string& enabledLevel() const
+        {
+            return _enabledLevel;
+        }
+
+        const std::string& level() const
+        {
+            return _level;
+        }
+
+        const awl::String& message() const
+        {
+            return _message;
+        }
+
+    private:
+
+        bool _enabled;
+        mutable int _enabledCallCount = 0;
+        mutable std::string _enabledLevel;
+        int _logCount = 0;
+        std::string _level;
+        awl::String _message;
     };
 }
 
@@ -182,4 +248,47 @@ AWL_TEST(ILogger)
     child_logger->info("source message");
 
     AWL_ASSERT(out.str().find(_T("Root.Child")) != awl::String::npos);
+}
+
+AWL_TEST(CompositeLogger)
+{
+    AWL_UNUSED_CONTEXT;
+
+    CompositeTestLogger disabled_logger(false);
+    CompositeTestLogger enabled_logger(true);
+    CompositeTestLogger skipped_logger(true);
+    awl::CompositeLogger logger;
+
+    AWL_ASSERT_FALSE(logger.enabled(awl::LogLevel::Info));
+
+    logger.subscribe(&disabled_logger);
+    logger.subscribe(&enabled_logger);
+    logger.subscribe(&skipped_logger);
+
+    AWL_ASSERT(logger.enabled(awl::LogLevel::Warning));
+    AWL_ASSERT_EQUAL(1, disabled_logger.enabledCallCount());
+    AWL_ASSERT_EQUAL(1, enabled_logger.enabledCallCount());
+    AWL_ASSERT_EQUAL(0, skipped_logger.enabledCallCount());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, disabled_logger.enabledLevel());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Warning, enabled_logger.enabledLevel());
+
+    logger.error("composite {}", 42);
+
+    AWL_ASSERT_EQUAL(1, disabled_logger.logCount());
+    AWL_ASSERT_EQUAL(1, enabled_logger.logCount());
+    AWL_ASSERT_EQUAL(1, skipped_logger.logCount());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Error, disabled_logger.level());
+    AWL_ASSERT_EQUAL(_T("composite 42"), disabled_logger.message());
+    AWL_ASSERT_EQUAL(awl::LogLevel::Error, enabled_logger.level());
+    AWL_ASSERT_EQUAL(_T("composite 42"), enabled_logger.message());
+
+    logger.unsubscribe(&enabled_logger);
+
+    logger.info("after unsubscribe");
+
+    AWL_ASSERT_EQUAL(2, disabled_logger.logCount());
+    AWL_ASSERT_EQUAL(1, enabled_logger.logCount());
+    AWL_ASSERT_EQUAL(2, skipped_logger.logCount());
+
+    AWL_ASSERT(logger.createLogger("Child") == nullptr);
 }
