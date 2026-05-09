@@ -19,13 +19,12 @@
 
 namespace
 {
-    std::string_view fileName(const char* path)
+    std::string_view sourceFileName(const char* path)
     {
         const std::string_view full_path(path);
         const size_t pos = full_path.find_last_of("/\\");
         return pos == std::string_view::npos ? full_path : full_path.substr(pos + 1);
     }
-
 }
 
 namespace awl
@@ -97,7 +96,7 @@ namespace awl
         }
 
         temp_out << separator
-            << awl::fromAString(std::string(fileName(location.file_name())))
+            << awl::fromAString(std::string(sourceFileName(location.file_name())))
             << _T(':')
             << location.line()
             << separator
