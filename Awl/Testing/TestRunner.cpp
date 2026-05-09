@@ -13,13 +13,17 @@
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
 #include "Awl/WatchDog.h"
+#include "Awl/CompositeLogger.h"
 #include "Awl/StdStreamLogger.h"
 
 #include <thread>
 #include <functional>
 #include <algorithm>
 #include <cassert>
+#include <filesystem>
+#include <fstream>
 #include <memory>
+#include <optional>
 
 namespace awl::testing
 {
@@ -32,6 +36,7 @@ namespace awl::testing
     {
         AWL_ATTRIBUTE(String, output, _T("failed"));
         AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
+        AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
@@ -124,7 +129,28 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
 
-            auto logger = std::make_shared<StdStreamLogger>(p_test_link->name(), *p_out, log_level);
+            auto logger = std::make_shared<CompositeLogger>();
+            logger->addLogger(std::make_shared<StdStreamLogger>(
+                p_test_link->name(),
+                StdStreamLogger::wrapStream(*p_out),
+                log_level));
+
+            if (log_file)
+            {
+                auto file_out = std::make_shared<std::basic_ofstream<Char>>(
+                    std::filesystem::path(*log_file),
+                    std::ios_base::app);
+
+                if (!*file_out)
+                {
+                    throw TestException(std::format("Cannot open log file '{}'.", *log_file));
+                }
+
+                logger->addLogger(std::make_shared<StdStreamLogger>(
+                    p_test_link->name(),
+                    file_out,
+                    log_level));
+            }
             
             const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
 

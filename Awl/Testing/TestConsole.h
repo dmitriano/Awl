@@ -10,6 +10,7 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/CompositeProvider.h"
 
+#include "Awl/ILogger.h"
 #include "Awl/StdStreamLogger.h"
 #include "Awl/Sleep.h"
 
@@ -40,7 +41,7 @@ namespace awl::testing
 
         bool runTests();
             
-        std::shared_ptr<StdStreamLogger> _logger;
+        std::shared_ptr<ILogger> _logger;
 
         Provider& _ap;
         TypeProvider _typeProvider;

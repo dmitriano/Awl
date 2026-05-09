@@ -10,6 +10,7 @@
 #include "Awl/Testing/LocalAttribute.h"
 
 #include "Awl/StdConsole.h"
+#include "Awl/CompositeLogger.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
@@ -24,9 +25,19 @@
 
 namespace awl::testing
 {
+    namespace
+    {
+        std::shared_ptr<ILogger> makeTestConsoleLogger()
+        {
+            auto logger = std::make_shared<CompositeLogger>();
+            logger->addLogger(std::make_shared<StdStreamLogger>("TestConsole", StdStreamLogger::coutStream()));
+            return logger;
+        }
+    }
+
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
-        _logger(std::make_shared<StdStreamLogger>("TestConsole")),
+        _logger(makeTestConsoleLogger()),
         _ap(provider),
         _context{ _logger, std::move(stop_token), _ap, _typeProvider}
     {}

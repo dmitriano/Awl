@@ -31,10 +31,10 @@ namespace awl
 {
     StdStreamLogger::StdStreamLogger(
         std::string source,
-        awl::ostream& out,
+        std::shared_ptr<awl::ostream> out,
         std::string level,
         bool allow_custom_level) :
-        _out(out),
+        _out(std::move(out)),
         _level(std::move(level)),
         _severity(logLevelSeverity(_level)),
         _allowCustomLevel(allow_custom_level),
@@ -43,15 +43,25 @@ namespace awl
 
     StdStreamLogger::StdStreamLogger(
         std::vector<std::string> source,
-        awl::ostream& out,
+        std::shared_ptr<awl::ostream> out,
         std::string level,
         bool allow_custom_level) :
-        _out(out),
+        _out(std::move(out)),
         _level(std::move(level)),
         _severity(logLevelSeverity(_level)),
         _allowCustomLevel(allow_custom_level),
         _source(std::move(source))
     {}
+
+    std::shared_ptr<awl::ostream> StdStreamLogger::wrapStream(awl::ostream& out)
+    {
+        return std::shared_ptr<awl::ostream>(&out, [](awl::ostream*) {});
+    }
+
+    std::shared_ptr<awl::ostream> StdStreamLogger::coutStream()
+    {
+        return wrapStream(awl::cout());
+    }
 
     bool StdStreamLogger::enabled(const std::string& level) const
     {
@@ -103,14 +113,14 @@ namespace awl
             << message.str()
             << _T('\n');
 
-        _out << temp_out.str();
-        _out.flush();
+        *_out << temp_out.str();
+        _out->flush();
 
-        if (!_out)
+        if (!*_out)
         {
             // Windows console streams can fail on valid Unicode market symbols.
             // See doc/fixes/2026-05-09-console-logger-unicode-stream-state.md.
-            _out.clear();
+            _out->clear();
         }
     }
 

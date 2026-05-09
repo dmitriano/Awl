@@ -240,7 +240,8 @@ AWL_TEST(ILogger)
     AWL_ASSERT_EQUAL(initial_log_count, filtered_logger.logCount());
 
     awl::ostringstream out;
-    awl::StdStreamLogger default_logger("Test", out);
+    auto out_stream = awl::StdStreamLogger::wrapStream(out);
+    awl::StdStreamLogger default_logger("Test", out_stream);
 
     AWL_ASSERT(default_logger.enabled(awl::LogLevel::Trace));
     awl::testing::Assert::throws<std::runtime_error>([&default_logger]()
@@ -248,7 +249,7 @@ AWL_TEST(ILogger)
         default_logger.enabled("Custom");
     });
 
-    awl::StdStreamLogger console_logger("Test", out, awl::LogLevel::Info);
+    awl::StdStreamLogger console_logger("Test", out_stream, awl::LogLevel::Info);
 
     AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Debug));
     AWL_ASSERT_FALSE(console_logger.enabled(awl::LogLevel::Trace));
@@ -257,31 +258,31 @@ AWL_TEST(ILogger)
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT(console_logger.enabled(awl::LogLevel::Critical));
 
-    awl::StdStreamLogger debug_logger("Test", out, awl::LogLevel::Debug);
+    awl::StdStreamLogger debug_logger("Test", out_stream, awl::LogLevel::Debug);
 
     AWL_ASSERT_FALSE(debug_logger.enabled(awl::LogLevel::Trace));
     AWL_ASSERT(debug_logger.enabled(awl::LogLevel::Debug));
 
-    awl::StdStreamLogger critical_logger("Test", out, awl::LogLevel::Critical);
+    awl::StdStreamLogger critical_logger("Test", out_stream, awl::LogLevel::Critical);
 
     AWL_ASSERT_FALSE(critical_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT(critical_logger.enabled(awl::LogLevel::Critical));
 
-    awl::StdStreamLogger off_logger("Test", out, awl::LogLevel::Off);
+    awl::StdStreamLogger off_logger("Test", out_stream, awl::LogLevel::Off);
 
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Error));
     AWL_ASSERT_FALSE(off_logger.enabled(awl::LogLevel::Critical));
 
-    awl::StdStreamLogger custom_logger("Test", out, awl::LogLevel::Info, true);
+    awl::StdStreamLogger custom_logger("Test", out_stream, awl::LogLevel::Info, true);
 
     AWL_ASSERT(custom_logger.enabled("Custom"));
     AWL_ASSERT(custom_logger.createLogger("Child")->enabled("Custom"));
 
-    awl::StdStreamLogger custom_off_logger("Test", out, awl::LogLevel::Off, true);
+    awl::StdStreamLogger custom_off_logger("Test", out_stream, awl::LogLevel::Off, true);
 
     AWL_ASSERT(custom_off_logger.enabled("Custom"));
 
-    auto root_logger = std::make_shared<awl::StdStreamLogger>("Root", out, awl::LogLevel::Info);
+    auto root_logger = std::make_shared<awl::StdStreamLogger>("Root", out_stream, awl::LogLevel::Info);
     std::shared_ptr<awl::ILogger> child_logger = root_logger->createLogger("Child");
     child_logger->info("source message");
 

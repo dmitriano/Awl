@@ -20,9 +20,13 @@ namespace awl
 
         explicit StdStreamLogger(
             std::string source,
-            awl::ostream& out = awl::cout(),
+            std::shared_ptr<awl::ostream> out,
             std::string level = LogLevel::Trace,
             bool allow_custom_level = false);
+
+        static std::shared_ptr<awl::ostream> wrapStream(awl::ostream& out);
+
+        static std::shared_ptr<awl::ostream> coutStream();
 
         bool enabled(const std::string& level) const override;
 
@@ -36,13 +40,13 @@ namespace awl
 
         StdStreamLogger(
             std::vector<std::string> source,
-            awl::ostream& out,
+            std::shared_ptr<awl::ostream> out,
             std::string level,
             bool allow_custom_level);
 
         void printSource(awl::ostream& out) const;
 
-        awl::ostream& _out;
+        std::shared_ptr<awl::ostream> _out;
         std::string _level;
         std::size_t _severity;
         bool _allowCustomLevel;
