@@ -3,6 +3,7 @@
 #include "Awl/String.h"
 #include "Awl/Time.h"
 
+#include <cassert>
 #include <chrono>
 #include <format>
 #include <stdexcept>
@@ -89,7 +90,11 @@ namespace awl
 
         temp_out << separator << level;
 
-        printSource(temp_out, separator);
+        if (!_source.empty())
+        {
+            temp_out << separator;
+            printSource(temp_out);
+        }
 
         temp_out << separator
             << awl::fromAString(std::string(fileName(location.file_name())))
@@ -102,41 +107,28 @@ namespace awl
         _out << temp_out.str();
     }
 
-    bool ConsoleLogger::printSource(awl::ostream& out, Char separator) const
+    void ConsoleLogger::printSource(awl::ostream& out) const
     {
-        bool printed = false;
+        bool first = true;
 
         for (const std::string& segment : _source)
         {
-            if (segment.empty())
-            {
-                continue;
-            }
-
-            if (printed)
+            if (!first)
             {
                 out << _T('.');
             }
-            else
-            {
-                out << separator;
-            }
 
             out << awl::fromAString(segment);
-            printed = true;
+            first = false;
         }
-
-        return printed;
     }
 
     std::shared_ptr<ILogger> ConsoleLogger::createLogger(std::string source) const
     {
-        std::vector<std::string> child_source = _source;
+        assert(!source.empty());
 
-        if (!source.empty())
-        {
-            child_source.push_back(std::move(source));
-        }
+        std::vector<std::string> child_source = _source;
+        child_source.push_back(std::move(source));
 
         return std::shared_ptr<ILogger>(new ConsoleLogger(
             std::move(child_source),
