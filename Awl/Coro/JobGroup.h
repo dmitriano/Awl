@@ -118,6 +118,7 @@ namespace awl
             return _handlers.empty();
         }
 
+        // Clears tracked jobs and wakes awaiters.
         void cancel();
 
         auto wait_all()
