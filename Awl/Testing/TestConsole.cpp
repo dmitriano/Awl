@@ -209,14 +209,13 @@ namespace awl::testing
                 AWL_ATTRIBUTE(std::string, filter, {});
 
                 auto test_map = StaticMap<TestFunc>::fill(filter);
-                auto logger = makeStdoutLogger(LogLevel::Trace);
 
                 for (auto& p_link : test_map)
                 {
-                    logger->info("{}", p_link->name());
+                    awl::cout() << p_link->name() << std::endl;
                 }
 
-                logger->info("Total {} tests.", test_map.size());
+                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
 
                 return 0;
             }
