@@ -71,7 +71,7 @@ namespace awl::testing
                 std::filesystem::path(*log_file),
                 std::ios_base::trunc);
 
-            if (!*file_out)
+            if (!file_out->is_open())
             {
                 throw TestException(std::format("Cannot open log file '{}'.", *log_file));
             }
