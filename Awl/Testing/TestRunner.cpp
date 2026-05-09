@@ -8,35 +8,42 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
 
-#include "Awl/StdConsole.h"
 #include "Awl/IntRange.h"
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
 #include "Awl/WatchDog.h"
-#include "Awl/CompositeLogger.h"
-#include "Awl/StdStreamLogger.h"
 
 #include <thread>
 #include <functional>
 #include <algorithm>
 #include <cassert>
-#include <filesystem>
-#include <fstream>
 #include <memory>
-#include <optional>
+
+namespace
+{
+    awl::String toString(const awl::StopWatch& sw)
+    {
+        awl::ostringstream out;
+        out << sw;
+        return out.str();
+    }
+
+    awl::String toString(std::chrono::milliseconds t)
+    {
+        awl::ostringstream out;
+        awl::format_duration(out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
+        return out.str();
+    }
+}
 
 namespace awl::testing
 {
     TestRunner::TestRunner(ostringstream& last_output) :
-        nullOutput(&nullBuffer),
         lastOutput(last_output)
     {}
 
-    void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out)
+    void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context)
     {
-        AWL_ATTRIBUTE(String, output, _T("failed"));
-        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
-        AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
 
@@ -44,48 +51,18 @@ namespace awl::testing
         // Used for simulating an app crash.
         AWL_FLAG(terminate);
 
-        out << fromACString(p_test_link->name());
+        const String test_name = fromACString(p_test_link->name());
+        context.logger->info(_T("{} started."), test_name);
 
         size_t loop_count = loop;
 
         if (loop_count != 0)
         {
-            out << _T(" Looping ") << loop_count << _T(" times.");
+            context.logger->info(_T("{} looping {} times."), test_name, loop_count);
         }
         else
         {
             loop_count = 1;
-        }
-
-        out << _T("... ");
-
-        //Required on Linux with GCC.
-        out.flush();
-
-        std::basic_ostream<Char>* p_out = nullptr;
-
-        if (output == _T("all"))
-        {
-            out << std::endl;
-            
-            p_out = &out;
-        }
-        else if (output == _T("failed"))
-        {
-            p_out = &lastOutput;
-        }
-        else if (output == _T("null"))
-        {
-            p_out = &nullOutput;
-        }
-        else
-        {
-            throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
-        }
-
-        if (!isLogLevel(log_level))
-        {
-            throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
         }
 
         for (auto i : awl::make_count(loop_count))
@@ -101,24 +78,17 @@ namespace awl::testing
                 std::chrono::milliseconds t(timeout);
                 
                 watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
-                    [&out, t, terminate]()
+                    [logger = context.logger, t, terminate]()
                     {
-                        out << _T("The timeout of ");
-
-                        //TODO: Casting to std::chrono::nanoseconds is a workround. It does not compile with milliseconds.
-                        format_duration(out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
-
-                        out << _T(" has elapsed");
-
                         if (terminate)
                         {
-                            out << _T(", terminating the app...") << std::endl;
+                            logger->warning(_T("The timeout of {} has elapsed, terminating the app."), toString(t));
 
                             std::terminate();
                         }
                         else
                         {
-                            out << _T(", requesting the test to stop...") << std::endl;
+                            logger->warning(_T("The timeout of {} has elapsed, requesting the test to stop."), toString(t));
                         }
                     });
 
@@ -128,42 +98,16 @@ namespace awl::testing
             {
                 test_token = context.stopToken;
             }
-
-            auto logger = std::make_shared<CompositeLogger>();
-            logger->addLogger(std::make_shared<StdStreamLogger>(
-                p_test_link->name(),
-                StdStreamLogger::wrapStream(*p_out),
-                log_level));
-
-            if (log_file)
-            {
-                auto file_out = std::make_shared<std::basic_ofstream<Char>>(
-                    std::filesystem::path(*log_file),
-                    std::ios_base::app);
-
-                if (!*file_out)
-                {
-                    throw TestException(std::format("Cannot open log file '{}'.", *log_file));
-                }
-
-                logger->addLogger(std::make_shared<StdStreamLogger>(
-                    p_test_link->name(),
-                    file_out,
-                    log_level));
-            }
             
-            const TestContext temp_context{ logger, test_token, context.attributeProvider, context.typeProvider };
+            const TestContext temp_context{ context.logger, test_token, context.attributeProvider, context.typeProvider };
 
             awl::StopWatch sw;
 
             p_test_link->value()(temp_context);
 
-            if (p_out == &lastOutput)
-            {
-                lastOutput.str(String());
-            }
-
-            out << _T("\tPassed within ") << sw << std::endl;
+            context.logger->info(_T("{} passed within {}."), test_name, toString(sw));
+            lastOutput.str(String());
+            lastOutput.clear();
 
             // Clear the attributes from the passed test.
             context.attributeProvider.clear();

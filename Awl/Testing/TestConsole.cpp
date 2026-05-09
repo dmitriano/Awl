@@ -14,12 +14,16 @@
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
+#include "Awl/StdStreamLogger.h"
 
 #ifdef AWL_QT
     #include "QtExtras/Json/JsonLoadSave.h"
     #include "QtExtras/StringConversion.h"
 #endif
 
+#include <filesystem>
+#include <fstream>
+#include <optional>
 #include <set>
 #include <regex>
 
@@ -27,17 +31,77 @@ namespace awl::testing
 {
     namespace
     {
-        std::shared_ptr<ILogger> makeTestConsoleLogger()
+        std::shared_ptr<CompositeLogger> makeStdoutLogger(const std::string& log_level)
         {
             auto logger = std::make_shared<CompositeLogger>();
-            logger->addLogger(std::make_shared<StdStreamLogger>("TestConsole", StdStreamLogger::coutStream()));
+            logger->addLogger(std::make_shared<StdStreamLogger>(
+                "TestConsole",
+                StdStreamLogger::coutStream(),
+                log_level));
+            return logger;
+        }
+
+        void addFileLogger(
+            const std::shared_ptr<CompositeLogger>& logger,
+            const std::optional<std::string>& log_file,
+            const std::string& log_level)
+        {
+            if (!log_file)
+            {
+                return;
+            }
+
+            auto file_out = std::make_shared<std::basic_ofstream<Char>>(
+                std::filesystem::path(*log_file),
+                std::ios_base::app);
+
+            if (!*file_out)
+            {
+                throw TestException(std::format("Cannot open log file '{}'.", *log_file));
+            }
+
+            logger->addLogger(std::make_shared<StdStreamLogger>(
+                "TestConsole",
+                file_out,
+                log_level));
+        }
+
+        std::shared_ptr<CompositeLogger> makeTestConsoleLogger(
+            const String& output,
+            const std::string& log_level,
+            const std::optional<std::string>& log_file,
+            ostringstream& last_output)
+        {
+            auto logger = std::make_shared<CompositeLogger>();
+
+            if (output == _T("all"))
+            {
+                logger->addLogger(std::make_shared<StdStreamLogger>(
+                    "TestConsole",
+                    StdStreamLogger::coutStream(),
+                    log_level));
+            }
+            else if (output == _T("failed"))
+            {
+                logger->addLogger(std::make_shared<StdStreamLogger>(
+                    "TestConsole",
+                    StdStreamLogger::wrapStream(last_output),
+                    log_level));
+            }
+            else if (output != _T("null"))
+            {
+                throw TestException(std::format(_T("Not a valid 'output' parameter value: '{}'."), output));
+            }
+
+            addFileLogger(logger, log_file, log_level);
+
             return logger;
         }
     }
 
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
-        _logger(makeTestConsoleLogger()),
+        _logger(makeStdoutLogger(LogLevel::Trace)),
         _ap(provider),
         _context{ _logger, std::move(stop_token), _ap, _typeProvider}
     {}
@@ -46,14 +110,22 @@ namespace awl::testing
     bool TestConsole<Provider>::runTests()
     {
         TestContext& context = _context;
-
-        awl::ostream& out = awl::cout();
         
+        AWL_ATTRIBUTE(String, output, _T("failed"));
+        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
+        AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(std::string, run, {});
+
+        if (!isLogLevel(log_level))
+        {
+            throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
+        }
 
         bool passed = false;
 
         ostringstream last_output;
+        _logger = makeTestConsoleLogger(output, log_level, log_file, last_output);
+        context.logger = _logger;
 
         try
         {
@@ -65,16 +137,16 @@ namespace awl::testing
 
                 StaticMap<TestFunc> test_map{ StaticMap<TestFunc>::fill(filter) };
 
-                out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
+                context.logger->info("Running {} tests.", test_map.size());
 
                 for (const TestLink* p_link : test_map)
                 {
-                    runner.runLink(p_link, context, out);
+                    runner.runLink(p_link, context);
                 }
             }
             else
             {
-                out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
+                context.logger->info("Running test {}.", run);
 
                 const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
@@ -83,18 +155,21 @@ namespace awl::testing
                     throw TestException(std::format(_T("The test '{}' does not exist."), run));
                 }
 
-                runner.runLink(p_link, context, out);
+                runner.runLink(p_link, context);
             }
 
-            out << std::endl << _T("***************** The tests passed *****************") << std::endl;
+            context.logger->info("The tests passed.");
 
             passed = true;
         }
         catch (const awl::testing::TestException& e)
         {
-            out << std::endl << last_output.str();
+            context.logger->error(_T("The tests failed: {}"), e.message());
 
-            out << std::endl << _T("***************** The tests failed: ") << e.message() << std::endl;
+            if (output == _T("failed") && !last_output.str().empty())
+            {
+                awl::cout() << std::endl << last_output.str();
+            }
         }
 
         // awl::static_chain<TestFunc>().clear();
@@ -113,7 +188,7 @@ namespace awl::testing
         }
         catch (const TestException& e)
         {
-            cout() << _T("The following error has occurred: ") << e.message() << std::endl;
+            _logger->error(_T("The following error has occurred: {}"), e.message());
         }
 
         return 2;
@@ -134,13 +209,14 @@ namespace awl::testing
                 AWL_ATTRIBUTE(std::string, filter, {});
 
                 auto test_map = StaticMap<TestFunc>::fill(filter);
+                auto logger = makeStdoutLogger(LogLevel::Trace);
 
                 for (auto& p_link : test_map)
                 {
-                    awl::cout() << p_link->name() << std::endl;
+                    logger->info("{}", p_link->name());
                 }
 
-                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+                logger->info("Total {} tests.", test_map.size());
 
                 return 0;
             }
@@ -160,7 +236,7 @@ namespace awl::testing
             }
             catch (const JsonException& e)
             {
-                awl::cout() << e.message() << std::endl;
+                makeStdoutLogger(LogLevel::Trace)->error(e.message());
 
                 return 3;
             }
@@ -176,13 +252,13 @@ namespace awl::testing
 
         TestConsole console(ap, std::move(stop_token));
 
-        auto guard = make_scope_guard([&ap]
+        auto guard = make_scope_guard([&ap, logger = console.context().logger]
         {
             auto names = ap.get_provider<0>().getUnusedOptions();
 
             for (const std::string& name : names)
             {
-                cout() << _T("Unused option '" << name << _T("'")) << std::endl;
+                logger->warning("Unused option '{}'.", name);
             }
         });
 

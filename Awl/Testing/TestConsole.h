@@ -11,7 +11,6 @@
 #include "Awl/Testing/CompositeProvider.h"
 
 #include "Awl/ILogger.h"
-#include "Awl/StdStreamLogger.h"
 #include "Awl/Sleep.h"
 
 #include <map>
