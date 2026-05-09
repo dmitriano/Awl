@@ -95,6 +95,7 @@ namespace awl
     {
         awl::ostringstream temp_out;
         const std::source_location location = message.location();
+        constexpr Char separator = _T('\t');
 
         // A quick fix to prevent compiler error "'to_chars' is unavailable: introduced in iOS 16.3"
         // with IPHONEOS_DEPLOYMENT_TARGET = 14.0 on Apple platform.
@@ -107,20 +108,20 @@ namespace awl
         temp_out << std::chrono::system_clock::now();
 #endif
 
-        temp_out << _T('\t') << level;
+        temp_out << separator << level;
 
         const std::string source = joinSource(_source);
 
         if (!source.empty())
         {
-            temp_out << _T('\t') << awl::fromAString(source);
+            temp_out << separator << awl::fromAString(source);
         }
 
-        temp_out << _T('\t')
+        temp_out << separator
             << awl::fromAString(std::string(fileName(location.file_name())))
             << _T(':')
             << location.line()
-            << _T('\t')
+            << separator
             << message.str()
             << _T('\n');
 
