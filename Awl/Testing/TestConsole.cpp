@@ -61,7 +61,7 @@ namespace awl::testing
 
             auto file_out = std::make_shared<std::basic_ofstream<Char>>(
                 std::filesystem::path(*log_file),
-                std::ios_base::app);
+                std::ios_base::trunc);
 
             if (!*file_out)
             {
