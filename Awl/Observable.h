@@ -120,9 +120,9 @@ namespace awl
             }
         }
 
-        friend Enclosing;
-
     private:
+
+        friend Enclosing;
 
         // Not const: observers may unsubscribe or destroy themselves during notification.
         template <class Callable>

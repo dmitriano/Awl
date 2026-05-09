@@ -104,9 +104,9 @@ namespace awl
             });
         }
 
-        friend Enclosing;
-
     private:
+
+        friend Enclosing;
 
         template <class Callable>
         bool notifyLoopImpl(Callable&& call)
