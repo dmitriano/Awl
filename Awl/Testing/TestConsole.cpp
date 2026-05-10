@@ -49,7 +49,7 @@ namespace awl::testing
         {
             auto logger = std::make_shared<CompositeLogger>();
             logger->addLogger(std::make_shared<StdStreamLogger>(
-                "TestConsole",
+                "",
                 StdStreamLogger::coutStream(),
                 log_level));
             return logger;
@@ -79,7 +79,7 @@ namespace awl::testing
             const std::string& effective_log_level = file_level ? *file_level : log_level;
 
             auto logger = std::make_shared<StdStreamLogger>(
-                "TestConsole",
+                "",
                 file_out,
                 effective_log_level);
 
@@ -97,7 +97,7 @@ namespace awl::testing
             bool delayed)
         {
             auto logger = std::make_shared<StdStreamLogger>(
-                "TestConsole",
+                "",
                 StdStreamLogger::coutStream(),
                 log_level);
 
@@ -217,7 +217,7 @@ namespace awl::testing
 
                 for (const TestLink* p_link : test_map)
                 {
-                    runner.runLink(p_link, context);
+                    runner.runLink(p_link, context, context.logger->createLogger(p_link->name()));
                 }
             }
             else
@@ -231,7 +231,7 @@ namespace awl::testing
                     throw TestException(std::format(_T("The test '{}' does not exist."), run));
                 }
 
-                runner.runLink(p_link, context);
+                runner.runLink(p_link, context, context.logger);
             }
 
             context.logger->info("The tests passed.");

@@ -50,16 +50,23 @@ namespace awl
 
     std::shared_ptr<ILogger> CompositeLogger::createLogger(std::string source) const
     {
-        std::vector<std::shared_ptr<ILogger>> child_loggers;
-        child_loggers.reserve(_loggers.size());
+        if (source.empty())
+        {
+            return std::const_pointer_cast<ILogger>(shared_from_this());
+        }
+        else
+        {
+            std::vector<std::shared_ptr<ILogger>> child_loggers;
+            child_loggers.reserve(_loggers.size());
 
-        using namespace std::placeholders;
+            using namespace std::placeholders;
 
-        std::ranges::transform(
-            _loggers,
-            std::back_inserter(child_loggers),
-            std::bind(&ILogger::createLogger, _1, std::cref(source)));
+            std::ranges::transform(
+                _loggers,
+                std::back_inserter(child_loggers),
+                std::bind(&ILogger::createLogger, _1, std::cref(source)));
 
-        return std::make_shared<CompositeLogger>(std::move(child_loggers));
+            return std::make_shared<CompositeLogger>(std::move(child_loggers));
+        }
     }
 }

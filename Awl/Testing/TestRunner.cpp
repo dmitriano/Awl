@@ -42,7 +42,10 @@ namespace awl::testing
         _clearOutput(std::move(clear_output))
     {}
 
-    void TestRunner::runLink(const TestLink* p_test_link, const TestContext& context)
+    void TestRunner::runLink(
+        const TestLink* p_test_link,
+        const TestContext& context,
+        std::shared_ptr<ILogger> test_logger)
     {
         AWL_ATTRIBUTE(size_t, loop, 0);
         AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
@@ -52,7 +55,6 @@ namespace awl::testing
         AWL_FLAG(terminate);
 
         const String test_name = fromACString(p_test_link->name());
-        std::shared_ptr<ILogger> test_logger = context.logger->createLogger(p_test_link->name());
 
         context.logger->info(_T("{} started."), test_name);
 

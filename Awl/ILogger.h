@@ -13,12 +13,15 @@
 #include "Awl/StringFormat.h"
 
 #include <format>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
 namespace awl
 {
-    class ILogger : public ILoggerFactory
+    class ILogger :
+        public ILoggerFactory,
+        public std::enable_shared_from_this<ILogger>
     {
     public:
 

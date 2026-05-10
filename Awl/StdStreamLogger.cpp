@@ -2,7 +2,6 @@
 #include "Awl/String.h"
 #include "Awl/Time.h"
 
-#include <cassert>
 #include <chrono>
 #include <format>
 #include <stdexcept>
@@ -48,8 +47,13 @@ namespace awl
         _level(std::move(level)),
         _severity(logLevelSeverity(_level)),
         _allowCustomLevel(allow_custom_level),
-        _source{ std::move(source) }
-    {}
+        _source()
+    {
+        if (!source.empty())
+        {
+            _source.push_back(std::move(source));
+        }
+    }
 
     StdStreamLogger::StdStreamLogger(
         std::vector<std::string> source,
@@ -193,15 +197,20 @@ namespace awl
 
     std::shared_ptr<ILogger> StdStreamLogger::createLogger(std::string source) const
     {
-        assert(!source.empty());
+        if (source.empty())
+        {
+            return std::const_pointer_cast<ILogger>(shared_from_this());
+        }
+        else
+        {
+            std::vector<std::string> child_source = _source;
+            child_source.push_back(std::move(source));
 
-        std::vector<std::string> child_source = _source;
-        child_source.push_back(std::move(source));
-
-        return std::shared_ptr<ILogger>(new StdStreamLogger(
-            std::move(child_source),
-            _state,
-            _level,
-            _allowCustomLevel));
+            return std::shared_ptr<ILogger>(new StdStreamLogger(
+                std::move(child_source),
+                _state,
+                _level,
+                _allowCustomLevel));
+        }
     }
 }
