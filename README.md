@@ -124,31 +124,31 @@ Remove `./` prefix on Windows and do not forget quotes on Linux:
 of
 
 ```bash
-./AwlTest --filter ".*_Test"
+./AwlTest --filter=".*_Test"
 ```
 
 Running the benchmarks:
 
 ```bash
-./AwlTest --filter ".*_Benchmark" --output all
+./AwlTest --filter=".*_Benchmark" --output=all
 ```
 
 Running the examples:
 
 ```bash
-./AwlTest --filter ".*_Example" --output all
+./AwlTest --filter=".*_Example" --output=all
 ```
 
 Running unstable tests and examples:
 
 ```bash
-./AwlTest --filter ".*_Unstable"
+./AwlTest --filter=".*_Unstable"
 ```
 
 or
 
 ```bash
-./AwlTest --filter ".*"
+./AwlTest --filter=".*"
 ```
 
 ## Running the tests on Android device
@@ -177,7 +177,7 @@ adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest"
 or
 
 ```bash
-adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter .*CompositeCompare.*"
+adb shell "cd /data/local/tmp && chmod a+x AwlTest && ./AwlTest --filter=.*CompositeCompare.*"
 ```
 
 ## Running the tests on Android device with QT

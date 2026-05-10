@@ -1,4 +1,4 @@
-#include "Awl/StringFormat.h"
+﻿#include "Awl/StringFormat.h"
 #include "Awl/Random.h"
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
@@ -239,7 +239,7 @@ namespace
 }
 
 // Run
-// AwlTest --run CoroutinesOnStrandExample_Example --output all --without_strand
+// AwlTest --run=CoroutinesOnStrandExample_Example --output=all --without_strand
 // to see the data race.
 AWL_EXAMPLE(CoroutinesOnStrand)
 {

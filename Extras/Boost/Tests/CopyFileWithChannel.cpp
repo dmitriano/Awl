@@ -1,4 +1,4 @@
-#include "Awl/Testing/UnitTest.h"
+﻿#include "Awl/Testing/UnitTest.h"
 #include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio.hpp>
@@ -567,7 +567,7 @@ AWL_EXAMPLE(CopyFileWithChannel2)
 }
 
 // This test handles the exceptions correctly.
-// --filter CopyFileWithChannel3.* --output all --use_handler --on_pool --src input.dat --dst input.dat.copy
+// --filter=CopyFileWithChannel3.* --output=all --use_handler --on_pool --src=input.dat --dst=input.dat.copy
 AWL_EXAMPLE(CopyFileWithChannel3)
 {
     FileCopier example{ context };

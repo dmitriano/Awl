@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Product: AWL (A Working Library)
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,8 +230,8 @@ namespace
 }
 
 //Parameter examples:
-//--filter Hybrid.* --verbose --insert_count 100 --range 10 --print_set
-//--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
+//--filter=Hybrid.* --verbose --insert_count=100 --range=10 --print_set
+//--filter=Hybrid.* --insert_count=1000000 --range=1000 --do_not_compare_sets
 AWL_TEST(VectorSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
@@ -387,7 +387,7 @@ AWL_TEST(VectorSetCopyMove)
     AWL_ASSERT(temp.empty());
 }
 
-//--filter VectorSetIndex_Test --insert_count 10000000 --range 100000000
+//--filter=VectorSetIndex_Test --insert_count=10000000 --range=100000000
 AWL_TEST(VectorSetIndex)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
@@ -754,7 +754,7 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
     }
 }
 
-//--filter VectorSetBoundAndContains.* --insert_count 1000 --range 1200
+//--filter=VectorSetBoundAndContains.* --insert_count=1000 --range=1200
 AWL_TEST(VectorSetBoundAndContains)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);

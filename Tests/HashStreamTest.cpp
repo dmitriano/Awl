@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Product: AWL (A Working Library)
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,18 +277,18 @@ AWL_TEST(IoHashStreamOnVectorFake)
 
 //This test can be used to measure the disk speed
 //Without hash:
-//./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000 --no_hash --buffered
+//./AwlTest --filter=IoHashStreamOnFile_Test --verbose --sample_count=1000000 --block_size=128000 --no_hash --buffered
 //With hash:
-//./AwlTest --filter IoHashStreamOnFile_Test --verbose --sample_count 1000000 --block_size 128000
+//./AwlTest --filter=IoHashStreamOnFile_Test --verbose --sample_count=1000000 --block_size=128000
 AWL_TEST(IoHashStreamOnFileCrc64)
 {
     TestOnFile(context, awl::crypto::Crc64(), MakeVector(context));
 }
 
 //on SSD:
-//./AwlTest --filter IoHash.*FileCrc.* --verbose --block_size 100000 --sample_count 1000 --sample_size 100000
+//./AwlTest --filter=IoHash.*FileCrc.* --verbose --block_size=100000 --sample_count=1000 --sample_size=100000
 // Write speed: 327.32 MB/sec Read speed: 347.95 MB/sec
-//./AwlTest --filter IoHash.*FileFake.* --verbose --block_size 100000 --sample_count 1000 --sample_size 100000
+//./AwlTest --filter=IoHash.*FileFake.* --verbose --block_size=100000 --sample_count=1000 --sample_size=100000
 // Write speed: 1041.22 MB/sec Read speed: 1878.19 MB/sec
 AWL_TEST(IoHashStreamOnFileFake)
 {
