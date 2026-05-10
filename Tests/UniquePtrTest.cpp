@@ -9,6 +9,7 @@
 #include "Awl/StringFormat.h"
 
 #include <functional>
+
 using namespace awl::testing;
 
 namespace

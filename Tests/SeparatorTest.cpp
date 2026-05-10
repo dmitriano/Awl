@@ -5,6 +5,7 @@
 
 #include "Awl/Separator.h"
 #include "Awl/Testing/UnitTest.h"
+
 namespace SeparatorTest
 {
     template <class C>

@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <cstdint>
+
 namespace awl::io
 {
     template <class Hash>

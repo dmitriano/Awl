@@ -14,6 +14,7 @@
 #include <cassert>
 #include <limits>
 #include <bit>
+
 namespace awl
 {
     template <typename UInt, uint8_t exp_len>

@@ -7,6 +7,7 @@
 
 #include <QString>
 #include <QDebug>
+
 //Ensure we did not mix release/debug builds.
 AWL_TEST(QtMixReleaseDebug)
 {

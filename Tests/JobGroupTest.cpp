@@ -10,6 +10,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <type_traits>
+
 static_assert(!std::is_copy_constructible_v<awl::JobGroup>);
 static_assert(!std::is_copy_assignable_v<awl::JobGroup>);
 static_assert(std::is_move_constructible_v<awl::JobGroup>);

@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <algorithm>
+
 using namespace awl::testing;
 
 AWL_TEST(ScopeGuard)

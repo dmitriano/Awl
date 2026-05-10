@@ -9,9 +9,11 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"
 
-#include <deque>
 #include <queue>
+
+#include <deque>
 #include <ranges>
+
 using Map = std::map<int, std::string>;
 
 using IntervalMap = awl::interval_map<int, std::string>;

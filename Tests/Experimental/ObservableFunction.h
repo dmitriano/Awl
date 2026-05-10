@@ -13,6 +13,7 @@
 #include <functional>
 #include <type_traits>
 #include <utility>
+
 namespace awl
 {
     // Storing this pointer in a std::function with std::bind, for example, prevents the observers from being movable,

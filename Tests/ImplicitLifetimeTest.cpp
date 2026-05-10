@@ -6,6 +6,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <stdlib.h>
+
 using namespace awl::testing;
 
 namespace

@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <memory>
+
 namespace
 {
     struct A

@@ -12,6 +12,7 @@
 #include <functional>
 #include <limits>
 #include <cassert>
+
 namespace awl
 {
     struct Field

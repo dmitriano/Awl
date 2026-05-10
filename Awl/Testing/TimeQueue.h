@@ -6,12 +6,14 @@
 #include "Awl/Coro/DelayedAwaitable.h"
 #include "Awl/KeyCompare.h"
 
-#include <chrono>
 #include <queue>
+
+#include <chrono>
 #include <vector>
 #include <thread>
 #include <coroutine>
 #include <limits>
+
 namespace awl::testing
 {
     class TimeQueue : public awl::coro::IDelayedExecutor

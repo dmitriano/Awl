@@ -5,6 +5,7 @@
 
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
+
 #ifdef AWL_QT
 
 AWL_TEST(StringFormatQt)

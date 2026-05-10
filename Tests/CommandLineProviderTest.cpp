@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <vector>
+
 using namespace awl::testing;
 
 #ifdef AWL_ANSI_CMD_CHAR

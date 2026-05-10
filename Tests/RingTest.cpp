@@ -11,9 +11,11 @@
 #include "Awl/IntRange.h"
 #include "Awl/RangeUtil.h"
 
-#include <deque>
 #include <queue>
+
+#include <deque>
 #include <ranges>
+
 static_assert(awl::range_over<awl::ring<int>, int>);
 
 namespace

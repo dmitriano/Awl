@@ -8,6 +8,7 @@
 #include "SingleList.h"
 
 #include <cassert>
+
 namespace awl
 {
     template <class T, class DLink, class ForwardLink, class BackwardLink>

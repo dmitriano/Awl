@@ -12,6 +12,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
+
 namespace awl
 {
     inline String typeToString(QJsonValue::Type t)

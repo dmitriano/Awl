@@ -7,6 +7,7 @@
 
 #include "Awl/Aggregator.h"
 #include "Awl/Testing/UnitTest.h"
+
 using A = awl::testing::helpers::NonCopyable;
 
 AWL_TEST(Aggregator)

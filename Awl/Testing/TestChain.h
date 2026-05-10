@@ -11,6 +11,7 @@
 #include "Awl/Testing/TestContext.h"
 
 #include <type_traits>
+
 namespace awl::testing
 {
     using TestFunc = const std::add_pointer_t<void(const TestContext& context)>;

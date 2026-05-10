@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <type_traits>
+
 namespace awl
 {
     template <class T>

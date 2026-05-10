@@ -9,6 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
 #include "Awl/StringFormat.h"
+
 //Why does it fail?
 //static_assert(std::ranges::range<awl::async_generator<int>>);
 

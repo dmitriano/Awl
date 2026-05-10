@@ -13,6 +13,7 @@
 #include "Awl/StringFormat.h"
 
 #include <chrono>
+
 using namespace awl::testing;
 using namespace awl::testing::helpers;
 

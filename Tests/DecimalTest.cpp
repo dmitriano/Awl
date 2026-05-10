@@ -8,6 +8,7 @@
 #include "Awl/Decimal.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
+
 #ifdef AWL_BOOST
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #endif

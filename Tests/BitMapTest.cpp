@@ -6,6 +6,7 @@
 #include "Awl/BitMap.h"
 #include "Awl/EnumFormatter.h"
 #include "Awl/Testing/UnitTest.h"
+
 using namespace awl::testing;
 
 namespace BitMapTest

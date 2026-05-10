@@ -10,6 +10,7 @@
 #include "Awl/Io/MeasureStream.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Io/MeasureStream.h"
+
 namespace awl::io
 {
     template <class T, class IStream = SequentialInputStream, class V = awl::mp::variant_from_struct<T>>

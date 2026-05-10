@@ -8,6 +8,7 @@
 #include "Awl/String.h"
 
 #include <iostream>
+
 namespace awl
 {
     //We use std::cout/std::cin or std::wcout/std::wcin depending on the Char alias.

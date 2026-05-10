@@ -9,6 +9,7 @@
 #include "Awl/SingleList.h"
 
 #include <cassert>
+
 namespace awl
 {
     //! Forward link for doubly-linked list.

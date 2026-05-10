@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <tuple>
 #include <utility>
+
 namespace awl
 {
     template <sequential_enum Enum, class T>

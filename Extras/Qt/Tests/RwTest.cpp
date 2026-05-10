@@ -7,6 +7,7 @@
 
 #include <Awl/Testing/UnitTest.h>
 #include "Awl/Io/VectorStream.h"
+
 namespace
 {
     const char sample[] = "some string";

@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <utility>
+
 namespace
 {
     using FunctionHandler = awl::Observer<std::function<void(int)>>;

@@ -11,6 +11,7 @@
 #include <optional>
 #include <functional>
 #include <memory>
+
 namespace awl
 {
     //Calls a function when its arguments have been set.

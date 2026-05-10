@@ -9,6 +9,7 @@
 
 #include "Awl/StringFormat.h"
 #include "Awl/Decimal.h"
+
 namespace awl
 {
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>

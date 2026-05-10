@@ -13,6 +13,7 @@
 
 #include <bitset>
 #include <type_traits>
+
 namespace awl::io
 {
     //Looks like std::bitset<N> does not have value_type, so we use BitSetAdapter

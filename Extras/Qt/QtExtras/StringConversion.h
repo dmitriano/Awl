@@ -8,8 +8,10 @@
 #include "Awl/String.h"
 #include "Awl/EnumTraits.h"
 
-#include <string>
 #include <QString>
+
+#include <string>
+
 namespace awl
 {
     inline void convertString(std::wstring& to, const QString& from)

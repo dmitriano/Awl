@@ -15,7 +15,9 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
+
 #include <format>
+
 AWL_TEST(JsonArray)
 {
     AWL_UNUSED_CONTEXT;

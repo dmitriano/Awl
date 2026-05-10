@@ -11,6 +11,7 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/TypeProvider.h"
+
 #ifdef AWL_QT
     #include "Awl/Testing/JsonProvider.h"
     #include <QObject>

@@ -11,6 +11,7 @@
 
 #include <string>
 #include <array>
+
 namespace
 {
     struct X

@@ -18,6 +18,7 @@
 #include <ranges>
 #include <span>
 #include <numeric>
+
 using namespace awl::testing;
 
 namespace

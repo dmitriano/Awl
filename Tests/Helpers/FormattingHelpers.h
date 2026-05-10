@@ -11,6 +11,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
+
 namespace awl::testing::helpers
 {
     template <size_t N>

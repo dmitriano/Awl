@@ -7,6 +7,7 @@
 #include "Awl/Io/MeasureStream.h"
 
 #include <memory>
+
 namespace awl::io
 {
     class FakeStream : public awl::io::SequentialOutputStream

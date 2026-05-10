@@ -7,6 +7,7 @@
 #include "Awl/StaticFactory.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
+
 namespace
 {
     using X = int;

@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <functional>
+
 namespace awl
 {
     template<typename Lambda>

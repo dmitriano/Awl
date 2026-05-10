@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <cstring>
+
 namespace awl::io
 {
     class TrivialMemoryStream

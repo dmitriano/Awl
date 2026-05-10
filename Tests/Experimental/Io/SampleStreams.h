@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <memory>
 #include <cassert>
+
 namespace awl::io
 {
     class SwitchMemoryOutputStream

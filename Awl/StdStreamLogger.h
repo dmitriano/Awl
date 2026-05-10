@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 namespace awl
 {
     class StdStreamLogger : public ILogger

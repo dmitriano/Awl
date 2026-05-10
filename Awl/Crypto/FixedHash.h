@@ -9,6 +9,7 @@
 #include "Awl/Crypto/IntHash.h"
 
 #include <string>
+
 namespace awl::crypto
 {
     //Can be calculated in compile time with Int64Hash, for example.

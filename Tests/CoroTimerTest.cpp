@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/TimeQueue.h"
 #include "Awl/StringFormat.h"
+
 namespace
 {
     using namespace std::chrono_literals;

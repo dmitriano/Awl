@@ -8,6 +8,7 @@
 #include "Tuplizable.h"
 
 #include <type_traits>
+
 #if defined(__GNUC__)
 #include <functional>
 #endif

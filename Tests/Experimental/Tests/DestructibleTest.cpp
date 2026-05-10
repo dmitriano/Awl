@@ -8,6 +8,7 @@
 
 #include "Awl/ScopeGuard.h"
 #include "Awl/Testing/UnitTest.h"
+
 namespace
 {
     constexpr int value = 5;

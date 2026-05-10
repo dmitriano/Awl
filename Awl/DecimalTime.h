@@ -8,6 +8,7 @@
 #include "Awl/Decimal.h"
 
 #include <chrono>
+
 namespace awl
 {
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate = BuiltinDecimalData>

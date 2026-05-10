@@ -11,6 +11,7 @@
 #include "Awl/Mp/TypeDescriptor.h"
 
 #include <QString>
+
 namespace awl::mp
 {
     template <>

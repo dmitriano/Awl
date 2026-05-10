@@ -8,6 +8,7 @@
 #include "Awl/String.h"
 
 #include <sstream>
+
 namespace awl
 {
     template <class CharT, class T>

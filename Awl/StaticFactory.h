@@ -10,6 +10,7 @@
 #include "Awl/StringFormat.h"
 
 #include <type_traits>
+
 namespace awl
 {
     AWL_DEFINE_EXCEPTION(FactoryException)

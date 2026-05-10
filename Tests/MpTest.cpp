@@ -14,6 +14,7 @@
 #include <map>
 #include <list>
 #include <string>
+
 using namespace awl::testing::helpers;
 
 namespace

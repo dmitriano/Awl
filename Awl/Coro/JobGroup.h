@@ -5,6 +5,7 @@
 #include "Awl/Observable.h"
 
 #include <vector>
+
 namespace awl
 {
     class JobGroup : public Observable<TaskSink>

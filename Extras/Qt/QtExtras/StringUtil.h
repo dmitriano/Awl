@@ -15,12 +15,14 @@
 #include <QString>
 #include <QStringList>
 #include <QObject>
+
 #include <functional>
 #include <atomic>
 #include <sstream>
 #include <ranges>
 #include <functional>
 #include <concepts>
+
 namespace awl
 {
     void removeTrailingZeros(QString & s);

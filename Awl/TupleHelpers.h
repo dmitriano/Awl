@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <utility>
+
 namespace awl
 {
     // In C++17 for_each and for_each_index methods can be rewritten with

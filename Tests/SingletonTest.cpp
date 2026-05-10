@@ -9,6 +9,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
+
 namespace
 {
     constexpr int value = 5;

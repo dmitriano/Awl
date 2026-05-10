@@ -9,6 +9,7 @@
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/Tuplizable.h"
+
 using namespace awl::testing;
 
 namespace

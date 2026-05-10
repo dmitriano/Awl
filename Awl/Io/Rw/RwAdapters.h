@@ -8,6 +8,7 @@
 #include "Awl/BitMap.h"
 
 #include <bitset>
+
 namespace awl
 {
     namespace io

@@ -8,6 +8,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <chrono>
+
 namespace awl::testing::helpers
 {
     double ReportSpeed(const awl::testing::TestContext & context, std::chrono::steady_clock::duration d, size_t size);

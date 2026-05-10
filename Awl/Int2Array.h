@@ -9,6 +9,7 @@
 #include <array>
 #include <type_traits>
 #include <bit>
+
 namespace awl
 {
     template <typename T>

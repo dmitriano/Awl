@@ -12,6 +12,7 @@
 #include <exception>
 #include <iterator>
 #include <functional>
+
 namespace awl
 {
     template<typename T>

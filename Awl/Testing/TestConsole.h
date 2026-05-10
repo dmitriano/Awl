@@ -18,6 +18,7 @@
 #include <functional>
 #include <algorithm>
 #include <cassert>
+
 namespace awl::testing
 {
     template <attribute_provider Provider>

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <ranges>
 #include <functional>
+
 using namespace awl::testing;
 
 namespace

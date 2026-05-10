@@ -15,6 +15,7 @@
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
 #include "Awl/StdStreamLogger.h"
+
 #ifdef AWL_QT
     #include "QtExtras/Json/JsonLoadSave.h"
     #include "QtExtras/StringConversion.h"

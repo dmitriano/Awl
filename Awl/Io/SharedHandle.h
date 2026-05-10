@@ -9,6 +9,7 @@
 #include "Awl/Io/HandleDuplicator.h"
 #include "Awl/Io/BasicSharedHandle.h"
 #include "Awl/Io/NullGetter.h"
+
 namespace awl::io
 {
     template <class NullGetter>

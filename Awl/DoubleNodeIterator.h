@@ -8,6 +8,7 @@
 #include "Awl/DoubleIterator.h"
 
 #include <cassert>
+
 namespace awl
 {
     //A transform iterator that extracts a value from a node.

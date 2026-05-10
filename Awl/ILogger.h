@@ -15,6 +15,7 @@
 #include <format>
 #include <type_traits>
 #include <utility>
+
 namespace awl
 {
     class ILogger : public ILoggerFactory

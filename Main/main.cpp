@@ -7,6 +7,7 @@
 #include "Awl/Testing/TestException.h"
 #include "Awl/String.h"
 #include "Awl/StdConsole.h"
+
 #ifndef _tmain
 #define _tmain main
 #endif

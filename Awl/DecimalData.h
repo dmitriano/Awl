@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <cassert>
 #include <limits>
+
 namespace awl
 {
     template <typename UInt, uint8_t exp_len>

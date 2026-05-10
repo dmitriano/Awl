@@ -7,6 +7,7 @@
 #include "Awl/KeyCompare.h"
 
 #include <vector>
+
 namespace awl
 {
     template <class Key, class Value>

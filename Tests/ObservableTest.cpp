@@ -12,6 +12,7 @@
 #include "Awl/Testing/TimeQueue.h"
 
 #include <vector>
+
 using namespace awl::testing;
 
 namespace

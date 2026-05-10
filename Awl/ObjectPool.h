@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <cassert>
+
 namespace awl
 {
     //T is default constructible and derived from awl::quick_link.

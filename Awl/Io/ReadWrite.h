@@ -19,6 +19,7 @@
 #include "Awl/Io/Rw/PointerReadWrite.h"
 #include "Awl/Io/Rw/EnumReadWrite.h"
 #include "Awl/Io/Rw/AtomicReadWrite.h"
+
 #ifdef AWL_BOOST
 #include "BoostExtras/Io/Rw/MultiprecisionReadWrite.h"
 #endif

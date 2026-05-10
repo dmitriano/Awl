@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <utility>
+
 namespace awl
 {
     // At least in MSVC (and probably in GCC also):

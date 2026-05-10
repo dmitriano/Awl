@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <exception>
 #include <type_traits>
+
 namespace asio = boost::asio;
 #include <boost/system/system_error.hpp>
 #include <boost/system/error_code.hpp>

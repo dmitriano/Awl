@@ -11,6 +11,7 @@
 #include "Awl/Io/ReadWrite.h"
 
 #include <cassert>
+
 namespace awl::io
 {
     template <class V, class OStream = SequentialOutputStream>

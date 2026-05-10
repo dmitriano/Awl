@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+
 namespace awl
 {
     class ILogger;

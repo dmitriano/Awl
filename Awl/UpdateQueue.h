@@ -10,6 +10,7 @@
 
 #include <mutex>
 #include <functional>
+
 namespace awl
 {
     template<typename ... Args>

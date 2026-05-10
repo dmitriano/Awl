@@ -10,6 +10,7 @@
 #include "QtExtras/Json/JsonException.h"
 
 #include "Awl/StringFormat.h"
+
 namespace awl
 {
     template <>

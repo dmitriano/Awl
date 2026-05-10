@@ -10,6 +10,7 @@
 #include "Awl/TypeTraits.h"
 
 #include <cassert>
+
 namespace awl
 {
     template <class T, class PrimaryKeyGetter, class ForeignKeyGetter>

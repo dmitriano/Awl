@@ -10,6 +10,7 @@
 
 #include <format>
 #include <string>
+
 namespace std
 {
     template <awl::sequential_enum T, class CharT>

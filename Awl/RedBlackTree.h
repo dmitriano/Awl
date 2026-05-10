@@ -15,6 +15,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
+
 namespace awl::helpers
 {
     template <class Node>

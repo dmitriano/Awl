@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <atomic>
+
 using namespace awl::testing;
 
 namespace

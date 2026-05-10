@@ -9,6 +9,7 @@
 
 #include <optional>
 #include <type_traits>
+
 namespace awl::io
 {
     template <class Stream, typename T, class Context = FakeContext>

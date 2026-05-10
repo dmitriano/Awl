@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QFile>
+
 namespace awl
 {
     inline QJsonDocument loadDocumentFromFile(QString file_name)

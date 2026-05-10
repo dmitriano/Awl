@@ -9,6 +9,7 @@
 #include "Awl/Testing/TestException.h"
 
 #include <regex>
+
 namespace awl::testing
 {
     CommandLineProvider::CommandLineProvider(int argc, CmdChar* argv[])

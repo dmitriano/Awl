@@ -8,6 +8,7 @@
 #include "QtExtras/Json/JsonSerializer.h"
 
 #include <optional>
+
 namespace awl
 {
     template <class T>

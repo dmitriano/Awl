@@ -49,6 +49,7 @@
 #include <stdint.h>
 #include <array>
 #include <type_traits>
+
 namespace awl::crypto
 {
     class Crc64 : public BasicHash<sizeof(uint64_t)>

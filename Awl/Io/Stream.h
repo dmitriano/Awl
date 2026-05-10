@@ -8,6 +8,7 @@
 #include "Awl/Io/SequentialStream.h"
 
 #include <cstddef>
+
 namespace awl
 {
     namespace io

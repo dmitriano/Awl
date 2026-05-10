@@ -6,6 +6,7 @@
 #include "Awl/Io/OptionalStorage.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/StringFormat.h"
+
 using namespace awl::io;
 
 bool OptionalStorage::open(const awl::String& file_name, const awl::String& backup_name)

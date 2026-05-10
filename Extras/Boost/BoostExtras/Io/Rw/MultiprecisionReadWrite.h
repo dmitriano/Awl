@@ -12,6 +12,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/container/small_vector.hpp>
+
 namespace awl::io
 {
     namespace detail

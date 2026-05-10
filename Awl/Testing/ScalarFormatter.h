@@ -8,6 +8,7 @@
 #include "Awl/String.h"
 
 #include <type_traits>
+
 namespace awl
 {
     namespace testing

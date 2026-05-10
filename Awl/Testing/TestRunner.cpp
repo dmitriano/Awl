@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+
 namespace
 {
     awl::String toString(const awl::StopWatch& sw)

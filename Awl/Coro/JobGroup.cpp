@@ -4,6 +4,7 @@
 #include <ranges>
 #include <functional>
 #include <stdexcept>
+
 using namespace awl;
 
 JobGroup::JobGroup(JobGroup&& other) noexcept :

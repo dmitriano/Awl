@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <utility>
+
 namespace awl
 {
     AWL_SEQUENTIAL_ENUM(KnownLogLevel,

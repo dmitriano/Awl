@@ -11,6 +11,7 @@
 #include <exception>
 #include <limits>
 #include <tuple>
+
 namespace
 {
     awl::generator<std::tuple<uint64_t, uint64_t>> fibonacci(uint64_t count)

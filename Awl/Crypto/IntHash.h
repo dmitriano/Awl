@@ -8,6 +8,7 @@
 #include "Awl/Crypto/Crc64.h"
 
 #include <string>
+
 namespace awl::crypto
 {
     class Int64Hash
