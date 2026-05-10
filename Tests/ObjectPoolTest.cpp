@@ -5,7 +5,6 @@
 
 #include "Awl/ObjectPool.h"
 #include "Awl/Testing/UnitTest.h"
-
 using namespace awl::testing;
 
 namespace

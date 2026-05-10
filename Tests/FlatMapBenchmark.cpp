@@ -3,12 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <algorithm>
+#include "Helpers/BenchmarkHelpers.h"
 
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
@@ -16,8 +11,12 @@
 #include "Awl/KeyCompare.h"
 #include "Awl/StringFormat.h"
 
-#include "Helpers/BenchmarkHelpers.h"
-
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
 using namespace awl::testing;
 
 namespace

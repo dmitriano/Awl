@@ -6,9 +6,7 @@
 #pragma once
 
 #include "Awl/Io/Rw/ArithmeticReadWrite.h"
-
 #include "Awl/Decimal.h"
-
 namespace awl::io
 {
     template <class Stream, typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate, class Context = FakeContext>

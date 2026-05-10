@@ -1,13 +1,12 @@
 #pragma once
 
+#include "Awl/Coro/JobPromise.h"
+#include "Awl/QuickLink.h"
+
 #include <coroutine>
 #include <exception>
 #include <utility>
 #include <cassert>
-
-#include "Awl/Coro/JobPromise.h"
-#include "Awl/QuickLink.h"
-
 namespace awl
 {
     class Job

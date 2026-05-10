@@ -18,7 +18,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
-
 namespace awl
 {
     template <class T, class Compare = std::less<>, class Allocator = std::allocator<T>> 

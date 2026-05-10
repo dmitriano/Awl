@@ -11,8 +11,6 @@
 
 #include <cassert>
 #include <initializer_list>
-
-
 namespace awl
 {
     template <class T, class Link, class Derived>

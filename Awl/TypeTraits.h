@@ -11,7 +11,6 @@
 #include <utility>
 #include <string>
 #include <ranges>
-
 #ifdef AWL_QT
 #include <QString>
 #endif //AWL_QT

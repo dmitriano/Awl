@@ -3,14 +3,12 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <set>
-
 #include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <vector>
+#include <set>
 #include <optional>
-
 using namespace awl;
 using namespace awl::testing;
 

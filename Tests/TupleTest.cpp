@@ -3,16 +3,14 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Helpers/NonCopyable.h"
+
+#include "Awl/TupleHelpers.h"
+#include "Awl/Testing/UnitTest.h"
+
 #include <string>
 #include <sstream>
 #include <atomic>
-
-#include "Awl/TupleHelpers.h"
-
-#include "Awl/Testing/UnitTest.h"
-
-#include "Helpers/NonCopyable.h"
-
 using namespace awl::testing;
 
 namespace

@@ -11,7 +11,6 @@
 #include <string>
 #include <typeinfo>
 #include <utility>
-
 namespace awl
 {
     class Exception : public std::exception

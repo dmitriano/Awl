@@ -16,7 +16,6 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <type_traits>
-
 namespace awl::io
 {
     template <class Stream, class First, class Second, class Context = FakeContext>

@@ -8,7 +8,6 @@
 #include "Awl/QuickList.h"
 
 #include <utility>
-
 namespace awl
 {
     AWL_DECLARE_QUICK_LINK(observer_link)

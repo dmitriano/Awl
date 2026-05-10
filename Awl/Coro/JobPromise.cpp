@@ -6,7 +6,6 @@
 #include "Awl/Exception.h"
 
 #include <memory>
-
 using namespace awl;
 
 Job JobPromise::get_return_object()

@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <iterator>
 #include <cassert>
-
 namespace awl 
 {
     namespace io

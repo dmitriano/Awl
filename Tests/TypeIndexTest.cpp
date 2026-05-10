@@ -8,7 +8,6 @@
 
 #include <string>
 #include <vector>
-
 using namespace awl::io;
 
 namespace

@@ -10,7 +10,6 @@
 
 #include <source_location>
 #include <type_traits>
-
 namespace awl
 {
     template <class C>

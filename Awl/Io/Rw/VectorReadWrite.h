@@ -10,7 +10,6 @@
 #include <array>
 #include <vector>
 #include <type_traits>
-
 namespace awl::io
 {
     template <class Stream, class Container, class Context = FakeContext>

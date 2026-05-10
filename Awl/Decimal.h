@@ -20,7 +20,6 @@
 #include <tuple>
 #include <stdexcept>
 #include <format>
-
 namespace awl
 {
     //The implementation of decimal class is not complete and I am not sure about its efficiency.

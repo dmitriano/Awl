@@ -9,7 +9,6 @@
 #include "Awl/DataCast.h"
 
 #include <locale.h>
-
 using namespace awl::testing;
 using namespace awl::io;
 

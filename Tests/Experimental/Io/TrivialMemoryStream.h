@@ -5,14 +5,13 @@
 
 #pragma once
 
+#include "StreamUtils.h"
+
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/ReadWrite.h"
 
-#include "StreamUtils.h"
-
 #include <cassert>
 #include <cstring>
-
 namespace awl::io
 {
     class TrivialMemoryStream

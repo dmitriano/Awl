@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Helpers/BenchmarkHelpers.h"
+#include "VtsData.h"
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/HashingSerializable.h"
@@ -18,7 +19,6 @@
 #include "Awl/ScopeGuard.h"
 #include "Awl/Random.h"
 #include "Awl/StopWatch.h"
-#include "VtsData.h"
 
 #include <memory>
 #include <filesystem>

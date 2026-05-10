@@ -5,15 +5,12 @@
 
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/BufferedStream.h"
-
 #include "Awl/String.h"
 #include "Awl/ScopeGuard.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #include <filesystem>
 #include <ranges>
-
 using namespace awl::testing;
 
 namespace

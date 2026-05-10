@@ -8,7 +8,6 @@
 #include "Awl/TupleHelpers.h"
 
 #include <type_traits>
-
 namespace awl
 {
     // There are two ways to make type T tuplizable:

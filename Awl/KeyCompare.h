@@ -11,7 +11,6 @@
 
 #include <type_traits>
 #include <memory>
-
 namespace awl
 {
     template <class T, class GetKey, class Compare = std::less<void>>

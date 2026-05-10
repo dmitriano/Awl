@@ -8,7 +8,6 @@
 #include "Awl/Io/Platform.h"
 
 #include <cassert>
-
 namespace awl::io
 {
     struct HandleDeleter

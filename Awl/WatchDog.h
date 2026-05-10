@@ -10,7 +10,6 @@
 
 #include <chrono>
 #include <functional>
-
 namespace awl
 {
     //Stops a test when a timeout has elapsed.

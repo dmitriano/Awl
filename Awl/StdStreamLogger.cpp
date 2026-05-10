@@ -1,5 +1,4 @@
 #include "Awl/StdStreamLogger.h"
-
 #include "Awl/String.h"
 #include "Awl/Time.h"
 
@@ -12,7 +11,6 @@
 #include <string_view>
 #include <utility>
 #include <vector>
-
 #if defined(__APPLE__)
 #include <ctime>
 #endif

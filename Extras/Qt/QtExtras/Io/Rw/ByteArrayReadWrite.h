@@ -9,7 +9,6 @@
 #include "Awl/Mp/TypeDescriptor.h"
 
 #include <QByteArray>
-
 namespace awl::mp
 {
     template <>

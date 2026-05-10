@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 #include <list>
-
 using namespace awl::testing;
 using namespace awl::io;
 

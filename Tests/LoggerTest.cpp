@@ -7,7 +7,6 @@
 #include "Awl/StdStreamLogger.h"
 #include "Awl/LegacyFormat.h"
 #include "Awl/StringFormat.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
@@ -15,7 +14,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <vector>
-
 namespace
 {
     std::string_view fileName(const char* path)

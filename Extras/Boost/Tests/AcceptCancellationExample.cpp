@@ -1,10 +1,10 @@
-#include "Awl/StringFormat.h"
 #include "Extras/Boost/BoostExtras/AsioEndpointFormatter.h"
+
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
 #include <chrono>
-
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;

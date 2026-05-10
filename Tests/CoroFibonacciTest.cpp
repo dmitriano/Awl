@@ -4,7 +4,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Coro/Generator.h"
-
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
@@ -12,7 +11,6 @@
 #include <exception>
 #include <limits>
 #include <tuple>
-
 namespace
 {
     awl::generator<std::tuple<uint64_t, uint64_t>> fibonacci(uint64_t count)

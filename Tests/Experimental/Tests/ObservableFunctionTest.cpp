@@ -4,11 +4,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Tests/Experimental/ObservableFunction.h"
+
 #include "Awl/Testing/UnitTest.h"
 
 #include <functional>
 #include <utility>
-
 namespace
 {
     using FunctionHandler = awl::Observer<std::function<void(int)>>;

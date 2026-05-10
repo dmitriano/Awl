@@ -13,7 +13,6 @@
 #include <ranges>
 #include <unordered_set>
 #include <vector>
-
 using namespace awl::testing;
 
 namespace

@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include <ranges>
-
 #include "Awl/Separator.h"
 #include "Awl/String.h"
 
+#include <ranges>
 namespace awl
 {
     // An experimental class for writing a container elements into std::ostream.

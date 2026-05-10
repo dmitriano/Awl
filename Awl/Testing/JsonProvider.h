@@ -4,7 +4,6 @@
 
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/StringFormat.h"
-
 namespace awl::testing
 {
     class JsonProvider

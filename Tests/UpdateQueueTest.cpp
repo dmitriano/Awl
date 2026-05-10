@@ -3,13 +3,12 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <thread>
-#include <chrono>
-
 #include "Awl/UpdateQueue.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
+#include <thread>
+#include <chrono>
 using namespace awl::testing;
 
 namespace

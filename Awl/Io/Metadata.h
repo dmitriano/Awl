@@ -11,7 +11,6 @@
 #include <cassert>
 #include <vector>
 #include <unordered_set>
-
 namespace awl::io
 {
     using TypeNameVector = std::vector<std::string>;

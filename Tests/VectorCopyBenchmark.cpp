@@ -3,6 +3,13 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Helpers/BenchmarkHelpers.h"
+
+#include "Awl/StopWatch.h"
+#include "Awl/IntRange.h"
+#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -11,14 +18,6 @@
 #include <ranges>
 #include <span>
 #include <numeric>
-
-#include "Awl/StopWatch.h"
-#include "Awl/IntRange.h"
-#include "Awl/Testing/UnitTest.h"
-#include "Awl/StringFormat.h"
-
-#include "Helpers/BenchmarkHelpers.h"
-
 using namespace awl::testing;
 
 namespace

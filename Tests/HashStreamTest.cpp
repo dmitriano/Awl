@@ -1,8 +1,24 @@
-﻿/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Product: AWL (A Working Library)
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+#include "Helpers/BenchmarkHelpers.h"
+
+#include "Awl/Io/HashStream.h"
+#include "Awl/Io/BufferedStream.h"
+#include "Awl/Io/VectorStream.h"
+#include "Awl/Io/StdStream.h"
+#include "Awl/Io/ReadWrite.h"
+#include "Awl/Io/IoException.h"
+#include "Awl/Crypto/Crc64.h"
+#include "Awl/String.h"
+#include "Awl/StringFormat.h"
+#include "Awl/Random.h"
+#include "Awl/IntRange.h"
+#include "Awl/StopWatch.h"
+#include "Awl/Testing/UnitTest.h"
 
 #include <iostream>
 #include <iomanip>
@@ -12,26 +28,6 @@
 #include <functional>
 #include <fstream>
 #include <filesystem>
-
-#include "Awl/Io/HashStream.h"
-#include "Awl/Io/BufferedStream.h"
-#include "Awl/Io/VectorStream.h"
-#include "Awl/Io/StdStream.h"
-#include "Awl/Io/ReadWrite.h"
-#include "Awl/Io/IoException.h"
-
-#include "Awl/Crypto/Crc64.h"
-
-#include "Awl/String.h"
-#include "Awl/StringFormat.h"
-#include "Awl/Random.h"
-#include "Awl/IntRange.h"
-
-#include "Awl/StopWatch.h"
-#include "Awl/Testing/UnitTest.h"
-
-#include "Helpers/BenchmarkHelpers.h"
-
 using namespace awl::testing;
 using namespace awl::io;
 

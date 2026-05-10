@@ -9,9 +9,7 @@
 #include "Awl/EnumTraits.h"
 
 #include <string>
-
 #include <QString>
-
 namespace awl
 {
     inline void convertString(std::wstring& to, const QString& from)

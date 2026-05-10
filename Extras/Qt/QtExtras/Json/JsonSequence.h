@@ -15,7 +15,6 @@
 
 #include <type_traits>
 #include <ranges>
-
 namespace awl
 {
     template <class Container>

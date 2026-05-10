@@ -7,7 +7,6 @@
 
 #include "QtExtras/Json/Jsonable.h"
 #include "QtExtras/Json/Json.h"
-
 namespace awl
 {
     template <class T>

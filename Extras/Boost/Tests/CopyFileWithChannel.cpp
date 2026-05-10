@@ -1,4 +1,4 @@
-﻿#include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/UnitTest.h"
 #include "Awl/CppStd/ThreadIdFormatter.h"
 
 #include <boost/asio.hpp>
@@ -9,13 +9,11 @@
 #include <boost/system/system_error.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/experimental/channel.hpp>
-
 #include <cstdint>
 #include <vector>
 #include <format>
 #include <thread>
 #include <optional>
-
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;

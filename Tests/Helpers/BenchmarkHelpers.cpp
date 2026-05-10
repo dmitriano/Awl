@@ -3,20 +3,19 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "BenchmarkHelpers.h"
+#include "FormattingHelpers.h"
+
+#include "Awl/TupleHelpers.h"
+#include "Awl/Time.h"
+#include "Awl/StringFormat.h"
+
 #include <iostream>
 #include <iomanip>
 #include <cmath>
 #include <limits>
 #include <variant>
 #include <array>
-
-#include "Awl/TupleHelpers.h"
-#include "Awl/Time.h"
-#include "Awl/StringFormat.h"
-
-#include "BenchmarkHelpers.h"
-#include "FormattingHelpers.h"
-
 namespace awl::testing::helpers
 {
     template <typename value_type>

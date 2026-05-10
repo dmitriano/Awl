@@ -5,18 +5,17 @@
  
 #pragma once
 
-#include "Awl/Exception.h"
-
-#include "Awl/StringFormat.h"
 #include "QtExtras/Json/JsonUtil.h"
 #include "QtExtras/Json/JsonException.h"
+
+#include "Awl/Exception.h"
+#include "Awl/StringFormat.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QFile>
-
 namespace awl
 {
     inline QJsonDocument loadDocumentFromFile(QString file_name)

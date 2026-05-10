@@ -10,7 +10,6 @@
 #include <boost/multiprecision/number.hpp>
 #include <format>
 #include <string_view>
-
 namespace std
 {
     template <class Backend, boost::multiprecision::expression_template_option ExpressionTemplates, class CharT>

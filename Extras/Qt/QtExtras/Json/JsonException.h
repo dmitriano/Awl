@@ -9,9 +9,7 @@
 #include "Awl/StringFormat.h"
 
 #include <QJsonValue>
-
 #include <vector>
-
 namespace awl
 {
     class JsonException : public GeneralException

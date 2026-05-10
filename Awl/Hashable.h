@@ -8,7 +8,6 @@
 #include "Awl/Tuplizable.h"
 
 #include <functional>
-
 namespace awl
 {
     template <class T>

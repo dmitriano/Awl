@@ -14,7 +14,6 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
-
 namespace awl::io
 {
     template <class IStream = SequentialInputStream, class OStream = SequentialOutputStream, class Hash = awl::crypto::Crc64>

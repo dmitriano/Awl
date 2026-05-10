@@ -11,7 +11,6 @@
 #include <set>
 #include <map>
 #include <string>
-
 namespace awl::testing::helpers
 {
     template <class T>

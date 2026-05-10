@@ -5,7 +5,6 @@
 #include <iterator>
 #include <ranges>
 #include <utility>
-
 namespace awl
 {
     CompositeLogger::CompositeLogger(std::vector<std::shared_ptr<ILogger>> loggers) :

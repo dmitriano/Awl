@@ -7,7 +7,6 @@
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
-
 #include "Awl/IntRange.h"
 #include "Awl/StopWatch.h"
 #include "Awl/Time.h"
@@ -18,7 +17,6 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
-
 namespace
 {
     awl::String toString(const awl::StopWatch& sw)

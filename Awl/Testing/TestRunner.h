@@ -8,7 +8,6 @@
 #include "Awl/Testing/TestChain.h"
 
 #include <functional>
-
 namespace awl 
 {
     namespace testing 

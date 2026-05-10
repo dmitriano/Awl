@@ -6,12 +6,10 @@
 #pragma once
 
 #include "Awl/Io/Handle.h"
-
 #include "Awl/StringFormat.h"
 #include "Awl/Io/Stream.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/Io/NativeException.h"
-
 namespace awl::io
 {
     template <class FileHandle>

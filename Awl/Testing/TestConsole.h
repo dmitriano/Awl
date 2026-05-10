@@ -9,7 +9,6 @@
 #include "Awl/Testing/TestContext.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/CompositeProvider.h"
-
 #include "Awl/ILogger.h"
 #include "Awl/Sleep.h"
 
@@ -19,7 +18,6 @@
 #include <functional>
 #include <algorithm>
 #include <cassert>
-
 namespace awl::testing
 {
     template <attribute_provider Provider>

@@ -7,7 +7,6 @@
 
 #include <cstdint>
 #include <cstring>
-
 namespace awl::io
 {
     constexpr void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)

@@ -10,7 +10,6 @@
 #include <concepts>
 #include <type_traits>
 #include <utility>
-
 namespace awl::io
 {
     template <class NullGetter, class Deleter, class Duplicator>

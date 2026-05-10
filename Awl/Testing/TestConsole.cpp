@@ -8,7 +8,6 @@
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
-
 #include "Awl/StdConsole.h"
 #include "Awl/CompositeLogger.h"
 #include "Awl/EnumTraits.h"
@@ -16,7 +15,6 @@
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
 #include "Awl/StdStreamLogger.h"
-
 #ifdef AWL_QT
     #include "QtExtras/Json/JsonLoadSave.h"
     #include "QtExtras/StringConversion.h"

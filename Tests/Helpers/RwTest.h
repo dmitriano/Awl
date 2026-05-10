@@ -9,7 +9,6 @@
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Testing/UnitTest.h"
-
 using namespace awl::testing;
 using namespace awl::io;
 

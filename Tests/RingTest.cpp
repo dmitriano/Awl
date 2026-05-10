@@ -3,18 +3,17 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Helpers/NonCopyable.h"
+
 #include "Awl/Ring.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 #include "Awl/IntRange.h"
 #include "Awl/RangeUtil.h"
 
-#include "Helpers/NonCopyable.h"
-
 #include <deque>
 #include <queue>
 #include <ranges>
-
 static_assert(awl::range_over<awl::ring<int>, int>);
 
 namespace

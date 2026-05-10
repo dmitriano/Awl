@@ -8,7 +8,6 @@
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Io/IoException.h"
 #include "Awl/DataCast.h"
-
 namespace awl 
 {
     namespace io

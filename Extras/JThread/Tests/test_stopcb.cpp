@@ -1,10 +1,9 @@
 #include "stop_token.hpp"
+
 #include <iostream>
 #include <type_traits>
 #include <functional>
 #include <cassert>
-
-
 void testStopCallbackInits()
 {
   std::cout << "\n============= testStopCallbackInits()\n";

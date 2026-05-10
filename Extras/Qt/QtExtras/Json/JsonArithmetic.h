@@ -8,8 +8,8 @@
 #include "QtExtras/Json/JsonSerializer.h"
 #include "QtExtras/Json/JsonHelpers.h"
 #include "QtExtras/Json/JsonException.h"
-#include "Awl/StringFormat.h"
 
+#include "Awl/StringFormat.h"
 namespace awl
 {
     template <>

@@ -11,7 +11,6 @@
 
 #include <ranges>
 #include <functional>
-
 namespace awl
 {
     template <class T>

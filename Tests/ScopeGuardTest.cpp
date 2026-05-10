@@ -3,12 +3,11 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <algorithm>
-
 #include "Awl/ScopeGuard.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <iostream>
+#include <algorithm>
 using namespace awl::testing;
 
 AWL_TEST(ScopeGuard)

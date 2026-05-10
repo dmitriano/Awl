@@ -9,7 +9,6 @@
 
 #include <format>
 #include <string_view>
-
 namespace std
 {
     template <class CharT>

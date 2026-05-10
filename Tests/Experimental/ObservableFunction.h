@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include "Awl/Observable.h"
 #include "Tests/Experimental/ObserverFunction.h"
+
+#include "Awl/Observable.h"
 
 #include <concepts>
 #include <functional>
 #include <type_traits>
 #include <utility>
-
 namespace awl
 {
     // Storing this pointer in a std::function with std::bind, for example, prevents the observers from being movable,

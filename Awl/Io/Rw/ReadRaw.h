@@ -11,7 +11,6 @@
 #include "Awl/DataCast.h"
 
 #include <cstdint>
-
 namespace awl::io
 {
     //The benefit of having Stream template parameter in all Read/Write methods is that Stream::read and Stream::write functions

@@ -8,7 +8,6 @@
 #include <boost/asio/detached.hpp>
 #include <iostream>
 #include <stdexcept>
-
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;

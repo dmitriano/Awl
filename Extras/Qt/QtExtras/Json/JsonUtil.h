@@ -13,7 +13,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-
 namespace awl
 {
     template <class T>

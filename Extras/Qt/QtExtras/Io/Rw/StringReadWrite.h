@@ -5,13 +5,12 @@
  
 #pragma once
 
+#include "QtExtras/Io/Rw/ReadWrite.h"
+
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Mp/TypeDescriptor.h"
 
-#include "QtExtras/Io/Rw/ReadWrite.h"
-
 #include <QString>
-
 namespace awl::mp
 {
     template <>

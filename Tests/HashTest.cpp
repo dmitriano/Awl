@@ -9,7 +9,6 @@
 #include <set>
 #include <memory>
 #include <ranges>
-
 #ifdef AWL_OPENSSL_HASH
 #include "Awl/Crypto/OpenSslHash.h"
 #endif

@@ -7,7 +7,6 @@
 
 #include <type_traits>
 #include <ranges>
-
 namespace awl
 {
     template <class T> requires std::is_integral_v<T>

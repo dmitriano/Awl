@@ -8,7 +8,6 @@
 #include <atomic>
 #include <cstdint>
 #include <exception>
-
 namespace awl
 {
     using Id = std::uint64_t;

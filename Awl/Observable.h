@@ -12,7 +12,6 @@
 #include <functional>
 #include <type_traits>
 #include <utility>
-
 namespace awl
 {
     template <class IObserver, class Enclosing = void>

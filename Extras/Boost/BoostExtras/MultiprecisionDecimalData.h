@@ -5,16 +5,15 @@
 
 #pragma once
 
-#include "Awl/DecimalConstants.h"
 #include "BoostExtras/MultiprecisionTraits.h"
 
-#include <boost/multiprecision/cpp_int.hpp>
+#include "Awl/DecimalConstants.h"
 
+#include <boost/multiprecision/cpp_int.hpp>
 #include <cstdint>
 #include <cassert>
 #include <limits>
 #include <bit>
-
 namespace awl
 {
     template <typename UInt, uint8_t exp_len>

@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include <tuple>
-
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/TupleHelpers.h"
 
+#include <tuple>
 namespace awl::testing
 {
     template <attribute_provider... Ps>

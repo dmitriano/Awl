@@ -8,7 +8,6 @@
 #include "QtExtras/Json/JsonSerializer.h"
 
 #include "Awl/EnumTraits.h"
-
 namespace awl
 {
     template <class T> requires std::is_enum_v<T>

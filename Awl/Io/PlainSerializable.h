@@ -7,7 +7,6 @@
 
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/ReadWrite.h"
-
 namespace awl::io
 {
     template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream, bool atomic = true>

@@ -10,7 +10,6 @@
 
 #include <type_traits>
 #include <unordered_set>
-
 namespace awl
 {
     namespace detail

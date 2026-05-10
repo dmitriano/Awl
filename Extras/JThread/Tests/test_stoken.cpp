@@ -1,9 +1,8 @@
 #include "stop_token.hpp"
+
 #include <iostream>
 #include <chrono>
 #include <cassert>
-
-
 void testStopTokenBasicAPI()
 {
   std::cout << "\n============= testStopTokenBasicAPI()\n";

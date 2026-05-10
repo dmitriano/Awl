@@ -9,7 +9,6 @@
 #include <memory>
 #include <unordered_set>
 #include <utility>
-
 namespace
 {
     class Handler

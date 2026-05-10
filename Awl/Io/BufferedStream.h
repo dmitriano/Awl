@@ -7,7 +7,6 @@
 
 #include "Awl/Crypto/BasicHash.h"
 #include "Awl/Io/HashStream.h"
-
 namespace awl 
 {
     namespace io

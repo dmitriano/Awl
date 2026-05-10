@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-
 namespace awl
 {
     template <class... Interfaces>

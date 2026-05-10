@@ -9,7 +9,6 @@
 #include "Awl/Mp/TypeDescriptor.h"
 
 #include <QVariant>
-
 namespace awl::mp
 {
     template <>

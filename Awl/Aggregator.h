@@ -5,13 +5,12 @@
 
 #pragma once
 
+#include "Awl/TupleHelpers.h"
+
 #include <tuple>
 #include <optional>
 #include <functional>
 #include <memory>
-
-#include "Awl/TupleHelpers.h"
-
 namespace awl
 {
     //Calls a function when its arguments have been set.

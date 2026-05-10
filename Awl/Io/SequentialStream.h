@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <concepts>
-
 namespace awl::io
 {
     class SequentialInputStream

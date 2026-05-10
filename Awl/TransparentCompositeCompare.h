@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include <tuple>
-
 #include "Awl/TupleHelpers.h"
 #include "Awl/CompositeCompare.h"
 
+#include <tuple>
 namespace awl
 {
     // Requires the composing comparers to have key_type.

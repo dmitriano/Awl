@@ -1,4 +1,4 @@
-﻿#include "Awl/StringFormat.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Random.h"
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
@@ -14,7 +14,6 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/strand.hpp>
-
 #include <chrono>
 #include <mutex>
 #include <optional>
@@ -23,7 +22,6 @@
 #include <thread>
 #include <vector>
 #include <atomic>
-
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;

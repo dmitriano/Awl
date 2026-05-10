@@ -9,10 +9,8 @@
 #include "Awl/DataCast.h"
 
 #include <type_traits>
-
 #include <openssl/md5.h>
 #include <openssl/sha.h>
-
 namespace awl
 {
     namespace crypto

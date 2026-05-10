@@ -10,9 +10,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-
 #include <ranges>
-
 namespace awl
 {
     template <std::ranges::range Range>

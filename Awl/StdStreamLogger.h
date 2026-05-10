@@ -6,12 +6,12 @@
 #pragma once
 
 #include "ILogger.h"
+
 #include "Awl/StdConsole.h"
 
 #include <memory>
 #include <string>
 #include <vector>
-
 namespace awl
 {
     class StdStreamLogger : public ILogger

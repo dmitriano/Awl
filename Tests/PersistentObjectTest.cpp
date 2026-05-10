@@ -1,11 +1,9 @@
 #include "Awl/Testing/UnitTest.h"
-
 #include "Awl/Io/PersistentObject.h"
 #include "Awl/Decimal.h"
 
 #include <filesystem>
 #include <map>
-
 namespace
 {
     template <class String>

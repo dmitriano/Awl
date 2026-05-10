@@ -7,12 +7,10 @@
 #include "Awl/Random.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/Tuplizable.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #include <algorithm>
 #include <set>
-
 using namespace awl::testing;
 
 namespace

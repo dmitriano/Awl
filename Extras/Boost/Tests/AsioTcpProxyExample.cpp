@@ -15,7 +15,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-
 namespace asio = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = asio::ip::tcp;

@@ -10,7 +10,6 @@
 #include "QtExtras/Json/TypeHint.h"
 
 #include "Awl/Reflection.h"
-
 namespace awl
 {
     template <class T> requires std::is_class_v<T>&& awl::is_reflectable_v<T>

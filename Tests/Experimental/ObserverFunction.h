@@ -9,7 +9,6 @@
 
 #include <functional>
 #include <utility>
-
 namespace awl
 {
     template <class Result, class... Args>

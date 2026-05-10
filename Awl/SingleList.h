@@ -9,7 +9,6 @@
 #include "Awl/SingleIterator.h"
 
 #include <cassert>
-
 namespace awl
 {
     //! A singly linked list containing elements derived from single_link<T>.

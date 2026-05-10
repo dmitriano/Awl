@@ -7,7 +7,6 @@
 
 #include <type_traits>
 #include <functional>
-
 namespace awl::math
 {
     //Constants can be replaced with std::numbers in C++20.

@@ -3,8 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-
 #include "Awl/QuickList.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/RangeUtil.h"
@@ -12,9 +10,9 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Random.h"
 
+#include <algorithm>
 #include <ranges>
 #include <functional>
-
 using namespace awl::testing;
 
 namespace

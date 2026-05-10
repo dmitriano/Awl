@@ -10,7 +10,6 @@
 #include "Awl/Exception.h"
 
 #include <typeinfo>
-
 namespace awl::testing
 {
     class Assert

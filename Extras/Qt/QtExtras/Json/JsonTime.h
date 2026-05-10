@@ -14,7 +14,6 @@
 #include <chrono>
 #include <format>
 #include <string_view>
-
 namespace awl
 {
     template <class Clock, class Duration>

@@ -8,7 +8,6 @@
 #include "Awl/OptionalMutex.h"
 
 #include <mutex>
-
 using namespace awl::io;
 
 bool AtomicStorage::load(Value& val)

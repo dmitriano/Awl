@@ -7,7 +7,6 @@
 
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
-
 namespace awl::io
 {
     class IoException : public Exception {};

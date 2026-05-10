@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <utility>
 #include <type_traits>
-
 namespace awl
 {
     //! An object that is destroyed explicitly by calling its destructor with p->~T().

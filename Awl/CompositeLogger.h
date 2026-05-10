@@ -10,7 +10,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-
 namespace awl
 {
     class CompositeLogger : public ILogger

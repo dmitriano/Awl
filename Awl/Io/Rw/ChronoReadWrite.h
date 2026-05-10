@@ -9,7 +9,6 @@
 
 #include <chrono>
 #include <type_traits>
-
 namespace awl::io
 {
     //Check if nanoseconds representation is either long or long long and its size is 8, so it can be converted to int64_t.

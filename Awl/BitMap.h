@@ -10,7 +10,6 @@
 #include <type_traits>
 #include <bitset>
 #include <initializer_list>
-
 namespace awl
 {
     template<typename Enum, typename std::underlying_type<Enum>::type N = EnumTraits<Enum>::count(), bool IsEnum = std::is_enum<Enum>::value>

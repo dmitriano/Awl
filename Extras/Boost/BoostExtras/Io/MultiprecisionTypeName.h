@@ -8,7 +8,6 @@
 #include "Awl/Mp/TypeDescriptor.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
-
 namespace awl::mp
 {
     template <class T> requires (

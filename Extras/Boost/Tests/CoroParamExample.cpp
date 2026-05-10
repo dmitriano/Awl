@@ -1,9 +1,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
-
 #include <iostream>
-
 namespace asio = boost::asio;
 using asio::awaitable;
 using asio::use_awaitable;

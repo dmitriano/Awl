@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <functional>
 #include <type_traits>
-
 namespace awl
 {
     template <class T, class GetKey>

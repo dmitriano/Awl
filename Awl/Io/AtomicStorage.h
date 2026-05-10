@@ -10,10 +10,10 @@
 #include "Awl/Io/Serializable.h"
 #include "Awl/Io/NativeStream.h"
 #include "Awl/Io/Snapshotable.h"
+
 #include <future>
 #include <cassert>
 #include <memory>
-
 namespace awl::io
 {
     class AtomicStorage

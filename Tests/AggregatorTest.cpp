@@ -3,12 +3,10 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Aggregator.h"
-
-#include "Awl/Testing/UnitTest.h"
-
 #include "Helpers/NonCopyable.h"
 
+#include "Awl/Aggregator.h"
+#include "Awl/Testing/UnitTest.h"
 using A = awl::testing::helpers::NonCopyable;
 
 AWL_TEST(Aggregator)

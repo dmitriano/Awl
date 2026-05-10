@@ -9,7 +9,6 @@
 #include "Awl/Int2Array.h"
 
 #include <type_traits>
-
 namespace awl::io
 {
     template <class Stream, size_t N>

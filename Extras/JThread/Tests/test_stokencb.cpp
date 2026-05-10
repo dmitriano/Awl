@@ -8,7 +8,6 @@
 #include <functional>
 #include <condition_variable>
 #include <mutex>
-
 //#define SAFE
 #include "stop_token.hpp"
 

@@ -5,9 +5,7 @@
 
 #include "Awl/StringFormat.h"
 #include "Awl/OptionalFormatter.h"
-
 #include "Awl/Testing/UnitTest.h"
-
 namespace
 {
     template <class C>

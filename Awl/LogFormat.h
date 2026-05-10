@@ -11,7 +11,6 @@
 #include <format>
 #include <source_location>
 #include <type_traits>
-
 namespace awl
 {
     template <class Character, class... Args>

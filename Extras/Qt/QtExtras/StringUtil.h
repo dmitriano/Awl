@@ -5,9 +5,9 @@
  
 #pragma once
 
-#include "Awl/Decimal.h"
 #include "QtExtras/StringConversion.h"
 
+#include "Awl/Decimal.h"
 #include "Awl/EnumTraits.h"
 #include "Awl/Crypto/IntHash.h"
 
@@ -15,14 +15,12 @@
 #include <QString>
 #include <QStringList>
 #include <QObject>
-
 #include <functional>
 #include <atomic>
 #include <sstream>
 #include <ranges>
 #include <functional>
 #include <concepts>
-
 namespace awl
 {
     void removeTrailingZeros(QString & s);

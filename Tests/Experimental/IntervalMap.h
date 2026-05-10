@@ -11,7 +11,6 @@
 #include <iterator>
 #include <algorithm>
 #include <map>
-
 namespace awl
 {
     template<

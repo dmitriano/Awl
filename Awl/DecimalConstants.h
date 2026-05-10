@@ -10,7 +10,6 @@
 #include <limits>
 #include <cmath>
 #include <array>
-
 namespace awl
 {
     namespace helpers

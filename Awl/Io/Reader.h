@@ -16,7 +16,6 @@
 #include <cassert>
 #include <optional>
 #include <vector>
-
 namespace awl::io
 {
     template <class V, class IStream = SequentialInputStream>

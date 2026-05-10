@@ -18,7 +18,6 @@
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
-
 namespace awl
 {
     template <class Node, class Compare = std::less<>> 

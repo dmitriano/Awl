@@ -7,13 +7,10 @@
 #include "Awl/TransparentCompositeCompare.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/EnumTraits.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #include <string>
-
 #include <array>
-
 namespace
 {
     struct X

@@ -10,7 +10,6 @@
 #include <concepts>
 #include <functional>
 #include <utility>
-
 namespace awl
 {
     // When we need an object to be "const", but still movable, we wrap it into immutable.

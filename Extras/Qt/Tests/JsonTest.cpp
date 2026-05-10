@@ -5,7 +5,6 @@
  
 #include "QtExtras/StringConversion.h"
 #include "QtExtras/Json/JsonUtil.h"
-
 #include "Tests/VtsData.h"
 
 #include "Awl/Decimal128.h"
@@ -16,9 +15,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-
 #include <format>
-
 AWL_TEST(JsonArray)
 {
     AWL_UNUSED_CONTEXT;

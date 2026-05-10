@@ -6,12 +6,10 @@
 #include "Awl/Coro/DelayedAwaitable.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Coro/JobGroup.h"
-
 #include "Awl/Testing/TimeQueue.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <type_traits>
-
 static_assert(!std::is_copy_constructible_v<awl::JobGroup>);
 static_assert(!std::is_copy_assignable_v<awl::JobGroup>);
 static_assert(std::is_move_constructible_v<awl::JobGroup>);
