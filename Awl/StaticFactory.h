@@ -9,7 +9,6 @@
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
-#include <string>
 #include <string_view>
 #include <type_traits>
 
@@ -31,8 +30,7 @@ namespace awl
 
         if (p_link == nullptr)
         {
-            const std::string name_string(name);
-            throw FactoryException(std::format(_T("Factory function '{}' not found."), awl::fromACString(name_string.c_str())));
+            throw FactoryException(std::format("Factory function '{}' not found.", name));
         }
 
         FuncPtr func = p_link->value();
