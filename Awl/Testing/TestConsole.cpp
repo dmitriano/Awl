@@ -60,6 +60,7 @@ namespace awl::testing
             TestConsoleLogger& console_logger,
             const std::optional<std::string>& log_file,
             const std::string& log_level,
+            const std::optional<std::string>& file_level,
             bool delayed)
         {
             if (!log_file)
@@ -76,10 +77,12 @@ namespace awl::testing
                 throw TestException(std::format("Cannot open log file '{}'.", *log_file));
             }
 
+            const std::string& effective_log_level = file_level ? *file_level : log_level;
+
             auto logger = std::make_shared<StdStreamLogger>(
                 "TestConsole",
                 file_out,
-                log_level);
+                effective_log_level);
 
             console_logger.logger->addLogger(logger);
 
@@ -134,6 +137,7 @@ namespace awl::testing
         TestConsoleLogger makeTestConsoleLogger(
             TestOutput output,
             const std::string& log_level,
+            const std::optional<std::string>& file_level,
             const std::optional<std::string>& log_file)
         {
             TestConsoleLogger console_logger{ std::make_shared<CompositeLogger>(), {} };
@@ -152,7 +156,7 @@ namespace awl::testing
                 break;
             }
 
-            addFileLogger(console_logger, log_file, log_level, output == TestOutput::Failed);
+            addFileLogger(console_logger, log_file, log_level, file_level, output == TestOutput::Failed);
 
             return console_logger;
         }
@@ -172,6 +176,7 @@ namespace awl::testing
         
         AWL_ATTRIBUTE(TestOutput, output, TestOutput::Failed);
         AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
+        AWL_ATTRIBUTE(std::optional<std::string>, file_level, std::nullopt);
         AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(std::string, run, {});
 
@@ -180,9 +185,14 @@ namespace awl::testing
             throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
         }
 
+        if (file_level && !isLogLevel(*file_level))
+        {
+            throw TestException(std::format("Not a valid 'file_level' parameter value: '{}'.", *file_level));
+        }
+
         bool passed = false;
 
-        TestConsoleLogger console_logger = makeTestConsoleLogger(output, log_level, log_file);
+        TestConsoleLogger console_logger = makeTestConsoleLogger(output, log_level, file_level, log_file);
         _logger = console_logger.logger;
         context.logger = _logger;
 
