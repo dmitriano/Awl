@@ -11,6 +11,7 @@
 
 #include <ranges>
 #include <functional>
+#include <string_view>
 
 namespace awl
 {
@@ -75,6 +76,27 @@ namespace awl
             auto i = std::ranges::find_if(begin(), end(),
                 std::bind(pred, name, std::placeholders::_1),
                 std::mem_fn(&Link::name));
+
+            if (i != end())
+            {
+                return *i;
+            }
+
+            return nullptr;
+        }
+
+        Link* find(std::string_view name)
+        {
+            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find(name));
+        }
+
+        const Link* find(std::string_view name) const
+        {
+            auto i = std::ranges::find_if(begin(), end(),
+                [name](const Link* p_link)
+                {
+                    return StringViewInsensitiveEqual<char>()(name, p_link->name());
+                });
 
             if (i != end())
             {

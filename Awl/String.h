@@ -200,6 +200,16 @@ namespace awl
         }
     };
 
+    template <typename Ch>
+    struct StringViewInsensitiveEqual
+    {
+        bool operator()(std::basic_string_view<Ch> str1, std::basic_string_view<Ch> str2) const
+        {
+            return ((str1.size() == str2.size()) &&
+                std::equal(str1.begin(), str1.end(), str2.begin(), CharInsensitiveEqual<Ch>()));
+        }
+    };
+
 #ifdef _MSC_VER
 
     class string_encoding_error : public std::exception

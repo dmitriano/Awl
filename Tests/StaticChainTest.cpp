@@ -8,6 +8,9 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <string>
+#include <string_view>
+
 namespace
 {
     using X = int;
@@ -48,6 +51,7 @@ AWL_TEST(StaticChainFactoryParameterless)
     AWL_UNUSED_CONTEXT;
 
     AWL_ASSERT(awl::create<std::string>("a") == "a");
+    AWL_ASSERT(awl::create<std::string>(std::string_view("A")) == "a");
     AWL_ASSERT(awl::create<std::string>("b") == "b");
     AWL_ASSERT(awl::create<std::string>("c") == "c");
 

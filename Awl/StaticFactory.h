@@ -9,6 +9,8 @@
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
+#include <string>
+#include <string_view>
 #include <type_traits>
 
 namespace awl
@@ -19,7 +21,7 @@ namespace awl
     using FactoryFuncPtr = std::add_pointer_t<T(Args... args)>;
 
     template <class T, typename... Args>
-    T create(const char* name, Args&&... args)
+    T create(std::string_view name, Args&&... args)
     {
         using FuncPtr = awl::FactoryFuncPtr<T, Args...>;
 
@@ -29,7 +31,8 @@ namespace awl
 
         if (p_link == nullptr)
         {
-            throw FactoryException(std::format(_T("Factory function '{}' not found."), awl::fromACString(name)));
+            const std::string name_string(name);
+            throw FactoryException(std::format(_T("Factory function '{}' not found."), awl::fromACString(name_string.c_str())));
         }
 
         FuncPtr func = p_link->value();
