@@ -53,6 +53,8 @@ namespace awl::testing
         AWL_FLAG(terminate);
 
         const String test_name = fromACString(p_test_link->name());
+        std::shared_ptr<ILogger> test_logger = context.logger->createLogger(p_test_link->name());
+
         context.logger->info(_T("{} started."), test_name);
 
         size_t loop_count = loop;
@@ -100,7 +102,7 @@ namespace awl::testing
                 test_token = context.stopToken;
             }
             
-            const TestContext temp_context{ context.logger, test_token, context.attributeProvider, context.typeProvider };
+            const TestContext temp_context{ test_logger, test_token, context.attributeProvider, context.typeProvider };
 
             awl::StopWatch sw;
 
