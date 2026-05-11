@@ -80,7 +80,7 @@ namespace awl::testing
             std::coroutine_handle<> handle;
         };
 
-        using Compare = member_compare<&Task::targetTime>;
+        using Compare = KeyCompare<Task, &Task::targetTime>;
 
         std::priority_queue<Task, std::vector<Task>, Compare> _tasks;
     };

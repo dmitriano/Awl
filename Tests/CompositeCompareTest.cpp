@@ -208,8 +208,8 @@ AWL_ENUM_TRAITS(data, AccountType)
 
 namespace
 {
-    using WalletAccountCompare = awl::member_compare<&data::Wallet::accountType>;
-    using WalletAssetCompare = awl::member_compare<&data::Wallet::asset>;
+    using WalletAccountCompare = awl::KeyCompare<data::Wallet, &data::Wallet::accountType>;
+    using WalletAssetCompare = awl::KeyCompare<data::Wallet, &data::Wallet::asset>;
     using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
 
     constexpr WalletPrimaryCompare MakeComp()

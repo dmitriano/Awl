@@ -512,7 +512,7 @@ namespace
             v.push_back(val);
         }
 
-        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
+        std::sort(v.begin(), v.end(), awl::KeyCompare<A, &A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         awl::vector_set<const A *, Compare> set(comp);
@@ -566,7 +566,7 @@ namespace
             set.insert(Pointer(new A(val)));
         }
 
-        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
+        std::sort(v.begin(), v.end(), awl::KeyCompare<A, &A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         for (size_t index = 0; index < v.size(); ++index)
@@ -595,24 +595,24 @@ namespace
 
 AWL_TEST(VectorSetComparer)
 {
-    TestComparer(context, awl::member_compare<&A::key>());
-    TestComparer(context, awl::member_compare<&A::GetKey>());
-    TestComparer(context, awl::member_compare<&A::GetKeyRef>());
+    TestComparer(context, awl::KeyCompare<A, &A::key>());
+    TestComparer(context, awl::KeyCompare<A, &A::GetKey>());
+    TestComparer(context, awl::KeyCompare<A, &A::GetKeyRef>());
     TestComparer(context, awl::tuplizable_compare<A, 0>{});
 
-    TestPointerComparer(context, awl::pointer_compare<&A::key>());
-    TestPointerComparer(context, awl::pointer_compare<&A::GetKey>());
-    TestPointerComparer(context, awl::pointer_compare<&A::GetKeyRef>());
+    TestPointerComparer(context, awl::KeyCompare<A*, &A::key>());
+    TestPointerComparer(context, awl::KeyCompare<A*, &A::GetKey>());
+    TestPointerComparer(context, awl::KeyCompare<A*, &A::GetKeyRef>());
     TestPointerComparer(context, awl::tuplizable_compare<A*, 0>{});
 
-    TestSmartPointerComparer(context, awl::shared_compare<&A::key>());
-    TestSmartPointerComparer(context, awl::shared_compare<&A::GetKey>());
-    TestSmartPointerComparer(context, awl::shared_compare<&A::GetKeyRef>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::key>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKeyRef>());
     TestSmartPointerComparer(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
 
-    TestSmartPointerComparer(context, awl::unique_compare<&A::key>());
-    TestSmartPointerComparer(context, awl::unique_compare<&A::GetKey>());
-    TestSmartPointerComparer(context, awl::unique_compare<&A::GetKeyRef>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::key>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKeyRef>());
     TestSmartPointerComparer(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
 }
 

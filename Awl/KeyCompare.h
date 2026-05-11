@@ -119,29 +119,4 @@ namespace awl
 
     template <class T, size_t index>
     using tuplizable_compare = KeyCompare<T, tuplizable_getter<remove_pointer_t<T>, index>{}>;
-
-    template <class>
-    struct member_pointer_traits;
-
-    template <class T, class Member>
-    struct member_pointer_traits<Member T::*>
-    {
-        using object_type = T;
-    };
-
-    template <auto value, class Compare = std::less<void>>
-    using member_compare = KeyCompare<typename member_pointer_traits<decltype(value)>::object_type, value, Compare>;
-
-    template <auto value, class Compare = std::less<void>>
-    using pointer_compare = KeyCompare<typename member_pointer_traits<decltype(value)>::object_type*, value, Compare>;
-
-    template <auto value, class Compare = std::less<void>>
-    using shared_compare = KeyCompare<std::shared_ptr<typename member_pointer_traits<decltype(value)>::object_type>, value, Compare>;
-
-    template <auto value, class Compare = std::less<void>>
-    using unique_compare = KeyCompare<std::unique_ptr<typename member_pointer_traits<decltype(value)>::object_type>, value, Compare>;
-
-    // When we have a pointer type declared as using ObjectPtr = std::shared_ptr<T>, for example.
-    template <class T, auto value, class Compare = std::less<void>>
-    using smart_compare = KeyCompare<T, value, Compare>;
 }

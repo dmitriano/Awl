@@ -69,7 +69,7 @@ namespace
         std::pair<iterator, bool> insert(const value_type& val)
         {
             auto i = std::lower_bound(_v.begin(), _v.end(), val, 
-                awl::member_compare<&value_type::first, key_compare>{});
+                awl::KeyCompare<value_type, &value_type::first, key_compare>{});
 
             if (i != _v.end() && i->first == val.first)
             {
