@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <array>
-#include <type_traits>
 #include <bit>
+#include <cstdint>
+#include <type_traits>
 
 namespace awl
 {
