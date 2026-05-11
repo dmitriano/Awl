@@ -545,13 +545,12 @@ namespace
         }
     }
 
-    template <class Compare>
+    template <class Pointer, class Compare>
     void TestSmartPointerComparer(const TestContext & context, Compare comp)
     {
         AWL_ATTRIBUTE(size_t, insert_count, 1000u);
         AWL_ATTRIBUTE(size_t, range, 1000u);
 
-        using Pointer = typename Compare::value_type;
         using A = typename Pointer::element_type;
 
         std::vector<A> v;
@@ -605,15 +604,15 @@ AWL_TEST(VectorSetComparer)
     TestPointerComparer(context, awl::KeyCompare<A*, &A::GetKeyRef>());
     TestPointerComparer(context, awl::tuplizable_compare<A*, 0>{});
 
-    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::key>());
-    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKey>());
-    TestSmartPointerComparer(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::key>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKeyRef>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
 
-    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::key>());
-    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKey>());
-    TestSmartPointerComparer(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::key>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKeyRef>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
 }
 
 namespace

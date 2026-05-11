@@ -40,11 +40,14 @@ namespace awl
     template <class T, class GetKey, class Compare = std::less<void>>
     class RuntimeKeyCompare
     {
-    public:
+    private:
 
         using element_type = key_compare_element_t<T>;
         using value_type = T;
         using compare_value_type = key_compare_value_t<T>;
+
+    public:
+
         using key_type = std::invoke_result_t<GetKey, const element_type&>;
 
         RuntimeKeyCompare() = default;
