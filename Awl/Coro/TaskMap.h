@@ -5,6 +5,7 @@
 #include "Awl/Coro/Job.h"
 #include "Awl/Observable.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/MemFn.h"
 
 #include <vector>
 
