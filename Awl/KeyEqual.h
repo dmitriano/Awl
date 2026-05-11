@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <type_traits>
 
@@ -15,7 +16,7 @@ namespace awl
     {
     private:
 
-        using Key = std::remove_cvref_t<typename GetKey::value_type>;
+        using Key = std::remove_cvref_t<std::invoke_result_t<GetKey, const T&>>;
 
     public:
 
@@ -51,7 +52,7 @@ namespace awl
     {
     private:
 
-        using Key = std::remove_cvref_t<typename GetKey::value_type>;
+        using Key = std::remove_cvref_t<std::invoke_result_t<GetKey, const T&>>;
 
     public:
 
