@@ -25,7 +25,7 @@ namespace awl
 
         std::size_t operator()(const T& val) const
         {
-            return std::hash<Key>{}(_getKey(val));
+            return std::hash<Key>{}(std::invoke(_getKey, val));
         }
 
         std::size_t operator()(const Key& key) const
@@ -51,7 +51,7 @@ namespace awl
 
         std::size_t operator()(const std::shared_ptr<T>& val) const
         {
-            return std::hash<Key>{}(_getKey(*val));
+            return std::hash<Key>{}(std::invoke(_getKey, *val));
         }
 
         std::size_t operator()(const Key& key) const

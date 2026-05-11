@@ -24,17 +24,17 @@ namespace awl
 
         bool operator()(const T& left, const T& right) const
         {
-            return _getKey(left) == _getKey(right);
+            return std::invoke(_getKey, left) == std::invoke(_getKey, right);
         }
 
         bool operator()(const T& left, const Key& right) const
         {
-            return _getKey(left) == right;
+            return std::invoke(_getKey, left) == right;
         }
 
         bool operator()(const Key& left, const T& right) const
         {
-            return left == _getKey(right);
+            return left == std::invoke(_getKey, right);
         }
 
         bool operator()(const Key& left, const Key& right) const
@@ -60,17 +60,17 @@ namespace awl
 
         bool operator()(const std::shared_ptr<T>& left, const std::shared_ptr<T>& right) const
         {
-            return _getKey(*left) == _getKey(*right);
+            return std::invoke(_getKey, *left) == std::invoke(_getKey, *right);
         }
 
         bool operator()(const std::shared_ptr<T>& left, const Key& right) const
         {
-            return _getKey(*left) == right;
+            return std::invoke(_getKey, *left) == right;
         }
 
         bool operator()(const Key& left, const std::shared_ptr<T>& right) const
         {
-            return left == _getKey(*right);
+            return left == std::invoke(_getKey, *right);
         }
 
         bool operator()(const Key& left, const Key& right) const
