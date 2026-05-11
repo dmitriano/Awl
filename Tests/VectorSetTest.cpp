@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <set>
 #include <ranges>
 
@@ -431,6 +432,48 @@ AWL_TEST(VectorSetIndex)
 
 namespace
 {
+    // Example of a custom getter that explicitly supports values, raw pointers,
+    // std::shared_ptr and std::unique_ptr.
+    template <size_t index>
+    struct tuplizable_getter
+    {
+        template <class T>
+            requires (!std::is_pointer_v<std::remove_cvref_t<T>>)
+        constexpr decltype(auto) operator()(const T& val) const
+        {
+            return get(val);
+        }
+
+        template <class T>
+        constexpr decltype(auto) operator()(const T* val) const
+        {
+            return get(*val);
+        }
+
+        template <class T>
+        constexpr decltype(auto) operator()(const std::shared_ptr<T>& val) const
+        {
+            return get(*val);
+        }
+
+        template <class T, class Deleter>
+        constexpr decltype(auto) operator()(const std::unique_ptr<T, Deleter>& val) const
+        {
+            return get(*val);
+        }
+
+    private:
+
+        template <class T>
+        static constexpr decltype(auto) get(const T& val)
+        {
+            return std::get<index>(awl::object_as_const_tuple(val));
+        }
+    };
+
+    template <class T, size_t index>
+    using tuplizable_compare = awl::KeyCompare<T, tuplizable_getter<index>{}>;
+
     struct A
     {
         A() = default;
@@ -597,22 +640,22 @@ AWL_TEST(VectorSetComparer)
     TestComparer(context, awl::KeyCompare<A, &A::key>());
     TestComparer(context, awl::KeyCompare<A, &A::GetKey>());
     TestComparer(context, awl::KeyCompare<A, &A::GetKeyRef>());
-    TestComparer(context, awl::tuplizable_compare<A, 0>{});
+    TestComparer(context, tuplizable_compare<A, 0>{});
 
     TestPointerComparer(context, awl::KeyCompare<const A*, &A::key>());
     TestPointerComparer(context, awl::KeyCompare<const A*, &A::GetKey>());
     TestPointerComparer(context, awl::KeyCompare<const A*, &A::GetKeyRef>());
-    //TestPointerComparer(context, awl::tuplizable_compare<A*, 0>{});
+    TestPointerComparer(context, tuplizable_compare<const A*, 0>{});
 
     TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::key>());
     TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKey>());
     TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKeyRef>());
-    //TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, tuplizable_compare<std::shared_ptr<A>, 0>{});
 
     TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::key>());
     TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKey>());
     TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKeyRef>());
-    //TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, tuplizable_compare<std::unique_ptr<A>, 0>{});
 }
 
 namespace
@@ -716,7 +759,7 @@ AWL_TEST(VectorSetNonCopyableElement)
     }
 
     TestBComparer(insert_count, range, awl::make_compare(&B::GetKey));
-    TestBComparer(insert_count, range, awl::tuplizable_compare<B, 0>{});
+    TestBComparer(insert_count, range, tuplizable_compare<B, 0>{});
 }
 
 template <class I1, class I2>

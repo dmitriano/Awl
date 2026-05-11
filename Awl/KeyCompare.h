@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include "Awl/Tuplizable.h"
-#include "Awl/TypeTraits.h"
-
-#include <cstddef>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -49,16 +45,4 @@ namespace awl
 
         [[no_unique_address]] Compare _comp;
     };
-
-    template <class T, size_t index>
-    struct tuplizable_getter
-    {
-        constexpr decltype(auto) operator()(const T& val) const
-        {
-            return std::get<index>(object_as_const_tuple(val));
-        }
-    };
-
-    template <class T, size_t index>
-    using tuplizable_compare = KeyCompare<T, tuplizable_getter<remove_pointer_t<T>, index>{}>;
 }
