@@ -9,8 +9,10 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/Getters.h"
 
-#include <type_traits>
+#include <functional>
 #include <memory>
+#include <type_traits>
+#include <utility>
 
 namespace awl
 {
@@ -42,17 +44,17 @@ namespace awl
 
         constexpr bool operator()(const T& left, const T& right) const
         {
-            return _comp(getKey(left), getKey(right));
+            return _comp(std::invoke(getKey, left), std::invoke(getKey, right));
         }
 
         constexpr bool operator()(const T& val, const key_type & id) const
         {
-            return _comp(getKey(val), id);
+            return _comp(std::invoke(getKey, val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T& val) const
         {
-            return _comp(id, getKey(val));
+            return _comp(id, std::invoke(getKey, val));
         }
 
         using is_transparent = void;
@@ -80,24 +82,19 @@ namespace awl
             _comp(std::move(comp))
         {}
 
-        //KeyCompare(const KeyCompare&) = default;
-        //KeyCompare(KeyCompare&&) = default;
-        //KeyCompare& operator = (const KeyCompare&) = default;
-        //KeyCompare& operator = (KeyCompare&&) = default;
-
         constexpr bool operator()(const T * left, const T * right) const
         {
-            return _comp(getKey(*left), getKey(*right));
+            return _comp(std::invoke(getKey, *left), std::invoke(getKey, *right));
         }
 
         constexpr bool operator()(const T * val, const key_type & id) const
         {
-            return _comp(getKey(*val), id);
+            return _comp(std::invoke(getKey, *val), id);
         }
 
         constexpr bool operator()(const key_type & id, const T * val) const
         {
-            return _comp(id, getKey(*val));
+            return _comp(id, std::invoke(getKey, *val));
         }
 
     private:
@@ -130,17 +127,17 @@ namespace awl
 
         constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
         {
-            return _comp(getKey(*left), getKey(*right));
+            return _comp(std::invoke(getKey, *left), std::invoke(getKey, *right));
         }
 
         constexpr bool operator()(const std::shared_ptr<T> & val, const key_type & id) const
         {
-            return _comp(getKey(*val), id);
+            return _comp(std::invoke(getKey, *val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::shared_ptr<T> & val) const
         {
-            return _comp(id, getKey(*val));
+            return _comp(id, std::invoke(getKey, *val));
         }
 
     private:
@@ -168,17 +165,17 @@ namespace awl
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & left, const std::unique_ptr<T, Deleter> & right) const
         {
-            return _comp(getKey(*left), getKey(*right));
+            return _comp(std::invoke(getKey, *left), std::invoke(getKey, *right));
         }
 
         constexpr bool operator()(const std::unique_ptr<T, Deleter> & val, const key_type & id) const
         {
-            return _comp(getKey(*val), id);
+            return _comp(std::invoke(getKey, *val), id);
         }
 
         constexpr bool operator()(const key_type & id, const std::unique_ptr<T, Deleter> & val) const
         {
-            return _comp(id, getKey(*val));
+            return _comp(id, std::invoke(getKey, *val));
         }
 
     private:
