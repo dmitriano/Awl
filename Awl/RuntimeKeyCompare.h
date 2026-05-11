@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include "Awl/KeyCompare.h"
-
-#include <concepts>
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -40,15 +37,9 @@ namespace awl
     template <class T, class GetKey, class Compare = std::less<void>>
     class RuntimeKeyCompare
     {
-    private:
-
-        using element_type = key_compare_element_t<T>;
-        using value_type = T;
-        using compare_value_type = key_compare_value_t<T>;
-
     public:
 
-        using key_type = std::invoke_result_t<GetKey, const element_type&>;
+        using key_type = std::remove_cvref_t<std::invoke_result_t<GetKey, const T&>>;
 
         RuntimeKeyCompare() = default;
 
@@ -57,36 +48,24 @@ namespace awl
             _comp(std::move(comp))
         {}
 
-        constexpr bool operator()(const compare_value_type& left, const compare_value_type& right) const
+        constexpr bool operator()(const T& left, const T& right) const
         {
-            return _comp(project(left), project(right));
+            return _comp(std::invoke(getKey, left), std::invoke(getKey, right));
         }
 
-        constexpr bool operator()(const compare_value_type& val, const key_type & id) const
+        constexpr bool operator()(const T& val, const key_type & id) const
         {
-            return _comp(project(val), id);
+            return _comp(std::invoke(getKey, val), id);
         }
 
-        constexpr bool operator()(const key_type & id, const compare_value_type& val) const
+        constexpr bool operator()(const key_type & id, const T& val) const
         {
-            return _comp(id, project(val));
+            return _comp(id, std::invoke(getKey, val));
         }
 
         using is_transparent = void;
 
     private:
-
-        constexpr decltype(auto) project(const compare_value_type& val) const
-        {
-            if constexpr (std::invocable<GetKey, const compare_value_type&>)
-            {
-                return std::invoke(getKey, val);
-            }
-            else
-            {
-                return std::invoke(getKey, *val);
-            }
-        }
 
         [[no_unique_address]] GetKey getKey;
         [[no_unique_address]] Compare _comp;

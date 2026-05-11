@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/CompositeCompare.h"
+#include "Awl/KeyCompare.h"
 #include "Awl/TransparentCompositeCompare.h"
 #include "Awl/RuntimeKeyCompare.h"
 #include "Awl/EnumTraits.h"
@@ -73,7 +74,7 @@ namespace
     static_assert(std::is_move_assignable_v<BCompare>);
 
     static_assert(std::is_same_v<ACompare::key_type, int>);
-    static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
+    static_assert(std::is_same_v<BCompare::key_type, std::string>);
     static_assert(std::is_same_v<decltype(MakeKey({})), std::tuple<int, std::string>>);
 
     X x1a{ 1, "a" };

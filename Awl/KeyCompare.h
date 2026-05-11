@@ -8,68 +8,19 @@
 #include "Awl/Tuplizable.h"
 #include "Awl/TypeTraits.h"
 
-#include <concepts>
+#include <cstddef>
 #include <functional>
-#include <memory>
 #include <type_traits>
 #include <utility>
 
 namespace awl
 {
-    template <class T>
-    struct key_compare_element
-    {
-        using type = T;
-    };
-
-    template <class T>
-    struct key_compare_element<T *>
-    {
-        using type = std::remove_cv_t<T>;
-    };
-
-    template <class T>
-    struct key_compare_element<std::shared_ptr<T>>
-    {
-        using type = T;
-    };
-
-    template <class T, class Deleter>
-    struct key_compare_element<std::unique_ptr<T, Deleter>>
-    {
-        using type = T;
-    };
-
-    template <class T>
-    using key_compare_element_t = typename key_compare_element<T>::type;
-
-    template <class T>
-    struct key_compare_value
-    {
-        using type = T;
-    };
-
-    template <class T>
-    struct key_compare_value<T *>
-    {
-        using type = const std::remove_cv_t<T>*;
-    };
-
-    template <class T>
-    using key_compare_value_t = typename key_compare_value<T>::type;
-
     template <class T, auto get_key, class Compare = std::less<void>>
     class KeyCompare
     {
-    private:
-
-        using element_type = key_compare_element_t<T>;
-        using value_type = T;
-        using compare_value_type = key_compare_value_t<T>;
-
     public:
 
-        using key_type = std::invoke_result_t<decltype(get_key), const element_type&>;
+        using key_type = std::remove_cvref_t<std::invoke_result_t<decltype(get_key), const T&>>;
 
         KeyCompare() = default;
 
@@ -77,36 +28,24 @@ namespace awl
             _comp(std::move(comp))
         {}
 
-        constexpr bool operator()(const compare_value_type& left, const compare_value_type& right) const
+        constexpr bool operator()(const T& left, const T& right) const
         {
-            return _comp(project(left), project(right));
+            return _comp(std::invoke(get_key, left), std::invoke(get_key, right));
         }
 
-        constexpr bool operator()(const compare_value_type& val, const key_type & id) const
+        constexpr bool operator()(const T& val, const key_type & id) const
         {
-            return _comp(project(val), id);
+            return _comp(std::invoke(get_key, val), id);
         }
 
-        constexpr bool operator()(const key_type & id, const compare_value_type& val) const
+        constexpr bool operator()(const key_type & id, const T& val) const
         {
-            return _comp(id, project(val));
+            return _comp(id, std::invoke(get_key, val));
         }
 
         using is_transparent = void;
 
     private:
-
-        static constexpr decltype(auto) project(const compare_value_type& val)
-        {
-            if constexpr (std::invocable<decltype(get_key), const compare_value_type&>)
-            {
-                return std::invoke(get_key, val);
-            }
-            else
-            {
-                return std::invoke(get_key, *val);
-            }
-        }
 
         [[no_unique_address]] Compare _comp;
     };

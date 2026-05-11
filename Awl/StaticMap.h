@@ -102,7 +102,7 @@ namespace awl
         }
 
         using equal_comp_type = StringInsensitiveEqual<char>;
-        using less_comp_type = awl::KeyCompare<StaticLink<T>*, &StaticLink<T>::name, awl::CStringInsensitiveLess<char>>;
+        using less_comp_type = awl::KeyCompare<const StaticLink<T>*, &StaticLink<T>::name, awl::CStringInsensitiveLess<char>>;
 
         static equal_comp_type equal_comp() { return {}; }
         static less_comp_type less_comp() { return {}; }
