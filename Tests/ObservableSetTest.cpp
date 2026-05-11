@@ -5,11 +5,15 @@
 
 #include "Awl/ObservableSet.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/Getters.h"
+#include "Awl/KeyEqual.h"
+#include "Awl/KeyHash.h"
 #include "Awl/Random.h"
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/Tuplizable.h"
 
+#include <memory>
 #include <ranges>
 #include <unordered_set>
 #include <vector>
@@ -155,4 +159,31 @@ AWL_TEST(ObservableSetUnordered)
     AWL_UNUSED_CONTEXT;
 
     checkSetNotifications<awl::observable_unordered_set<int>, std::unordered_set<int>>();
+}
+
+AWL_TEST(ObservableSetUnorderedSharedKey)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using Set = awl::observable_unordered_set<
+        std::shared_ptr<A>,
+        awl::KeyHash<std::shared_ptr<A>, awl::getter<&A::GetKey>>,
+        awl::KeyEqual<std::shared_ptr<A>, awl::getter<&A::GetKey>>>;
+
+    Set set;
+
+    auto first = std::make_shared<A>(10);
+    auto second = std::make_shared<A>(20);
+
+    AWL_ASSERT(set.insert(first).second);
+    AWL_ASSERT(set.insert(second).second);
+    AWL_ASSERT_FALSE(set.insert(std::make_shared<A>(10)).second);
+
+    AWL_ASSERT(set.contains(10u));
+    AWL_ASSERT(set.contains(first));
+
+    auto i = set.find(20u);
+
+    AWL_ASSERT(i != set.end());
+    AWL_ASSERT(*i == second);
 }
