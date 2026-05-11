@@ -37,11 +37,6 @@ namespace awl
             _comp(std::move(comp))
         {}
 
-        //KeyCompare(const KeyCompare&) = default;
-        //KeyCompare(KeyCompare&&) = default;
-        //KeyCompare& operator = (const KeyCompare&) = default;
-        //KeyCompare& operator = (KeyCompare&&) = default;
-
         constexpr bool operator()(const T& left, const T& right) const
         {
             return _comp(std::invoke(getKey, left), std::invoke(getKey, right));
@@ -119,11 +114,6 @@ namespace awl
             getKey(std::move(get_key)),
             _comp(std::move(comp))
         {}
-
-        //KeyCompare(const KeyCompare&) = default;
-        //KeyCompare(KeyCompare&&) = default;
-        //KeyCompare& operator = (const KeyCompare&) = default;
-        //KeyCompare& operator = (KeyCompare&&) = default;
 
         constexpr bool operator()(const std::shared_ptr<T> & left, const std::shared_ptr<T> & right) const
         {
