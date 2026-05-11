@@ -5,7 +5,7 @@
 
 #include "Awl/CompositeCompare.h"
 #include "Awl/TransparentCompositeCompare.h"
-#include "Awl/KeyCompare.h"
+#include "Awl/RuntimeKeyCompare.h"
 #include "Awl/EnumTraits.h"
 #include "Awl/Testing/UnitTest.h"
 

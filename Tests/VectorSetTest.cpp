@@ -8,6 +8,7 @@
 #include "Awl/Random.h"
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/RuntimeKeyCompare.h"
 #include "Awl/Tuplizable.h"
 #include "Awl/StringFormat.h"
 
