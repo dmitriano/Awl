@@ -10,10 +10,11 @@
 #include "Awl/TypeTraits.h"
 
 #include <cassert>
+#include <functional>
 
 namespace awl
 {
-    template <class T, class PrimaryKeyGetter, class ForeignKeyGetter>
+    template <class T, auto primary_key, auto foreign_key>
     class foreign_set : public Observer<INotifySetChanged<T>>
     {
     private:
@@ -23,8 +24,8 @@ namespace awl
         //another type A -> A *
         using Pointer = std::conditional_t<is_copyable_pointer_v<T>, T, const remove_pointer_t<T>*>;
 
-        using ForeignKey = std::invoke_result_t<ForeignKeyGetter, const remove_pointer_t<T>&>;
-        using PrimaryCompare = KeyCompare<Pointer, PrimaryKeyGetter>;
+        using ForeignKey = std::invoke_result_t<decltype(foreign_key), const remove_pointer_t<T>&>;
+        using PrimaryCompare = KeyCompare<Pointer, primary_key>;
         using ValueSet = observable_vector_set<Pointer, PrimaryCompare>;
 
         class ValueSetCompare
@@ -32,8 +33,6 @@ namespace awl
         public:
 
             ValueSetCompare() = default;
-            
-            constexpr ValueSetCompare(ForeignKeyGetter getter) : foreignKeyGetter(std::move(getter)) {}
 
             constexpr bool operator()(const ValueSet & left, const ValueSet & right) const
             {
@@ -55,10 +54,8 @@ namespace awl
             constexpr ForeignKey foreignKey(const ValueSet & vs) const
             {
                 assert(!vs.empty());
-                return foreignKeyGetter(*vs.front());
+                return std::invoke(foreign_key, *vs.front());
             }
-
-            ForeignKeyGetter foreignKeyGetter;
         };
         
         using MultiSet = observable_vector_set<ValueSet, ValueSetCompare>;
@@ -66,16 +63,14 @@ namespace awl
 
     public:
 
-        foreign_set(PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
-            _set(fk_getter),
-            primaryKeyGetter(pk_getter),
-            foreignKeyGetter(fk_getter)
+        foreign_set() :
+            _set()
         {}
 
         //TODO: Make it deduce template arguments.
         template <class SrcSet>
-        foreign_set(const SrcSet& src_set, PrimaryKeyGetter pk_getter = {}, ForeignKeyGetter fk_getter = {}) :
-            foreign_set(pk_getter, fk_getter)
+        foreign_set(const SrcSet& src_set) :
+            foreign_set()
         {
             for (auto& val : src_set)
             {
@@ -173,7 +168,7 @@ namespace awl
         {
             auto& val_ref = *object_address(val);
 
-            auto i = _set.find(foreignKeyGetter(val_ref));
+            auto i = _set.find(std::invoke(foreign_key, val_ref));
 
             if (i != _set.end())
             {
@@ -184,7 +179,7 @@ namespace awl
             }
             else
             {
-                ValueSet vs{ PrimaryCompare{primaryKeyGetter} };
+                ValueSet vs{ PrimaryCompare{} };
                 vs.insert(valueToPointer(val));
                 const bool is_new = _set.insert(std::move(vs)).second;
                 assert(is_new);
@@ -196,7 +191,7 @@ namespace awl
         {
             auto& val_ref = *object_address(val);
             
-            auto i = _set.find(foreignKeyGetter(val_ref));
+            auto i = _set.find(std::invoke(foreign_key, val_ref));
 
             assert(i != _set.end());
 
@@ -206,14 +201,14 @@ namespace awl
 
             if (vs.size() == 1)
             {
-                assert(primaryKeyGetter(*vs.front()) == primaryKeyGetter(val_ref));
+                assert(std::invoke(primary_key, *vs.front()) == std::invoke(primary_key, val_ref));
                 
                 //vs destructor will fire 'onClearing'.
                 _set.erase(vs);
             }
             else
             {
-                auto j = vs.find(primaryKeyGetter(val_ref));
+                auto j = vs.find(std::invoke(primary_key, val_ref));
 
                 assert(j != vs.end());
                 
@@ -227,8 +222,5 @@ namespace awl
         }
 
         MultiSet _set;
-
-        PrimaryKeyGetter primaryKeyGetter;
-        ForeignKeyGetter foreignKeyGetter;
     };
 }

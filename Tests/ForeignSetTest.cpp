@@ -26,11 +26,8 @@ namespace
     
     AWL_MEMBERWISE_EQUATABLE(A)
 
-    using PrimaryGetter = awl::field_getter<A, int>; //&A::pk
-    using ForeignGetter = awl::field_getter<A, int>; //&A::fk
-
-    using PrimarySet = awl::observable_vector_set<A, awl::KeyCompare<A, PrimaryGetter>>;
-    using ForeignSet = awl::foreign_set<A, PrimaryGetter, ForeignGetter>;
+    using PrimarySet = awl::observable_vector_set<A, awl::KeyCompare<A, &A::pk>>;
+    using ForeignSet = awl::foreign_set<A, &A::pk, &A::fk>;
 
     //Do we really need it to be const?
     static_assert(std::is_same_v<typename ForeignSet::value_type::value_type, const A*>);
@@ -66,8 +63,8 @@ AWL_TEST(ForeignSetAddRemoveClear)
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
 
-    PrimarySet ps{ PrimaryGetter{ &A::pk } };
-    ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
+    PrimarySet ps;
+    ForeignSet fs;
 
     auto check = [&]()
     {
@@ -114,10 +111,10 @@ AWL_TEST(ForeignSetDestructor)
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
 
-    ForeignSet fs{ PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk } };
+    ForeignSet fs;
     
     {
-        PrimarySet ps{ PrimaryGetter{ &A::pk } };
+        PrimarySet ps;
 
         ps.subscribe(&fs);
 
@@ -132,11 +129,11 @@ AWL_TEST(ForeignSetConstructor)
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
     AWL_ATTRIBUTE(int, range, 1000);
 
-    PrimarySet ps{ PrimaryGetter{ &A::pk } };
+    PrimarySet ps;
 
     GenerateSet(ps, insert_count / 2, range / 2);
 
-    ForeignSet fs(ps, PrimaryGetter{ &A::pk }, ForeignGetter{ &A::fk });
+    ForeignSet fs(ps);
 
     GenerateSet(ps, insert_count / 2, range / 2);
 
@@ -170,22 +167,21 @@ AWL_TEST(ForeignSetShared)
         auto p_a = awl::object_address(a);
         static_assert(std::is_same_v<decltype(p_a), A*>);
 
-        ForeignGetter foreign_getter{ &A::fk };
-        const int key = foreign_getter(*plain_p);
+        const int key = plain_p->fk;
         static_cast<void>(key);
     }
 
     //Check if it compiles.
     
-    using SharedPrimarySet = awl::observable_vector_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, PrimaryGetter>>;
-    using SharedForeignSet = awl::foreign_set<std::shared_ptr<A>, PrimaryGetter, ForeignGetter>;
+    using SharedPrimarySet = awl::observable_vector_set<std::shared_ptr<A>, awl::KeyCompare<std::shared_ptr<A>, &A::pk>>;
+    using SharedForeignSet = awl::foreign_set<std::shared_ptr<A>, &A::pk, &A::fk>;
 
     static_assert(std::is_same_v<typename SharedForeignSet::value_type::value_type, std::shared_ptr<A>>);
 
-    SharedForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
+    SharedForeignSet fs;
 
     {
-        SharedPrimarySet ps{ PrimaryGetter{&A::pk} };
+        SharedPrimarySet ps;
 
         ps.subscribe(&fs);
 
@@ -207,15 +203,15 @@ AWL_TEST(ForeignSetUnique)
 
     //Check if it compiles.
 
-    using UniquePrimarySet = awl::observable_vector_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, PrimaryGetter>>;
-    using UniqueForeignSet = awl::foreign_set<std::unique_ptr<A>, PrimaryGetter, ForeignGetter>;
+    using UniquePrimarySet = awl::observable_vector_set<std::unique_ptr<A>, awl::KeyCompare<std::unique_ptr<A>, &A::pk>>;
+    using UniqueForeignSet = awl::foreign_set<std::unique_ptr<A>, &A::pk, &A::fk>;
 
     static_assert(std::is_same_v<typename UniqueForeignSet::value_type::value_type, const A*>);
 
-    UniqueForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
+    UniqueForeignSet fs;
     
     {
-        UniquePrimarySet ps{ PrimaryGetter{&A::pk} };
+        UniquePrimarySet ps;
 
         ps.subscribe(&fs);
 
@@ -237,13 +233,13 @@ AWL_TEST(ForeignSetPlainPointer)
 
     //Check if it compiles.
 
-    using PointerPrimarySet = awl::observable_vector_set<A *, awl::KeyCompare<A *, PrimaryGetter>>;
-    using PointerForeignSet = awl::foreign_set<A *, PrimaryGetter, ForeignGetter>;
+    using PointerPrimarySet = awl::observable_vector_set<A *, awl::KeyCompare<A *, &A::pk>>;
+    using PointerForeignSet = awl::foreign_set<A *, &A::pk, &A::fk>;
 
     static_assert(std::is_same_v<typename PointerForeignSet::value_type::value_type, A*>);
 
-    PointerForeignSet fs{ PrimaryGetter{&A::pk}, ForeignGetter{&A::fk} };
-    PointerPrimarySet ps{ PrimaryGetter{&A::pk} };
+    PointerForeignSet fs;
+    PointerPrimarySet ps;
 
     ps.subscribe(&fs);
 

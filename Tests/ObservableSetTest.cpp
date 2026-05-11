@@ -5,7 +5,6 @@
 
 #include "Awl/ObservableSet.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/Getters.h"
 #include "Awl/KeyEqual.h"
 #include "Awl/KeyHash.h"
 #include "Awl/Random.h"

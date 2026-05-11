@@ -35,7 +35,7 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
-    using GetAPtr = awl::FuncPtr<X, int>;
+    using GetAPtr = decltype(&X::GetA);
 
     static_assert(std::is_copy_constructible_v<GetAPtr>);
     static_assert(std::is_copy_assignable_v<GetAPtr>);
@@ -47,7 +47,7 @@ namespace
     static_assert(std::is_move_constructible_v<X>);
     static_assert(std::is_move_assignable_v<X>);
 
-    inline constexpr auto a_getter = awl::func_getter(&X::GetA);
+    inline constexpr auto a_getter = awl::member_getter<X, int() const>(&X::GetA);
     using AGetter = std::remove_const_t<decltype(a_getter)>;
 
     static_assert(std::is_copy_constructible_v<AGetter>);
