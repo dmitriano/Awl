@@ -7,10 +7,11 @@
 
 #include <functional>
 #include <type_traits>
+#include <utility>
 
 namespace awl
 {
-    template <class T, auto get_key>
+    template <class T, auto get_key, class Equals = std::equal_to<void>>
     class KeyEqual
     {
     private:
@@ -21,24 +22,34 @@ namespace awl
 
         using is_transparent = void;
 
+        KeyEqual() = default;
+
+        constexpr KeyEqual(Equals equals) :
+            _equals(std::move(equals))
+        {}
+
         bool operator()(const T& left, const T& right) const
         {
-            return std::invoke(get_key, left) == std::invoke(get_key, right);
+            return _equals(std::invoke(get_key, left), std::invoke(get_key, right));
         }
 
         bool operator()(const T& left, const Key& right) const
         {
-            return std::invoke(get_key, left) == right;
+            return _equals(std::invoke(get_key, left), right);
         }
 
         bool operator()(const Key& left, const T& right) const
         {
-            return left == std::invoke(get_key, right);
+            return _equals(left, std::invoke(get_key, right));
         }
 
         bool operator()(const Key& left, const Key& right) const
         {
-            return left == right;
+            return _equals(left, right);
         }
+
+    private:
+
+        [[no_unique_address]] Equals _equals;
     };
 }
