@@ -167,8 +167,8 @@ AWL_TEST(ObservableSetUnorderedSharedKey)
 
     using Set = awl::observable_unordered_set<
         std::shared_ptr<A>,
-        awl::KeyHash<std::shared_ptr<A>, awl::getter<&A::GetKey>>,
-        awl::KeyEqual<std::shared_ptr<A>, awl::getter<&A::GetKey>>>;
+        awl::KeyHash<std::shared_ptr<A>, &A::GetKey>,
+        awl::KeyEqual<std::shared_ptr<A>, &A::GetKey>>;
 
     Set set;
 
