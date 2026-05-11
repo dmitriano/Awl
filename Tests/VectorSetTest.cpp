@@ -758,7 +758,7 @@ AWL_TEST(VectorSetNonCopyableElement)
         AWL_ASSERT(set1.find(B(found_key)) != set1.end());
     }
 
-    TestBComparer(insert_count, range, awl::make_compare(&B::GetKey));
+    TestBComparer(insert_count, range, awl::makeRuntimeCompare(&B::GetKey));
     TestBComparer(insert_count, range, tuplizable_compare<B, 0>{});
 }
 

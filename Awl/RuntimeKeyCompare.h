@@ -12,28 +12,6 @@
 
 namespace awl
 {
-    template <class T, class Member>
-    class member_getter
-    {
-    public:
-
-        using object_type = T;
-        using value_type = std::invoke_result_t<Member T::*, const T&>;
-
-        constexpr member_getter(Member T::* p) :
-            _p(p)
-        {}
-
-        constexpr decltype(auto) operator()(const T& val) const
-        {
-            return std::invoke(_p, val);
-        }
-
-    private:
-
-        Member T::* _p;
-    };
-
     template <class T, class GetKey, class Compare = std::less<void>>
     class RuntimeKeyCompare
     {
@@ -72,16 +50,18 @@ namespace awl
     };
 
     template <class T, class Member, class Compare = std::less<void>>
-    constexpr auto make_compare(Member T::* p, Compare comp = {})
+    constexpr auto makeRuntimeCompare(Member T::* p, Compare comp = {})
     {
-        using GetKey = member_getter<T, Member>;
-        return RuntimeKeyCompare<T, GetKey, std::remove_const_t<std::decay_t<Compare>>>(GetKey{ p }, comp);
+        auto get_key = std::mem_fn(p);
+        using GetKey = decltype(get_key);
+        return RuntimeKeyCompare<T, GetKey, std::remove_const_t<std::decay_t<Compare>>>(std::move(get_key), comp);
     }
 
     template <class T, class Member, class Compare = std::less<void>>
-    constexpr auto make_shared_compare(Member T::* p, Compare comp = {})
+    constexpr auto makeSharedRuntimeCompare(Member T::* p, Compare comp = {})
     {
-        using GetKey = member_getter<T, Member>;
-        return RuntimeKeyCompare<std::shared_ptr<T>, GetKey, std::remove_const_t<std::decay_t<Compare>>>(GetKey{ p }, comp);
+        auto get_key = std::mem_fn(p);
+        using GetKey = decltype(get_key);
+        return RuntimeKeyCompare<std::shared_ptr<T>, GetKey, std::remove_const_t<std::decay_t<Compare>>>(std::move(get_key), comp);
     }
 }
