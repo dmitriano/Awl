@@ -103,6 +103,83 @@ AWL_TEST(Signal_StdFunction)
     AWL_ASSERT(signal.empty());
 }
 
+AWL_TEST(Signal_UnsubscribeSelfDuringEmit)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+    awl::Id id = {};
+    int self_sum = 0;
+    int other_sum = 0;
+
+    id = signal.subscribe(std::function<void(int)>([&signal, &id, &self_sum](int value)
+    {
+        self_sum += value;
+        AWL_ASSERT(signal.unsubscribe(id));
+    }));
+
+    signal.subscribe(std::function<void(int)>([&other_sum](int value)
+    {
+        other_sum += value;
+    }));
+
+    signal.emit(3);
+
+    AWL_ASSERT_EQUAL(3, self_sum);
+    AWL_ASSERT_EQUAL(3, other_sum);
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    signal.emit(4);
+
+    AWL_ASSERT_EQUAL(3, self_sum);
+    AWL_ASSERT_EQUAL(7, other_sum);
+    AWL_ASSERT_EQUAL(1u, signal.size());
+}
+
+AWL_TEST(Signal_UnsubscribeOtherDuringEmit)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Signal<int> signal;
+    awl::Id other_id = {};
+    int remover_sum = 0;
+    int other_sum = 0;
+    int tail_sum = 0;
+    bool removed_other = false;
+
+    signal.subscribe(std::function<void(int)>([&signal, &other_id, &remover_sum, &removed_other](int value)
+    {
+        remover_sum += value;
+        const bool unsubscribed = signal.unsubscribe(other_id);
+        AWL_ASSERT(unsubscribed != removed_other);
+        removed_other = true;
+    }));
+
+    other_id = signal.subscribe(std::function<void(int)>([&other_sum](int value)
+    {
+        other_sum += value;
+    }));
+
+    signal.subscribe(std::function<void(int)>([&tail_sum](int value)
+    {
+        tail_sum += value;
+    }));
+
+    signal.emit(3);
+
+    AWL_ASSERT_EQUAL(3, remover_sum);
+    AWL_ASSERT_EQUAL(0, other_sum);
+    AWL_ASSERT_EQUAL(3, tail_sum);
+    AWL_ASSERT_EQUAL(2u, signal.size());
+
+    signal.emit(4);
+
+    AWL_ASSERT_EQUAL(7, remover_sum);
+    AWL_ASSERT_EQUAL(0, other_sum);
+    AWL_ASSERT_EQUAL(7, tail_sum);
+    AWL_ASSERT_EQUAL(2u, signal.size());
+}
+
 AWL_TEST(Signal_SharedPtr)
 {
     AWL_UNUSED_CONTEXT;

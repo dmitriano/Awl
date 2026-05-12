@@ -9,6 +9,7 @@
 #include "Awl/UniqueId.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <concepts>
 #include <cstdint>
@@ -25,7 +26,18 @@ namespace awl
     public:
 
         using Slot = equatable_function<void(Args...)>;
-        using container_type = std::vector<Slot>;
+
+    private:
+
+        struct SlotRecord
+        {
+            Slot slot;
+            bool removed = false;
+        };
+
+    public:
+
+        using container_type = std::vector<SlotRecord>;
 
         Id subscribe(std::function<void(Args...)> func)
         {
@@ -36,9 +48,15 @@ namespace awl
 
         void subscribe(Slot slot)
         {
-            if (std::find(_slots.begin(), _slots.end(), slot) == _slots.end())
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
+
+            if (it == _slots.end())
             {
-                _slots.push_back(std::move(slot));
+                _slots.push_back(SlotRecord{ std::move(slot) });
             }
         }
 
@@ -80,22 +98,26 @@ namespace awl
 
         bool unsubscribe(const Slot& slot)
         {
-            const auto it = std::find(_slots.begin(), _slots.end(), slot);
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
 
             if (it == _slots.end())
             {
                 return false;
             }
 
-            auto last = _slots.end();
-            --last;
-
-            if (it != last)
+            if (_emitting)
             {
-                *it = std::move(*last);
+                it->removed = true;
+            }
+            else
+            {
+                eraseRecord(it);
             }
 
-            _slots.pop_back();
             return true;
         }
 
@@ -144,34 +166,26 @@ namespace awl
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
         {
-            auto i = _slots.begin();
+            assert(!_emitting);
 
-            while (i != _slots.end())
+            EmitGuard guard(*this);
+
+            for (SlotRecord& record : _slots)
             {
-                auto guard = i->lock();
-
-                if (guard)
+                if (record.removed)
                 {
-                    guard(args...);
-                    ++i;
+                    continue;
+                }
+
+                auto slot_guard = record.slot.lock();
+
+                if (slot_guard)
+                {
+                    slot_guard(args...);
                 }
                 else
                 {
-                    auto last = _slots.end();
-                    --last;
-                    const bool removing_last = (i == last);
-
-                    if (!removing_last)
-                    {
-                        *i = std::move(*last);
-                    }
-
-                    _slots.pop_back();
-
-                    if (removing_last)
-                    {
-                        i = _slots.end();
-                    }
+                    record.removed = true;
                 }
             }
         }
@@ -183,16 +197,64 @@ namespace awl
 
         bool empty() const noexcept
         {
-            return _slots.empty();
+            return size() == 0;
         }
 
         std::size_t size() const noexcept
         {
-            return _slots.size();
+            return static_cast<std::size_t>(std::count_if(_slots.begin(), _slots.end(),
+                [](const SlotRecord& record)
+                {
+                    return !record.removed;
+                }));
         }
 
     private:
 
+        class EmitGuard
+        {
+        public:
+
+            explicit EmitGuard(const Signal& signal) :
+                _signal(signal)
+            {
+                _signal._emitting = true;
+            }
+
+            ~EmitGuard()
+            {
+                _signal._emitting = false;
+                _signal.compact();
+            }
+
+        private:
+
+            const Signal& _signal;
+        };
+
+        void eraseRecord(container_type::iterator it)
+        {
+            auto last = _slots.end();
+            --last;
+
+            if (it != last)
+            {
+                *it = std::move(*last);
+            }
+
+            _slots.pop_back();
+        }
+
+        void compact() const
+        {
+            std::erase_if(_slots,
+                [](const SlotRecord& record)
+                {
+                    return record.removed;
+                });
+        }
+
+        mutable bool _emitting = false;
         mutable container_type _slots;
     };
 }
