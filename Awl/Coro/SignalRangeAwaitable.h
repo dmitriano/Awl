@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/RangeUtil.h"
 #include "Awl/Signal.h"
 
 #include <cassert>
@@ -46,29 +47,6 @@ namespace awl
             }
         }
 
-        template <class T>
-        struct shared_ptr_traits;
-
-        template <class T>
-        struct shared_ptr_traits<std::shared_ptr<T>>
-        {
-            using element_type = T;
-        };
-
-        template <class T>
-        concept shared_ptr_reference = requires
-        {
-            typename shared_ptr_traits<std::remove_cvref_t<T>>::element_type;
-        };
-
-        template <class R>
-        concept shared_ptr_range = std::ranges::input_range<R> &&
-            shared_ptr_reference<std::ranges::range_reference_t<R>>;
-
-        template <class R>
-        using shared_ptr_range_element_t = typename shared_ptr_traits<
-            std::remove_cvref_t<std::ranges::range_reference_t<R>>>::element_type;
-
         template <class Object, auto get_signal, class SignalType>
         class BasicSignalRangeAwaitable;
 
@@ -87,8 +65,7 @@ namespace awl
         public:
 
             template <std::ranges::input_range R>
-                requires detail::shared_ptr_range<R> &&
-                    std::same_as<detail::shared_ptr_range_element_t<R>, Object>
+                requires awl::range_over<R, std::shared_ptr<Object>>
             explicit BasicSignalRangeAwaitable(R&& objects)
             {
                 for (auto&& object : objects)
@@ -187,10 +164,10 @@ namespace awl
         std::remove_cvref_t<std::invoke_result_t<decltype(get_signal), Object&>>>;
 
     template <auto get_signal, std::ranges::input_range R>
-        requires detail::shared_ptr_range<R>
-    SignalRangeAwaitable<detail::shared_ptr_range_element_t<R>, get_signal> wait_signal(R&& objects)
+        requires awl::range_over<R, std::shared_ptr<typename std::ranges::range_value_t<R>::element_type>>
+    SignalRangeAwaitable<typename std::ranges::range_value_t<R>::element_type, get_signal> wait_signal(R&& objects)
     {
-        using Object = detail::shared_ptr_range_element_t<R>;
+        using Object = typename std::ranges::range_value_t<R>::element_type;
 
         return SignalRangeAwaitable<Object, get_signal>(std::forward<R>(objects));
     }
