@@ -234,32 +234,29 @@ namespace awl
 
             void onAdded(const ObjectPtr& object)
             {
-                if (!_done)
-                {
-                    Subscription& subscription = addObject(object);
+                assert(!_done);
 
-                    if (_coroutine != nullptr)
-                    {
-                        subscribeObject(subscription);
-                    }
+                Subscription& subscription = addObject(object);
+
+                if (_coroutine != nullptr)
+                {
+                    subscribeObject(subscription);
                 }
             }
 
             void onRemoving(const ObjectPtr& object)
             {
-                if (!_done)
-                {
-                    removeObject(object);
-                }
+                assert(!_done);
+
+                removeObject(object);
             }
 
             void onClearing()
             {
-                if (!_done)
-                {
-                    unsubscribeObjects();
-                    _subscriptions.clear();
-                }
+                assert(!_done);
+
+                unsubscribeObjects();
+                _subscriptions.clear();
             }
 
             void resume(std::shared_ptr<Object> sender, Args... args)
