@@ -5,7 +5,8 @@
 
 #pragma once
 
-#include "Awl/ObservableSet.h"
+#include "Awl/INotifySetChanged.h"
+#include "Awl/Observable.h"
 
 #include <concepts>
 #include <functional>

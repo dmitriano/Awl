@@ -1,0 +1,18 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Product: AWL (A Working Library)
+// Author: Dmitriano
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+namespace awl
+{
+    //The argument is const probably because it can be 'const shared_ptr<A> &'.
+    template <class T>
+    struct INotifySetChanged
+    {
+        virtual void onAdded(const T& val) = 0;
+        virtual void onRemoving(const T& val) = 0;
+        virtual void onClearing() = 0;
+    };
+}
