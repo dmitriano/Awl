@@ -1,5 +1,7 @@
 #include "Awl/Coro/SignalAwaitable.h"
 #include "Awl/Coro/Job.h"
+#include "Awl/ObservableSet.h"
+#include "Awl/ObservableUnorderedSet.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
@@ -346,6 +348,162 @@ AWL_TEST(SignalRangeAwaitable_UnsubscribesOnCancel)
 
     AWL_ASSERT(weak1.expired());
     AWL_ASSERT(weak2.expired());
+    AWL_ASSERT(sender == nullptr);
+    AWL_ASSERT_EQUAL(0, value);
+}
+
+AWL_TEST(SignalRangeAwaitable_ObservableSetAdded)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::observable_vector_set<std::shared_ptr<RangeSender>> objects;
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    awl::Job job = waitRangeValue(objects, sender, value);
+
+    AWL_ASSERT(!job.done());
+
+    auto object = std::make_shared<RangeSender>(1);
+    objects.insert(object);
+
+    AWL_ASSERT_EQUAL(1u, object->changed.size());
+
+    object->changed.emit(41);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(sender == object);
+    AWL_ASSERT_EQUAL(41, value);
+    AWL_ASSERT(object->changed.empty());
+}
+
+AWL_TEST(SignalRangeAwaitable_ObservableUnorderedSetAdded)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::observable_unordered_set<std::shared_ptr<RangeSender>> objects;
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    awl::Job job = waitRangeValue(objects, sender, value);
+
+    AWL_ASSERT(!job.done());
+
+    auto object = std::make_shared<RangeSender>(1);
+    objects.insert(object);
+
+    AWL_ASSERT_EQUAL(1u, object->changed.size());
+
+    object->changed.emit(43);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(sender == object);
+    AWL_ASSERT_EQUAL(43, value);
+    AWL_ASSERT(object->changed.empty());
+}
+
+AWL_TEST(SignalRangeAwaitable_ObservableSetRemoving)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::observable_vector_set<std::shared_ptr<RangeSender>> objects;
+    auto first = std::make_shared<RangeSender>(1);
+    auto second = std::make_shared<RangeSender>(2);
+
+    objects.insert(first);
+    objects.insert(second);
+
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    awl::Job job = waitRangeValue(objects, sender, value);
+
+    AWL_ASSERT(!job.done());
+    AWL_ASSERT_EQUAL(1u, first->changed.size());
+    AWL_ASSERT_EQUAL(1u, second->changed.size());
+
+    objects.erase(first);
+
+    AWL_ASSERT(first->changed.empty());
+    AWL_ASSERT_EQUAL(1u, second->changed.size());
+
+    first->changed.emit(45);
+
+    AWL_ASSERT(!job.done());
+    AWL_ASSERT(sender == nullptr);
+
+    second->changed.emit(47);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(sender == second);
+    AWL_ASSERT_EQUAL(47, value);
+    AWL_ASSERT(second->changed.empty());
+}
+
+AWL_TEST(SignalRangeAwaitable_ObservableSetClearing)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::observable_vector_set<std::shared_ptr<RangeSender>> objects;
+    auto first = std::make_shared<RangeSender>(1);
+    auto second = std::make_shared<RangeSender>(2);
+
+    objects.insert(first);
+    objects.insert(second);
+
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    awl::Job job = waitRangeValue(objects, sender, value);
+
+    AWL_ASSERT(!job.done());
+
+    objects.clear();
+
+    AWL_ASSERT(first->changed.empty());
+    AWL_ASSERT(second->changed.empty());
+
+    first->changed.emit(51);
+    second->changed.emit(53);
+
+    AWL_ASSERT(!job.done());
+    AWL_ASSERT(sender == nullptr);
+    AWL_ASSERT_EQUAL(0, value);
+
+    auto third = std::make_shared<RangeSender>(3);
+    objects.insert(third);
+
+    AWL_ASSERT_EQUAL(1u, third->changed.size());
+
+    third->changed.emit(55);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(sender == third);
+    AWL_ASSERT_EQUAL(55, value);
+    AWL_ASSERT(third->changed.empty());
+}
+
+AWL_TEST(SignalRangeAwaitable_ObservableSetUnsubscribesOnCancel)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::observable_vector_set<std::shared_ptr<RangeSender>> objects;
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    {
+        awl::Job job = waitRangeValue(objects, sender, value);
+
+        AWL_ASSERT(!job.done());
+    }
+
+    auto object = std::make_shared<RangeSender>(1);
+    objects.insert(object);
+
+    AWL_ASSERT(object->changed.empty());
+
+    object->changed.emit(57);
+
     AWL_ASSERT(sender == nullptr);
     AWL_ASSERT_EQUAL(0, value);
 }

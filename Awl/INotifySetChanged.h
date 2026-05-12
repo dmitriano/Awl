@@ -9,6 +9,7 @@
 #include "Awl/RangeUtil.h"
 
 #include <concepts>
+#include <type_traits>
 
 namespace awl
 {
@@ -22,11 +23,11 @@ namespace awl
     };
 
     template <class T>
-    using set_change_observer_t = Observer<INotifySetChanged<typename T::value_type>>;
+    using set_change_observer_t = Observer<INotifySetChanged<typename std::remove_cvref_t<T>::value_type>>;
 
     template <class T>
     concept observable_set_like =
-        requires { typename T::value_type; } &&
+        requires { typename std::remove_cvref_t<T>::value_type; } &&
         requires(const T& set, set_change_observer_t<T>* p_observer)
         {
             { set.subscribe(p_observer) } -> std::same_as<void>;

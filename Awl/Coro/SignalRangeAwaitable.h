@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Awl/INotifySetChanged.h"
 #include "Awl/RangeUtil.h"
 #include "Awl/Signal.h"
 
+#include <algorithm>
 #include <cassert>
 #include <coroutine>
 #include <cstddef>
@@ -56,20 +58,70 @@ namespace awl
         private:
 
             using Result = detail::signal_range_awaitable_result_t<Object, Args...>;
+            using ObjectPtr = std::shared_ptr<Object>;
+            using SetObserverBase = Observer<INotifySetChanged<ObjectPtr>>;
 
             struct State
             {
                 std::optional<Result> result;
             };
 
+            struct Subscription
+            {
+                ObjectPtr object;
+                Id id = 0;
+            };
+
+            class SetObserver : public SetObserverBase
+            {
+            public:
+
+                explicit SetObserver(BasicSignalRangeAwaitable& owner) :
+                    _owner(owner)
+                {}
+
+                void onAdded(const ObjectPtr& object) override
+                {
+                    _owner.onAdded(object);
+                }
+
+                void onRemoving(const ObjectPtr& object) override
+                {
+                    _owner.onRemoving(object);
+                }
+
+                void onClearing() override
+                {
+                    _owner.onClearing();
+                }
+
+            private:
+
+                BasicSignalRangeAwaitable& _owner;
+            };
+
         public:
 
-            template <awl::input_range_over<std::shared_ptr<Object>> R>
+            template <awl::input_range_over<ObjectPtr> R>
             explicit BasicSignalRangeAwaitable(R&& objects)
             {
+                if constexpr (awl::observable_shared_ptr_set<R>)
+                {
+                    static_assert(
+                        std::is_lvalue_reference_v<R>,
+                        "An observable set passed to wait_signal must outlive the awaiting coroutine.");
+
+                    auto* p_objects = std::addressof(objects);
+
+                    _subscribeSet = [p_objects](SetObserver* p_observer)
+                    {
+                        p_objects->subscribe(p_observer);
+                    };
+                }
+
                 for (auto&& object : objects)
                 {
-                    _objects.push_back(std::forward<decltype(object)>(object));
+                    addObject(std::forward<decltype(object)>(object));
                 }
             }
 
@@ -93,20 +145,18 @@ namespace awl
 
             void await_suspend(std::coroutine_handle<> h)
             {
-                assert(!_objects.empty());
+                assert(observesSet() || !_subscriptions.empty());
 
                 _coroutine = h;
-                _subscriptionIds.reserve(_objects.size());
 
-                for (const std::shared_ptr<Object>& object : _objects)
+                if (observesSet())
                 {
-                    ISignal<Args...>& signal = getSignal(*object);
+                    _subscribeSet(&_setObserver);
+                }
 
-                    _subscriptionIds.push_back(signal.subscribe(std::function<void(Args...)>(
-                        [this, object](Args... args)
-                        {
-                            resume(object, std::forward<Args>(args)...);
-                        })));
+                for (Subscription& subscription : _subscriptions)
+                {
+                    subscribeObject(subscription);
                 }
             }
 
@@ -122,6 +172,96 @@ namespace awl
                 return std::invoke(get_signal, object);
             }
 
+            bool observesSet() const
+            {
+                return static_cast<bool>(_subscribeSet);
+            }
+
+            Subscription& addObject(ObjectPtr object)
+            {
+                _subscriptions.push_back(Subscription{ std::move(object) });
+                return _subscriptions.back();
+            }
+
+            void subscribeObject(Subscription& subscription)
+            {
+                if (subscription.id == 0)
+                {
+                    ISignal<Args...>& signal = getSignal(*subscription.object);
+                    ObjectPtr object = subscription.object;
+
+                    subscription.id = signal.subscribe(std::function<void(Args...)>(
+                        [this, object = std::move(object)](Args... args)
+                        {
+                            resume(object, std::forward<Args>(args)...);
+                        }));
+                }
+            }
+
+            void unsubscribeObject(Subscription& subscription)
+            {
+                if (subscription.id != 0)
+                {
+                    ISignal<Args...>& signal = getSignal(*subscription.object);
+                    signal.unsubscribe(subscription.id);
+                    subscription.id = 0;
+                }
+            }
+
+            void unsubscribeObjects()
+            {
+                for (Subscription& subscription : _subscriptions)
+                {
+                    unsubscribeObject(subscription);
+                }
+            }
+
+            auto findSubscription(const ObjectPtr& object)
+            {
+                return std::ranges::find(_subscriptions, object, &Subscription::object);
+            }
+
+            void removeObject(const ObjectPtr& object)
+            {
+                auto i = findSubscription(object);
+
+                if (i != _subscriptions.end())
+                {
+                    unsubscribeObject(*i);
+                    _subscriptions.erase(i);
+                }
+            }
+
+            void onAdded(const ObjectPtr& object)
+            {
+                if (!_done)
+                {
+                    Subscription& subscription = addObject(object);
+
+                    if (_coroutine != nullptr)
+                    {
+                        subscribeObject(subscription);
+                    }
+                }
+            }
+
+            void onRemoving(const ObjectPtr& object)
+            {
+                if (!_done)
+                {
+                    removeObject(object);
+                }
+            }
+
+            void onClearing()
+            {
+                if (!_done)
+                {
+                    unsubscribeObjects();
+                    _subscriptions.clear();
+                }
+            }
+
             void resume(std::shared_ptr<Object> sender, Args... args)
             {
                 if (!_done)
@@ -135,21 +275,14 @@ namespace awl
 
             void unsubscribe()
             {
-                for (std::size_t i = 0; i != _subscriptionIds.size(); ++i)
-                {
-                    Id& id = _subscriptionIds[i];
-
-                    if (id != 0)
-                    {
-                        ISignal<Args...>& signal = getSignal(*_objects[i]);
-                        signal.unsubscribe(id);
-                        id = 0;
-                    }
-                }
+                _setObserver.unsubscribeSafe();
+                unsubscribeObjects();
+                _subscriptions.clear();
             }
 
-            std::vector<std::shared_ptr<Object>> _objects;
-            std::vector<Id> _subscriptionIds;
+            std::vector<Subscription> _subscriptions;
+            SetObserver _setObserver{ *this };
+            std::function<void(SetObserver*)> _subscribeSet;
             bool _done = false;
             std::coroutine_handle<> _coroutine = nullptr;
             State _state;
