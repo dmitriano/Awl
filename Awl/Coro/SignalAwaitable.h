@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/Coro/SignalRangeAwaitable.h"
 #include "Awl/Signal.h"
 
 #include <coroutine>
@@ -46,6 +47,19 @@ namespace awl
         template <>
         struct signal_awaitable_state<void>
         {};
+
+        template <class Result, class State, class... Args>
+        void store_signal_awaitable_result(State& state, Args&&... args)
+        {
+            if constexpr (std::is_void_v<Result>)
+            {
+                static_cast<void>(sizeof...(args));
+            }
+            else
+            {
+                state.result.emplace(std::forward<Args>(args)...);
+            }
+        }
     }
 
     template <class... Args>
@@ -117,18 +131,7 @@ namespace awl
 
         void store(Args... args)
         {
-            if constexpr (std::is_void_v<Result>)
-            {
-                static_cast<void>(sizeof...(args));
-            }
-            else if constexpr (sizeof...(Args) == 1)
-            {
-                _state.result.emplace(std::forward<Args>(args)...);
-            }
-            else
-            {
-                _state.result.emplace(std::forward<Args>(args)...);
-            }
+            detail::store_signal_awaitable_result<Result>(_state, std::forward<Args>(args)...);
         }
 
         Signal<Args...>& _signal;
