@@ -17,6 +17,7 @@
 #include <ranges>
 
 static_assert(awl::range_over<awl::ring<int>, int>);
+static_assert(awl::input_range_over<awl::ring<int>, int>);
 
 namespace
 {
