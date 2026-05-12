@@ -31,7 +31,7 @@ namespace awl
         return true;
     }
 
-    bool CompositeLogger::enabled(const std::string& level) const
+    bool CompositeLogger::enabled(const std::string& level) const noexcept
     {
         using namespace std::placeholders;
 
@@ -40,7 +40,7 @@ namespace awl
             std::bind(&ILogger::enabled, _1, std::cref(level)));
     }
 
-    void CompositeLogger::doLog(const std::string& level, const LogString& message)
+    void CompositeLogger::doLog(const std::string& level, const LogString& message) noexcept
     {
         std::ranges::for_each(_loggers, [&](const std::shared_ptr<ILogger>& logger)
         {

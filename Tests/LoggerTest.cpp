@@ -78,7 +78,7 @@ namespace
 
     protected:
 
-        void doLog(const std::string& level, const awl::LogString& message) override
+        void doLog(const std::string& level, const awl::LogString& message) noexcept override
         {
             ++_logCount;
             _level = level;
@@ -100,7 +100,7 @@ namespace
     {
     public:
 
-        bool enabled(const std::string& level) const override
+        bool enabled(const std::string& level) const noexcept override
         {
             return level != awl::LogLevel::Debug;
         }
@@ -114,7 +114,7 @@ namespace
             _enabled(enabled)
         {}
 
-        bool enabled(const std::string& level) const override
+        bool enabled(const std::string& level) const noexcept override
         {
             ++_enabledCallCount;
             _enabledLevel = level;
@@ -154,7 +154,7 @@ namespace
 
     protected:
 
-        void doLog(const std::string& level, const awl::LogString& message) override
+        void doLog(const std::string& level, const awl::LogString& message) noexcept override
         {
             ++_logCount;
             _level = level;
@@ -243,10 +243,7 @@ AWL_TEST(ILogger)
     awl::StdStreamLogger default_logger("Test", out_stream);
 
     AWL_ASSERT(default_logger.enabled(awl::LogLevel::Trace));
-    awl::testing::Assert::throws<std::runtime_error>([&default_logger]()
-    {
-        default_logger.enabled("Custom");
-    });
+    AWL_ASSERT_FALSE(default_logger.enabled("Custom"));
 
     awl::StdStreamLogger console_logger("Test", out_stream, awl::LogLevel::Info);
 

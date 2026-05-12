@@ -112,7 +112,7 @@ namespace awl
         _state->delayedOutput.clear();
     }
 
-    bool StdStreamLogger::enabled(const std::string& level) const
+    bool StdStreamLogger::enabled(const std::string& level) const noexcept
     {
         const std::size_t severity = logLevelSeverity(level);
 
@@ -120,7 +120,7 @@ namespace awl
         {
             if (!_allowCustomLevel)
             {
-                throw std::runtime_error(std::format("Unknown log level: '{}'.", level));
+                return false;
             }
 
             return true;
@@ -129,7 +129,7 @@ namespace awl
         return severity >= _severity;
     }
 
-    void StdStreamLogger::doLog(const std::string& level, const LogString& message)
+    void StdStreamLogger::doLog(const std::string& level, const LogString& message) noexcept
     {
         awl::ostringstream temp_out;
         const std::source_location location = message.location();

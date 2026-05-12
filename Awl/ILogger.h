@@ -25,154 +25,154 @@ namespace awl
     {
     public:
 
-        virtual bool enabled(const std::string& level) const
+        virtual bool enabled(const std::string& level) const noexcept
         {
             static_cast<void>(level);
             return true;
         }
 
-        void log(const std::string& level, const LogString& message)
+        void log(const std::string& level, const LogString& message) noexcept
         {
             logLazy(level, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void log(const std::string& level, std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void log(const std::string& level, std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             logFormatted<char>(level, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void log(const std::string& level, std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void log(const std::string& level, std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             logFormatted<wchar_t>(level, fmt, std::forward<Args>(args)...);
         }
 
-        void debug(const LogString& message)
+        void debug(const LogString& message) noexcept
         {
             logLazy(LogLevel::Debug, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void debug(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void debug(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Debug, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void debug(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void debug(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Debug, fmt, std::forward<Args>(args)...);
         }
 
-        void trace(const LogString& message)
+        void trace(const LogString& message) noexcept
         {
             logLazy(LogLevel::Trace, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void trace(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void trace(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Trace, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void trace(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void trace(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Trace, fmt, std::forward<Args>(args)...);
         }
 
-        void info(const LogString& message)
+        void info(const LogString& message) noexcept
         {
             logLazy(LogLevel::Info, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void info(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void info(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Info, fmt, std::forward<Args>(args)...);
         }
         
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void info(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void info(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Info, fmt, std::forward<Args>(args)...);
         }
 
-        void warning(const LogString& message)
+        void warning(const LogString& message) noexcept
         {
             logLazy(LogLevel::Warning, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void warning(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void warning(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Warning, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void warning(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void warning(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Warning, fmt, std::forward<Args>(args)...);
         }
 
-        void error(const LogString& message)
+        void error(const LogString& message) noexcept
         {
             logLazy(LogLevel::Error, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void error(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void error(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Error, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void error(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void error(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Error, fmt, std::forward<Args>(args)...);
         }
 
-        void critical(const LogString& message)
+        void critical(const LogString& message) noexcept
         {
             logLazy(LogLevel::Critical, message);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void critical(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args)
+        void critical(std::type_identity_t<LogFormat<char, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Critical, fmt, std::forward<Args>(args)...);
         }
 
         template <class... Args>
             requires (sizeof...(Args) > 0)
-        void critical(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args)
+        void critical(std::type_identity_t<LogFormat<wchar_t, Args...>> fmt, Args&&... args) noexcept
         {
             log(LogLevel::Critical, fmt, std::forward<Args>(args)...);
         }
 
     protected:
 
-        virtual void doLog(const std::string& level, const LogString& message) = 0;
+        virtual void doLog(const std::string& level, const LogString& message) noexcept = 0;
 
     private:
 
         template <class Character, class... Args>
             requires (sizeof...(Args) > 0)
-        void logFormatted(const std::string& level, std::type_identity_t<LogFormat<Character, Args...>> fmt, Args&&... args)
+        void logFormatted(const std::string& level, std::type_identity_t<LogFormat<Character, Args...>> fmt, Args&&... args) noexcept
         {
             if (enabled(level))
             {
@@ -180,7 +180,7 @@ namespace awl
             }
         }
 
-        void logLazy(const std::string& level, const LogString& message)
+        void logLazy(const std::string& level, const LogString& message) noexcept
         {
             if (enabled(level))
             {
