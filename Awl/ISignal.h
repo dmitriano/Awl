@@ -25,8 +25,7 @@ namespace awl
 
         virtual bool unsubscribe(const Slot& slot) = 0;
 
-        // ISignal is a non-owning subscription interface. It intentionally has no virtual destructor:
-        // only the owner deletes the concrete Source instance.
+        virtual ~ISignal() = default;
 
         Id subscribe(std::function<void(Args...)> func)
         {
