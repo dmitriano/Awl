@@ -1,0 +1,145 @@
+#pragma once
+
+#include "Awl/Signal.h"
+
+#include <coroutine>
+#include <functional>
+#include <optional>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
+namespace awl
+{
+    template <class... Args>
+    class SignalAwaitable;
+
+    namespace detail
+    {
+        template <class... Args>
+        struct signal_awaitable_result
+        {
+            using type = std::tuple<std::decay_t<Args>...>;
+        };
+
+        template <class Arg>
+        struct signal_awaitable_result<Arg>
+        {
+            using type = std::decay_t<Arg>;
+        };
+
+        template <>
+        struct signal_awaitable_result<>
+        {
+            using type = void;
+        };
+
+        template <class... Args>
+        using signal_awaitable_result_t = typename signal_awaitable_result<Args...>::type;
+
+        template <class Result>
+        struct signal_awaitable_state
+        {
+            std::optional<Result> result;
+        };
+
+        template <>
+        struct signal_awaitable_state<void>
+        {};
+    }
+
+    template <class... Args>
+    class SignalAwaitable
+    {
+    private:
+
+        using Result = detail::signal_awaitable_result_t<Args...>;
+
+    public:
+
+        explicit SignalAwaitable(Signal<Args...>& signal) :
+            _signal(signal)
+        {}
+
+        SignalAwaitable(const SignalAwaitable&) = delete;
+
+        SignalAwaitable(SignalAwaitable&&) = delete;
+
+        SignalAwaitable& operator = (const SignalAwaitable&) = delete;
+
+        SignalAwaitable& operator = (SignalAwaitable&&) = delete;
+
+        ~SignalAwaitable()
+        {
+            unsubscribe();
+        }
+
+        bool await_ready() const noexcept
+        {
+            return false;
+        }
+
+        void await_suspend(std::coroutine_handle<> h)
+        {
+            _coroutine = h;
+
+            _subscriptionId = _signal.subscribe(std::function<void(Args...)>(
+                [this](Args... args)
+                {
+                    store(std::forward<Args>(args)...);
+                    unsubscribe();
+                    _coroutine.resume();
+                }));
+        }
+
+        decltype(auto) await_resume()
+        {
+            if constexpr (std::is_void_v<Result>)
+            {
+                return;
+            }
+            else
+            {
+                return std::move(*_state.result);
+            }
+        }
+
+    private:
+
+        void unsubscribe()
+        {
+            if (_subscriptionId != 0)
+            {
+                _signal.unsubscribe(_subscriptionId);
+                _subscriptionId = 0;
+            }
+        }
+
+        void store(Args... args)
+        {
+            if constexpr (std::is_void_v<Result>)
+            {
+                static_cast<void>(sizeof...(args));
+            }
+            else if constexpr (sizeof...(Args) == 1)
+            {
+                _state.result.emplace(std::forward<Args>(args)...);
+            }
+            else
+            {
+                _state.result.emplace(std::forward<Args>(args)...);
+            }
+        }
+
+        Signal<Args...>& _signal;
+        Id _subscriptionId = 0;
+        std::coroutine_handle<> _coroutine = nullptr;
+        detail::signal_awaitable_state<Result> _state;
+    };
+
+    template <class... Args>
+    SignalAwaitable<Args...> wait_signal(Signal<Args...>& signal)
+    {
+        return SignalAwaitable<Args...>(signal);
+    }
+}
