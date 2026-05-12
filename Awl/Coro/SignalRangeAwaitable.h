@@ -51,7 +51,7 @@ namespace awl
         class BasicSignalRangeAwaitable;
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalRangeAwaitable<Object, get_signal, Signal<Args...>>
+        class BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>
         {
         private:
 
@@ -100,7 +100,7 @@ namespace awl
 
                 for (const std::shared_ptr<Object>& object : _objects)
                 {
-                    Signal<Args...>& signal = getSignal(*object);
+                    ISignal<Args...>& signal = getSignal(*object);
 
                     _subscriptionIds.push_back(signal.subscribe(std::function<void(Args...)>(
                         [this, object](Args... args)
@@ -117,7 +117,7 @@ namespace awl
 
         private:
 
-            static Signal<Args...>& getSignal(Object& object)
+            static ISignal<Args...>& getSignal(Object& object)
             {
                 return std::invoke(get_signal, object);
             }
@@ -141,7 +141,7 @@ namespace awl
 
                     if (id != 0)
                     {
-                        Signal<Args...>& signal = getSignal(*_objects[i]);
+                        ISignal<Args...>& signal = getSignal(*_objects[i]);
                         signal.unsubscribe(id);
                         id = 0;
                     }
@@ -156,12 +156,12 @@ namespace awl
         };
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalRangeAwaitable<Object, get_signal, SignalSource<Args...>> :
-            public BasicSignalRangeAwaitable<Object, get_signal, Signal<Args...>>
+        class BasicSignalRangeAwaitable<Object, get_signal, Source<Args...>> :
+            public BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>
         {
         private:
 
-            using Base = BasicSignalRangeAwaitable<Object, get_signal, Signal<Args...>>;
+            using Base = BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>;
 
         public:
 

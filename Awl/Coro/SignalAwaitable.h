@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/Coro/SignalRangeAwaitable.h"
-#include "Awl/Signal.h"
+#include "Awl/ISignal.h"
 
 #include <coroutine>
 #include <functional>
@@ -71,7 +71,7 @@ namespace awl
 
     public:
 
-        explicit SignalAwaitable(Signal<Args...>& signal) :
+        explicit SignalAwaitable(ISignal<Args...>& signal) :
             _signal(signal)
         {}
 
@@ -134,14 +134,14 @@ namespace awl
             detail::store_signal_awaitable_result<Result>(_state, std::forward<Args>(args)...);
         }
 
-        Signal<Args...>& _signal;
+        ISignal<Args...>& _signal;
         Id _subscriptionId = 0;
         std::coroutine_handle<> _coroutine = nullptr;
         detail::signal_awaitable_state<Result> _state;
     };
 
     template <class... Args>
-    SignalAwaitable<Args...> wait_signal(Signal<Args...>& signal)
+    SignalAwaitable<Args...> wait_signal(ISignal<Args...>& signal)
     {
         return SignalAwaitable<Args...>(signal);
     }

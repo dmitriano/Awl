@@ -20,22 +20,22 @@ namespace
 
         int id;
         bool enabled = true;
-        awl::SignalSource<int> changed;
-        awl::SignalSource<> closed;
+        awl::Source<int> changed;
+        awl::Source<> closed;
 
-        awl::Signal<int>& changedSignal()
+        awl::ISignal<int>& changedSignal()
         {
             return changed;
         }
     };
 
-    awl::Job waitInt(awl::Signal<int>& signal, int& result)
+    awl::Job waitInt(awl::ISignal<int>& signal, int& result)
     {
         result = co_await awl::wait_signal(signal);
     }
 
     awl::Job waitTuple(
-        awl::Signal<const std::shared_ptr<int>&, const std::string&>& signal,
+        awl::ISignal<const std::shared_ptr<int>&, const std::string&>& signal,
         std::shared_ptr<int>& sender,
         std::string& value)
     {
@@ -45,7 +45,7 @@ namespace
         value = std::move(result_value);
     }
 
-    awl::Job waitVoid(awl::Signal<>& signal, bool& resumed)
+    awl::Job waitVoid(awl::ISignal<>& signal, bool& resumed)
     {
         co_await awl::wait_signal(signal);
 
@@ -81,7 +81,7 @@ AWL_TEST(SignalAwaitable_SingleArgument)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::SignalSource<int> signal;
+    awl::Source<int> signal;
     int result = 0;
 
     awl::Job job = waitInt(signal, result);
@@ -100,7 +100,7 @@ AWL_TEST(SignalAwaitable_Tuple)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::SignalSource<const std::shared_ptr<int>&, const std::string&> signal;
+    awl::Source<const std::shared_ptr<int>&, const std::string&> signal;
     auto expected_sender = std::make_shared<int>(42);
     std::shared_ptr<int> sender;
     std::string value;
@@ -121,7 +121,7 @@ AWL_TEST(SignalAwaitable_Void)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::SignalSource<> signal;
+    awl::Source<> signal;
     bool resumed = false;
 
     awl::Job job = waitVoid(signal, resumed);
@@ -139,7 +139,7 @@ AWL_TEST(SignalAwaitable_ResumesOnce)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::SignalSource<int> signal;
+    awl::Source<int> signal;
     int result = 0;
 
     awl::Job job = waitInt(signal, result);
@@ -156,7 +156,7 @@ AWL_TEST(SignalAwaitable_UnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::SignalSource<int> signal;
+    awl::Source<int> signal;
     int result = 0;
 
     {
