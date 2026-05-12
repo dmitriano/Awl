@@ -12,57 +12,6 @@
 
 namespace awl
 {
-    namespace detail
-    {
-        template <class Set, class = void>
-        struct reverse_iterator_of
-        {
-            using type = typename Set::iterator;
-        };
-
-        template <class Set>
-        struct reverse_iterator_of<Set, std::void_t<typename Set::reverse_iterator>>
-        {
-            using type = typename Set::reverse_iterator;
-        };
-
-        template <class Set, class = void>
-        struct const_reverse_iterator_of
-        {
-            using type = typename Set::const_iterator;
-        };
-
-        template <class Set>
-        struct const_reverse_iterator_of<Set, std::void_t<typename Set::const_reverse_iterator>>
-        {
-            using type = typename Set::const_reverse_iterator;
-        };
-
-        template <class Set, class Fallback, class = void>
-        struct key_compare_of
-        {
-            using type = Fallback;
-        };
-
-        template <class Set, class Fallback>
-        struct key_compare_of<Set, Fallback, std::void_t<typename Set::key_compare>>
-        {
-            using type = typename Set::key_compare;
-        };
-
-        template <class Set, class Fallback, class = void>
-        struct value_compare_of
-        {
-            using type = Fallback;
-        };
-
-        template <class Set, class Fallback>
-        struct value_compare_of<Set, Fallback, std::void_t<typename Set::value_compare>>
-        {
-            using type = typename Set::value_compare;
-        };
-    }
-
     //The argument is const probably because it can be 'const shared_ptr<A> &'.
     template <class T>
     struct INotifySetChanged
@@ -96,12 +45,12 @@ namespace awl
         using iterator = typename InternalSet::iterator;
         using const_iterator = typename InternalSet::const_iterator;
 
-        using reverse_iterator = typename detail::reverse_iterator_of<InternalSet>::type;
-        using const_reverse_iterator = typename detail::const_reverse_iterator_of<InternalSet>::type;
+        using reverse_iterator = typename InternalSet::reverse_iterator;
+        using const_reverse_iterator = typename InternalSet::const_reverse_iterator;
 
         using allocator_type = typename InternalSet::allocator_type;
-        using key_compare = typename detail::key_compare_of<InternalSet, Compare>::type;
-        using value_compare = typename detail::value_compare_of<InternalSet, Compare>::type;
+        using key_compare = typename InternalSet::key_compare;
+        using value_compare = typename InternalSet::value_compare;
 
         basic_observable_set() = default;
         
