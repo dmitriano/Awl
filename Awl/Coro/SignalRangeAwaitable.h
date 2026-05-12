@@ -261,13 +261,12 @@ namespace awl
 
             void resume(std::shared_ptr<Object> sender, Args... args)
             {
-                if (!_done)
-                {
-                    _done = true;
-                    detail::store_signal_range_awaitable_result<Result>(_state, std::move(sender), std::forward<Args>(args)...);
-                    unsubscribe();
-                    _coroutine.resume();
-                }
+                assert(!_done);
+
+                _done = true;
+                detail::store_signal_range_awaitable_result<Result>(_state, std::move(sender), std::forward<Args>(args)...);
+                unsubscribe();
+                _coroutine.resume();
             }
 
             void unsubscribe()
