@@ -21,11 +21,11 @@ namespace awl
 
         using Slot = equatable_function<void(Args...)>;
 
+        virtual ~ISignal() = default;
+
         virtual void subscribe(Slot slot) = 0;
 
         virtual bool unsubscribe(const Slot& slot) = 0;
-
-        virtual ~ISignal() = default;
 
         Id subscribe(std::function<void(Args...)> func)
         {

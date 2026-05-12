@@ -23,9 +23,9 @@ namespace
         awl::Source<int> changed;
         awl::Source<> closed;
 
-        awl::ISignal<int>& changedSignal()
+        decltype(changed)::Signal& changedSignal()
         {
-            return changed;
+            return changed.signal();
         }
     };
 

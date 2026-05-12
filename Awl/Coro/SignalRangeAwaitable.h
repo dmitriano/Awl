@@ -175,8 +175,7 @@ namespace awl
         get_signal,
         std::remove_cvref_t<std::invoke_result_t<decltype(get_signal), Object&>>>;
 
-    template <auto get_signal, class R>
-        requires awl::input_range_over<R, std::shared_ptr<typename std::ranges::range_value_t<R>::element_type>>
+    template <auto get_signal, awl::input_shared_ptr_range R>
     SignalRangeAwaitable<typename std::ranges::range_value_t<R>::element_type, get_signal> wait_signal(R&& objects)
     {
         using Object = typename std::ranges::range_value_t<R>::element_type;

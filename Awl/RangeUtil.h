@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <concepts>
+#include <memory>
 #include <ranges>
 
 namespace awl
@@ -16,6 +18,11 @@ namespace awl
     template <class R, class Value>
     concept input_range_over = std::ranges::input_range<R> &&
         std::same_as<std::ranges::range_value_t<R>, Value>;
+
+    template <class R>
+    concept input_shared_ptr_range = std::ranges::input_range<R> &&
+        requires { typename std::ranges::range_value_t<R>::element_type; } &&
+        input_range_over<R, std::shared_ptr<typename std::ranges::range_value_t<R>::element_type>>;
 
     //with 'const R& r' we will get error: no viable conversion from 'const_iterator' ... in CLang
     template <std::ranges::range R, class Compare>
