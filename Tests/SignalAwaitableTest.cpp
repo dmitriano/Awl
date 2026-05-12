@@ -20,8 +20,8 @@ namespace
 
         int id;
         bool enabled = true;
-        awl::Signal<int> changed;
-        awl::Signal<> closed;
+        awl::SignalSource<int> changed;
+        awl::SignalSource<> closed;
 
         awl::Signal<int>& changedSignal()
         {
@@ -81,7 +81,7 @@ AWL_TEST(SignalAwaitable_SingleArgument)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     int result = 0;
 
     awl::Job job = waitInt(signal, result);
@@ -100,7 +100,7 @@ AWL_TEST(SignalAwaitable_Tuple)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<const std::shared_ptr<int>&, const std::string&> signal;
+    awl::SignalSource<const std::shared_ptr<int>&, const std::string&> signal;
     auto expected_sender = std::make_shared<int>(42);
     std::shared_ptr<int> sender;
     std::string value;
@@ -121,7 +121,7 @@ AWL_TEST(SignalAwaitable_Void)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<> signal;
+    awl::SignalSource<> signal;
     bool resumed = false;
 
     awl::Job job = waitVoid(signal, resumed);
@@ -139,7 +139,7 @@ AWL_TEST(SignalAwaitable_ResumesOnce)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     int result = 0;
 
     awl::Job job = waitInt(signal, result);
@@ -156,7 +156,7 @@ AWL_TEST(SignalAwaitable_UnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     int result = 0;
 
     {

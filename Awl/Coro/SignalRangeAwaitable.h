@@ -154,6 +154,19 @@ namespace awl
             std::coroutine_handle<> _coroutine = nullptr;
             State _state;
         };
+
+        template <class Object, auto get_signal, class... Args>
+        class BasicSignalRangeAwaitable<Object, get_signal, SignalSource<Args...>> :
+            public BasicSignalRangeAwaitable<Object, get_signal, Signal<Args...>>
+        {
+        private:
+
+            using Base = BasicSignalRangeAwaitable<Object, get_signal, Signal<Args...>>;
+
+        public:
+
+            using Base::Base;
+        };
     }
 
     template <class Object, auto get_signal>

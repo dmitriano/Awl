@@ -30,7 +30,7 @@ AWL_TEST(Signal_SubscribeUnsubscribeEmit)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     Handler h1;
     Handler h2;
 
@@ -70,7 +70,7 @@ AWL_TEST(Signal_StdFunction)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     int sum1 = 0;
     int sum2 = 0;
 
@@ -107,7 +107,7 @@ AWL_TEST(Signal_UnsubscribeSelfDuringEmit)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     awl::Id id = {};
     int self_sum = 0;
     int other_sum = 0;
@@ -140,7 +140,7 @@ AWL_TEST(Signal_UnsubscribeOtherDuringEmit)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
     awl::Id other_id = {};
     int remover_sum = 0;
     int other_sum = 0;
@@ -184,7 +184,7 @@ AWL_TEST(Signal_SharedPtr)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
 
     auto owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
@@ -216,7 +216,7 @@ AWL_TEST(Signal_SharedAndWeakAreDifferentSlots)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
 
     auto owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
@@ -248,7 +248,7 @@ AWL_TEST(Signal_WeakPtr)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
 
     auto owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
@@ -275,7 +275,7 @@ AWL_TEST(Signal_WeakPtrCompaction)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
 
     auto owner_alive = std::make_shared<Handler>();
     auto owner_dead = std::make_shared<Handler>();
@@ -299,7 +299,7 @@ AWL_TEST(Signal_RemoveExpiredSlotInEmit)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::Signal<int> signal;
+    awl::SignalSource<int> signal;
 
     auto owner1 = std::make_shared<Handler>();
     auto owner_dead = std::make_shared<Handler>();

@@ -27,17 +27,8 @@ namespace awl
 
         using Slot = equatable_function<void(Args...)>;
 
-    private:
-
-        struct SlotRecord
-        {
-            Slot slot;
-            bool removed = false;
-        };
-
-    public:
-
-        using container_type = std::vector<SlotRecord>;
+        // Signal is a non-owning subscription interface. It intentionally has no virtual destructor:
+        // only the owner deletes the concrete SignalSource instance.
 
         Id subscribe(std::function<void(Args...)> func)
         {
@@ -46,19 +37,7 @@ namespace awl
             return id;
         }
 
-        void subscribe(Slot slot)
-        {
-            const auto it = std::find_if(_slots.begin(), _slots.end(),
-                [&slot](const SlotRecord& record)
-                {
-                    return !record.removed && record.slot == slot;
-                });
-
-            if (it == _slots.end())
-            {
-                _slots.push_back(SlotRecord{ std::move(slot) });
-            }
-        }
+        virtual void subscribe(Slot slot) = 0;
 
         template <class Object>
         void subscribe(Object* p_object, void (Object::*member)(Args...))
@@ -96,30 +75,7 @@ namespace awl
             subscribe(Slot(std::move(p_object), member));
         }
 
-        bool unsubscribe(const Slot& slot)
-        {
-            const auto it = std::find_if(_slots.begin(), _slots.end(),
-                [&slot](const SlotRecord& record)
-                {
-                    return !record.removed && record.slot == slot;
-                });
-
-            if (it == _slots.end())
-            {
-                return false;
-            }
-
-            if (_emitting)
-            {
-                it->removed = true;
-            }
-            else
-            {
-                eraseRecord(it);
-            }
-
-            return true;
-        }
+        virtual bool unsubscribe(const Slot& slot) = 0;
 
         bool unsubscribe(Id id)
         {
@@ -162,6 +118,70 @@ namespace awl
             return unsubscribe(Slot(std::move(p_object), member));
         }
 
+        virtual bool empty() const noexcept = 0;
+
+        virtual std::size_t size() const noexcept = 0;
+    };
+
+    template <class... Args>
+    class SignalSource :
+        public Signal<Args...>
+    {
+    private:
+
+        using Slot = typename Signal<Args...>::Slot;
+
+        struct SlotRecord
+        {
+            Slot slot;
+            bool removed = false;
+        };
+
+    public:
+
+        using container_type = std::vector<SlotRecord>;
+        using Signal<Args...>::subscribe;
+        using Signal<Args...>::unsubscribe;
+
+        void subscribe(Slot slot) override
+        {
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
+
+            if (it == _slots.end())
+            {
+                _slots.push_back(SlotRecord{ std::move(slot) });
+            }
+        }
+
+        bool unsubscribe(const Slot& slot) override
+        {
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
+
+            if (it == _slots.end())
+            {
+                return false;
+            }
+
+            if (_emitting)
+            {
+                it->removed = true;
+            }
+            else
+            {
+                eraseRecord(it);
+            }
+
+            return true;
+        }
+
         template<typename ...Params>
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
@@ -195,12 +215,12 @@ namespace awl
             container_type().swap(_slots);
         }
 
-        bool empty() const noexcept
+        bool empty() const noexcept override
         {
             return size() == 0;
         }
 
-        std::size_t size() const noexcept
+        std::size_t size() const noexcept override
         {
             return static_cast<std::size_t>(std::count_if(_slots.begin(), _slots.end(),
                 [](const SlotRecord& record)
@@ -215,7 +235,7 @@ namespace awl
         {
         public:
 
-            explicit EmitGuard(const Signal& signal) :
+            explicit EmitGuard(const SignalSource& signal) :
                 _signal(signal)
             {
                 _signal._emitting = true;
@@ -229,7 +249,7 @@ namespace awl
 
         private:
 
-            const Signal& _signal;
+            const SignalSource& _signal;
         };
 
         void eraseRecord(container_type::iterator it)
