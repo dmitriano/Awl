@@ -35,4 +35,15 @@ namespace awl
             transaction->commit();
         };
     }
+
+    inline std::move_only_function<void()> wrapInTransaction(
+        std::unique_ptr<ITransaction> transaction,
+        std::move_only_function<void()> func)
+    {
+        return [transaction = std::move(transaction), func = std::move(func)]() mutable
+        {
+            func();
+            transaction->commit();
+        };
+    }
 }

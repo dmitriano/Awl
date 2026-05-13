@@ -78,26 +78,14 @@ namespace awl
         equatable_function(std::nullptr_t) noexcept
         {}
 
-        equatable_function(const equatable_function& other)
-        {
-            copy_from(other);
-        }
+        equatable_function(const equatable_function& other) = delete;
 
         equatable_function(equatable_function&& other) noexcept
         {
             move_from(std::move(other));
         }
 
-        equatable_function& operator=(const equatable_function& other)
-        {
-            if (this != std::addressof(other))
-            {
-                reset();
-                copy_from(other);
-            }
-
-            return *this;
-        }
+        equatable_function& operator=(const equatable_function& other) = delete;
 
         equatable_function& operator=(equatable_function&& other) noexcept
         {
@@ -151,7 +139,7 @@ namespace awl
             emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
         }
 
-        equatable_function(std::uint64_t id, std::function<Result(Args...)> func)
+        equatable_function(std::uint64_t id, std::move_only_function<Result(Args...)> func)
         {
             emplace_invocable<ErasedLambda>(id, std::move(func));
         }
@@ -233,7 +221,6 @@ namespace awl
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual void destroy() noexcept = 0;
-            virtual Invocable* clone_to(void* p_storage) const = 0;
             virtual Invocable* move_to(void* p_storage) noexcept = 0;
         };
 
@@ -262,11 +249,6 @@ namespace awl
             void destroy() noexcept override
             {
                 static_cast<Derived*>(this)->~Derived();
-            }
-
-            Invocable* clone_to(void* p_storage) const override
-            {
-                return ::new (p_storage) Derived(static_cast<const Derived&>(*this));
             }
 
             Invocable* move_to(void* p_storage) noexcept override
@@ -336,7 +318,7 @@ namespace awl
         {
         public:
 
-            ErasedLambda(std::uint64_t id, std::function<Result(Args...)> func)
+            ErasedLambda(std::uint64_t id, std::move_only_function<Result(Args...)> func)
                 : _id(id)
                 , _func(std::move(func))
             {}
@@ -359,7 +341,7 @@ namespace awl
         private:
 
             std::uint64_t _id = 0;
-            mutable std::function<Result(Args...)> _func;
+            mutable std::move_only_function<Result(Args...)> _func;
         };
 
         template <class Member>
@@ -510,7 +492,7 @@ namespace awl
         // The last void* is vtable.
         static constexpr std::size_t member_storage_size =
             std::max(
-                sizeof(std::uint64_t) + sizeof(std::function<Result(Args...)>),
+                sizeof(std::uint64_t) + sizeof(std::move_only_function<Result(Args...)>),
                 std::max(
                     sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()),
                     sizeof(std::shared_ptr<HandleSample>) + sizeof(void (HandleSample::*)()))) +
@@ -536,14 +518,6 @@ namespace awl
             {
                 _invocable->destroy();
                 _invocable = nullptr;
-            }
-        }
-
-        void copy_from(const equatable_function& other)
-        {
-            if (other._invocable != nullptr)
-            {
-                _invocable = other._invocable->clone_to(storage_ptr());
             }
         }
 

@@ -6,7 +6,6 @@
 #include "Awl/Signal.h"
 #include "Awl/Testing/UnitTest.h"
 
-#include <functional>
 #include <memory>
 
 namespace
@@ -66,7 +65,7 @@ AWL_TEST(Signal_SubscribeUnsubscribeEmit)
     AWL_ASSERT_EQUAL(0u, signal.size());
 }
 
-AWL_TEST(Signal_StdFunction)
+AWL_TEST(Signal_Function)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -74,15 +73,15 @@ AWL_TEST(Signal_StdFunction)
     int sum1 = 0;
     int sum2 = 0;
 
-    const auto id1 = signal.subscribe(std::function<void(int)>([&sum1](int value)
+    const auto id1 = signal.subscribe([&sum1](int value)
     {
         sum1 += value;
-    }));
+    });
 
-    const auto id2 = signal.subscribe(std::function<void(int)>([&sum2](int value)
+    const auto id2 = signal.subscribe([&sum2](int value)
     {
         sum2 += value * 2;
-    }));
+    });
 
     AWL_ASSERT_FALSE(id1 == id2);
     AWL_ASSERT_EQUAL(2u, signal.size());
@@ -103,6 +102,31 @@ AWL_TEST(Signal_StdFunction)
     AWL_ASSERT(signal.empty());
 }
 
+AWL_TEST(Signal_MoveOnlyFunction)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Source<int> signal;
+    int sum = 0;
+    auto multiplier = std::make_unique<int>(3);
+
+    const auto id = signal.subscribe([multiplier = std::move(multiplier), &sum](int value)
+    {
+        sum += *multiplier * value;
+    });
+
+    signal.emit(4);
+
+    AWL_ASSERT_EQUAL(12, sum);
+
+    AWL_ASSERT(signal.unsubscribe(id));
+
+    signal.emit(5);
+
+    AWL_ASSERT_EQUAL(12, sum);
+    AWL_ASSERT(signal.empty());
+}
+
 AWL_TEST(Signal_UnsubscribeSelfDuringEmit)
 {
     AWL_UNUSED_CONTEXT;
@@ -112,16 +136,16 @@ AWL_TEST(Signal_UnsubscribeSelfDuringEmit)
     int self_sum = 0;
     int other_sum = 0;
 
-    id = signal.subscribe(std::function<void(int)>([&signal, &id, &self_sum](int value)
+    id = signal.subscribe([&signal, &id, &self_sum](int value)
     {
         self_sum += value;
         AWL_ASSERT(signal.unsubscribe(id));
-    }));
+    });
 
-    signal.subscribe(std::function<void(int)>([&other_sum](int value)
+    signal.subscribe([&other_sum](int value)
     {
         other_sum += value;
-    }));
+    });
 
     signal.emit(3);
 
@@ -147,23 +171,23 @@ AWL_TEST(Signal_UnsubscribeOtherDuringEmit)
     int tail_sum = 0;
     bool removed_other = false;
 
-    signal.subscribe(std::function<void(int)>([&signal, &other_id, &remover_sum, &removed_other](int value)
+    signal.subscribe([&signal, &other_id, &remover_sum, &removed_other](int value)
     {
         remover_sum += value;
         const bool unsubscribed = signal.unsubscribe(other_id);
         AWL_ASSERT(unsubscribed != removed_other);
         removed_other = true;
-    }));
+    });
 
-    other_id = signal.subscribe(std::function<void(int)>([&other_sum](int value)
+    other_id = signal.subscribe([&other_sum](int value)
     {
         other_sum += value;
-    }));
+    });
 
-    signal.subscribe(std::function<void(int)>([&tail_sum](int value)
+    signal.subscribe([&tail_sum](int value)
     {
         tail_sum += value;
-    }));
+    });
 
     signal.emit(3);
 

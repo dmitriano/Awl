@@ -97,13 +97,13 @@ namespace awl
         {
             _coroutine = h;
 
-            _subscriptionId = _signal.subscribe(std::function<void(Args...)>(
+            _subscriptionId = _signal.subscribe(
                 [this](Args... args)
                 {
                     store(std::forward<Args>(args)...);
                     unsubscribe();
                     _coroutine.resume();
-                }));
+                });
         }
 
         decltype(auto) await_resume()

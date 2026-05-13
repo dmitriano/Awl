@@ -7,6 +7,7 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 
@@ -105,6 +106,10 @@ AWL_TEST(EquatableFunction_Invoke)
 {
     AWL_UNUSED_CONTEXT;
 
+    static_assert(!std::copy_constructible<awl::equatable_function<void(int)>>);
+    static_assert(!std::is_copy_assignable_v<awl::equatable_function<void(int)>>);
+    static_assert(std::move_constructible<awl::equatable_function<void(int)>>);
+
     Handler h;
 
     awl::equatable_function<void(int)> f(&h, &Handler::on_value);
@@ -114,6 +119,30 @@ AWL_TEST(EquatableFunction_Invoke)
     f(7);
 
     AWL_ASSERT_EQUAL(12, h.sum);
+}
+
+AWL_TEST(EquatableFunction_MoveOnlyLambda)
+{
+    AWL_UNUSED_CONTEXT;
+
+    auto multiplier = std::make_unique<int>(4);
+    int sum = 0;
+
+    awl::equatable_function<void(int)> f1(100u, [multiplier = std::move(multiplier), &sum](int value)
+    {
+        sum += *multiplier * value;
+    });
+
+    awl::equatable_function<void(int)> f2(100u, [&sum](int value)
+    {
+        sum += value;
+    });
+
+    AWL_ASSERT(f1 == f2);
+
+    f1(3);
+
+    AWL_ASSERT_EQUAL(12, sum);
 }
 
 AWL_TEST(EquatableFunction_Lambda)
@@ -153,9 +182,9 @@ AWL_TEST(EquatableFunction_Lambda)
     AWL_ASSERT_EQUAL(5, sum);
 
     std::unordered_set<awl::equatable_function<void(int)>> handlers;
-    AWL_ASSERT(handlers.insert(f1).second);
-    AWL_ASSERT_FALSE(handlers.insert(f2).second);
-    AWL_ASSERT(handlers.insert(f3).second);
+    AWL_ASSERT(handlers.insert(std::move(f1)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f2)).second);
+    AWL_ASSERT(handlers.insert(std::move(f3)).second);
     AWL_ASSERT_EQUAL(2u, handlers.size());
 }
 
@@ -172,7 +201,7 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     awl::equatable_function<void(int)> f2(&h1, &Handler::on_value);
     awl::equatable_function<void(int)> f3(&h2, &Handler::on_value);
     awl::equatable_function<void(int)> f4(&h1, &Handler::on_other);
-    awl::equatable_function<void(int)> f5 = f1;
+    awl::equatable_function<void(int)> f5(&h1, &Handler::on_value);
     awl::equatable_function<void(int)> movable(&h1, &Handler::on_value);
     awl::equatable_function<void(int)> f6(std::move(movable));
     awl::equatable_function<void(int)> empty1;
@@ -182,28 +211,27 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     awl::equatable_function<void(int)> f_derived_dup(&derived, &DerivedHandler::on_value_derived);
 
     std::unordered_set<awl::equatable_function<void(int)>> handlers;
-    AWL_ASSERT(handlers.insert(f1).second);
-    AWL_ASSERT_FALSE(handlers.insert(f2).second);
-    AWL_ASSERT(handlers.insert(f3).second);
-    AWL_ASSERT(handlers.insert(f4).second);
-    AWL_ASSERT_FALSE(handlers.insert(f5).second);
-    AWL_ASSERT_FALSE(handlers.insert(f6).second);
-    AWL_ASSERT(handlers.insert(empty1).second);
-    AWL_ASSERT_FALSE(handlers.insert(empty2).second);
-    AWL_ASSERT(handlers.insert(f_other).second);
-    AWL_ASSERT(handlers.insert(f_derived).second);
-    AWL_ASSERT_FALSE(handlers.insert(f_derived_dup).second);
+    AWL_ASSERT(handlers.insert(std::move(f1)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f2)).second);
+    AWL_ASSERT(handlers.insert(std::move(f3)).second);
+    AWL_ASSERT(handlers.insert(std::move(f4)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f5)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f6)).second);
+    AWL_ASSERT(handlers.insert(std::move(empty1)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(empty2)).second);
+    AWL_ASSERT(handlers.insert(std::move(f_other)).second);
+    AWL_ASSERT(handlers.insert(std::move(f_derived)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f_derived_dup)).second);
 
     AWL_ASSERT_EQUAL(6u, handlers.size());
-    AWL_ASSERT(handlers.find(f1) != handlers.end());
-    AWL_ASSERT(handlers.find(f2) != handlers.end());
-    AWL_ASSERT(handlers.find(f3) != handlers.end());
-    AWL_ASSERT(handlers.find(f4) != handlers.end());
-    AWL_ASSERT(handlers.find(empty1) != handlers.end());
-    AWL_ASSERT(handlers.find(f_other) != handlers.end());
-    AWL_ASSERT(handlers.find(f_derived) != handlers.end());
-    AWL_ASSERT_EQUAL(1u, handlers.erase(f3));
-    AWL_ASSERT(handlers.find(f3) == handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&h1, &Handler::on_value)) != handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&h2, &Handler::on_value)) != handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&h1, &Handler::on_other)) != handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>()) != handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&other, &OtherHandler::on_value)) != handlers.end());
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&derived, &DerivedHandler::on_value_derived)) != handlers.end());
+    AWL_ASSERT_EQUAL(1u, handlers.erase(awl::equatable_function<void(int)>(&h2, &Handler::on_value)));
+    AWL_ASSERT(handlers.find(awl::equatable_function<void(int)>(&h2, &Handler::on_value)) == handlers.end());
     AWL_ASSERT_EQUAL(5u, handlers.size());
 
     awl::equatable_function<bool(int)> p1(&h1, &Handler::test_value);
@@ -214,19 +242,19 @@ AWL_TEST(EquatableFunction_UnorderedSet)
     awl::equatable_function<bool(int)> p_derived_dup(&derived, &DerivedHandler::test_value_derived);
 
     std::unordered_set<awl::equatable_function<bool(int)>> predicates;
-    AWL_ASSERT(predicates.insert(p1).second);
-    AWL_ASSERT_FALSE(predicates.insert(p2).second);
-    AWL_ASSERT(predicates.insert(p3).second);
-    AWL_ASSERT(predicates.insert(p_other).second);
-    AWL_ASSERT(predicates.insert(p_derived).second);
-    AWL_ASSERT_FALSE(predicates.insert(p_derived_dup).second);
+    AWL_ASSERT(predicates.insert(std::move(p1)).second);
+    AWL_ASSERT_FALSE(predicates.insert(std::move(p2)).second);
+    AWL_ASSERT(predicates.insert(std::move(p3)).second);
+    AWL_ASSERT(predicates.insert(std::move(p_other)).second);
+    AWL_ASSERT(predicates.insert(std::move(p_derived)).second);
+    AWL_ASSERT_FALSE(predicates.insert(std::move(p_derived_dup)).second);
     AWL_ASSERT_EQUAL(4u, predicates.size());
-    AWL_ASSERT(predicates.find(p2) != predicates.end());
-    AWL_ASSERT(predicates.find(p_other) != predicates.end());
-    AWL_ASSERT(predicates.find(p_derived) != predicates.end());
-    AWL_ASSERT_EQUAL(1u, predicates.erase(p2));
-    AWL_ASSERT(predicates.find(p2) == predicates.end());
-    AWL_ASSERT_EQUAL(0u, predicates.erase(p2));
+    AWL_ASSERT(predicates.find(awl::equatable_function<bool(int)>(&h1, &Handler::test_value)) != predicates.end());
+    AWL_ASSERT(predicates.find(awl::equatable_function<bool(int)>(&other, &OtherHandler::test_value)) != predicates.end());
+    AWL_ASSERT(predicates.find(awl::equatable_function<bool(int)>(&derived, &DerivedHandler::test_value_derived)) != predicates.end());
+    AWL_ASSERT_EQUAL(1u, predicates.erase(awl::equatable_function<bool(int)>(&h1, &Handler::test_value)));
+    AWL_ASSERT(predicates.find(awl::equatable_function<bool(int)>(&h1, &Handler::test_value)) == predicates.end());
+    AWL_ASSERT_EQUAL(0u, predicates.erase(awl::equatable_function<bool(int)>(&h1, &Handler::test_value)));
     AWL_ASSERT_EQUAL(3u, predicates.size());
 }
 
@@ -251,11 +279,11 @@ AWL_TEST(EquatableFunction_DifferentHandlerTypes)
     AWL_ASSERT_FALSE(f_derived1 == f_derived2);
 
     std::unordered_set<awl::equatable_function<void(int)>> handlers;
-    AWL_ASSERT(handlers.insert(f_base).second);
-    AWL_ASSERT(handlers.insert(f_other).second);
-    AWL_ASSERT(handlers.insert(f_derived1).second);
-    AWL_ASSERT_FALSE(handlers.insert(f_derived1_dup).second);
-    AWL_ASSERT(handlers.insert(f_derived2).second);
+    AWL_ASSERT(handlers.insert(std::move(f_base)).second);
+    AWL_ASSERT(handlers.insert(std::move(f_other)).second);
+    AWL_ASSERT(handlers.insert(std::move(f_derived1)).second);
+    AWL_ASSERT_FALSE(handlers.insert(std::move(f_derived1_dup)).second);
+    AWL_ASSERT(handlers.insert(std::move(f_derived2)).second);
     AWL_ASSERT_EQUAL(4u, handlers.size());
 
     awl::equatable_function<bool(int)> p_base(&base, &Handler::test_value);
@@ -264,10 +292,10 @@ AWL_TEST(EquatableFunction_DifferentHandlerTypes)
     awl::equatable_function<bool(int)> p_derived_dup(&derived1, &DerivedHandler::test_value_derived);
 
     std::unordered_set<awl::equatable_function<bool(int)>> predicates;
-    AWL_ASSERT(predicates.insert(p_base).second);
-    AWL_ASSERT(predicates.insert(p_other).second);
-    AWL_ASSERT(predicates.insert(p_derived).second);
-    AWL_ASSERT_FALSE(predicates.insert(p_derived_dup).second);
+    AWL_ASSERT(predicates.insert(std::move(p_base)).second);
+    AWL_ASSERT(predicates.insert(std::move(p_other)).second);
+    AWL_ASSERT(predicates.insert(std::move(p_derived)).second);
+    AWL_ASSERT_FALSE(predicates.insert(std::move(p_derived_dup)).second);
     AWL_ASSERT_EQUAL(3u, predicates.size());
 }
 

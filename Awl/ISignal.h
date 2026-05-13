@@ -27,7 +27,7 @@ namespace awl
 
         virtual bool unsubscribe(const Slot& slot) = 0;
 
-        Id subscribe(std::function<void(Args...)> func)
+        Id subscribe(std::move_only_function<void(Args...)> func)
         {
             const Id id = unique_id();
             subscribe(Slot(id, std::move(func)));
@@ -72,7 +72,7 @@ namespace awl
 
         bool unsubscribe(Id id)
         {
-            return unsubscribe(Slot(id, std::function<void(Args...)>{ [](Args...) {} }));
+            return unsubscribe(Slot(id, std::move_only_function<void(Args...)>{ [](Args...) {} }));
         }
 
         template <class Object>

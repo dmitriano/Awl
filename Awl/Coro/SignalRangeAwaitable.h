@@ -190,11 +190,11 @@ namespace awl
                     ISignal<Args...>& signal = getSignal(*subscription.object);
                     ObjectPtr object = subscription.object;
 
-                    subscription.id = signal.subscribe(std::function<void(Args...)>(
+                    subscription.id = signal.subscribe(
                         [this, object = std::move(object)](Args... args)
                         {
                             resume(object, std::forward<Args>(args)...);
-                        }));
+                        });
                 }
             }
 
