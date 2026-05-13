@@ -57,25 +57,59 @@ namespace
     template <class R>
     awl::Job waitRangeValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
     {
-        auto [result_sender, result_value] = co_await awl::wait_signal<&RangeSender::changed>(std::forward<R>(objects));
+        {
+            auto accumulator = awl::accumulate_signal<&RangeSender::changed>(std::forward<R>(objects));
+            auto [result_sender, result_value] = co_await accumulator.wait();
 
-        sender = std::move(result_sender);
-        value = result_value;
+            sender = std::move(result_sender);
+            value = result_value;
+        }
     }
 
     template <class R>
     awl::Job waitRangeMethodValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
     {
-        auto [result_sender, result_value] = co_await awl::wait_signal<&RangeSender::changedSignal>(std::forward<R>(objects));
+        {
+            auto accumulator = awl::accumulate_signal<&RangeSender::changedSignal>(std::forward<R>(objects));
+            auto [result_sender, result_value] = co_await accumulator.wait();
 
-        sender = std::move(result_sender);
-        value = result_value;
+            sender = std::move(result_sender);
+            value = result_value;
+        }
     }
 
     template <class R>
     awl::Job waitRangeVoid(R&& objects, std::shared_ptr<RangeSender>& sender)
     {
-        sender = co_await awl::wait_signal<&RangeSender::closed>(std::forward<R>(objects));
+        {
+            auto accumulator = awl::accumulate_signal<&RangeSender::closed>(std::forward<R>(objects));
+
+            sender = co_await accumulator.wait();
+        }
+    }
+
+    using RangeChangedAccumulator = awl::SignalAccumulator<RangeSender, &RangeSender::changed>;
+
+    awl::Job waitAccumulatedValue(RangeChangedAccumulator& accumulator, std::shared_ptr<RangeSender>& sender, int& value)
+    {
+        auto [result_sender, result_value] = co_await accumulator.wait();
+
+        sender = std::move(result_sender);
+        value = result_value;
+    }
+
+    awl::Job waitAccumulatedValues(
+        RangeChangedAccumulator& accumulator,
+        std::vector<std::shared_ptr<RangeSender>>& senders,
+        std::vector<int>& values)
+    {
+        for (int i = 0; i != 2; ++i)
+        {
+            auto [sender, value] = co_await accumulator.wait();
+
+            senders.push_back(std::move(sender));
+            values.push_back(value);
+        }
     }
 }
 
@@ -175,7 +209,7 @@ AWL_TEST(SignalAwaitable_UnsubscribesOnCancel)
     AWL_ASSERT_EQUAL(0, result);
 }
 
-AWL_TEST(SignalRangeAwaitable_Value)
+AWL_TEST(SignalAccumulator_Value)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -215,7 +249,7 @@ AWL_TEST(SignalRangeAwaitable_Value)
     AWL_ASSERT_EQUAL(17, value);
 }
 
-AWL_TEST(SignalRangeAwaitable_MemberFunction)
+AWL_TEST(SignalAccumulator_MemberFunction)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -243,7 +277,7 @@ AWL_TEST(SignalRangeAwaitable_MemberFunction)
     AWL_ASSERT(objects[1]->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_Void)
+AWL_TEST(SignalAccumulator_Void)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -270,7 +304,7 @@ AWL_TEST(SignalRangeAwaitable_Void)
     AWL_ASSERT(objects[1]->closed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_FilterView)
+AWL_TEST(SignalAccumulator_FilterView)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -313,7 +347,7 @@ AWL_TEST(SignalRangeAwaitable_FilterView)
     AWL_ASSERT(objects[1]->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_UnsubscribesOnCancel)
+AWL_TEST(SignalAccumulator_UnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -352,7 +386,71 @@ AWL_TEST(SignalRangeAwaitable_UnsubscribesOnCancel)
     AWL_ASSERT_EQUAL(0, value);
 }
 
-AWL_TEST(SignalRangeAwaitable_ObservableSetAdded)
+AWL_TEST(SignalAccumulator_QueuesBeforeWait)
+{
+    AWL_UNUSED_CONTEXT;
+
+    std::vector<std::shared_ptr<RangeSender>> objects =
+    {
+        std::make_shared<RangeSender>(1),
+        std::make_shared<RangeSender>(2)
+    };
+
+    RangeChangedAccumulator accumulator(objects);
+
+    AWL_ASSERT_EQUAL(1u, objects[0]->changed.size());
+    AWL_ASSERT_EQUAL(1u, objects[1]->changed.size());
+
+    objects[1]->changed.emit(61);
+
+    std::shared_ptr<RangeSender> sender;
+    int value = 0;
+
+    awl::Job job = waitAccumulatedValue(accumulator, sender, value);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(sender == objects[1]);
+    AWL_ASSERT_EQUAL(61, value);
+    AWL_ASSERT_EQUAL(1u, objects[0]->changed.size());
+    AWL_ASSERT_EQUAL(1u, objects[1]->changed.size());
+}
+
+AWL_TEST(SignalAccumulator_WaitMany)
+{
+    AWL_UNUSED_CONTEXT;
+
+    std::vector<std::shared_ptr<RangeSender>> objects =
+    {
+        std::make_shared<RangeSender>(1),
+        std::make_shared<RangeSender>(2)
+    };
+
+    RangeChangedAccumulator accumulator(objects);
+    std::vector<std::shared_ptr<RangeSender>> senders;
+    std::vector<int> values;
+
+    awl::Job job = waitAccumulatedValues(accumulator, senders, values);
+
+    AWL_ASSERT(!job.done());
+
+    objects[0]->changed.emit(67);
+
+    AWL_ASSERT(!job.done());
+    AWL_ASSERT_EQUAL(1u, senders.size());
+    AWL_ASSERT(senders[0] == objects[0]);
+    AWL_ASSERT_EQUAL(67, values[0]);
+
+    objects[1]->changed.emit(71);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT_EQUAL(2u, senders.size());
+    AWL_ASSERT(senders[1] == objects[1]);
+    AWL_ASSERT_EQUAL(71, values[1]);
+    AWL_ASSERT_EQUAL(1u, objects[0]->changed.size());
+    AWL_ASSERT_EQUAL(1u, objects[1]->changed.size());
+}
+
+AWL_TEST(SignalAccumulator_ObservableSetAdded)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -377,7 +475,7 @@ AWL_TEST(SignalRangeAwaitable_ObservableSetAdded)
     AWL_ASSERT(object->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_ObservableUnorderedSetAdded)
+AWL_TEST(SignalAccumulator_ObservableUnorderedSetAdded)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -402,7 +500,7 @@ AWL_TEST(SignalRangeAwaitable_ObservableUnorderedSetAdded)
     AWL_ASSERT(object->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_ObservableSetRemoving)
+AWL_TEST(SignalAccumulator_ObservableSetRemoving)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -440,7 +538,7 @@ AWL_TEST(SignalRangeAwaitable_ObservableSetRemoving)
     AWL_ASSERT(second->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_ObservableSetClearing)
+AWL_TEST(SignalAccumulator_ObservableSetClearing)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -483,7 +581,7 @@ AWL_TEST(SignalRangeAwaitable_ObservableSetClearing)
     AWL_ASSERT(third->changed.empty());
 }
 
-AWL_TEST(SignalRangeAwaitable_ObservableSetUnsubscribesOnCancel)
+AWL_TEST(SignalAccumulator_ObservableSetUnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 

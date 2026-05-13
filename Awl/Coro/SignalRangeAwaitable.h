@@ -8,9 +8,9 @@
 #include <cassert>
 #include <coroutine>
 #include <cstddef>
+#include <deque>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -37,23 +37,23 @@ namespace awl
         using signal_range_awaitable_result_t = typename signal_range_awaitable_result<Object, Args...>::type;
 
         template <class Result, class Object, class State, class... Args>
-        void store_signal_range_awaitable_result(State& state, std::shared_ptr<Object> sender, Args&&... args)
+        void push_signal_range_awaitable_result(State& state, std::shared_ptr<Object> sender, Args&&... args)
         {
             if constexpr (sizeof...(Args) == 0)
             {
-                state.result = std::move(sender);
+                state.results.push_back(std::move(sender));
             }
             else
             {
-                state.result.emplace(std::move(sender), std::forward<Args>(args)...);
+                state.results.emplace_back(std::move(sender), std::forward<Args>(args)...);
             }
         }
 
         template <class Object, auto get_signal, class SignalType>
-        class BasicSignalRangeAwaitable;
+        class BasicSignalAccumulator;
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>
+        class BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>
         {
         private:
 
@@ -61,9 +61,12 @@ namespace awl
             using ObjectPtr = std::shared_ptr<Object>;
             using SetObserverBase = Observer<INotifySetChanged<ObjectPtr>>;
 
+            class Awaitable;
+
             struct State
             {
-                std::optional<Result> result;
+                std::deque<Result> results;
+                Awaitable* waiter = nullptr;
             };
 
             struct Subscription
@@ -76,7 +79,7 @@ namespace awl
             {
             public:
 
-                explicit SetObserver(BasicSignalRangeAwaitable& owner) :
+                explicit SetObserver(BasicSignalAccumulator& owner) :
                     _owner(owner)
                 {}
 
@@ -97,19 +100,120 @@ namespace awl
 
             private:
 
-                BasicSignalRangeAwaitable& _owner;
+                BasicSignalAccumulator& _owner;
+            };
+
+            class Awaitable
+            {
+            public:
+
+                explicit Awaitable(std::shared_ptr<State> state) :
+                    _state(std::move(state))
+                {}
+
+                Awaitable(const Awaitable&) = delete;
+
+                Awaitable(Awaitable&& other) noexcept :
+                    _state(std::move(other._state)),
+                    _coroutine(std::exchange(other._coroutine, nullptr))
+                {
+                    if (_state && _state->waiter == &other)
+                    {
+                        _state->waiter = this;
+                    }
+                }
+
+                Awaitable& operator = (const Awaitable&) = delete;
+
+                Awaitable& operator = (Awaitable&& other) noexcept
+                {
+                    if (this != &other)
+                    {
+                        unsubscribe();
+
+                        _state = std::move(other._state);
+                        _coroutine = std::exchange(other._coroutine, nullptr);
+
+                        if (_state && _state->waiter == &other)
+                        {
+                            _state->waiter = this;
+                        }
+                    }
+
+                    return *this;
+                }
+
+                ~Awaitable()
+                {
+                    unsubscribe();
+                }
+
+                bool await_ready() const noexcept
+                {
+                    return !_state->results.empty();
+                }
+
+                bool await_suspend(std::coroutine_handle<> h)
+                {
+                    _coroutine = h;
+
+                    if (!_state->results.empty())
+                    {
+                        return false;
+                    }
+
+                    assert(_state->waiter == nullptr);
+
+                    _state->waiter = this;
+
+                    return true;
+                }
+
+                Result await_resume()
+                {
+                    unsubscribe();
+
+                    assert(!_state->results.empty());
+
+                    Result result = std::move(_state->results.front());
+                    _state->results.pop_front();
+
+                    return result;
+                }
+
+                void resume()
+                {
+                    if (_coroutine != nullptr)
+                    {
+                        _coroutine.resume();
+                    }
+                }
+
+            private:
+
+                void unsubscribe()
+                {
+                    if (_state && _state->waiter == this)
+                    {
+                        _state->waiter = nullptr;
+                    }
+                }
+
+                std::shared_ptr<State> _state;
+                std::coroutine_handle<> _coroutine = nullptr;
             };
 
         public:
 
             template <awl::input_range_over<ObjectPtr> R>
-            explicit BasicSignalRangeAwaitable(R&& objects)
+            explicit BasicSignalAccumulator(R&& objects) :
+                _state(std::make_shared<State>())
             {
                 if constexpr (awl::observable_shared_ptr_set<R>)
                 {
                     static_assert(
                         std::is_lvalue_reference_v<R>,
-                        "An observable set passed to wait_signal must outlive the awaiting coroutine.");
+                        "An observable set passed to accumulate_signal must outlive the accumulator.");
 
                     auto* p_objects = std::addressof(objects);
 
@@ -117,6 +221,8 @@ namespace awl
                     {
                         p_objects->subscribe(p_observer);
                     };
+
+                    _subscribeSet(&_setObserver);
                 }
 
                 for (auto&& object : objects)
@@ -125,44 +231,24 @@ namespace awl
                 }
             }
 
-            BasicSignalRangeAwaitable(const BasicSignalRangeAwaitable&) = delete;
+            BasicSignalAccumulator(const BasicSignalAccumulator&) = delete;
 
-            BasicSignalRangeAwaitable(BasicSignalRangeAwaitable&&) = delete;
+            BasicSignalAccumulator(BasicSignalAccumulator&&) = delete;
 
-            BasicSignalRangeAwaitable& operator = (const BasicSignalRangeAwaitable&) = delete;
+            BasicSignalAccumulator& operator = (const BasicSignalAccumulator&) = delete;
 
-            BasicSignalRangeAwaitable& operator = (BasicSignalRangeAwaitable&&) = delete;
+            BasicSignalAccumulator& operator = (BasicSignalAccumulator&&) = delete;
 
-            ~BasicSignalRangeAwaitable()
+            ~BasicSignalAccumulator()
             {
                 unsubscribe();
             }
 
-            bool await_ready() const noexcept
-            {
-                return false;
-            }
-
-            void await_suspend(std::coroutine_handle<> h)
+            Awaitable wait()
             {
                 assert(observesSet() || !_subscriptions.empty());
 
-                _coroutine = h;
-
-                if (observesSet())
-                {
-                    _subscribeSet(&_setObserver);
-                }
-
-                for (Subscription& subscription : _subscriptions)
-                {
-                    subscribeObject(subscription);
-                }
-            }
-
-            Result await_resume()
-            {
-                return std::move(*_state.result);
+                return Awaitable(_state);
             }
 
         private:
@@ -180,7 +266,10 @@ namespace awl
             Subscription& addObject(ObjectPtr object)
             {
                 _subscriptions.push_back(Subscription{ std::move(object) });
-                return _subscriptions.back();
+                Subscription& subscription = _subscriptions.back();
+                subscribeObject(subscription);
+
+                return subscription;
             }
 
             void subscribeObject(Subscription& subscription)
@@ -234,39 +323,28 @@ namespace awl
 
             void onAdded(const ObjectPtr& object)
             {
-                assert(!_done);
-
-                Subscription& subscription = addObject(object);
-
-                if (_coroutine != nullptr)
-                {
-                    subscribeObject(subscription);
-                }
+                addObject(object);
             }
 
             void onRemoving(const ObjectPtr& object)
             {
-                assert(!_done);
-
                 removeObject(object);
             }
 
             void onClearing()
             {
-                assert(!_done);
-
                 unsubscribeObjects();
                 _subscriptions.clear();
             }
 
             void resume(std::shared_ptr<Object> sender, Args... args)
             {
-                assert(!_done);
+                detail::push_signal_range_awaitable_result<Result>(*_state, std::move(sender), std::forward<Args>(args)...);
 
-                _done = true;
-                detail::store_signal_range_awaitable_result<Result>(_state, std::move(sender), std::forward<Args>(args)...);
-                unsubscribe();
-                _coroutine.resume();
+                if (Awaitable* waiter = std::exchange(_state->waiter, nullptr))
+                {
+                    waiter->resume();
+                }
             }
 
             void unsubscribe()
@@ -279,18 +357,16 @@ namespace awl
             std::vector<Subscription> _subscriptions;
             SetObserver _setObserver{ *this };
             std::function<void(SetObserver*)> _subscribeSet;
-            bool _done = false;
-            std::coroutine_handle<> _coroutine = nullptr;
-            State _state;
+            std::shared_ptr<State> _state;
         };
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalRangeAwaitable<Object, get_signal, Source<Args...>> :
-            public BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>
+        class BasicSignalAccumulator<Object, get_signal, Source<Args...>> :
+            public BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>
         {
         private:
 
-            using Base = BasicSignalRangeAwaitable<Object, get_signal, ISignal<Args...>>;
+            using Base = BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>;
 
         public:
 
@@ -299,16 +375,16 @@ namespace awl
     }
 
     template <class Object, auto get_signal>
-    using SignalRangeAwaitable = detail::BasicSignalRangeAwaitable<
+    using SignalAccumulator = detail::BasicSignalAccumulator<
         Object,
         get_signal,
         std::remove_cvref_t<std::invoke_result_t<decltype(get_signal), Object&>>>;
 
     template <auto get_signal, awl::input_shared_ptr_range R>
-    SignalRangeAwaitable<typename std::ranges::range_value_t<R>::element_type, get_signal> wait_signal(R&& objects)
+    SignalAccumulator<typename std::ranges::range_value_t<R>::element_type, get_signal> accumulate_signal(R&& objects)
     {
         using Object = typename std::ranges::range_value_t<R>::element_type;
 
-        return SignalRangeAwaitable<Object, get_signal>(std::forward<R>(objects));
+        return SignalAccumulator<Object, get_signal>(std::forward<R>(objects));
     }
 }
