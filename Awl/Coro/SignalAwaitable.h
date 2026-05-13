@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Awl/Coro/SignalRangeAccumulator.h"
 #include "Awl/ISignal.h"
 
 #include <coroutine>
-#include <functional>
 #include <optional>
 #include <tuple>
 #include <type_traits>
