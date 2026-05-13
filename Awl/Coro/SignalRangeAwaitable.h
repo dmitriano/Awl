@@ -155,10 +155,14 @@ namespace awl
 
                 bool await_suspend(std::coroutine_handle<> h)
                 {
+                    assert(_coroutine == nullptr);
+
                     _coroutine = h;
 
                     if (!_state->results.empty())
                     {
+                        _coroutine = nullptr;
+
                         return false;
                     }
 
@@ -183,9 +187,9 @@ namespace awl
 
                 void resume()
                 {
-                    if (_coroutine != nullptr)
+                    if (std::coroutine_handle<> coroutine = std::exchange(_coroutine, nullptr))
                     {
-                        _coroutine.resume();
+                        coroutine.resume();
                     }
                 }
 
@@ -193,9 +197,13 @@ namespace awl
 
                 void unsubscribe()
                 {
-                    if (_state && _state->waiter == this)
+                    if (_coroutine != nullptr)
                     {
+                        assert(_state);
+                        assert(_state->waiter == this);
+
                         _state->waiter = nullptr;
+                        _coroutine = nullptr;
                     }
                 }
 
