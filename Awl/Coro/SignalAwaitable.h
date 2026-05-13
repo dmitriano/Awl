@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Awl/Coro/SignalRangeAwaitable.h"
+#include "Awl/Coro/SignalRangeAccumulator.h"
 #include "Awl/ISignal.h"
 
 #include <coroutine>

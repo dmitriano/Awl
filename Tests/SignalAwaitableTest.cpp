@@ -88,7 +88,7 @@ namespace
         }
     }
 
-    using RangeChangedAccumulator = awl::SignalAccumulator<RangeSender, &RangeSender::changed>;
+    using RangeChangedAccumulator = awl::SignalRangeAccumulator<RangeSender, &RangeSender::changed>;
 
     awl::Job waitAccumulatedValue(RangeChangedAccumulator& accumulator, std::shared_ptr<RangeSender>& sender, int& value)
     {
@@ -209,7 +209,7 @@ AWL_TEST(SignalAwaitable_UnsubscribesOnCancel)
     AWL_ASSERT_EQUAL(0, result);
 }
 
-AWL_TEST(SignalAccumulator_Value)
+AWL_TEST(SignalRangeAccumulator_Value)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -249,7 +249,7 @@ AWL_TEST(SignalAccumulator_Value)
     AWL_ASSERT_EQUAL(17, value);
 }
 
-AWL_TEST(SignalAccumulator_MemberFunction)
+AWL_TEST(SignalRangeAccumulator_MemberFunction)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -277,7 +277,7 @@ AWL_TEST(SignalAccumulator_MemberFunction)
     AWL_ASSERT(objects[1]->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_Void)
+AWL_TEST(SignalRangeAccumulator_Void)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -304,7 +304,7 @@ AWL_TEST(SignalAccumulator_Void)
     AWL_ASSERT(objects[1]->closed.empty());
 }
 
-AWL_TEST(SignalAccumulator_FilterView)
+AWL_TEST(SignalRangeAccumulator_FilterView)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -347,7 +347,7 @@ AWL_TEST(SignalAccumulator_FilterView)
     AWL_ASSERT(objects[1]->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_UnsubscribesOnCancel)
+AWL_TEST(SignalRangeAccumulator_UnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -386,7 +386,7 @@ AWL_TEST(SignalAccumulator_UnsubscribesOnCancel)
     AWL_ASSERT_EQUAL(0, value);
 }
 
-AWL_TEST(SignalAccumulator_QueuesBeforeWait)
+AWL_TEST(SignalRangeAccumulator_QueuesBeforeWait)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -415,7 +415,7 @@ AWL_TEST(SignalAccumulator_QueuesBeforeWait)
     AWL_ASSERT_EQUAL(1u, objects[1]->changed.size());
 }
 
-AWL_TEST(SignalAccumulator_WaitMany)
+AWL_TEST(SignalRangeAccumulator_WaitMany)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -450,7 +450,7 @@ AWL_TEST(SignalAccumulator_WaitMany)
     AWL_ASSERT_EQUAL(1u, objects[1]->changed.size());
 }
 
-AWL_TEST(SignalAccumulator_ObservableSetAdded)
+AWL_TEST(SignalRangeAccumulator_ObservableSetAdded)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -475,7 +475,7 @@ AWL_TEST(SignalAccumulator_ObservableSetAdded)
     AWL_ASSERT(object->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_ObservableUnorderedSetAdded)
+AWL_TEST(SignalRangeAccumulator_ObservableUnorderedSetAdded)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -500,7 +500,7 @@ AWL_TEST(SignalAccumulator_ObservableUnorderedSetAdded)
     AWL_ASSERT(object->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_ObservableSetRemoving)
+AWL_TEST(SignalRangeAccumulator_ObservableSetRemoving)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -538,7 +538,7 @@ AWL_TEST(SignalAccumulator_ObservableSetRemoving)
     AWL_ASSERT(second->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_ObservableSetClearing)
+AWL_TEST(SignalRangeAccumulator_ObservableSetClearing)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -581,7 +581,7 @@ AWL_TEST(SignalAccumulator_ObservableSetClearing)
     AWL_ASSERT(third->changed.empty());
 }
 
-AWL_TEST(SignalAccumulator_ObservableSetUnsubscribesOnCancel)
+AWL_TEST(SignalRangeAccumulator_ObservableSetUnsubscribesOnCancel)
 {
     AWL_UNUSED_CONTEXT;
 

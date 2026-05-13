@@ -50,10 +50,10 @@ namespace awl
         }
 
         template <class Object, auto get_signal, class SignalType>
-        class BasicSignalAccumulator;
+        class BasicSignalRangeAccumulator;
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>
+        class BasicSignalRangeAccumulator<Object, get_signal, ISignal<Args...>>
         {
         private:
 
@@ -79,7 +79,7 @@ namespace awl
             {
             public:
 
-                explicit SetObserver(BasicSignalAccumulator& owner) :
+                explicit SetObserver(BasicSignalRangeAccumulator& owner) :
                     _owner(owner)
                 {}
 
@@ -100,7 +100,7 @@ namespace awl
 
             private:
 
-                BasicSignalAccumulator& _owner;
+                BasicSignalRangeAccumulator& _owner;
             };
 
             class Awaitable
@@ -214,7 +214,7 @@ namespace awl
         public:
 
             template <awl::input_range_over<ObjectPtr> R>
-            explicit BasicSignalAccumulator(R&& objects) :
+            explicit BasicSignalRangeAccumulator(R&& objects) :
                 _state(std::make_shared<State>())
             {
                 if constexpr (awl::observable_shared_ptr_set<R>)
@@ -239,15 +239,15 @@ namespace awl
                 }
             }
 
-            BasicSignalAccumulator(const BasicSignalAccumulator&) = delete;
+            BasicSignalRangeAccumulator(const BasicSignalRangeAccumulator&) = delete;
 
-            BasicSignalAccumulator(BasicSignalAccumulator&&) = delete;
+            BasicSignalRangeAccumulator(BasicSignalRangeAccumulator&&) = delete;
 
-            BasicSignalAccumulator& operator = (const BasicSignalAccumulator&) = delete;
+            BasicSignalRangeAccumulator& operator = (const BasicSignalRangeAccumulator&) = delete;
 
-            BasicSignalAccumulator& operator = (BasicSignalAccumulator&&) = delete;
+            BasicSignalRangeAccumulator& operator = (BasicSignalRangeAccumulator&&) = delete;
 
-            ~BasicSignalAccumulator()
+            ~BasicSignalRangeAccumulator()
             {
                 unsubscribe();
             }
@@ -369,12 +369,12 @@ namespace awl
         };
 
         template <class Object, auto get_signal, class... Args>
-        class BasicSignalAccumulator<Object, get_signal, Source<Args...>> :
-            public BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>
+        class BasicSignalRangeAccumulator<Object, get_signal, Source<Args...>> :
+            public BasicSignalRangeAccumulator<Object, get_signal, ISignal<Args...>>
         {
         private:
 
-            using Base = BasicSignalAccumulator<Object, get_signal, ISignal<Args...>>;
+            using Base = BasicSignalRangeAccumulator<Object, get_signal, ISignal<Args...>>;
 
         public:
 
@@ -383,16 +383,16 @@ namespace awl
     }
 
     template <class Object, auto get_signal>
-    using SignalAccumulator = detail::BasicSignalAccumulator<
+    using SignalRangeAccumulator = detail::BasicSignalRangeAccumulator<
         Object,
         get_signal,
         std::remove_cvref_t<std::invoke_result_t<decltype(get_signal), Object&>>>;
 
     template <auto get_signal, awl::input_shared_ptr_range R>
-    SignalAccumulator<typename std::ranges::range_value_t<R>::element_type, get_signal> accumulate_signal(R&& objects)
+    SignalRangeAccumulator<typename std::ranges::range_value_t<R>::element_type, get_signal> accumulate_signal(R&& objects)
     {
         using Object = typename std::ranges::range_value_t<R>::element_type;
 
-        return SignalAccumulator<Object, get_signal>(std::forward<R>(objects));
+        return SignalRangeAccumulator<Object, get_signal>(std::forward<R>(objects));
     }
 }
