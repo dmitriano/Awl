@@ -25,23 +25,12 @@ namespace awl
     };
 
     inline std::move_only_function<void()> wrapInTransaction(
-        ITransactionFactory& transaction_factory,
+        std::shared_ptr<ITransactionFactory> transaction_factory,
         std::move_only_function<void()> func)
     {
-        return [&transaction_factory, func = std::move(func)]() mutable
+        return [transaction_factory = std::move(transaction_factory), func = std::move(func)]() mutable
         {
-            std::unique_ptr<ITransaction> transaction = transaction_factory.startTransaction();
-            func();
-            transaction->commit();
-        };
-    }
-
-    inline std::move_only_function<void()> wrapInTransaction(
-        std::unique_ptr<ITransaction> transaction,
-        std::move_only_function<void()> func)
-    {
-        return [transaction = std::move(transaction), func = std::move(func)]() mutable
-        {
+            std::unique_ptr<ITransaction> transaction = transaction_factory->startTransaction();
             func();
             transaction->commit();
         };
