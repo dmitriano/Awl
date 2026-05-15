@@ -2,7 +2,7 @@
 
 #include "Awl/INotifySetChanged.h"
 #include "Awl/RangeUtil.h"
-#include "Awl/Signal.h"
+#include "Awl/Source.h"
 
 #include <algorithm>
 #include <cassert>
