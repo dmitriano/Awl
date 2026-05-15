@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "Awl/Coro/IDelayedExecutor.h"
+#include "IDelayedExecutor.h"
 
-namespace awl::coro
+namespace awl::testing
 {
     class DelayedAwaitable
     {

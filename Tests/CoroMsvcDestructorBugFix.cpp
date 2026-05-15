@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/Testing/TimeQueue.h"
+#include "Helpers/TimeQueue.h"
 #include "Awl/StringFormat.h"
 
 #include <coroutine>
@@ -40,7 +40,7 @@ namespace
 
     struct JobPromise
     {
-        JobPromise(awl::testing::TestContext context, awl::coro::IDelayedExecutor&) :
+        JobPromise(awl::testing::TestContext context, awl::testing::IDelayedExecutor&) :
             _logger(std::move(context.logger))
         {}
 
@@ -107,7 +107,7 @@ namespace
 
         void return_void() {}
 
-        auto await_transform(awl::coro::DelayedAwaitable awaitable)
+        auto await_transform(awl::testing::DelayedAwaitable awaitable)
         {
             return awaitable;
         }
@@ -189,18 +189,18 @@ namespace
 
     using namespace std::chrono_literals;
 
-    Job TestTimerAwait(awl::testing::TestContext context, awl::coro::IDelayedExecutor& delayed_executor)
+    Job TestTimerAwait(awl::testing::TestContext context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestTimerAwait started."));
 
-        co_await awl::coro::DelayedAwaitable(delayed_executor, 1s);
+        co_await awl::testing::DelayedAwaitable(delayed_executor, 1s);
 
         context.logger->debug(_T("TestTimerAwait finished."));
     }
 
-    Job TestNestedTask(awl::testing::TestContext context, awl::coro::IDelayedExecutor& delayed_executor)
+    Job TestNestedTask(awl::testing::TestContext context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         using namespace std::chrono_literals;
 
@@ -208,7 +208,7 @@ namespace
 
         auto task = TestTimerAwait(context, delayed_executor);
 
-        co_await awl::coro::DelayedAwaitable(delayed_executor, 2s);
+        co_await awl::testing::DelayedAwaitable(delayed_executor, 2s);
 
         context.logger->debug(_T("Time interval has elapsed."));
 

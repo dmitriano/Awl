@@ -7,7 +7,7 @@
 #include "Awl/Coro/Task.h"
 #include "Awl/Coro/AsyncGenerator.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/Testing/TimeQueue.h"
+#include "Helpers/TimeQueue.h"
 #include "Awl/StringFormat.h"
 
 //Why does it fail?
@@ -17,12 +17,12 @@ namespace
 {
     using namespace std::chrono_literals;
 
-    awl::async_generator<int> gen(awl::coro::IDelayedExecutor& delayed_executor, int count)
+    awl::async_generator<int> gen(awl::testing::IDelayedExecutor& delayed_executor, int count)
     {
         for (int i = 0; i < count; ++i)
         {
             // std::generator has deleted await_transform()
-            co_await awl::coro::DelayedAwaitable(delayed_executor, 100ms);
+            co_await awl::testing::DelayedAwaitable(delayed_executor, 100ms);
 
             if (i > 5)
             {
@@ -35,7 +35,7 @@ namespace
 
     awl::Task<void> print(
         const awl::testing::TestContext& context,
-        awl::coro::IDelayedExecutor& delayed_executor,
+        awl::testing::IDelayedExecutor& delayed_executor,
         int count,
         std::optional<int> limit = {})
     {
@@ -72,7 +72,7 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::Job test(const awl::testing::TestContext& context, awl::coro::IDelayedExecutor& delayed_executor)
+    awl::Job test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         co_await print(context, delayed_executor, 3);
 

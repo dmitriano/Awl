@@ -8,7 +8,7 @@
 #include <chrono>
 #include <coroutine>
 
-namespace awl::coro
+namespace awl::testing
 {
     class IDelayedExecutor
     {

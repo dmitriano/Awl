@@ -9,7 +9,7 @@
 #include "Awl/Observable.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/Formatter.h"
-#include "Awl/Testing/TimeQueue.h"
+#include "Helpers/TimeQueue.h"
 
 #include <vector>
 
@@ -457,7 +457,7 @@ namespace
     public:
 
         AsyncHandler(
-            awl::coro::IDelayedExecutor& delayed_executor,
+            awl::testing::IDelayedExecutor& delayed_executor,
             int tag,
             std::vector<int>* p_events,
             bool defer = false) :
@@ -471,7 +471,7 @@ namespace
         {
             if (_defer)
             {
-                co_await awl::coro::DelayedAwaitable(_delayedExecutor, 1ms);
+                co_await awl::testing::DelayedAwaitable(_delayedExecutor, 1ms);
             }
 
             _events->push_back(_tag * 1000 + value);
@@ -480,7 +480,7 @@ namespace
 
     private:
 
-        awl::coro::IDelayedExecutor& _delayedExecutor;
+        awl::testing::IDelayedExecutor& _delayedExecutor;
         int _tag = 0;
         std::vector<int>* _events = nullptr;
         bool _defer = false;

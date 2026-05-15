@@ -3,7 +3,10 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Coro/DelayedAwaitable.h"
+#pragma once
+
+#include "DelayedAwaitable.h"
+
 #include "Awl/KeyCompare.h"
 
 #include <queue>
@@ -16,7 +19,7 @@
 
 namespace awl::testing
 {
-    class TimeQueue : public awl::coro::IDelayedExecutor
+    class TimeQueue : public IDelayedExecutor
     {
     public:
 

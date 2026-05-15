@@ -5,27 +5,27 @@
 
 #include "Awl/Coro/Task.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Awl/Testing/TimeQueue.h"
+#include "Helpers/TimeQueue.h"
 #include "Awl/StringFormat.h"
 
 namespace
 {
     using namespace std::chrono_literals;
 
-    awl::Task<int> wait_n(const awl::testing::TestContext& context, awl::coro::IDelayedExecutor& delayed_executor, int n)
+    awl::Task<int> wait_n(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor, int n)
     {
         context.logger->debug(_T("before wait {}\n"), n);
-        co_await awl::coro::DelayedAwaitable(delayed_executor, std::chrono::seconds(n));
+        co_await awl::testing::DelayedAwaitable(delayed_executor, std::chrono::seconds(n));
         context.logger->debug(_T("after wait {}\n"), n);
         co_return n;
     }
 
-    awl::Task<int> test(const awl::testing::TestContext& context, awl::coro::IDelayedExecutor& delayed_executor)
+    awl::Task<int> test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         for (auto c : "hello world\n")
         {
             context.logger->debug(_T("{}"), c);
-            co_await awl::coro::DelayedAwaitable(delayed_executor, 100ms);
+            co_await awl::testing::DelayedAwaitable(delayed_executor, 100ms);
         }
 
         context.logger->debug("test step 1\n");
@@ -40,7 +40,7 @@ namespace
         co_return co_await w1 + r;
     }
 
-    awl::Task<int> wait_0(const awl::testing::TestContext& context, awl::coro::IDelayedExecutor& delayed_executor)
+    awl::Task<int> wait_0(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         co_return co_await wait_n(context, delayed_executor, 0);
     }
