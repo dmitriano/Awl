@@ -134,26 +134,26 @@ namespace awl
         public:
 
             explicit EmitGuard(Source& signal) :
-                _signal(signal)
+                _source(signal)
             {
-                ++_signal._emissionDepth;
+                ++_source._emissionDepth;
             }
 
             ~EmitGuard()
             {
-                assert(_signal._emissionDepth != 0);
+                assert(_source._emissionDepth != 0);
 
-                --_signal._emissionDepth;
+                --_source._emissionDepth;
 
-                if (!_signal.isEmitting())
+                if (!_source.isEmitting())
                 {
-                    _signal.compact();
+                    _source.compact();
                 }
             }
 
         private:
 
-            Source& _signal;
+            Source& _source;
         };
 
         bool isEmitting() const noexcept
