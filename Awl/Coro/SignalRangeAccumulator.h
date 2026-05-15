@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Awl/INotifySetChanged.h"
+#include "Awl/ISignal.h"
 #include "Awl/RangeUtil.h"
-#include "Awl/Source.h"
 
 #include <algorithm>
 #include <cassert>
@@ -366,19 +366,6 @@ namespace awl::coro
             SetObserver _setObserver{ *this };
             std::function<void(SetObserver*)> _subscribeSet;
             std::shared_ptr<State> _state;
-        };
-
-        template <class Object, auto get_signal, class... Args>
-        class BasicSignalRangeAccumulator<Object, get_signal, Source<Args...>> :
-            public BasicSignalRangeAccumulator<Object, get_signal, ISignal<Args...>>
-        {
-        private:
-
-            using Base = BasicSignalRangeAccumulator<Object, get_signal, ISignal<Args...>>;
-
-        public:
-
-            using Base::Base;
         };
     }
 

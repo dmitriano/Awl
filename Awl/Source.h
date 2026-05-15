@@ -18,7 +18,7 @@ namespace awl
 {
     template <class... Args>
     class Source :
-        public ISignal<Args...>
+        private ISignal<Args...>
     {
     public:
 
@@ -37,51 +37,10 @@ namespace awl
     public:
 
         using container_type = std::vector<SlotRecord>;
-        using Signal::subscribe;
-        using Signal::unsubscribe;
 
         Signal& signal() noexcept
         {
             return *this;
-        }
-
-        void subscribe(Slot slot) override
-        {
-            const auto it = std::find_if(_slots.begin(), _slots.end(),
-                [&slot](const SlotRecord& record)
-                {
-                    return !record.removed && record.slot == slot;
-                });
-
-            if (it == _slots.end())
-            {
-                _slots.push_back(SlotRecord{ std::move(slot) });
-            }
-        }
-
-        bool unsubscribe(const Slot& slot) override
-        {
-            const auto it = std::find_if(_slots.begin(), _slots.end(),
-                [&slot](const SlotRecord& record)
-                {
-                    return !record.removed && record.slot == slot;
-                });
-
-            if (it == _slots.end())
-            {
-                return false;
-            }
-
-            if (isEmitting())
-            {
-                it->removed = true;
-            }
-            else
-            {
-                eraseRecord(it);
-            }
-
-            return true;
         }
 
         template<typename ...Params>
@@ -130,6 +89,45 @@ namespace awl
         }
 
     private:
+
+        void subscribe(Slot slot) override
+        {
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
+
+            if (it == _slots.end())
+            {
+                _slots.push_back(SlotRecord{ std::move(slot) });
+            }
+        }
+
+        bool unsubscribe(const Slot& slot) override
+        {
+            const auto it = std::find_if(_slots.begin(), _slots.end(),
+                [&slot](const SlotRecord& record)
+                {
+                    return !record.removed && record.slot == slot;
+                });
+
+            if (it == _slots.end())
+            {
+                return false;
+            }
+
+            if (isEmitting())
+            {
+                it->removed = true;
+            }
+            else
+            {
+                eraseRecord(it);
+            }
+
+            return true;
+        }
 
         class EmitGuard
         {
