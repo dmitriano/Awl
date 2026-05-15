@@ -10,11 +10,11 @@
 
 namespace awl::testing
 {
-    class IDelayedExecutor
+    class ITimeQueue
     {
     public:
 
-        virtual ~IDelayedExecutor() = default;
+        virtual ~ITimeQueue() = default;
 
         virtual void executeAfter(std::coroutine_handle<> handle, std::chrono::nanoseconds delay) = 0;
     };

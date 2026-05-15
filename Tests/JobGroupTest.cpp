@@ -3,7 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Helpers/DelayedAwaitable.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Coro/JobGroup.h"
 #include "Helpers/TimeQueue.h"
@@ -22,22 +21,22 @@ namespace
 
     awl::coro::Job delayedJob(
         const awl::testing::TestContext& context,
-        awl::testing::IDelayedExecutor& delayed_executor,
+        awl::testing::ITimeQueue& time_queue,
         int id)
     {
-        co_await awl::testing::DelayedAwaitable(delayed_executor, 100ms);
+        co_await awl::testing::TimeQueueAwaitable(time_queue, 100ms);
 
         context.logger->debug(_T("{} finished"), id);
     }
 
     void spawnThreeJobs(
         const awl::testing::TestContext& context,
-        awl::testing::IDelayedExecutor& delayed_executor,
+        awl::testing::ITimeQueue& time_queue,
         awl::coro::JobGroup& jobs)
     {
-        jobs.spawn(delayedJob(context, delayed_executor, 1));
-        jobs.spawn(delayedJob(context, delayed_executor, 2));
-        jobs.spawn(delayedJob(context, delayed_executor, 3));
+        jobs.spawn(delayedJob(context, time_queue, 1));
+        jobs.spawn(delayedJob(context, time_queue, 2));
+        jobs.spawn(delayedJob(context, time_queue, 3));
 
         AWL_ASSERT_EQUAL(3u, jobs.task_count());
     }
@@ -51,22 +50,22 @@ namespace awl::coro
 
         static awl::coro::Job waitAllJobs(
             const awl::testing::TestContext& context,
-            awl::testing::IDelayedExecutor& delayed_executor,
+            awl::testing::ITimeQueue& time_queue,
             awl::coro::JobGroup& jobs)
         {
-            spawnThreeJobs(context, delayed_executor, jobs);
+            spawnThreeJobs(context, time_queue, jobs);
 
             co_await jobs.wait_all_jobs_experimental();
         }
 
         static awl::coro::Job waitAnyThenWaitAll(
             const awl::testing::TestContext& context,
-            awl::testing::IDelayedExecutor& delayed_executor,
+            awl::testing::ITimeQueue& time_queue,
             awl::coro::JobGroup& jobs,
             bool wait_jobs_directly = false,
             std::size_t expected_count_after_wait_any = 2)
         {
-            spawnThreeJobs(context, delayed_executor, jobs);
+            spawnThreeJobs(context, time_queue, jobs);
 
             context.logger->debug("wait_any() started");
 

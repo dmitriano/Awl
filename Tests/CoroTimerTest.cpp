@@ -12,37 +12,37 @@ namespace
 {
     using namespace std::chrono_literals;
 
-    awl::coro::Task<int> wait_n(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor, int n)
+    awl::coro::Task<int> wait_n(const awl::testing::TestContext& context, awl::testing::ITimeQueue& time_queue, int n)
     {
         context.logger->debug(_T("before wait {}\n"), n);
-        co_await awl::testing::DelayedAwaitable(delayed_executor, std::chrono::seconds(n));
+        co_await awl::testing::TimeQueueAwaitable(time_queue, std::chrono::seconds(n));
         context.logger->debug(_T("after wait {}\n"), n);
         co_return n;
     }
 
-    awl::coro::Task<int> test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Task<int> test(const awl::testing::TestContext& context, awl::testing::ITimeQueue& time_queue)
     {
         for (auto c : "hello world\n")
         {
             context.logger->debug(_T("{}"), c);
-            co_await awl::testing::DelayedAwaitable(delayed_executor, 100ms);
+            co_await awl::testing::TimeQueueAwaitable(time_queue, 100ms);
         }
 
         context.logger->debug("test step 1\n");
-        auto w3 = wait_n(context, delayed_executor, 3);
+        auto w3 = wait_n(context, time_queue, 3);
         context.logger->debug("test step 2\n");
-        auto w2 = wait_n(context, delayed_executor, 2);
+        auto w2 = wait_n(context, time_queue, 2);
         context.logger->debug("test step 3\n");
-        auto w1 = wait_n(context, delayed_executor, 1);
+        auto w1 = wait_n(context, time_queue, 1);
         context.logger->debug("test step 4\n");
         auto r = co_await w2 + co_await w3;
         context.logger->debug("awaiting already computed coroutine\n");
         co_return co_await w1 + r;
     }
 
-    awl::coro::Task<int> wait_0(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Task<int> wait_0(const awl::testing::TestContext& context, awl::testing::ITimeQueue& time_queue)
     {
-        co_return co_await wait_n(context, delayed_executor, 0);
+        co_return co_await wait_n(context, time_queue, 0);
     }
 }
 

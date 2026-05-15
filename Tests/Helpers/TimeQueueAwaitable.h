@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include "IDelayedExecutor.h"
+#include "ITimeQueue.h"
 
 namespace awl::testing
 {
-    class DelayedAwaitable
+    class TimeQueueAwaitable
     {
     public:
 
-        DelayedAwaitable(IDelayedExecutor& executor, std::chrono::nanoseconds delay) :
+        TimeQueueAwaitable(ITimeQueue& executor, std::chrono::nanoseconds delay) :
             _executor(executor),
             _delay(delay)
         {}
@@ -33,7 +33,7 @@ namespace awl::testing
 
     private:
 
-        IDelayedExecutor& _executor;
+        ITimeQueue& _executor;
         std::chrono::nanoseconds _delay;
     };
 }

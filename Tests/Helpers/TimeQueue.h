@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "DelayedAwaitable.h"
+#include "TimeQueueAwaitable.h"
 
 #include "Awl/KeyCompare.h"
 
@@ -19,7 +19,7 @@
 
 namespace awl::testing
 {
-    class TimeQueue : public IDelayedExecutor
+    class TimeQueue : public ITimeQueue
     {
     public:
 

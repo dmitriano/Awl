@@ -17,12 +17,12 @@ namespace
 {
     using namespace std::chrono_literals;
 
-    awl::coro::async_generator<int> gen(awl::testing::IDelayedExecutor& delayed_executor, int count)
+    awl::coro::async_generator<int> gen(awl::testing::ITimeQueue& time_queue, int count)
     {
         for (int i = 0; i < count; ++i)
         {
             // std::generator has deleted await_transform()
-            co_await awl::testing::DelayedAwaitable(delayed_executor, 100ms);
+            co_await awl::testing::TimeQueueAwaitable(time_queue, 100ms);
 
             if (i > 5)
             {
@@ -35,7 +35,7 @@ namespace
 
     awl::coro::Task<void> print(
         const awl::testing::TestContext& context,
-        awl::testing::IDelayedExecutor& delayed_executor,
+        awl::testing::ITimeQueue& time_queue,
         int count,
         std::optional<int> limit = {})
     {
@@ -43,7 +43,7 @@ namespace
         //old school for loop with previously captured by rvalue generator.
         //for co_await(int i : gen())
 
-        auto g = gen(delayed_executor, count);
+        auto g = gen(time_queue, count);
 
         int n = 0;
 
@@ -72,15 +72,15 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::coro::Job test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Job test(const awl::testing::TestContext& context, awl::testing::ITimeQueue& time_queue)
     {
-        co_await print(context, delayed_executor, 3);
+        co_await print(context, time_queue, 3);
 
-        co_await print(context, delayed_executor, 10, 2);
+        co_await print(context, time_queue, 10, 2);
 
         try
         {
-            co_await print(context, delayed_executor, 10);
+            co_await print(context, time_queue, 10);
 
             AWL_FAILM(_T("AsyncGenerator did not throw."));
         }

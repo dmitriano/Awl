@@ -40,7 +40,7 @@ namespace
 
     struct JobPromise
     {
-        JobPromise(awl::testing::TestContext context, awl::testing::IDelayedExecutor&) :
+        JobPromise(awl::testing::TestContext context, awl::testing::ITimeQueue&) :
             _logger(std::move(context.logger))
         {}
 
@@ -107,7 +107,7 @@ namespace
 
         void return_void() {}
 
-        auto await_transform(awl::testing::DelayedAwaitable awaitable)
+        auto await_transform(awl::testing::TimeQueueAwaitable awaitable)
         {
             return awaitable;
         }
@@ -189,26 +189,26 @@ namespace
 
     using namespace std::chrono_literals;
 
-    Job TestTimerAwait(awl::testing::TestContext context, awl::testing::IDelayedExecutor& delayed_executor)
+    Job TestTimerAwait(awl::testing::TestContext context, awl::testing::ITimeQueue& time_queue)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestTimerAwait started."));
 
-        co_await awl::testing::DelayedAwaitable(delayed_executor, 1s);
+        co_await awl::testing::TimeQueueAwaitable(time_queue, 1s);
 
         context.logger->debug(_T("TestTimerAwait finished."));
     }
 
-    Job TestNestedTask(awl::testing::TestContext context, awl::testing::IDelayedExecutor& delayed_executor)
+    Job TestNestedTask(awl::testing::TestContext context, awl::testing::ITimeQueue& time_queue)
     {
         using namespace std::chrono_literals;
 
         context.logger->debug(_T("TestNestedTask started."));
 
-        auto task = TestTimerAwait(context, delayed_executor);
+        auto task = TestTimerAwait(context, time_queue);
 
-        co_await awl::testing::DelayedAwaitable(delayed_executor, 2s);
+        co_await awl::testing::TimeQueueAwaitable(time_queue, 2s);
 
         context.logger->debug(_T("Time interval has elapsed."));
 

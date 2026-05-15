@@ -457,11 +457,11 @@ namespace
     public:
 
         AsyncHandler(
-            awl::testing::IDelayedExecutor& delayed_executor,
+            awl::testing::ITimeQueue& time_queue,
             int tag,
             std::vector<int>* p_events,
             bool defer = false) :
-            _delayedExecutor(delayed_executor),
+            _timeQueue(time_queue),
             _tag(tag),
             _events(p_events),
             _defer(defer)
@@ -471,7 +471,7 @@ namespace
         {
             if (_defer)
             {
-                co_await awl::testing::DelayedAwaitable(_delayedExecutor, 1ms);
+                co_await awl::testing::TimeQueueAwaitable(_timeQueue, 1ms);
             }
 
             _events->push_back(_tag * 1000 + value);
@@ -480,7 +480,7 @@ namespace
 
     private:
 
-        awl::testing::IDelayedExecutor& _delayedExecutor;
+        awl::testing::ITimeQueue& _timeQueue;
         int _tag = 0;
         std::vector<int>* _events = nullptr;
         bool _defer = false;
