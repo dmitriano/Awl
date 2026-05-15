@@ -72,7 +72,7 @@ namespace awl
                 return false;
             }
 
-            if (_emitting)
+            if (isEmitting())
             {
                 it->removed = true;
             }
@@ -88,8 +88,6 @@ namespace awl
         void emit(const Params&... args) const
             requires (std::invocable<Slot&, const Params&...>)
         {
-            assert(!_emitting);
-
             EmitGuard guard(*this);
 
             for (SlotRecord& record : _slots)
@@ -140,19 +138,30 @@ namespace awl
             explicit EmitGuard(const Source& signal) :
                 _signal(signal)
             {
-                _signal._emitting = true;
+                ++_signal._emissionDepth;
             }
 
             ~EmitGuard()
             {
-                _signal._emitting = false;
-                _signal.compact();
+                assert(_signal._emissionDepth != 0);
+
+                --_signal._emissionDepth;
+
+                if (!_signal.isEmitting())
+                {
+                    _signal.compact();
+                }
             }
 
         private:
 
             const Source& _signal;
         };
+
+        bool isEmitting() const noexcept
+        {
+            return _emissionDepth != 0;
+        }
 
         void eraseRecord(container_type::iterator it)
         {
@@ -176,7 +185,7 @@ namespace awl
                 });
         }
 
-        mutable bool _emitting = false;
+        mutable std::size_t _emissionDepth = 0;
         mutable container_type _slots;
     };
 }
