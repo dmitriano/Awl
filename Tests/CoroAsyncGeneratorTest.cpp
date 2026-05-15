@@ -11,13 +11,13 @@
 #include "Awl/StringFormat.h"
 
 //Why does it fail?
-//static_assert(std::ranges::range<awl::async_generator<int>>);
+//static_assert(std::ranges::range<awl::coro::async_generator<int>>);
 
 namespace
 {
     using namespace std::chrono_literals;
 
-    awl::async_generator<int> gen(awl::testing::IDelayedExecutor& delayed_executor, int count)
+    awl::coro::async_generator<int> gen(awl::testing::IDelayedExecutor& delayed_executor, int count)
     {
         for (int i = 0; i < count; ++i)
         {
@@ -33,7 +33,7 @@ namespace
         }
     }
 
-    awl::Task<void> print(
+    awl::coro::Task<void> print(
         const awl::testing::TestContext& context,
         awl::testing::IDelayedExecutor& delayed_executor,
         int count,
@@ -72,7 +72,7 @@ namespace
         context.logger->debug(line.str());
     }
 
-    awl::Job test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Job test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         co_await print(context, delayed_executor, 3);
 
@@ -99,7 +99,7 @@ AWL_TEST(CoroAsyncGeneratorOwned)
 {
     awl::testing::TimeQueue time_queue;
 
-    awl::Job task = test(context, time_queue);
+    awl::coro::Job task = test(context, time_queue);
 
     AWL_ASSERT(!task.done());
 

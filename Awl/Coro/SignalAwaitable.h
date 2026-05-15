@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace awl
+namespace awl::coro
 {
     template <class... Args>
     class SignalAwaitable;

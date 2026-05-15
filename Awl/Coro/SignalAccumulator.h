@@ -11,7 +11,7 @@
 #include <utility>
 #include <variant>
 
-namespace awl
+namespace awl::coro
 {
     template <class... Args>
     class SignalAccumulator;

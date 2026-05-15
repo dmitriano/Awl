@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace awl
+namespace awl::coro
 {
     class JobGroup : public Observable<TaskSink>
     {

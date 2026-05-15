@@ -5,180 +5,183 @@
 #include <optional>
 #include <exception>
 
-namespace awl
+namespace awl::coro
 {
     template<typename T>
     struct Task;
 
-    template<typename T>
-    class TaskPromise
+    namespace detail
     {
-    public:
-
-        // value to be computed
-        // when Task is not completed (coroutine didn't co_return anything yet) value is empty
-        std::optional<T> _value;
-        std::exception_ptr _exception;
-
-        void rethrow() const
+        template<typename T>
+        class TaskPromise
         {
-            if (_exception)
+        public:
+
+            // value to be computed
+            // when Task is not completed (coroutine didn't co_return anything yet) value is empty
+            std::optional<T> _value;
+            std::exception_ptr _exception;
+
+            void rethrow() const
             {
-                std::rethrow_exception(_exception);
+                if (_exception)
+                {
+                    std::rethrow_exception(_exception);
+                }
             }
-        }
 
-        // corouine that awaiting this coroutine value
-        // we need to store it in order to resume it later when value of this coroutine will be computed
-        std::coroutine_handle<> _awaitingCoroutine;
+            // corouine that awaiting this coroutine value
+            // we need to store it in order to resume it later when value of this coroutine will be computed
+            std::coroutine_handle<> _awaitingCoroutine;
 
-        // Task is async result of our coroutine
-        // it is created before execution of the coroutine body
-        // it can be either co_awaited inside another coroutine
-        // or used via special interface for extracting values (is_ready and get)
-        Task<T> get_return_object();
+            // Task is async result of our coroutine
+            // it is created before execution of the coroutine body
+            // it can be either co_awaited inside another coroutine
+            // or used via special interface for extracting values (is_ready and get)
+            Task<T> get_return_object();
 
-        // there are two kinds of coroutines:
-        // 1. eager - that start its execution immediately
-        // 2. lazy - that start its execution only after 'co_await'ing on them
-        // here I used eager coroutine Task
-        // eager: do not suspend before running coroutine body
-        std::suspend_never initial_suspend() noexcept
-        {
-            return {};
-        }
-
-        // store value to be returned to awaiting coroutine or accessed through 'get' function
-        void return_value(T val) noexcept
-        {
-            rethrow();
-            
-            _value = std::move(val);
-        }
-
-        void unhandled_exception() noexcept
-        {
-            // alternatively we can store current exeption in std::exception_ptr to rethrow it later
-            _exception = std::current_exception();
-        }
-
-        // when final suspend is executed 'value' is already set
-        // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
-        // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
-        // value
-        auto final_suspend() noexcept
-        {
-            // if there is a coroutine that is awaiting on this coroutine resume it
-            struct transfer_awaitable
+            // there are two kinds of coroutines:
+            // 1. eager - that start its execution immediately
+            // 2. lazy - that start its execution only after 'co_await'ing on them
+            // here I used eager coroutine Task
+            // eager: do not suspend before running coroutine body
+            std::suspend_never initial_suspend() noexcept
             {
-                // always stop at final suspend
-                bool await_ready() noexcept
-                {
-                    return false;
-                }
-
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
-                {
-                    TaskPromise& promise = h.promise();
-
-                    // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
-                    // nothing
-                    return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
-                }
-                
-                void await_resume() noexcept {}
-            };
-            
-            return transfer_awaitable{};
-        }
-    };
-
-    template<>
-    class TaskPromise<void>
-    {
-    public:
-
-        std::exception_ptr _exception;
-
-        void rethrow() const
-        {
-            if (_exception)
-            {
-                std::rethrow_exception(_exception);
+                return {};
             }
-        }
 
-        // corouine that awaiting this coroutine value
-        // we need to store it in order to resume it later when value of this coroutine will be computed
-        std::coroutine_handle<> _awaitingCoroutine;
-
-        // Task is async result of our coroutine
-        // it is created before execution of the coroutine body
-        // it can be either co_awaited inside another coroutine
-        // or used via special interface for extracting values (is_ready and get)
-        Task<void> get_return_object();
-
-        // there are two kinds of coroutines:
-        // 1. eager - that start its execution immediately
-        // 2. lazy - that start its execution only after 'co_await'ing on them
-        // here I used eager coroutine Task
-        // eager: do not suspend before running coroutine body
-        std::suspend_never initial_suspend()
-        {
-            return {};
-        }
-
-        // store value to be returned to awaiting coroutine or accessed through 'get' function
-        void return_void()
-        {
-            rethrow();
-        }
-
-        void unhandled_exception()
-        {
-            // alternatively we can store current exeption in std::exception_ptr to rethrow it later
-            _exception = std::current_exception();
-        }
-
-        // when final suspend is executed 'value' is already set
-        // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
-        // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
-        // value
-        auto final_suspend() noexcept
-        {
-            // if there is a coroutine that is awaiting on this coroutine resume it
-            struct transfer_awaitable
+            // store value to be returned to awaiting coroutine or accessed through 'get' function
+            void return_value(T val) noexcept
             {
-                // always stop at final suspend
-                bool await_ready() noexcept
+                rethrow();
+
+                _value = std::move(val);
+            }
+
+            void unhandled_exception() noexcept
+            {
+                // alternatively we can store current exeption in std::exception_ptr to rethrow it later
+                _exception = std::current_exception();
+            }
+
+            // when final suspend is executed 'value' is already set
+            // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
+            // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
+            // value
+            auto final_suspend() noexcept
+            {
+                // if there is a coroutine that is awaiting on this coroutine resume it
+                struct transfer_awaitable
                 {
-                    return false;
-                }
+                    // always stop at final suspend
+                    bool await_ready() noexcept
+                    {
+                        return false;
+                    }
 
-                std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
+                    std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
+                    {
+                        TaskPromise& promise = h.promise();
+
+                        // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
+                        // nothing
+                        return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
+                    }
+
+                    void await_resume() noexcept {}
+                };
+
+                return transfer_awaitable{};
+            }
+        };
+
+        template<>
+        class TaskPromise<void>
+        {
+        public:
+
+            std::exception_ptr _exception;
+
+            void rethrow() const
+            {
+                if (_exception)
                 {
-                    TaskPromise& promise = h.promise();
-
-                    // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
-                    // nothing
-                    return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
+                    std::rethrow_exception(_exception);
                 }
+            }
 
-                void await_resume() noexcept {}
-            };
+            // corouine that awaiting this coroutine value
+            // we need to store it in order to resume it later when value of this coroutine will be computed
+            std::coroutine_handle<> _awaitingCoroutine;
 
-            return transfer_awaitable{};
-        }
-    };
+            // Task is async result of our coroutine
+            // it is created before execution of the coroutine body
+            // it can be either co_awaited inside another coroutine
+            // or used via special interface for extracting values (is_ready and get)
+            Task<void> get_return_object();
+
+            // there are two kinds of coroutines:
+            // 1. eager - that start its execution immediately
+            // 2. lazy - that start its execution only after 'co_await'ing on them
+            // here I used eager coroutine Task
+            // eager: do not suspend before running coroutine body
+            std::suspend_never initial_suspend()
+            {
+                return {};
+            }
+
+            // store value to be returned to awaiting coroutine or accessed through 'get' function
+            void return_void()
+            {
+                rethrow();
+            }
+
+            void unhandled_exception()
+            {
+                // alternatively we can store current exeption in std::exception_ptr to rethrow it later
+                _exception = std::current_exception();
+            }
+
+            // when final suspend is executed 'value' is already set
+            // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
+            // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
+            // value
+            auto final_suspend() noexcept
+            {
+                // if there is a coroutine that is awaiting on this coroutine resume it
+                struct transfer_awaitable
+                {
+                    // always stop at final suspend
+                    bool await_ready() noexcept
+                    {
+                        return false;
+                    }
+
+                    std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
+                    {
+                        TaskPromise& promise = h.promise();
+
+                        // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
+                        // nothing
+                        return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
+                    }
+
+                    void await_resume() noexcept {}
+                };
+
+                return transfer_awaitable{};
+            }
+        };
+    }
 
     template<typename T>
     struct Task
     {
         // declare promise type
-        using promise_type = TaskPromise<T>;
+        using promise_type = detail::TaskPromise<T>;
 
         Task() : _h(nullptr) {}
-        
+
         Task(std::coroutine_handle<promise_type> handle) noexcept : _h(handle) {}
 
         Task(Task&& other) noexcept : _h(std::exchange(other._h, nullptr)) {}
@@ -211,7 +214,7 @@ namespace awl
         T get()
         {
             check_handle();
-            
+
             _h.promise().rethrow();
 
             return std::move(*_h.promise()._value);
@@ -240,12 +243,12 @@ namespace awl
     };
 
     template<typename T>
-    Task<T> TaskPromise<T>::get_return_object()
+    Task<T> detail::TaskPromise<T>::get_return_object()
     {
         return { std::coroutine_handle<TaskPromise>::from_promise(*this) };
     }
 
-    inline Task<void> TaskPromise<void>::get_return_object()
+    inline Task<void> detail::TaskPromise<void>::get_return_object()
     {
         return { std::coroutine_handle<TaskPromise>::from_promise(*this) };
     }
@@ -268,7 +271,7 @@ namespace awl
 
         struct task_awaitable
         {
-            std::coroutine_handle<TaskPromise<T>> _h;
+            std::coroutine_handle<detail::TaskPromise<T>> _h;
 
             // check if this Task already has value computed
             bool await_ready()

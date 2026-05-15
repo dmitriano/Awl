@@ -1,6 +1,6 @@
 #pragma once
 
-namespace awl
+namespace awl::coro
 {
     class TaskSink
     {

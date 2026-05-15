@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace awl
+namespace awl::coro
 {
     template <class Key, class Value>
     class TaskMap : public awl::Observable<MappedTaskSink<Key, Value>>

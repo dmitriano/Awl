@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace awl
+namespace awl::coro
 {
     namespace detail
     {

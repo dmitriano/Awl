@@ -14,7 +14,7 @@
 #include <functional>
 #include <cassert>
 
-namespace awl
+namespace awl::coro
 {
     template<typename T>
     class async_generator;

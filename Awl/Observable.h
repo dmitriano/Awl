@@ -67,7 +67,7 @@ namespace awl
 
     protected:
 
-        //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce 
+        //Separating Params and Args prevents ambiguity for const ref parameter types. The method invocation will produce
         //compiler errors if Args does not match Params.
         template<typename ...Params, typename ... Args>
         void notify(void (IObserver::* func)(Params ...), const Args& ... args)
@@ -124,7 +124,7 @@ namespace awl
         }
 
         template<typename ...Params, typename ... Args>
-        Task<void> notifyAsync(Task<void> (IObserver::* func)(Params ...), Args ... args)
+        awl::coro::Task<void> notifyAsync(awl::coro::Task<void> (IObserver::* func)(Params ...), Args ... args)
             requires (std::invocable<decltype(func), IObserver*, Args&...>)
         {
             for (typename ObserverList::iterator i = _observers.begin(); i != _observers.end(); )

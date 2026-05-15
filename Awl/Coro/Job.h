@@ -8,17 +8,17 @@
 #include <utility>
 #include <cassert>
 
-namespace awl
+namespace awl::coro
 {
     class Job
     {
     public:
 
         // declare promise type
-        using promise_type = JobPromise;
+        using promise_type = detail::JobPromise;
 
         Job() : _h(nullptr) {}
-        
+
         Job(std::coroutine_handle<promise_type> _h) : _h(_h) {}
 
         Job(Job&& other) noexcept : _h(std::exchange(other._h, nullptr)) {}
@@ -75,7 +75,7 @@ namespace awl
 
             struct task_awaitable
             {
-                std::coroutine_handle<JobPromise> _h;
+                std::coroutine_handle<detail::JobPromise> _h;
 
                 // check if this Job already has value computed
                 bool await_ready()

@@ -27,7 +27,7 @@ namespace
     public:
 
         ChangeHandler() = default;
-        
+
         ChangeHandler(const TestContext & c) : pContext(&c)
         {}
 
@@ -167,7 +167,7 @@ AWL_TEST(Observer_Move)
 
     ChangeHandler handler2_copy(context);
     handler2_copy = std::move(handler2);
-    
+
     something1.SetIt(5);
 
     AWL_ASSERTM_FALSE(handler1.included(), _T("Observer #1 is included"));
@@ -449,7 +449,7 @@ namespace
 
     struct IAsyncNotify
     {
-        virtual awl::Task<void> changed(int value) = 0;
+        virtual awl::coro::Task<void> changed(int value) = 0;
     };
 
     class AsyncHandler : public awl::Observer<IAsyncNotify>
@@ -467,7 +467,7 @@ namespace
             _defer(defer)
         {}
 
-        awl::Task<void> changed(int value) override
+        awl::coro::Task<void> changed(int value) override
         {
             if (_defer)
             {
@@ -490,7 +490,7 @@ namespace
     {
     public:
 
-        awl::Task<int> setValueAsync(int value)
+        awl::coro::Task<int> setValueAsync(int value)
         {
             co_await notifyAsync(&IAsyncNotify::changed, value);
             co_return value;
@@ -512,7 +512,7 @@ AWL_TEST(Observable_NotifyAsync)
     observable.subscribe(&handler1);
     observable.subscribe(&handler2);
 
-    awl::Task<int> task = observable.setValueAsync(7);
+    awl::coro::Task<int> task = observable.setValueAsync(7);
 
     AWL_ASSERT(!task.is_ready());
     AWL_ASSERT_EQUAL(0u, events.size());

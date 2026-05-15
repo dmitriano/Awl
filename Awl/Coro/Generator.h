@@ -13,7 +13,7 @@
 #include <iterator>
 #include <functional>
 
-namespace awl
+namespace awl::coro
 {
     template<typename T>
     class generator;

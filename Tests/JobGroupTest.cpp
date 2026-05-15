@@ -11,16 +11,16 @@
 
 #include <type_traits>
 
-static_assert(!std::is_copy_constructible_v<awl::JobGroup>);
-static_assert(!std::is_copy_assignable_v<awl::JobGroup>);
-static_assert(std::is_move_constructible_v<awl::JobGroup>);
-static_assert(std::is_move_assignable_v<awl::JobGroup>);
+static_assert(!std::is_copy_constructible_v<awl::coro::JobGroup>);
+static_assert(!std::is_copy_assignable_v<awl::coro::JobGroup>);
+static_assert(std::is_move_constructible_v<awl::coro::JobGroup>);
+static_assert(std::is_move_assignable_v<awl::coro::JobGroup>);
 
 namespace
 {
     using namespace std::chrono_literals;
 
-    awl::Job delayedJob(
+    awl::coro::Job delayedJob(
         const awl::testing::TestContext& context,
         awl::testing::IDelayedExecutor& delayed_executor,
         int id)
@@ -33,7 +33,7 @@ namespace
     void spawnThreeJobs(
         const awl::testing::TestContext& context,
         awl::testing::IDelayedExecutor& delayed_executor,
-        awl::JobGroup& jobs)
+        awl::coro::JobGroup& jobs)
     {
         jobs.spawn(delayedJob(context, delayed_executor, 1));
         jobs.spawn(delayedJob(context, delayed_executor, 2));
@@ -43,26 +43,26 @@ namespace
     }
 }
 
-namespace awl
+namespace awl::coro
 {
     class JobGroupTestAccess
     {
     public:
 
-        static awl::Job waitAllJobs(
+        static awl::coro::Job waitAllJobs(
             const awl::testing::TestContext& context,
             awl::testing::IDelayedExecutor& delayed_executor,
-            awl::JobGroup& jobs)
+            awl::coro::JobGroup& jobs)
         {
             spawnThreeJobs(context, delayed_executor, jobs);
 
             co_await jobs.wait_all_jobs_experimental();
         }
 
-        static awl::Job waitAnyThenWaitAll(
+        static awl::coro::Job waitAnyThenWaitAll(
             const awl::testing::TestContext& context,
             awl::testing::IDelayedExecutor& delayed_executor,
-            awl::JobGroup& jobs,
+            awl::coro::JobGroup& jobs,
             bool wait_jobs_directly = false,
             std::size_t expected_count_after_wait_any = 2)
         {
@@ -95,7 +95,7 @@ namespace awl
 AWL_TEST(JobGroupCancel)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
     jobs.spawn(delayedJob(context, time_queue, 1));
 
@@ -111,7 +111,7 @@ AWL_TEST(JobGroupCancel)
 AWL_TEST(JobGroupRemovesFinishedJobs)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
     jobs.spawn(delayedJob(context, time_queue, 1));
 
@@ -125,9 +125,9 @@ AWL_TEST(JobGroupRemovesFinishedJobs)
 AWL_TEST(JobGroupWaitAllJobsDirectly)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
-    awl::Job task = awl::JobGroupTestAccess::waitAllJobs(context, time_queue, jobs);
+    awl::coro::Job task = awl::coro::JobGroupTestAccess::waitAllJobs(context, time_queue, jobs);
 
     time_queue.loop(1);
 
@@ -149,9 +149,9 @@ AWL_TEST(JobGroupWaitAllJobsDirectly)
 AWL_TEST(JobGroupWaitAnyThenWaitAll)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
-    awl::Job task = awl::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs);
+    awl::coro::Job task = awl::coro::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs);
 
     time_queue.loop();
 
@@ -161,11 +161,11 @@ AWL_TEST(JobGroupWaitAnyThenWaitAll)
 AWL_TEST(JobGroupMoveConstruct)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
     spawnThreeJobs(context, time_queue, jobs);
 
-    awl::JobGroup moved_jobs(std::move(jobs));
+    awl::coro::JobGroup moved_jobs(std::move(jobs));
 
     AWL_ASSERT_EQUAL(3u, moved_jobs.task_count());
 
@@ -177,8 +177,8 @@ AWL_TEST(JobGroupMoveConstruct)
 AWL_TEST(JobGroupMoveAssign)
 {
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
-    awl::JobGroup moved_jobs;
+    awl::coro::JobGroup jobs;
+    awl::coro::JobGroup moved_jobs;
 
     spawnThreeJobs(context, time_queue, jobs);
 
@@ -196,9 +196,9 @@ AWL_TEST(JobGroupCancelBeforeWaiting)
     AWL_FLAG(wait_jobs_directly);
 
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
-    awl::Job task = awl::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs, wait_jobs_directly, 0);
+    awl::coro::Job task = awl::coro::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs, wait_jobs_directly, 0);
 
     jobs.cancel();
 
@@ -215,9 +215,9 @@ AWL_TEST(JobGroupCancelAfterFirstJobFinished)
     AWL_FLAG(wait_jobs_directly);
 
     awl::testing::TimeQueue time_queue;
-    awl::JobGroup jobs;
+    awl::coro::JobGroup jobs;
 
-    awl::Job task = awl::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs, wait_jobs_directly);
+    awl::coro::Job task = awl::coro::JobGroupTestAccess::waitAnyThenWaitAll(context, time_queue, jobs, wait_jobs_directly);
 
     time_queue.loop(1);
 

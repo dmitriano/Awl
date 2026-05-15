@@ -33,35 +33,35 @@ namespace
         }
     };
 
-    awl::Job waitInt(awl::ISignal<int>& signal, int& result)
+    awl::coro::Job waitInt(awl::ISignal<int>& signal, int& result)
     {
-        result = co_await awl::wait_signal(signal);
+        result = co_await awl::coro::wait_signal(signal);
     }
 
-    awl::Job waitTuple(
+    awl::coro::Job waitTuple(
         awl::ISignal<const std::shared_ptr<int>&, const std::string&>& signal,
         std::shared_ptr<int>& sender,
         std::string& value)
     {
-        auto [result_sender, result_value] = co_await awl::wait_signal(signal);
+        auto [result_sender, result_value] = co_await awl::coro::wait_signal(signal);
 
         sender = std::move(result_sender);
         value = std::move(result_value);
     }
 
-    awl::Job waitVoid(awl::ISignal<>& signal, bool& resumed)
+    awl::coro::Job waitVoid(awl::ISignal<>& signal, bool& resumed)
     {
-        co_await awl::wait_signal(signal);
+        co_await awl::coro::wait_signal(signal);
 
         resumed = true;
     }
 
-    awl::Job waitAccumulatedInt(awl::SignalAccumulator<int>& accumulator, int& result)
+    awl::coro::Job waitAccumulatedInt(awl::coro::SignalAccumulator<int>& accumulator, int& result)
     {
         result = co_await accumulator.wait();
     }
 
-    awl::Job waitAccumulatedInts(awl::SignalAccumulator<int>& accumulator, std::vector<int>& values)
+    awl::coro::Job waitAccumulatedInts(awl::coro::SignalAccumulator<int>& accumulator, std::vector<int>& values)
     {
         for (int i = 0; i != 2; ++i)
         {
@@ -69,7 +69,7 @@ namespace
         }
     }
 
-    awl::Job waitAccumulatedVoid(awl::SignalAccumulator<>& accumulator, int& count)
+    awl::coro::Job waitAccumulatedVoid(awl::coro::SignalAccumulator<>& accumulator, int& count)
     {
         co_await accumulator.wait();
         ++count;
@@ -78,8 +78,8 @@ namespace
         ++count;
     }
 
-    awl::Job emitDuringAccumulatedProcessing(
-        awl::SignalAccumulator<int>& accumulator,
+    awl::coro::Job emitDuringAccumulatedProcessing(
+        awl::coro::SignalAccumulator<int>& accumulator,
         awl::Source<int>& signal,
         std::vector<int>& values)
     {
@@ -91,10 +91,10 @@ namespace
     }
 
     template <class R>
-    awl::Job waitRangeValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
+    awl::coro::Job waitRangeValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
     {
         {
-            auto accumulator = awl::accumulate_signal<&RangeSender::changed>(std::forward<R>(objects));
+            auto accumulator = awl::coro::accumulate_signal<&RangeSender::changed>(std::forward<R>(objects));
             auto [result_sender, result_value] = co_await accumulator.wait();
 
             sender = std::move(result_sender);
@@ -103,10 +103,10 @@ namespace
     }
 
     template <class R>
-    awl::Job waitRangeMethodValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
+    awl::coro::Job waitRangeMethodValue(R&& objects, std::shared_ptr<RangeSender>& sender, int& value)
     {
         {
-            auto accumulator = awl::accumulate_signal<&RangeSender::changedSignal>(std::forward<R>(objects));
+            auto accumulator = awl::coro::accumulate_signal<&RangeSender::changedSignal>(std::forward<R>(objects));
             auto [result_sender, result_value] = co_await accumulator.wait();
 
             sender = std::move(result_sender);
@@ -115,18 +115,18 @@ namespace
     }
 
     template <class R>
-    awl::Job waitRangeVoid(R&& objects, std::shared_ptr<RangeSender>& sender)
+    awl::coro::Job waitRangeVoid(R&& objects, std::shared_ptr<RangeSender>& sender)
     {
         {
-            auto accumulator = awl::accumulate_signal<&RangeSender::closed>(std::forward<R>(objects));
+            auto accumulator = awl::coro::accumulate_signal<&RangeSender::closed>(std::forward<R>(objects));
 
             sender = co_await accumulator.wait();
         }
     }
 
-    using RangeChangedAccumulator = awl::SignalRangeAccumulator<RangeSender, &RangeSender::changed>;
+    using RangeChangedAccumulator = awl::coro::SignalRangeAccumulator<RangeSender, &RangeSender::changed>;
 
-    awl::Job waitAccumulatedValue(RangeChangedAccumulator& accumulator, std::shared_ptr<RangeSender>& sender, int& value)
+    awl::coro::Job waitAccumulatedValue(RangeChangedAccumulator& accumulator, std::shared_ptr<RangeSender>& sender, int& value)
     {
         auto [result_sender, result_value] = co_await accumulator.wait();
 
@@ -134,7 +134,7 @@ namespace
         value = result_value;
     }
 
-    awl::Job waitAccumulatedValues(
+    awl::coro::Job waitAccumulatedValues(
         RangeChangedAccumulator& accumulator,
         std::vector<std::shared_ptr<RangeSender>>& senders,
         std::vector<int>& values)
@@ -156,7 +156,7 @@ AWL_TEST(SignalAwaitable_SingleArgument)
     awl::Source<int> signal;
     int result = 0;
 
-    awl::Job job = waitInt(signal, result);
+    awl::coro::Job job = waitInt(signal, result);
 
     AWL_ASSERT(!job.done());
     AWL_ASSERT_EQUAL(1u, signal.size());
@@ -177,7 +177,7 @@ AWL_TEST(SignalAwaitable_Tuple)
     std::shared_ptr<int> sender;
     std::string value;
 
-    awl::Job job = waitTuple(signal, sender, value);
+    awl::coro::Job job = waitTuple(signal, sender, value);
 
     AWL_ASSERT(!job.done());
 
@@ -196,7 +196,7 @@ AWL_TEST(SignalAwaitable_Void)
     awl::Source<> signal;
     bool resumed = false;
 
-    awl::Job job = waitVoid(signal, resumed);
+    awl::coro::Job job = waitVoid(signal, resumed);
 
     AWL_ASSERT(!job.done());
 
@@ -214,7 +214,7 @@ AWL_TEST(SignalAwaitable_ResumesOnce)
     awl::Source<int> signal;
     int result = 0;
 
-    awl::Job job = waitInt(signal, result);
+    awl::coro::Job job = waitInt(signal, result);
 
     signal.emit(1);
     signal.emit(2);
@@ -232,7 +232,7 @@ AWL_TEST(SignalAwaitable_UnsubscribesOnCancel)
     int result = 0;
 
     {
-        awl::Job job = waitInt(signal, result);
+        awl::coro::Job job = waitInt(signal, result);
 
         AWL_ASSERT(!job.done());
         AWL_ASSERT_EQUAL(1u, signal.size());
@@ -250,12 +250,12 @@ AWL_TEST(SignalAccumulator_QueuesBeforeWait)
     AWL_UNUSED_CONTEXT;
 
     awl::Source<int> signal;
-    awl::SignalAccumulator<int> accumulator(signal);
+    awl::coro::SignalAccumulator<int> accumulator(signal);
 
     signal.emit(11);
 
     int result = 0;
-    awl::Job job = waitAccumulatedInt(accumulator, result);
+    awl::coro::Job job = waitAccumulatedInt(accumulator, result);
 
     AWL_ASSERT(job.done());
     AWL_ASSERT_EQUAL(11, result);
@@ -267,13 +267,13 @@ AWL_TEST(SignalAccumulator_QueuesInOrder)
     AWL_UNUSED_CONTEXT;
 
     awl::Source<int> signal;
-    awl::SignalAccumulator<int> accumulator(signal);
+    awl::coro::SignalAccumulator<int> accumulator(signal);
 
     signal.emit(13);
     signal.emit(17);
 
     std::vector<int> values;
-    awl::Job job = waitAccumulatedInts(accumulator, values);
+    awl::coro::Job job = waitAccumulatedInts(accumulator, values);
 
     AWL_ASSERT(job.done());
     AWL_ASSERT_EQUAL(2u, values.size());
@@ -286,10 +286,10 @@ AWL_TEST(SignalAccumulator_WaitMany)
     AWL_UNUSED_CONTEXT;
 
     awl::Source<int> signal;
-    awl::SignalAccumulator<int> accumulator(signal);
+    awl::coro::SignalAccumulator<int> accumulator(signal);
     std::vector<int> values;
 
-    awl::Job job = waitAccumulatedInts(accumulator, values);
+    awl::coro::Job job = waitAccumulatedInts(accumulator, values);
 
     AWL_ASSERT(!job.done());
 
@@ -311,10 +311,10 @@ AWL_TEST(SignalAccumulator_QueuesDuringProcessing)
     AWL_UNUSED_CONTEXT;
 
     awl::Source<int> signal;
-    awl::SignalAccumulator<int> accumulator(signal);
+    awl::coro::SignalAccumulator<int> accumulator(signal);
     std::vector<int> values;
 
-    awl::Job job = emitDuringAccumulatedProcessing(accumulator, signal, values);
+    awl::coro::Job job = emitDuringAccumulatedProcessing(accumulator, signal, values);
 
     AWL_ASSERT(!job.done());
 
@@ -331,13 +331,13 @@ AWL_TEST(SignalAccumulator_Void)
     AWL_UNUSED_CONTEXT;
 
     awl::Source<> signal;
-    awl::SignalAccumulator<> accumulator(signal);
+    awl::coro::SignalAccumulator<> accumulator(signal);
     int count = 0;
 
     signal.emit();
     signal.emit();
 
-    awl::Job job = waitAccumulatedVoid(accumulator, count);
+    awl::coro::Job job = waitAccumulatedVoid(accumulator, count);
 
     AWL_ASSERT(job.done());
     AWL_ASSERT_EQUAL(2, count);
@@ -350,7 +350,7 @@ AWL_TEST(SignalAccumulator_Unsubscribes)
     awl::Source<int> signal;
 
     {
-        awl::SignalAccumulator<int> accumulator(signal);
+        awl::coro::SignalAccumulator<int> accumulator(signal);
 
         AWL_ASSERT_EQUAL(1u, signal.size());
     }
@@ -372,7 +372,7 @@ AWL_TEST(SignalRangeAccumulator_Value)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(objects, sender, value);
+    awl::coro::Job job = waitRangeValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
 
@@ -411,7 +411,7 @@ AWL_TEST(SignalRangeAccumulator_MemberFunction)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeMethodValue(objects, sender, value);
+    awl::coro::Job job = waitRangeMethodValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
     AWL_ASSERT_EQUAL(1u, objects[0]->changed.size());
@@ -438,7 +438,7 @@ AWL_TEST(SignalRangeAccumulator_Void)
 
     std::shared_ptr<RangeSender> sender;
 
-    awl::Job job = waitRangeVoid(objects, sender);
+    awl::coro::Job job = waitRangeVoid(objects, sender);
 
     AWL_ASSERT(!job.done());
     AWL_ASSERT_EQUAL(1u, objects[0]->closed.size());
@@ -475,7 +475,7 @@ AWL_TEST(SignalRangeAccumulator_FilterView)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(enabled_objects, sender, value);
+    awl::coro::Job job = waitRangeValue(enabled_objects, sender, value);
 
     AWL_ASSERT(!job.done());
     AWL_ASSERT(objects[0]->changed.empty());
@@ -516,7 +516,7 @@ AWL_TEST(SignalRangeAccumulator_UnsubscribesOnCancel)
         weak2 = objects[1];
 
         {
-            awl::Job job = waitRangeValue(objects, sender, value);
+            awl::coro::Job job = waitRangeValue(objects, sender, value);
 
             AWL_ASSERT(!job.done());
             AWL_ASSERT_EQUAL(1u, objects[0]->changed.size());
@@ -555,7 +555,7 @@ AWL_TEST(SignalRangeAccumulator_QueuesBeforeWait)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitAccumulatedValue(accumulator, sender, value);
+    awl::coro::Job job = waitAccumulatedValue(accumulator, sender, value);
 
     AWL_ASSERT(job.done());
     AWL_ASSERT(sender == objects[1]);
@@ -578,7 +578,7 @@ AWL_TEST(SignalRangeAccumulator_WaitMany)
     std::vector<std::shared_ptr<RangeSender>> senders;
     std::vector<int> values;
 
-    awl::Job job = waitAccumulatedValues(accumulator, senders, values);
+    awl::coro::Job job = waitAccumulatedValues(accumulator, senders, values);
 
     AWL_ASSERT(!job.done());
 
@@ -607,7 +607,7 @@ AWL_TEST(SignalRangeAccumulator_ObservableSetAdded)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(objects, sender, value);
+    awl::coro::Job job = waitRangeValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
 
@@ -632,7 +632,7 @@ AWL_TEST(SignalRangeAccumulator_ObservableUnorderedSetAdded)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(objects, sender, value);
+    awl::coro::Job job = waitRangeValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
 
@@ -663,7 +663,7 @@ AWL_TEST(SignalRangeAccumulator_ObservableSetRemoving)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(objects, sender, value);
+    awl::coro::Job job = waitRangeValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
     AWL_ASSERT_EQUAL(1u, first->changed.size());
@@ -701,7 +701,7 @@ AWL_TEST(SignalRangeAccumulator_ObservableSetClearing)
     std::shared_ptr<RangeSender> sender;
     int value = 0;
 
-    awl::Job job = waitRangeValue(objects, sender, value);
+    awl::coro::Job job = waitRangeValue(objects, sender, value);
 
     AWL_ASSERT(!job.done());
 
@@ -739,7 +739,7 @@ AWL_TEST(SignalRangeAccumulator_ObservableSetUnsubscribesOnCancel)
     int value = 0;
 
     {
-        awl::Job job = waitRangeValue(objects, sender, value);
+        awl::coro::Job job = waitRangeValue(objects, sender, value);
 
         AWL_ASSERT(!job.done());
     }

@@ -12,7 +12,7 @@ namespace
 {
     using namespace std::chrono_literals;
 
-    awl::Task<int> wait_n(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor, int n)
+    awl::coro::Task<int> wait_n(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor, int n)
     {
         context.logger->debug(_T("before wait {}\n"), n);
         co_await awl::testing::DelayedAwaitable(delayed_executor, std::chrono::seconds(n));
@@ -20,7 +20,7 @@ namespace
         co_return n;
     }
 
-    awl::Task<int> test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Task<int> test(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         for (auto c : "hello world\n")
         {
@@ -40,7 +40,7 @@ namespace
         co_return co_await w1 + r;
     }
 
-    awl::Task<int> wait_0(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
+    awl::coro::Task<int> wait_0(const awl::testing::TestContext& context, awl::testing::IDelayedExecutor& delayed_executor)
     {
         co_return co_await wait_n(context, delayed_executor, 0);
     }
