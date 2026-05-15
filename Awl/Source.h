@@ -44,7 +44,7 @@ namespace awl
         }
 
         template<typename ...Params>
-        void emit(const Params&... args) const
+        void emit(const Params&... args)
             requires (std::invocable<Slot&, const Params&...>)
         {
             EmitGuard guard(*this);
@@ -133,7 +133,7 @@ namespace awl
         {
         public:
 
-            explicit EmitGuard(const Source& signal) :
+            explicit EmitGuard(Source& signal) :
                 _signal(signal)
             {
                 ++_signal._emissionDepth;
@@ -153,7 +153,7 @@ namespace awl
 
         private:
 
-            const Source& _signal;
+            Source& _signal;
         };
 
         bool isEmitting() const noexcept
@@ -174,7 +174,7 @@ namespace awl
             _slots.pop_back();
         }
 
-        void compact() const
+        void compact()
         {
             std::erase_if(_slots,
                 [](const SlotRecord& record)
@@ -183,7 +183,7 @@ namespace awl
                 });
         }
 
-        mutable std::size_t _emissionDepth = 0;
-        mutable container_type _slots;
+        std::size_t _emissionDepth = 0;
+        container_type _slots;
     };
 }
