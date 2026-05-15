@@ -15,22 +15,22 @@ namespace awl
         virtual void commit() = 0;
     };
 
-    class ITransactionFactory
+    class ITransactionProvider
     {
     public:
 
-        virtual ~ITransactionFactory() = default;
+        virtual ~ITransactionProvider() = default;
 
         virtual std::unique_ptr<awl::ITransaction> startTransaction() = 0;
     };
 
     inline std::move_only_function<void()> wrapInTransaction(
-        std::shared_ptr<ITransactionFactory> transaction_factory,
+        std::shared_ptr<ITransactionProvider> transaction_provider,
         std::move_only_function<void()> func)
     {
-        return [transaction_factory = std::move(transaction_factory), func = std::move(func)]() mutable
+        return [transaction_provider = std::move(transaction_provider), func = std::move(func)]() mutable
         {
-            std::unique_ptr<ITransaction> transaction = transaction_factory->startTransaction();
+            std::unique_ptr<ITransaction> transaction = transaction_provider->startTransaction();
             func();
             transaction->commit();
         };
