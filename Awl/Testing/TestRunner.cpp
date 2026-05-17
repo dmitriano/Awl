@@ -56,13 +56,13 @@ namespace awl::testing
 
         const String test_name = fromACString(p_test_link->name());
 
-        context.logger->info(_T("{} started."), test_name);
+        test_logger->info(_T("{} started."), test_name);
 
         size_t loop_count = loop;
 
         if (loop_count != 0)
         {
-            context.logger->info(_T("{} looping {} times."), test_name, loop_count);
+            test_logger->info(_T("{} looping {} times."), test_name, loop_count);
         }
         else
         {
@@ -82,7 +82,7 @@ namespace awl::testing
                 std::chrono::milliseconds t(timeout);
                 
                 watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
-                    [logger = context.logger, t, terminate]()
+                    [logger = test_logger, t, terminate]()
                     {
                         if (terminate)
                         {
@@ -119,7 +119,7 @@ namespace awl::testing
                 _clearOutput();
             }
 
-            context.logger->info(_T("{} passed within {}."), test_name, toString(sw));
+            test_logger->info(_T("{} passed within {}."), test_name, toString(sw));
 
             // Clear the attributes from the passed test.
             context.attributeProvider.clear();
