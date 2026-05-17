@@ -68,7 +68,7 @@ void AtomicStorage::startSaveLocked(const Value& val, IMutex& mutex)
     _saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::writeSnapshotsAndClearBackup, this, std::move(snapshot)));
 }
 
-bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)
+bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, const std::string level)
 {
     bool success = false;
 

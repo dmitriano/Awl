@@ -127,7 +127,7 @@ namespace awl
         };
 
         template <class Hash, class UnderlyingStream>
-        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, size_t count)
+        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, const size_t count)
         {
             size_t flushed_count = 0;
 
@@ -202,7 +202,7 @@ namespace awl
         };
 
         template <class Hash, class UnderlyingStream>
-        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, size_t count)
+        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, const size_t count)
         {
             assert(_v.size() < blockSize - Hash::size());
 

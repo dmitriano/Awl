@@ -785,7 +785,7 @@ namespace awl
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     template <class C>
     constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, UInt>
-        decimal<UInt, exp_len, DataTemplate>::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
+        decimal<UInt, exp_len, DataTemplate>::parse_int(const std::basic_string_view<C> fixed_string, const bool point_terminator)
     {
         uint8_t digit_count = 0;
 
