@@ -49,7 +49,7 @@ namespace awl::coro
             return std::move(func);
         }
 
-        std::shared_ptr<ISharedDispatcher> _dispatcher;
-        std::shared_ptr<awl::ITransactionProvider> _transactionProvider;
+        const std::shared_ptr<ISharedDispatcher> _dispatcher;
+        const std::shared_ptr<awl::ITransactionProvider> _transactionProvider;
     };
 }
