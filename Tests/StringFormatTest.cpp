@@ -26,6 +26,13 @@ namespace
         AWL_REFLECT(symbol, point)
     };
 
+    struct ReflectableFlag
+    {
+        bool enabled;
+
+        AWL_REFLECT(enabled)
+    };
+
     template <class C>
     class StringTest
     {
@@ -195,6 +202,11 @@ namespace
 
             AWL_ASSERT(std::format("{}", order) == std::string("{symbol=BTCUSDT, point={x=1, y=2.5}}"));
             AWL_ASSERT(std::format(L"{}", order) == std::wstring(L"{symbol=BTCUSDT, point={x=1, y=2.5}}"));
+
+            const ReflectableFlag flag{ true };
+
+            AWL_ASSERT(std::format("{}", flag) == std::string("{enabled=true}"));
+            AWL_ASSERT(std::format(L"{}", flag) == std::wstring(L"{enabled=true}"));
 
             AWL_ASSERT(std::format("{:>26}", point) == std::string("              {x=1, y=2.5}"));
             AWL_ASSERT(std::format(L"{:>26}", point) == std::wstring(L"              {x=1, y=2.5}"));

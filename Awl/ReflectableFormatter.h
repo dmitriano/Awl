@@ -11,6 +11,7 @@
 #include <concepts>
 #include <cstddef>
 #include <format>
+#include <ios>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -23,6 +24,27 @@ namespace awl
 
     namespace detail
     {
+        template <class CharT>
+        class BasicStreamFlagsGuard
+        {
+        public:
+
+            explicit BasicStreamFlagsGuard(std::basic_ostream<CharT>& init_out) :
+                out(init_out),
+                flags(init_out.flags())
+            {}
+
+            ~BasicStreamFlagsGuard()
+            {
+                out.flags(flags);
+            }
+
+        private:
+
+            std::basic_ostream<CharT>& out;
+            std::ios_base::fmtflags flags;
+        };
+
         template <class CharT, reflectable T, size_t index, class Tuple>
         void appendReflectableField(std::basic_ostream<CharT>& out, const Tuple& tuple, awl::basic_separator<CharT>& sep)
         {
@@ -36,8 +58,10 @@ namespace awl
         template <class CharT, reflectable T, size_t... indices>
         std::basic_ostream<CharT>& writeReflectable(std::basic_ostream<CharT>& out, const T& val, std::index_sequence<indices...>)
         {
+            BasicStreamFlagsGuard guard(out);
             const auto tuple = object_as_tuple(val);
 
+            out << std::boolalpha;
             out << static_cast<CharT>('{');
 
             awl::basic_separator<CharT> sep(static_cast<CharT>(','));
