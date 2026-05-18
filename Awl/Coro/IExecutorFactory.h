@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Awl/Coro/IDelayedExecutor.h"
-#include "Awl/Coro/ISharedExecutor.h"
+#include "Awl/Coro/IExecutor.h"
 
 #include <memory>
 
@@ -15,6 +15,6 @@ namespace awl::coro
 
         virtual std::shared_ptr<IDelayedExecutor> makeDelayedExecutor() = 0;
 
-        virtual std::shared_ptr<ISharedDispatcher> makeSharedExecutor() = 0;
+        virtual std::shared_ptr<IDispatcher> makeExecutor() = 0;
     };
 }

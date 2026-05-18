@@ -11,16 +11,16 @@
 
 namespace awl::coro
 {
-    class ISharedExecutor
+    class IExecutor
     {
     public:
 
-        virtual ~ISharedExecutor() = default;
+        virtual ~IExecutor() = default;
 
         virtual Awaitable<void> execute(std::move_only_function<void()> func) = 0;
     };
 
-    class ISharedDispatcher : public ISharedExecutor
+    class IDispatcher : public IExecutor
     {
     public:
 
@@ -32,12 +32,12 @@ namespace awl::coro
     namespace detail
     {
         template <class Func>
-        using shared_executor_result_t = std::remove_cvref_t<std::invoke_result_t<Func&>>;
+        using executor_result_t = std::remove_cvref_t<std::invoke_result_t<Func&>>;
     }
 
     template <class Func>
-    Task<detail::shared_executor_result_t<Func>> execute(
-        ISharedExecutor& executor,
+    Task<detail::executor_result_t<Func>> execute(
+        IExecutor& executor,
         Func func)
     {
         using Result = std::invoke_result_t<Func&>;
@@ -53,7 +53,7 @@ namespace awl::coro
         }
         else
         {
-            using Value = detail::shared_executor_result_t<Func>;
+            using Value = detail::executor_result_t<Func>;
             std::optional<Value> result;
 
             co_await executor.execute([func = std::move(func), &result]() mutable
@@ -66,8 +66,8 @@ namespace awl::coro
     }
 
     template <class Func>
-    Task<detail::shared_executor_result_t<Func>> execute(
-        const std::shared_ptr<ISharedExecutor>& executor,
+    Task<detail::executor_result_t<Func>> execute(
+        const std::shared_ptr<IExecutor>& executor,
         Func func)
     {
         if constexpr (std::is_void_v<std::invoke_result_t<Func&>>)
