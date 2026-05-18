@@ -67,7 +67,7 @@ AWL_TEST(CommandLineProvider_RejectsSpaceSeparatedValue)
 {
     AWL_UNUSED_CONTEXT;
 
-    Assert::throws<TestException>([]()
+    Assert::throws<CommandLineException>([]()
     {
         makeCommandLineProvider({
             AWL_CMD_TEXT("AwlTest"),
@@ -81,7 +81,7 @@ AWL_TEST(CommandLineProvider_RejectsDuplicateOption)
 {
     AWL_UNUSED_CONTEXT;
 
-    Assert::throws<TestException>([]()
+    Assert::throws<CommandLineException>([]()
     {
         makeCommandLineProvider({
             AWL_CMD_TEXT("AwlTest"),
