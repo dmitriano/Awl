@@ -80,6 +80,24 @@ namespace awl::testing
     };
 }
 
+#define AWL_TEST_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_TEST(test_class_name##_##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
+#define AWL_EXAMPLE_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_EXAMPLE(test_class_name##_##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
+#define AWL_BENCHMARK_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_BENCHMARK(test_class_name##_##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
 #define AWL_TEST_CLASS(test_class_name) \
 AWL_TEST(test_class_name) \
 { \
