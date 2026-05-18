@@ -22,38 +22,34 @@ namespace awl
 {
     namespace detail
     {
-        template <class CharT, reflectable T, size_t index, class Tuple>
-        void appendReflectableField(std::basic_ostream<CharT>& out, const Tuple& tuple, awl::basic_separator<CharT>& sep)
+        template <class CharT, reflectable T, class Field, class Index>
+        void appendReflectableField(std::basic_ostream<CharT>& out, const Field& field, Index index, awl::basic_separator<CharT>& sep)
         {
             out << sep;
 
             static constexpr auto format_string = awl::string_from_ascii<CharT>("{}={}");
 
-            out << std::format(format_string, T::member_names()[index], std::get<index>(tuple));
-        }
-
-        template <class CharT, reflectable T, size_t... indices>
-        std::basic_ostream<CharT>& writeReflectable(std::basic_ostream<CharT>& out, const T& val, std::index_sequence<indices...>)
-        {
-            const auto tuple = object_as_tuple(val);
-
-            out << static_cast<CharT>('{');
-
-            awl::basic_separator<CharT> sep(static_cast<CharT>(','));
-            (appendReflectableField<CharT, T, indices>(out, tuple, sep), ...);
-
-            out << static_cast<CharT>('}');
-
-            return out;
+            out << std::format(format_string, T::member_names()[index], field);
         }
     }
 
     template <class CharT, reflectable T>
     std::basic_ostream<CharT>& writeReflectable(std::basic_ostream<CharT>& out, const T& val)
     {
-        using Tie = typename tuplizable_traits<T>::ConstTie;
+        const auto tuple = object_as_tuple(val);
 
-        return detail::writeReflectable(out, val, std::make_index_sequence<std::tuple_size_v<Tie>>{});
+        out << static_cast<CharT>('{');
+
+        awl::basic_separator<CharT> sep(static_cast<CharT>(','));
+
+        awl::for_each_index(tuple, [&out, &sep](const auto& field, auto index)
+        {
+            detail::appendReflectableField<CharT, T>(out, field, index, sep);
+        });
+
+        out << static_cast<CharT>('}');
+
+        return out;
     }
 }
 
