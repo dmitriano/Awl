@@ -6,7 +6,6 @@
 #include "Awl/StdConsole.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/CommandLineProvider.h"
-#include "Awl/Testing/TestException.h"
 
 #include <regex>
 
@@ -39,7 +38,7 @@ namespace awl::testing
 
                 if (!result.second)
                 {
-                    throw TestException(std::format(_T("Duplicated option '{}'."), name));
+                    throw CommandLineException(std::format(_T("Duplicated option '{}'."), name));
                 }
             }
             else
@@ -48,11 +47,11 @@ namespace awl::testing
 
                 if (arg.starts_with(StringConvertor<CmdChar>::convertFrom("--")))
                 {
-                    throw TestException(std::format(_T("Invalid option syntax '{}'. Use '--name' for flags or '--name=value' for attributes."),
+                    throw CommandLineException(std::format(_T("Invalid option syntax '{}'. Use '--name' for flags or '--name=value' for attributes."),
                         StringConvertor<Char>::convertFrom(val)));
                 }
 
-                throw TestException(std::format(_T("An option name starting with '--' expected near {}"),
+                throw CommandLineException(std::format(_T("An option name starting with '--' expected near {}"),
                     StringConvertor<Char>::convertFrom(val)));
             }
         }

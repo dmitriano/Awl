@@ -268,72 +268,81 @@ namespace awl::testing
 
     int run(int argc, CmdChar* argv[], std::stop_token stop_token)
     {
-        CommandLineProvider cl(argc, argv);
-
-        // "list" command runs without TestRunner
+        try
         {
-            ProviderContext<CommandLineProvider> context{ cl };
+            CommandLineProvider cl(argc, argv);
 
-            AWL_FLAG(list);
-
-            if (list)
+            // "list" command runs without TestRunner
             {
-                AWL_ATTRIBUTE(std::string, filter, {});
+                ProviderContext<CommandLineProvider> context{ cl };
 
-                auto test_map = StaticMap<TestFunc>::fill(filter);
+                AWL_FLAG(list);
 
-                for (auto& p_link : test_map)
+                if (list)
                 {
-                    awl::cout() << p_link->name() << std::endl;
+                    AWL_ATTRIBUTE(std::string, filter, {});
+
+                    auto test_map = StaticMap<TestFunc>::fill(filter);
+
+                    for (auto& p_link : test_map)
+                    {
+                        awl::cout() << p_link->name() << std::endl;
+                    }
+
+                    awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+
+                    return 0;
                 }
-
-                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
-
-                return 0;
             }
-        }
 
 #ifdef AWL_QT
 
-        QJsonObject jo;
+            QJsonObject jo;
 
-        CmdString json_file;
+            CmdString json_file;
 
-        if (cl.tryGet("json", json_file))
-        {
-            try
+            if (cl.tryGet("json", json_file))
             {
-                jo = loadObjectFromFile(toQString(json_file));
-            }
-            catch (const JsonException& e)
-            {
-                makeStdoutLogger(LogLevel::Trace)->error(e.message());
+                try
+                {
+                    jo = loadObjectFromFile(toQString(json_file));
+                }
+                catch (const JsonException& e)
+                {
+                    makeStdoutLogger(LogLevel::Trace)->error(e.message());
 
-                return 3;
+                    return 3;
+                }
             }
-        }
 
-        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
 
 #else
 
-        CompositeProvider<CommandLineProvider> ap(std::move(cl));
+            CompositeProvider<CommandLineProvider> ap(std::move(cl));
 
 #endif
 
-        TestConsole console(ap, std::move(stop_token));
+            TestConsole console(ap, std::move(stop_token));
 
-        auto guard = make_scope_guard([&ap, logger = console.context().logger]
-        {
-            auto names = ap.get_provider<0>().getUnusedOptions();
-
-            for (const std::string& name : names)
+            auto guard = make_scope_guard([&ap, logger = console.context().logger]
             {
-                logger->warning("Unused option '{}'.", name);
-            }
-        });
+                auto names = ap.get_provider<0>().getUnusedOptions();
 
-        return console.run();
+                for (const std::string& name : names)
+                {
+                    logger->warning("Unused option '{}'.", name);
+                }
+            });
+
+            return console.run();
+        }
+        catch (const CommandLineException& e)
+        {
+            makeStdoutLogger(LogLevel::Trace)->error(_T("The following error has occurred: {}"), e.message());
+        }
+
+        return 2;
     }
 
     int run(int argc, CmdChar* argv[])

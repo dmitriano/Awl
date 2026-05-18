@@ -25,6 +25,8 @@ namespace awl::testing
 
     using CmdString = std::basic_string<CmdChar>;
 
+    AWL_DEFINE_EXCEPTION(CommandLineException)
+
     class CommandLineProvider
     {
     public:
