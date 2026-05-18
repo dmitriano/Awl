@@ -13,7 +13,7 @@
 
 namespace awl
 {
-    template <class T> requires std::is_class_v<T>&& awl::is_reflectable_v<T>
+    template <class T> requires std::is_class_v<T>&& awl::reflectable<T>
     class JsonSerializer<T>
     {
     public:

@@ -35,19 +35,21 @@ namespace
 namespace awl
 {
     template <>
-    constexpr auto object_as_const_tuple(const A & val)
+    struct tuplizable_traits<A>
     {
-        return std::tie(val.x, val.y);
-    }
+        static constexpr auto tie(const A & val) -> decltype(std::tie(val.x, val.y))
+        {
+            return std::tie(val.x, val.y);
+        }
 
-    template <>
-    constexpr auto object_as_tuple(A & val)
-    {
-        return std::tie(val.x, val.y);
-    }
+        static constexpr auto tie(A & val) -> decltype(std::tie(val.x, val.y))
+        {
+            return std::tie(val.x, val.y);
+        }
 
-    template <>
-    struct is_tuplizable<A> : std::true_type{};
+        using ConstTie = decltype(tie(std::declval<const A&>()));
+        using Tie = decltype(tie(std::declval<A&>()));
+    };
 }
 
 namespace

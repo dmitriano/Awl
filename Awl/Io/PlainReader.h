@@ -27,12 +27,12 @@ namespace awl::io
         template<class Struct>
         void readV(InputStream & s, Struct & val) const
         {
-            if constexpr (is_reflectable_v<Struct>)
+            if constexpr (reflectable<Struct>)
             {
                 this->readStructIndex(s);
             }
 
-            if constexpr (is_tuplizable_v<Struct>)
+            if constexpr (tuplizable<Struct>)
             {
                 for_each(object_as_tuple(val), [this, &s](auto& field)
                 {

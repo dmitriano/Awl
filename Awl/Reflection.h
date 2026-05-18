@@ -148,18 +148,11 @@ namespace awl
         };
     }
 
-    template <typename T, typename = void>
-    struct is_reflectable_impl : std::false_type {};
-
     template <typename T>
-    struct is_reflectable_impl<T, std::void_t<decltype(std::declval<T>().member_names())>> : std::true_type {};
-
-    // Hide an extra template parameter.
-    template <typename T>
-    struct is_reflectable : is_reflectable_impl<T> {};
-
-    template <typename T>
-    inline constexpr bool is_reflectable_v = is_reflectable<T>::value;
+    concept reflectable = tuplizable<T> && requires
+    {
+        T::member_names();
+    };
 
     struct EmptyStringizable
     {
@@ -183,7 +176,7 @@ namespace awl
         }
     };
 
-    template <class T> requires is_reflectable_v<T>
+    template <reflectable T>
     auto different_member_names(const T& left, const T& right)
     {
         auto a = objects_diff(left, right);

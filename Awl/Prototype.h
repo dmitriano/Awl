@@ -47,7 +47,7 @@ namespace awl
         {
             using FieldType = std::remove_reference_t<std::tuple_element_t<index, U>>;
             
-            if constexpr (is_reflectable_v<FieldType>)
+            if constexpr (reflectable<FieldType>)
             {
                 return Field::NoType;
             }
