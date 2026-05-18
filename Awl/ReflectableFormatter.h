@@ -18,9 +18,6 @@
 #include <string>
 #include <tuple>
 
-namespace awl
-{}
-
 namespace std
 {
     template <awl::reflectable T, class CharT>
