@@ -5,7 +5,6 @@
 
 #include "Awl/CompositeLogger.h"
 #include "Awl/StdStreamLogger.h"
-#include "Awl/LegacyFormat.h"
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
@@ -211,13 +210,6 @@ AWL_TEST(ILogger)
     AWL_ASSERT_EQUAL(std::format(_T("value={}, hex={:x}"), 42, 42), logger.message());
     AWL_ASSERT_EQUAL(expected_debug_location.line() + 1, logger.location().line());
     AWL_ASSERT(fileName(expected_debug_location.file_name()) == fileName(logger.location().file_name()));
-
-    const auto expected_legacy_location = std::source_location::current();
-    awl::LogString legacy_message = awl::format() << "legacy " << 11;
-
-    AWL_ASSERT_EQUAL(_T("legacy 11"), legacy_message.str());
-    AWL_ASSERT_EQUAL(expected_legacy_location.line() + 1, legacy_message.location().line());
-    AWL_ASSERT(fileName(expected_legacy_location.file_name()) == fileName(legacy_message.location().file_name()));
 
     logger.error(_T("wide {}"), awl::String(_T("message")));
 
