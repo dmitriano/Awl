@@ -5,10 +5,27 @@
 
 #include "Awl/StringFormat.h"
 #include "Awl/OptionalFormatter.h"
+#include "Awl/ReflectableFormatter.h"
 #include "Awl/Testing/UnitTest.h"
 
 namespace
 {
+    struct ReflectablePoint
+    {
+        int x;
+        double y;
+
+        AWL_REFLECT(x, y)
+    };
+
+    struct ReflectableOrder
+    {
+        std::string symbol;
+        ReflectablePoint point;
+
+        AWL_REFLECT(symbol, point)
+    };
+
     template <class C>
     class StringTest
     {
@@ -167,6 +184,22 @@ namespace
             AWL_ASSERT(std::format(L"{}", empty_int) == std::wstring(L"null"));
         }
 
+        static void TestReflectableStdFormat()
+        {
+            const ReflectablePoint point{ 1, 2.5 };
+
+            AWL_ASSERT(std::format("{}", point) == std::string("{x=1, y=2.5}"));
+            AWL_ASSERT(std::format(L"{}", point) == std::wstring(L"{x=1, y=2.5}"));
+
+            const ReflectableOrder order{ "BTCUSDT", point };
+
+            AWL_ASSERT(std::format("{}", order) == std::string("{symbol=BTCUSDT, point={x=1, y=2.5}}"));
+            AWL_ASSERT(std::format(L"{}", order) == std::wstring(L"{symbol=BTCUSDT, point={x=1, y=2.5}}"));
+
+            AWL_ASSERT(std::format("{:>26}", point) == std::string("              {x=1, y=2.5}"));
+            AWL_ASSERT(std::format(L"{:>26}", point) == std::wstring(L"              {x=1, y=2.5}"));
+        }
+
 #ifdef AWL_INT_128
 
         static void TestInt128Format()
@@ -277,6 +310,14 @@ AWL_TEST(StringOptionalStdFormat)
 
     StringTest<char>::TestOptionalStdFormat();
     StringTest<wchar_t>::TestOptionalStdFormat();
+}
+
+AWL_TEST(StringReflectableStdFormat)
+{
+    AWL_UNUSED_CONTEXT;
+
+    StringTest<char>::TestReflectableStdFormat();
+    StringTest<wchar_t>::TestReflectableStdFormat();
 }
 
 #ifdef AWL_INT_128
