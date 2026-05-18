@@ -7,6 +7,7 @@
 
 #include "Awl/Reflection.h"
 #include "Awl/Separator.h"
+#include "Awl/StringFormat.h"
 
 #include <concepts>
 #include <cstddef>
@@ -19,49 +20,23 @@
 
 namespace awl
 {
-    template <class CharT, reflectable T>
-    std::basic_ostream<CharT>& operator << (std::basic_ostream<CharT>& out, const T& val);
-
     namespace detail
     {
-        template <class CharT>
-        class BasicStreamFlagsGuard
-        {
-        public:
-
-            explicit BasicStreamFlagsGuard(std::basic_ostream<CharT>& init_out) :
-                out(init_out),
-                flags(init_out.flags())
-            {}
-
-            ~BasicStreamFlagsGuard()
-            {
-                out.flags(flags);
-            }
-
-        private:
-
-            std::basic_ostream<CharT>& out;
-            std::ios_base::fmtflags flags;
-        };
-
         template <class CharT, reflectable T, size_t index, class Tuple>
         void appendReflectableField(std::basic_ostream<CharT>& out, const Tuple& tuple, awl::basic_separator<CharT>& sep)
         {
             out << sep;
 
-            using awl::operator <<;
+            static constexpr auto format_string = awl::string_from_ascii<CharT>("{}={}");
 
-            out << T::member_names()[index] << static_cast<CharT>('=') << std::get<index>(tuple);
+            out << std::format(format_string, T::member_names()[index], std::get<index>(tuple));
         }
 
         template <class CharT, reflectable T, size_t... indices>
         std::basic_ostream<CharT>& writeReflectable(std::basic_ostream<CharT>& out, const T& val, std::index_sequence<indices...>)
         {
-            BasicStreamFlagsGuard guard(out);
             const auto tuple = object_as_tuple(val);
 
-            out << std::boolalpha;
             out << static_cast<CharT>('{');
 
             awl::basic_separator<CharT> sep(static_cast<CharT>(','));
@@ -79,12 +54,6 @@ namespace awl
         using Tie = typename tuplizable_traits<T>::ConstTie;
 
         return detail::writeReflectable(out, val, std::make_index_sequence<std::tuple_size_v<Tie>>{});
-    }
-
-    template <class CharT, reflectable T>
-    std::basic_ostream<CharT>& operator << (std::basic_ostream<CharT>& out, const T& val)
-    {
-        return writeReflectable(out, val);
     }
 }
 
