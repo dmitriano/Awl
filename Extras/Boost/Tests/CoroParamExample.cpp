@@ -89,8 +89,6 @@ namespace
         co_await timer.async_wait(use_awaitable);
 
         param.func();
-
-        co_return;
     }
 
     awaitable<void> callerFunc()

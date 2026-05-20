@@ -475,7 +475,6 @@ namespace
             }
 
             _events->push_back(_tag * 1000 + value);
-            co_return;
         }
 
     private:

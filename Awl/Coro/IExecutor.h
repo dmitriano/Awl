@@ -48,8 +48,6 @@ namespace awl::coro
                 {
                     std::invoke(func);
                 });
-
-            co_return;
         }
         else
         {
@@ -73,8 +71,6 @@ namespace awl::coro
         if constexpr (std::is_void_v<std::invoke_result_t<Func&>>)
         {
             co_await execute(*executor, std::move(func));
-
-            co_return;
         }
         else
         {
