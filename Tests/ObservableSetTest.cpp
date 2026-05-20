@@ -172,8 +172,8 @@ AWL_TEST(ObservableSetUnorderedSharedKey)
 
     Set set;
 
-    auto first = std::make_shared<A>(10);
-    auto second = std::make_shared<A>(20);
+    std::shared_ptr<A> first = std::make_shared<A>(10);
+    std::shared_ptr<A> second = std::make_shared<A>(20);
 
     AWL_ASSERT(set.insert(first).second);
     AWL_ASSERT(set.insert(second).second);

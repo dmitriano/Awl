@@ -339,7 +339,7 @@ AWL_TEST(EquatableFunction_SharedPtr)
     std::weak_ptr<Handler> weak;
 
     {
-        auto p_owner = std::make_shared<Handler>();
+        std::shared_ptr<Handler> p_owner = std::make_shared<Handler>();
         weak = p_owner;
 
         awl::equatable_function<void(int)> f1(p_owner, &Handler::on_value);
@@ -369,7 +369,7 @@ AWL_TEST(EquatableFunction_TryLockWeak)
 {
     AWL_UNUSED_CONTEXT;
 
-    auto p_owner = std::make_shared<Handler>();
+    std::shared_ptr<Handler> p_owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = p_owner;
 
     awl::equatable_function<void(int)> f(weak, &Handler::on_value);

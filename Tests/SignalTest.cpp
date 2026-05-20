@@ -210,7 +210,7 @@ AWL_TEST(Signal_SharedPtr)
 
     awl::Source<int> signal;
 
-    auto owner = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
 
     signal.signal().subscribe(owner, &Handler::on_value);
@@ -242,7 +242,7 @@ AWL_TEST(Signal_SharedAndWeakAreDifferentSlots)
 
     awl::Source<int> signal;
 
-    auto owner = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
 
     signal.signal().subscribe(owner, &Handler::on_value);
@@ -274,7 +274,7 @@ AWL_TEST(Signal_WeakPtr)
 
     awl::Source<int> signal;
 
-    auto owner = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak = owner;
 
     signal.signal().subscribe(weak, &Handler::on_value);
@@ -301,8 +301,8 @@ AWL_TEST(Signal_WeakPtrCompaction)
 
     awl::Source<int> signal;
 
-    auto owner_alive = std::make_shared<Handler>();
-    auto owner_dead = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner_alive = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner_dead = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak_alive = owner_alive;
     std::weak_ptr<Handler> weak_dead = owner_dead;
 
@@ -325,9 +325,9 @@ AWL_TEST(Signal_RemoveExpiredSlotInEmit)
 
     awl::Source<int> signal;
 
-    auto owner1 = std::make_shared<Handler>();
-    auto owner_dead = std::make_shared<Handler>();
-    auto owner2 = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner1 = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner_dead = std::make_shared<Handler>();
+    std::shared_ptr<Handler> owner2 = std::make_shared<Handler>();
     std::weak_ptr<Handler> weak1 = owner1;
     std::weak_ptr<Handler> weak_dead = owner_dead;
     std::weak_ptr<Handler> weak2 = owner2;

@@ -146,7 +146,7 @@ namespace
             asio::stream_file source(exec);
             source.open(sourcePath(), asio::stream_file::read_only);
 
-            auto buffer = std::make_shared<std::vector<char>>(chunkSize);
+            std::shared_ptr<std::vector<char>> buffer = std::make_shared<std::vector<char>>(chunkSize);
 
             for (;;)
             {

@@ -47,7 +47,7 @@ namespace awl::testing
 
         std::shared_ptr<CompositeLogger> makeStdoutLogger(const std::string& log_level)
         {
-            auto logger = std::make_shared<CompositeLogger>();
+            std::shared_ptr<CompositeLogger> logger = std::make_shared<CompositeLogger>();
             logger->addLogger(std::make_shared<StdStreamLogger>(
                 "",
                 StdStreamLogger::coutStream(),
@@ -67,7 +67,7 @@ namespace awl::testing
                 return;
             }
 
-            auto file_out = std::make_shared<std::basic_ofstream<Char>>(
+            std::shared_ptr<std::basic_ofstream<Char>> file_out = std::make_shared<std::basic_ofstream<Char>>(
                 std::filesystem::path(*log_file),
                 std::ios_base::trunc);
 
@@ -78,7 +78,7 @@ namespace awl::testing
 
             const std::string& effective_log_level = file_level ? *file_level : log_level;
 
-            auto logger = std::make_shared<StdStreamLogger>(
+            std::shared_ptr<StdStreamLogger> logger = std::make_shared<StdStreamLogger>(
                 "",
                 file_out,
                 effective_log_level);
@@ -96,7 +96,7 @@ namespace awl::testing
             const std::string& log_level,
             bool delayed)
         {
-            auto logger = std::make_shared<StdStreamLogger>(
+            std::shared_ptr<StdStreamLogger> logger = std::make_shared<StdStreamLogger>(
                 "",
                 StdStreamLogger::coutStream(),
                 log_level);

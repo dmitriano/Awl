@@ -40,7 +40,7 @@ namespace
 
         std::shared_ptr<awl::ILogger> createLogger(std::string source) const override
         {
-            auto child = std::make_shared<CaptureLogger>(std::move(source));
+            std::shared_ptr<CaptureLogger> child = std::make_shared<CaptureLogger>(std::move(source));
             _children.push_back(child);
             return child;
         }
@@ -270,7 +270,7 @@ AWL_TEST(ILogger)
 
     AWL_ASSERT(custom_off_logger.enabled("Custom"));
 
-    auto root_logger = std::make_shared<awl::StdStreamLogger>("Root", out_stream, awl::LogLevel::Info);
+    std::shared_ptr<awl::StdStreamLogger> root_logger = std::make_shared<awl::StdStreamLogger>("Root", out_stream, awl::LogLevel::Info);
     std::shared_ptr<awl::ILogger> child_logger = root_logger->createLogger("Child");
     child_logger->info("source message");
 
@@ -281,9 +281,9 @@ AWL_TEST(CompositeLogger)
 {
     AWL_UNUSED_CONTEXT;
 
-    auto disabled_logger = std::make_shared<CompositeTestLogger>(false);
-    auto enabled_logger = std::make_shared<CompositeTestLogger>(true);
-    auto skipped_logger = std::make_shared<CompositeTestLogger>(true);
+    std::shared_ptr<CompositeTestLogger> disabled_logger = std::make_shared<CompositeTestLogger>(false);
+    std::shared_ptr<CompositeTestLogger> enabled_logger = std::make_shared<CompositeTestLogger>(true);
+    std::shared_ptr<CompositeTestLogger> skipped_logger = std::make_shared<CompositeTestLogger>(true);
     awl::CompositeLogger logger;
 
     AWL_ASSERT_FALSE(logger.enabled(awl::LogLevel::Info));
@@ -316,7 +316,7 @@ AWL_TEST(CompositeLogger)
     AWL_ASSERT_EQUAL(2, skipped_logger->logCount());
     AWL_ASSERT_EQUAL(_T("after remove"), skipped_logger->message());
 
-    auto capture_logger = std::make_shared<CaptureLogger>();
+    std::shared_ptr<CaptureLogger> capture_logger = std::make_shared<CaptureLogger>();
     awl::CompositeLogger parent_logger({ capture_logger });
     std::shared_ptr<awl::ILogger> child_logger = parent_logger.createLogger("Child");
 

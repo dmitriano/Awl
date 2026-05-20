@@ -702,7 +702,7 @@ namespace
 
                 std::shared_ptr<asio::steady_timer> upstream_timeout_timer;
                 std::shared_ptr<asio::cancellation_signal> upstream_cancellation_signal;
-                auto upstream_timed_out = std::make_shared<std::atomic_bool>(false);
+                std::shared_ptr<std::atomic_bool> upstream_timed_out = std::make_shared<std::atomic_bool>(false);
 
                 if (upstream_handshake_timeout_ms != 0)
                 {
@@ -940,7 +940,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
 
     // SSL context for the client side (proxy acts as a server)
-    auto client_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_server);
+    std::shared_ptr<ssl::context> client_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_server);
 
     client_ctx->set_options(
         ssl::context::default_workarounds
@@ -959,19 +959,18 @@ AWL_EXAMPLE(AsioTcpProxy)
         session_id_context,
         sizeof(session_id_context) - 1);
 
-    auto server_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_client);
+    std::shared_ptr<ssl::context> server_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_client);
     server_ctx->set_default_verify_paths();
     SSL_CTX_set_session_cache_mode(server_ctx->native_handle(), SSL_SESS_CACHE_CLIENT);
-    auto tls_client_session_cache = std::make_shared<TlsClientSessionCache>();
-    auto stats = std::make_shared<ProxyStats>();
+    std::shared_ptr<TlsClientSessionCache> tls_client_session_cache = std::make_shared<TlsClientSessionCache>();
+    std::shared_ptr<ProxyStats> stats = std::make_shared<ProxyStats>();
 
     auto pos = target.find(':');
     const std::string target_host = target.substr(0, pos);
     const std::string target_port = target.substr(pos + 1);
 
     asio::thread_pool ioc(thread_count);
-    auto upstream_concurrency_limiter =
-        std::make_shared<UpstreamConcurrencyLimiter>(ioc.get_executor(), upstream_concurrency_limit);
+    std::shared_ptr<UpstreamConcurrencyLimiter> upstream_concurrency_limiter = std::make_shared<UpstreamConcurrencyLimiter>(ioc.get_executor(), upstream_concurrency_limit);
 
     asio::co_spawn(ioc, log_proxy_stats(stats, context), asio::detached);
 
