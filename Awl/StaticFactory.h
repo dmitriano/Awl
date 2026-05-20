@@ -9,8 +9,10 @@
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
+#include <functional>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace awl
 {
@@ -18,6 +20,9 @@ namespace awl
 
     template <class T, typename... Args>
     using FactoryFuncPtr = std::add_pointer_t<T(Args... args)>;
+
+    template <class T, typename... Args>
+    using FactoryFunc = std::function<T(std::string_view, Args... args)>;
 
     template <class T, typename... Args>
     T create(std::string_view name, Args&&... args)
@@ -46,6 +51,15 @@ namespace awl
     {
         using Link = awl::StaticLink<awl::FactoryFuncPtr<T, Args...>>;
     };
+
+    template <class T, typename... Args>
+    FactoryFunc<T, Args...> make_static_factory()
+    {
+        return [](std::string_view name, Args... args) -> T
+        {
+            return awl::create<T>(name, std::forward<Args>(args)...);
+        };
+    }
 }
 
 // Factory with parameters (signature is unknown).

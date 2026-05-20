@@ -8,6 +8,7 @@
 #include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
+#include <functional>
 #include <string>
 #include <string_view>
 
@@ -73,6 +74,17 @@ AWL_TEST(StaticChainFactoryArgs)
         // c is of different type.
         awl::create<std::string>("c", 7);
     });
+}
+
+AWL_TEST(StaticChainMakeStaticFactory)
+{
+    AWL_UNUSED_CONTEXT;
+
+    std::function<std::string(std::string_view)> parameterless_factory = awl::make_static_factory<std::string>();
+    std::function<std::string(std::string_view, int)> args_factory = awl::make_static_factory<std::string, int>();
+
+    AWL_ASSERT(parameterless_factory("a") == "a");
+    AWL_ASSERT(args_factory("a1", 5) == "A5");
 }
 
 // Parameterless factory
