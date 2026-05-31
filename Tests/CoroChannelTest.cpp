@@ -1,13 +1,13 @@
 #include "Awl/Coro/Channel.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Testing/UnitTest.h"
-#include "Helpers/FakeDispatcher.h"
 #include "Helpers/TestDispatcher.h"
 
 #include <algorithm>
 #include <array>
 #include <memory>
 #include <string>
+#include <thread>
 #include <utility>
 
 namespace
@@ -47,13 +47,39 @@ namespace
             closed = true;
         }
     }
+
+    awl::coro::Job sendAndRememberThread(
+        awl::coro::Channel<int>& channel,
+        int value,
+        std::thread::id& start_thread_id,
+        std::thread::id& resume_thread_id,
+        bool& sent)
+    {
+        start_thread_id = std::this_thread::get_id();
+        co_await channel.asyncSend(value);
+        resume_thread_id = std::this_thread::get_id();
+        sent = true;
+    }
+
+    awl::coro::Job receiveAndRememberThread(
+        awl::coro::Channel<int>& channel,
+        int& value,
+        std::thread::id& start_thread_id,
+        std::thread::id& resume_thread_id,
+        bool& received)
+    {
+        start_thread_id = std::this_thread::get_id();
+        value = co_await channel.asyncReceive();
+        resume_thread_id = std::this_thread::get_id();
+        received = true;
+    }
 }
 
 AWL_TEST(CoroChannel_Rendezvous)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
+    awl::coro::Channel<int> channel;
 
     int value = 0;
     bool received = false;
@@ -79,7 +105,7 @@ AWL_TEST(CoroChannel_Buffered)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<std::string> channel(std::make_shared<awl::testing::FakeDispatcher>(), 2);
+    awl::coro::Channel<std::string> channel(2);
 
     bool first_sent = false;
     bool first_send_closed = false;
@@ -116,7 +142,7 @@ AWL_TEST(CoroChannel_BackPressure)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>(), 1);
+    awl::coro::Channel<int> channel(1);
 
     bool first_sent = false;
     bool first_send_closed = false;
@@ -155,7 +181,7 @@ AWL_TEST(CoroChannel_CloseWaitingReceiver)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
+    awl::coro::Channel<int> channel;
 
     int value = 0;
     bool received = false;
@@ -176,7 +202,7 @@ AWL_TEST(CoroChannel_CloseKeepsBufferedValues)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>(), 1);
+    awl::coro::Channel<int> channel(1);
 
     bool sent = false;
     bool send_closed = false;
@@ -210,7 +236,7 @@ AWL_TEST(CoroChannel_SendToClosedChannel)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
+    awl::coro::Channel<int> channel;
     channel.close();
 
     bool sent = false;
@@ -220,4 +246,52 @@ AWL_TEST(CoroChannel_SendToClosedChannel)
     AWL_ASSERT(sender.done());
     AWL_ASSERT(!sent);
     AWL_ASSERT(send_closed);
+}
+
+AWL_TEST(CoroChannel_SendAndReceiveResumeOnCallingDispatchers)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::coro::Channel<int> channel;
+    std::shared_ptr<awl::testing::TestDispatcher> producer_dispatcher =
+        std::make_shared<awl::testing::TestDispatcher>();
+    std::shared_ptr<awl::testing::TestDispatcher> consumer_dispatcher =
+        std::make_shared<awl::testing::TestDispatcher>();
+
+    std::thread::id producer_start_thread;
+    std::thread::id producer_resume_thread;
+    std::thread::id consumer_start_thread;
+    std::thread::id consumer_resume_thread;
+    int value = 0;
+    bool sent = false;
+    bool received = false;
+
+    awl::coro::Job producer = awl::coro::coSpawn(
+        sendAndRememberThread(channel, 17, producer_start_thread, producer_resume_thread, sent),
+        producer_dispatcher);
+
+    producer_dispatcher->join();
+
+    AWL_ASSERT(!producer.done());
+    AWL_ASSERT(!sent);
+
+    awl::coro::Job consumer = awl::coro::coSpawn(
+        receiveAndRememberThread(channel, value, consumer_start_thread, consumer_resume_thread, received),
+        consumer_dispatcher);
+
+    consumer_dispatcher->join();
+    producer_dispatcher->join();
+
+    AWL_ASSERT(producer.done());
+    AWL_ASSERT(consumer.done());
+    AWL_ASSERT(sent);
+    AWL_ASSERT(received);
+    AWL_ASSERT_EQUAL(17, value);
+    AWL_ASSERT(producer_start_thread != std::thread::id());
+    AWL_ASSERT(producer_resume_thread != std::thread::id());
+    AWL_ASSERT(consumer_start_thread != std::thread::id());
+    AWL_ASSERT(consumer_resume_thread != std::thread::id());
+    AWL_ASSERT(producer_start_thread == producer_resume_thread);
+    AWL_ASSERT(consumer_start_thread == consumer_resume_thread);
+    AWL_ASSERT(producer_resume_thread != consumer_resume_thread);
 }

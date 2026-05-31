@@ -93,12 +93,16 @@ namespace awl::coro
             template<class Awaitable>
             Awaitable& await_transform(Awaitable& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return awaitable;
             }
 
             template<class Awaitable>
             Awaitable&& await_transform(Awaitable&& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return std::move(awaitable);
             }
         };

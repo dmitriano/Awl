@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Awl/Coro/IExecutor.h"
 #include "Awl/Coro/Task.h"
 #include "Awl/Exception.h"
 
@@ -27,15 +26,19 @@ namespace awl::coro
         class ReceiveOperation;
         class SendOperation;
 
+        struct Continuation
+        {
+            std::shared_ptr<IDispatcher> dispatcher;
+            std::coroutine_handle<> coroutine;
+        };
+
         struct State
         {
-            State(std::shared_ptr<IDispatcher> init_dispatcher, const size_t init_capacity) :
-                dispatcher(std::move(init_dispatcher)),
+            explicit State(const size_t init_capacity) :
                 capacity(init_capacity)
             {}
 
             std::mutex mutex;
-            std::shared_ptr<IDispatcher> dispatcher;
             bool open = true;
             size_t capacity;
             std::deque<T> values;
@@ -45,8 +48,8 @@ namespace awl::coro
 
     public:
 
-        explicit Channel(std::shared_ptr<IDispatcher> dispatcher, size_t capacity = 0) :
-            _state(std::make_shared<State>(std::move(dispatcher), capacity))
+        explicit Channel(size_t capacity = 0) :
+            _state(std::make_shared<State>(capacity))
         {}
 
         Channel(const Channel&) = delete;
@@ -71,7 +74,7 @@ namespace awl::coro
 
         void close()
         {
-            std::vector<std::coroutine_handle<>> continuations;
+            std::vector<Continuation> continuations;
 
             {
                 std::lock_guard lock(_state->mutex);
@@ -98,7 +101,7 @@ namespace awl::coro
                 }
             }
 
-            resume(_state->dispatcher, continuations);
+            resume(continuations);
         }
 
         Task<void> asyncSend(T val)
@@ -118,30 +121,27 @@ namespace awl::coro
             return std::make_exception_ptr(ChannelClosedException("Channel is closed."));
         }
 
-        static void resume(const std::shared_ptr<IDispatcher>& dispatcher, const std::vector<std::coroutine_handle<>>& continuations)
+        static void resume(const std::vector<Continuation>& continuations)
         {
-            for (std::coroutine_handle<> continuation : continuations)
+            for (const Continuation& continuation : continuations)
             {
-                dispatcher->post([continuation]
-                    {
-                        continuation.resume();
-                    });
+                detail::resume(continuation.dispatcher, continuation.coroutine);
             }
         }
 
         template <class Operation>
         static void erase(std::deque<Operation*>& operations, Operation* operation);
 
-        static void complete(SendOperation& sender, std::vector<std::coroutine_handle<>>& continuations);
+        static void complete(SendOperation& sender, std::vector<Continuation>& continuations);
 
         static void complete(
             ReceiveOperation& receiver,
             T val,
-            std::vector<std::coroutine_handle<>>& continuations);
+            std::vector<Continuation>& continuations);
 
         static void moveWaitingSenderToBuffer(
             State& state,
-            std::vector<std::coroutine_handle<>>& continuations);
+            std::vector<Continuation>& continuations);
 
         class ReceiveOperation
         {
@@ -169,11 +169,16 @@ namespace awl::coro
                 return false;
             }
 
+            void setDispatcher(const std::shared_ptr<IDispatcher>& init_dispatcher)
+            {
+                dispatcher = init_dispatcher;
+            }
+
             bool await_suspend(std::coroutine_handle<> h)
             {
                 coroutine = h;
 
-                std::vector<std::coroutine_handle<>> continuations;
+                std::vector<Continuation> continuations;
                 bool suspended = false;
 
                 {
@@ -211,7 +216,7 @@ namespace awl::coro
                     }
                 }
 
-                resume(state->dispatcher, continuations);
+                resume(continuations);
 
                 return suspended;
             }
@@ -230,18 +235,19 @@ namespace awl::coro
 
             void setException(
                 std::exception_ptr init_exception,
-                std::vector<std::coroutine_handle<>>& continuations)
+                std::vector<Continuation>& continuations)
             {
                 registered = false;
                 exception = std::move(init_exception);
 
                 if (std::coroutine_handle<> continuation = std::exchange(coroutine, nullptr))
                 {
-                    continuations.push_back(continuation);
+                    continuations.push_back({ dispatcher, continuation });
                 }
             }
 
             std::shared_ptr<State> state;
+            std::shared_ptr<IDispatcher> dispatcher;
             std::optional<T> value;
             std::exception_ptr exception;
             std::coroutine_handle<> coroutine = nullptr;
@@ -289,11 +295,16 @@ namespace awl::coro
                 return false;
             }
 
+            void setDispatcher(const std::shared_ptr<IDispatcher>& init_dispatcher)
+            {
+                dispatcher = init_dispatcher;
+            }
+
             bool await_suspend(std::coroutine_handle<> h)
             {
                 coroutine = h;
 
-                std::vector<std::coroutine_handle<>> continuations;
+                std::vector<Continuation> continuations;
                 bool suspended = false;
 
                 {
@@ -327,7 +338,7 @@ namespace awl::coro
                     }
                 }
 
-                resume(state->dispatcher, continuations);
+                resume(continuations);
 
                 return suspended;
             }
@@ -344,18 +355,19 @@ namespace awl::coro
 
             void setException(
                 std::exception_ptr init_exception,
-                std::vector<std::coroutine_handle<>>& continuations)
+                std::vector<Continuation>& continuations)
             {
                 registered = false;
                 exception = std::move(init_exception);
 
                 if (std::coroutine_handle<> continuation = std::exchange(coroutine, nullptr))
                 {
-                    continuations.push_back(continuation);
+                    continuations.push_back({ dispatcher, continuation });
                 }
             }
 
             std::shared_ptr<State> state;
+            std::shared_ptr<IDispatcher> dispatcher;
             std::optional<T> value;
             std::exception_ptr exception;
             std::coroutine_handle<> coroutine = nullptr;
@@ -394,13 +406,13 @@ namespace awl::coro
     template <class T>
     void Channel<T>::complete(
         typename Channel<T>::SendOperation& sender,
-        std::vector<std::coroutine_handle<>>& continuations)
+        std::vector<Continuation>& continuations)
     {
         sender.registered = false;
 
         if (std::coroutine_handle<> continuation = std::exchange(sender.coroutine, nullptr))
         {
-            continuations.push_back(continuation);
+            continuations.push_back({ sender.dispatcher, continuation });
         }
     }
 
@@ -408,21 +420,21 @@ namespace awl::coro
     void Channel<T>::complete(
         typename Channel<T>::ReceiveOperation& receiver,
         T val,
-        std::vector<std::coroutine_handle<>>& continuations)
+        std::vector<Continuation>& continuations)
     {
         receiver.registered = false;
         receiver.value = std::move(val);
 
         if (std::coroutine_handle<> continuation = std::exchange(receiver.coroutine, nullptr))
         {
-            continuations.push_back(continuation);
+            continuations.push_back({ receiver.dispatcher, continuation });
         }
     }
 
     template <class T>
     void Channel<T>::moveWaitingSenderToBuffer(
         typename Channel<T>::State& state,
-        std::vector<std::coroutine_handle<>>& continuations)
+        std::vector<Continuation>& continuations)
     {
         if (state.open && state.capacity != 0 && !state.senders.empty() && state.values.size() < state.capacity)
         {

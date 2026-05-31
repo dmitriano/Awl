@@ -77,6 +77,21 @@ namespace awl::coro
             }
         }
 
+        template<class Awaitable>
+        concept DispatcherAwareAwaitable = requires(Awaitable& awaitable, const std::shared_ptr<IDispatcher>& dispatcher)
+        {
+            awaitable.setDispatcher(dispatcher);
+        };
+
+        template<class Awaitable>
+        void setAwaitableDispatcher(Awaitable& awaitable, const std::shared_ptr<IDispatcher>& dispatcher)
+        {
+            if constexpr (DispatcherAwareAwaitable<Awaitable>)
+            {
+                awaitable.setDispatcher(dispatcher);
+            }
+        }
+
         template<typename T>
         class TaskPromise : public PromiseContext
         {
@@ -146,12 +161,16 @@ namespace awl::coro
             template<class Awaitable>
             Awaitable& await_transform(Awaitable& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return awaitable;
             }
 
             template<class Awaitable>
             Awaitable&& await_transform(Awaitable&& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return std::move(awaitable);
             }
         };
@@ -220,12 +239,16 @@ namespace awl::coro
             template<class Awaitable>
             Awaitable& await_transform(Awaitable& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return awaitable;
             }
 
             template<class Awaitable>
             Awaitable&& await_transform(Awaitable&& awaitable) noexcept
             {
+                setAwaitableDispatcher(awaitable, _dispatcher);
+
                 return std::move(awaitable);
             }
         };
