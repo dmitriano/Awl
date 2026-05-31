@@ -1,7 +1,9 @@
 #include "Awl/Coro/Channel.h"
 #include "Awl/Coro/Job.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Helpers/FakeDispatcher.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -48,7 +50,7 @@ AWL_TEST(CoroChannel_Rendezvous)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel;
+    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
 
     int value = 0;
     bool received = false;
@@ -74,7 +76,7 @@ AWL_TEST(CoroChannel_Buffered)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<std::string> channel(2);
+    awl::coro::Channel<std::string> channel(std::make_shared<awl::testing::FakeDispatcher>(), 2);
 
     bool first_sent = false;
     bool first_send_closed = false;
@@ -111,7 +113,7 @@ AWL_TEST(CoroChannel_BackPressure)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(1);
+    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>(), 1);
 
     bool first_sent = false;
     bool first_send_closed = false;
@@ -150,7 +152,7 @@ AWL_TEST(CoroChannel_CloseWaitingReceiver)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel;
+    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
 
     int value = 0;
     bool received = false;
@@ -171,7 +173,7 @@ AWL_TEST(CoroChannel_CloseKeepsBufferedValues)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel(1);
+    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>(), 1);
 
     bool sent = false;
     bool send_closed = false;
@@ -205,7 +207,7 @@ AWL_TEST(CoroChannel_SendToClosedChannel)
 {
     AWL_UNUSED_CONTEXT;
 
-    awl::coro::Channel<int> channel;
+    awl::coro::Channel<int> channel(std::make_shared<awl::testing::FakeDispatcher>());
     channel.close();
 
     bool sent = false;

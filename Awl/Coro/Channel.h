@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/Coro/IExecutor.h"
 #include "Awl/Coro/Task.h"
 #include "Awl/Exception.h"
 
@@ -28,11 +29,13 @@ namespace awl::coro
 
         struct State
         {
-            explicit State(const size_t init_capacity) :
+            State(std::shared_ptr<IDispatcher> init_dispatcher, const size_t init_capacity) :
+                dispatcher(std::move(init_dispatcher)),
                 capacity(init_capacity)
             {}
 
             std::mutex mutex;
+            std::shared_ptr<IDispatcher> dispatcher;
             bool open = true;
             size_t capacity;
             std::deque<T> values;
@@ -42,8 +45,8 @@ namespace awl::coro
 
     public:
 
-        explicit Channel(size_t capacity = 0) :
-            _state(std::make_shared<State>(capacity))
+        explicit Channel(std::shared_ptr<IDispatcher> dispatcher, size_t capacity = 0) :
+            _state(std::make_shared<State>(std::move(dispatcher), capacity))
         {}
 
         Channel(const Channel&) = delete;
@@ -95,7 +98,7 @@ namespace awl::coro
                 }
             }
 
-            resume(continuations);
+            resume(_state->dispatcher, continuations);
         }
 
         Task<void> asyncSend(T val)
@@ -115,11 +118,14 @@ namespace awl::coro
             return std::make_exception_ptr(ChannelClosedException("Channel is closed."));
         }
 
-        static void resume(const std::vector<std::coroutine_handle<>>& continuations)
+        static void resume(const std::shared_ptr<IDispatcher>& dispatcher, const std::vector<std::coroutine_handle<>>& continuations)
         {
             for (std::coroutine_handle<> continuation : continuations)
             {
-                continuation.resume();
+                dispatcher->post([continuation]
+                    {
+                        continuation.resume();
+                    });
             }
         }
 
@@ -205,7 +211,7 @@ namespace awl::coro
                     }
                 }
 
-                resume(continuations);
+                resume(state->dispatcher, continuations);
 
                 return suspended;
             }
@@ -321,7 +327,7 @@ namespace awl::coro
                     }
                 }
 
-                resume(continuations);
+                resume(state->dispatcher, continuations);
 
                 return suspended;
             }
