@@ -3,10 +3,13 @@
 #include "Awl/Coro/JobPromise.h"
 #include "Awl/QuickLink.h"
 
+#include <cassert>
 #include <coroutine>
 #include <exception>
+#include <functional>
+#include <memory>
+#include <optional>
 #include <utility>
-#include <cassert>
 
 namespace awl::coro
 {
@@ -59,23 +62,18 @@ namespace awl::coro
             return _h.done();
         }
 
-        friend auto operator co_await(const Job& job) noexcept
+        auto await(std::shared_ptr<IDispatcher> awaiting_dispatcher) & noexcept
         {
-            if (!job._h)
+            if (!_h)
             {
                 //coroutine without promise awaited
                 std::terminate();
             }
 
-            if (job._h.promise()._awaitingCoroutine)
-            {
-                //coroutine already awaited
-                std::terminate();
-            }
-
-            struct task_awaitable
+            struct job_awaitable
             {
                 std::coroutine_handle<detail::JobPromise> _h;
+                std::shared_ptr<IDispatcher> _awaitingDispatcher;
 
                 // check if this Job already has value computed
                 bool await_ready()
@@ -87,7 +85,18 @@ namespace awl::coro
                 // store coroutine handle to be resumed after computing Job value
                 void await_suspend(std::coroutine_handle<> h)
                 {
-                    _h.promise()._awaitingCoroutine = h;
+                    detail::JobPromise& promise = _h.promise();
+
+                    if (promise._awaitingCoroutine)
+                    {
+                        //coroutine already awaited
+                        std::terminate();
+                    }
+
+                    promise._awaitingCoroutine = h;
+                    promise._awaitingDispatcher = _awaitingDispatcher;
+
+                    detail::start(_h);
                 }
 
                 // when ready return value to a consumer
@@ -95,7 +104,51 @@ namespace awl::coro
                 {}
             };
 
-            return task_awaitable{ job._h };
+            return job_awaitable{ _h, std::move(awaiting_dispatcher) };
+        }
+
+        auto await(std::shared_ptr<IDispatcher> awaiting_dispatcher) && noexcept
+        {
+            if (!_h)
+            {
+                //coroutine without promise awaited
+                std::terminate();
+            }
+
+            struct owning_job_awaitable
+            {
+                std::optional<Job> _job;
+                std::coroutine_handle<detail::JobPromise> _h;
+                std::shared_ptr<IDispatcher> _awaitingDispatcher;
+
+                bool await_ready()
+                {
+                    return _h.done();
+                }
+
+                void await_suspend(std::coroutine_handle<> h)
+                {
+                    detail::JobPromise& promise = _h.promise();
+
+                    if (promise._awaitingCoroutine)
+                    {
+                        std::terminate();
+                    }
+
+                    promise._awaitingCoroutine = h;
+                    promise._awaitingDispatcher = _awaitingDispatcher;
+
+                    detail::start(_h);
+                }
+
+                auto await_resume()
+                {}
+            };
+
+            Job job = std::move(*this);
+            std::coroutine_handle<detail::JobPromise> handle = job._h;
+
+            return owning_job_awaitable{ std::move(job), handle, std::move(awaiting_dispatcher) };
         }
 
         void subscribe(awl::Observer<TaskSink>* p_sink)
@@ -110,8 +163,40 @@ namespace awl::coro
 
     private:
 
+        friend Job coSpawn(std::shared_ptr<IDispatcher> dispatcher, Job job);
+
         //void release();
 
         std::coroutine_handle<promise_type> _h;
     };
+
+    inline Job coSpawn(std::shared_ptr<IDispatcher> dispatcher, Job job)
+    {
+        if (!job._h)
+        {
+            std::terminate();
+        }
+
+        job._h.promise().setDispatcher(std::move(dispatcher));
+        detail::start(job._h);
+
+        return job;
+    }
+
+    template<class Func>
+    auto coSpawn(std::shared_ptr<IDispatcher> dispatcher, Func func)
+        requires std::invocable<Func&>
+    {
+        return coSpawn(std::move(dispatcher), std::invoke(func));
+    }
+
+    inline auto operator co_await(Job& job) noexcept
+    {
+        return job.await(nullptr);
+    }
+
+    inline auto operator co_await(Job&& job) noexcept
+    {
+        return std::move(job).await(nullptr);
+    }
 }

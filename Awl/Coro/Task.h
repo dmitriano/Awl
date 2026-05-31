@@ -1,9 +1,15 @@
 #pragma once
 
-#include <utility>
+#include "Awl/Coro/IDispatcher.h"
+
+#include <concepts>
 #include <coroutine>
-#include <optional>
 #include <exception>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <type_traits>
+#include <utility>
 
 namespace awl::coro
 {
@@ -12,8 +18,67 @@ namespace awl::coro
 
     namespace detail
     {
+        inline void resume(std::shared_ptr<IDispatcher> dispatcher, std::coroutine_handle<> handle)
+        {
+            if (handle)
+            {
+                if (dispatcher)
+                {
+                    dispatcher->post([handle]
+                        {
+                            handle.resume();
+                        });
+                }
+                else
+                {
+                    handle.resume();
+                }
+            }
+        }
+
+        struct PromiseContext
+        {
+            std::shared_ptr<IDispatcher> _dispatcher;
+            std::coroutine_handle<> _awaitingCoroutine;
+            std::shared_ptr<IDispatcher> _awaitingDispatcher;
+            bool _started = false;
+
+            void setDispatcher(std::shared_ptr<IDispatcher> dispatcher)
+            {
+                _dispatcher = std::move(dispatcher);
+            }
+
+            void setDispatcherIfEmpty(const std::shared_ptr<IDispatcher>& dispatcher)
+            {
+                if (!_dispatcher)
+                {
+                    _dispatcher = dispatcher;
+                }
+            }
+
+            void resumeAwaiting()
+            {
+                std::coroutine_handle<> awaiting_coroutine = std::exchange(_awaitingCoroutine, nullptr);
+                std::shared_ptr<IDispatcher> awaiting_dispatcher = std::exchange(_awaitingDispatcher, nullptr);
+
+                resume(std::move(awaiting_dispatcher), awaiting_coroutine);
+            }
+        };
+
+        template <class Promise>
+        void start(std::coroutine_handle<Promise> handle)
+        {
+            Promise& promise = handle.promise();
+
+            if (!promise._started && !handle.done())
+            {
+                promise._started = true;
+                resume(promise._dispatcher, handle);
+            }
+        }
+
         template<typename T>
-        class TaskPromise
+        class TaskPromise : public PromiseContext
         {
         public:
 
@@ -30,22 +95,10 @@ namespace awl::coro
                 }
             }
 
-            // corouine that awaiting this coroutine value
-            // we need to store it in order to resume it later when value of this coroutine will be computed
-            std::coroutine_handle<> _awaitingCoroutine;
-
-            // Task is async result of our coroutine
-            // it is created before execution of the coroutine body
-            // it can be either co_awaited inside another coroutine
-            // or used via special interface for extracting values (is_ready and get)
+            // Task is async result of our coroutine.
             Task<T> get_return_object();
 
-            // there are two kinds of coroutines:
-            // 1. eager - that start its execution immediately
-            // 2. lazy - that start its execution only after 'co_await'ing on them
-            // here I used eager coroutine Task
-            // eager: do not suspend before running coroutine body
-            std::suspend_never initial_suspend() noexcept
+            std::suspend_always initial_suspend() noexcept
             {
                 return {};
             }
@@ -60,32 +113,22 @@ namespace awl::coro
 
             void unhandled_exception() noexcept
             {
-                // alternatively we can store current exeption in std::exception_ptr to rethrow it later
+                // alternatively we can store current exception in std::exception_ptr to rethrow it later
                 _exception = std::current_exception();
             }
 
-            // when final suspend is executed 'value' is already set
-            // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
-            // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
-            // value
             auto final_suspend() noexcept
             {
-                // if there is a coroutine that is awaiting on this coroutine resume it
                 struct transfer_awaitable
                 {
-                    // always stop at final suspend
                     bool await_ready() noexcept
                     {
                         return false;
                     }
 
-                    std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
+                    void await_suspend(std::coroutine_handle<TaskPromise> handle) noexcept
                     {
-                        TaskPromise& promise = h.promise();
-
-                        // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
-                        // nothing
-                        return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
+                        handle.promise().resumeAwaiting();
                     }
 
                     void await_resume() noexcept {}
@@ -93,10 +136,28 @@ namespace awl::coro
 
                 return transfer_awaitable{};
             }
+
+            template<typename U>
+            auto await_transform(Task<U>& task) noexcept;
+
+            template<typename U>
+            auto await_transform(Task<U>&& task) noexcept;
+
+            template<class Awaitable>
+            Awaitable& await_transform(Awaitable& awaitable) noexcept
+            {
+                return awaitable;
+            }
+
+            template<class Awaitable>
+            Awaitable&& await_transform(Awaitable&& awaitable) noexcept
+            {
+                return std::move(awaitable);
+            }
         };
 
         template<>
-        class TaskPromise<void>
+        class TaskPromise<void> : public PromiseContext
         {
         public:
 
@@ -110,22 +171,10 @@ namespace awl::coro
                 }
             }
 
-            // corouine that awaiting this coroutine value
-            // we need to store it in order to resume it later when value of this coroutine will be computed
-            std::coroutine_handle<> _awaitingCoroutine;
-
-            // Task is async result of our coroutine
-            // it is created before execution of the coroutine body
-            // it can be either co_awaited inside another coroutine
-            // or used via special interface for extracting values (is_ready and get)
+            // Task is async result of our coroutine.
             Task<void> get_return_object();
 
-            // there are two kinds of coroutines:
-            // 1. eager - that start its execution immediately
-            // 2. lazy - that start its execution only after 'co_await'ing on them
-            // here I used eager coroutine Task
-            // eager: do not suspend before running coroutine body
-            std::suspend_never initial_suspend()
+            std::suspend_always initial_suspend() noexcept
             {
                 return {};
             }
@@ -138,38 +187,46 @@ namespace awl::coro
 
             void unhandled_exception()
             {
-                // alternatively we can store current exeption in std::exception_ptr to rethrow it later
+                // alternatively we can store current exception in std::exception_ptr to rethrow it later
                 _exception = std::current_exception();
             }
 
-            // when final suspend is executed 'value' is already set
-            // we need to suspend this coroutine in order to use value in other coroutine or through 'get' function
-            // otherwise promise object would be destroyed (together with stored value) and one couldn't access Task result
-            // value
             auto final_suspend() noexcept
             {
-                // if there is a coroutine that is awaiting on this coroutine resume it
                 struct transfer_awaitable
                 {
-                    // always stop at final suspend
                     bool await_ready() noexcept
                     {
                         return false;
                     }
 
-                    std::coroutine_handle<> await_suspend(std::coroutine_handle<TaskPromise> h) noexcept
+                    void await_suspend(std::coroutine_handle<TaskPromise> handle) noexcept
                     {
-                        TaskPromise& promise = h.promise();
-
-                        // resume awaiting coroutine or if there is no coroutine to resume return special coroutine that do
-                        // nothing
-                        return promise._awaitingCoroutine ? promise._awaitingCoroutine : std::noop_coroutine();
+                        handle.promise().resumeAwaiting();
                     }
 
                     void await_resume() noexcept {}
                 };
 
                 return transfer_awaitable{};
+            }
+
+            template<typename U>
+            auto await_transform(Task<U>& task) noexcept;
+
+            template<typename U>
+            auto await_transform(Task<U>&& task) noexcept;
+
+            template<class Awaitable>
+            Awaitable& await_transform(Awaitable& awaitable) noexcept
+            {
+                return awaitable;
+            }
+
+            template<class Awaitable>
+            Awaitable&& await_transform(Awaitable&& awaitable) noexcept
+            {
+                return std::move(awaitable);
             }
         };
     }
@@ -201,23 +258,37 @@ namespace awl::coro
         }
 
         // interface for extracting value without awaiting on it
-
         bool is_ready() const
         {
             check_handle();
 
             _h.promise().rethrow();
 
-            return _h.promise()._value.has_value();
+            if constexpr (std::is_same_v<T, void>)
+            {
+                return _h.done();
+            }
+            else
+            {
+                return _h.promise()._value.has_value();
+            }
         }
 
         T get()
         {
             check_handle();
 
+            if (!is_ready())
+            {
+                std::terminate();
+            }
+
             _h.promise().rethrow();
 
-            return std::move(*_h.promise()._value);
+            if constexpr (!std::is_same_v<T, void>)
+            {
+                return std::move(*_h.promise()._value);
+            }
         }
 
         void check_handle() const
@@ -239,8 +310,75 @@ namespace awl::coro
             }
         }
 
+        auto await(std::shared_ptr<IDispatcher> awaiting_dispatcher) & noexcept;
+
+        auto await(std::shared_ptr<IDispatcher> awaiting_dispatcher) && noexcept;
+
         std::coroutine_handle<promise_type> _h;
     };
+
+    namespace detail
+    {
+        template<typename T>
+        class TaskAwaiter
+        {
+        public:
+
+            TaskAwaiter(Task<T>& task, std::shared_ptr<IDispatcher> awaiting_dispatcher) noexcept :
+                _h(task._h),
+                _awaitingDispatcher(std::move(awaiting_dispatcher))
+            {}
+
+            TaskAwaiter(Task<T>&& task, std::shared_ptr<IDispatcher> awaiting_dispatcher) noexcept :
+                _task(std::move(task)),
+                _h(_task->_h),
+                _awaitingDispatcher(std::move(awaiting_dispatcher))
+            {}
+
+            bool await_ready()
+            {
+                return _h.done();
+            }
+
+            void await_suspend(std::coroutine_handle<> h)
+            {
+                typename Task<T>::promise_type& promise = _h.promise();
+
+                if (promise._awaitingCoroutine)
+                {
+                    std::terminate();
+                }
+
+                promise._awaitingCoroutine = h;
+                promise._awaitingDispatcher = _awaitingDispatcher;
+
+                start(_h);
+            }
+
+            auto await_resume()
+            {
+                typename Task<T>::promise_type& promise = _h.promise();
+
+                promise.rethrow();
+
+                if constexpr (!std::is_same_v<T, void>)
+                {
+                    if (!promise._value)
+                    {
+                        std::terminate();
+                    }
+
+                    return std::move(*promise._value);
+                }
+            }
+
+        private:
+
+            std::optional<Task<T>> _task;
+            std::coroutine_handle<typename Task<T>::promise_type> _h;
+            std::shared_ptr<IDispatcher> _awaitingDispatcher;
+        };
+    }
 
     template<typename T>
     Task<T> detail::TaskPromise<T>::get_return_object()
@@ -253,52 +391,75 @@ namespace awl::coro
         return { std::coroutine_handle<TaskPromise>::from_promise(*this) };
     }
 
+    template<typename T>
+    auto Task<T>::await(std::shared_ptr<IDispatcher> awaiting_dispatcher) & noexcept
+    {
+        return detail::TaskAwaiter<T>(*this, std::move(awaiting_dispatcher));
+    }
+
+    template<typename T>
+    auto Task<T>::await(std::shared_ptr<IDispatcher> awaiting_dispatcher) && noexcept
+    {
+        return detail::TaskAwaiter<T>(std::move(*this), std::move(awaiting_dispatcher));
+    }
+
+    template<typename T>
+    Task<T> coSpawn(std::shared_ptr<IDispatcher> dispatcher, Task<T> task)
+    {
+        task.check_handle();
+        task._h.promise().setDispatcher(std::move(dispatcher));
+        detail::start(task._h);
+
+        return task;
+    }
+
     // also we can await other Task<T>
     template<typename T>
-    auto operator co_await(const Task<T>& task) noexcept
+    auto operator co_await(Task<T>& task) noexcept
     {
-        if (!task._h)
+        return task.await(nullptr);
+    }
+
+    template<typename T>
+    auto operator co_await(Task<T>&& task) noexcept
+    {
+        return std::move(task).await(nullptr);
+    }
+
+    namespace detail
+    {
+        template<typename T>
+        template<typename U>
+        auto TaskPromise<T>::await_transform(Task<U>& task) noexcept
         {
-            //coroutine without promise awaited
-            std::terminate();
+            task._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+            return task.await(_dispatcher);
         }
 
-        if (task._h.promise()._awaitingCoroutine)
+        template<typename T>
+        template<typename U>
+        auto TaskPromise<T>::await_transform(Task<U>&& task) noexcept
         {
-            //coroutine already awaited
-            std::terminate();
+            task._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+            return std::move(task).await(_dispatcher);
         }
 
-        struct task_awaitable
+        template<typename U>
+        auto TaskPromise<void>::await_transform(Task<U>& task) noexcept
         {
-            std::coroutine_handle<detail::TaskPromise<T>> _h;
+            task._h.promise().setDispatcherIfEmpty(_dispatcher);
 
-            // check if this Task already has value computed
-            bool await_ready()
-            {
-                return _h.done();
-                //return handle.promise().value.has_value();
-            }
+            return task.await(_dispatcher);
+        }
 
-            // h - is a handle to coroutine that calls co_await
-            // store coroutine handle to be resumed after computing Task value
-            void await_suspend(std::coroutine_handle<> h)
-            {
-                _h.promise()._awaitingCoroutine = h;
-            }
+        template<typename U>
+        auto TaskPromise<void>::await_transform(Task<U>&& task) noexcept
+        {
+            task._h.promise().setDispatcherIfEmpty(_dispatcher);
 
-            // when ready return value to a consumer
-            auto await_resume()
-            {
-                _h.promise().rethrow();
-
-                if constexpr (!std::is_same_v<T, void>)
-                {
-                    return std::move(*(_h.promise()._value));
-                }
-            }
-        };
-
-        return task_awaitable{ task._h };
+            return std::move(task).await(_dispatcher);
+        }
     }
 }

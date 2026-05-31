@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Awl/Coro/Awaitable.h"
+#include "Awl/Coro/IDispatcher.h"
 #include "Awl/Coro/Task.h"
 
 #include <functional>
@@ -18,17 +19,6 @@ namespace awl::coro
         virtual ~IExecutor() = default;
 
         virtual Awaitable<void> execute(std::move_only_function<void()> func) = 0;
-    };
-
-    class IDispatcher
-    {
-    public:
-
-        virtual ~IDispatcher() = default;
-
-        virtual void post(std::move_only_function<void()> func) = 0;
-
-        virtual void join() = 0;
     };
 
     class IExecutionQueue : public IExecutor, public IDispatcher

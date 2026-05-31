@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Awl/Coro/Task.h"
 #include "Awl/Coro/TaskSink.h"
 #include "Awl/Observable.h"
 
@@ -13,24 +14,15 @@ namespace awl::coro
 
     namespace detail
     {
-        struct JobPromise : Observable<TaskSink>
+        struct JobPromise : Observable<TaskSink>, PromiseContext
         {
-            // corouine that awaiting this coroutine value
-            // we need to store it in order to resume it later when value of this coroutine will be computed
-            std::coroutine_handle<> _awaitingCoroutine;
-
             // Job is async result of our coroutine
             // it is created before execution of the coroutine body
             // it can be either co_awaited inside another coroutine
             // or used via special interface for extracting values (is_ready and get)
             Job get_return_object();
 
-            // there are two kinds of coroutines:
-            // 1. eager - that start its execution immediately
-            // 2. lazy - that start its execution only after 'co_await'ing on them
-            // here I used eager coroutine Job
-            // eager: do not suspend before running coroutine body
-            std::suspend_never initial_suspend() noexcept
+            std::suspend_always initial_suspend() noexcept
             {
                 return {};
             }
@@ -64,16 +56,10 @@ namespace awl::coro
                     {
                         JobPromise& promise = h.promise();
 
-                        auto coro = promise._awaitingCoroutine;
-
                         // The Promise is always owned by Job,
                         // so we do not call h.destroy() here.
                         promise.notify(&TaskSink::onFinished);
-
-                        if (coro)
-                        {
-                            coro.resume();
-                        }
+                        promise.resumeAwaiting();
                     }
 
                     void await_resume() noexcept {}
@@ -83,6 +69,34 @@ namespace awl::coro
             }
 
             void return_void() {}
+
+            template<typename T>
+            auto await_transform(Task<T>& task) noexcept
+            {
+                task._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+                return task.await(_dispatcher);
+            }
+
+            template<typename T>
+            auto await_transform(Task<T>&& task) noexcept
+            {
+                task._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+                return std::move(task).await(_dispatcher);
+            }
+
+            template<class Awaitable>
+            Awaitable& await_transform(Awaitable& awaitable) noexcept
+            {
+                return awaitable;
+            }
+
+            template<class Awaitable>
+            Awaitable&& await_transform(Awaitable&& awaitable) noexcept
+            {
+                return std::move(awaitable);
+            }
         };
     }
 }
