@@ -30,11 +30,11 @@ namespace
         }
 
         context.logger->debug("test step 1\n");
-        auto w3 = awl::coro::coSpawn(wait_n(context, time_queue, 3));
+        auto w3 = awl::coro::spawn(wait_n(context, time_queue, 3));
         context.logger->debug("test step 2\n");
-        auto w2 = awl::coro::coSpawn(wait_n(context, time_queue, 2));
+        auto w2 = awl::coro::spawn(wait_n(context, time_queue, 2));
         context.logger->debug("test step 3\n");
-        auto w1 = awl::coro::coSpawn(wait_n(context, time_queue, 1));
+        auto w1 = awl::coro::spawn(wait_n(context, time_queue, 1));
         context.logger->debug("test step 4\n");
         auto r = co_await w2 + co_await w3;
         context.logger->debug("awaiting already computed coroutine\n");
@@ -71,7 +71,7 @@ AWL_TEST(CoroJobStartsOnCoSpawn)
     AWL_ASSERT(!flag);
     AWL_ASSERT(!job.done());
 
-    job = awl::coro::coSpawn(std::move(job));
+    job = awl::coro::spawn(std::move(job));
 
     AWL_ASSERT(flag);
     AWL_ASSERT(job.done());
@@ -87,7 +87,7 @@ AWL_TEST(CoroTaskStartsOnCoSpawn)
     AWL_ASSERT(!flag);
     AWL_ASSERT(!task.is_ready());
 
-    task = awl::coro::coSpawn(std::move(task));
+    task = awl::coro::spawn(std::move(task));
 
     AWL_ASSERT(flag);
     AWL_ASSERT(task.is_ready());
@@ -99,7 +99,7 @@ AWL_EXAMPLE(CoroTimer)
 {
     awl::testing::TimeQueue time_queue;
 
-    auto result = awl::coro::coSpawn(test(context, time_queue));
+    auto result = awl::coro::spawn(test(context, time_queue));
 
     // execute deferred coroutines
     time_queue.loop();
@@ -111,7 +111,7 @@ AWL_EXAMPLE(CoroTimer0)
 {
     awl::testing::TimeQueue time_queue;
 
-    auto result = awl::coro::coSpawn(wait_0(context, time_queue));
+    auto result = awl::coro::spawn(wait_0(context, time_queue));
 
     // execute deferred coroutines
     time_queue.loop();

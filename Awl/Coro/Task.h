@@ -427,7 +427,7 @@ namespace awl::coro
     }
 
     template<typename T>
-    Task<T> coSpawn(Task<T> task, std::shared_ptr<IDispatcher> dispatcher = nullptr)
+    Task<T> spawn(Task<T> task, std::shared_ptr<IDispatcher> dispatcher = nullptr)
     {
         task.check_handle();
         task._h.promise().setDispatcher(std::move(dispatcher));

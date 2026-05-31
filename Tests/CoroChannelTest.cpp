@@ -84,13 +84,13 @@ AWL_TEST(CoroChannel_Rendezvous)
     int value = 0;
     bool received = false;
     bool receive_closed = false;
-    awl::coro::Job receiver = awl::coro::coSpawn(receive(channel, value, received, receive_closed));
+    awl::coro::Job receiver = awl::coro::spawn(receive(channel, value, received, receive_closed));
 
     AWL_ASSERT(!receiver.done());
 
     bool sent = false;
     bool send_closed = false;
-    awl::coro::Job sender = awl::coro::coSpawn(send(channel, 7, sent, send_closed));
+    awl::coro::Job sender = awl::coro::spawn(send(channel, 7, sent, send_closed));
 
     AWL_ASSERT(sender.done());
     AWL_ASSERT(receiver.done());
@@ -109,11 +109,11 @@ AWL_TEST(CoroChannel_Buffered)
 
     bool first_sent = false;
     bool first_send_closed = false;
-    awl::coro::Job first_sender = awl::coro::coSpawn(send(channel, std::string("first"), first_sent, first_send_closed));
+    awl::coro::Job first_sender = awl::coro::spawn(send(channel, std::string("first"), first_sent, first_send_closed));
 
     bool second_sent = false;
     bool second_send_closed = false;
-    awl::coro::Job second_sender = awl::coro::coSpawn(send(channel, std::string("second"), second_sent, second_send_closed));
+    awl::coro::Job second_sender = awl::coro::spawn(send(channel, std::string("second"), second_sent, second_send_closed));
 
     AWL_ASSERT(first_sender.done());
     AWL_ASSERT(second_sender.done());
@@ -123,12 +123,12 @@ AWL_TEST(CoroChannel_Buffered)
     std::string first_value;
     bool first_received = false;
     bool first_receive_closed = false;
-    awl::coro::Job first_receiver = awl::coro::coSpawn(receive(channel, first_value, first_received, first_receive_closed));
+    awl::coro::Job first_receiver = awl::coro::spawn(receive(channel, first_value, first_received, first_receive_closed));
 
     std::string second_value;
     bool second_received = false;
     bool second_receive_closed = false;
-    awl::coro::Job second_receiver = awl::coro::coSpawn(receive(channel, second_value, second_received, second_receive_closed));
+    awl::coro::Job second_receiver = awl::coro::spawn(receive(channel, second_value, second_received, second_receive_closed));
 
     AWL_ASSERT(first_receiver.done());
     AWL_ASSERT(second_receiver.done());
@@ -146,11 +146,11 @@ AWL_TEST(CoroChannel_BackPressure)
 
     bool first_sent = false;
     bool first_send_closed = false;
-    awl::coro::Job first_sender = awl::coro::coSpawn(send(channel, 1, first_sent, first_send_closed));
+    awl::coro::Job first_sender = awl::coro::spawn(send(channel, 1, first_sent, first_send_closed));
 
     bool second_sent = false;
     bool second_send_closed = false;
-    awl::coro::Job second_sender = awl::coro::coSpawn(send(channel, 2, second_sent, second_send_closed));
+    awl::coro::Job second_sender = awl::coro::spawn(send(channel, 2, second_sent, second_send_closed));
 
     AWL_ASSERT(first_sender.done());
     AWL_ASSERT(!second_sender.done());
@@ -160,7 +160,7 @@ AWL_TEST(CoroChannel_BackPressure)
     int first_value = 0;
     bool first_received = false;
     bool first_receive_closed = false;
-    awl::coro::Job first_receiver = awl::coro::coSpawn(receive(channel, first_value, first_received, first_receive_closed));
+    awl::coro::Job first_receiver = awl::coro::spawn(receive(channel, first_value, first_received, first_receive_closed));
 
     AWL_ASSERT(first_receiver.done());
     AWL_ASSERT(second_sender.done());
@@ -170,7 +170,7 @@ AWL_TEST(CoroChannel_BackPressure)
     int second_value = 0;
     bool second_received = false;
     bool second_receive_closed = false;
-    awl::coro::Job second_receiver = awl::coro::coSpawn(receive(channel, second_value, second_received, second_receive_closed));
+    awl::coro::Job second_receiver = awl::coro::spawn(receive(channel, second_value, second_received, second_receive_closed));
 
     AWL_ASSERT(second_receiver.done());
     AWL_ASSERT(second_received);
@@ -186,7 +186,7 @@ AWL_TEST(CoroChannel_CloseWaitingReceiver)
     int value = 0;
     bool received = false;
     bool receive_closed = false;
-    awl::coro::Job receiver = awl::coro::coSpawn(receive(channel, value, received, receive_closed));
+    awl::coro::Job receiver = awl::coro::spawn(receive(channel, value, received, receive_closed));
 
     AWL_ASSERT(!receiver.done());
 
@@ -206,7 +206,7 @@ AWL_TEST(CoroChannel_CloseKeepsBufferedValues)
 
     bool sent = false;
     bool send_closed = false;
-    awl::coro::Job sender = awl::coro::coSpawn(send(channel, 3, sent, send_closed));
+    awl::coro::Job sender = awl::coro::spawn(send(channel, 3, sent, send_closed));
 
     AWL_ASSERT(sender.done());
 
@@ -215,7 +215,7 @@ AWL_TEST(CoroChannel_CloseKeepsBufferedValues)
     int value = 0;
     bool received = false;
     bool receive_closed = false;
-    awl::coro::Job receiver = awl::coro::coSpawn(receive(channel, value, received, receive_closed));
+    awl::coro::Job receiver = awl::coro::spawn(receive(channel, value, received, receive_closed));
 
     AWL_ASSERT(receiver.done());
     AWL_ASSERT(received);
@@ -225,7 +225,7 @@ AWL_TEST(CoroChannel_CloseKeepsBufferedValues)
     int closed_value = 0;
     bool closed_received = false;
     bool closed_receive_closed = false;
-    awl::coro::Job closed_receiver = awl::coro::coSpawn(receive(channel, closed_value, closed_received, closed_receive_closed));
+    awl::coro::Job closed_receiver = awl::coro::spawn(receive(channel, closed_value, closed_received, closed_receive_closed));
 
     AWL_ASSERT(closed_receiver.done());
     AWL_ASSERT(!closed_received);
@@ -241,7 +241,7 @@ AWL_TEST(CoroChannel_SendToClosedChannel)
 
     bool sent = false;
     bool send_closed = false;
-    awl::coro::Job sender = awl::coro::coSpawn(send(channel, 5, sent, send_closed));
+    awl::coro::Job sender = awl::coro::spawn(send(channel, 5, sent, send_closed));
 
     AWL_ASSERT(sender.done());
     AWL_ASSERT(!sent);
@@ -266,7 +266,7 @@ AWL_TEST(CoroChannel_SendAndReceiveResumeOnCallingDispatchers)
     bool sent = false;
     bool received = false;
 
-    awl::coro::Job producer = awl::coro::coSpawn(
+    awl::coro::Job producer = awl::coro::spawn(
         sendAndRememberThread(channel, 17, producer_start_thread, producer_resume_thread, sent),
         producer_dispatcher);
 
@@ -275,7 +275,7 @@ AWL_TEST(CoroChannel_SendAndReceiveResumeOnCallingDispatchers)
     AWL_ASSERT(!producer.done());
     AWL_ASSERT(!sent);
 
-    awl::coro::Job consumer = awl::coro::coSpawn(
+    awl::coro::Job consumer = awl::coro::spawn(
         receiveAndRememberThread(channel, value, consumer_start_thread, consumer_resume_thread, received),
         consumer_dispatcher);
 

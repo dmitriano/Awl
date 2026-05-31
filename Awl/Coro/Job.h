@@ -163,7 +163,7 @@ namespace awl::coro
 
     private:
 
-        friend Job coSpawn(Job job, std::shared_ptr<IDispatcher> dispatcher);
+        friend Job spawn(Job job, std::shared_ptr<IDispatcher> dispatcher);
         friend detail::JobPromise;
 
         //void release();
@@ -171,7 +171,7 @@ namespace awl::coro
         std::coroutine_handle<promise_type> _h;
     };
 
-    inline Job coSpawn(Job job, std::shared_ptr<IDispatcher> dispatcher = nullptr)
+    inline Job spawn(Job job, std::shared_ptr<IDispatcher> dispatcher = nullptr)
     {
         if (!job._h)
         {
@@ -185,10 +185,10 @@ namespace awl::coro
     }
 
     template<class Func>
-    auto coSpawn(Func func, std::shared_ptr<IDispatcher> dispatcher = nullptr)
+    auto spawn(Func func, std::shared_ptr<IDispatcher> dispatcher = nullptr)
         requires std::invocable<Func&>
     {
-        return coSpawn(std::invoke(func), std::move(dispatcher));
+        return spawn(std::invoke(func), std::move(dispatcher));
     }
 
     inline auto detail::JobPromise::await_transform(Job& job) noexcept
