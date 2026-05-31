@@ -511,7 +511,7 @@ AWL_TEST(Observable_NotifyAsync)
     observable.subscribe(&handler1);
     observable.subscribe(&handler2);
 
-    awl::coro::Task<int> task = awl::coro::coSpawn(nullptr, observable.setValueAsync(7));
+    awl::coro::Task<int> task = awl::coro::coSpawn(observable.setValueAsync(7));
 
     AWL_ASSERT(!task.is_ready());
     AWL_ASSERT_EQUAL(0u, events.size());

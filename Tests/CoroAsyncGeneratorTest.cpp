@@ -99,7 +99,7 @@ AWL_TEST(CoroAsyncGeneratorOwned)
 {
     awl::testing::TimeQueue time_queue;
 
-    awl::coro::Job task = awl::coro::coSpawn(nullptr, test(context, time_queue));
+    awl::coro::Job task = awl::coro::coSpawn(test(context, time_queue));
 
     AWL_ASSERT(!task.done());
 
