@@ -164,6 +164,7 @@ namespace awl::coro
     private:
 
         friend Job coSpawn(Job job, std::shared_ptr<IDispatcher> dispatcher);
+        friend detail::JobPromise;
 
         //void release();
 
@@ -190,13 +191,17 @@ namespace awl::coro
         return coSpawn(std::invoke(func), std::move(dispatcher));
     }
 
-    inline auto operator co_await(Job& job) noexcept
+    inline auto detail::JobPromise::await_transform(Job& job) noexcept
     {
-        return job.await(nullptr);
+        job._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+        return job.await(_dispatcher);
     }
 
-    inline auto operator co_await(Job&& job) noexcept
+    inline auto detail::JobPromise::await_transform(Job&& job) noexcept
     {
-        return std::move(job).await(nullptr);
+        job._h.promise().setDispatcherIfEmpty(_dispatcher);
+
+        return std::move(job).await(_dispatcher);
     }
 }

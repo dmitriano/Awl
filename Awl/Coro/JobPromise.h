@@ -86,6 +86,10 @@ namespace awl::coro
                 return std::move(task).await(_dispatcher);
             }
 
+            auto await_transform(Job& job) noexcept;
+
+            auto await_transform(Job&& job) noexcept;
+
             template<class Awaitable>
             Awaitable& await_transform(Awaitable& awaitable) noexcept
             {
