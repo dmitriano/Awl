@@ -2,7 +2,9 @@
 
 #include "Awl/ISignal.h"
 
+#include <cassert>
 #include <coroutine>
+#include <functional>
 #include <optional>
 #include <tuple>
 #include <type_traits>
@@ -75,11 +77,31 @@ namespace awl::coro
 
         SignalAwaitable(const SignalAwaitable&) = delete;
 
-        SignalAwaitable(SignalAwaitable&&) = delete;
+        SignalAwaitable(SignalAwaitable&& other) noexcept :
+            _signal(other._signal),
+            _state(std::move(other._state))
+        {
+            assert(other._subscriptionId == 0);
+            assert(other._coroutine == nullptr);
+        }
 
         SignalAwaitable& operator = (const SignalAwaitable&) = delete;
 
-        SignalAwaitable& operator = (SignalAwaitable&&) = delete;
+        SignalAwaitable& operator = (SignalAwaitable&& other) noexcept
+        {
+            if (this != &other)
+            {
+                assert(_subscriptionId == 0);
+                assert(_coroutine == nullptr);
+                assert(other._subscriptionId == 0);
+                assert(other._coroutine == nullptr);
+
+                _signal = other._signal;
+                _state = std::move(other._state);
+            }
+
+            return *this;
+        }
 
         ~SignalAwaitable()
         {
@@ -95,7 +117,7 @@ namespace awl::coro
         {
             _coroutine = h;
 
-            _subscriptionId = _signal.subscribe(
+            _subscriptionId = _signal.get().subscribe(
                 [this](Args... args)
                 {
                     store(std::forward<Args>(args)...);
@@ -122,7 +144,7 @@ namespace awl::coro
         {
             if (_subscriptionId != 0)
             {
-                _signal.unsubscribe(_subscriptionId);
+                _signal.get().unsubscribe(_subscriptionId);
                 _subscriptionId = 0;
             }
         }
@@ -132,7 +154,7 @@ namespace awl::coro
             detail::store_signal_awaitable_result<Result>(_state, std::forward<Args>(args)...);
         }
 
-        ISignal<Args...>& _signal;
+        std::reference_wrapper<ISignal<Args...>> _signal;
         Id _subscriptionId = 0;
         std::coroutine_handle<> _coroutine = nullptr;
         detail::signal_awaitable_state<Result> _state;

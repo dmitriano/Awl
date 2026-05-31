@@ -44,6 +44,14 @@ namespace
         result = co_await awl::coro::wait_signal(signal);
     }
 
+    awl::coro::Job waitMovedInt(awl::ISignal<int>& signal, int& result)
+    {
+        awl::coro::SignalAwaitable<int> awaitable = awl::coro::wait_signal(signal);
+        awl::coro::SignalAwaitable<int> moved(std::move(awaitable));
+
+        result = co_await moved;
+    }
+
     awl::coro::Job waitTuple(
         awl::ISignal<const std::shared_ptr<int>&, const std::string&>& signal,
         std::shared_ptr<int>& sender,
@@ -171,6 +179,25 @@ AWL_TEST(SignalAwaitable_SingleArgument)
 
     AWL_ASSERT(job.done());
     AWL_ASSERT_EQUAL(7, result);
+    AWL_ASSERT(signal.empty());
+}
+
+AWL_TEST(SignalAwaitable_MoveConstructedBeforeAwait)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::Source<int> signal;
+    int result = 0;
+
+    awl::coro::Job job = waitMovedInt(signal.signal(), result);
+
+    AWL_ASSERT(!job.done());
+    AWL_ASSERT_EQUAL(1u, signal.size());
+
+    signal.emit(9);
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT_EQUAL(9, result);
     AWL_ASSERT(signal.empty());
 }
 
