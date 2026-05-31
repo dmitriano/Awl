@@ -2,7 +2,10 @@
 #include "Awl/Coro/Job.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Helpers/FakeDispatcher.h"
+#include "Helpers/TestDispatcher.h"
 
+#include <algorithm>
+#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -217,4 +220,62 @@ AWL_TEST(CoroChannel_SendToClosedChannel)
     AWL_ASSERT(sender.done());
     AWL_ASSERT(!sent);
     AWL_ASSERT(send_closed);
+}
+
+AWL_TEST(CoroChannel_TestDispatchersSendAndReceiveConcurrently)
+{
+    AWL_UNUSED_CONTEXT;
+
+    constexpr size_t count = 32;
+
+    std::shared_ptr<awl::testing::TestDispatcher> channel_dispatcher =
+        std::make_shared<awl::testing::TestDispatcher>();
+    std::shared_ptr<awl::testing::TestDispatcher> producer_dispatcher =
+        std::make_shared<awl::testing::TestDispatcher>();
+    std::shared_ptr<awl::testing::TestDispatcher> consumer_dispatcher =
+        std::make_shared<awl::testing::TestDispatcher>();
+
+    awl::coro::Channel<int> channel(channel_dispatcher);
+
+    std::array<awl::coro::Job, count> send_jobs;
+    std::array<awl::coro::Job, count> receive_jobs;
+    std::array<int, count> values = {};
+    std::array<bool, count> sent = {};
+    std::array<bool, count> send_closed = {};
+    std::array<bool, count> received = {};
+    std::array<bool, count> receive_closed = {};
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        producer_dispatcher->post([&, i]
+            {
+                send_jobs[i] = send(channel, static_cast<int>(i), sent[i], send_closed[i]);
+            });
+
+        consumer_dispatcher->post([&, i]
+            {
+                receive_jobs[i] = receive(channel, values[i], received[i], receive_closed[i]);
+            });
+    }
+
+    producer_dispatcher->join();
+    consumer_dispatcher->join();
+    channel_dispatcher->join();
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        AWL_ASSERT(send_jobs[i].done());
+        AWL_ASSERT(receive_jobs[i].done());
+        AWL_ASSERT(sent[i]);
+        AWL_ASSERT(!send_closed[i]);
+        AWL_ASSERT(received[i]);
+        AWL_ASSERT(!receive_closed[i]);
+    }
+
+    std::ranges::sort(values);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        AWL_ASSERT_EQUAL(static_cast<int>(i), values[i]);
+    }
 }
