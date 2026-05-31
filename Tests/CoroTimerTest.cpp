@@ -61,7 +61,7 @@ namespace
     }
 }
 
-AWL_TEST(CoroJobStartsOnCoSpawn)
+AWL_TEST(CoroJobStartsOnSpawn)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -77,7 +77,7 @@ AWL_TEST(CoroJobStartsOnCoSpawn)
     AWL_ASSERT(job.done());
 }
 
-AWL_TEST(CoroTaskStartsOnCoSpawn)
+AWL_TEST(CoroTaskStartsOnSpawn)
 {
     AWL_UNUSED_CONTEXT;
 
