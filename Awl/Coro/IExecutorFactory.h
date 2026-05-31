@@ -15,6 +15,6 @@ namespace awl::coro
 
         virtual std::shared_ptr<IDelayedExecutor> makeDelayedExecutor() = 0;
 
-        virtual std::shared_ptr<IDispatcher> makeExecutor() = 0;
+        virtual std::shared_ptr<IExecutionQueue> makeExecutor() = 0;
     };
 }
