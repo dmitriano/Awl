@@ -72,6 +72,37 @@ namespace awl::coro
             return _state->open;
         }
 
+        bool trySend(T val)
+        {
+            std::vector<Continuation> continuations;
+            bool sent = false;
+
+            {
+                std::lock_guard lock(_state->mutex);
+
+                if (_state->open)
+                {
+                    if (!_state->receivers.empty())
+                    {
+                        ReceiveOperation* receiver = _state->receivers.front();
+                        _state->receivers.pop_front();
+
+                        complete(*receiver, std::move(val), continuations);
+                        sent = true;
+                    }
+                    else if (_state->capacity != 0 && _state->values.size() < _state->capacity)
+                    {
+                        _state->values.push_back(std::move(val));
+                        sent = true;
+                    }
+                }
+            }
+
+            resume(continuations);
+
+            return sent;
+        }
+
         void close()
         {
             std::vector<Continuation> continuations;

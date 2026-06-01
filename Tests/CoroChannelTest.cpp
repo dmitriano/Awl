@@ -101,6 +101,25 @@ AWL_TEST(CoroChannel_Rendezvous)
     AWL_ASSERT_EQUAL(7, value);
 }
 
+AWL_TEST(CoroChannel_TrySendResumesReceiver)
+{
+    AWL_UNUSED_CONTEXT;
+
+    awl::coro::Channel<int> channel;
+
+    int value = 0;
+    bool received = false;
+    bool receive_closed = false;
+    awl::coro::Job receiver = awl::coro::spawn(receive(channel, value, received, receive_closed));
+
+    AWL_ASSERT(!receiver.done());
+    AWL_ASSERT(channel.trySend(7));
+    AWL_ASSERT(receiver.done());
+    AWL_ASSERT(received);
+    AWL_ASSERT(!receive_closed);
+    AWL_ASSERT_EQUAL(7, value);
+}
+
 AWL_TEST(CoroChannel_Buffered)
 {
     AWL_UNUSED_CONTEXT;
