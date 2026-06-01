@@ -58,8 +58,14 @@ namespace awl::coro
 
                         // The Promise is always owned by Job,
                         // so we do not call h.destroy() here.
-                        promise.notify(&TaskSink::onFinished);
-                        promise.resumeAwaiting();
+                        if (promise._awaitingCoroutine)
+                        {
+                            promise.resumeAwaiting();
+                        }
+                        else
+                        {
+                            promise.notify(&TaskSink::onFinished);
+                        }
                     }
 
                     void await_resume() noexcept {}
