@@ -83,7 +83,7 @@ namespace awl::coro
 
                 // h - is a handle to coroutine that calls co_await
                 // store coroutine handle to be resumed after computing Job value
-                void await_suspend(std::coroutine_handle<> h)
+                bool await_suspend(std::coroutine_handle<> h)
                 {
                     detail::JobPromise& promise = _h.promise();
 
@@ -95,8 +95,22 @@ namespace awl::coro
 
                     promise._awaitingCoroutine = h;
                     promise._awaitingDispatcher = _awaitingDispatcher;
+                    promise._resumeAwaitingOnFinalSuspend = false;
 
                     detail::start(_h);
+
+                    if (_h.done())
+                    {
+                        promise._awaitingCoroutine = nullptr;
+                        promise._awaitingDispatcher = nullptr;
+                        promise._resumeAwaitingOnFinalSuspend = true;
+
+                        return false;
+                    }
+
+                    promise._resumeAwaitingOnFinalSuspend = true;
+
+                    return true;
                 }
 
                 // when ready return value to a consumer
@@ -126,7 +140,7 @@ namespace awl::coro
                     return _h.done();
                 }
 
-                void await_suspend(std::coroutine_handle<> h)
+                bool await_suspend(std::coroutine_handle<> h)
                 {
                     detail::JobPromise& promise = _h.promise();
 
@@ -137,8 +151,22 @@ namespace awl::coro
 
                     promise._awaitingCoroutine = h;
                     promise._awaitingDispatcher = _awaitingDispatcher;
+                    promise._resumeAwaitingOnFinalSuspend = false;
 
                     detail::start(_h);
+
+                    if (_h.done())
+                    {
+                        promise._awaitingCoroutine = nullptr;
+                        promise._awaitingDispatcher = nullptr;
+                        promise._resumeAwaitingOnFinalSuspend = true;
+
+                        return false;
+                    }
+
+                    promise._resumeAwaitingOnFinalSuspend = true;
+
+                    return true;
                 }
 
                 auto await_resume()

@@ -59,6 +59,21 @@ namespace
 
         co_return 7;
     }
+
+    awl::coro::Task<int> synchronousValue()
+    {
+        co_return 7;
+    }
+
+    awl::coro::Job awaitSynchronousTask(int& result)
+    {
+        result = co_await synchronousValue();
+    }
+
+    awl::coro::Job awaitSynchronousJob(bool& flag)
+    {
+        co_await setFlag(flag);
+    }
 }
 
 AWL_TEST(CoroJobStartsOnSpawn)
@@ -92,6 +107,28 @@ AWL_TEST(CoroTaskStartsOnSpawn)
     AWL_ASSERT(flag);
     AWL_ASSERT(task.is_ready());
     AWL_ASSERT_EQUAL(7, task.get());
+}
+
+AWL_TEST(CoroTaskAwaitsSynchronousTask)
+{
+    AWL_UNUSED_CONTEXT;
+
+    int result = 0;
+    awl::coro::Job job = awl::coro::spawn(awaitSynchronousTask(result));
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT_EQUAL(7, result);
+}
+
+AWL_TEST(CoroJobAwaitsSynchronousJob)
+{
+    AWL_UNUSED_CONTEXT;
+
+    bool flag = false;
+    awl::coro::Job job = awl::coro::spawn(awaitSynchronousJob(flag));
+
+    AWL_ASSERT(job.done());
+    AWL_ASSERT(flag);
 }
 
 // main can't be a coroutine and usually need some sort of looper (io_service or timer loop in this example)

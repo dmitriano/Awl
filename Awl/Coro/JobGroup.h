@@ -108,15 +108,9 @@ namespace awl::coro
 
         void spawn(Job&& task);
 
-        std::size_t task_count() const
-        {
-            return _handlers.size();
-        }
+        std::size_t task_count() const;
 
-        bool empty() const
-        {
-            return _handlers.empty();
-        }
+        bool empty() const;
 
         // Clears tracked jobs and wakes awaiters.
         void cancel();
@@ -150,6 +144,12 @@ namespace awl::coro
             JobGroup* pThis;
 
             Job _task;
+            bool _finished = false;
+
+            bool finished() const
+            {
+                return _finished || (_task && _task.done());
+            }
 
             void onFinished() override;
         };

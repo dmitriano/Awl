@@ -1,5 +1,6 @@
 #include "Awl/Coro/JobGroup.h"
 
+#include <algorithm>
 #include <cassert>
 #include <ranges>
 #include <functional>
@@ -37,6 +38,21 @@ namespace awl::coro
         }
     }
 
+    std::size_t JobGroup::task_count() const
+    {
+        return std::ranges::count_if(
+            _handlers,
+            [](const Handler& handler)
+            {
+                return !handler.finished();
+            });
+    }
+
+    bool JobGroup::empty() const
+    {
+        return task_count() == 0;
+    }
+
     void JobGroup::cancel()
     {
         // Do not notify awaiters if nothing changed.
@@ -67,27 +83,21 @@ namespace awl::coro
         {
             Job task = std::move(_handlers.back()._task);
 
-            // The vector contains an empty task and
-            // onFinished() should delete it correctly.
             // BUG: This task is not cancelled by JobGroup::cancel().
-            co_await task;
+            if (task)
+            {
+                co_await task;
+            }
+
+            _handlers.pop_back();
         }
     }
 
     void JobGroup::Handler::onFinished()
     {
-        // The handler is going to be deleted, save its members.
-        JobGroup* saved_this = pThis;
-
-        std::vector<Handler>& handlers = saved_this->_handlers;
-
-        const std::size_t index = this - handlers.data();
-
-        assert(index < handlers.size());
-
-        handlers.erase(handlers.begin() + index);
+        _finished = true;
 
         // For wait_any().
-        saved_this->notify(&TaskSink::onFinished);
+        pThis->notify(&TaskSink::onFinished);
     }
 }

@@ -39,9 +39,10 @@ namespace awl::coro
         struct PromiseContext
         {
             std::shared_ptr<IDispatcher> _dispatcher;
-            std::coroutine_handle<> _awaitingCoroutine;
+            std::coroutine_handle<> _awaitingCoroutine = nullptr;
             std::shared_ptr<IDispatcher> _awaitingDispatcher;
             bool _started = false;
+            bool _resumeAwaitingOnFinalSuspend = true;
 
             void setDispatcher(std::shared_ptr<IDispatcher> dispatcher)
             {
@@ -58,10 +59,13 @@ namespace awl::coro
 
             void resumeAwaiting()
             {
-                std::coroutine_handle<> awaiting_coroutine = std::exchange(_awaitingCoroutine, nullptr);
-                std::shared_ptr<IDispatcher> awaiting_dispatcher = std::exchange(_awaitingDispatcher, nullptr);
+                if (_resumeAwaitingOnFinalSuspend)
+                {
+                    std::coroutine_handle<> awaiting_coroutine = std::exchange(_awaitingCoroutine, nullptr);
+                    std::shared_ptr<IDispatcher> awaiting_dispatcher = std::exchange(_awaitingDispatcher, nullptr);
 
-                resume(std::move(awaiting_dispatcher), awaiting_coroutine);
+                    resume(std::move(awaiting_dispatcher), awaiting_coroutine);
+                }
             }
         };
 
@@ -363,7 +367,7 @@ namespace awl::coro
                 return _h.done();
             }
 
-            void await_suspend(std::coroutine_handle<> h)
+            bool await_suspend(std::coroutine_handle<> h)
             {
                 typename Task<T>::promise_type& promise = _h.promise();
 
@@ -374,8 +378,22 @@ namespace awl::coro
 
                 promise._awaitingCoroutine = h;
                 promise._awaitingDispatcher = _awaitingDispatcher;
+                promise._resumeAwaitingOnFinalSuspend = false;
 
                 start(_h);
+
+                if (_h.done())
+                {
+                    promise._awaitingCoroutine = nullptr;
+                    promise._awaitingDispatcher = nullptr;
+                    promise._resumeAwaitingOnFinalSuspend = true;
+
+                    return false;
+                }
+
+                promise._resumeAwaitingOnFinalSuspend = true;
+
+                return true;
             }
 
             auto await_resume()
