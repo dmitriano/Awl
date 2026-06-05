@@ -4,7 +4,7 @@
 
 #include <atomic>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class T>
     class JsonSerializer<std::atomic<T>>

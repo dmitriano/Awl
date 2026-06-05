@@ -9,7 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace awl::boost_json
+namespace awl
 {
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     class JsonSerializer<awl::decimal<UInt, exp_len, DataTemplate>>

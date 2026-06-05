@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class T>
     void fromJson(const boost::json::value& jv, T& val)

@@ -12,8 +12,11 @@
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/TypeProvider.h"
 
-#ifdef AWL_QT
+#ifdef AWL_BOOST
     #include "Awl/Testing/JsonProvider.h"
+#endif
+
+#ifdef AWL_QT
     #include <QObject>
 #endif
 
@@ -45,27 +48,38 @@ namespace awl::testing
         const TypeProvider& typeProvider;
     };
 
-#ifdef AWL_QT
+#ifdef AWL_BOOST
 
-    struct TestContext : public CompositeTestContext<CommandLineProvider, JsonProvider>
-    {
-        using Base = CompositeTestContext<CommandLineProvider, JsonProvider>;
-
-        TestContext(std::shared_ptr<ILogger> logger, const std::stop_token stop_token,
-            AttributeProvider& attribute_provider, const TypeProvider& type_provider, QObject* worker = nullptr) :
-            Base(std::move(logger), stop_token, attribute_provider, type_provider),
-            worker(worker)
-        {}
-
-        // For handling QT signals inside the tests.
-        QObject* worker;
-    };
+    using TestContextBase = CompositeTestContext<CommandLineProvider, JsonProvider>;
 
 #else
 
-    using TestContext = CompositeTestContext<CommandLineProvider>;
+    using TestContextBase = CompositeTestContext<CommandLineProvider>;
 
 #endif
+
+    struct TestContext : public TestContextBase
+    {
+        using Base = TestContextBase;
+
+        TestContext(std::shared_ptr<ILogger> logger, const std::stop_token stop_token,
+            AttributeProvider& attribute_provider, const TypeProvider& type_provider
+#ifdef AWL_QT
+            , QObject* worker = nullptr
+#endif
+            ) :
+            Base(std::move(logger), stop_token, attribute_provider, type_provider)
+#ifdef AWL_QT
+            ,
+            worker(worker)
+#endif
+        {}
+
+#ifdef AWL_QT
+        // For handling QT signals inside the tests.
+        QObject* worker;
+#endif
+    };
 
     static_assert(attribute_provider<TestContext::AttributeProvider>);
 }

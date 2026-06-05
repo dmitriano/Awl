@@ -9,7 +9,7 @@
 #include <format>
 #include <string>
 
-namespace awl::boost_json
+namespace awl
 {
     inline awl::String typeToString(boost::json::kind kind)
     {

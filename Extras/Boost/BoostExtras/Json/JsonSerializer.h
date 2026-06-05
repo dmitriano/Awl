@@ -4,7 +4,7 @@
 
 #include <boost/json.hpp>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class T>
     class JsonSerializer;

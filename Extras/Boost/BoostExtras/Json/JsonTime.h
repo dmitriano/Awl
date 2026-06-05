@@ -10,7 +10,7 @@
 #include <string>
 #include <string_view>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class Clock, class Duration>
     class JsonSerializer<std::chrono::time_point<Clock, Duration>>

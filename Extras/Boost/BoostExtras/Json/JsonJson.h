@@ -3,7 +3,7 @@
 #include "BoostExtras/Json/JsonHelpers.h"
 #include "BoostExtras/Json/JsonSerializer.h"
 
-namespace awl::boost_json
+namespace awl
 {
     template <>
     class JsonSerializer<boost::json::value>

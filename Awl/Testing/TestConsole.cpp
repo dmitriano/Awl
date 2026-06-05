@@ -16,13 +16,17 @@
 #include "Awl/StaticMap.h"
 #include "Awl/StdStreamLogger.h"
 
+#ifdef AWL_BOOST
+    #include "BoostExtras/Json/JsonUtil.h"
+#endif
+
 #ifdef AWL_QT
-    #include "QtExtras/Json/JsonLoadSave.h"
     #include "QtExtras/StringConversion.h"
 #endif
 
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <optional>
 #include <set>
 #include <regex>
@@ -159,6 +163,33 @@ namespace awl::testing
 
             return console_logger;
         }
+
+#ifdef AWL_BOOST
+
+        boost::json::object loadTestAttributes(const CmdString& file_name)
+        {
+            std::ifstream in(std::filesystem::path(file_name), std::ios_base::binary);
+
+            if (!in.is_open())
+            {
+                throw JsonException(std::format(_T("Cannot open input file '{}'."), file_name));
+            }
+
+            const std::string text{
+                std::istreambuf_iterator<char>(in),
+                std::istreambuf_iterator<char>()};
+
+            boost::json::value jv = boost::json::parse(text);
+
+            if (!jv.is_object())
+            {
+                throw JsonException(std::format(_T("JSON object expected in file '{}'."), file_name));
+            }
+
+            return jv.as_object();
+        }
+
+#endif
     }
 
     template <attribute_provider Provider>
@@ -295,9 +326,9 @@ namespace awl::testing
                 }
             }
 
-#ifdef AWL_QT
+#ifdef AWL_BOOST
 
-            QJsonObject jo;
+            boost::json::object jo;
 
             CmdString json_file;
 
@@ -305,7 +336,7 @@ namespace awl::testing
             {
                 try
                 {
-                    jo = loadObjectFromFile(toQString(json_file));
+                    jo = loadTestAttributes(json_file);
                 }
                 catch (const JsonException& e)
                 {
@@ -315,7 +346,7 @@ namespace awl::testing
                 }
             }
 
-            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(std::move(jo)));
 
 #else
 

@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace awl::boost_json
+namespace awl
 {
     class JsonException : public awl::GeneralException
     {

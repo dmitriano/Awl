@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class T> requires std::is_class_v<T> && awl::reflectable<T>
     class JsonSerializer<T>

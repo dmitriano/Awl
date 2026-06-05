@@ -24,7 +24,7 @@ namespace awl::testing::boost_json_tests
 AWL_ENUM_TRAITS(awl::testing::boost_json_tests, TestEnum)
 
 using namespace awl::testing::helpers::v1;
-namespace json = awl::boost_json;
+namespace json = awl;
 
 namespace
 {

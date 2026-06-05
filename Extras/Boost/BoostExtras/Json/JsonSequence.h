@@ -10,7 +10,7 @@
 #include <string>
 #include <type_traits>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class Container>
         requires awl::inserter_defined<Container>

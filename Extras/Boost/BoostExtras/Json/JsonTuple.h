@@ -8,7 +8,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace awl::boost_json
+namespace awl
 {
     template <typename... Args>
     class JsonSerializer<std::tuple<Args...>>

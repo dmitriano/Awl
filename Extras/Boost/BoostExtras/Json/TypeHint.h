@@ -2,7 +2,7 @@
 
 #include <typeinfo>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class T>
     constexpr auto type_hint()

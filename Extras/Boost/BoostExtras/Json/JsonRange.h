@@ -8,7 +8,7 @@
 
 #include <ranges>
 
-namespace awl::boost_json
+namespace awl
 {
     template <std::ranges::range Range>
     boost::json::array rangeToJson(const Range& r)

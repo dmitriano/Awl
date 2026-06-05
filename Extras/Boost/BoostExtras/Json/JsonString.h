@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace awl::boost_json
+namespace awl
 {
     template <>
     class JsonSerializer<std::string>

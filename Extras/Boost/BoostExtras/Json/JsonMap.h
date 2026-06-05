@@ -9,7 +9,7 @@
 #include <string>
 #include <type_traits>
 
-namespace awl::boost_json
+namespace awl
 {
     template <class Container> requires awl::insertable_map<Container> &&
         std::is_same_v<typename Container::key_type, std::string>

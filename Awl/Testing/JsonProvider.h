@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QtExtras/Json/Json.h"
+#include "BoostExtras/Json/Json.h"
 
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/StringFormat.h"
@@ -11,7 +11,9 @@ namespace awl::testing
     {
     public:
 
-        JsonProvider(QJsonObject& jo) : _jo(jo) {}
+        JsonProvider() = default;
+
+        explicit JsonProvider(boost::json::object jo) : _jo(std::move(jo)) {}
 
         template <class T>
         bool tryGet(const char* name, T& val)
@@ -22,7 +24,7 @@ namespace awl::testing
 
             if (i != _jo.end())
             {
-                serializer.fromJson(*i, val);
+                serializer.fromJson(i->value(), val);
 
                 return true;
             }
@@ -40,11 +42,10 @@ namespace awl::testing
 
             JsonSerializer<T> serializer;
 
-            QJsonValue jv;
-
+            boost::json::value jv;
             serializer.toJson(val, jv);
 
-            _jo[name] = jv;
+            _jo[name] = std::move(jv);
 
             _dirty = true;
         }
@@ -62,7 +63,7 @@ namespace awl::testing
 
     private:
 
-        QJsonObject& _jo;
+        boost::json::object _jo;
 
         bool _dirty = false;
     };
