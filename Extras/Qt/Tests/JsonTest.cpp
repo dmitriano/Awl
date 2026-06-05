@@ -18,7 +18,7 @@
 
 #include <format>
 
-AWL_TEST(JsonArray)
+AWL_TEST(QtJsonArray)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -61,7 +61,7 @@ namespace
     }
 }
 
-AWL_TEST(JsonBinanceErrorParsing)
+AWL_TEST(QtJsonBinanceErrorParsing)
 {
     {
         QString err_answer = "{\"code\":-1003,\"msg\":\"Too much request weight used; current limit is 1200 request weight per 1 MINUTE. Please use the websocket for live updates to avoid polling the API.\"}";
@@ -117,7 +117,7 @@ namespace
     }
 }
 
-AWL_TEST(JsonReflectableA)
+AWL_TEST(QtJsonReflectableA)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -128,7 +128,7 @@ AWL_TEST(JsonReflectableA)
     AWL_ASSERT(a == a_expected);
 }
 
-AWL_TEST(JsonReflectableB)
+AWL_TEST(QtJsonReflectableB)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -144,7 +144,7 @@ AWL_TEST(JsonReflectableB)
 // Details :
 //     [a] (Object / struct)
 //     [b] (String / int8_t)
-AWL_TEST(JsonReflectableExceptionTypeMismatch)
+AWL_TEST(QtJsonReflectableExceptionTypeMismatch)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -173,7 +173,7 @@ AWL_TEST(JsonReflectableExceptionTypeMismatch)
 // Details :
 //     [a] (Object / struct)
 //     [b] (Null / int8_t)
-AWL_TEST(JsonReflectableExceptionNull)
+AWL_TEST(QtJsonReflectableExceptionNull)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -203,7 +203,7 @@ AWL_TEST(JsonReflectableExceptionNull)
 //  [v] (Array/sequence<struct>)
 //  [1] (Object/struct)
 //  [b] (Null/int8_t)
-AWL_TEST(JsonReflectableExceptionVector)
+AWL_TEST(QtJsonReflectableExceptionVector)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -234,7 +234,7 @@ AWL_TEST(JsonReflectableExceptionVector)
 //  [1] (Object/struct)
 //  [a] (Object/struct)
 //  [b] (Null/int8_t)
-AWL_TEST(JsonReflectableExceptionSet)
+AWL_TEST(QtJsonReflectableExceptionSet)
 {
     QJsonObject b_jo = makeBJson();
 
@@ -302,7 +302,7 @@ namespace
     }
 }
 
-AWL_TEST(JsonMap)
+AWL_TEST(QtJsonMap)
 {
     TestRunner<std::map<QString, int>>(context);
     TestRunner<std::map<std::string, int>>(context);
@@ -310,7 +310,7 @@ AWL_TEST(JsonMap)
     TestRunner<std::unordered_map<std::string, int>>(context);
 }
 
-AWL_TEST(JsonDuration)
+AWL_TEST(QtJsonDuration)
 {
     using namespace std::chrono;
 
@@ -490,7 +490,7 @@ AWL_TEST(JsonDuration)
         });
 }
 
-AWL_TEST(JsonDurationWeek)
+AWL_TEST(QtJsonDurationWeek)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -507,7 +507,7 @@ AWL_TEST(JsonDurationWeek)
     AWL_ASSERT(awl::toJson(week_4).toString() == "28d");
 }
 
-AWL_TEST(JsonDurationNew)
+AWL_TEST(QtJsonDurationNew)
 {
     using namespace std::chrono;
 
@@ -551,7 +551,7 @@ AWL_TEST(JsonDurationNew)
     test_new_format.operator()<milliseconds>("standalone fractional", "0.125", milliseconds(125));
 }
 
-AWL_TEST(JsonDurationInvalid)
+AWL_TEST(QtJsonDurationInvalid)
 {
     auto test_invalid_input = [&context]<class Duration>(const char* label, const QString& input)
     {
@@ -578,7 +578,7 @@ AWL_TEST(JsonDurationInvalid)
 
 #ifdef AWL_DECIMAL_128
 
-AWL_TEST(JsonDecimal)
+AWL_TEST(QtJsonDecimal)
 {
     const char* sample = "12345.6789999";
     
