@@ -926,8 +926,8 @@ namespace
 AWL_EXAMPLE(AsioTcpProxy)
 {
     AWL_ATTRIBUTE(unsigned int, listen_port, 12345);
-    AWL_ATTRIBUTE(std::string, cert_file, "ldap.crt");
-    AWL_ATTRIBUTE(std::string, key_file, "ldap.key");
+    AWL_ATTRIBUTE(std::string, cert_file, "ldaps.certificate.pem");
+    AWL_ATTRIBUTE(std::string, key_file, "ldaps.key.pem");
     AWL_ATTRIBUTE(std::string, target, "192.168.0.123:636");
     AWL_ATTRIBUTE(unsigned int, thread_count, 4);
     AWL_ATTRIBUTE(bool, tcp_nodelay, true);

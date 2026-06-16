@@ -190,6 +190,10 @@ namespace
             }
         }
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
         asio::any_io_executor getExecutor() const
         {
             if (strand)
@@ -199,6 +203,9 @@ namespace
 
             return pool.get_executor();
         }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
     private:
 
