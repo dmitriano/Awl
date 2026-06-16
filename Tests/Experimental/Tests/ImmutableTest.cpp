@@ -261,6 +261,10 @@ namespace
 
             std::vector<awl::immutable<ObserverA>> v;
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer"
+#endif
             for (size_t i = 0; i < insert_count; ++i)
             {
                 ObserverA a(static_cast<int>(i), long_string);
@@ -270,6 +274,9 @@ namespace
                 // The address of a changes here, but it still handles the signals.
                 v.push_back(std::move(a));
             }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
             return v;
         }
