@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <format>
+#include <mutex>
 #include <stdexcept>
 #include <source_location>
 #include <string>
@@ -36,6 +37,7 @@ namespace awl
         std::shared_ptr<awl::ostream> out;
         awl::ostringstream delayedOutput;
         bool delayed = false;
+        std::mutex mutex;
     };
 
     StdStreamLogger::StdStreamLogger(
@@ -79,12 +81,17 @@ namespace awl
 
     void StdStreamLogger::delay()
     {
-        clearDelayed();
+        std::lock_guard lock(_state->mutex);
+
+        _state->delayedOutput.str(String());
+        _state->delayedOutput.clear();
         _state->delayed = true;
     }
 
     void StdStreamLogger::flushDelayed()
     {
+        std::lock_guard lock(_state->mutex);
+
         _state->delayed = false;
 
         const String output = _state->delayedOutput.str();
@@ -107,6 +114,8 @@ namespace awl
 
     void StdStreamLogger::clearDelayed()
     {
+        std::lock_guard lock(_state->mutex);
+
         _state->delayed = false;
         _state->delayedOutput.str(String());
         _state->delayedOutput.clear();
@@ -162,13 +171,16 @@ namespace awl
             << message.str()
             << _T('\n');
 
+        const String output = temp_out.str();
+        std::lock_guard lock(_state->mutex);
+
         if (_state->delayed)
         {
-            _state->delayedOutput << temp_out.str();
+            _state->delayedOutput << output;
             return;
         }
 
-        *_state->out << temp_out.str();
+        *_state->out << output;
         _state->out->flush();
 
         if (!*_state->out)
