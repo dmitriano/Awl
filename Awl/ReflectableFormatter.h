@@ -35,9 +35,21 @@ namespace std
 
             awl::for_each_index(tuple, [&out, &sep](const auto& field, auto index)
             {
-                static constexpr auto format_string = awl::string_from_ascii<CharT>("{}={}");
+                out << sep;
 
-                out << sep << std::format(format_string, T::member_names()[index], field);
+                // GCC 13.3 requires a string literal and does not compile this.
+                // static constexpr auto format_string = awl::string_from_ascii<CharT>("{}={}");
+                // out << sep << std::format(format_string, T::member_names()[index], field);
+
+                // So we can't avoid code duplication with std::format.
+                if constexpr (std::same_as<CharT, char>)
+                {
+                    out << std::format("{}={}", T::member_names()[index], field);
+                }
+                else if constexpr (std::same_as<CharT, wchar_t>)
+                {
+                    out << std::format(L"{}={}", T::member_names()[index], field);
+                }
             });
 
             out << static_cast<CharT>('}');

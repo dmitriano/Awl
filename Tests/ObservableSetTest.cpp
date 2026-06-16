@@ -233,5 +233,5 @@ AWL_TEST(ObservableSetUnorderedStdInterface)
 
     AWL_ASSERT_EQUAL(size_t(4), recorder.added.size());
     AWL_ASSERT_EQUAL(size_t(1), recorder.removed.size());
-    AWL_ASSERT_EQUAL(1, recorder.clearing_count);
+    AWL_ASSERT_EQUAL(size_t(1), recorder.clearing_count);
 }
