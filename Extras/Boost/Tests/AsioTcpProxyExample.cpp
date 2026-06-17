@@ -643,6 +643,7 @@ namespace
         std::shared_ptr<TlsClientSessionCache> tls_client_session_cache,
         std::shared_ptr<UpstreamConcurrencyLimiter> upstream_concurrency_limiter,
         std::shared_ptr<ProxyStats> stats,
+        bool client_handshake_completed,
         const std::string& target_host,
         const std::string& target_port,
         unsigned int max_upstream_waiters,
@@ -796,12 +797,19 @@ namespace
                 }
             };
 
-            using namespace boost::asio::experimental::awaitable_operators;
+            if (client_handshake_completed)
+            {
+                co_await connect_server();
+            }
+            else
+            {
+                using namespace boost::asio::experimental::awaitable_operators;
 
-            // The proxy can connect to DC while the client-side TLS handshake is in progress.
-            co_await(
-                client_ssl.async_handshake(ssl::stream_base::server, asio::use_awaitable)
-                && connect_server());
+                // The proxy can connect to DC while the client-side TLS handshake is in progress.
+                co_await(
+                    client_ssl.async_handshake(ssl::stream_base::server, asio::use_awaitable)
+                    && connect_server());
+            }
 
             co_await bidirectional_transfer(client_ssl, server_ssl, context);
         }
@@ -872,6 +880,7 @@ namespace
         unsigned int max_upstream_waiters,
         unsigned int upstream_handshake_timeout_ms,
         SocketOptions socket_options,
+        bool handshake_in_accept_loop,
         const awl::testing::TestContext& context)
     {
         try
@@ -890,6 +899,36 @@ namespace
 
                 ssl::stream<tcp::socket> client_ssl(std::move(sock), *client_ctx);
 
+                if (handshake_in_accept_loop)
+                {
+                    try
+                    {
+                        co_await client_ssl.async_handshake(ssl::stream_base::server, asio::use_awaitable);
+                    }
+                    catch (const boost::system::system_error& e)
+                    {
+                        count_network_exception(e.code(), stats);
+                        if (
+                            e.code() == boost::system::errc::operation_canceled
+                            || e.code() == boost::asio::error::operation_aborted
+                            || e.code() == boost::asio::error::connection_reset
+                            || e.code() == boost::asio::ssl::error::stream_truncated)
+                        {
+                            context.logger->trace(
+                                _T("runProxy: client TLS handshake in accept loop failed: {}"),
+                                awl::fromACString(e.what()));
+                        }
+                        else
+                        {
+                            context.logger->error(
+                                _T("runProxy: client TLS handshake in accept loop failed: {}"),
+                                awl::fromACString(e.what()));
+                        }
+                        close_socket(client_ssl.next_layer());
+                        continue;
+                    }
+                }
+
                 // Launch a background coroutine to handle the client
                 co_spawn(
                     session_exec,
@@ -899,6 +938,7 @@ namespace
                         tls_client_session_cache,
                         upstream_concurrency_limiter,
                         stats,
+                        handshake_in_accept_loop,
                         target_host,
                         target_port,
                         max_upstream_waiters,
@@ -943,6 +983,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     AWL_ATTRIBUTE(unsigned int, max_upstream_waiters, 50);
     AWL_ATTRIBUTE(unsigned int, upstream_handshake_timeout_ms, 3000);
     AWL_FLAG(full_handshake);
+    AWL_FLAG(handshake_in_accept_loop);
 
     const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
 
@@ -996,6 +1037,7 @@ AWL_EXAMPLE(AsioTcpProxy)
             max_upstream_waiters,
             upstream_handshake_timeout_ms,
             socket_options,
+            handshake_in_accept_loop,
             context),
         asio::detached);
 
