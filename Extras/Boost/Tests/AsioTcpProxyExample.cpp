@@ -751,7 +751,10 @@ namespace
                     }
 
                     set_socket_options(server_ssl.next_layer(), socket_options, context, "server socket");
-                    tls_client_session_cache->apply(server_ssl, context);
+                    if (tls_client_session_cache)
+                    {
+                        tls_client_session_cache->apply(server_ssl, context);
+                    }
 
                     if (upstream_cancellation_signal)
                     {
@@ -766,7 +769,10 @@ namespace
                         co_await server_ssl.async_handshake(ssl::stream_base::client, asio::use_awaitable);
                     }
 
-                    tls_client_session_cache->store(server_ssl, context);
+                    if (tls_client_session_cache)
+                    {
+                        tls_client_session_cache->store(server_ssl, context);
+                    }
                 }
                 catch (...)
                 {
@@ -936,6 +942,7 @@ AWL_EXAMPLE(AsioTcpProxy)
     AWL_ATTRIBUTE(unsigned int, upstream_concurrency_limit, 200);
     AWL_ATTRIBUTE(unsigned int, max_upstream_waiters, 50);
     AWL_ATTRIBUTE(unsigned int, upstream_handshake_timeout_ms, 3000);
+    AWL_FLAG(full_handshake);
 
     const SocketOptions socket_options{ tcp_nodelay, linger, linger_timeout };
 
@@ -962,7 +969,8 @@ AWL_EXAMPLE(AsioTcpProxy)
     std::shared_ptr<ssl::context> server_ctx = std::make_shared<ssl::context>(ssl::context::tlsv12_client);
     server_ctx->set_default_verify_paths();
     SSL_CTX_set_session_cache_mode(server_ctx->native_handle(), SSL_SESS_CACHE_CLIENT);
-    std::shared_ptr<TlsClientSessionCache> tls_client_session_cache = std::make_shared<TlsClientSessionCache>();
+    std::shared_ptr<TlsClientSessionCache> tls_client_session_cache =
+        full_handshake ? nullptr : std::make_shared<TlsClientSessionCache>();
     std::shared_ptr<ProxyStats> stats = std::make_shared<ProxyStats>();
 
     auto pos = target.find(':');
