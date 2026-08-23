@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <tuple>
-
 #include "Awl/TupleHelpers.h"
 #include "Awl/CompositeCompare.h"
+
+#include <tuple>
 
 namespace awl
 {
@@ -80,7 +80,7 @@ namespace awl
             }
             else
             {
-                auto& comp = std::get<Index>(compositeComare.m_comps);
+                auto& comp = std::get<Index>(compositeComare._comps);
 
                 auto& right = std::get<Index>(right_key);
 
@@ -109,7 +109,7 @@ namespace awl
             }
             else
             {
-                auto& comp = std::get<Index>(compositeComare.m_comps);
+                auto& comp = std::get<Index>(compositeComare._comps);
 
                 auto& left = std::get<Index>(left_key);
 

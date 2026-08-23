@@ -8,7 +8,9 @@
 #include "Awl/String.h"
 
 #include <exception>
+#include <string>
 #include <typeinfo>
+#include <utility>
 
 namespace awl
 {
@@ -40,17 +42,21 @@ namespace awl
     {
     protected:
 
-        const String theMessage;
+        const String _message;
 
     public:
 
-        explicit GeneralException(String message) : theMessage(message)
-        {
-        }
+        explicit GeneralException(std::string message) :
+            _message(fromAString(std::move(message)))
+        {}
+
+        explicit GeneralException(std::wstring message) :
+            _message(fromWString(std::move(message)))
+        {}
 
         String message() const override
         {
-            return theMessage;
+            return _message;
         }
     };
 }
@@ -59,7 +65,8 @@ namespace awl
     class DerivedClass : public BaseClass \
     { \
         public: \
-        DerivedClass(awl::String message) : BaseClass(message) {} \
+        explicit DerivedClass(std::string message) : BaseClass(std::move(message)) {} \
+        explicit DerivedClass(std::wstring message) : BaseClass(std::move(message)) {} \
     };
 
 #define AWL_DEFINE_EXCEPTION(ExceptionClass) AWL_DEFINE_DERIVED_EXCEPTION(ExceptionClass, awl::GeneralException)

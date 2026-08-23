@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Tests/VtsData.h"
+
 #include "Awl/Io/Vts.h"
 #include "Awl/Io/PlainReader.h"
 #include "Awl/Io/MeasureStream.h"
@@ -12,7 +14,6 @@
 #include "Awl/StopWatch.h"
 #include "Awl/IntRange.h"
 #include "Awl/StringFormat.h"
-#include "Tests/VtsData.h"
 
 #include <chrono>
 #include <tuple>

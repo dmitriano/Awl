@@ -15,13 +15,13 @@ bool AtomicStorage::load(Value& val)
 {
     wait();
 
-    bool backup_success = loadFromFile(val, m_backup, LogLevel::Debug);
+    bool backup_success = loadFromFile(val, _backup, LogLevel::Debug);
 
     if (backup_success)
     {
-        m_logger.warning(_T("The settings have been loaded from backup file '{}'."), m_backup.fileName());
+        _logger->warning(_T("The settings have been loaded from backup file '{}'."), _backup.fileName());
 
-        writeToStream(m_s, val);
+        writeToStream(_s, val);
     }
 
     clearBackup();
@@ -33,7 +33,7 @@ bool AtomicStorage::load(Value& val)
 
     //No need to reset the data after unsuccessful read because Serializable::read should do std::mvoe in its implementation.
 
-    bool master_success = loadFromFile(val, m_s, LogLevel::Warning);
+    bool master_success = loadFromFile(val, _s, LogLevel::Warning);
 
     return master_success;
 }
@@ -65,10 +65,10 @@ void AtomicStorage::startSaveLocked(const Value& val, IMutex& mutex)
 
     wait();
 
-    m_saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::writeSnapshotsAndClearBackup, this, std::move(snapshot)));
+    _saveFuture = std::async(std::launch::async, std::bind(&AtomicStorage::writeSnapshotsAndClearBackup, this, std::move(snapshot)));
 }
 
-bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, std::string level)
+bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, const std::string level)
 {
     bool success = false;
 
@@ -82,25 +82,25 @@ bool AtomicStorage::loadFromFile(Value& val, awl::io::UniqueStream& s, std::stri
         }
         else
         {
-            m_logger.log(level, "Some data at the end of the settings file remained unread.");
+            _logger->log(level, "Some data at the end of the settings file remained unread.");
         }
     }
     catch (const awl::io::CorruptionException&)
     {
-        m_logger.log(level, std::format(_T("Corrupted settings file '{}'."), s.fileName()));
+        _logger->log(level, std::format(_T("Corrupted settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::EndOfFileException&)
     {
-        m_logger.log(level, std::format(_T("Unexpected end of settings file '{}'."), s.fileName()));
+        _logger->log(level, std::format(_T("Unexpected end of settings file '{}'."), s.fileName()));
     }
     catch (const awl::io::TypeMismatchException& e)
     {
-        m_logger.log(level, std::format(_T("Type mismatch error {} in the settings file '{}' Did you include all the types including those that were removed ? ."),
+        _logger->log(level, std::format(_T("Type mismatch error {} in the settings file '{}' Did you include all the types including those that were removed ? ."),
             e.message(), s.fileName()));
     }
     catch (const awl::io::IoException& e)
     {
-        m_logger.log(level, std::format(_T("General IO exception in '{}': {}"), s.fileName(), e.message()));
+        _logger->log(level, std::format(_T("General IO exception in '{}': {}"), s.fileName(), e.message()));
     }
 
     return success;

@@ -14,35 +14,34 @@ namespace awl
     {
     public:
 
-        basic_separator(C ch) : m_sep(1, ch)
+        basic_separator(C ch) : _sep(1, ch)
         {
-            m_sep += ' ';
+            _sep += ' ';
         }
 
-        basic_separator(std::basic_string<C> s) : m_sep(s)
-        {
-        }
+        basic_separator(std::basic_string<C> s) : _sep(s)
+        {}
 
         bool first() const
         {
-            return m_first;
+            return _first;
         }
 
         void hlop()
         {
-            m_first = false;
+            _first = false;
         }
 
         const std::basic_string<C>& content()
         {
-            return m_sep;
+            return _sep;
         }
 
     private:
 
-        std::basic_string<C> m_sep;
+        std::basic_string<C> _sep;
         
-        bool m_first = true;
+        bool _first = true;
     };
 
     template <class C>

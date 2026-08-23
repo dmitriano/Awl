@@ -1,16 +1,15 @@
 #pragma once
 
-#pragma once
-
-#include "Awl/Coro/TaskPool.h"
+#include "Awl/Coro/JobGroup.h"
 #include "Awl/Coro/TaskSink.h"
-#include "Awl/Coro/UpdateTask.h"
+#include "Awl/Coro/Job.h"
 #include "Awl/Observable.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/MemFn.h"
 
 #include <vector>
 
-namespace awl
+namespace awl::coro
 {
     template <class Key, class Value>
     class TaskMap : public awl::Observable<MappedTaskSink<Key, Value>>
@@ -22,27 +21,27 @@ namespace awl
         {
             Handler(TaskMap* p_this, Key key, Value value) :
                 pThis(p_this),
-                m_key(std::move(key)),
-                m_value(std::move(value))
+                _key(std::move(key)),
+                _value(std::move(value))
             {}
 
             TaskMap* pThis;
 
-            Key m_key;
+            Key _key;
 
-            Value m_value;
+            Value _value;
 
             void onFinished() override
             {
-                const std::size_t index = this - pThis->m_handlers.data();
+                const std::size_t index = this - pThis->_handlers.data();
 
-                assert(index < pThis->m_handlers.size());
+                assert(index < pThis->_handlers.size());
 
-                Key temp_key = std::move(m_key);
+                Key temp_key = std::move(_key);
 
-                Value temp_value = std::move(m_value);
+                Value temp_value = std::move(_value);
 
-                pThis->m_handlers.erase(pThis->m_handlers.begin() + index);
+                pThis->_handlers.erase(pThis->_handlers.begin() + index);
 
                 pThis->notify(&MappedTaskSink<Key, Value>::onFinished, temp_key, temp_value);
             }
@@ -52,58 +51,58 @@ namespace awl
 
     public:
 
-        void spawn(UpdateTask&& task, Key key, Value value)
+        void spawn(Job&& task, Key key, Value value)
         {
-            // A couroutine has executed as a regular function.
+            // A coroutine has executed as a regular function.
             if (!task.done())
             {
                 assert(!contains(key));
 
-                m_handlers.emplace_back(this, std::move(key), std::move(value));
+                _handlers.emplace_back(this, std::move(key), std::move(value));
 
-                Handler& handler = m_handlers.back();
+                Handler& handler = _handlers.back();
 
                 task.subscribe(&handler);
             }
 
-            m_pool.spawn(std::move(task));
+            _jobs.spawn(std::move(task));
         }
 
         std::size_t task_count() const
         {
-            return m_pool.task_count();
+            return _jobs.task_count();
         }
 
         bool empty() const
         {
-            return m_pool.empty();
+            return _jobs.empty();
         }
 
         void cancel()
         {
-            m_pool.cancel();
+            _jobs.cancel();
         }
 
         auto wait_all()
         {
-            return m_pool.wait_all();
+            return _jobs.wait_all();
         }
 
         auto wait_any()
         {
-            return m_pool.wait_any();
+            return _jobs.wait_any();
         }
 
         const Value* find(const Key& key) const
         {
-            auto i = std::ranges::find_if(m_handlers, awl::mem_fn_equal_to(&Handler::m_key, key));
+            auto i = std::ranges::find_if(_handlers, awl::mem_fn_equal_to(&Handler::_key, key));
 
-            if (i == m_handlers.end())
+            if (i == _handlers.end())
             {
                 return nullptr;
             }
 
-            return std::addressof(i->m_value);
+            return std::addressof(i->_value);
         }
 
         bool contains(const Key& key) const
@@ -113,20 +112,20 @@ namespace awl
 
         auto keys() const
         {
-            return m_handlers | std::views::transform([](const Handler& h) -> const Key& { return h.m_key; });
+            return _handlers | std::views::transform([](const Handler& h) -> const Key& { return h._key; });
         }
 
         auto elements() const
         {
-            return m_handlers | std::views::transform([](const Handler& h) { return std::make_pair(h.m_key, h.m_value); });
+            return _handlers | std::views::transform([](const Handler& h) { return std::make_pair(h._key, h._value); });
         }
 
     private:
 
-        TaskPool m_pool;
+        JobGroup _jobs;
 
-        // The tasks remove themself automatically from the vector
+        // The tasks remove themselves automatically from the vector
         // when their promises are destroyed.
-        std::vector<Handler> m_handlers;
+        std::vector<Handler> _handlers;
     };
 }

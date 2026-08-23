@@ -21,19 +21,17 @@ namespace awl
     {
     public:
         
-        constexpr unique_ptr() noexcept : m_p(nullptr)
-        {
-        }
+        constexpr unique_ptr() noexcept : _p(nullptr)
+        {}
 
-        explicit constexpr unique_ptr(T * p) noexcept : m_p(p)
-        {
-        }
+        explicit constexpr unique_ptr(T * p) noexcept : _p(p)
+        {}
 
         unique_ptr(const unique_ptr& other) = delete;
 
-        constexpr unique_ptr(unique_ptr&& other) noexcept : m_p(other.m_p)
+        constexpr unique_ptr(unique_ptr&& other) noexcept : _p(other._p)
         {
-            other.m_p = nullptr;
+            other._p = nullptr;
         }
 
         constexpr ~unique_ptr()
@@ -43,7 +41,7 @@ namespace awl
 
         constexpr bool operator == (const unique_ptr& other) const noexcept
         {
-            return m_p == other.m_p;
+            return _p == other._p;
         }
 
         constexpr bool operator != (const unique_ptr& other) const noexcept
@@ -53,7 +51,7 @@ namespace awl
 
         constexpr bool operator == (const T* p) const noexcept
         {
-            return m_p == p;
+            return _p == p;
         }
 
         constexpr bool operator != (const T* p) const noexcept
@@ -65,45 +63,45 @@ namespace awl
 
         constexpr unique_ptr& operator=(unique_ptr&& other) noexcept
         {
-            reset(other.m_p);
+            reset(other._p);
 
-            other.m_p = nullptr;
+            other._p = nullptr;
 
             return *this;
         }
 
         constexpr T& operator*() const noexcept
         {
-            return *m_p;
+            return *_p;
         }
 
         constexpr T* operator->() const noexcept
         {
-            return m_p;
+            return _p;
         }
 
         constexpr operator bool() const noexcept
         {
-            return m_p != nullptr;
+            return _p != nullptr;
         }
 
         constexpr T* get() const noexcept
         {
-            return m_p;
+            return _p;
         }
 
         constexpr void reset(T* p) noexcept
         {
             destroy();
 
-            m_p = p;
+            _p = p;
         }
         
         constexpr T* release() noexcept
         {
-            T* saved_p = m_p;
+            T* saved_p = _p;
 
-            m_p = nullptr;
+            _p = nullptr;
             
             return saved_p;
         }
@@ -112,10 +110,10 @@ namespace awl
         
         constexpr void destroy() noexcept
         {
-            delete m_p;
+            delete _p;
         }
 
-        T* m_p;
+        T* _p;
     };
 
     template <class T, class... Args>

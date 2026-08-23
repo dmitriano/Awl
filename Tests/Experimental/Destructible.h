@@ -56,22 +56,21 @@ namespace awl
         }
 
         ~Destructible()
-        {
-        }
+        {}
     
     private:
         
         T * get()
         {
-            return launder_cast<T>(&m_storage);
+            return launder_cast<T>(&_storage);
         }
 
         void * address()
         {
-            return address_cast(m_storage);
+            return address_cast(_storage);
         }
 
         //Properly aligned uninitialized storage for T.
-        alignas(alignof(T)) uint8_t m_storage[sizeof(T)];
+        alignas(alignof(T)) uint8_t _storage[sizeof(T)];
     };
 }

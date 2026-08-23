@@ -41,8 +41,6 @@ namespace
         {
             std::cout << "runner(): caught unknown exception\n";
         }
-
-        co_return;
     }
 
     awaitable<void> runner2(asio::io_context& io)
@@ -63,8 +61,6 @@ namespace
         {
             std::cout << "runner(): caught unknown exception\n";
         }
-
-        co_return;
     }
 }
 

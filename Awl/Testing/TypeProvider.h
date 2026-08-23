@@ -24,15 +24,15 @@ namespace awl::testing
         {
             using Value = std::decay_t<T>;
 
-            const auto it = std::ranges::find(m_values, typeid(Value), &std::any::type);
+            const auto it = std::ranges::find(_values, typeid(Value), &std::any::type);
 
-            if (it != m_values.end())
+            if (it != _values.end())
             {
                 *it = std::forward<T>(val);
                 return;
             }
 
-            m_values.emplace_back(std::forward<T>(val));
+            _values.emplace_back(std::forward<T>(val));
         }
 
         template <class T>
@@ -56,9 +56,9 @@ namespace awl::testing
         {
             using Value = std::decay_t<T>;
 
-            const auto it = std::ranges::find(m_values, typeid(Value), &std::any::type);
+            const auto it = std::ranges::find(_values, typeid(Value), &std::any::type);
 
-            if (it != m_values.end())
+            if (it != _values.end())
             {
                 val = std::any_cast<const Value&>(*it);
                 return true;
@@ -67,7 +67,7 @@ namespace awl::testing
             return false;
         }
 
-        std::vector<std::any> m_values;
+        std::vector<std::any> _values;
 
         friend class TypeProviderTest;
     };

@@ -25,9 +25,9 @@ namespace awl
         {
             T* p;
             
-            if (!m_free.empty())
+            if (!_free.empty())
             {
-                p = m_free.pop_front();
+                p = _free.pop_front();
             }
             else
             {
@@ -39,23 +39,23 @@ namespace awl
 
         std::shared_ptr<T> add(T* p)
         {
-            m_used.push_back(p);
+            _used.push_back(p);
 
             return makePointer(p);
         }
 
         ~object_pool()
         {
-            assert(m_used.empty());
+            assert(_used.empty());
 
             clear();
         }
 
         void clear()
         {
-            while (!m_free.empty())
+            while (!_free.empty())
             {
-                delete m_free.pop_front();
+                delete _free.pop_front();
             }
         }
 
@@ -67,9 +67,9 @@ namespace awl
 
             void operator () (T* p)
             {
-                p_this->m_used.erase(p);
+                p_this->_used.erase(p);
                 //p->pooled_object::exclude();
-                p_this->m_free.push_back(p);
+                p_this->_free.push_back(p);
                 p->finalize();
             }
         };
@@ -88,8 +88,8 @@ namespace awl
 
         using List = awl::quick_list<T, pooled_object_link>;
         
-        List m_free;
-        List m_used;
+        List _free;
+        List _used;
     };
 
     template <class T>

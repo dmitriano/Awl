@@ -3,11 +3,12 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <set>
-
 #include "Awl/Testing/Formatter.h"
 #include "Awl/Testing/UnitTest.h"
+
+#include <vector>
+#include <set>
+#include <optional>
 
 using namespace awl;
 using namespace awl::testing;
@@ -104,4 +105,26 @@ AWL_TEST(Formatter_Arithmetic)
     Formatter<float>();
     Formatter<double>();
     Formatter<long double>();
+}
+
+template <class C>
+static void TestOptional()
+{
+    using F = BasicFormatter<C, std::optional<int>>;
+    using TString = std::basic_string<C>;
+
+    AWL_ASSERT(!F::fromString(TString(StringConvertor<C>::convertFrom("null"))));
+    AWL_ASSERT(!F::fromString(TString(StringConvertor<C>::convertFrom("NULL"))));
+    AWL_ASSERT(F::fromString(TString(StringConvertor<C>::convertFrom("42"))) == std::optional<int>{ 42 });
+
+    AWL_ASSERT(F::toString(std::optional<int>{}) == TString(StringConvertor<C>::convertFrom("null")));
+    AWL_ASSERT(F::toString(std::optional<int>{ 42 }) == TString(StringConvertor<C>::convertFrom("42")));
+}
+
+AWL_TEST(Formatter_Optional)
+{
+    AWL_UNUSED_CONTEXT;
+
+    TestOptional<char>();
+    TestOptional<awl::Char>();
 }

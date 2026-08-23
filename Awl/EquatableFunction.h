@@ -42,7 +42,7 @@ namespace awl
 
             explicit operator bool() const noexcept
             {
-                return m_invocable != nullptr;
+                return _invocable != nullptr;
             }
 
             Result operator()(Args... args) const
@@ -54,22 +54,21 @@ namespace awl
 
             Result invoke(Args... args) const
             {
-                if (!m_invocable)
+                if (!_invocable)
                 {
                     throw std::bad_function_call();
                 }
 
-                return m_invocable->invoke_locked(m_owner, std::forward<Args>(args)...);
+                return _invocable->invoke_locked(_owner, std::forward<Args>(args)...);
             }
 
             invocation_guard(const Invocable* p_invocable, std::shared_ptr<void> owner)
-                : m_invocable(p_invocable)
-                , m_owner(std::move(owner))
-            {
-            }
+                : _invocable(p_invocable)
+                , _owner(std::move(owner))
+            {}
 
-            const Invocable* m_invocable = nullptr;
-            std::shared_ptr<void> m_owner;
+            const Invocable* _invocable = nullptr;
+            std::shared_ptr<void> _owner;
 
             friend equatable_function;
         };
@@ -77,29 +76,16 @@ namespace awl
         equatable_function() = default;
 
         equatable_function(std::nullptr_t) noexcept
-        {
-        }
+        {}
 
-        equatable_function(const equatable_function& other)
-        {
-            copy_from(other);
-        }
+        equatable_function(const equatable_function& other) = delete;
 
         equatable_function(equatable_function&& other) noexcept
         {
             move_from(std::move(other));
         }
 
-        equatable_function& operator=(const equatable_function& other)
-        {
-            if (this != std::addressof(other))
-            {
-                reset();
-                copy_from(other);
-            }
-
-            return *this;
-        }
+        equatable_function& operator=(const equatable_function& other) = delete;
 
         equatable_function& operator=(equatable_function&& other) noexcept
         {
@@ -153,56 +139,56 @@ namespace awl
             emplace_invocable<ErasedWeak<decltype(member)>>(std::move(p_object), member);
         }
 
-        equatable_function(std::uint64_t id, std::function<Result(Args...)> func)
+        equatable_function(std::uint64_t id, std::move_only_function<Result(Args...)> func)
         {
             emplace_invocable<ErasedLambda>(id, std::move(func));
         }
 
         Result operator()(Args... args) const
         {
-            if (!m_invocable)
+            if (!_invocable)
             {
                 throw std::bad_function_call();
             }
 
-            return m_invocable->invoke(std::forward<Args>(args)...);
+            return _invocable->invoke(std::forward<Args>(args)...);
         }
 
         [[nodiscard]] invocation_guard lock() const noexcept
         {
-            if (!m_invocable)
+            if (!_invocable)
             {
                 return {};
             }
 
             std::shared_ptr<void> owner;
 
-            if (!m_invocable->try_lock(owner))
+            if (!_invocable->try_lock(owner))
             {
                 return {};
             }
 
-            return invocation_guard(m_invocable, std::move(owner));
+            return invocation_guard(_invocable, std::move(owner));
         }
 
         explicit operator bool() const noexcept
         {
-            return static_cast<bool>(m_invocable);
+            return static_cast<bool>(_invocable);
         }
 
         std::size_t hash() const noexcept
         {
-            return m_invocable ? m_invocable->hash() : std::hash<std::size_t>{}(0u);
+            return _invocable ? _invocable->hash() : std::hash<std::size_t>{}(0u);
         }
 
         friend bool operator==(const equatable_function& left, const equatable_function& right) noexcept
         {
-            if (!left.m_invocable || !right.m_invocable)
+            if (!left._invocable || !right._invocable)
             {
-                return !left.m_invocable && !right.m_invocable;
+                return !left._invocable && !right._invocable;
             }
 
-            return left.m_invocable->equals(*right.m_invocable);
+            return left._invocable->equals(*right._invocable);
         }
 
         friend bool operator!=(const equatable_function& left, const equatable_function& right) noexcept
@@ -235,7 +221,6 @@ namespace awl
             virtual bool equals(const Invocable& other) const noexcept = 0;
             virtual std::size_t hash() const noexcept = 0;
             virtual void destroy() noexcept = 0;
-            virtual Invocable* clone_to(void* p_storage) const = 0;
             virtual Invocable* move_to(void* p_storage) noexcept = 0;
         };
 
@@ -264,11 +249,6 @@ namespace awl
             void destroy() noexcept override
             {
                 static_cast<Derived*>(this)->~Derived();
-            }
-
-            Invocable* clone_to(void* p_storage) const override
-            {
-                return ::new (p_storage) Derived(static_cast<const Derived&>(*this));
             }
 
             Invocable* move_to(void* p_storage) noexcept override
@@ -338,31 +318,30 @@ namespace awl
         {
         public:
 
-            ErasedLambda(std::uint64_t id, std::function<Result(Args...)> func)
-                : m_id(id)
-                , m_func(std::move(func))
-            {
-            }
+            ErasedLambda(std::uint64_t id, std::move_only_function<Result(Args...)> func)
+                : _id(id)
+                , _func(std::move(func))
+            {}
 
             bool operator==(const ErasedLambda& other) const noexcept
             {
-                return m_id == other.m_id;
+                return _id == other._id;
             }
 
             Result invoke(Args... args) const override
             {
-                return std::invoke(m_func, std::forward<Args>(args)...);
+                return std::invoke(_func, std::forward<Args>(args)...);
             }
 
             std::size_t hash() const noexcept override
             {
-                return std::hash<std::uint64_t>{}(m_id);
+                return std::hash<std::uint64_t>{}(_id);
             }
 
         private:
 
-            std::uint64_t m_id = 0;
-            mutable std::function<Result(Args...)> m_func;
+            std::uint64_t _id = 0;
+            mutable std::move_only_function<Result(Args...)> _func;
         };
 
         template <class Member>
@@ -376,31 +355,30 @@ namespace awl
             using WeakPtr = std::weak_ptr<WeakObject>;
 
             ErasedWeak(WeakPtr p_object, Member member)
-                : m_object(std::move(p_object))
-                , m_member(member)
-            {
-            }
+                : _object(std::move(p_object))
+                , _member(member)
+            {}
 
             bool operator==(const ErasedWeak& other) const
             {
-                return object_ptr() == other.object_ptr() && m_member == other.m_member;
+                return object_ptr() == other.object_ptr() && _member == other._member;
             }
 
             Result invoke(Args... args) const override
             {
-                std::shared_ptr<WeakObject> p_object = m_object.lock();
+                std::shared_ptr<WeakObject> p_object = _object.lock();
 
                 if (!p_object)
                 {
                     throw std::bad_function_call();
                 }
 
-                return std::invoke(m_member, p_object.get(), std::forward<Args>(args)...);
+                return std::invoke(_member, p_object.get(), std::forward<Args>(args)...);
             }
             
             bool try_lock(std::shared_ptr<void>& owner) const noexcept override
             {
-                owner = m_object.lock();
+                owner = _object.lock();
                 return static_cast<bool>(owner);
             }
 
@@ -413,23 +391,24 @@ namespace awl
                     throw std::bad_function_call();
                 }
 
-                return std::invoke(m_member, p_object, std::forward<Args>(args)...);
+                return std::invoke(_member, p_object, std::forward<Args>(args)...);
             }
 
             std::size_t hash() const noexcept override
             {
-                return InvocableImpl<ErasedWeak<Member>>::template compute_hash<Object>(object_ptr(), m_member);
+                return InvocableImpl<ErasedWeak<Member>>::template compute_hash<Object>(object_ptr(), _member);
             }
 
         private:
+
             const void* object_ptr() const noexcept
             {
-                std::shared_ptr<WeakObject> p_locked = m_object.lock();
+                std::shared_ptr<WeakObject> p_locked = _object.lock();
                 return p_locked ? static_cast<const void*>(p_locked.get()) : nullptr;
             }
 
-            WeakPtr m_object;
-            Member m_member{};
+            WeakPtr _object;
+            Member _member{};
         };
 
         template <class Member>
@@ -443,37 +422,36 @@ namespace awl
             using SharedPtr = std::shared_ptr<SharedObject>;
 
             ErasedShared(SharedPtr p_object, Member member)
-                : m_object(std::move(p_object))
-                , m_member(member)
-            {
-            }
+                : _object(std::move(p_object))
+                , _member(member)
+            {}
 
             bool operator==(const ErasedShared& other) const = default;
 
             Result invoke(Args... args) const override
             {
-                if (!m_object)
+                if (!_object)
                 {
                     throw std::bad_function_call();
                 }
 
-                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
+                return std::invoke(_member, _object, std::forward<Args>(args)...);
             }
 
             std::size_t hash() const noexcept override
             {
-                if (!m_object)
+                if (!_object)
                 {
                     return std::hash<std::size_t>{}(0u);
                 }
 
-                return InvocableImpl<ErasedShared<Member>>::template compute_hash<Object>(static_cast<const void*>(m_object.get()), m_member);
+                return InvocableImpl<ErasedShared<Member>>::template compute_hash<Object>(static_cast<const void*>(_object.get()), _member);
             }
 
         private:
 
-            SharedPtr m_object;
-            Member m_member{};
+            SharedPtr _object;
+            Member _member{};
         };
 
         template <class Member>
@@ -486,27 +464,26 @@ namespace awl
             using ObjectPtr = typename Traits::object_ptr;
 
             ErasedMember(ObjectPtr p_object, Member member)
-                : m_object(p_object)
-                , m_member(member)
-            {
-            }
+                : _object(p_object)
+                , _member(member)
+            {}
 
             bool operator==(const ErasedMember& other) const = default;
 
             Result invoke(Args... args) const override
             {
-                return std::invoke(m_member, m_object, std::forward<Args>(args)...);
+                return std::invoke(_member, _object, std::forward<Args>(args)...);
             }
 
             std::size_t hash() const noexcept override
             {
-                return InvocableImpl<ErasedMember<Member>>::template compute_hash<Object>(static_cast<const void*>(m_object), m_member);
+                return InvocableImpl<ErasedMember<Member>>::template compute_hash<Object>(static_cast<const void*>(_object), _member);
             }
 
         private:
 
-            ObjectPtr m_object = nullptr;
-            Member m_member{};
+            ObjectPtr _object = nullptr;
+            Member _member{};
         };
 
         struct HandleSample { void f() {} };
@@ -515,50 +492,42 @@ namespace awl
         // The last void* is vtable.
         static constexpr std::size_t member_storage_size =
             std::max(
-                sizeof(std::uint64_t) + sizeof(std::function<Result(Args...)>),
+                sizeof(std::uint64_t) + sizeof(std::move_only_function<Result(Args...)>),
                 std::max(
                     sizeof(std::weak_ptr<HandleSample>) + sizeof(void (HandleSample::*)()),
                     sizeof(std::shared_ptr<HandleSample>) + sizeof(void (HandleSample::*)()))) +
             sizeof(void*);
 
         static constexpr std::size_t storage_size = std::max(member_storage_size, sizeof(ErasedLambda));
-        alignas(std::max_align_t) std::byte m_storage[storage_size];
-        Invocable* m_invocable = nullptr;
+        alignas(std::max_align_t) std::byte _storage[storage_size];
+        Invocable* _invocable = nullptr;
 
         void* storage_ptr() noexcept
         {
-            return static_cast<void*>(m_storage);
+            return static_cast<void*>(_storage);
         }
 
         const void* storage_ptr() const noexcept
         {
-            return static_cast<const void*>(m_storage);
+            return static_cast<const void*>(_storage);
         }
 
         void reset() noexcept
         {
-            if (m_invocable != nullptr)
+            if (_invocable != nullptr)
             {
-                m_invocable->destroy();
-                m_invocable = nullptr;
-            }
-        }
-
-        void copy_from(const equatable_function& other)
-        {
-            if (other.m_invocable != nullptr)
-            {
-                m_invocable = other.m_invocable->clone_to(storage_ptr());
+                _invocable->destroy();
+                _invocable = nullptr;
             }
         }
 
         void move_from(equatable_function&& other) noexcept
         {
-            if (other.m_invocable != nullptr)
+            if (other._invocable != nullptr)
             {
-                m_invocable = other.m_invocable->move_to(storage_ptr());
-                other.m_invocable->destroy();
-                other.m_invocable = nullptr;
+                _invocable = other._invocable->move_to(storage_ptr());
+                other._invocable->destroy();
+                other._invocable = nullptr;
             }
         }
 
@@ -568,7 +537,7 @@ namespace awl
             static_assert(sizeof(T) <= storage_size);
             static_assert(alignof(T) <= alignof(std::max_align_t));
 
-            m_invocable = ::new (storage_ptr()) T(std::forward<Ts>(args)...);
+            _invocable = ::new (storage_ptr()) T(std::forward<Ts>(args)...);
         }
     };
 }

@@ -30,6 +30,7 @@ namespace awl::io
     class BasicSharedHandle
     {
     public:
+
         using handle_type = HANDLE;
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
@@ -37,38 +38,33 @@ namespace awl::io
 
         BasicSharedHandle() noexcept
             : BasicSharedHandle(null())
-        {
-        }
+        {}
 
         BasicSharedHandle(HANDLE h) noexcept
-            : m_h(h)
-            , m_deleter()
-            , m_duplicator()
-        {
-        }
+            : _h(h)
+            , _deleter()
+            , _duplicator()
+        {}
 
         BasicSharedHandle(HANDLE h, const deleter_type& deleter, const duplicator_type& duplicator)
             noexcept
-            : m_h(h)
-            , m_deleter(deleter)
-            , m_duplicator(duplicator)
-        {
-        }
+            : _h(h)
+            , _deleter(deleter)
+            , _duplicator(duplicator)
+        {}
 
         BasicSharedHandle(BasicSharedHandle&& other) noexcept
-            : m_h(other.release())
-            , m_deleter(other.m_deleter)
-            , m_duplicator(other.m_duplicator)
-        {
-        }
+            : _h(other.release())
+            , _deleter(other._deleter)
+            , _duplicator(other._duplicator)
+        {}
 
         BasicSharedHandle(const BasicSharedHandle& other)
             noexcept(duplicateNoexcept)
-            : m_h(other.duplicate(other.m_h))
-            , m_deleter(other.m_deleter)
-            , m_duplicator(other.m_duplicator)
-        {
-        }
+            : _h(other.duplicate(other._h))
+            , _deleter(other._deleter)
+            , _duplicator(other._duplicator)
+        {}
 
         ~BasicSharedHandle()
         {
@@ -81,9 +77,9 @@ namespace awl::io
             {
                 close();
 
-                m_h = other.release();
-                m_deleter = other.m_deleter;
-                m_duplicator = other.m_duplicator;
+                _h = other.release();
+                _deleter = other._deleter;
+                _duplicator = other._duplicator;
             }
 
             return *this;
@@ -93,13 +89,13 @@ namespace awl::io
         {
             if (this != &other)
             {
-                HANDLE h = other.duplicate(other.m_h);
+                HANDLE h = other.duplicate(other._h);
 
                 close();
 
-                m_h = h;
-                m_deleter = other.m_deleter;
-                m_duplicator = other.m_duplicator;
+                _h = h;
+                _deleter = other._deleter;
+                _duplicator = other._duplicator;
             }
 
             return *this;
@@ -107,32 +103,32 @@ namespace awl::io
 
         bool operator==(const BasicSharedHandle& other) const noexcept
         {
-            return m_h == other.m_h;
+            return _h == other._h;
         }
 
         HANDLE get() const noexcept
         {
-            return m_h;
+            return _h;
         }
 
         deleter_type& get_deleter() noexcept
         {
-            return m_deleter;
+            return _deleter;
         }
 
         const deleter_type& get_deleter() const noexcept
         {
-            return m_deleter;
+            return _deleter;
         }
 
         duplicator_type& get_duplicator() noexcept
         {
-            return m_duplicator;
+            return _duplicator;
         }
 
         const duplicator_type& get_duplicator() const noexcept
         {
-            return m_duplicator;
+            return _duplicator;
         }
 
         operator HANDLE() const noexcept
@@ -142,40 +138,41 @@ namespace awl::io
 
         operator bool() const noexcept
         {
-            return m_h != null();
+            return _h != null();
         }
 
         HANDLE release() noexcept
         {
-            HANDLE h = m_h;
+            HANDLE h = _h;
 
-            m_h = null();
+            _h = null();
 
             return h;
         }
 
         void reset(HANDLE h = null()) noexcept
         {
-            if (m_h == h)
+            if (_h == h)
             {
                 return;
             }
 
             close();
 
-            m_h = h;
+            _h = h;
         }
 
         void close() noexcept
         {
-            if (m_h != null())
+            if (_h != null())
             {
                 HANDLE h = release();
-                m_deleter(h);
+                _deleter(h);
             }
         }
 
     private:
+
         static constexpr bool duplicateNoexcept = std::is_nothrow_invocable_v<const duplicator_type&, HANDLE>;
 
         static HANDLE null() noexcept
@@ -183,9 +180,9 @@ namespace awl::io
             return null_getter_type::null();
         }
 
-        HANDLE m_h;
-        deleter_type m_deleter;
-        duplicator_type m_duplicator;
+        HANDLE _h;
+        deleter_type _deleter;
+        duplicator_type _duplicator;
 
         HANDLE duplicate(HANDLE h) const noexcept(duplicateNoexcept)
         {
@@ -194,7 +191,7 @@ namespace awl::io
                 return null();
             }
 
-            return m_duplicator(h);
+            return _duplicator(h);
         }
     };
 }

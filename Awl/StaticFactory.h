@@ -9,7 +9,10 @@
 #include "Awl/Exception.h"
 #include "Awl/StringFormat.h"
 
+#include <functional>
+#include <string_view>
 #include <type_traits>
+#include <utility>
 
 namespace awl
 {
@@ -19,7 +22,10 @@ namespace awl
     using FactoryFuncPtr = std::add_pointer_t<T(Args... args)>;
 
     template <class T, typename... Args>
-    T create(const char* name, Args&&... args)
+    using FactoryFunc = std::function<T(std::string_view, Args... args)>;
+
+    template <class T, typename... Args>
+    T create(std::string_view name, Args&&... args)
     {
         using FuncPtr = awl::FactoryFuncPtr<T, Args...>;
 
@@ -29,7 +35,7 @@ namespace awl
 
         if (p_link == nullptr)
         {
-            throw FactoryException(std::format(_T("Factory function '{}' not found."), awl::fromACString(name)));
+            throw FactoryException(std::format("Factory function '{}' not found.", name));
         }
 
         FuncPtr func = p_link->value();
@@ -45,6 +51,15 @@ namespace awl
     {
         using Link = awl::StaticLink<awl::FactoryFuncPtr<T, Args...>>;
     };
+
+    template <class T, typename... Args>
+    FactoryFunc<T, Args...> make_static_factory()
+    {
+        return [](std::string_view name, Args... args) -> T
+        {
+            return awl::create<T>(name, std::forward<Args>(args)...);
+        };
+    }
 }
 
 // Factory with parameters (signature is unknown).

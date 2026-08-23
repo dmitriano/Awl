@@ -1,8 +1,8 @@
 #include "stop_token.hpp"
+
 #include <iostream>
 #include <chrono>
 #include <cassert>
-
 
 void testStopTokenBasicAPI()
 {

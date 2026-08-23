@@ -13,7 +13,7 @@
 
 namespace std
 {
-    template <awl::is_sequential_enum T, class CharT>
+    template <awl::sequential_enum T, class CharT>
     struct formatter<T, CharT> : formatter<std::string, CharT>
     {
         template <class FormatContext>

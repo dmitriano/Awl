@@ -28,27 +28,27 @@ namespace awl
 
         public:
 
-            MemberList(const char* s) : m_v(getArgNames(s)) {}
+            MemberList(const char* s) : _v(getArgNames(s)) {}
 
             using const_reference = Vector::const_reference;
             using const_pointer = Vector::const_pointer;
             using const_iterator = Vector::const_iterator;
             using const_reverse_iterator = Vector::const_reverse_iterator;
 
-            const_iterator begin() const { return m_v.begin();}
-            const_iterator cbegin() const noexcept { return m_v.cbegin();}
+            const_iterator begin() const { return _v.begin();}
+            const_iterator cbegin() const noexcept { return _v.cbegin();}
 
-            const_iterator end() const { return m_v.end();}
-            const_iterator cend() const noexcept { return m_v.cend();}
+            const_iterator end() const { return _v.end();}
+            const_iterator cend() const noexcept { return _v.cend();}
 
             const_iterator find(const std::string& name) const
             {
-                return std::find(m_v.begin(), m_v.end(), name);
+                return std::find(_v.begin(), _v.end(), name);
             }
 
             const_iterator find_cstr(const char* name) const
             {
-                return std::find_if(m_v.begin(), m_v.end(), [name](const std::string& val)
+                return std::find_if(_v.begin(), _v.end(), [name](const std::string& val)
                 {
                     return std::strcmp(val.c_str(), name) == 0;
                 });
@@ -60,9 +60,9 @@ namespace awl
             {
                 const_iterator i = find(name);
 
-                if (i != m_v.end())
+                if (i != _v.end())
                 {
-                    return i - m_v.begin();
+                    return i - _v.begin();
                 }
 
                 return NotAnIndex;
@@ -70,12 +70,12 @@ namespace awl
 
             const_reference operator[](size_t pos) const
             {
-                return m_v[pos];
+                return _v[pos];
             }
 
             size_t size() const
             {
-                return m_v.size();
+                return _v.size();
             }
 
         private:
@@ -144,22 +144,15 @@ namespace awl
                 return v;
             }
 
-            Vector m_v;
+            Vector _v;
         };
     }
 
-    template <typename T, typename = void>
-    struct is_reflectable_impl : std::false_type {};
-
     template <typename T>
-    struct is_reflectable_impl<T, std::void_t<decltype(std::declval<T>().member_names())>> : std::true_type {};
-
-    // Hide an extra template parameter.
-    template <typename T>
-    struct is_reflectable : is_reflectable_impl<T> {};
-
-    template <typename T>
-    inline constexpr bool is_reflectable_v = is_reflectable<T>::value;
+    concept reflectable = tuplizable<T> && requires
+    {
+        T::member_names();
+    };
 
     struct EmptyStringizable
     {
@@ -183,7 +176,7 @@ namespace awl
         }
     };
 
-    template <class T> requires is_reflectable_v<T>
+    template <reflectable T>
     auto different_member_names(const T& left, const T& right)
     {
         auto a = objects_diff(left, right);

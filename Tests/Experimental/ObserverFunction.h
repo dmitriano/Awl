@@ -22,9 +22,8 @@ namespace awl
         Observer() = default;
 
         explicit Observer(Function function) :
-            m_function(std::move(function))
-        {
-        }
+            _function(std::move(function))
+        {}
 
         Observer(const Observer& other) = delete;
 
@@ -56,16 +55,16 @@ namespace awl
 
         const Function& function() const
         {
-            return m_function;
+            return _function;
         }
 
         void setFunction(Function function)
         {
-            m_function = std::move(function);
+            _function = std::move(function);
         }
 
     private:
 
-        Function m_function;
+        Function _function;
     };
 }

@@ -4,15 +4,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+#include "Awl/IntRange.h"
+#include "Awl/String.h"
+#include "Awl/Testing/UnitTest.h"
+
 #include <iostream>
 #include <iomanip>
 #include <map>
-
-#include "Awl/IntRange.h"
-
-#include "Awl/String.h"
-
-#include "Awl/Testing/UnitTest.h"
 
 using namespace awl::testing;
 

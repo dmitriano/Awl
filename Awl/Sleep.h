@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "Awl/CppStd/Thread.h"
+
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
-
-#include "Awl/CppStd/Thread.h"
 
 namespace awl
 {

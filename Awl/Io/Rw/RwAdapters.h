@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include <bitset>
 #include "Awl/BitMap.h"
+
+#include <bitset>
 
 namespace awl
 {
@@ -25,28 +26,27 @@ namespace awl
                 using value_type = bool;
                 using size_type = std::size_t;
 
-                explicit BitSetAdapter(BitSet & v) : m_bits(v)
-                {
-                }
+                explicit BitSetAdapter(BitSet & v) : _bits(v)
+                {}
 
                 size_type size() const
                 {
-                    return m_bits.size();
+                    return _bits.size();
                 }
 
                 auto at(std::size_t i) const
                 {
-                    return m_bits[i];
+                    return _bits[i];
                 }
 
                 auto at(std::size_t i)
                 {
-                    return m_bits[i];
+                    return _bits[i];
                 }
 
             private:
 
-                BitSet & m_bits;
+                BitSet & _bits;
             };
 
             template<class BitMap>
@@ -57,28 +57,27 @@ namespace awl
                 using value_type = bool;
                 using size_type = typename BitMap::size_type;
 
-                explicit BitMapAdapter(BitMap & v) : m_bm(v)
-                {
-                }
+                explicit BitMapAdapter(BitMap & v) : _bm(v)
+                {}
 
                 size_type size() const
                 {
-                    return m_bm.size();
+                    return _bm.size();
                 }
 
                 auto at(size_type i) const
                 {
-                    return m_bm[static_cast<typename BitMap::enum_type>(i)];
+                    return _bm[static_cast<typename BitMap::enum_type>(i)];
                 }
 
                 auto at(size_type i)
                 {
-                    return m_bm[static_cast<typename BitMap::enum_type>(i)];
+                    return _bm[static_cast<typename BitMap::enum_type>(i)];
                 }
 
             private:
 
-                BitMap & m_bm;
+                BitMap & _bm;
             };
         }
     }

@@ -47,7 +47,7 @@ namespace awl
         {
             using FieldType = std::remove_reference_t<std::tuple_element_t<index, U>>;
             
-            if constexpr (is_reflectable_v<FieldType>)
+            if constexpr (reflectable<FieldType>)
             {
                 return Field::NoType;
             }
@@ -81,26 +81,26 @@ namespace awl
     
     public:
 
-        AttachedPrototype() : m_types(helpers::map_types_t2v_no_struct<Tie, V>())
+        AttachedPrototype() : _types(helpers::map_types_t2v_no_struct<Tie, V>())
         {
-            assert(m_types.size() == S::member_names().size());
+            assert(_types.size() == S::member_names().size());
         }
 
         Field field(size_t index) const override
         {
             assert(index < count());
-            return { S::member_names()[index], m_types[index] };
+            return { S::member_names()[index], _types[index] };
         }
 
         size_t count() const override
         {
-            return m_types.size();
+            return _types.size();
         }
 
     private:
 
         using TypesArray = std::array<size_t, std::tuple_size_v<Tie>>;
-        TypesArray m_types;
+        TypesArray _types;
     };
 
     class DetachedPrototype : public Prototype
@@ -117,30 +117,29 @@ namespace awl
 
         DetachedPrototype() = default;
         
-        explicit DetachedPrototype(std::vector<FieldContainer> fields) : m_fields(std::move(fields))
-        {
-        }
+        explicit DetachedPrototype(std::vector<FieldContainer> fields) : _fields(std::move(fields))
+        {}
 
         explicit DetachedPrototype(const Prototype & ap)
         {
-            m_fields.resize(ap.count());
+            _fields.resize(ap.count());
             for (size_t i = 0; i < ap.count(); ++i)
             {
                 const Field field = ap.field(i);
-                m_fields[i] = {std::string(field.name), field.type};
+                _fields[i] = {std::string(field.name), field.type};
             }
         }
 
         Field field(size_t index) const override
         {
             assert(index < count());
-            const FieldContainer & m = m_fields[index];
+            const FieldContainer & m = _fields[index];
             return { m.name, m.type };
         }
 
         size_t count() const override
         {
-            return m_fields.size();
+            return _fields.size();
         }
 
         //For type map
@@ -148,16 +147,16 @@ namespace awl
         {
             assert(index < count());
             assert(type != Field::NoType);
-            assert(m_fields[index].type != Field::NoType);
+            assert(_fields[index].type != Field::NoType);
 
-            m_fields[index].type = type;
+            _fields[index].type = type;
         }
 
-        AWL_TUPLIZABLE(m_fields)
+        AWL_TUPLIZABLE(_fields)
 
     private:
 
-        std::vector<FieldContainer> m_fields;
+        std::vector<FieldContainer> _fields;
     };
 
     AWL_MEMBERWISE_EQUATABLE(DetachedPrototype::FieldContainer)

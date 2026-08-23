@@ -25,9 +25,9 @@ namespace awl::io
         {
         protected:
 
-            VtsOwner(T& val) : m_vts(val) {}
+            VtsOwner(T& val) : _vts(val) {}
 
-            VersionTolerantSerializable<T, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>, true, V> m_vts;
+            VersionTolerantSerializable<T, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>, true, V> _vts;
         };
     }
 
@@ -47,7 +47,7 @@ namespace awl::io
 
         EuphoricallySerializable(T& val, size_t block_size = defaultBlockSize, Hash hash = {}) :
             BaseVts(val),
-            BaseHashing(BaseVts::m_vts, block_size, hash),
+            BaseHashing(BaseVts::_vts, block_size, hash),
             vector_vts(val),
             measure_vts(val)
         {}

@@ -4,12 +4,16 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/ObservableSet.h"
+#include "Awl/ObservableUnorderedSet.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/KeyEqual.h"
+#include "Awl/KeyHash.h"
 #include "Awl/Random.h"
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
 #include "Awl/Tuplizable.h"
 
+#include <memory>
 #include <ranges>
 #include <unordered_set>
 #include <vector>
@@ -23,8 +27,7 @@ namespace
         A() = default;
 
         explicit A(size_t k) : key(k), attribute(k + 1)
-        {
-        }
+        {}
 
         size_t key;
         size_t attribute;
@@ -131,7 +134,7 @@ AWL_TEST(ObservableSetAssignment)
 {
     AWL_UNUSED_CONTEXT;
 
-    using Compare = awl::member_compare<&A::key>;
+    using Compare = awl::KeyCompare<A, &A::key>;
     using Set = awl::observable_vector_set<A, Compare>;
 
     //Check if it satisfies the concept std::ranges::range.
@@ -156,4 +159,79 @@ AWL_TEST(ObservableSetUnordered)
     AWL_UNUSED_CONTEXT;
 
     checkSetNotifications<awl::observable_unordered_set<int>, std::unordered_set<int>>();
+}
+
+AWL_TEST(ObservableSetUnorderedSharedKey)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using Set = awl::observable_unordered_set<
+        std::shared_ptr<A>,
+        awl::KeyHash<std::shared_ptr<A>, &A::GetKey>,
+        awl::KeyEqual<std::shared_ptr<A>, &A::GetKey>>;
+
+    Set set;
+
+    std::shared_ptr<A> first = std::make_shared<A>(10);
+    std::shared_ptr<A> second = std::make_shared<A>(20);
+
+    AWL_ASSERT(set.insert(first).second);
+    AWL_ASSERT(set.insert(second).second);
+    AWL_ASSERT_FALSE(set.insert(std::make_shared<A>(10)).second);
+
+    AWL_ASSERT(set.contains(10u));
+    AWL_ASSERT(set.contains(first));
+
+    auto i = set.find(20u);
+
+    AWL_ASSERT(i != set.end());
+    AWL_ASSERT(*i == second);
+}
+
+AWL_TEST(ObservableSetUnorderedStdInterface)
+{
+    AWL_UNUSED_CONTEXT;
+
+    using Set = awl::observable_unordered_set<int>;
+
+    static_assert(std::ranges::range<Set>);
+
+    Set set = { 1, 2 };
+
+    AWL_ASSERT(set.key_eq()(1, 1));
+    AWL_ASSERT_EQUAL(std::hash<int>{}(1), set.hash_function()(1));
+
+    set.reserve(16);
+    AWL_ASSERT(set.bucket(1) < set.bucket_count());
+
+    SetChangeRecorder<int> recorder;
+    set.subscribe(&recorder);
+
+    Set::node_type node = set.extract(1);
+    AWL_ASSERT(!node.empty());
+    AWL_ASSERT_FALSE(set.contains(1));
+
+    const Set::insert_return_type insert_result = set.insert(std::move(node));
+    AWL_ASSERT(insert_result.inserted);
+    AWL_ASSERT(set.contains(1));
+
+    std::unordered_set<int> source = { 3, 4 };
+    set.merge(source);
+
+    AWL_ASSERT(source.empty());
+    AWL_ASSERT(set.contains(3));
+    AWL_ASSERT(set.contains(4));
+
+    Set other = { 10 };
+    set.swap(other);
+
+    AWL_ASSERT(set.contains(10));
+    AWL_ASSERT(other.contains(1));
+    AWL_ASSERT(other.contains(2));
+    AWL_ASSERT(other.contains(3));
+    AWL_ASSERT(other.contains(4));
+
+    AWL_ASSERT_EQUAL(size_t(4), recorder.added.size());
+    AWL_ASSERT_EQUAL(size_t(1), recorder.removed.size());
+    AWL_ASSERT_EQUAL(size_t(1), recorder.clearing_count);
 }

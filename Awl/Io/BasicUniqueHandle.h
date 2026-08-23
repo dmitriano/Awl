@@ -26,40 +26,37 @@ namespace awl::io
     class BasicUniqueHandle
     {
     public:
+
         using handle_type = HANDLE;
         using null_getter_type = NullGetter;
         using deleter_type = Deleter;
 
         BasicUniqueHandle() noexcept
             : BasicUniqueHandle(null())
-        {
-        }
+        {}
 
         BasicUniqueHandle(HANDLE h) noexcept
-            : m_h(h)
-            , m_deleter()
-        {
-        }
+            : _h(h)
+            , _deleter()
+        {}
 
         BasicUniqueHandle(HANDLE h, const deleter_type& deleter) noexcept
-            : m_h(h)
-            , m_deleter(deleter)
-        {
-        }
+            : _h(h)
+            , _deleter(deleter)
+        {}
 
         BasicUniqueHandle(HANDLE h, deleter_type&& deleter) noexcept
-            : m_h(h)
-            , m_deleter(std::move(deleter))
-        {
-        }
+            : _h(h)
+            , _deleter(std::move(deleter))
+        {}
 
         BasicUniqueHandle(const BasicUniqueHandle& other) = delete;
 
         BasicUniqueHandle(BasicUniqueHandle&& other) noexcept
-            : m_h(null())
-            , m_deleter(other.m_deleter)
+            : _h(null())
+            , _deleter(other._deleter)
         {
-            m_h = other.release();
+            _h = other.release();
         }
 
         ~BasicUniqueHandle()
@@ -75,8 +72,8 @@ namespace awl::io
             {
                 close();
 
-                m_deleter = other.m_deleter;
-                m_h = other.release();
+                _deleter = other._deleter;
+                _h = other.release();
             }
 
             return *this;
@@ -84,22 +81,22 @@ namespace awl::io
 
         bool operator==(const BasicUniqueHandle& other) const noexcept
         {
-            return m_h == other.m_h;
+            return _h == other._h;
         }
 
         HANDLE get() const noexcept
         {
-            return m_h;
+            return _h;
         }
 
         deleter_type& get_deleter() noexcept
         {
-            return m_deleter;
+            return _deleter;
         }
 
         const deleter_type& get_deleter() const noexcept
         {
-            return m_deleter;
+            return _deleter;
         }
 
         operator HANDLE() const noexcept
@@ -109,46 +106,47 @@ namespace awl::io
 
         operator bool() const noexcept
         {
-            return m_h != null();
+            return _h != null();
         }
 
         HANDLE release() noexcept
         {
-            HANDLE h = m_h;
+            HANDLE h = _h;
 
-            m_h = null();
+            _h = null();
 
             return h;
         }
 
         void reset(HANDLE h = null()) noexcept
         {
-            if (m_h == h)
+            if (_h == h)
             {
                 return;
             }
 
             close();
 
-            m_h = h;
+            _h = h;
         }
 
         void close() noexcept
         {
-            if (m_h != null())
+            if (_h != null())
             {
                 HANDLE h = release();
-                m_deleter(h);
+                _deleter(h);
             }
         }
 
     private:
+
         static HANDLE null() noexcept
         {
             return null_getter_type::null();
         }
 
-        HANDLE m_h;
-        deleter_type m_deleter;
+        HANDLE _h;
+        deleter_type _deleter;
     };
 }

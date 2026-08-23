@@ -3,11 +3,9 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <format>
-#include <stdlib.h>
-
 #include "Awl/Testing/UnitTest.h"
+
+#include <stdlib.h>
 
 using namespace awl::testing;
 
@@ -47,43 +45,40 @@ namespace
 
 AWL_EXAMPLE(ImplicitLifetimeAllocator)
 {
-    AWL_UNUSED_CONTEXT;
-
     MyAllocator<64> a;
 
-    std::cout << "allocated a.data at " << (void*)a.data
-        << " (" << sizeof a.data << " bytes)\n";
+    context.logger->debug("allocated a.data at {} ({} bytes)", static_cast<void*>(a.data), sizeof a.data);
 
     // Allocate A
     if (A* p = a.implicit_aligned_alloc<A>())
     {
-        std::cout << "allocated A char at " << (void*)p << '\n';
-        std::cout << "\tOriginal value: " << std::format("{:x}", p->x) << '\n';
+        context.logger->debug("allocated A char at {}", static_cast<void*>(p));
+        context.logger->debug("Original value: {:x}", p->x);
         *p = {};
-        std::cout << "\tDefault value: " << std::format("{:x}", p->x) << '\n';
+        context.logger->debug("Default value: {:x}", p->x);
         p->x = 0x42;
-        std::cout << "\tUpdated value: " << std::format("{:x}", p->x) << '\n';
+        context.logger->debug("Updated value: {:x}", p->x);
     }
 
     // Allocate a char
     if (char* p = a.implicit_aligned_alloc<char>())
     {
         *p = 'a';
-        std::cout << "allocated a char at " << (void*)p << '\n';
+        context.logger->debug("allocated a char at {}", static_cast<void*>(p));
     }
 
     // Allocate an int
     if (int* p = a.implicit_aligned_alloc<int>())
     {
         *p = 1;
-        std::cout << "allocated an int at " << (void*)p << '\n';
+        context.logger->debug("allocated an int at {}", static_cast<void*>(p));
     }
 
     // Allocate an int, aligned at a 32-byte boundary
     if (int* p = a.implicit_aligned_alloc<int>(32))
     {
         *p = 2;
-        std::cout << "allocated an int at " << (void*)p << " (32-byte alignment)\n";
+        context.logger->debug("allocated an int at {} (32-byte alignment)", static_cast<void*>(p));
     }
 }
 

@@ -25,6 +25,8 @@ namespace awl::testing
 
     using CmdString = std::basic_string<CmdChar>;
 
+    AWL_DEFINE_EXCEPTION(CommandLineException)
+
     class CommandLineProvider
     {
     public:
@@ -77,8 +79,7 @@ namespace awl::testing
         struct Option
         {
             Option() : val(nullptr), usage(0)
-            {
-            }
+            {}
 
             Option(const CmdChar* val_ptr) : Option()
             {
@@ -88,7 +89,7 @@ namespace awl::testing
             //A flag is an option that does not have a value.
             bool isFlag() const
             {
-                return val != nullptr;
+                return val == nullptr;
             }
 
             const CmdChar* val;

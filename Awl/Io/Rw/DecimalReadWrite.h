@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Awl/Io/Rw/ArithmeticReadWrite.h"
-
 #include "Awl/Decimal.h"
 
 namespace awl::io

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QtExtras/Json/Json.h"
+#include "BoostExtras/Json/Json.h"
 
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/StringFormat.h"
@@ -11,18 +11,20 @@ namespace awl::testing
     {
     public:
 
-        JsonProvider(QJsonObject& jo) : m_jo(jo) {}
+        JsonProvider() = default;
+
+        explicit JsonProvider(boost::json::object jo) : _jo(std::move(jo)) {}
 
         template <class T>
         bool tryGet(const char* name, T& val)
         {
-            auto i = m_jo.find(name);
+            auto i = _jo.find(name);
 
             JsonSerializer<T> serializer;
 
-            if (i != m_jo.end())
+            if (i != _jo.end())
             {
-                serializer.fromJson(*i, val);
+                serializer.fromJson(i->value(), val);
 
                 return true;
             }
@@ -33,38 +35,37 @@ namespace awl::testing
         template <class T>
         void set(const char* name, const T& val)
         {
-            if (m_jo.contains(name))
+            if (_jo.contains(name))
             {
                 throw JsonException(std::format(_T("Attribute '{}' is already set."), awl::fromACString(name)));
             }
 
             JsonSerializer<T> serializer;
 
-            QJsonValue jv;
-
+            boost::json::value jv;
             serializer.toJson(val, jv);
 
-            m_jo[name] = jv;
+            _jo[name] = std::move(jv);
 
-            m_dirty = true;
+            _dirty = true;
         }
 
         // Quick fix. Clear the attributes from the previous test.
         void clear()
         {
-            m_jo = {};
+            _jo = {};
         }
 
         bool isDirty() const
         {
-            return m_dirty;
+            return _dirty;
         }
 
     private:
 
-        QJsonObject& m_jo;
+        boost::json::object _jo;
 
-        bool m_dirty = false;
+        bool _dirty = false;
     };
 
     static_assert(attribute_provider<JsonProvider>);

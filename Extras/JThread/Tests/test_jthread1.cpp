@@ -1,9 +1,11 @@
 #include "jthread.hpp"
+
 #include <iostream>
 #include <string>
 #include <chrono>
 #include <cassert>
 #include <atomic>
+
 using namespace::std::literals;
 
 //------------------------------------------------------

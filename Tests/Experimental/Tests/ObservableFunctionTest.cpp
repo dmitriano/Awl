@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Tests/Experimental/ObservableFunction.h"
+
 #include "Awl/Testing/UnitTest.h"
 
 #include <functional>
@@ -29,9 +30,14 @@ namespace
     {
     public:
 
-        bool emitWhileTrue(int val)
+        bool emitWhile(int val)
         {
-            return notifyWhileTrue(val);
+            return notifyWhile(val);
+        }
+
+        bool emitUntil(int val)
+        {
+            return notifyUntil(val);
         }
     };
 
@@ -42,8 +48,7 @@ namespace
         FunctionAndPredicateOwner()
             : functionHandler(std::bind(&FunctionAndPredicateOwner::onFunction, this, std::placeholders::_1))
             , predicateHandler(std::bind(&FunctionAndPredicateOwner::onPredicate, this, std::placeholders::_1))
-        {
-        }
+        {}
 
         void onFunction(int value)
         {
@@ -109,7 +114,7 @@ AWL_TEST(Observable_Function_Events)
     AWL_ASSERT_EQUAL(2, callCount3);
 }
 
-AWL_TEST(Observable_Function_NotifyWhileTrue)
+AWL_TEST(Observable_Function_NotifyWhile)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -131,9 +136,39 @@ AWL_TEST(Observable_Function_NotifyWhileTrue)
     observable.subscribe(&handler2);
     observable.subscribe(&handler3);
 
-    const bool result = observable.emitWhileTrue(10);
+    const bool result = observable.emitWhile(10);
 
-    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at false."));
+    AWL_ASSERTM_FALSE(result, _T("notifyWhile should stop at false."));
+    AWL_ASSERT_EQUAL(1, callCount1);
+    AWL_ASSERT_EQUAL(1, callCount2);
+    AWL_ASSERT_EQUAL(0, callCount3);
+}
+
+AWL_TEST(Observable_Function_NotifyUntil)
+{
+    AWL_UNUSED_CONTEXT;
+
+    PredicateObservable observable;
+
+    PredicateHandler handler1;
+    PredicateHandler handler2;
+    PredicateHandler handler3;
+
+    int callCount1 = 0;
+    int callCount2 = 0;
+    int callCount3 = 0;
+
+    handler1.setFunction([&](int) { ++callCount1; return false; });
+    handler2.setFunction([&](int) { ++callCount2; return true; });
+    handler3.setFunction([&](int) { ++callCount3; return false; });
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.emitUntil(10);
+
+    AWL_ASSERTM_TRUE(result, _T("notifyUntil should stop at true."));
     AWL_ASSERT_EQUAL(1, callCount1);
     AWL_ASSERT_EQUAL(1, callCount2);
     AWL_ASSERT_EQUAL(0, callCount3);
@@ -187,7 +222,7 @@ AWL_TEST(Observable_FunctionHandlers_MemberFunctions)
     predicateObservable.subscribe(&owner.predicateHandler);
 
     functionObservable.emit(11);
-    const bool result1 = predicateObservable.emitWhileTrue(13);
+    const bool result1 = predicateObservable.emitWhile(13);
 
     AWL_ASSERT_EQUAL(1, owner.functionCallCount);
     AWL_ASSERT_EQUAL(11, owner.lastFunctionValue);
@@ -197,7 +232,7 @@ AWL_TEST(Observable_FunctionHandlers_MemberFunctions)
 
     owner.predicateResult = false;
 
-    const bool result2 = predicateObservable.emitWhileTrue(17);
+    const bool result2 = predicateObservable.emitWhile(17);
 
     AWL_ASSERT_EQUAL(2, owner.predicateCallCount);
     AWL_ASSERT_EQUAL(17, owner.lastPredicateValue);

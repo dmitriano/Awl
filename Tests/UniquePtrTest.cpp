@@ -4,7 +4,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/UniquePtr.h"
-
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/String.h"
 #include "Awl/StringFormat.h"
@@ -74,8 +73,7 @@ namespace
             type(std::move(t)),
             name(std::move(n)),
             col(p)
-        {
-        }
+        {}
 
         std::string type;
         std::string name;

@@ -27,7 +27,10 @@ namespace awl::io
 
     protected:
 
-        using Split = mp::split_variant<V, is_reflectable>;
+        template <class T>
+        struct reflectable_predicate : std::bool_constant<reflectable<T>> {};
+
+        using Split = mp::split_variant<V, reflectable_predicate>;
 
         using StructV = typename Split::matching;
         using FieldV = typename Split::non_matching;
@@ -98,8 +101,7 @@ namespace awl::io
         PrototypeContainer() :
             newPrototypesTuple(transform_v2t<StructV, MyAttachedPrototype>()),
             newPrototypes(tuple_cast<Prototype>(newPrototypesTuple))
-        {
-        }
+        {}
 
     public:
 

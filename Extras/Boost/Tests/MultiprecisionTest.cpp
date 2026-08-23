@@ -5,13 +5,12 @@
 
 
 #include "Tests/Helpers/RwTest.h"
-
-#include "Awl/String.h"
-#include "Awl/StringFormat.h"
 #include "Extras/Boost/BoostExtras/MultiprecisionFormatter.h"
 #include "BoostExtras/MultiprecisionDecimalData.h"
 #include "BoostExtras/MultiprecisionTraits.h"
 
+#include "Awl/String.h"
+#include "Awl/StringFormat.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
@@ -19,7 +18,6 @@
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/container/static_vector.hpp>
 #include <boost/container/small_vector.hpp>
-
 #include <iostream>
 #include <iomanip>
 #include <limits>

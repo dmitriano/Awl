@@ -9,7 +9,6 @@
 #include <boost/system/system_error.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/experimental/channel.hpp>
-
 #include <cstdint>
 #include <vector>
 #include <format>
@@ -52,7 +51,7 @@ namespace
 
         FakeProcessor(const awl::testing::TestContext& context, VectorChannel& input_chan) :
             Test(context),
-            m_inputChan(input_chan)
+            _inputChan(input_chan)
         {}
 
         awaitable<void> run() override
@@ -64,12 +63,12 @@ namespace
 
         VectorChannel& outputChannel() override
         {
-            return m_inputChan;
+            return _inputChan;
         }
 
     private:
 
-        VectorChannel& m_inputChan;
+        VectorChannel& _inputChan;
     };
 
     class PrintProcessor final : public awl::testing::Test, public VectorProcessor
@@ -78,8 +77,8 @@ namespace
 
         PrintProcessor(const awl::testing::TestContext& context, VectorChannel& input_chan, VectorChannel output_chan) :
             Test(context),
-            m_inputChan(input_chan),
-            m_outputChan(std::move(output_chan))
+            _inputChan(input_chan),
+            _outputChan(std::move(output_chan))
         {}
 
         awaitable<void> run() override
@@ -93,13 +92,13 @@ namespace
                 for (;;)
                 {
                     // Receive a message asynchronously from the channel
-                    VectorChunk buffer = co_await m_inputChan.async_receive(asio::use_awaitable);
+                    VectorChunk buffer = co_await _inputChan.async_receive(asio::use_awaitable);
 
                     print(std::format("Thread {}. {} bytes have been handled.", std::this_thread::get_id(), buffer->size()));
 
                     total_handled += buffer->size();
 
-                    co_await m_outputChan.async_send({}, buffer, use_awaitable);
+                    co_await _outputChan.async_send({}, buffer, use_awaitable);
                 }
             }
             catch (const boost::system::system_error& e)
@@ -111,20 +110,20 @@ namespace
                     print(std::format(_T("Receive error: {}"), awl::fromAString(e.code().message())));
             }
 
-            m_outputChan.close();
+            _outputChan.close();
 
             print(std::format("Thread {}. Totally handled {} bytes.", std::this_thread::get_id(), total_handled));
         }
 
         VectorChannel& outputChannel() override
         {
-            return m_outputChan;
+            return _outputChan;
         }
 
     private:
 
-        VectorChannel& m_inputChan;
-        VectorChannel m_outputChan;
+        VectorChannel& _inputChan;
+        VectorChannel _outputChan;
     };
 
     class FileCopier : public awl::testing::Test
@@ -379,7 +378,7 @@ namespace
             asio::stream_file source(exec);
             source.open(sourcePath(), asio::stream_file::read_only);
 
-            auto buffer = std::make_shared<std::vector<char>>(chunkSize);
+            std::shared_ptr<std::vector<char>> buffer = std::make_shared<std::vector<char>>(chunkSize);
 
             for (;;)
             {
@@ -567,7 +566,7 @@ AWL_EXAMPLE(CopyFileWithChannel2)
 }
 
 // This test handles the exceptions correctly.
-// --filter CopyFileWithChannel3.* --output all --use_handler --on_pool --src input.dat --dst input.dat.copy
+// --filter=CopyFileWithChannel3.* --output=all --use_handler --on_pool --src=input.dat --dst=input.dat.copy
 AWL_EXAMPLE(CopyFileWithChannel3)
 {
     FileCopier example{ context };

@@ -17,13 +17,13 @@ namespace awl::io
 
     public:
 
-        OptionalStorage(Logger& logger) : 
-            m_logger(logger),
-            m_storage(logger)
+        explicit OptionalStorage(std::shared_ptr<ILogger> logger) :
+            _logger(std::move(logger)),
+            _storage(_logger)
         {}
 
-        OptionalStorage(Logger& logger, const awl::String& file_name, const awl::String& backup_name) : 
-            OptionalStorage(logger)
+        OptionalStorage(std::shared_ptr<ILogger> logger, const awl::String& file_name, const awl::String& backup_name) :
+            OptionalStorage(std::move(logger))
         {
             open(file_name, backup_name);
         }
@@ -35,18 +35,18 @@ namespace awl::io
 
         OptionalStorage& operator = (OptionalStorage&& other)
         {
-            m_storage = std::move(other.m_storage);
+            _storage = std::move(other._storage);
             return *this;
         }
 
         bool isEmpty() const
         {
-            return m_storage.isEmpty();
+            return _storage.isEmpty();
         }
 
         bool isOpened() const
         {
-            return m_storage.isOpened();
+            return _storage.isOpened();
         }
 
         bool open(const awl::String& file_name, const awl::String& backup_name);
@@ -86,15 +86,15 @@ namespace awl::io
         template <class Func>
         auto callIfOpened(Func func) -> std::invoke_result_t<Func, AtomicStorage*>
         {
-            if (m_storage.isOpened())
+            if (_storage.isOpened())
             {
                 try
                 {
-                    return std::invoke(func, m_storage);
+                    return std::invoke(func, _storage);
                 }
                 catch (const IoException& e)
                 {
-                    m_logger.warning(_T("Application settings were not saved correctly. Error message: {}"), e.message());
+                    _logger->warning(_T("Application settings were not saved correctly. Error message: {}"), e.message());
                 }
             }
 
@@ -109,7 +109,7 @@ namespace awl::io
             }
         }
 
-        Logger& m_logger;
-        AtomicStorage m_storage;
+        std::shared_ptr<ILogger> _logger;
+        AtomicStorage _storage;
     };
 }

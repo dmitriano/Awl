@@ -38,7 +38,7 @@ namespace awl
 
         double_node_iterator() = default;
         
-        double_node_iterator(ListIterator i) : m_i(std::move(i)) {}
+        double_node_iterator(ListIterator i) : _i(std::move(i)) {}
 
         T & operator * () const
         {
@@ -52,7 +52,7 @@ namespace awl
 
         double_node_iterator & operator++ ()
         {
-            ++m_i;
+            ++_i;
 
             return *this;
         }
@@ -61,14 +61,14 @@ namespace awl
         {
             double_node_iterator tmp = *this;
 
-            ++m_i;
+            ++_i;
 
             return tmp;
         }
 
         double_node_iterator & operator-- ()
         {
-            --m_i;
+            --_i;
 
             return *this;
         }
@@ -77,14 +77,14 @@ namespace awl
         {
             double_node_iterator tmp = *this;
 
-            --m_i;
+            --_i;
 
             return tmp;
         }
 
         bool operator == (const double_node_iterator & r) const
         {
-            return m_i == r.m_i;
+            return _i == r._i;
         }
 
         bool operator != (const double_node_iterator & r)  const
@@ -95,19 +95,19 @@ namespace awl
         //Construction of const_iterator from iterator
         operator ConstNodeIterator() const
         {
-            return ConstNodeIterator(ConstListIterator(m_i));
+            return ConstNodeIterator(ConstListIterator(_i));
         }
     
     private:
 
         T & value() const
         {
-            Node * p_node = *m_i;
+            Node * p_node = *_i;
 
             return p_node->*p_val;
         }
 
-        ListIterator m_i;
+        ListIterator _i;
 
         friend Container;
 

@@ -22,32 +22,30 @@ namespace awl
         using format_string = std::basic_format_string<Character, std::type_identity_t<Args>...>;
 
         consteval LogFormat(format_string fmt, std::source_location location = std::source_location::current()) noexcept :
-            m_fmt(fmt),
-            m_location(location)
-        {
-        }
+            _fmt(fmt),
+            _location(location)
+        {}
 
         template <class T>
             requires std::constructible_from<format_string, const T&>
         consteval LogFormat(const T& fmt, std::source_location location = std::source_location::current()) noexcept :
-            m_fmt(fmt),
-            m_location(location)
-        {
-        }
+            _fmt(fmt),
+            _location(location)
+        {}
 
         constexpr format_string format() const noexcept
         {
-            return m_fmt;
+            return _fmt;
         }
 
         constexpr std::source_location location() const noexcept
         {
-            return m_location;
+            return _location;
         }
 
     private:
 
-        format_string m_fmt;
-        std::source_location m_location;
+        format_string _fmt;
+        std::source_location _location;
     };
 }

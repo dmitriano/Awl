@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <tuple>
-
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/TupleHelpers.h"
+
+#include <tuple>
 
 namespace awl::testing
 {
@@ -21,7 +21,7 @@ namespace awl::testing
         CompositeProvider() = default;
 
         //A template parameter pack cannot have a default argument.
-        constexpr CompositeProvider(Ps... providers) : m_providers(std::move(providers) ...) {}
+        constexpr CompositeProvider(Ps... providers) : _providers(std::move(providers) ...) {}
 
         template <class T>
         bool tryGet(const char* name, T& val)
@@ -36,7 +36,7 @@ namespace awl::testing
             {
                 (provider.set(name, val), ...);
 
-            }, m_providers);
+            }, _providers);
         }
 
         void clear()
@@ -45,13 +45,13 @@ namespace awl::testing
                 {
                     (provider.clear(), ...);
 
-                }, m_providers);
+                }, _providers);
         }
 
         template<std::size_t I>
         auto& get_provider() const
         {
-            return std::get<I>(m_providers);
+            return std::get<I>(_providers);
         }
 
     private:
@@ -69,7 +69,7 @@ namespace awl::testing
             }
             else
             {
-                auto& provider = std::get<Index>(m_providers);
+                auto& provider = std::get<Index>(_providers);
 
                 if (provider.tryGet(name, val))
                 {
@@ -80,7 +80,7 @@ namespace awl::testing
             }
         }
 
-        Tuple m_providers;
+        Tuple _providers;
     };
 
     template <class ... Ps>

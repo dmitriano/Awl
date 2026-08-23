@@ -6,7 +6,6 @@
 #include "QtExtras/Io/Rw/ReadWrite.h"
 
 #include <Awl/Testing/UnitTest.h>
-
 #include "Awl/Io/VectorStream.h"
 
 namespace

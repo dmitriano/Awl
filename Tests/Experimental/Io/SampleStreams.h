@@ -22,9 +22,9 @@ namespace awl::io
     public:
 
         //new uint8_t[size] is not constexpr and allocating 64K on the stack probably is not a good idea.
-        SwitchMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf)
+        SwitchMemoryOutputStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf)
         {
-            std::memset(pBuf, 0u, m_size);
+            std::memset(pBuf, 0u, _size);
         }
 
         ~SwitchMemoryOutputStream()
@@ -40,51 +40,51 @@ namespace awl::io
             switch (count)
             {
             case 1:
-                PlainCopy<uint8_t>(m_p, buffer);
+                PlainCopy<uint8_t>(_p, buffer);
                 break;
             case 2:
-                PlainCopy<uint16_t>(m_p, buffer);
+                PlainCopy<uint16_t>(_p, buffer);
                 break;
             case 4:
-                PlainCopy<uint32_t>(m_p, buffer);
+                PlainCopy<uint32_t>(_p, buffer);
                 break;
             case 8:
-                PlainCopy<uint64_t>(m_p, buffer);
+                PlainCopy<uint64_t>(_p, buffer);
                 break;
             default:
                 //memcpy, memmove, and memset are obsolete!
                 //std::copy is constexpr in C++ 20.
-                //std::copy(buffer, buffer + count, m_p);
-                StdCopy(buffer, buffer + count, m_p);
+                //std::copy(buffer, buffer + count, _p);
+                StdCopy(buffer, buffer + count, _p);
                 break;
             }
 
-            m_p += count;
+            _p += count;
         }
 
         size_t GetCapacity() const
         {
-            return m_size;
+            return _size;
         }
 
         size_t length() const
         {
-            return m_p - pBuf;
+            return _p - pBuf;
         }
 
         void Reset()
         {
-            m_p = pBuf;
+            _p = pBuf;
         }
 
         const uint8_t * begin() const { return pBuf; }
-        const uint8_t * end() const { return pBuf + m_size; }
+        const uint8_t * end() const { return pBuf + _size; }
 
     private:
 
-        const size_t m_size;
+        const size_t _size;
         uint8_t * pBuf;
-        uint8_t * m_p;
+        uint8_t * _p;
     };
 
     static_assert(sequential_output_stream<SwitchMemoryOutputStream>);
@@ -93,43 +93,43 @@ namespace awl::io
     {
     public:
 
-        VirtualMemoryOutputStream(size_t size) : m_size(size), pBuf(new uint8_t[size]), m_p(pBuf.get())
+        VirtualMemoryOutputStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf.get())
         {
-            std::memset(pBuf.get(), 0u, m_size);
+            std::memset(pBuf.get(), 0u, _size);
         }
 
         void write(const uint8_t * buffer, size_t count) override
         {
-            assert(length() + count <= m_size);
-            std::memmove(m_p, buffer, count);
-            //std::copy(buffer, buffer + count, m_p);
-            m_p += count;
+            assert(length() + count <= _size);
+            std::memmove(_p, buffer, count);
+            //std::copy(buffer, buffer + count, _p);
+            _p += count;
         }
 
         size_t GetCapacity() const
         {
-            return m_size;
+            return _size;
         }
 
         size_t length() const
         {
-            assert(pBuf.get() <= m_p);
-            return m_p - pBuf.get();
+            assert(pBuf.get() <= _p);
+            return _p - pBuf.get();
         }
 
         void Reset()
         {
-            m_p = pBuf.get();
+            _p = pBuf.get();
         }
 
         const uint8_t * begin() const { return pBuf.get(); }
-        const uint8_t * end() const { return pBuf.get() + m_size; }
+        const uint8_t * end() const { return pBuf.get() + _size; }
 
     private:
 
-        const size_t m_size;
+        const size_t _size;
         std::unique_ptr<uint8_t[]> pBuf;
-        uint8_t * m_p;
+        uint8_t * _p;
     };
 
     static_assert(sequential_output_stream<VirtualMemoryOutputStream>);
@@ -142,19 +142,19 @@ namespace awl::io
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated
-            //m_pos += count;
-            m_pos = m_pos + count;
+            //_pos += count;
+            _pos = _pos + count;
         }
 
         size_t length() const
         {
-            return m_pos;
+            return _pos;
         }
 
     private:
 
         //prevent the optimization
-        volatile size_t m_pos = 0;
+        volatile size_t _pos = 0;
     };
 
     static_assert(sequential_output_stream<VirtualMeasureStream>);
@@ -167,19 +167,19 @@ namespace awl::io
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated
-            //m_pos += count;
-            m_pos = m_pos + count;
+            //_pos += count;
+            _pos = _pos + count;
         }
 
         size_t length() const
         {
-            return m_pos;
+            return _pos;
         }
 
     private:
 
         //prevent the optimization
-        volatile size_t m_pos = 0;
+        volatile size_t _pos = 0;
     };
 
     static_assert(sequential_output_stream<InlineMeasureStream>);

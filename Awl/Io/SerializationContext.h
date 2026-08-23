@@ -27,24 +27,22 @@ namespace awl::io
         { std::as_const(t).writeV(std::declval<Stream&>(), std::declval<const Val&>()) } -> std::same_as<void>;
     };
 
-    class FakeContext
-    {
-    };
+    class FakeContext {};
 
     class LimitedContext
     {
     public:
 
-        LimitedContext(size_t len) : m_len(len) {}
+        LimitedContext(size_t len) : _len(len) {}
 
         size_t max_length() const
         {
-            return m_len;
+            return _len;
         }
 
     private:
 
-        size_t m_len;
+        size_t _len;
     };
 
     static_assert(limited_context<LimitedContext>);

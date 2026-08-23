@@ -11,6 +11,7 @@
 
 #include <ranges>
 #include <functional>
+#include <string_view>
 
 namespace awl
 {
@@ -29,20 +30,20 @@ namespace awl
 
         const T& value() const
         {
-            return m_val;
+            return _val;
         }
 
         // Use variable_static_chain() to access non-const value,
         T& value()
         {
-            return m_val;
+            return _val;
         }
 
     private:
 
         const char* const pName;
 
-        T m_val;
+        T _val;
     };
 
     template <class T>
@@ -57,11 +58,11 @@ namespace awl
 
     public:
 
-        ConstIterator begin() const { return m_list.begin(); }
-        ConstIterator end() const { return m_list.end(); }
+        ConstIterator begin() const { return _list.begin(); }
+        ConstIterator end() const { return _list.end(); }
 
-        Iterator begin() { return m_list.begin(); }
-        Iterator end() { return m_list.end(); }
+        Iterator begin() { return _list.begin(); }
+        Iterator end() { return _list.end(); }
 
         template <class Pred = CStringInsensitiveEqual<char>>
         Link* find(const char* name, Pred&& pred = {})
@@ -75,6 +76,27 @@ namespace awl
             auto i = std::ranges::find_if(begin(), end(),
                 std::bind(pred, name, std::placeholders::_1),
                 std::mem_fn(&Link::name));
+
+            if (i != end())
+            {
+                return *i;
+            }
+
+            return nullptr;
+        }
+
+        Link* find(std::string_view name)
+        {
+            return const_cast<Link*>((const_cast<const StaticChain*>(this))->find(name));
+        }
+
+        const Link* find(std::string_view name) const
+        {
+            auto i = std::ranges::find_if(begin(), end(),
+                [name](const Link* p_link)
+                {
+                    return StringViewInsensitiveEqual<char>()(name, p_link->name());
+                });
 
             if (i != end())
             {
@@ -98,9 +120,9 @@ namespace awl
 
         void clear()
         {
-            while (!m_list.empty())
+            while (!_list.empty())
             {
-                m_list.pop_front();
+                _list.pop_front();
             }
         }
 
@@ -109,7 +131,7 @@ namespace awl
         template <class T1>
         friend class StaticLink;
 
-        List m_list;
+        List _list;
     };
 
     // It is not clear what can be the usage of variable_static_chain()
@@ -133,7 +155,7 @@ namespace awl
     template <typename... Args>
     StaticLink<T>::StaticLink(const char* p_name, Args&&... args):
         pName(p_name),
-        m_val(std::forward<Args>(args)...)
+        _val(std::forward<Args>(args)...)
     {
         // We circumvent const-correctness here.
         // Declaring StaticChain as const can potentially lead to UB.
@@ -143,6 +165,6 @@ namespace awl
         // const and volatile semantics (7.1.6.1) are not applied on an object under construction.
         // They come into effect when the constructor for the most derived object (1.8) ends.
 
-        variable_static_chain<T>().m_list.push_front(this);
+        variable_static_chain<T>()._list.push_front(this);
     }
 }

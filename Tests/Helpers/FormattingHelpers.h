@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "Awl/Crypto/BasicHash.h"
+#include "Awl/String.h"
+
 #include <iostream>
 #include <iomanip>
 #include <chrono>
-
-#include "Awl/Crypto/BasicHash.h"
-#include "Awl/String.h"
 
 namespace awl::testing::helpers
 {

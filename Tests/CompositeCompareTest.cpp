@@ -4,14 +4,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/CompositeCompare.h"
-#include "Awl/TransparentCompositeCompare.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/TransparentCompositeCompare.h"
+#include "Awl/RuntimeKeyCompare.h"
 #include "Awl/EnumTraits.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #include <string>
-
 #include <array>
 
 namespace
@@ -37,7 +36,7 @@ namespace
         return std::make_tuple(x.a, x.b);
     }
 
-    using GetAPtr = awl::FuncPtr<X, int>;
+    using GetAPtr = decltype(&X::GetA);
 
     static_assert(std::is_copy_constructible_v<GetAPtr>);
     static_assert(std::is_copy_assignable_v<GetAPtr>);
@@ -49,7 +48,7 @@ namespace
     static_assert(std::is_move_constructible_v<X>);
     static_assert(std::is_move_assignable_v<X>);
 
-    inline constexpr auto a_getter = awl::func_getter(&X::GetA);
+    inline constexpr auto a_getter = std::mem_fn(&X::GetA);
     using AGetter = std::remove_const_t<decltype(a_getter)>;
 
     static_assert(std::is_copy_constructible_v<AGetter>);
@@ -57,9 +56,9 @@ namespace
     static_assert(std::is_move_constructible_v<AGetter>);
     static_assert(std::is_move_assignable_v<AGetter>);
 
-    inline constexpr auto a_comp = awl::make_compare(&X::GetA);
-    inline constexpr auto a1_comp = awl::make_compare(&X::GetA1);
-    inline constexpr auto b_comp = awl::make_compare(&X::b);
+    inline constexpr auto a_comp = awl::makeRuntimeCompare(&X::GetA);
+    inline constexpr auto a1_comp = awl::makeRuntimeCompare(&X::GetA1);
+    inline constexpr auto b_comp = awl::makeRuntimeCompare(&X::b);
 
     using ACompare = std::remove_const_t<decltype(a_comp)>;
     using BCompare = std::remove_const_t<decltype(b_comp)>;
@@ -75,7 +74,7 @@ namespace
     static_assert(std::is_move_assignable_v<BCompare>);
 
     static_assert(std::is_same_v<ACompare::key_type, int>);
-    static_assert(std::is_same_v<BCompare::key_type, const std::string&>);
+    static_assert(std::is_same_v<BCompare::key_type, std::string>);
     static_assert(std::is_same_v<decltype(MakeKey({})), std::tuple<int, std::string>>);
 
     X x1a{ 1, "a" };
@@ -210,8 +209,8 @@ AWL_ENUM_TRAITS(data, AccountType)
 
 namespace
 {
-    using WalletAccountCompare = awl::member_compare<&data::Wallet::accountType>;
-    using WalletAssetCompare = awl::member_compare<&data::Wallet::asset>;
+    using WalletAccountCompare = awl::KeyCompare<data::Wallet, &data::Wallet::accountType>;
+    using WalletAssetCompare = awl::KeyCompare<data::Wallet, &data::Wallet::asset>;
     using WalletPrimaryCompare = awl::TransparentCompositeCompare<data::Wallet, WalletAccountCompare, WalletAssetCompare>;
 
     constexpr WalletPrimaryCompare MakeComp()

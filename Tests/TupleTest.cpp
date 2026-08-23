@@ -3,15 +3,14 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Helpers/NonCopyable.h"
+
+#include "Awl/TupleHelpers.h"
+#include "Awl/Testing/UnitTest.h"
+
 #include <string>
 #include <sstream>
 #include <atomic>
-
-#include "Awl/TupleHelpers.h"
-
-#include "Awl/Testing/UnitTest.h"
-
-#include "Helpers/NonCopyable.h"
 
 using namespace awl::testing;
 
@@ -32,18 +31,17 @@ namespace
     {
     public:
 
-        FieldWriter(const Field & field) : m_field(field)
-        {
-        }
+        FieldWriter(const Field & field) : _field(field)
+        {}
 
         void write(std::ostream & out) const override
         {
-            out << m_field << " ";
+            out << _field << " ";
         }
 
     private:
 
-        const Field & m_field;
+        const Field & _field;
     };
 
     template <class Field>
@@ -51,18 +49,17 @@ namespace
     {
     public:
 
-        FieldReader(Field & field) : m_field(field)
-        {
-        }
+        FieldReader(Field & field) : _field(field)
+        {}
 
         void read(std::istream & in) const override
         {
-            in >> m_field;
+            in >> _field;
         }
 
     private:
 
-        Field & m_field;
+        Field & _field;
     };
 }
 

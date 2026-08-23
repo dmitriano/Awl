@@ -48,12 +48,10 @@ namespace awl
         using Rep = typename Data::Rep;
 
         constexpr decimal()
-        {
-        }
+        {}
 
-        explicit constexpr decimal(uint8_t digits) : m_data(true, digits, 0)
-        {
-        }
+        explicit constexpr decimal(uint8_t digits) : _data(true, digits, 0)
+        {}
 
         //We do not normalize it in the constructor.
         constexpr decimal(Int man, uint8_t digits) : decimal(digits)
@@ -69,8 +67,7 @@ namespace awl
 
         template <class C>
         constexpr explicit decimal(const C* fixed_string) : decimal(std::basic_string_view<C>(fixed_string))
-        {
-        }
+        {}
 
         decimal(const decimal& other) = default;
         decimal(decimal&& other) = default;
@@ -83,13 +80,13 @@ namespace awl
         static constexpr decimal from_bits(Rep val)
         {
             decimal a;
-            a.m_data = Data::from_bits(val);
+            a._data = Data::from_bits(val);
             return a;
         }
 
         constexpr Rep to_bits() const
         {
-            return m_data.to_bits();
+            return _data.to_bits();
         }
 
         template <class Float>
@@ -108,7 +105,7 @@ namespace awl
 
         constexpr bool positive() const
         {
-            return m_data.positive();
+            return _data.positive();
         }
 
         constexpr bool negative() const
@@ -118,12 +115,12 @@ namespace awl
 
         constexpr void negate()
         {
-            m_data.set_positive(!m_data.positive());
+            _data.set_positive(!_data.positive());
         }
 
         constexpr Int mantissa() const
         {
-            const Int signed_man = static_cast<Int>(m_data.man());
+            const Int signed_man = static_cast<Int>(_data.man());
 
             return positive() ? signed_man : -signed_man;
         }
@@ -132,24 +129,24 @@ namespace awl
         {
             if (val >= 0)
             {
-                m_data.set_positive(true);
-                m_data.set_man(static_cast<UInt>(val));
+                _data.set_positive(true);
+                _data.set_man(static_cast<UInt>(val));
             }
             else
             {
-                m_data.set_positive(false);
-                m_data.set_man(static_cast<UInt>(-val));
+                _data.set_positive(false);
+                _data.set_man(static_cast<UInt>(-val));
             }
         }
         
         constexpr UInt unsigned_mantissa() const
         {
-            return m_data.man();
+            return _data.man();
         }
 
         constexpr void set_unsigned_mantissa(UInt val)
         {
-            m_data.set_man(val);
+            _data.set_man(val);
         }
 
         static constexpr UInt max_mantissa()
@@ -159,7 +156,7 @@ namespace awl
 
         constexpr uint8_t exponent() const
         {
-            return static_cast<uint8_t>(m_data.exp());
+            return static_cast<uint8_t>(_data.exp());
         }
 
         static constexpr uint8_t max_exponent()
@@ -169,7 +166,7 @@ namespace awl
 
         constexpr UInt denominator() const
         {
-            return m_denoms[m_data.exp()];
+            return _denoms[_data.exp()];
         }
 
         template <class Float>
@@ -190,12 +187,12 @@ namespace awl
                 return true;
             }
 
-            if (m_data.positive() == other.m_data.positive())
+            if (_data.positive() == other._data.positive())
             {
                 const decimal a = normalize();
                 const decimal b = other.normalize();
 
-                return a.m_data.exp() == b.m_data.exp() && a.m_data.man() == b.m_data.man();
+                return a._data.exp() == b._data.exp() && a._data.man() == b._data.man();
             }
             
             return false;
@@ -242,7 +239,7 @@ namespace awl
 
             align(a, b);
 
-            return decimal(a.mantissa() + b.mantissa(), a.m_data.exp());
+            return decimal(a.mantissa() + b.mantissa(), a._data.exp());
         }
 
         constexpr decimal operator - (const decimal& other) const
@@ -252,7 +249,7 @@ namespace awl
 
             align(a, b);
 
-            return decimal(a.mantissa() - b.mantissa(), a.m_data.exp());
+            return decimal(a.mantissa() - b.mantissa(), a._data.exp());
         }
 
         constexpr decimal& operator += (const decimal& other)
@@ -471,11 +468,11 @@ namespace awl
         //If check==false losing precision (trimming) is allowed.
         constexpr void rescale_self(uint8_t digits, bool check = true)
         {
-            if (m_data.exp() < digits)
+            if (_data.exp() < digits)
             {
                 extend_self(digits);
             }
-            else if (digits < m_data.exp())
+            else if (digits < _data.exp())
             {
                 trim_self(digits, check);
             }
@@ -483,92 +480,92 @@ namespace awl
 
         constexpr void extend_self(uint8_t digits)
         {
-            if (m_data.exp() < digits)
+            if (_data.exp() < digits)
             {
                 check_exp(digits);
 
                 //Nothing to do if the mantissa is zero.
-                if (m_data.man() != 0)
+                if (_data.man() != 0)
                 {
                     //the difference of two unsigned values is unsigned
                     const uint8_t diff = digits - exponent();
 
-                    const UInt denom = m_denoms[diff];
+                    const UInt denom = _denoms[diff];
 
-                    const UInt max_diff = max_mantissa() / m_data.man();
+                    const UInt max_diff = max_mantissa() / _data.man();
 
                     if (denom > max_diff)
                     {
                         throw std::runtime_error("Decimal overflow.");
                     }
 
-                    m_data.set_man(m_data.man() * denom);
+                    _data.set_man(_data.man() * denom);
                 }
 
-                m_data.set_exp(digits);
+                _data.set_exp(digits);
             }
         }
 
         constexpr void trim_self(uint8_t digits, bool check)
         {
-            if (digits < m_data.exp())
+            if (digits < _data.exp())
             {
                 const uint8_t diff = exponent() - digits;
 
-                const UInt denom = m_denoms[diff];
+                const UInt denom = _denoms[diff];
 
-                if (check && m_data.man() % denom != 0)
+                if (check && _data.man() % denom != 0)
                 {
                     throw std::runtime_error("Decimal is losing precision.");
                 }
 
-                m_data.set_man(m_data.man() / denom);
+                _data.set_man(_data.man() / denom);
 
-                m_data.set_exp(digits);
+                _data.set_exp(digits);
             }
         }
 
         constexpr void ceil_self(uint8_t digits)
         {
-            if (digits < m_data.exp())
+            if (digits < _data.exp())
             {
                 const uint8_t diff = exponent() - digits;
 
-                const UInt denom = m_denoms[diff];
+                const UInt denom = _denoms[diff];
 
-                UInt new_man = m_data.man() / denom;
+                UInt new_man = _data.man() / denom;
 
-                if (m_data.man() % denom != 0)
+                if (_data.man() % denom != 0)
                 {
                     ++new_man;
                 }
 
-                m_data.set_man(new_man);
+                _data.set_man(new_man);
 
-                m_data.set_exp(digits);
+                _data.set_exp(digits);
             }
         }
 
         //Removes traling zeros.
         constexpr void normalize_self()
         {
-            while (m_data.man() != 0 && m_data.exp() != 0)
+            while (_data.man() != 0 && _data.exp() != 0)
             {
-                const UInt remainder = m_data.man() % 10u;
+                const UInt remainder = _data.man() % 10u;
 
                 if (remainder != 0)
                 {
                     break;
                 }
 
-                m_data.set_man(m_data.man() / 10u);
-                m_data.set_exp(m_data.exp() - 1u);
+                _data.set_man(_data.man() / 10u);
+                _data.set_exp(_data.exp() - 1u);
             }
 
-            if (m_data.man() == 0)
+            if (_data.man() == 0)
             {
-                m_data.set_positive(true);
-                m_data.set_exp(0);
+                _data.set_positive(true);
+                _data.set_exp(0);
             }
         }
 
@@ -596,7 +593,7 @@ namespace awl
 
             auto make_sign = [](const Data& data) -> uint8_t { return data.positive() ? 0 : 1; };
             
-            return comp(make_sign(b.m_data), make_sign(a.m_data));
+            return comp(make_sign(b._data), make_sign(a._data));
         }
 
         template <class Comp>
@@ -609,8 +606,8 @@ namespace awl
 
             //Compare int parts.
             {
-                const UInt a_val = a.m_data.man() / a_denom;
-                const UInt b_val = b.m_data.man() / b_denom;
+                const UInt a_val = a._data.man() / a_denom;
+                const UInt b_val = b._data.man() / b_denom;
 
                 if (a_val != b_val)
                 {
@@ -620,20 +617,20 @@ namespace awl
 
             //We can align fractional parts.
             {
-                UInt a_val = a.m_data.man() % a_denom;
-                UInt b_val = b.m_data.man() % b_denom;
+                UInt a_val = a._data.man() % a_denom;
+                UInt b_val = b._data.man() % b_denom;
 
                 if (a.exponent() > b.exponent())
                 {
                     const uint8_t diff = a.exponent() - b.exponent();
 
-                    b_val *= m_denoms[diff];
+                    b_val *= _denoms[diff];
                 }
                 else if (b.exponent() > a.exponent())
                 {
                     const uint8_t diff = b.exponent() - a.exponent();
 
-                    a_val *= m_denoms[diff];
+                    a_val *= _denoms[diff];
                 }
 
                 return comp(a_val, b_val);
@@ -675,19 +672,19 @@ namespace awl
 
         static constexpr void align(decimal& a, decimal& b)
         {
-            if (a.m_data.exp() > b.m_data.exp())
+            if (a._data.exp() > b._data.exp())
             {
-                b.rescale_self(a.m_data.exp());
+                b.rescale_self(a._data.exp());
             }
-            else if (b.m_data.exp() > a.m_data.exp())
+            else if (b._data.exp() > a._data.exp())
             {
-                a.rescale_self(b.m_data.exp());
+                a.rescale_self(b._data.exp());
             }
         }
 
-        static constexpr typename Constants::DenomArray m_denoms = Constants::make_denoms();
+        static constexpr typename Constants::DenomArray _denoms = Constants::make_denoms();
         
-        Data m_data;
+        Data _data;
     };
 
     //Returns a normalized decimal, because we trimmed zeros.
@@ -732,7 +729,7 @@ namespace awl
 
         check_exp(digits);
 
-        const UInt denom = m_denoms[digits];
+        const UInt denom = _denoms[digits];
 
         if (int_part > max_mantissa() / denom)
         {
@@ -748,8 +745,8 @@ namespace awl
 
         decimal result;
 
-        result.m_data.set_man(int_part + fractional_part);
-        result.m_data.set_exp(digits);
+        result._data.set_man(int_part + fractional_part);
+        result._data.set_exp(digits);
 
         if (!positive)
         {
@@ -788,7 +785,7 @@ namespace awl
     template <typename UInt, uint8_t exp_len, template <typename, uint8_t> class DataTemplate>
     template <class C>
     constexpr std::tuple<typename std::basic_string_view<C>::const_iterator, uint8_t, UInt>
-        decimal<UInt, exp_len, DataTemplate>::parse_int(std::basic_string_view<C> fixed_string, bool point_terminator)
+        decimal<UInt, exp_len, DataTemplate>::parse_int(const std::basic_string_view<C> fixed_string, const bool point_terminator)
     {
         uint8_t digit_count = 0;
 

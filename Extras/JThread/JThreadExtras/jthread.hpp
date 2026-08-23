@@ -20,6 +20,7 @@ namespace std {
 class jthread
 {
   public:
+
     //***************************************** 
     //* standardized API:
     //***************************************** 
@@ -74,6 +75,7 @@ class jthread
   //***************************************** 
 
   private:
+
     //*** API for the starting thread:
     stop_source _stopSource;                   // stop_source for started thread
     ::std::thread _thread{};                   // started thread (if any)
@@ -115,8 +117,7 @@ inline jthread::jthread(Callable&& cb, Args&&... args)
                ::std::forward<Callable>(cb),  // pass callable
                ::std::forward<Args>(args)...  // pass arguments for callable
            }
-{
-}
+{}
 
 // move assignment operator:
 inline jthread& jthread::operator=(jthread&& t) noexcept {

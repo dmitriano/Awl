@@ -5,9 +5,9 @@
  
 #pragma once
 
-#include "Awl/Decimal.h"
 #include "QtExtras/StringConversion.h"
 
+#include "Awl/Decimal.h"
 #include "Awl/EnumTraits.h"
 #include "Awl/Crypto/IntHash.h"
 

@@ -56,13 +56,13 @@ namespace awl::io
         template<class Struct>
         void writeV(OutputStream & s, const Struct & val) const
         {
-            if constexpr (is_reflectable_v<Struct>)
+            if constexpr (reflectable<Struct>)
             {
                 const typename Base::StructIndexType index = static_cast<typename Base::StructIndexType>(Base::template StructIndex<Struct>);
                 write(s, index);
             }
 
-            if constexpr (is_tuplizable_v<Struct>)
+            if constexpr (tuplizable<Struct>)
             {
                 for_each(object_as_tuple(val), [this, &s](auto& field)
                 {

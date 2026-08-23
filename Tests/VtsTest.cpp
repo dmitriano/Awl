@@ -3,6 +3,10 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Tests/Helpers/BenchmarkHelpers.h"
+#include "Tests/Helpers/FormattingHelpers.h"
+#include "Tests/VtsTestCommon.h"
+
 #include "Awl/Io/VectorStream.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StopWatch.h"
@@ -12,10 +16,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "Tests/Helpers/BenchmarkHelpers.h"
-#include "Tests/Helpers/FormattingHelpers.h"
-#include "Tests/VtsTestCommon.h"
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;

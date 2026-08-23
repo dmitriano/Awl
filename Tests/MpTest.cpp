@@ -3,13 +3,12 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "VtsData.h"
+
 #include "Awl/Mp/TypeCollector.h"
 #include "Awl/Mp/VariantFromStructs.h"
-
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
-
-#include "VtsData.h"
 
 #include <vector>
 #include <map>

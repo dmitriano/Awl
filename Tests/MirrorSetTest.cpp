@@ -25,8 +25,8 @@ namespace
 
     AWL_MEMBERWISE_EQUATABLE(A)
 
-    using Compare1 = awl::member_compare<&A::key1>;
-    using Compare2 = awl::member_compare<&A::key2>;
+    using Compare1 = awl::KeyCompare<A, &A::key1>;
+    using Compare2 = awl::KeyCompare<A, &A::key2>;
     
     using Set = awl::observable_vector_set<A, Compare1>;
     using MirrorSet = awl::mirror_set<A, Compare2>;

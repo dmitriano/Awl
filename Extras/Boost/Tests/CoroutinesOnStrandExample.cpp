@@ -14,7 +14,6 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/strand.hpp>
-
 #include <chrono>
 #include <mutex>
 #include <optional>
@@ -43,8 +42,8 @@ namespace
         : 
             context(std::cref(context)),
             executor(executor),
-            m_index(index),
-            m_val(val),
+            _index(index),
+            _val(val),
             workDuration(work_duration)
         {}
 
@@ -62,7 +61,7 @@ namespace
 
             auto after = std::this_thread::get_id();
 
-            logger().debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), m_index, before, after, value);
+            logger()->debug(_T("#{} first awaited second on thread {} and resumed on thread {}, result = {}"), _index, before, after, value);
         }
 
         awaitable<void> print()
@@ -76,7 +75,7 @@ namespace
 
         void log(const char* caption) const
         {
-            logger().debug(_T("#{} {} on thread {}"), m_index, awl::fromACString(caption), std::this_thread::get_id());
+            logger()->debug(_T("#{} {} on thread {}"), _index, awl::fromACString(caption), std::this_thread::get_id());
         }
 
         awaitable<int> runSecondStage()
@@ -131,13 +130,13 @@ namespace
 
                 Value sample = i;
 
-                m_val.store(sample);
+                _val.store(sample);
 
-                const size_t actual = m_val.load();
+                const size_t actual = _val.load();
 
                 if (actual != sample)
                 {
-                    logger().error(_T("#{} Data Race! Stored {}, but loaded {}"), m_index, sample.load(), actual);
+                    logger()->error(_T("#{} Data Race! Stored {}, but loaded {}"), _index, sample.load(), actual);
                 }
             }
 
@@ -162,15 +161,15 @@ namespace
             return executor;
         }
 
-        awl::Logger& logger() const
+        const std::shared_ptr<awl::ILogger>& logger() const
         {
-            return *context.get().logger;
+            return context.get().logger;
         }
 
         std::reference_wrapper<const awl::testing::TestContext> context;
         asio::any_io_executor executor;
-        const std::size_t m_index;
-        Value& m_val;
+        const std::size_t _index;
+        Value& _val;
         const std::chrono::milliseconds workDuration;
     };
 
@@ -191,6 +190,10 @@ namespace
             }
         }
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
         asio::any_io_executor getExecutor() const
         {
             if (strand)
@@ -200,6 +203,9 @@ namespace
 
             return pool.get_executor();
         }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
     private:
 
@@ -239,7 +245,7 @@ namespace
 }
 
 // Run
-// AwlTest --run CoroutinesOnStrandExample_Example --output all --without_strand
+// AwlTest --run=CoroutinesOnStrandExample_Example --output=all --without_strand
 // to see the data race.
 AWL_EXAMPLE(CoroutinesOnStrand)
 {

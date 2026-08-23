@@ -5,7 +5,6 @@
 
 #include "Awl/BitMap.h"
 #include "Awl/EnumFormatter.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 using namespace awl::testing;
@@ -106,11 +105,10 @@ namespace BitMapTest1
 
         AWL_BITMAP(GameLevel, Baby, Starter, Professional, Expert)
 
-        A(GameLevelBitMap bm) : m_bm(bm)
-        {
-        }
+        A(GameLevelBitMap bm) : _bm(bm)
+        {}
 
-        GameLevelBitMap m_bm;
+        GameLevelBitMap _bm;
 
         static void Test()
         {
@@ -133,8 +131,8 @@ AWL_TEST(BitMapEnclosed)
 
     A::Test();
 
-    AWL_ASSERT(A({ }).m_bm.none());
-    AWL_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert }).m_bm.all()));
+    AWL_ASSERT(A({ })._bm.none());
+    AWL_ASSERT((A({ A::GameLevel::Baby, A::GameLevel::Starter, A::GameLevel::Professional, A::GameLevel::Expert })._bm.all()));
 
     using GameLevelBitMap2 = awl::bitmap<A::GameLevel, A::GameLevelTraits::Count>;
     AWL_ASSERT(GameLevelBitMap2{ }.none());

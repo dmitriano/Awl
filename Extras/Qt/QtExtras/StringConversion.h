@@ -8,9 +8,9 @@
 #include "Awl/String.h"
 #include "Awl/EnumTraits.h"
 
-#include <string>
-
 #include <QString>
+
+#include <string>
 
 namespace awl
 {

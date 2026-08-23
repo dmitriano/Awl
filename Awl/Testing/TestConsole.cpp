@@ -8,46 +8,235 @@
 #include "Awl/Testing/TestAssert.h"
 #include "Awl/Testing/CommandLineProvider.h"
 #include "Awl/Testing/LocalAttribute.h"
-
 #include "Awl/StdConsole.h"
+#include "Awl/CompositeLogger.h"
+#include "Awl/EnumTraits.h"
 #include "Awl/IntRange.h"
 #include "Awl/ScopeGuard.h"
 #include "Awl/StaticMap.h"
+#include "Awl/StdStreamLogger.h"
+
+#ifdef AWL_BOOST
+    #include "BoostExtras/Json/JsonUtil.h"
+#endif
 
 #ifdef AWL_QT
-    #include "QtExtras/Json/JsonLoadSave.h"
     #include "QtExtras/StringConversion.h"
 #endif
 
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <optional>
 #include <set>
 #include <regex>
+#include <vector>
 
 namespace awl::testing
 {
+    AWL_SEQUENTIAL_ENUM(TestOutput, Failed, All, Null)
+}
+
+AWL_ENUM_TRAITS(awl::testing, TestOutput)
+
+namespace awl::testing
+{
+    namespace
+    {
+        struct TestConsoleLogger
+        {
+            std::shared_ptr<CompositeLogger> logger;
+            std::vector<std::shared_ptr<StdStreamLogger>> delayedLoggers;
+        };
+
+        std::shared_ptr<CompositeLogger> makeStdoutLogger(const std::string& log_level)
+        {
+            std::shared_ptr<CompositeLogger> logger = std::make_shared<CompositeLogger>();
+            logger->addLogger(std::make_shared<StdStreamLogger>(
+                "",
+                StdStreamLogger::coutStream(),
+                log_level));
+            return logger;
+        }
+
+        void addFileLogger(
+            TestConsoleLogger& console_logger,
+            const std::optional<std::string>& log_file,
+            const std::string& log_level,
+            const std::optional<std::string>& file_level,
+            bool delayed)
+        {
+            if (!log_file)
+            {
+                return;
+            }
+
+            std::shared_ptr<std::basic_ofstream<Char>> file_out = std::make_shared<std::basic_ofstream<Char>>(
+                std::filesystem::path(*log_file),
+                std::ios_base::trunc);
+
+            if (!file_out->is_open())
+            {
+                throw TestException(std::format("Cannot open log file '{}'.", *log_file));
+            }
+
+            const std::string& effective_log_level = file_level ? *file_level : log_level;
+
+            std::shared_ptr<StdStreamLogger> logger = std::make_shared<StdStreamLogger>(
+                "",
+                file_out,
+                effective_log_level);
+
+            console_logger.logger->addLogger(logger);
+
+            if (delayed)
+            {
+                console_logger.delayedLoggers.push_back(logger);
+            }
+        }
+
+        void addStdoutLogger(
+            TestConsoleLogger& console_logger,
+            const std::string& log_level,
+            bool delayed)
+        {
+            std::shared_ptr<StdStreamLogger> logger = std::make_shared<StdStreamLogger>(
+                "",
+                StdStreamLogger::coutStream(),
+                log_level);
+
+            console_logger.logger->addLogger(logger);
+
+            if (delayed)
+            {
+                console_logger.delayedLoggers.push_back(logger);
+            }
+        }
+
+        void delayLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->delay();
+            }
+        }
+
+        void flushDelayedLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->flushDelayed();
+            }
+        }
+
+        void clearDelayedLoggers(const std::vector<std::shared_ptr<StdStreamLogger>>& loggers)
+        {
+            for (const std::shared_ptr<StdStreamLogger>& logger : loggers)
+            {
+                logger->clearDelayed();
+            }
+        }
+
+        TestConsoleLogger makeTestConsoleLogger(
+            TestOutput output,
+            const std::string& log_level,
+            const std::optional<std::string>& file_level,
+            const std::optional<std::string>& log_file)
+        {
+            TestConsoleLogger console_logger{ std::make_shared<CompositeLogger>(), {} };
+
+            switch (output)
+            {
+            case TestOutput::All:
+                addStdoutLogger(console_logger, log_level, false);
+                break;
+
+            case TestOutput::Failed:
+                addStdoutLogger(console_logger, log_level, true);
+                break;
+
+            case TestOutput::Null:
+                break;
+            }
+
+            addFileLogger(console_logger, log_file, log_level, file_level, output == TestOutput::Failed);
+
+            return console_logger;
+        }
+
+#ifdef AWL_BOOST
+
+        boost::json::object loadTestAttributes(const CmdString& file_name)
+        {
+            std::ifstream in(std::filesystem::path(file_name), std::ios_base::binary);
+
+            if (!in.is_open())
+            {
+                throw JsonException(std::format(_T("Cannot open input file '{}'."), file_name));
+            }
+
+            const std::string text{
+                std::istreambuf_iterator<char>(in),
+                std::istreambuf_iterator<char>()};
+
+            boost::json::value jv = boost::json::parse(text);
+
+            if (!jv.is_object())
+            {
+                throw JsonException(std::format(_T("JSON object expected in file '{}'."), file_name));
+            }
+
+            return jv.as_object();
+        }
+
+#endif
+    }
+
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
-        m_logger(std::make_shared<ConsoleLogger>()),
-        m_ap(provider),
-        m_context{ m_logger, std::move(stop_token), m_ap, m_typeProvider}
-    {
-    }
+        _logger(makeStdoutLogger(LogLevel::Trace)),
+        _ap(provider),
+        _context{ _logger, std::move(stop_token), _ap, _typeProvider}
+    {}
 
     template <attribute_provider Provider>
     bool TestConsole<Provider>::runTests()
     {
-        TestContext& context = m_context;
-
-        awl::ostream& out = awl::cout();
+        TestContext& context = _context;
         
+        AWL_ATTRIBUTE(TestOutput, output, TestOutput::Failed);
+        AWL_ATTRIBUTE(std::string, log_level, LogLevel::Trace);
+        AWL_ATTRIBUTE(std::optional<std::string>, file_level, std::nullopt);
+        AWL_ATTRIBUTE(std::optional<std::string>, log_file, std::nullopt);
         AWL_ATTRIBUTE(std::string, run, {});
+
+        if (!isLogLevel(log_level))
+        {
+            throw TestException(std::format("Not a valid 'log_level' parameter value: '{}'.", log_level));
+        }
+
+        if (file_level && !isLogLevel(*file_level))
+        {
+            throw TestException(std::format("Not a valid 'file_level' parameter value: '{}'.", *file_level));
+        }
 
         bool passed = false;
 
-        ostringstream last_output;
+        TestConsoleLogger console_logger = makeTestConsoleLogger(output, log_level, file_level, log_file);
+        _logger = console_logger.logger;
+        context.logger = _logger;
 
         try
         {
-            TestRunner runner(last_output);
+            TestRunner runner(
+                [&console_logger]
+                {
+                    delayLoggers(console_logger.delayedLoggers);
+                },
+                [&console_logger]
+                {
+                    clearDelayedLoggers(console_logger.delayedLoggers);
+                });
 
             if (run.empty())
             {
@@ -55,16 +244,16 @@ namespace awl::testing
 
                 StaticMap<TestFunc> test_map{ StaticMap<TestFunc>::fill(filter) };
 
-                out << std::endl << _T("***************** Running ") << test_map.size() << _T(" tests *****************") << std::endl;
+                context.logger->info("Running {} tests.", test_map.size());
 
                 for (const TestLink* p_link : test_map)
                 {
-                    runner.runLink(p_link, context, out);
+                    runner.runLink(p_link, context, context.logger->createLogger(p_link->name()));
                 }
             }
             else
             {
-                out << std::endl << _T("***************** Running test ") << run << _T(" *****************") << std::endl;
+                context.logger->info("Running test {}.", run);
 
                 const TestLink* p_link = static_chain<TestFunc>().find(run.c_str());
 
@@ -73,18 +262,17 @@ namespace awl::testing
                     throw TestException(std::format(_T("The test '{}' does not exist."), run));
                 }
 
-                runner.runLink(p_link, context, out);
+                runner.runLink(p_link, context, context.logger);
             }
 
-            out << std::endl << _T("***************** The tests passed *****************") << std::endl;
+            context.logger->info("The tests passed.");
 
             passed = true;
         }
         catch (const awl::testing::TestException& e)
         {
-            out << std::endl << last_output.str();
-
-            out << std::endl << _T("***************** The tests failed: ") << e.message() << std::endl;
+            flushDelayedLoggers(console_logger.delayedLoggers);
+            context.logger->error(_T("The tests failed: {}"), e.message());
         }
 
         // awl::static_chain<TestFunc>().clear();
@@ -103,7 +291,7 @@ namespace awl::testing
         }
         catch (const TestException& e)
         {
-            cout() << _T("The following error has occurred: ") << e.message() << std::endl;
+            _logger->error(_T("The following error has occurred: {}"), e.message());
         }
 
         return 2;
@@ -111,72 +299,81 @@ namespace awl::testing
 
     int run(int argc, CmdChar* argv[], std::stop_token stop_token)
     {
-        CommandLineProvider cl(argc, argv);
-
-        // "list" command runs without TestRunner
+        try
         {
-            ProviderContext<CommandLineProvider> context{ cl };
+            CommandLineProvider cl(argc, argv);
 
-            AWL_FLAG(list);
-
-            if (list)
+            // "list" command runs without TestRunner
             {
-                AWL_ATTRIBUTE(std::string, filter, {});
+                ProviderContext<CommandLineProvider> context{ cl };
 
-                auto test_map = StaticMap<TestFunc>::fill(filter);
+                AWL_FLAG(list);
 
-                for (auto& p_link : test_map)
+                if (list)
                 {
-                    awl::cout() << p_link->name() << std::endl;
+                    AWL_ATTRIBUTE(std::string, filter, {});
+
+                    auto test_map = StaticMap<TestFunc>::fill(filter);
+
+                    for (auto& p_link : test_map)
+                    {
+                        awl::cout() << p_link->name() << std::endl;
+                    }
+
+                    awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+
+                    return 0;
                 }
-
-                awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
-
-                return 0;
             }
-        }
 
-#ifdef AWL_QT
+#ifdef AWL_BOOST
 
-        QJsonObject jo;
+            boost::json::object jo;
 
-        CmdString json_file;
+            CmdString json_file;
 
-        if (cl.tryGet("json", json_file))
-        {
-            try
+            if (cl.tryGet("json", json_file))
             {
-                jo = loadObjectFromFile(toQString(json_file));
-            }
-            catch (const JsonException& e)
-            {
-                awl::cout() << e.message() << std::endl;
+                try
+                {
+                    jo = loadTestAttributes(json_file);
+                }
+                catch (const JsonException& e)
+                {
+                    makeStdoutLogger(LogLevel::Trace)->error(e.message());
 
-                return 3;
+                    return 3;
+                }
             }
-        }
 
-        CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(jo));
+            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(std::move(jo)));
 
 #else
 
-        CompositeProvider<CommandLineProvider> ap(std::move(cl));
+            CompositeProvider<CommandLineProvider> ap(std::move(cl));
 
 #endif
 
-        TestConsole console(ap, std::move(stop_token));
+            TestConsole console(ap, std::move(stop_token));
 
-        auto guard = make_scope_guard([&ap]
-        {
-            auto names = ap.get_provider<0>().getUnusedOptions();
-
-            for (const std::string& name : names)
+            auto guard = make_scope_guard([&ap, logger = console.context().logger]
             {
-                cout() << _T("Unused option '" << name << _T("'")) << std::endl;
-            }
-        });
+                auto names = ap.get_provider<0>().getUnusedOptions();
 
-        return console.run();
+                for (const std::string& name : names)
+                {
+                    logger->warning("Unused option '{}'.", name);
+                }
+            });
+
+            return console.run();
+        }
+        catch (const CommandLineException& e)
+        {
+            makeStdoutLogger(LogLevel::Trace)->error(_T("The following error has occurred: {}"), e.message());
+        }
+
+        return 2;
     }
 
     int run(int argc, CmdChar* argv[])

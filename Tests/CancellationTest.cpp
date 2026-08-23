@@ -3,9 +3,6 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <chrono>
-#include <vector>
-
 #include "Awl/Sleep.h"
 #include "Awl/StopWatch.h"
 #include "Awl/Testing/UnitTest.h"
@@ -14,6 +11,9 @@
 #include "Awl/Time.h"
 #include "Awl/CppStd/ThreadIdFormatter.h"
 #include "Awl/StopWatchFormatter.h"
+
+#include <chrono>
+#include <vector>
 
 AWL_TEST(Cancellation_NegativeTimeDiff)
 {
@@ -38,7 +38,7 @@ static constexpr int default_worker_sleep_time = 1000;
 
 using Duration = std::chrono::milliseconds;
 
-//./AwlTest --filter Cancellation_InterruptibleSleep.* --output failed --loop 100 --thread_count 10
+//./AwlTest --filter=Cancellation_InterruptibleSleep.* --output=failed --loop=100 --thread_count=10
 AWL_TEST(Cancellation_InterruptibleSleep)
 {
     AWL_ATTRIBUTE(int, client_sleep_time, default_client_sleep_time);

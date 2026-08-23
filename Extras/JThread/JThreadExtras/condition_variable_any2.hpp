@@ -35,6 +35,7 @@ class condition_variable_any2
         unlock_guard& operator=(unlock_guard&&)=delete;
         
     private:
+
         Lockable& mtx;
     };
 
@@ -53,6 +54,7 @@ class condition_variable_any2
     };
     
   public:
+
     //***************************************** 
     //* standardized API for condition_variable_any:
     //***************************************** 
@@ -181,6 +183,7 @@ class condition_variable_any2
   //***************************************** 
 
   private:
+
     //*** API for the starting thread:
     std::shared_ptr<cv_internals> internals;
      // NOTE (as Howard Hinnant pointed out): 

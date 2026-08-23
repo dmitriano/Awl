@@ -7,38 +7,30 @@
 
 #include "Awl/Testing/TestChain.h"
 
-#include <iostream>
+#include <functional>
+#include <memory>
 
 namespace awl 
 {
     namespace testing 
     {
-        //TODO: Implement QueryTests(filter) with std::ranges and move all output related code to TestConsole.
         class TestRunner
         {
         public:
 
-            TestRunner(ostringstream& last_output);
+            TestRunner() = default;
 
-            String getLastOutput() const
-            {
-                return lastOutput.str();
-            }
+            TestRunner(std::function<void()> delay_output, std::function<void()> clear_output);
 
-            void runLink(const TestLink* p_test_link, const TestContext& context, awl::ostream& out);
+            void runLink(
+                const TestLink* p_test_link,
+                const TestContext& context,
+                std::shared_ptr<ILogger> test_logger);
 
         private:
 
-            class NullBuffer : public std::basic_streambuf<Char>
-            {
-            public:
-                int overflow(int c) { return c; }
-            };
-
-            NullBuffer nullBuffer;
-            std::basic_ostream<Char> nullOutput;
-
-            ostringstream& lastOutput;
+            std::function<void()> _delayOutput;
+            std::function<void()> _clearOutput;
         };
     }
 }

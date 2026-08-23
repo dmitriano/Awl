@@ -9,6 +9,9 @@
 #include "Awl/Observable.h"
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Testing/Formatter.h"
+#include "Helpers/TimeQueue.h"
+
+#include <vector>
 
 using namespace awl::testing;
 
@@ -24,10 +27,9 @@ namespace
     public:
 
         ChangeHandler() = default;
-        
+
         ChangeHandler(const TestContext & c) : pContext(&c)
-        {
-        }
+        {}
 
         void ItChanged(int param, awl::String val) override;
 
@@ -165,7 +167,7 @@ AWL_TEST(Observer_Move)
 
     ChangeHandler handler2_copy(context);
     handler2_copy = std::move(handler2);
-    
+
     something1.SetIt(5);
 
     AWL_ASSERTM_FALSE(handler1.included(), _T("Observer #1 is included"));
@@ -242,8 +244,7 @@ namespace
     public:
 
         ChangeHandler2(const TestContext & c) : context(c)
-        {
-        }
+        {}
 
         void SomeHanderFunc(const awl::String & val)
         {
@@ -293,20 +294,19 @@ namespace
     public:
 
         ConditionHandler(bool result, int* p_count, int* p_last_value)
-            : m_result(result), pCount(p_count), pLastValue(p_last_value)
-        {
-        }
+            : _result(result), pCount(p_count), pLastValue(p_last_value)
+        {}
 
         bool check(int value) override
         {
             ++(*pCount);
             *pLastValue = value;
-            return m_result;
+            return _result;
         }
 
     private:
 
-        bool m_result;
+        bool _result;
         int* pCount = nullptr;
         int* pLastValue = nullptr;
     };
@@ -315,14 +315,19 @@ namespace
     {
     public:
 
-        bool checkAll(int value)
+        bool checkWhile(int value)
         {
-            return notifyWhileTrue(&IConditioncheck::check, value);
+            return notifyWhile(&IConditioncheck::check, value);
+        }
+
+        bool checkUntil(int value)
+        {
+            return notifyUntil(&IConditioncheck::check, value);
         }
     };
 }
 
-AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
+AWL_TEST(Observable_NotifyWhile_StopsOnFalse)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -343,9 +348,9 @@ AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
     observable.subscribe(&handler2);
     observable.subscribe(&handler3);
 
-    const bool result = observable.checkAll(42);
+    const bool result = observable.checkWhile(42);
 
-    AWL_ASSERTM_FALSE(result, _T("notifyWhileTrue should stop at first false."));
+    AWL_ASSERTM_FALSE(result, _T("notifyWhile should stop at first false."));
     AWL_ASSERT_EQUAL(1, count1);
     AWL_ASSERT_EQUAL(1, count2);
     AWL_ASSERT_EQUAL(0, count3);
@@ -354,7 +359,7 @@ AWL_TEST(Observable_NotifyWhileTrue_StopsOnFalse)
     AWL_ASSERT_EQUAL(0, last3);
 }
 
-AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
+AWL_TEST(Observable_NotifyWhile_AllTrue)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -371,11 +376,157 @@ AWL_TEST(Observable_NotifyWhileTrue_AllTrue)
     observable.subscribe(&handler1);
     observable.subscribe(&handler2);
 
-    const bool result = observable.checkAll(7);
+    const bool result = observable.checkWhile(7);
 
-    AWL_ASSERTM_TRUE(result, _T("notifyWhileTrue should return true when all observers return true."));
+    AWL_ASSERTM_TRUE(result, _T("notifyWhile should return true when all observers return true."));
     AWL_ASSERT_EQUAL(1, count1);
     AWL_ASSERT_EQUAL(1, count2);
     AWL_ASSERT_EQUAL(7, last1);
     AWL_ASSERT_EQUAL(7, last2);
+}
+
+AWL_TEST(Observable_NotifyUntil_StopsOnTrue)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int count3 = 0;
+    int last1 = 0;
+    int last2 = 0;
+    int last3 = 0;
+
+    ConditionHandler handler1(false, &count1, &last1);
+    ConditionHandler handler2(true, &count2, &last2);
+    ConditionHandler handler3(false, &count3, &last3);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+    observable.subscribe(&handler3);
+
+    const bool result = observable.checkUntil(11);
+
+    AWL_ASSERTM_TRUE(result, _T("notifyUntil should stop at first true."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(0, count3);
+    AWL_ASSERT_EQUAL(11, last1);
+    AWL_ASSERT_EQUAL(11, last2);
+    AWL_ASSERT_EQUAL(0, last3);
+}
+
+AWL_TEST(Observable_NotifyUntil_AllFalse)
+{
+    AWL_UNUSED_CONTEXT;
+
+    ConditionObservable observable;
+
+    int count1 = 0;
+    int count2 = 0;
+    int last1 = 0;
+    int last2 = 0;
+
+    ConditionHandler handler1(false, &count1, &last1);
+    ConditionHandler handler2(false, &count2, &last2);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    const bool result = observable.checkUntil(13);
+
+    AWL_ASSERTM_FALSE(result, _T("notifyUntil should return false when all observers return false."));
+    AWL_ASSERT_EQUAL(1, count1);
+    AWL_ASSERT_EQUAL(1, count2);
+    AWL_ASSERT_EQUAL(13, last1);
+    AWL_ASSERT_EQUAL(13, last2);
+}
+
+namespace
+{
+    using namespace std::chrono_literals;
+
+    struct IAsyncNotify
+    {
+        virtual awl::coro::Task<void> changed(int value) = 0;
+    };
+
+    class AsyncHandler : public awl::Observer<IAsyncNotify>
+    {
+    public:
+
+        AsyncHandler(
+            awl::testing::ITimeQueue& time_queue,
+            int tag,
+            std::vector<int>* p_events,
+            bool defer = false) :
+            _timeQueue(time_queue),
+            _tag(tag),
+            _events(p_events),
+            _defer(defer)
+        {}
+
+        awl::coro::Task<void> changed(int value) override
+        {
+            if (_defer)
+            {
+                co_await awl::testing::TimeQueueAwaitable(_timeQueue, 1ms);
+            }
+
+            _events->push_back(_tag * 1000 + value);
+        }
+
+    private:
+
+        awl::testing::ITimeQueue& _timeQueue;
+        int _tag = 0;
+        std::vector<int>* _events = nullptr;
+        bool _defer = false;
+    };
+
+    class AsyncObservable : public awl::Observable<IAsyncNotify>
+    {
+    public:
+
+        awl::coro::Task<int> setValueAsync(int value)
+        {
+            co_await notifyAsync(&IAsyncNotify::changed, value);
+            co_return value;
+        }
+    };
+}
+
+AWL_TEST(Observable_NotifyAsync)
+{
+    AWL_UNUSED_CONTEXT;
+
+    AsyncObservable observable;
+    awl::testing::TimeQueue time_queue;
+    std::vector<int> events;
+
+    AsyncHandler handler1(time_queue, 1, &events, true);
+    AsyncHandler handler2(time_queue, 2, &events, true);
+
+    observable.subscribe(&handler1);
+    observable.subscribe(&handler2);
+
+    awl::coro::Task<int> task = observable.setValueAsync(7);
+
+    AWL_ASSERT(!task.is_ready());
+    AWL_ASSERT_EQUAL(0u, events.size());
+
+    time_queue.loop(1);
+
+    AWL_ASSERT(!task.is_ready());
+    AWL_ASSERT_EQUAL(1u, events.size());
+    AWL_ASSERT_EQUAL(1007, events[0]);
+
+    time_queue.loop();
+
+    AWL_ASSERT(task.is_ready());
+    AWL_ASSERT_EQUAL(7, task.get());
+
+    AWL_ASSERT_EQUAL(2u, events.size());
+    AWL_ASSERT_EQUAL(2007, events[1]);
 }

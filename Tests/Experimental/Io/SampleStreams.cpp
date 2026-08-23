@@ -5,6 +5,7 @@
 
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/Io/MeasureStream.h"
+
 #include <memory>
 
 namespace awl::io

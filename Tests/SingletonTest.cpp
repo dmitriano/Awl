@@ -3,10 +3,10 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Tests/Helpers/NonCopyable.h"
+
 #include "Awl/SharedSingleton.h"
 #include "Awl/Testing/UnitTest.h"
-
-#include "Tests/Helpers/NonCopyable.h"
 
 #include <memory>
 

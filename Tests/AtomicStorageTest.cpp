@@ -4,6 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Helpers/BenchmarkHelpers.h"
+#include "VtsData.h"
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Io/HashingSerializable.h"
@@ -18,10 +19,10 @@
 #include "Awl/ScopeGuard.h"
 #include "Awl/Random.h"
 #include "Awl/StopWatch.h"
-#include "VtsData.h"
 
 #include <memory>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 
 
@@ -95,7 +96,7 @@ AWL_TEST(AtomicStoragePlain)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = *context.logger;
+    auto logger = context.logger;
 
     using Value = awl::io::PlainSerializable<v2::B, HashInputStream, HashOutputStream>;
 
@@ -159,7 +160,7 @@ AWL_TEST(AtomicStorageVts)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = *context.logger;
+    auto logger = context.logger;
 
     {
         {
@@ -232,7 +233,7 @@ AWL_TEST(AtomicStorageVts)
 
 namespace
 {
-    awl::io::AtomicStorage MakeStorage(awl::Logger& logger)
+    awl::io::AtomicStorage MakeStorage(std::shared_ptr<awl::ILogger> logger)
     {
         return awl::io::AtomicStorage(logger, master_name, backup_name);
     }
@@ -242,7 +243,7 @@ AWL_TEST(AtomicStorageMove)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = *context.logger;
+    auto logger = context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
 
@@ -270,7 +271,7 @@ AWL_TEST(AtomicStorageSave)
 {
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = *context.logger;
+    auto logger = context.logger;
 
     awl::io::AtomicStorage storage = MakeStorage(logger);
     AWL_ASSERT(storage.isEmpty());
@@ -301,7 +302,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        auto& logger = *context.logger;
+        auto logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWL_ASSERT(storage.isEmpty());
@@ -418,7 +419,7 @@ namespace
     {
         auto guard = awl::make_scope_guard(RemoveFiles);
 
-        auto& logger = *context.logger;
+        auto logger = context.logger;
 
         awl::io::AtomicStorage storage = MakeStorage(logger);
         AWL_ASSERT(storage.isEmpty());
@@ -638,7 +639,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
     auto guard = awl::make_scope_guard(RemoveFiles);
 
-    auto& logger = *context.logger;
+    auto logger = context.logger;
 
     SomeState state{ 0u, {} };
 

@@ -56,7 +56,7 @@ namespace awl::crypto
     {
     public:
 
-        constexpr Crc64(uint64_t seed = 127) : m_seed(seed) {}
+        constexpr Crc64(uint64_t seed = 127) : _seed(seed) {}
 
         template <class InputIt>
             requires std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value
@@ -64,7 +64,7 @@ namespace awl::crypto
         {
             using T = typename std::iterator_traits<InputIt>::value_type;
 
-            uint64_t crc = m_seed;
+            uint64_t crc = _seed;
 
             for (InputIt i = begin; i != end; ++i)
             {
@@ -220,7 +220,7 @@ namespace awl::crypto
             UINT64_C(0x536fa08fdfd90e51), UINT64_C(0x29b7d047efec8728),
         };
 
-        uint64_t m_seed;
+        uint64_t _seed;
 
         static constexpr void calc(uint64_t & crc, uint8_t byte)
         {

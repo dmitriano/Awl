@@ -71,8 +71,8 @@ namespace awl
             {
                 return value_type
                 {
-                    m_i->second.leftKey + m_offset,
-                    m_i->second.value
+                    _i->second.leftKey + _offset,
+                    _i->second.value
                 };
             }
 
@@ -110,7 +110,7 @@ namespace awl
 
             bool operator == (const MyIterator& other) const
             {
-                assert(m_pMap == other.m_pMap);
+                assert(_pMap == other._pMap);
                 
                 return as_tie() == other.as_tie();
             }
@@ -128,31 +128,30 @@ namespace awl
             // Conversion to const_iterator
             operator MyIterator<const Container, typename RightMap::const_iterator, const Value>() const
             {
-                return MyIterator<const Container, typename RightMap::const_iterator, const Value>(m_pMap, m_i, m_offset);
+                return MyIterator<const Container, typename RightMap::const_iterator, const Value>(_pMap, _i, _offset);
             }
 
         private:
 
             MyIterator(Container* p_map, Iterator i, Key offset = 0) :
-                m_pMap(p_map), m_i(i), m_offset(offset)
-            {
-            }
+                _pMap(p_map), _i(i), _offset(offset)
+            {}
 
             void move_next()
             {
-                assert(m_i != container().m_map.end());
+                assert(_i != container()._map.end());
                 
-                Key length = m_i->first - m_i->second.leftKey;
-                assert(container().less_or_equal(m_offset, length));
+                Key length = _i->first - _i->second.leftKey;
+                assert(container().less_or_equal(_offset, length));
 
-                if (container().equal(m_offset, length))
+                if (container().equal(_offset, length))
                 {
-                    m_i = std::next(m_i);
-                    m_offset = 0;
+                    _i = std::next(_i);
+                    _offset = 0;
                 }
                 else
                 {
-                    m_offset = next_key(m_offset);
+                    _offset = next_key(_offset);
                 }
             }
 
@@ -163,19 +162,19 @@ namespace awl
 
             const interval_map& container() const
             {
-                return *m_pMap;
+                return *_pMap;
             }
 
             auto as_tie() const
             {
-                return std::tie(m_i, m_offset);
+                return std::tie(_i, _offset);
             }
 
-            Container* m_pMap;
+            Container* _pMap;
 
-            Iterator m_i;
+            Iterator _i;
 
-            Key m_offset;
+            Key _offset;
 
             friend interval_map;
         };
@@ -187,13 +186,13 @@ namespace awl
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        iterator begin() { return iterator(this, m_map.begin()); }
+        iterator begin() { return iterator(this, _map.begin()); }
         const_iterator begin() const { return cbegin(); }
-        const_iterator cbegin() const { return iterator(this, m_map.begin()); }
+        const_iterator cbegin() const { return iterator(this, _map.begin()); }
 
-        iterator end() { return iterator(this, m_map.end()); }
+        iterator end() { return iterator(this, _map.end()); }
         const_iterator end() const { return cend(); }
-        const_iterator cend() const { return iterator(this, m_map.end());}
+        const_iterator cend() const { return iterator(this, _map.end());}
 
         reverse_iterator rbegin() { return std::make_reverse_iterator(end()); }
         const_reverse_iterator rbegin() const { return crbegin(); }
@@ -240,9 +239,9 @@ namespace awl
                 typename RightMap::iterator remove_end;
 
                 {
-                    auto a_i = m_map.lower_bound(a);
+                    auto a_i = _map.lower_bound(a);
 
-                    if (a_i != m_map.end())
+                    if (a_i != _map.end())
                     {
                         RightValue& a_right_value = a_i->second;
 
@@ -253,11 +252,11 @@ namespace awl
 
                             Key saved_right_key = a_i->first;
 
-                            m_map.erase(a_i);
+                            _map.erase(a_i);
 
                             Key new_right_key = previous_key(std::forward<KeyA>(a));
                             
-                            auto [new_i, inserted] = m_map.emplace(new_right_key, std::move(saved_right_value));
+                            auto [new_i, inserted] = _map.emplace(new_right_key, std::move(saved_right_value));
 
                             if (!inserted)
                             {
@@ -267,7 +266,7 @@ namespace awl
                             if (less(b, saved_right_key))
                             {
                                 // [a, b] inside the current interval, insert the tail with the same value.
-                                auto [tail_i, tail_inserted] = m_map.emplace(saved_right_key, RightValue{ next_key(b), new_i->second.value });
+                                auto [tail_i, tail_inserted] = _map.emplace(saved_right_key, RightValue{ next_key(b), new_i->second.value });
 
                                 if (!tail_inserted)
                                 {
@@ -275,7 +274,7 @@ namespace awl
                                 }
 
                                 // b is already handled.
-                                remove_begin = m_map.end();
+                                remove_begin = _map.end();
                             }
                             else
                             {
@@ -290,15 +289,15 @@ namespace awl
                     }
                     else
                     {
-                        remove_begin = m_map.end();
+                        remove_begin = _map.end();
                     }
                 }
 
-                if (remove_begin != m_map.end())
+                if (remove_begin != _map.end())
                 {
-                    auto b_i = m_map.lower_bound(b);
+                    auto b_i = _map.lower_bound(b);
 
-                    if (b_i != m_map.end())
+                    if (b_i != _map.end())
                     {
                         RightValue& b_right_value = b_i->second;
 
@@ -327,13 +326,13 @@ namespace awl
                     }
                     else
                     {
-                        remove_end = m_map.end();
+                        remove_end = _map.end();
                     }
 
-                    m_map.erase(remove_begin, remove_end);
+                    _map.erase(remove_begin, remove_end);
                 }
 
-                auto [new_i, inserted] = m_map.emplace(std::forward<KeyA>(b), RightValue{ std::forward<KeyB>(a), std::forward<U>(value)});
+                auto [new_i, inserted] = _map.emplace(std::forward<KeyA>(b), RightValue{ std::forward<KeyB>(a), std::forward<U>(value)});
 
                 if (!inserted)
                 {
@@ -344,7 +343,7 @@ namespace awl
                 // TODO: to this before new interval is inserted and use equality comarer to check if the values are equal.
 
                 {
-                    if (new_i != m_map.begin())
+                    if (new_i != _map.begin())
                     {
                         auto prev_i = std::prev(new_i);
 
@@ -352,18 +351,18 @@ namespace awl
                         {
                             new_i->second.leftKey = prev_i->second.leftKey;
 
-                            m_map.erase(prev_i);
+                            _map.erase(prev_i);
                         }
                     }
 
                     {
                         auto next_i = std::next(new_i);
 
-                        if (next_i != m_map.end() && new_i->second.value == next_i->second.value)
+                        if (next_i != _map.end() && new_i->second.value == next_i->second.value)
                         {
                             next_i->second.leftKey = new_i->second.leftKey;
 
-                            m_map.erase(new_i);
+                            _map.erase(new_i);
                         }
                     }
                 }
@@ -372,7 +371,7 @@ namespace awl
 
         void clear()
         {
-            m_map.clear();
+            _map.clear();
         }
 
     private:
@@ -381,7 +380,7 @@ namespace awl
 
         key_compare key_comp() const
         {
-            return m_map.key_comp();
+            return _map.key_comp();
         }
 
         bool less(const Key& left, const Key& right) const
@@ -412,9 +411,9 @@ namespace awl
         // Returns the interval the key belongs.
         const RightValue* find_interval(const Key& key) const
         {
-            auto i = m_map.lower_bound(key);
+            auto i = _map.lower_bound(key);
 
-            if (i != m_map.end())
+            if (i != _map.end())
             {
                 return &i->second;
             }
@@ -464,6 +463,6 @@ namespace awl
             return prev;
         }
 
-        RightMap m_map;
+        RightMap _map;
     };
 }

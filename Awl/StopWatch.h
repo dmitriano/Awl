@@ -15,8 +15,7 @@ namespace awl
 
         explicit StopWatch(std::chrono::steady_clock::time_point from = std::chrono::steady_clock::now()) :
             startTime(from)
-        {
-        }
+        {}
 
         void reset()
         {

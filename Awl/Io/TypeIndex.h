@@ -22,7 +22,7 @@ namespace awl::io
     template <class T>
     constexpr std::size_t countof_fields()
     {
-        if constexpr (is_tuplizable_v<T>)
+        if constexpr (tuplizable<T>)
         {
             using Tie = typename tuplizable_traits<T>::Tie;
             return countof_tuple_fields<Tie>(std::make_index_sequence<std::tuple_size_v<Tie>>());
@@ -72,7 +72,7 @@ namespace awl::io
     template <class Struct, class Field>
     constexpr size_t indexof_type()
     {
-        if constexpr (is_tuplizable_v<Struct>)
+        if constexpr (tuplizable<Struct>)
         {
             using Tie = typename tuplizable_traits<Struct>::Tie;
             return indexof_tuple_type<Tie, Field>(std::make_index_sequence<std::tuple_size_v<Tie>>());

@@ -21,24 +21,24 @@ namespace awl
     {
     public:
 
-        constexpr immutable(T val) noexcept : m_val(std::move(val)) {}
+        constexpr immutable(T val) noexcept : _val(std::move(val)) {}
         
-        constexpr immutable(const immutable& other) : m_val(other.m_val) {}
+        constexpr immutable(const immutable& other) : _val(other._val) {}
 
-        constexpr immutable(immutable&& other) noexcept : m_val(safeMove(other)) {}
+        constexpr immutable(immutable&& other) noexcept : _val(safeMove(other)) {}
 
         constexpr immutable& operator=(const immutable& other)
         {
             other.ensureNotMoved();
 
-            m_val = other.m_val;
+            _val = other._val;
 
             return *this;
         }
 
         constexpr immutable& operator=(immutable&& other) noexcept
         {
-            m_val = safeMove(other);
+            _val = safeMove(other);
 
             return *this;
         }
@@ -48,28 +48,28 @@ namespace awl
             ensureNotMoved();
             other.ensureNotMoved();
 
-            return operator == (other.m_val);
+            return operator == (other._val);
         }
 
         constexpr bool operator == (const T& val) const noexcept
         {
             ensureNotMoved();
 
-            return m_val == val;
+            return _val == val;
         }
 
         constexpr const T& operator*() const noexcept
         {
             ensureNotMoved();
 
-            return m_val;
+            return _val;
         }
 
         constexpr const T* operator->() const noexcept
         {
             ensureNotMoved();
 
-            return &m_val;
+            return &_val;
         }
 
         template <class Func, class... Args>
@@ -78,7 +78,7 @@ namespace awl
         {
             ensureNotMoved();
 
-            T val = m_val;
+            T val = _val;
 
             std::invoke(func, val, std::forward<Args>(args)...);
 
@@ -101,7 +101,7 @@ namespace awl
         {
             ensureNotMoved();
 
-            T val = m_val;
+            T val = _val;
 
             val.*p = std::forward<Field>(field_val);
 
@@ -130,19 +130,19 @@ namespace awl
         
         constexpr void markAsMoved()
         {
-            m_owns = false;
+            _owns = false;
         }
 
         constexpr void ensureNotMoved() const
         {
-            if (!m_owns)
+            if (!_owns)
             {
                 // This will result in std::terminate, because operator->() is noexcept.
                 throw std::runtime_error("An attempt to use an immutable object that was moved.");
             }
         }
 
-        bool m_owns = true;
+        bool _owns = true;
 
 #else
         
@@ -158,10 +158,10 @@ namespace awl
             other.ensureNotMoved();
             other.markAsMoved();
 
-            return std::move(other.m_val);
+            return std::move(other._val);
         }
 
-        T m_val;
+        T _val;
     };
 
     template <class T, class... Args>

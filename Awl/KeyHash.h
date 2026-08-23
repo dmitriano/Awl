@@ -5,44 +5,43 @@
 
 #pragma once
 
+#include <cstddef>
 #include <functional>
-#include <memory>
+#include <type_traits>
+#include <utility>
 
 namespace awl
 {
-    template <auto member>
-    class KeyHash;
-
-    template <class T, class Key, Key T::* member>
-    class KeyHash<member>
+    template <class T, auto get_key,
+        class Hash = std::hash<std::remove_cvref_t<std::invoke_result_t<decltype(get_key), const T&>>>>
+    class KeyHash
     {
+    private:
+
+        using Key = std::remove_cvref_t<std::invoke_result_t<decltype(get_key), const T&>>;
+
     public:
-        size_t operator()(const T& val) const
+
+        using is_transparent = void;
+
+        KeyHash() = default;
+
+        constexpr KeyHash(Hash hash) :
+            _hash(std::move(hash))
+        {}
+
+        std::size_t operator()(const T& val) const
         {
-            return std::hash<Key>{}(val.*member);
+            return _hash(std::invoke(get_key, val));
         }
 
-        size_t operator()(const std::shared_ptr<T>& val) const
+        std::size_t operator()(const Key& key) const
         {
-            return std::hash<Key>{}((*val).*member);
-        }
-    };
-
-    template <auto member>
-    class KeyEqual;
-
-    template <class T, class Key, Key T::* member>
-    class KeyEqual<member>
-    {
-    public:
-        bool operator()(const T& left, const T& right) const
-        {
-            return left.*member == right.*member;
+            return _hash(key);
         }
 
-        bool operator()(const std::shared_ptr<T>& left, const std::shared_ptr<T>& right) const
-        {
-            return (*left).*member == (*right).*member;
-        }
+    private:
+
+        [[no_unique_address]] Hash _hash;
     };
 }

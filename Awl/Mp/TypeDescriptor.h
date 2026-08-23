@@ -204,7 +204,7 @@ namespace awl::mp
 
     static_assert(make_type_name<std::array<uint8_t, 5>>() == std::string("array<int8_t, 5>"));
 
-    template <class T> requires is_reflectable_v<T>
+    template <class T> requires reflectable<T>
     struct type_descriptor<T>
     {
         using inner_tuple = typename tuplizable_traits<T>::Tie;

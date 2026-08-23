@@ -3,14 +3,14 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "FormattingHelpers.h"
+
+#include "Awl/TupleHelpers.h"
+
 #include <iostream>
 #include <iomanip>
 #include <variant>
 #include <array>
-
-#include "Awl/TupleHelpers.h"
-
-#include "FormattingHelpers.h"
 
 namespace awl::testing::helpers
 {

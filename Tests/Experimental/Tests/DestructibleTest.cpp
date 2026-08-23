@@ -4,10 +4,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Tests/Experimental/Destructible.h"
+#include "Tests/Helpers/NonCopyable.h"
+
 #include "Awl/ScopeGuard.h"
 #include "Awl/Testing/UnitTest.h"
-
-#include "Tests/Helpers/NonCopyable.h"
 
 namespace
 {

@@ -7,7 +7,6 @@
 
 #include "Awl/Io/IoException.h"
 #include "Awl/StringFormat.h"
-
 #include "Awl/Io/Platform.h"
 
 namespace awl::io
@@ -24,17 +23,17 @@ namespace awl::io
 
         PosixException(String message, int error = errno) : 
             IoError(std::move(message)),
-            m_error(error)
+            _error(error)
         {}
 
         String message() const override
         {
-            return std::format(_T("{} Error code: {} ."), IoError::message(), m_error);
+            return std::format(_T("{} Error code: {} ."), IoError::message(), _error);
         }
 
     private:
 
-        const int m_error;
+        const int _error;
     };
 
     using NativeException = PosixException;

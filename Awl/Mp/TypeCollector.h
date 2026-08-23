@@ -29,7 +29,7 @@ namespace awl::mp
 
     // Add extra_tuple to reflectable types.
     // Used to add the types of deleted fiels, for example.
-    template <class T> requires is_reflectable_v<T>
+    template <class T> requires reflectable<T>
     struct type_collector<T>
     {
         using Tuple = awl::tuple_cat_t<

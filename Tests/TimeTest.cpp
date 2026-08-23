@@ -5,7 +5,6 @@
 
 #include "Awl/String.h"
 #include "Awl/Time.h"
-
 #include "Awl/Testing/UnitTest.h"
 
 #ifdef __STDC_LIB_EXT1__

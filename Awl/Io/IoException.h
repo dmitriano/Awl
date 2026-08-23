@@ -10,9 +10,7 @@
 
 namespace awl::io
 {
-    class IoException : public Exception
-    {
-    };
+    class IoException : public Exception {};
 
     class EndOfFileException : public IoException
     {
@@ -20,8 +18,7 @@ namespace awl::io
 
         EndOfFileException(size_t requested_count, size_t actually_read_count) :
             requestedCount(requested_count), actuallyReadCount(actually_read_count)
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -38,9 +35,8 @@ namespace awl::io
     {
     public:
 
-        CorruptionException(size_t pos = -1) : m_pos(pos)
-        {
-        }
+        CorruptionException(size_t pos = -1) : _pos(pos)
+        {}
 
         String message() const override
         {
@@ -48,9 +44,9 @@ namespace awl::io
 
             out << _T("The stream is corrupted");
 
-            if (m_pos != static_cast<size_t>(-1))
+            if (_pos != static_cast<size_t>(-1))
             {
-                out << _T(" at ") << m_pos;
+                out << _T(" at ") << _pos;
             }
 
             out << _T(" .");
@@ -60,16 +56,12 @@ namespace awl::io
 
     private:
 
-        const size_t m_pos;
+        const size_t _pos;
     };
 
-    class ReadFailException : public IoException
-    {
-    };
+    class ReadFailException : public IoException {};
 
-    class WriteFailException : public IoException
-    {
-    };
+    class WriteFailException : public IoException {};
 
     //The exception indicating a general IO error in the user code.
     //When the user does an IO operation he throws IoError (or an exception of another type derived from IoException)
@@ -83,8 +75,7 @@ namespace awl::io
     public:
 
         explicit IoError(String message) : theMessage(std::move(message))
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -97,8 +88,7 @@ namespace awl::io
     public:
 
         FieldNotFoundException(std::string name) : fieldName(name)
-        {
-        }
+        {}
 
         String message() const override
         {
@@ -116,8 +106,7 @@ namespace awl::io
 
         TypeMismatchException(std::string name, size_t actual, size_t expected) :
             fieldName(name), actualType(actual), expectedType(expected)
-        {
-        }
+        {}
 
         String message() const override
         {

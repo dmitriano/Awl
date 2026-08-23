@@ -1,5 +1,6 @@
 #include "condition_variable_any2.hpp"
 #include "jthread.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -9,6 +10,7 @@
 #include <cassert>
 #include <vector>
 #include <array>
+
 using namespace::std::literals;
 
 // helper to call iwait() and check some assertions
@@ -30,7 +32,6 @@ void cvIWait (std::stop_token sToken, int id,
       if (sToken.stop_requested()) {
         throw "interrupted";
       }
-
     }
     if (sToken.stop_requested()) {
       std::string msg = "\ncvIWait(" + std::to_string(id) + "): interrupted";

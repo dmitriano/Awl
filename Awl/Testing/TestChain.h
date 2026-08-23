@@ -66,22 +66,52 @@ namespace awl::testing
 
     protected:
 
-        Logger& logger() const
+        const std::shared_ptr<ILogger>& logger() const
         {
-            return *context.logger;
+            return context.logger;
         }
 
         void print(awl::LogString message) const
         {
-            logger().debug(message);
+            logger()->debug(message);
         }
 
         const awl::testing::TestContext& context;
     };
 }
 
+#define AWL_TEST_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_TEST(test_class_name##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
+#define AWL_EXAMPLE_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_EXAMPLE(test_class_name##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
+#define AWL_BENCHMARK_CLASS_METHOD(test_class_name, method_name, method_alias, ...) \
+AWL_BENCHMARK(test_class_name##method_alias) \
+{ \
+    test_class_name{ context }.method_name(__VA_ARGS__); \
+}
+
 #define AWL_TEST_CLASS(test_class_name) \
 AWL_TEST(test_class_name) \
+{ \
+    test_class_name{ context }.run(); \
+}
+
+#define AWL_EXAMPLE_CLASS(test_class_name) \
+AWL_EXAMPLE(test_class_name) \
+{ \
+    test_class_name{ context }.run(); \
+}
+
+#define AWL_BENCHMARK_CLASS(test_class_name) \
+AWL_BENCHMARK(test_class_name) \
 { \
     test_class_name{ context }.run(); \
 }

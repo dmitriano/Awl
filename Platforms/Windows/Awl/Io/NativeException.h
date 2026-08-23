@@ -7,7 +7,6 @@
 
 #include "Awl/Io/IoException.h"
 #include "Awl/StringFormat.h"
-
 #include "Awl/Io/Platform.h"
 
 namespace awl::io
@@ -18,14 +17,12 @@ namespace awl::io
 
         Win32Exception(DWORD error = ::GetLastError()) :
             Win32Exception(_T("A Win32 API call failed."), error)
-        {
-        }
+        {}
 
         Win32Exception(String message, DWORD error = ::GetLastError()) :
             IoError(std::move(message)),
             dwError(error)
-        {
-        }
+        {}
 
         String message() const override
         {

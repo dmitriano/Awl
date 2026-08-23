@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <cassert>
-
 #include "Awl/SingleLink.h"
 #include "Awl/SingleList.h"
+
+#include <cassert>
 
 namespace awl
 {
@@ -20,8 +20,10 @@ namespace awl
     class forward_link : public base_single_link<forward_link<DLink>>
     {
     protected:
+
         forward_link() {}
     public:
+
         forward_link(forward_link * n) : base_single_link<forward_link<DLink>>(n) {}
     };
 
@@ -83,8 +85,7 @@ namespace awl
         basic_quick_link(basic_quick_link* next, basic_quick_link* prev) :
             ForwardLink(next),
             BackwardLink(prev)
-        {
-        }
+        {}
 
         basic_quick_link(const basic_quick_link& other) = delete;
 

@@ -4,7 +4,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Awl/Coro/Generator.h"
-
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/StringFormat.h"
 
@@ -15,7 +14,7 @@
 
 namespace
 {
-    awl::generator<std::tuple<uint64_t, uint64_t>> fibonacci(uint64_t count)
+    awl::coro::generator<std::tuple<uint64_t, uint64_t>> fibonacci(uint64_t count)
     {
         if (count > 0)
         {
@@ -34,7 +33,7 @@ namespace
                 {
                     throw std::runtime_error("Too big Fibonacci sequence. Elements would overflow.");
                 }
-                
+
                 const uint64_t tmp = i;
                 i += j;
                 j = tmp;
@@ -56,7 +55,7 @@ namespace
 AWL_EXAMPLE(CoroGeneratorFibonacci)
 {
     context.logger->debug("Short Fibonacci sequence: \n");
-    
+
     PrintFibonacci(context, 5);
 
     context.logger->debug("Long Fibonacci sequence: \n");

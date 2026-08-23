@@ -24,14 +24,13 @@ namespace awl
         {
         public:
 
-            HashInputStream(UnderlyingStream& in, size_t block_size = defaultBlockSize, Hash hash = {}) : m_hash(hash), m_in(in), blockSize(block_size), m_i(m_block.end())
+            HashInputStream(UnderlyingStream& in, size_t block_size = defaultBlockSize, Hash hash = {}) : _hash(hash), _in(in), blockSize(block_size), _i(_block.end())
             {
                 assert(blockSize > Hash::size());
             }
 
             HashInputStream(UnderlyingStream& in, Hash hash) : HashInputStream(in, defaultBlockSize, hash)
-            {
-            }
+            {}
 
             bool end() override
             {
@@ -46,21 +45,21 @@ namespace awl
             {
                 peekBuf();
 
-                return m_i == m_block.end();
+                return _i == _block.end();
             }
             
             void peekBuf()
             {
-                if (m_i == m_block.end())
+                if (_i == _block.end())
                 {
-                    m_block.resize(blockSize);
+                    _block.resize(blockSize);
 
-                    const size_t actually_read = m_in.read(m_block.data(), blockSize);
+                    const size_t actually_read = _in.read(_block.data(), blockSize);
 
                     if (actually_read == 0)
                     {
                         //Nothing to read, we are at the end of the file.
-                        m_block.clear();
+                        _block.clear();
                     }
                     else
                     {
@@ -71,64 +70,64 @@ namespace awl
                             throw CorruptionException();
                         }
 
-                        m_block.resize(actually_read);
+                        _block.resize(actually_read);
 
                         typename Hash::value_type read_val;
 
-                        auto hash_begin = m_block.begin() + actually_read - Hash::size();
+                        auto hash_begin = _block.begin() + actually_read - Hash::size();
 
                         for (size_t i = 0; i != read_val.size(); ++i)
                         {
                             read_val[i] = *(hash_begin + i);
                         }
 
-                        auto calculated_val = m_hash(m_block.begin(), hash_begin);
+                        auto calculated_val = _hash(_block.begin(), hash_begin);
 
                         if (calculated_val != read_val)
                         {
                             throw CorruptionException();
                         }
 
-                        m_block.resize(actually_read - Hash::size());
+                        _block.resize(actually_read - Hash::size());
                     }
 
-                    m_i = m_block.begin();
+                    _i = _block.begin();
                 }
             }
 
             void flushBuf(uint8_t * buffer, size_t & flushed_count, size_t count)
             {
-                assert(m_i <= m_block.end());
+                assert(_i <= _block.end());
                 
-                if (m_i != m_block.end())
+                if (_i != _block.end())
                 {
-                    const size_t available_count = static_cast<size_t>(m_block.end() - m_i);
+                    const size_t available_count = static_cast<size_t>(_block.end() - _i);
 
                     const size_t remaining_count = count - flushed_count;
 
                     const size_t write_count = std::min(available_count, remaining_count);
 
-                    std::memcpy(buffer + flushed_count, static_cast<const uint8_t *>(&(*m_i)), write_count);
+                    std::memcpy(buffer + flushed_count, static_cast<const uint8_t *>(&(*_i)), write_count);
 
-                    m_i += write_count;
+                    _i += write_count;
 
                     flushed_count += write_count;
                 }
             }
 
-            const Hash m_hash;
+            const Hash _hash;
             
-            UnderlyingStream& m_in;
+            UnderlyingStream& _in;
             
             const size_t blockSize;
 
-            std::vector<uint8_t> m_block;
+            std::vector<uint8_t> _block;
 
-            std::vector<uint8_t>::iterator m_i;
+            std::vector<uint8_t>::iterator _i;
         };
 
         template <class Hash, class UnderlyingStream>
-        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, size_t count)
+        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, const size_t count)
         {
             size_t flushed_count = 0;
 
@@ -160,16 +159,15 @@ namespace awl
         public:
 
             HashOutputStream(UnderlyingStream& out, size_t block_size = defaultBlockSize, Hash hash = {}) :
-                m_hash(hash), m_out(out), blockSize(block_size)
+                _hash(hash), _out(out), blockSize(block_size)
             {
                 assert(blockSize > Hash::size());
 
-                m_v.reserve(blockSize);
+                _v.reserve(blockSize);
             }
 
             HashOutputStream(UnderlyingStream& out, Hash hash) : HashOutputStream(out, defaultBlockSize, hash)
-            {
-            }
+            {}
 
             ~HashOutputStream()
             {
@@ -182,31 +180,31 @@ namespace awl
 
             void flush()
             {
-                if (!m_v.empty())
+                if (!_v.empty())
                 {
-                    auto val = m_hash(m_v.begin(), m_v.end());
+                    auto val = _hash(_v.begin(), _v.end());
 
-                    m_v.insert(m_v.end(), val.begin(), val.end());
+                    _v.insert(_v.end(), val.begin(), val.end());
 
-                    m_out.write(m_v.data(), m_v.size());
+                    _out.write(_v.data(), _v.size());
 
-                    m_v.clear();
+                    _v.clear();
                 }
             }
 
-            Hash m_hash;
+            Hash _hash;
 
-            UnderlyingStream& m_out;
+            UnderlyingStream& _out;
 
             const size_t blockSize;
 
-            std::vector<uint8_t> m_v;
+            std::vector<uint8_t> _v;
         };
 
         template <class Hash, class UnderlyingStream>
-        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, size_t count)
+        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, const size_t count)
         {
-            assert(m_v.size() < blockSize - Hash::size());
+            assert(_v.size() < blockSize - Hash::size());
 
             size_t written_cont = 0;
 
@@ -214,15 +212,15 @@ namespace awl
             {
                 const size_t remaining_cont = count - written_cont;
                 
-                const size_t tail_count = blockSize - Hash::size() - m_v.size();
+                const size_t tail_count = blockSize - Hash::size() - _v.size();
 
                 const size_t insert_count = std::min(tail_count, remaining_cont);
 
-                m_v.insert(m_v.end(), buffer + written_cont, buffer + written_cont + insert_count);
+                _v.insert(_v.end(), buffer + written_cont, buffer + written_cont + insert_count);
 
-                assert(m_v.size() <= blockSize - Hash::size());
+                assert(_v.size() <= blockSize - Hash::size());
 
-                if (m_v.size() == blockSize - Hash::size())
+                if (_v.size() == blockSize - Hash::size())
                 {
                     flush();
                 }

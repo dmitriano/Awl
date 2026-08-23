@@ -19,7 +19,7 @@ namespace awl::io
 		{
 		public:
 
-			OutputElement(SequentialOutputStream& out) : m_out(out) {}
+			OutputElement(SequentialOutputStream& out) : _out(out) {}
 
 			OutputElement& operator = (T&& val)
 			{
@@ -28,7 +28,7 @@ namespace awl::io
 
 		private:
 
-			SequentialOutputStream& m_out;
+			SequentialOutputStream& _out;
 		};
 	}
 	

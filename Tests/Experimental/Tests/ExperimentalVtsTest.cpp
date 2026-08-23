@@ -3,16 +3,16 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Awl/Testing/UnitTest.h"
-#include "Awl/StringFormat.h"
-
-#include <chrono>
-
 #include "Tests/Helpers/BenchmarkHelpers.h"
 #include "Tests/Helpers/FormattingHelpers.h"
 #include "Tests/Experimental/Io/TrivialMemoryStream.h"
 #include "Tests/Experimental/Io/SampleStreams.h"
 #include "Tests/VtsTestCommon.h"
+
+#include "Awl/Testing/UnitTest.h"
+#include "Awl/StringFormat.h"
+
+#include <chrono>
 
 using namespace awl::testing;
 using namespace awl::testing::helpers;

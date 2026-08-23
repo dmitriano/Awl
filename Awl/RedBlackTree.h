@@ -100,16 +100,16 @@ namespace awl::helpers
 
         using Color = typename RedBlackLink<Node>::Color;
 
-        RedBlackTree(Compare comp) : m_comp(std::move(comp)) {}
+        RedBlackTree(Compare comp) : _comp(std::move(comp)) {}
 
         bool empty() const
         {
-            return m_root == nullptr;
+            return _root == nullptr;
         }
 
         std::size_t size() const
         {
-            return m_root == nullptr ? 0 : m_root->count + 1;
+            return _root == nullptr ? 0 : _root->count + 1;
         }
 
         template <class Key>
@@ -142,17 +142,17 @@ namespace awl::helpers
         template <class Key, class AccumulateLeft, class AccumulateRight>
         Node * findNodeByKey(const Key & key, AccumulateLeft && accum_left, AccumulateRight && accum_right) const
         {
-            Node * x = m_root;
+            Node * x = _root;
 
             //walk down the tree
             while (x != nullptr)
             {
-                if (m_comp(key, x->value()))
+                if (_comp(key, x->value()))
                 {
                     accum_left(x);
                     x = x->left;
                 }
-                else if (m_comp(x->value(), key))
+                else if (_comp(x->value(), key))
                 {
                     accum_right(x);
                     x = x->right;
@@ -198,19 +198,19 @@ namespace awl::helpers
         template <class Key>
         std::tuple<Node *, bool> boundByKey(const Key & key) const
         {
-            Node * x = m_root;
+            Node * x = _root;
             //the last found element greater than x
             Node * greater = nullptr;
 
             //walk down the tree
             while (x != nullptr)
             {
-                if (m_comp(key, x->value()))
+                if (_comp(key, x->value()))
                 {
                     greater = x;
                     x = x->left;
                 }
-                else if (m_comp(x->value(), key))
+                else if (_comp(x->value(), key))
                 {
                     x = x->right;
                 }
@@ -226,7 +226,7 @@ namespace awl::helpers
 
         Node * findNodeByIndex(size_t index) const
         {
-            Node * x = m_root;
+            Node * x = _root;
             size_t i = index;
 
             //walk down the tree
@@ -321,36 +321,36 @@ namespace awl::helpers
 
             if (parent == nullptr)
             {
-                m_root = node;
+                _root = node;
             }
             else
             {
-                if (m_comp(node->value(), parent->value()))
+                if (_comp(node->value(), parent->value()))
                 {
                     parent->setLeft(node);
                 }
                 else
                 {
                     //They cannot be equal, because we passed the parent in findNodeByKey(...).
-                    assert(m_comp(parent->value(), node->value()));
+                    assert(_comp(parent->value(), node->value()));
                     parent->setRight(node);
                 }
             }
             node->color = Color::Red;
             balanceAfterInsert(node);
-            m_root->color = Color::Black;
+            _root->color = Color::Black;
 
             //Insert newly added node to the list.
             Node * pred = predecessor(node);
             if (pred != nullptr)
             {
-                assert(m_comp(pred->value(), node->value()));
-                m_list.insert(typename List::iterator(pred), node);
+                assert(_comp(pred->value(), node->value()));
+                _list.insert(typename List::iterator(pred), node);
             }
             else
             {
-                assert(node == m_root || m_comp(node->value(), m_list.front()->value()));
-                m_list.push_front(node);
+                assert(node == _root || _comp(node->value(), _list.front()->value()));
+                _list.push_front(node);
             }
         }
 
@@ -437,7 +437,7 @@ namespace awl::helpers
 
             // if X was the root
             if (x->parent == nullptr)
-                m_root = y;
+                _root = y;
             else
             {
                 // Set X's parent's left or right pointer to be Y
@@ -485,7 +485,7 @@ namespace awl::helpers
 
             // if Y was the root
             if (y->parent == nullptr)
-                m_root = x;
+                _root = x;
             else
             {
                 // Set Y's parent's left or right pointer to be X
@@ -515,7 +515,7 @@ namespace awl::helpers
             //While we are not at the top and our parent node is red
             //N.B. Since the root node is garanteed black, then we
             //are also going to stop if we are the child of the root
-            while (x != m_root && (x->parent->color == Color::Red))
+            while (x != _root && (x->parent->color == Color::Red))
             {
                 //if our parent is on the left side of our grandparent
                 if (x->parent == x->parent->parent->left)
@@ -578,7 +578,7 @@ namespace awl::helpers
                     }
                 }
             }
-            m_root->color = Color::Black;
+            _root->color = Color::Black;
         }
 
         // Delete the node z, and free up the space
@@ -601,7 +601,7 @@ namespace awl::helpers
                 x->setParent(y->parent);
 
             if (y->parent == nullptr)
-                m_root = x;
+                _root = x;
             else
             {
                 if (y == y->parent->left)
@@ -615,8 +615,8 @@ namespace awl::helpers
                 //we must replace 'z' with 'y' node
                 copyFrom(y, z);
 
-                if (z == m_root)
-                    m_root = y;
+                if (z == _root)
+                    _root = y;
 
                 //we do this all above instead of the following line in original code
                 //to provide guarantee of the persistence of the node in the tree
@@ -632,7 +632,7 @@ namespace awl::helpers
         {
             Node * w;
 
-            while (x != m_root && x->color == Color::Black)
+            while (x != _root && x->color == Color::Black)
             {
                 if (x == x->parent->left)
                 {
@@ -679,7 +679,7 @@ namespace awl::helpers
                         if (w->right != nullptr)
                             w->right->color = Color::Black;
                         rotateLeft(x->parent);
-                        x = m_root;
+                        x = _root;
                     }
                 }
                 else
@@ -727,15 +727,15 @@ namespace awl::helpers
                         if (w->left != nullptr)
                             w->left->color = Color::Black;
                         rotateRight(x->parent);
-                        x = m_root;
+                        x = _root;
                     }
                 }
             }
             x->color = Color::Black;
         }
 
-        Compare m_comp;
-        Node * m_root = nullptr;
-        List m_list;
+        Compare _comp;
+        Node * _root = nullptr;
+        List _list;
     };
 }

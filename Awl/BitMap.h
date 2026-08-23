@@ -30,140 +30,140 @@ namespace awl
 
         constexpr bitmap() = default;
 
-        constexpr bitmap(std::initializer_list<Enum> values) : m_bits(makeLong(values))
+        constexpr bitmap(std::initializer_list<Enum> values) : _bits(makeLong(values))
         {
             //for (Enum v : values)
             //{
-            //    m_bits |= enum2Bits(v);
+            //    _bits |= enum2Bits(v);
             //}
         }
 
         constexpr bitmap operator|(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits |= enum2Bits(value);
+            bm._bits |= enum2Bits(value);
             return bm;
         }
 
         constexpr bitmap operator&(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits &= enum2Bits(value);
+            bm._bits &= enum2Bits(value);
             return bm;
         }
 
         constexpr bitmap operator^(Enum value) const
         {
             bitmap bm = *this;
-            bm.m_bits ^= enum2Bits(value);
+            bm._bits ^= enum2Bits(value);
             return bm;
         }
 
         constexpr bitmap operator~() const
         {
             bitmap bm = *this;
-            bm.m_bits.flip();
+            bm._bits.flip();
             return bm;
         }
 
         constexpr bitmap& operator|=(Enum value)
         {
-            m_bits |= enum2Bits(value);
+            _bits |= enum2Bits(value);
             return *this;
         }
 
         constexpr bitmap& operator&=(Enum value)
         {
-            m_bits &= enum2Bits(value);
+            _bits &= enum2Bits(value);
             return *this;
         }
 
         constexpr bitmap& operator^=(Enum value)
         {
-            m_bits ^= enum2Bits(value);
+            _bits ^= enum2Bits(value);
             return *this;
         }
 
         constexpr bitmap operator|(const bitmap & other) const
         {
             bitmap bm = *this;
-            bm.m_bits |= other.m_bits;
+            bm._bits |= other._bits;
             return bm;
         }
 
         constexpr bitmap operator&(const bitmap & other) const
         {
             bitmap bm = *this;
-            bm.m_bits &= other.m_bits;
+            bm._bits &= other._bits;
             return bm;
         }
 
         constexpr bitmap operator^(const bitmap & other) const
         {
             bitmap bm = *this;
-            bm.m_bits ^= other.m_bits;
+            bm._bits ^= other._bits;
             return bm;
         }
 
         constexpr bitmap& operator|=(const bitmap & other)
         {
-            m_bits |= other.m_bits;
+            _bits |= other._bits;
             return *this;
         }
 
         constexpr bitmap& operator&=(const bitmap & other)
         {
-            m_bits &= other.m_bits;
+            _bits &= other._bits;
             return *this;
         }
 
         constexpr bitmap& operator^=(const bitmap & other)
         {
-            m_bits ^= other.m_bits;
+            _bits ^= other._bits;
             return *this;
         }
 
         constexpr bool test(Enum value) const
         {
-            return m_bits.test(enum2Index(value));
+            return _bits.test(enum2Index(value));
         }
 
-        constexpr bool any() const { return m_bits.any(); }
+        constexpr bool any() const { return _bits.any(); }
         
-        constexpr bool all() const { return m_bits.all(); }
+        constexpr bool all() const { return _bits.all(); }
         
-        constexpr bool none() const { return m_bits.none(); }
+        constexpr bool none() const { return _bits.none(); }
         
         constexpr bitmap& set(Enum value, bool b)
         {
-            m_bits.set(enum2Index(value), b);
+            _bits.set(enum2Index(value), b);
 
             return *this;
         }
 
         constexpr bool operator[](Enum value) const
         {
-            return m_bits[enum2Index(value)];
+            return _bits[enum2Index(value)];
         }
 
         auto operator[](Enum value)
         {
-            return m_bits[enum2Index(value)];
+            return _bits[enum2Index(value)];
         }
 
         size_type count() const
         {
-            return static_cast<size_type>(m_bits.count());
+            return static_cast<size_type>(_bits.count());
         }
         
         constexpr size_type size() const noexcept
         {
-            return static_cast<size_type>(m_bits.size());
+            return static_cast<size_type>(_bits.size());
         }
 
         bool operator==(const bitmap& other) const
         {
-            return m_bits == other.m_bits;
+            return _bits == other._bits;
         }
         
         bool operator!=(const bitmap& other) const
@@ -199,7 +199,7 @@ namespace awl
             return val;
         }
 
-        BitSet m_bits;
+        BitSet _bits;
     };
 }
 

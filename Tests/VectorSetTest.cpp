@@ -8,11 +8,13 @@
 #include "Awl/Random.h"
 #include "Awl/String.h"
 #include "Awl/KeyCompare.h"
+#include "Awl/RuntimeKeyCompare.h"
 #include "Awl/Tuplizable.h"
 #include "Awl/StringFormat.h"
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <set>
 #include <ranges>
 
@@ -44,11 +46,11 @@ namespace awl
                 InsertExisting(static_cast<int>(i + 1));
             }
 
-            Set::Node * pn3 = set.m_tree.findNodeByKey(3);
+            Set::Node * pn3 = set._tree.findNodeByKey(3);
             AWL_ASSERT(pn3 != nullptr);
             AWL_ASSERT(pn3->value() == 3);
 
-            Set::Node * pn7 = set.m_tree.findNodeByKey(7);
+            Set::Node * pn7 = set._tree.findNodeByKey(7);
             AWL_ASSERT(pn7 == nullptr);
 
             {
@@ -61,8 +63,8 @@ namespace awl
                     Set::Node * predecessor = i != 0 ? nodes[i - 1] : nullptr;
                     Set::Node * successor = i != count - 1 ? nodes[i + 1] : nullptr;
 
-                    AWL_ASSERT(set.m_tree.predecessor(x) == predecessor);
-                    AWL_ASSERT(set.m_tree.successor(x) == successor);
+                    AWL_ASSERT(set._tree.predecessor(x) == predecessor);
+                    AWL_ASSERT(set._tree.successor(x) == successor);
                 }
             }
 
@@ -72,18 +74,18 @@ namespace awl
             AWL_ASSERT_EQUAL(1, set.front());
             AWL_ASSERT_EQUAL(nN->value(), set.back());
 
-            set.m_tree.removeNode(n1);
-            AWL_ASSERT(set.m_tree.m_root == n2);
-            set.m_tree.removeNode(n2);
-            AWL_ASSERT(set.m_tree.m_root == n4);
-            set.m_tree.removeNode(n4);
-            AWL_ASSERT(set.m_tree.m_root == n5);
-            set.m_tree.removeNode(n3);
-            AWL_ASSERT(set.m_tree.m_root == n5);
-            set.m_tree.removeNode(n5);
-            AWL_ASSERT(set.m_tree.m_root == nN);
-            set.m_tree.removeNode(nN);
-            AWL_ASSERT(set.m_tree.m_root == nullptr);
+            set._tree.removeNode(n1);
+            AWL_ASSERT(set._tree._root == n2);
+            set._tree.removeNode(n2);
+            AWL_ASSERT(set._tree._root == n4);
+            set._tree.removeNode(n4);
+            AWL_ASSERT(set._tree._root == n5);
+            set._tree.removeNode(n3);
+            AWL_ASSERT(set._tree._root == n5);
+            set._tree.removeNode(n5);
+            AWL_ASSERT(set._tree._root == nN);
+            set._tree.removeNode(nN);
+            AWL_ASSERT(set._tree._root == nullptr);
         }
 
     private:
@@ -92,7 +94,7 @@ namespace awl
         {
             std::pair<Set::iterator, bool> p = set.insert(val);
             AWL_ASSERT(p.second);
-            return *p.first.m_i;
+            return *p.first._i;
         }
 
         void InsertExisting(int val)
@@ -127,25 +129,24 @@ namespace
         TestAllocator() = default;
 
         template <class Q>
-        TestAllocator(const TestAllocator<Q> & other) : m_alloc(other.m_alloc)
-        {
-        }
+        TestAllocator(const TestAllocator<Q> & other) : _alloc(other._alloc)
+        {}
 
         T* allocate(std::size_t n)
         {
             memory_size += n * sizeof(T);
-            return m_alloc.allocate(n);
+            return _alloc.allocate(n);
         }
 
         void deallocate(T* p, std::size_t n)
         {
             memory_size -= n * sizeof(T);
-            return m_alloc.deallocate(p, n);
+            return _alloc.deallocate(p, n);
         }
 
     private:
 
-        std::allocator<T> m_alloc;
+        std::allocator<T> _alloc;
 
         template <class Q>
         friend class TestAllocator;
@@ -231,8 +232,8 @@ namespace
 }
 
 //Parameter examples:
-//--filter Hybrid.* --verbose --insert_count 100 --range 10 --print_set
-//--filter Hybrid.* --insert_count 1000000 --range 1000 --do_not_compare_sets
+//--filter=Hybrid.* --verbose --insert_count=100 --range=10 --print_set
+//--filter=Hybrid.* --insert_count=1000000 --range=1000 --do_not_compare_sets
 AWL_TEST(VectorSetRandom)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
@@ -388,7 +389,7 @@ AWL_TEST(VectorSetCopyMove)
     AWL_ASSERT(temp.empty());
 }
 
-//--filter VectorSetIndex_Test --insert_count 10000000 --range 100000000
+//--filter=VectorSetIndex_Test --insert_count=10000000 --range=100000000
 AWL_TEST(VectorSetIndex)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);
@@ -431,13 +432,54 @@ AWL_TEST(VectorSetIndex)
 
 namespace
 {
+    // Example of a custom getter that explicitly supports values, raw pointers,
+    // std::shared_ptr and std::unique_ptr.
+    template <size_t index>
+    struct tuplizable_getter
+    {
+        template <class T>
+            requires (!std::is_pointer_v<std::remove_cvref_t<T>>)
+        constexpr decltype(auto) operator()(const T& val) const
+        {
+            return get(val);
+        }
+
+        template <class T>
+        constexpr decltype(auto) operator()(const T* val) const
+        {
+            return get(*val);
+        }
+
+        template <class T>
+        constexpr decltype(auto) operator()(const std::shared_ptr<T>& val) const
+        {
+            return get(*val);
+        }
+
+        template <class T, class Deleter>
+        constexpr decltype(auto) operator()(const std::unique_ptr<T, Deleter>& val) const
+        {
+            return get(*val);
+        }
+
+    private:
+
+        template <class T>
+        static constexpr decltype(auto) get(const T& val)
+        {
+            return std::get<index>(awl::object_as_const_tuple(val));
+        }
+    };
+
+    template <class T, size_t index>
+    using tuplizable_compare = awl::KeyCompare<T, tuplizable_getter<index>{}>;
+
     struct A
     {
         A() = default;
 
         explicit A(size_t k) : key(k), attribute(k + 1)
-        {
-        }
+        {}
 
         size_t key;
         size_t attribute;
@@ -513,7 +555,7 @@ namespace
             v.push_back(val);
         }
 
-        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
+        std::sort(v.begin(), v.end(), awl::KeyCompare<A, &A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         awl::vector_set<const A *, Compare> set(comp);
@@ -546,13 +588,12 @@ namespace
         }
     }
 
-    template <class Compare>
+    template <class Pointer, class Compare>
     void TestSmartPointerComparer(const TestContext & context, Compare comp)
     {
         AWL_ATTRIBUTE(size_t, insert_count, 1000u);
         AWL_ATTRIBUTE(size_t, range, 1000u);
 
-        using Pointer = typename Compare::value_type;
         using A = typename Pointer::element_type;
 
         std::vector<A> v;
@@ -567,7 +608,7 @@ namespace
             set.insert(Pointer(new A(val)));
         }
 
-        std::sort(v.begin(), v.end(), awl::member_compare<&A::key>());
+        std::sort(v.begin(), v.end(), awl::KeyCompare<A, &A::key>());
         v.erase(std::unique(v.begin(), v.end()), v.end());
 
         for (size_t index = 0; index < v.size(); ++index)
@@ -596,25 +637,25 @@ namespace
 
 AWL_TEST(VectorSetComparer)
 {
-    TestComparer(context, awl::member_compare<&A::key>());
-    TestComparer(context, awl::member_compare<&A::GetKey>());
-    TestComparer(context, awl::member_compare<&A::GetKeyRef>());
-    TestComparer(context, awl::tuplizable_compare<A, 0>{});
+    TestComparer(context, awl::KeyCompare<A, &A::key>());
+    TestComparer(context, awl::KeyCompare<A, &A::GetKey>());
+    TestComparer(context, awl::KeyCompare<A, &A::GetKeyRef>());
+    TestComparer(context, tuplizable_compare<A, 0>{});
 
-    TestPointerComparer(context, awl::pointer_compare<&A::key>());
-    TestPointerComparer(context, awl::pointer_compare<&A::GetKey>());
-    TestPointerComparer(context, awl::pointer_compare<&A::GetKeyRef>());
-    TestPointerComparer(context, awl::tuplizable_compare<A*, 0>{});
+    TestPointerComparer(context, awl::KeyCompare<const A*, &A::key>());
+    TestPointerComparer(context, awl::KeyCompare<const A*, &A::GetKey>());
+    TestPointerComparer(context, awl::KeyCompare<const A*, &A::GetKeyRef>());
+    TestPointerComparer(context, tuplizable_compare<const A*, 0>{});
 
-    TestSmartPointerComparer(context, awl::shared_compare<&A::key>());
-    TestSmartPointerComparer(context, awl::shared_compare<&A::GetKey>());
-    TestSmartPointerComparer(context, awl::shared_compare<&A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::tuplizable_compare<std::shared_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::key>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, awl::KeyCompare<std::shared_ptr<A>, &A::GetKeyRef>());
+    TestSmartPointerComparer<std::shared_ptr<A>>(context, tuplizable_compare<std::shared_ptr<A>, 0>{});
 
-    TestSmartPointerComparer(context, awl::unique_compare<&A::key>());
-    TestSmartPointerComparer(context, awl::unique_compare<&A::GetKey>());
-    TestSmartPointerComparer(context, awl::unique_compare<&A::GetKeyRef>());
-    TestSmartPointerComparer(context, awl::tuplizable_compare<std::unique_ptr<A>, 0>{});
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::key>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKey>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, awl::KeyCompare<std::unique_ptr<A>, &A::GetKeyRef>());
+    TestSmartPointerComparer<std::unique_ptr<A>>(context, tuplizable_compare<std::unique_ptr<A>, 0>{});
 }
 
 namespace
@@ -624,8 +665,7 @@ namespace
     public:
 
         B(int k) : key(k)
-        {
-        }
+        {}
 
         B(const B &) = delete;
         B(B &&) = default;
@@ -718,8 +758,8 @@ AWL_TEST(VectorSetNonCopyableElement)
         AWL_ASSERT(set1.find(B(found_key)) != set1.end());
     }
 
-    TestBComparer(insert_count, range, awl::make_compare(&B::GetKey));
-    TestBComparer(insert_count, range, awl::tuplizable_compare<B, 0>{});
+    TestBComparer(insert_count, range, awl::makeRuntimeCompare(&B::GetKey));
+    TestBComparer(insert_count, range, tuplizable_compare<B, 0>{});
 }
 
 template <class I1, class I2>
@@ -757,7 +797,7 @@ static void TestBound(Set1 & set, Set2 & std_set, size_t range, size_t iter_coun
     }
 }
 
-//--filter VectorSetBoundAndContains.* --insert_count 1000 --range 1200
+//--filter=VectorSetBoundAndContains.* --insert_count=1000 --range=1200
 AWL_TEST(VectorSetBoundAndContains)
 {
     AWL_ATTRIBUTE(size_t, insert_count, 1000);

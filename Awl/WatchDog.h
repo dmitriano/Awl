@@ -19,17 +19,16 @@ namespace awl
     public:
 
         watch_dog(std::stop_token token, std::chrono::nanoseconds timeout, std::function<void()> log) :
-            m_token(token),
-            m_timeout(timeout),
-            m_thread(std::bind(&watch_dog::thread_proc, this, std::placeholders::_1)),
-            m_callback(m_token, std::bind(&watch_dog::callback_proc, this)),
-            m_log(log)
-        {
-        }
+            _token(token),
+            _timeout(timeout),
+            _thread(std::bind(&watch_dog::thread_proc, this, std::placeholders::_1)),
+            _callback(_token, std::bind(&watch_dog::callback_proc, this)),
+            _log(log)
+        {}
 
         std::stop_token get_token() const
         {
-            return m_source.get_token();
+            return _source.get_token();
         }
 
     private:
@@ -37,33 +36,33 @@ namespace awl
         //Stop the test when the timout has elapsed.
         void thread_proc(std::stop_token token)
         {
-            awl::sleep_for(m_timeout, token);
+            awl::sleep_for(_timeout, token);
 
             if (!token.stop_requested())
             {
                 //The timeout has elapsed.
-                m_log();
+                _log();
             }
 
-            m_source.request_stop();
+            _source.request_stop();
         }
 
         //Stop the test when the user pressed "Cancel" button.
         void callback_proc()
         {
-            m_source.request_stop();
+            _source.request_stop();
         }
 
-        std::stop_source m_source;
+        std::stop_source _source;
 
-        std::stop_token m_token;
+        std::stop_token _token;
 
-        std::chrono::nanoseconds m_timeout;
+        std::chrono::nanoseconds _timeout;
 
-        std::jthread m_thread;
+        std::jthread _thread;
 
-        std::stop_callback<std::function<void()>> m_callback;
+        std::stop_callback<std::function<void()>> _callback;
 
-        std::function<void()> m_log;
+        std::function<void()> _log;
     };
 }

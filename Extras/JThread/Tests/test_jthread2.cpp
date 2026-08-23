@@ -1,4 +1,5 @@
 #include "jthread.hpp"
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -6,6 +7,7 @@
 #include <cassert>
 #include <atomic>
 #include <vector>
+
 using namespace::std::literals;
 
 //------------------------------------------------------
