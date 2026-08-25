@@ -14,6 +14,20 @@ message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 
 option(AWL_PARALLEL_BUILD "Enable parallel build with MSVC." ON)
 option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
+
+set(AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT ON)
+
+# Android and iOS standard libraries do not support std::move_only_function yet.
+if (ANDROID OR IOS)
+    set(AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT OFF)
+endif()
+
+option(AWL_HAS_STD_MOVE_ONLY_FUNCTION
+    "The standard library provides std::move_only_function."
+    ${AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT})
+
+unset(AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT)
+
 option(AWL_FIND_OPENSSL "Use OpenSSL.")
 option(AWL_FIND_QT "Use QString if the project is built with QT.")
 option(AWL_FIND_BOOST "Use boost::multiprecision.")

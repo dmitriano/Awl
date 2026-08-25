@@ -33,6 +33,14 @@ endif()
 
 if (AWL_COMPILE_TESTS)
     file(GLOB_RECURSE AWL_CPP_TEST_FILES ${AWL_ROOT_DIR}/Tests/*.h ${AWL_ROOT_DIR}/Tests/*.cpp)
+
+    if (NOT AWL_HAS_STD_MOVE_ONLY_FUNCTION)
+        list(REMOVE_ITEM AWL_CPP_TEST_FILES
+            ${AWL_ROOT_DIR}/Tests/EquatableFunctionTest.cpp
+            ${AWL_ROOT_DIR}/Tests/SignalAwaitableTest.cpp
+            ${AWL_ROOT_DIR}/Tests/SignalTest.cpp)
+    endif()
+
     target_sources(${PROJECT_NAME} PRIVATE ${AWL_CPP_TEST_FILES})
 endif()
 
