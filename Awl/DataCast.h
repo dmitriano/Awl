@@ -25,12 +25,12 @@ namespace awl
     template <class T>
     constexpr uint8_t* mutable_data_cast(T* data)
     {
-        return launder_cast<uint8_t>(data);
+        return reinterpret_cast<uint8_t*>(data);
     }
 
     template <class T>
     constexpr const uint8_t* const_data_cast(const T* data)
     {
-        return launder_cast<const uint8_t>(data);
+        return reinterpret_cast<const uint8_t*>(data);
     }
 }
