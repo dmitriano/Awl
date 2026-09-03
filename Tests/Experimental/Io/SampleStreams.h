@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <cstddef>
 #include <cassert>
 
 namespace awl::io
@@ -21,8 +22,8 @@ namespace awl::io
     {
     public:
 
-        //new uint8_t[size] is not constexpr and allocating 64K on the stack probably is not a good idea.
-        SwitchMemoryOutputStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf)
+        //new std::byte[size] is not constexpr and allocating 64K on the stack probably is not a good idea.
+        SwitchMemoryOutputStream(size_t size) : _size(size), pBuf(new std::byte[size]), _p(pBuf)
         {
             std::memset(pBuf, 0u, _size);
         }
@@ -35,7 +36,7 @@ namespace awl::io
         //To make this look better and get gid of switch operator we would probably define
         //the specialization of Read/Write functions not only for the type
         //but also for the stream.
-        constexpr void write(const uint8_t * buffer, size_t count)
+        constexpr void write(const std::byte * buffer, size_t count)
         {
             switch (count)
             {
@@ -77,14 +78,14 @@ namespace awl::io
             _p = pBuf;
         }
 
-        const uint8_t * begin() const { return pBuf; }
-        const uint8_t * end() const { return pBuf + _size; }
+        const std::byte * begin() const { return pBuf; }
+        const std::byte * end() const { return pBuf + _size; }
 
     private:
 
         const size_t _size;
-        uint8_t * pBuf;
-        uint8_t * _p;
+        std::byte * pBuf;
+        std::byte * _p;
     };
 
     static_assert(sequential_output_stream<SwitchMemoryOutputStream>);
@@ -93,12 +94,12 @@ namespace awl::io
     {
     public:
 
-        VirtualMemoryOutputStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf.get())
+        VirtualMemoryOutputStream(size_t size) : _size(size), pBuf(new std::byte[size]), _p(pBuf.get())
         {
             std::memset(pBuf.get(), 0u, _size);
         }
 
-        void write(const uint8_t * buffer, size_t count) override
+        void write(const std::byte * buffer, size_t count) override
         {
             assert(length() + count <= _size);
             std::memmove(_p, buffer, count);
@@ -122,14 +123,14 @@ namespace awl::io
             _p = pBuf.get();
         }
 
-        const uint8_t * begin() const { return pBuf.get(); }
-        const uint8_t * end() const { return pBuf.get() + _size; }
+        const std::byte * begin() const { return pBuf.get(); }
+        const std::byte * end() const { return pBuf.get() + _size; }
 
     private:
 
         const size_t _size;
-        std::unique_ptr<uint8_t[]> pBuf;
-        uint8_t * _p;
+        std::unique_ptr<std::byte[]> pBuf;
+        std::byte * _p;
     };
 
     static_assert(sequential_output_stream<VirtualMemoryOutputStream>);
@@ -138,7 +139,7 @@ namespace awl::io
     {
     public:
 
-        void write(const uint8_t * buffer, size_t count) override
+        void write(const std::byte * buffer, size_t count) override
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated
@@ -163,7 +164,7 @@ namespace awl::io
     {
     public:
 
-        void write(const uint8_t * buffer, size_t count)
+        void write(const std::byte * buffer, size_t count)
         {
             static_cast<void>(buffer);
             //compound assignment with volatile-qualified left operand is deprecated

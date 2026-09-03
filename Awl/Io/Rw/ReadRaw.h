@@ -10,7 +10,7 @@
 #include "Awl/Io/SequentialStream.h"
 #include "Awl/DataCast.h"
 
-#include <cstdint>
+#include <cstddef>
 
 namespace awl::io
 {
@@ -19,7 +19,7 @@ namespace awl::io
 
     template <class Stream>
         requires sequential_input_stream<Stream>
-    void readRaw(Stream & s, uint8_t * buffer, size_t count)
+    void readRaw(Stream & s, std::byte * buffer, size_t count)
     {
         const size_t actually_read = s.read(buffer, count);
 

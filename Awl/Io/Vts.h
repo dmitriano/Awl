@@ -48,7 +48,7 @@ namespace awl::io
     template <class From, class To>
     void copyV(const From& from_val, To& to_val)
     {
-        std::vector<uint8_t> v;
+        std::vector<std::byte> v;
 
         v.reserve(measureV(from_val));
 

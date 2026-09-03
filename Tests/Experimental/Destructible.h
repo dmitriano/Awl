@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "Awl/DataCast.h"
-
 #include <stdint.h>
+#include <new>
 #include <utility>
 #include <type_traits>
 
@@ -62,12 +61,12 @@ namespace awl
         
         T * get()
         {
-            return launder_cast<T>(&_storage);
+            return std::launder(reinterpret_cast<T*>(&_storage));
         }
 
         void * address()
         {
-            return address_cast(_storage);
+            return reinterpret_cast<void*>(&_storage);
         }
 
         //Properly aligned uninitialized storage for T.

@@ -22,12 +22,15 @@ namespace awl
         public:
             
             template <class T>
-                requires (std::is_integral_v<T> && sizeof(T) == 1)
+                requires (sizeof(T) == 1)
             typename BasicHash<N>::value_type operator()(const T* begin, const T* end) const
             {
                 typename BasicHash<N>::value_type digest;
 
-                func(mutable_data_cast(begin), end - begin, digest.data());
+                func(
+                    reinterpret_cast<const unsigned char*>(begin),
+                    end - begin,
+                    reinterpret_cast<unsigned char*>(digest.data()));
 
                 return digest;
             }

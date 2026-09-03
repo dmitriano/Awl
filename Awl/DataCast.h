@@ -5,32 +5,31 @@
 
 #pragma once
 
-#include <cstdint>
-#include <new>
+#include <cstddef>
 
 namespace awl
 {
-    template <class To, class From>
-    constexpr To* launder_cast(From* data)
+    template <class T>
+    constexpr std::byte* byte_cast(T* data)
     {
-        return std::launder(reinterpret_cast<To*>(data));
+        return reinterpret_cast<std::byte*>(data);
     }
 
     template <class T>
-    void* address_cast(T& storage)
+    constexpr const std::byte* byte_cast(const T* data)
     {
-        return reinterpret_cast<void*>(&storage);
+        return reinterpret_cast<const std::byte*>(data);
     }
 
     template <class T>
-    constexpr uint8_t* mutable_data_cast(T* data)
+    constexpr char* char_cast(T* data)
     {
-        return reinterpret_cast<uint8_t*>(data);
+        return reinterpret_cast<char*>(data);
     }
 
     template <class T>
-    constexpr const uint8_t* const_data_cast(const T* data)
+    constexpr const char* char_cast(const T* data)
     {
-        return reinterpret_cast<const uint8_t*>(data);
+        return reinterpret_cast<const char*>(data);
     }
 }

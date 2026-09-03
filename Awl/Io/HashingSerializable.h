@@ -13,7 +13,7 @@
 
 #include <vector>
 #include <memory>
-#include <cstdint>
+#include <cstddef>
 
 namespace awl::io
 {
@@ -63,7 +63,7 @@ namespace awl::io
 
         virtual void writeHeader(awl::io::SequentialOutputStream&) const {}
 
-        std::shared_ptr<Snapshot> makeShanshotHelper(std::vector<uint8_t> v) const
+        std::shared_ptr<Snapshot> makeShanshotHelper(std::vector<std::byte> v) const
         {
             return std::make_shared<HashingSnapshot<Hash>>(std::move(v), _blockSize, _hash);
         }

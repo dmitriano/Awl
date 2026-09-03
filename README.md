@@ -3,7 +3,7 @@ AWL - A Working Library
 
 AWL is a small cross-platform C++ library that includes:
 
-1. A simple [binary serialization framework](https://developernote.com/2024/07/version-tolerant-serialization-in-c/) and simple [JSON serialization framework](https://github.com/dmitriano/Awl/tree/master/Extras/Qt/QtExtras/Json).
+1. A simple [binary serialization framework](https://developernote.com/2024/07/version-tolerant-serialization-in-c/) and simple [JSON serialization framework](https://github.com/dmitriano/Awl/tree/master/Extras/Boost/BoostExtras/Json).
 2. Memory stream, buffered stream, hashing stream.
 3. A [set](https://github.com/dmitriano/Awl/blob/master/Awl/VectorSet.h) that finds an element by both key and index with O(logN) time.
 4. A [doubly linked list](https://github.com/dmitriano/Awl/blob/master/Awl/QuickList.h) with static `insert` and `erase` methods and movable elements.
@@ -13,7 +13,7 @@ AWL is a small cross-platform C++ library that includes:
 8. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 9. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.44.35224`, `GCC 13.3.0`, `Android CLang 21.0.0 (from NDK 29.0.14206865)` and `Apple Clang 1700.0.13.5 (on MacOS Sonoma with Xcode 16.4)`.
+Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.51.36256.0 (Visual Studio 18 2026)`, `GCC 13.3.0`, `Android CLang 21.0.0 (from NDK 29.0.14206865)` and `Apple Clang 1700.0.13.5 (on MacOS Sonoma with Xcode 16.4)`.
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -23,10 +23,10 @@ Feel free to use it or fork it, report a bug by opening an issue.
 
 To leave the author a message fill the [form on his website](https://developernote.com/contact/).
 
-## Compiling on Windows with MSVC 2022:
+## Compiling on Windows with Visual Studio 18 2026:
 
 ```bat
-cmake ..\..\Awl -G "Visual Studio 17 2022" -A x64
+cmake ..\..\Awl -G "Visual Studio 18 2026" -A x64
 cmake --build . --target AwlTest --config Release
 ```
 
@@ -39,7 +39,7 @@ msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
 It also builds for x86 using the following command:
 
 ```bat
-cmake ..\..\Awl -G "Visual Studio 17 2022" -A win32
+cmake ..\..\Awl -G "Visual Studio 18 2026" -A win32
 ```
 
 but with couple warnings related to std::streamsize that are not fixed yet.
@@ -81,10 +81,10 @@ set MY_DRIVE=C:
 %MY_DRIVE%
 cd \dev\build\awl
 
-set MY_CMAKE_EXE=%MY_DRIVE%\dev\tools\cmake-4.1.2-windows-x86_64\bin\cmake.exe
+set MY_CMAKE_EXE=%MY_DRIVE%\dev\tools\cmake-4.4.3-windows-x86_64\bin\cmake.exe
 set MY_QT_DIR=%MY_DRIVE%\dev\libs\Qt6\windows
 set MY_BOOST_DIR=%MY_DRIVE%\dev\libs\boost_1_89_0
-set MY_VS_GENERATOR="Visual Studio 17 2022"
+set MY_VS_GENERATOR="Visual Studio 18 2026"
 
 set OPENSSL_ROOT_DIR=%MY_DRIVE%/dev/libs/OpenSSL
 set OPENSSL_USE_STATIC_LIBS=ON

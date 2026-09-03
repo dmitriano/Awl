@@ -8,12 +8,14 @@
 #include <Awl/Testing/UnitTest.h>
 #include "Awl/Io/VectorStream.h"
 
+#include <cstddef>
+
 namespace
 {
     const char sample[] = "some string";
 
     template <class T>
-    void write(std::vector<uint8_t>& v, const T& val)
+    void write(std::vector<std::byte>& v, const T& val)
     {
         awl::io::VectorOutputStream out(v);
 
@@ -21,7 +23,7 @@ namespace
     }
 
     template <class T>
-    void read(const std::vector<uint8_t>& v, const T& expected)
+    void read(const std::vector<std::byte>& v, const T& expected)
     {
         awl::io::VectorInputStream in(v);
 
@@ -38,14 +40,14 @@ AWL_TEST(RwQtString)
     AWL_UNUSED_CONTEXT;
 
     {
-        std::vector<uint8_t> v;
+        std::vector<std::byte> v;
 
         write(v, std::string(sample));
         read(v, QString(sample));
     }
 
     {
-        std::vector<uint8_t> v;
+        std::vector<std::byte> v;
 
         write(v, QString(sample));
         read(v, std::string(sample));

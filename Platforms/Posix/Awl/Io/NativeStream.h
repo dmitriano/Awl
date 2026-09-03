@@ -49,7 +49,7 @@ namespace awl::io
             return static_cast<size_t>(pos);
         }
 
-        size_t read(uint8_t* buffer, size_t count) override
+        size_t read(std::byte* buffer, size_t count) override
         {
             const ssize_t read_count = ::read(_hFile, buffer, count);
 
@@ -58,7 +58,7 @@ namespace awl::io
             return static_cast<size_t>(read_count);
         }
 
-        void write(const uint8_t* buffer, size_t count) override
+        void write(const std::byte* buffer, size_t count) override
         {
             const ssize_t written_count = ::write(_hFile, buffer, count);
 

@@ -5,14 +5,15 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 
 namespace awl::io
 {
-    constexpr void StdCopy(const uint8_t * begin, const uint8_t * end, uint8_t * out)
+    constexpr void StdCopy(const std::byte * begin, const std::byte * end, std::byte * out)
     {
-        const uint8_t * p = begin;
+        const std::byte * p = begin;
         while (p != end)
         {
             *out++ = *p++;
@@ -20,7 +21,7 @@ namespace awl::io
     }
 
     template <class T>
-    constexpr void PlainCopy(uint8_t * p_dest, const uint8_t * p_src)
+    constexpr void PlainCopy(std::byte * p_dest, const std::byte * p_src)
     {
         std::memcpy(p_dest, p_src, sizeof(T));
     }

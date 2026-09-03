@@ -54,11 +54,11 @@ namespace
         const size_t i = dist(awl::random());
 
         s.seek(i);
-        uint8_t bad;
+        std::byte bad;
         s.read(&bad, 1);
 
         s.seek(i);
-        ++bad;
+        bad ^= std::byte{0x01};
         s.write(&bad, 1);
         s.flush();
     }
@@ -469,7 +469,7 @@ AWL_TEST(Shapshot)
     v2::B b = v2::b_expected;
     Value val(b);
 
-    std::vector<uint8_t> expected_v;
+    std::vector<std::byte> expected_v;
 
     {
         awl::io::VectorOutputStream out(expected_v);
@@ -479,7 +479,7 @@ AWL_TEST(Shapshot)
 
     auto snapshot = val.makeShanshot();
 
-    std::vector<uint8_t> actual_v;
+    std::vector<std::byte> actual_v;
 
     {
         awl::io::VectorOutputStream out(actual_v);
@@ -527,7 +527,7 @@ AWL_TEST(HeaderedSerializable)
     // A header from the current version of the software.
     const awl::io::Header current_header{ "SAMPLE FORMAT", 2u };
 
-    std::vector<uint8_t> v;
+    std::vector<std::byte> v;
 
     {
         awl::io::VectorOutputStream out(v);
@@ -690,7 +690,7 @@ AWL_BENCHMARK(AtomicStorageVtsWrite)
 
     if (vector_stream)
     {
-        std::vector<uint8_t> v;
+        std::vector<std::byte> v;
         v.resize(stream_size);
 
         awl::io::VectorOutputStream out(v);

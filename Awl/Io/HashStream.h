@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <cstddef>
 #include <cassert>
 
 namespace awl 
@@ -37,7 +38,7 @@ namespace awl
                 return internalEnd();
             }
 
-            size_t read(uint8_t * buffer, size_t count) override;
+            size_t read(std::byte * buffer, size_t count) override;
 
         private:
 
@@ -95,7 +96,7 @@ namespace awl
                 }
             }
 
-            void flushBuf(uint8_t * buffer, size_t & flushed_count, size_t count)
+            void flushBuf(std::byte * buffer, size_t & flushed_count, size_t count)
             {
                 assert(_i <= _block.end());
                 
@@ -107,7 +108,7 @@ namespace awl
 
                     const size_t write_count = std::min(available_count, remaining_count);
 
-                    std::memcpy(buffer + flushed_count, static_cast<const uint8_t *>(&(*_i)), write_count);
+                    std::memcpy(buffer + flushed_count, _block.data() + (_i - _block.begin()), write_count);
 
                     _i += write_count;
 
@@ -121,13 +122,13 @@ namespace awl
             
             const size_t blockSize;
 
-            std::vector<uint8_t> _block;
+            std::vector<std::byte> _block;
 
-            std::vector<uint8_t>::iterator _i;
+            std::vector<std::byte>::iterator _i;
         };
 
         template <class Hash, class UnderlyingStream>
-        size_t HashInputStream<Hash, UnderlyingStream>::read(uint8_t * buffer, const size_t count)
+        size_t HashInputStream<Hash, UnderlyingStream>::read(std::byte * buffer, const size_t count)
         {
             size_t flushed_count = 0;
 
@@ -174,7 +175,7 @@ namespace awl
                 flush();
             }
 
-            void write(const uint8_t * buffer, size_t count) override;
+            void write(const std::byte * buffer, size_t count) override;
 
         private:
 
@@ -198,11 +199,11 @@ namespace awl
 
             const size_t blockSize;
 
-            std::vector<uint8_t> _v;
+            std::vector<std::byte> _v;
         };
 
         template <class Hash, class UnderlyingStream>
-        void HashOutputStream<Hash, UnderlyingStream>::write(const uint8_t * buffer, const size_t count)
+        void HashOutputStream<Hash, UnderlyingStream>::write(const std::byte * buffer, const size_t count)
         {
             assert(_v.size() < blockSize - Hash::size());
 

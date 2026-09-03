@@ -14,7 +14,7 @@ namespace awl::io
     {
     public:
 
-        void write(const uint8_t * buffer, size_t count) override
+        void write(const std::byte * buffer, size_t count) override
         {
             static_cast<void>(buffer);
             static_cast<void>(count);

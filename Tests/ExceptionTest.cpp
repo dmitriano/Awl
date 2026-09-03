@@ -32,7 +32,7 @@ AWL_TEST(DecodeString)
     setlocale(LC_ALL, "ru_RU.utf8");
 
     {
-        const char * encoded = awl::launder_cast<const char>(u8"z\u00df\u6c34\U0001f34c");
+        const char * encoded = awl::char_cast(u8"z\u00df\u6c34\U0001f34c");
 
         context.logger->debug(_T("Decoded string: {}"), awl::fromACString(encoded));
     }

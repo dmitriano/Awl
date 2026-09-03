@@ -12,7 +12,7 @@
 #include "Awl/Io/Snapshotable.h"
 
 #include <vector>
-#include <cstdint>
+#include <cstddef>
 #include <cassert>
 
 namespace awl::io
@@ -54,7 +54,7 @@ namespace awl::io
 
         std::shared_ptr<Snapshot> makeShanshot() const override
         {
-            std::vector<uint8_t> v;
+            std::vector<std::byte> v;
 
             {
                 VectorOutputStream out(v);

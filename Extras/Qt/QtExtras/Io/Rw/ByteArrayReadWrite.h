@@ -40,7 +40,7 @@ namespace awl::io
         }
 
         val.resize(size);
-        readRaw(s, mutable_data_cast(val.data()), std_size);
+        readRaw(s, byte_cast(val.data()), std_size);
     }
 
     template <class Stream, class Context = FakeContext>
@@ -49,6 +49,6 @@ namespace awl::io
         const size_t std_size = static_cast<size_t>(val.size());
         write(s, std_size, ctx);
 
-        s.write(const_data_cast(val.data()), std_size);
+        s.write(byte_cast(val.data()), std_size);
     }
 }

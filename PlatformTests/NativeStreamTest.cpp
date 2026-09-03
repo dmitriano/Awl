@@ -11,6 +11,7 @@
 
 #include <filesystem>
 #include <ranges>
+#include <cstddef>
 
 using namespace awl::testing;
 
@@ -28,7 +29,7 @@ AWL_TEST(NativeStream)
 {
     auto guard = awl::make_scope_guard(RemoveFile);
 
-    const std::vector<uint8_t> sample = {'A', 'B', 'C', 'D'};
+    const std::vector<std::byte> sample = { std::byte{0x41}, std::byte{0x42}, std::byte{0x43}, std::byte{0x44} };
 
     {
         awl::io::UniqueStream s(awl::io::createUniqueFile(file_name));
@@ -50,7 +51,7 @@ AWL_TEST(NativeStream)
         AWL_ASSERT(in.length() == sample.size());
         AWL_ASSERT(in.position() == 0);
 
-        std::vector<uint8_t> actual(sample.size());
+        std::vector<std::byte> actual(sample.size());
 
         AWL_ASSERT(in.read(actual.data(), sample.size()) == sample.size());
 
@@ -78,7 +79,7 @@ AWL_TEST(NativeStream)
 
         s.seek(0);
 
-        std::vector<uint8_t> actual(pos);
+        std::vector<std::byte> actual(pos);
 
         AWL_ASSERT(s.read(actual.data(), actual.size()) == actual.size());
 

@@ -52,7 +52,7 @@ namespace awl::io
         val.resize(len);
 
         //There is non-const version of data() since C++ 17.
-        readRaw(s, mutable_data_cast(val.data()), string_length);
+        readRaw(s, byte_cast(val.data()), string_length);
     }
 
     template<
@@ -73,6 +73,6 @@ namespace awl::io
 
         write(s, len, ctx);
 
-        s.write(const_data_cast(val.data()), string_length);
+        s.write(byte_cast(val.data()), string_length);
     }
 }

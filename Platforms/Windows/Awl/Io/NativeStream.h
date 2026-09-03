@@ -43,7 +43,7 @@ namespace awl::io
             return static_cast<size_t>(filePointerHelper());
         }
 
-        size_t read(uint8_t* buffer, size_t count) override
+        size_t read(std::byte* buffer, size_t count) override
         {
             const DWORD nNumberOfBytesToRead = static_cast<DWORD>(count);
             assert(nNumberOfBytesToRead == count);
@@ -54,7 +54,7 @@ namespace awl::io
             return NumberOfBytesRead;
         }
 
-        void write(const uint8_t* buffer, size_t count) override
+        void write(const std::byte* buffer, size_t count) override
         {
             const DWORD nNumberOfBytesToWrite = static_cast<DWORD>(count);
             assert(nNumberOfBytesToWrite == count);

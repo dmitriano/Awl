@@ -267,7 +267,7 @@ static void TestVector(const TestContext & context, std::vector<T> sample)
 {
     AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
-    std::vector<uint8_t> v;
+    std::vector<std::byte> v;
 
     VectorOutputStream out(v);
 

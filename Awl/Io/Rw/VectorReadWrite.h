@@ -8,25 +8,30 @@
 #include "Awl/Io/Rw/ReadRaw.h"
 
 #include <array>
+#include <cstddef>
 #include <vector>
 #include <type_traits>
 
 namespace awl::io
 {
     template <class Stream, class Container, class Context = FakeContext>
-        requires (sequential_input_stream<Stream> && std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value)
+        requires (sequential_input_stream<Stream> &&
+            (std::is_arithmetic<typename Container::value_type>::value || std::is_same_v<typename Container::value_type, std::byte>) &&
+            !std::is_same<typename Container::value_type, bool>::value)
     void readVector(Stream & s, Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        readRaw(s, mutable_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
+        readRaw(s, byte_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     template <class Stream, class Container, class Context = FakeContext>
-        requires (sequential_output_stream<Stream> && std::is_arithmetic<typename Container::value_type>::value && !std::is_same<typename Container::value_type, bool>::value)
+        requires (sequential_output_stream<Stream> &&
+            (std::is_arithmetic<typename Container::value_type>::value || std::is_same_v<typename Container::value_type, std::byte>) &&
+            !std::is_same<typename Container::value_type, bool>::value)
     void writeVector(Stream & s, const Container & v, const Context & ctx = {})
     {
         static_cast<void>(ctx);
-        s.write(const_data_cast(v.data()), v.size() * sizeof(typename Container::value_type));
+        s.write(byte_cast(v.data()), v.size() * sizeof(typename Container::value_type));
     }
 
     //vector<string>, for example.
@@ -58,13 +63,13 @@ namespace awl::io
 
         for (typename Container::size_type i = 0; i < n;)
         {
-            uint8_t aggr;
+            std::byte aggr;
 
             read(s, aggr, ctx);
 
-            for (uint8_t mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
+            for (std::byte mask{1}; mask != std::byte{} && i < n; ++i, mask <<= 1)
             {
-                x.at(i) = (aggr & mask) != 0;
+                x.at(i) = (aggr & mask) != std::byte{};
             }
         }
     }
@@ -77,9 +82,9 @@ namespace awl::io
 
         for (typename Container::size_type i = 0; i < n;)
         {
-            uint8_t aggr = 0;
+            std::byte aggr{};
 
-            for (uint8_t mask = 1; mask > 0 && i < n; ++i, mask <<= 1)
+            for (std::byte mask{1}; mask != std::byte{} && i < n; ++i, mask <<= 1)
             {
                 if (x.at(i))
                 {

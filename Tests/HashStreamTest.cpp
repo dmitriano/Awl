@@ -32,7 +32,7 @@
 using namespace awl::testing;
 using namespace awl::io;
 
-using CorruptFunc = std::function<void(std::vector<uint8_t> &)>;
+using CorruptFunc = std::function<void(std::vector<std::byte> &)>;
 
 template <class Hash, class T>
 static void TestOnVector(const TestContext & context, Hash hash, const T & sample, const CorruptFunc & corrupt = {})
@@ -40,7 +40,7 @@ static void TestOnVector(const TestContext & context, Hash hash, const T & sampl
     AWL_ATTRIBUTE(size_t, block_size, 64);
     AWL_ATTRIBUTE(size_t, sample_count, 100);
 
-    static std::vector<uint8_t> v;
+    static std::vector<std::byte> v;
 
     const size_t total_size = sample_count * (sample.size() * sizeof(typename T::value_type) + sizeof(decltype(sample.size())));
 
@@ -239,7 +239,7 @@ AWL_TEST(IoHashStreamCorruption)
 
     awl::crypto::Crc64 hash;
 
-    TestCorruption(context, hash, sample, [](std::vector<uint8_t> & v)
+    TestCorruption(context, hash, sample, [](std::vector<std::byte> & v)
     {
         std::uniform_int_distribution<size_t> dist(1, v.size() - 1);
 
@@ -251,13 +251,13 @@ AWL_TEST(IoHashStreamCorruption)
     },
     true);
 
-    TestCorruption(context, hash, sample, [](std::vector<uint8_t> & v)
+    TestCorruption(context, hash, sample, [](std::vector<std::byte> & v)
     {
         std::uniform_int_distribution<size_t> dist(0, v.size() - 1);
 
         size_t i = dist(awl::random());
 
-        ++v[i];
+        v[i] ^= std::byte{0x01};
     },
     false);
 }

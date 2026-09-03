@@ -48,6 +48,7 @@
 
 #include <stdint.h>
 #include <array>
+#include <cstddef>
 #include <type_traits>
 
 namespace awl::crypto
@@ -59,7 +60,8 @@ namespace awl::crypto
         constexpr Crc64(uint64_t seed = 127) : _seed(seed) {}
 
         template <class InputIt>
-            requires std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value
+            requires (std::is_arithmetic<typename std::iterator_traits<InputIt>::value_type>::value ||
+                std::is_same_v<typename std::iterator_traits<InputIt>::value_type, std::byte>)
         constexpr value_type operator()(InputIt begin, InputIt end) const
         {
             using T = typename std::iterator_traits<InputIt>::value_type;
@@ -70,7 +72,7 @@ namespace awl::crypto
             {
                 if constexpr (sizeof(T) == 1)
                 {
-                    calc(crc, static_cast<uint8_t>(*i));
+                    calc(crc, toByte(*i));
                 }
                 else
                 {
@@ -78,7 +80,7 @@ namespace awl::crypto
 
                     for (size_t j = 0; j < bytes.size(); ++j)
                     {
-                        calc(crc, bytes[j]);
+                        calc(crc, std::to_integer<uint8_t>(bytes[j]));
                     }
                 }
             }
@@ -221,6 +223,19 @@ namespace awl::crypto
         };
 
         uint64_t _seed;
+
+        template <class T>
+        static constexpr uint8_t toByte(T val)
+        {
+            if constexpr (std::is_same_v<T, std::byte>)
+            {
+                return std::to_integer<uint8_t>(val);
+            }
+            else
+            {
+                return static_cast<uint8_t>(val);
+            }
+        }
 
         static constexpr void calc(uint64_t & crc, uint8_t byte)
         {

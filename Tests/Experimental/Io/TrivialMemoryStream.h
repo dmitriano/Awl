@@ -11,6 +11,7 @@
 #include "Awl/Io/ReadWrite.h"
 
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 
 namespace awl::io
@@ -19,7 +20,7 @@ namespace awl::io
     {
     public:
 
-        TrivialMemoryStream(size_t size) : _size(size), pBuf(new uint8_t[size]), _p(pBuf)
+        TrivialMemoryStream(size_t size) : _size(size), pBuf(new std::byte[size]), _p(pBuf)
         {
             std::memset(pBuf, 0u, _size);
         }
@@ -34,7 +35,7 @@ namespace awl::io
             return length() == _size;
         }
 
-        constexpr size_t read(uint8_t * buffer, size_t count)
+        constexpr size_t read(std::byte * buffer, size_t count)
         {
             const size_t available_count = _size - length();
             const size_t read_count = std::min(count, available_count);
@@ -43,7 +44,7 @@ namespace awl::io
             return read_count;
         }
 
-        constexpr void write(const uint8_t * buffer, size_t count)
+        constexpr void write(const std::byte * buffer, size_t count)
         {
             assert(length() + count <= _size);
             //std::memmove(_p, buffer, count);
@@ -67,8 +68,8 @@ namespace awl::io
             _p = pBuf;
         }
 
-        const uint8_t * begin() const { return pBuf; }
-        const uint8_t * end() const { return pBuf + _size; }
+        const std::byte * begin() const { return pBuf; }
+        const std::byte * end() const { return pBuf + _size; }
 
     private:
 
@@ -77,7 +78,7 @@ namespace awl::io
         friend void write(TrivialMemoryStream& s, T val)
         {
             assert(s.length() + sizeof(val) <= s._size);
-            std::memcpy(s._p, awl::const_data_cast(&val), sizeof(val));
+            std::memcpy(s._p, awl::byte_cast(&val), sizeof(val));
             s._p += sizeof(val);
         }
 
@@ -86,12 +87,12 @@ namespace awl::io
         friend void read(TrivialMemoryStream& s, T& val)
         {
             assert(s.length() + sizeof(val) <= s._size);
-            std::memcpy(awl::mutable_data_cast(&val), s._p, sizeof(val));
+            std::memcpy(awl::byte_cast(&val), s._p, sizeof(val));
             s._p += sizeof(val);
         }
 
         const size_t _size;
-        uint8_t * pBuf;
-        uint8_t * _p;
+        std::byte * pBuf;
+        std::byte * _p;
     };
 }

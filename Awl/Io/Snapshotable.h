@@ -13,7 +13,7 @@ namespace awl::io
     {
     public:
 
-        // Snapshot is typically an std::vector<uint8_t> so we wite it to a basic stream.
+        // Snapshot is typically an std::vector<std::byte> so we write it to a basic stream.
         virtual void write(SequentialOutputStream& out) const = 0;
 
         virtual ~Snapshot() = default;

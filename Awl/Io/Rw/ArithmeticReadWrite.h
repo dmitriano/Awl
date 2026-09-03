@@ -8,20 +8,21 @@
 #include "Awl/Io/Rw/ReadRaw.h"
 #include "Awl/Int2Array.h"
 
+#include <cstddef>
 #include <type_traits>
 
 namespace awl::io
 {
     template <class Stream, size_t N>
         requires sequential_input_stream<Stream>
-    constexpr void readBuffer(Stream& s, std::array<std::uint8_t, N>& a)
+    constexpr void readBuffer(Stream& s, std::array<std::byte, N>& a)
     {
         readRaw(s, a.data(), a.size());
     }
 
     template <class Stream, size_t N>
         requires sequential_output_stream<Stream>
-    constexpr void writeBuffer(Stream& s, const std::array<std::uint8_t, N>& a)
+    constexpr void writeBuffer(Stream& s, const std::array<std::byte, N>& a)
     {
         s.write(a.data(), a.size());
     }
@@ -32,7 +33,7 @@ namespace awl::io
     {
         static_cast<void>(ctx);
 
-        std::array<std::uint8_t, sizeof(T)> a;
+        std::array<std::byte, sizeof(T)> a;
 
         readBuffer(s, a);
 
@@ -53,20 +54,38 @@ namespace awl::io
 
     template <class Stream, class Context = FakeContext>
         requires sequential_input_stream<Stream>
+    void read(Stream & s, std::byte & val, const Context & ctx = {})
+    {
+        static_cast<void>(ctx);
+
+        readRaw(s, &val, 1);
+    }
+
+    template <class Stream, class Context = FakeContext>
+        requires sequential_output_stream<Stream>
+    void write(Stream & s, std::byte val, const Context & ctx = {})
+    {
+        static_cast<void>(ctx);
+
+        s.write(&val, 1);
+    }
+
+    template <class Stream, class Context = FakeContext>
+        requires sequential_input_stream<Stream>
     void read(Stream & s, bool & b, const Context & ctx = {})
     {
-        uint8_t val;
+        std::byte val;
 
         read(s, val, ctx);
 
-        b = val != 0;
+        b = val != std::byte{};
     }
 
     template <class Stream, class Context = FakeContext>
         requires sequential_output_stream<Stream>
     void write(Stream & s, bool b, const Context & ctx = {})
     {
-        uint8_t val = b ? 1 : 0;
+        std::byte val = b ? std::byte{1} : std::byte{};
 
         write(s, val, ctx);
     }

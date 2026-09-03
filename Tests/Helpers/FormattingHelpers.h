@@ -11,6 +11,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
+#include <cstddef>
 
 namespace awl::testing::helpers
 {
@@ -21,7 +22,7 @@ namespace awl::testing::helpers
 
         for (size_t i = 0; i < N; ++i)
         {
-            out << std::hex << std::setfill(_T('0')) << std::setw(2) << static_cast<unsigned int>(h[i]) << std::dec;
+            out << std::hex << std::setfill(_T('0')) << std::setw(2) << std::to_integer<unsigned int>(h[i]) << std::dec;
         }
 
         return out;

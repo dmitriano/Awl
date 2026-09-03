@@ -20,7 +20,7 @@ namespace awl::testing::helpers
     {
         AWL_ATTRIBUTE(size_t, iteration_count, 10);
 
-        std::vector<uint8_t> reusable_v;
+        std::vector<std::byte> reusable_v;
 
         VectorOutputStream out(reusable_v);
 

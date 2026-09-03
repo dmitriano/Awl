@@ -45,7 +45,7 @@ namespace awl::io
                 {
                     // For example, structures containing std::atomic are not copyable or movable.
 
-                    std::vector<uint8_t> v;
+                    std::vector<std::byte> v;
 
                     {
                         MeasureStream measure_out;
@@ -87,14 +87,14 @@ namespace awl::io
 
     protected:
 
-        void writeSnapshot(std::vector<uint8_t>& v) noexcept
+        void writeSnapshot(std::vector<std::byte>& v) noexcept
         {
             VectorOutputStream v_out(v);
 
             io::write(v_out, _val);
         }
 
-        void readSnapshot(const std::vector<uint8_t>& v) noexcept
+        void readSnapshot(const std::vector<std::byte>& v) noexcept
         {
             VectorInputStream v_in(v);
 

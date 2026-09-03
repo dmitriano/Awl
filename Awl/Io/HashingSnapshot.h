@@ -11,7 +11,7 @@
 #include "Awl/Crypto/Crc64.h"
 
 #include <vector>
-#include <cstdint>
+#include <cstddef>
 
 namespace awl::io
 {
@@ -24,7 +24,7 @@ namespace awl::io
 
     private:
 
-        using Value = std::vector<uint8_t>;
+        using Value = std::vector<std::byte>;
 
     public:
 

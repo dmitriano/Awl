@@ -17,8 +17,8 @@ option(AWL_JTHREAD_EXTRAS "Use home made implementation of std::jthread.")
 
 set(AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT ON)
 
-# Android and iOS standard libraries do not support std::move_only_function yet.
-if (ANDROID OR IOS)
+# Android and Apple standard libraries do not support std::move_only_function yet.
+if (ANDROID OR APPLE)
     set(AWL_HAS_STD_MOVE_ONLY_FUNCTION_DEFAULT OFF)
 endif()
 

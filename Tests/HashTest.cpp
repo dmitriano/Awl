@@ -9,6 +9,7 @@
 #include <set>
 #include <memory>
 #include <ranges>
+#include <cstddef>
 
 #ifdef AWL_OPENSSL_HASH
 #include "Awl/Crypto/OpenSslHash.h"
@@ -64,7 +65,7 @@ namespace
     };
 
     template <size_t N>
-    constexpr std::array<std::uint8_t, N> reverse_array(std::array<std::uint8_t, N> a)
+    constexpr std::array<std::byte, N> reverse_array(std::array<std::byte, N> a)
     {
         auto b = a;
         std::reverse(b.begin(), b.end());
@@ -72,7 +73,16 @@ namespace
     }
 
     constexpr char sampleString[] = "123456789";
-    constexpr awl::crypto::HashValue<8> oldSampleHash = { 0xe9, 0xc6, 0xd9, 0x14, 0xc4, 0xb8, 0xd9, 0xca };
+    constexpr awl::crypto::HashValue<8> oldSampleHash = {
+        std::byte{0xe9},
+        std::byte{0xc6},
+        std::byte{0xd9},
+        std::byte{0x14},
+        std::byte{0xc4},
+        std::byte{0xb8},
+        std::byte{0xd9},
+        std::byte{0xca}
+    };
     constexpr awl::crypto::HashValue<8> sampleHash = reverse_array(oldSampleHash);
     constexpr Int64Hash::value_type sampleIntHash = 0xe9c6d914c4b8d9ca;
 

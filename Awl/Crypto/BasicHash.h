@@ -7,6 +7,7 @@
 
 #include "Awl/Int2Array.h"
 
+#include <cstddef>
 #include <stdint.h>
 #include <array>
 #include <type_traits>
@@ -19,7 +20,7 @@ namespace awl
         //The standard library does not impose specific algorithms for calculating hashes, so we won't get portable hash codes from the standard library,
         //even for the same system, if we use a different compiler. So we need our own.
 
-        template <size_t N> using HashValue = std::array<uint8_t, N>;
+        template <size_t N> using HashValue = std::array<std::byte, N>;
 
         template <size_t N>
         class BasicHash

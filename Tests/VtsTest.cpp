@@ -47,7 +47,7 @@ AWL_TEST(VtsReadWriteVectorStream)
 
     const size_t mem_size = awl::testing::vts_common::MeasureStreamSize(context, element_count);
 
-    std::vector<uint8_t> v;
+    std::vector<std::byte> v;
     v.reserve(mem_size);
 
     context.logger->debug(_T("{} bytes of memory has been allocated. "), v.capacity());
@@ -138,7 +138,7 @@ AWL_BENCHMARK(VtsMemSetMove)
 {
     AWL_ATTRIBUTE(size_t, element_count, awl::testing::vts_common::defaultElementCount);
 
-    std::unique_ptr<uint8_t[]> p(new uint8_t[element_count]);
+    std::unique_ptr<std::byte[]> p(new std::byte[element_count]);
 
     {
         context.logger->debug(_T("std::memset: "));
@@ -152,7 +152,7 @@ AWL_BENCHMARK(VtsMemSetMove)
         context.logger->debug(_T(""));
     }
 
-    std::unique_ptr<uint8_t[]> p1(new uint8_t[element_count]);
+    std::unique_ptr<std::byte[]> p1(new std::byte[element_count]);
 
     {
         context.logger->debug(_T("std::memmove: "));
@@ -167,9 +167,9 @@ AWL_BENCHMARK(VtsMemSetMove)
     }
 
     {
-        context.logger->debug(_T("vector<uint8_t>::insert: "));
+        context.logger->debug(_T("vector<std::byte>::insert: "));
 
-        std::vector<uint8_t> v;
+        std::vector<std::byte> v;
         v.reserve(element_count);
         AWL_ASSERT_EQUAL(element_count, v.capacity());
 
