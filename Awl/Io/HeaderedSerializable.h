@@ -41,6 +41,11 @@ namespace awl::io
 
             read(in, actual_header, LimitedContext{ formatNameLimit });
 
+            return validateHeader(in, actual_header);
+        }
+
+        bool validateHeader(awl::io::SequentialInputStream& in, const Header& actual_header)
+        {
             if (actual_header.format != expectedHeader.format)
             {
                 throw IoError(std::format(_T("Wrong format. Expected: {}. Actual: {}."), expectedHeader.format, actual_header.format));
