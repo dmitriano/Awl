@@ -100,4 +100,3 @@ int main()
    std::cerr << "EXCEPTION" << std::endl;
  }
 }
-

@@ -363,4 +363,3 @@ int main()
   testSToken(::std::chrono::seconds{0});
   testSToken(::std::chrono::milliseconds{500});
 }
-

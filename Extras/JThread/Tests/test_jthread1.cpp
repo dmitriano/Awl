@@ -476,4 +476,3 @@ int main()
   testJThreadAPI();
   std::cout << "\n\n**************************\n";
 }
-

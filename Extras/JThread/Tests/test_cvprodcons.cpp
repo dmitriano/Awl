@@ -186,4 +186,3 @@ int main()
  }
  std::cout << "**** all OK\n";
 }
-

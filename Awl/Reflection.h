@@ -195,4 +195,3 @@ namespace awl
         static const awl::helpers::MemberList ml(#__VA_ARGS__); \
         return ml; \
     }
-

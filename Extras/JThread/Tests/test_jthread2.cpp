@@ -408,4 +408,3 @@ int main()
   testEnabledIfForCopyConstructor_CompileTimeOnly();
   std::cout << "\n**************************\n\n";
 }
-

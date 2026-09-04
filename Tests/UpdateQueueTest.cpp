@@ -96,4 +96,3 @@ AWL_TEST(UpdateQueue)
 
     render_thread.join();
 }
-
