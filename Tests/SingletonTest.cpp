@@ -9,13 +9,39 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
+#include <type_traits>
 
 namespace
 {
     constexpr int shared_value = 5;
     constexpr int weak_value = 7;
 
-    using A = awl::testing::helpers::NonCopyable;
+    class A : public awl::testing::helpers::NonCopyable
+    {
+    private:
+
+        template <class T>
+        friend std::shared_ptr<T> awl::make_shared_instance();
+
+        // Instances can only be created as shared singletons.
+        A() : NonCopyable(shared_value)
+        {}
+    };
+
+    class B : public awl::testing::helpers::NonCopyable
+    {
+    private:
+
+        template <class T>
+        friend std::shared_ptr<T> awl::make_weak_instance();
+
+        // Instances can only be created as weak singletons.
+        B() : NonCopyable(weak_value)
+        {}
+    };
+
+    static_assert(!std::is_default_constructible_v<A>);
+    static_assert(!std::is_default_constructible_v<B>);
 }
 
 namespace awl
@@ -23,25 +49,13 @@ namespace awl
     template <>
     std::shared_ptr<A> make_shared_instance<>()
     {
-        return std::make_shared<A>(shared_value);
+        return std::shared_ptr<A>(new A());
     }
 
     template <>
-    std::shared_ptr<A> make_weak_instance<>()
+    std::shared_ptr<B> make_weak_instance<>()
     {
-        return std::make_shared<A>(weak_value);
-    }
-
-    template <>
-    std::shared_ptr<int> make_shared_instance<>()
-    {
-        return std::make_shared<int>(23);
-    }
-
-    template <>
-    std::shared_ptr<int> make_weak_instance<>()
-    {
-        return std::make_shared<int>(29);
+        return std::shared_ptr<B>(new B());
     }
 }
 
@@ -49,22 +63,19 @@ AWL_TEST(SharedSingleton)
 {
     AWL_UNUSED_CONTEXT;
 
-    AWL_ASSERT_EQUAL(23, *awl::shared_singleton<int>());
-    AWL_ASSERT_EQUAL(0L, *awl::shared_singleton<long>());
-
     AWL_ASSERT_EQUAL(0, A::count);
 
     {
-        auto p1 = awl::shared_singleton<A>();
+        std::shared_ptr<A> p1 = awl::shared_singleton<A>();
 
         AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(shared_value));
+        AWL_ASSERT(*p1 == shared_value);
 
         {
-            auto p2 = awl::shared_singleton<A>();
+            std::shared_ptr<A> p2 = awl::shared_singleton<A>();
 
             AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(shared_value));
+            AWL_ASSERT(*p2 == shared_value);
         }
 
         AWL_ASSERT_EQUAL(1, A::count);
@@ -79,44 +90,41 @@ AWL_TEST(WeakSingleton)
 {
     AWL_UNUSED_CONTEXT;
 
-    AWL_ASSERT_EQUAL(29, *awl::weak_singleton<int>());
-    AWL_ASSERT_EQUAL(0L, *awl::weak_singleton<long>());
-
-    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, B::count);
 
     {
-        auto p1 = awl::weak_singleton<A>();
+        std::shared_ptr<B> p1 = awl::weak_singleton<B>();
 
-        AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(weak_value));
+        AWL_ASSERT_EQUAL(1, B::count);
+        AWL_ASSERT(*p1 == weak_value);
 
         {
-            auto p2 = awl::weak_singleton<A>();
+            std::shared_ptr<B> p2 = awl::weak_singleton<B>();
 
-            AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(weak_value));
+            AWL_ASSERT_EQUAL(1, B::count);
+            AWL_ASSERT(*p2 == weak_value);
         }
 
-        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, B::count);
     }
 
-    AWL_ASSERT_EQUAL(0, A::count);
-    AWL_ASSERT(awl::weak_singleton<A>() != nullptr);
-    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, B::count);
+    AWL_ASSERT(awl::weak_singleton<B>() != nullptr);
+    AWL_ASSERT_EQUAL(0, B::count);
 
     {
-        auto p1 = awl::weak_singleton<A>();
+        std::shared_ptr<B> p1 = awl::weak_singleton<B>();
 
-        AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(weak_value));
+        AWL_ASSERT_EQUAL(1, B::count);
+        AWL_ASSERT(*p1 == weak_value);
 
         {
-            auto p2 = awl::weak_singleton<A>();
+            std::shared_ptr<B> p2 = awl::weak_singleton<B>();
 
-            AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(weak_value));
+            AWL_ASSERT_EQUAL(1, B::count);
+            AWL_ASSERT(*p2 == weak_value);
         }
 
-        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, B::count);
     }
 }

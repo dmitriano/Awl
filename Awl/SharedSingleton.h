@@ -33,6 +33,7 @@ namespace awl
     template <class T> requires std::is_default_constructible_v<T>
     std::shared_ptr<T> make_weak_instance()
     {
+        // Allocate separately so the static weak_ptr does not retain the object's storage.
         return std::shared_ptr<T>(new T());
     }
 
