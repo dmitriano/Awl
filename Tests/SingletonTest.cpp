@@ -20,8 +20,7 @@ namespace
     {
     private:
 
-        template <class T>
-        friend std::shared_ptr<T> awl::make_shared_instance();
+        friend std::shared_ptr<A> awl::make_shared_instance<A>();
 
         // Instances can only be created as shared singletons.
         A() : NonCopyable(shared_value)
@@ -32,8 +31,7 @@ namespace
     {
     private:
 
-        template <class T>
-        friend std::shared_ptr<T> awl::make_weak_instance();
+        friend std::shared_ptr<B> awl::make_weak_instance<B>();
 
         // Instances can only be created as weak singletons.
         B() : NonCopyable(weak_value)
@@ -50,12 +48,6 @@ namespace awl
     std::shared_ptr<A> make_shared_instance<>()
     {
         return std::shared_ptr<A>(new A());
-    }
-
-    template <>
-    std::shared_ptr<B> make_weak_instance<>()
-    {
-        return std::shared_ptr<B>(new B());
     }
 }
 

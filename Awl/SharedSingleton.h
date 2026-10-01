@@ -6,7 +6,6 @@
 #pragma once
 
 #include <memory>
-#include <type_traits>
 
 namespace awl
 {
@@ -19,18 +18,12 @@ namespace awl
 
     // Let the user customize each singleton factory independently.
     template <class T>
-    std::shared_ptr<T> make_shared_instance();
-
-    template <class T> requires std::is_default_constructible_v<T>
     std::shared_ptr<T> make_shared_instance()
     {
         return std::make_shared<T>();
     }
 
     template <class T>
-    std::shared_ptr<T> make_weak_instance();
-
-    template <class T> requires std::is_default_constructible_v<T>
     std::shared_ptr<T> make_weak_instance()
     {
         // Allocate separately so the static weak_ptr does not retain the object's storage.
