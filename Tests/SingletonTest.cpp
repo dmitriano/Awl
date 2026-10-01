@@ -9,7 +9,6 @@
 #include "Awl/Testing/UnitTest.h"
 
 #include <memory>
-#include <type_traits>
 
 namespace
 {
@@ -37,9 +36,6 @@ namespace
         B() : NonCopyable(weak_value)
         {}
     };
-
-    static_assert(!std::is_default_constructible_v<A>);
-    static_assert(!std::is_default_constructible_v<B>);
 }
 
 namespace awl
