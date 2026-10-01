@@ -3,8 +3,9 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Tests/Helpers/NonCopyable.h"
+#include "Tests/Helpers/NonCopyableInt.h"
 
+#include "Awl/NoCopyMove.h"
 #include "Awl/SharedSingleton.h"
 #include "Awl/Testing/UnitTest.h"
 
@@ -15,25 +16,25 @@ namespace
     constexpr int shared_value = 5;
     constexpr int weak_value = 7;
 
-    class A : public awl::testing::helpers::NonCopyable
+    class A : public awl::testing::helpers::NonCopyableInt, private awl::NoCopyMove
     {
     private:
 
         friend std::shared_ptr<A> awl::make_shared_instance<A>();
 
         // Instances can only be created as shared singletons.
-        explicit A(const int value) : NonCopyable(value)
+        explicit A(const int value) : NonCopyableInt(value)
         {}
     };
 
-    class B : public awl::testing::helpers::NonCopyable
+    class B : public awl::testing::helpers::NonCopyableInt, private awl::NoCopyMove
     {
     private:
 
         friend std::shared_ptr<B> awl::make_weak_instance<B>();
 
         // Instances can only be created as weak singletons.
-        explicit B(const int value) : NonCopyable(value)
+        explicit B(const int value) : NonCopyableInt(value)
         {}
     };
 }

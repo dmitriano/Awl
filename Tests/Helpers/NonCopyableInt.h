@@ -7,32 +7,32 @@
 
 namespace awl::testing::helpers
 {
-    class NonCopyable
+    class NonCopyableInt
     {
     public:
 
         using value_type = int;
 
-        explicit NonCopyable(int a) : _a(a)
+        explicit NonCopyableInt(int a) : _a(a)
         {
             ++count;
         }
 
-        ~NonCopyable()
+        ~NonCopyableInt()
         {
             --count;
         }
 
-        NonCopyable(NonCopyable const &) = delete;
+        NonCopyableInt(NonCopyableInt const &) = delete;
 
-        NonCopyable(NonCopyable && other) : NonCopyable(other._a)
+        NonCopyableInt(NonCopyableInt && other) : NonCopyableInt(other._a)
         {
             other._moved = true;
         }
 
-        NonCopyable & operator = (const NonCopyable &) = delete;
+        NonCopyableInt & operator = (const NonCopyableInt &) = delete;
 
-        NonCopyable & operator = (NonCopyable && other)
+        NonCopyableInt & operator = (NonCopyableInt && other)
         {
             _a = other._a;
             other._moved = true;
@@ -40,12 +40,12 @@ namespace awl::testing::helpers
             return *this;
         }
 
-        bool operator == (const NonCopyable & other) const
+        bool operator == (const NonCopyableInt & other) const
         {
             return _a == other._a;
         }
 
-        bool operator != (const NonCopyable & other) const
+        bool operator != (const NonCopyableInt & other) const
         {
             return !operator==(other);
         }
@@ -60,7 +60,7 @@ namespace awl::testing::helpers
             return !operator==(a);
         }
 
-        bool operator < (const NonCopyable & other) const
+        bool operator < (const NonCopyableInt & other) const
         {
             return _a < other._a;
         }

@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Tests/Experimental/Destructible.h"
-#include "Tests/Helpers/NonCopyable.h"
+#include "Tests/Helpers/NonCopyableInt.h"
 
 #include "Awl/ScopeGuard.h"
 #include "Awl/Testing/UnitTest.h"
@@ -13,7 +13,7 @@ namespace
 {
     constexpr int value = 5;
 
-    using A = awl::testing::helpers::NonCopyable;
+    using A = awl::testing::helpers::NonCopyableInt;
 }
 
 AWL_TEST(Destructible)
