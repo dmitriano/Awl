@@ -48,7 +48,7 @@ namespace awl
 
     //Alternative implementation that recreates the instance.
     template <class T>
-    std::shared_ptr<T> ondemand_singleton()
+    std::shared_ptr<T> weak_singleton()
     {
         static std::weak_ptr<T> wp;
 

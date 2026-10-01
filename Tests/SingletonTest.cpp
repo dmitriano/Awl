@@ -59,20 +59,20 @@ AWL_TEST(SharedSingleton)
     AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWL_TEST(OnDemandSingleton)
+AWL_TEST(WeakSingleton)
 {
     AWL_UNUSED_CONTEXT;
 
     AWL_ASSERT_EQUAL(0, A::count);
 
     {
-        auto p1 = awl::ondemand_singleton<A>();
+        auto p1 = awl::weak_singleton<A>();
 
         AWL_ASSERT_EQUAL(1, A::count);
         AWL_ASSERT(*p1 == A(value));
 
         {
-            auto p2 = awl::ondemand_singleton<A>();
+            auto p2 = awl::weak_singleton<A>();
 
             AWL_ASSERT_EQUAL(1, A::count);
             AWL_ASSERT(*p2 == A(value));
@@ -82,17 +82,17 @@ AWL_TEST(OnDemandSingleton)
     }
 
     AWL_ASSERT_EQUAL(0, A::count);
-    AWL_ASSERT(awl::ondemand_singleton<A>() != nullptr);
+    AWL_ASSERT(awl::weak_singleton<A>() != nullptr);
     AWL_ASSERT_EQUAL(0, A::count);
 
     {
-        auto p1 = awl::ondemand_singleton<A>();
+        auto p1 = awl::weak_singleton<A>();
 
         AWL_ASSERT_EQUAL(1, A::count);
         AWL_ASSERT(*p1 == A(value));
 
         {
-            auto p2 = awl::ondemand_singleton<A>();
+            auto p2 = awl::weak_singleton<A>();
 
             AWL_ASSERT_EQUAL(1, A::count);
             AWL_ASSERT(*p2 == A(value));
