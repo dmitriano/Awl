@@ -17,15 +17,23 @@ namespace awl
         return !wp.owner_before(WeakPtr{}) && !WeakPtr{}.owner_before(wp);
     }
 
-    //Let the user define a function that crates its singleton instance.
+    // Let the user customize each singleton factory independently.
     template <class T>
-    std::shared_ptr<T> make_singleton_instance();
+    std::shared_ptr<T> make_shared_instance();
 
     template <class T> requires std::is_default_constructible_v<T>
-    std::shared_ptr<T> make_singleton_instance()
+    std::shared_ptr<T> make_shared_instance()
     {
-        //We have a long leaving std::weak_ptr so we may not use std::make_shared.
         return std::make_shared<T>();
+    }
+
+    template <class T>
+    std::shared_ptr<T> make_weak_instance();
+
+    template <class T> requires std::is_default_constructible_v<T>
+    std::shared_ptr<T> make_weak_instance()
+    {
+        return std::shared_ptr<T>(new T());
     }
 
     //Does not recreate the instance after it was destroyed, but returns nullptr.
@@ -36,7 +44,7 @@ namespace awl
 
         if (is_uninitialized(wp))
         {
-            std::shared_ptr<T> p = make_singleton_instance<T>();
+            std::shared_ptr<T> p = make_shared_instance<T>();
 
             wp = p;
 
@@ -56,8 +64,7 @@ namespace awl
 
         if (p == nullptr)
         {
-            //We have a long leaving std::weak_ptr so we may not use std::make_shared.
-            p = make_singleton_instance<T>();
+            p = make_weak_instance<T>();
 
             wp = p;
         }
