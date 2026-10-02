@@ -36,10 +36,9 @@ namespace awl
                 {
                     formatter.fromJson(item_jv, val);
                 }
-                catch (JsonException& e)
+                catch (const JsonException& e)
                 {
-                    e.append({ item_jv.kind(), type_hint<T>(), std::string(item.key()) });
-                    throw;
+                    throw JsonException(e, { item_jv.kind(), type_hint<T>(), std::string(item.key()) });
                 }
 
                 const bool new_key = map.insert(pair(std::string(item.key()), std::move(val))).second;

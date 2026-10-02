@@ -20,6 +20,11 @@ namespace awl::io
             requestedCount(requested_count), actuallyReadCount(actually_read_count)
         {}
 
+        const char* what() const noexcept override
+        {
+            return "End of file.";
+        }
+
         String message() const override
         {
             return std::format(_T("Requested {} actually read {} ."), requestedCount, actuallyReadCount);
@@ -37,6 +42,11 @@ namespace awl::io
 
         CorruptionException(size_t pos = -1) : _pos(pos)
         {}
+
+        const char* what() const noexcept override
+        {
+            return "The stream is corrupted.";
+        }
 
         String message() const override
         {
@@ -59,9 +69,25 @@ namespace awl::io
         const size_t _pos;
     };
 
-    class ReadFailException : public IoException {};
+    class ReadFailException : public IoException
+    {
+    public:
 
-    class WriteFailException : public IoException {};
+        const char* what() const noexcept override
+        {
+            return "Read failed.";
+        }
+    };
+
+    class WriteFailException : public IoException
+    {
+    public:
+
+        const char* what() const noexcept override
+        {
+            return "Write failed.";
+        }
+    };
 
     //The exception indicating a general IO error in the user code.
     //When the user does an IO operation he throws IoError (or an exception of another type derived from IoException)
@@ -70,16 +96,16 @@ namespace awl::io
     {
     private:
 
-        const String theMessage;
+        const std::string theMessage;
 
     public:
 
-        explicit IoError(String message) : theMessage(std::move(message))
+        explicit IoError(String message) : theMessage(toAString(std::move(message)))
         {}
 
-        String message() const override
+        const char* what() const noexcept override
         {
-            return theMessage;
+            return theMessage.c_str();
         }
     };
 
@@ -89,6 +115,11 @@ namespace awl::io
 
         FieldNotFoundException(std::string name) : fieldName(name)
         {}
+
+        const char* what() const noexcept override
+        {
+            return "Field not found.";
+        }
 
         String message() const override
         {
@@ -107,6 +138,11 @@ namespace awl::io
         TypeMismatchException(std::string name, size_t actual, size_t expected) :
             fieldName(name), actualType(actual), expectedType(expected)
         {}
+
+        const char* what() const noexcept override
+        {
+            return "Type mismatch.";
+        }
 
         String message() const override
         {

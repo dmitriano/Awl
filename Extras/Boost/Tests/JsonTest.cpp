@@ -170,15 +170,72 @@ AWL_TEST(BoostJsonReflectableExceptionPath)
 
     B b;
 
+    bool caught = false;
+
     try
     {
         json::fromJson(b_jo, b);
-        AWL_FAILM(_T("Exception of type JsonException was not thrown."));
     }
     catch (const json::JsonException& e)
     {
+        caught = true;
         context.logger->debug(e.message());
+        const std::string text = e.what();
+        const auto outer = text.find("\n    [a] (");
+        const auto inner = text.find("\n    [b] (");
+        AWL_ASSERT(outer != std::string::npos);
+        AWL_ASSERT(inner != std::string::npos);
+        AWL_ASSERT(outer < inner);
+        AWL_ASSERT_EQUAL(awl::fromACString(e.what()), e.message());
     }
+
+    AWL_ASSERT(caught);
+}
+
+AWL_TEST(BoostJsonExceptionContext)
+{
+    AWL_UNUSED_CONTEXT;
+    const json::JsonException original(_T("Wrong value.\nDetails: part of the original message."));
+    const std::string root = original.what();
+    const json::JsonException inner(original, { boost::json::kind::string, "int", "value" });
+    const json::JsonException outer(inner, { boost::json::kind::object, "Record", "record" });
+
+    AWL_ASSERT_EQUAL(root, std::string(original.what()));
+    AWL_ASSERT_EQUAL(root + "\nDetails:\n    [value] (String / int)", std::string(inner.what()));
+    AWL_ASSERT_EQUAL(root + "\nDetails:\n    [record] (Object / Record)\n    [value] (String / int)",
+        std::string(outer.what()));
+    AWL_ASSERT_EQUAL(awl::fromACString(outer.what()), outer.message());
+
+    const json::JsonException direct(_T("Wrong value."), { boost::json::kind::string, "int", "value" });
+    AWL_ASSERT_EQUAL(std::string("Wrong value.\nDetails:\n    [value] (String / int)"), std::string(direct.what()));
+}
+
+AWL_TEST(BoostJsonContainerExceptionPath)
+{
+    AWL_UNUSED_CONTEXT;
+    const boost::json::object object{
+        { "items", boost::json::array{ makeAJson(), boost::json::value("wrong") } }
+    };
+    std::map<std::string, std::vector<A>> values;
+    bool caught = false;
+
+    try
+    {
+        json::fromJson(object, values);
+    }
+    catch (const json::JsonException& e)
+    {
+        caught = true;
+        const std::string text = e.what();
+        const auto outer = text.find("\n    [items] (");
+        const auto inner = text.find("\n    [1] (");
+        AWL_ASSERT(outer != std::string::npos);
+        AWL_ASSERT(inner != std::string::npos);
+        AWL_ASSERT(outer < inner);
+        AWL_ASSERT(text.find("Expected value type: Object, actual value type: String") == 0);
+    }
+
+    AWL_ASSERT(caught);
 }
 
 AWL_TEST(BoostJsonEnumSerializer)
