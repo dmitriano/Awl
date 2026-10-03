@@ -21,12 +21,12 @@ namespace awl
     // same strand for the coroutine and retain the adapter until completion.
     // Check stop_requested() at coroutine entry: a signal does not remember
     // requests made before its slot handler is installed.
-    class StopTokenCancellation
+    class StopToken
     {
     public:
 
         template <class Executor>
-        StopTokenCancellation(const boost::asio::strand<Executor>& executor,
+        StopToken(const boost::asio::strand<Executor>& executor,
             const std::stop_token stop_token) :
             _signal(std::make_shared<boost::asio::cancellation_signal>()),
             _stopCallback(stop_token, [executor, weak_signal = std::weak_ptr(_signal)]
@@ -43,10 +43,10 @@ namespace awl
             })
         {}
 
-        StopTokenCancellation(const StopTokenCancellation&) = delete;
-        StopTokenCancellation& operator=(const StopTokenCancellation&) = delete;
-        StopTokenCancellation(StopTokenCancellation&&) = delete;
-        StopTokenCancellation& operator=(StopTokenCancellation&&) = delete;
+        StopToken(const StopToken&) = delete;
+        StopToken& operator=(const StopToken&) = delete;
+        StopToken(StopToken&&) = delete;
+        StopToken& operator=(StopToken&&) = delete;
 
         boost::asio::cancellation_slot slot() const
         {
