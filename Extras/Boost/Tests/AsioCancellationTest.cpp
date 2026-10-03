@@ -233,7 +233,8 @@ AWL_TEST(AsioCancellationWithoutEntryCheck)
     for (const bool stop_before_spawn : {true, false})
     {
         asio::io_context io_context;
-        const Strand executor = asio::make_strand(io_context);
+        // Type erasure must preserve the caller's strand and cancellation ordering.
+        const asio::any_io_executor executor = asio::make_strand(io_context);
         asio::steady_timer timer(executor, asio::steady_timer::time_point::max());
         asio::steady_timer watchdog(executor, std::chrono::seconds(5));
         std::stop_source source;
