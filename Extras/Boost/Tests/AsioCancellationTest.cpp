@@ -1,3 +1,5 @@
+#include "BoostExtras/StopTokenCancellation.h"
+
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
@@ -18,44 +20,11 @@ namespace
     using Strand = asio::strand<asio::io_context::executor_type>;
     using Channel = asio::experimental::concurrent_channel<void(boost::system::error_code, int)>;
 
-    // Test-local prototype: one signal per co_spawn, owned until its completion.
-    class StopTokenCancellation
-    {
-    public:
-
-        StopTokenCancellation(const Strand& executor, const std::stop_token stop_token) :
-            _signal(std::make_shared<asio::cancellation_signal>()),
-            _stopCallback(stop_token, [executor, weak_signal = std::weak_ptr(_signal)]
-            {
-                // post is intentional: dispatch could emit before the pending
-                // operation installs its slot handler when called on the strand.
-                asio::post(executor, [weak_signal]
-                {
-                    if (std::shared_ptr<asio::cancellation_signal> signal = weak_signal.lock())
-                    {
-                        signal->emit(asio::cancellation_type::terminal);
-                    }
-                });
-            })
-        {}
-
-        asio::cancellation_slot slot() const
-        {
-            return _signal->slot();
-        }
-
-    private:
-
-        std::shared_ptr<asio::cancellation_signal> _signal;
-        // Destroy the callback before the signal it refers to.
-        std::stop_callback<std::function<void()>> _stopCallback;
-    };
-
     struct Outcome
     {
         boost::system::error_code error;
         std::exception_ptr exception;
-        std::weak_ptr<StopTokenCancellation> cancellation;
+        std::weak_ptr<awl::StopTokenCancellation> cancellation;
         std::size_t starts = 0;
         std::size_t completions = 0;
         bool onStrand = false;
@@ -112,8 +81,8 @@ namespace
         {
             asio::post(_executor, [this, stop_token, index, task = std::move(task)]() mutable
             {
-                std::shared_ptr<StopTokenCancellation> cancellation =
-                    std::make_shared<StopTokenCancellation>(_executor, stop_token);
+                std::shared_ptr<awl::StopTokenCancellation> cancellation =
+                    std::make_shared<awl::StopTokenCancellation>(_executor, stop_token);
                 Outcome& outcome = _outcomes.at(index);
                 outcome.cancellation = cancellation;
 
@@ -401,11 +370,11 @@ AWL_TEST(AsioCancellationQueuedAfterDestruction)
     const Strand executor = asio::make_strand(io_context);
     std::stop_source source;
     std::size_t emissions = 0;
-    std::weak_ptr<StopTokenCancellation> weak_cancellation;
+    std::weak_ptr<awl::StopTokenCancellation> weak_cancellation;
     asio::post(executor, [&]
     {
-        std::shared_ptr<StopTokenCancellation> cancellation =
-            std::make_shared<StopTokenCancellation>(executor, source.get_token());
+        std::shared_ptr<awl::StopTokenCancellation> cancellation =
+            std::make_shared<awl::StopTokenCancellation>(executor, source.get_token());
         weak_cancellation = cancellation;
         cancellation->slot().assign([&](asio::cancellation_type) { ++emissions; });
         source.request_stop();
