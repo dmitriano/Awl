@@ -157,6 +157,14 @@ namespace
         co_await asio::post(asio::use_awaitable);
     }
 
+    asio::awaitable<void> asyncWaitAfterYield(asio::steady_timer& timer)
+    {
+        // Cancellation may arrive after post completes, before the timer wait
+        // is installed. Default Asio checks retain it across that gap.
+        co_await asio::post(asio::use_awaitable);
+        co_await timer.async_wait(asio::use_awaitable);
+    }
+
     void assertStarted(const Outcome& outcome)
     {
         AWL_ASSERT_EQUAL(std::size_t{1}, outcome.starts);
@@ -216,6 +224,70 @@ AWL_TEST(AsioCancellationBeforeRun)
 
     AWL_ASSERT_EQUAL(std::size_t{0}, scenario.outcome().starts);
     AWL_ASSERT(scenario.outcome().error == asio::error::operation_aborted);
+}
+
+AWL_TEST(AsioCancellationWithoutEntryCheck)
+{
+    AWL_UNUSED_CONTEXT;
+
+    for (const bool stop_before_spawn : {true, false})
+    {
+        asio::io_context io_context;
+        const Strand executor = asio::make_strand(io_context);
+        asio::steady_timer timer(executor, asio::steady_timer::time_point::max());
+        asio::steady_timer watchdog(executor, std::chrono::seconds(5));
+        std::stop_source source;
+        std::exception_ptr failure;
+        std::weak_ptr<awl::StopToken> weak_cancellation;
+        std::size_t completions = 0;
+        bool timed_out = false;
+        watchdog.async_wait([&](const boost::system::error_code error)
+        {
+            if (!error)
+            {
+                timed_out = true;
+                io_context.stop();
+            }
+        });
+
+        if (stop_before_spawn)
+        {
+            source.request_stop();
+        }
+
+        asio::post(executor, [&]
+        {
+            std::shared_ptr<awl::StopToken> cancellation =
+                std::make_shared<awl::StopToken>(executor, source.get_token());
+            weak_cancellation = cancellation;
+            asio::co_spawn(executor, asyncWaitAfterYield(timer),
+                asio::bind_cancellation_slot(cancellation->slot(),
+                    [&, cancellation](const std::exception_ptr exception)
+                    {
+                        failure = exception;
+                        ++completions;
+                        watchdog.cancel();
+                    }));
+            if (!stop_before_spawn)
+            {
+                source.request_stop();
+            }
+        });
+        io_context.run();
+
+        AWL_ASSERT_FALSE(timed_out);
+        AWL_ASSERT_EQUAL(std::size_t{1}, completions);
+        AWL_ASSERT(weak_cancellation.expired());
+        AWL_ASSERT(failure != nullptr);
+        try
+        {
+            std::rethrow_exception(failure);
+        }
+        catch (const boost::system::system_error& error)
+        {
+            AWL_ASSERT(error.code() == asio::error::operation_aborted);
+        }
+    }
 }
 
 AWL_TEST(AsioCancellationBetweenCheckAndWait)

@@ -19,8 +19,10 @@ namespace awl
     // Bridges a stop_token to Asio terminal cancellation for one co_spawn task.
     // Construct this adapter and start the task on the supplied strand; use the
     // same strand for the coroutine and retain the adapter until completion.
-    // Check stop_requested() at coroutine entry: a signal does not remember
-    // requests made before its slot handler is installed.
+    // Posting the emit lets co_spawn install its cancellation_state first.
+    // With Asio's default cancellation checks, no entry stop_requested() check
+    // is needed. Explicit polling is still needed for work without co_await or
+    // when automatic cancellation checks are disabled.
     class StopToken
     {
     public:
