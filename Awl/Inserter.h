@@ -20,7 +20,10 @@ namespace awl
     {
         static void reserve(Container& v, size_t n)
         {
-            v.reserve(n);
+            if constexpr (requires { v.reserve(n); })
+            {
+                v.reserve(n);
+            }
         }
 
         static void insert(Container& v, typename Container::value_type&& val)

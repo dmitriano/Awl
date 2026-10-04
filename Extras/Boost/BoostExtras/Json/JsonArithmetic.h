@@ -5,6 +5,7 @@
 
 #include <charconv>
 #include <concepts>
+#include <cmath>
 #include <cstdlib>
 #include <format>
 #include <limits>
@@ -48,19 +49,21 @@ namespace awl
             else if (jv.is_double())
             {
                 const double d_val = jv.as_double();
-                const int64_t i_val = static_cast<int64_t>(d_val);
-
-                if (static_cast<double>(i_val) != d_val)
+                const double upper = std::ldexp(1.0, std::numeric_limits<T>::digits);
+                const double lower = std::is_signed_v<T> ? -upper : 0.0;
+                if (!std::isfinite(d_val) || std::trunc(d_val) != d_val || d_val < lower || d_val >= upper)
                 {
-                    throw JsonException(_T("JSON double value cannot be converted to an integral value without precision loss."));
+                    throw JsonException("JSON double value is not an integer within the target type range.");
                 }
 
-                val = checkedCast(i_val);
+                val = static_cast<T>(d_val);
             }
             else if (jv.is_string())
             {
                 const std::string text(jv.as_string());
-                T parsed{};
+                // from_chars does not support wchar_t/char8_t/char16_t/char32_t.
+                using Parsed = std::conditional_t<std::is_signed_v<T>, std::int64_t, std::uint64_t>;
+                Parsed parsed{};
                 const auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), parsed);
 
                 if (ec != std::errc{} || ptr != text.data() + text.size())
@@ -68,7 +71,7 @@ namespace awl
                     throw JsonException(std::format(_T("Can't convert '{}' to an integral value."), text));
                 }
 
-                val = parsed;
+                val = checkedCast(parsed);
             }
             else
             {

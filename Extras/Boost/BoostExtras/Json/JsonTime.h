@@ -6,7 +6,11 @@
 
 #include "Awl/Duration.h"
 
+#include <charconv>
 #include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <limits>
 #include <string>
 #include <string_view>
 
@@ -21,38 +25,74 @@ namespace awl
 
         void fromJson(const boost::json::value& jv, value_type& v)
         {
-            using namespace std::chrono;
-
-            double ms{};
-
-            if (jv.is_string())
+            using Milliseconds = std::chrono::milliseconds;
+            std::int64_t ms{};
+            if (jv.is_int64())
             {
-                ms = std::stod(std::string(jv.as_string()));
+                ms = jv.as_int64();
             }
-            else if (jv.is_double())
+            else if (jv.is_uint64() && jv.as_uint64() <= static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))
             {
-                ms = jv.as_double();
+                ms = static_cast<std::int64_t>(jv.as_uint64());
             }
-            else if (jv.is_int64())
+            else if (jv.is_double() && std::isfinite(jv.as_double()) && std::trunc(jv.as_double()) == jv.as_double()
+                && jv.as_double() >= -std::ldexp(1.0, 63) && jv.as_double() < std::ldexp(1.0, 63))
             {
-                ms = static_cast<double>(jv.as_int64());
+                ms = static_cast<std::int64_t>(jv.as_double());
             }
-            else if (jv.is_uint64())
+            else if (jv.is_string())
             {
-                ms = static_cast<double>(jv.as_uint64());
+                const std::string_view text = asString(jv);
+                const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), ms);
+                if (error != std::errc{} || end != text.data() + text.size())
+                {
+                    throw JsonException("Invalid epoch-millisecond integer.");
+                }
             }
             else
             {
-                throw JsonException(_T("Expected time point as JSON number or string."));
+                throw JsonException("Expected epoch milliseconds as a signed 64-bit integer.");
             }
 
-            v = value_type(milliseconds(static_cast<milliseconds::rep>(ms)));
+            try
+            {
+                v = value_type(time_detail::checked_duration_cast<Duration>(Milliseconds(ms)));
+            }
+            catch (const GeneralException& error)
+            {
+                throw JsonException(error.message());
+            }
         }
 
         void toJson(const value_type& v, boost::json::value& jv)
         {
-            using namespace std::chrono;
-            jv = static_cast<int64_t>(duration_cast<milliseconds>(v.time_since_epoch()).count());
+            using Milliseconds = std::chrono::milliseconds;
+            using Factor = std::ratio_divide<typename Duration::period, std::milli>;
+            try
+            {
+                if constexpr (std::is_integral_v<typename Duration::rep> && Factor::num == 1)
+                {
+                    // Preserve the existing truncation of sub-millisecond ticks,
+                    // without converting 64-bit integer epochs through double.
+                    const std::chrono::duration<typename Duration::rep, std::milli> truncated(
+                        v.time_since_epoch().count() / Factor::den);
+                    jv = time_detail::checked_duration_cast<Milliseconds>(truncated).count();
+                }
+                else if constexpr (std::is_integral_v<typename Duration::rep> && Factor::den == 1)
+                {
+                    jv = time_detail::checked_duration_cast<Milliseconds>(v.time_since_epoch()).count();
+                }
+                else
+                {
+                    const long double ms = std::chrono::duration<long double, std::milli>(v.time_since_epoch()).count();
+                    jv = time_detail::checked_duration_cast<Milliseconds>(
+                        std::chrono::duration<long double, std::milli>(std::trunc(ms))).count();
+                }
+            }
+            catch (const GeneralException& error)
+            {
+                throw JsonException(error.message());
+            }
         }
     };
 
