@@ -28,6 +28,23 @@ Feel free to use it or fork it, report a bug by opening an issue.
 
 To leave the author a message fill the [form on his website](https://developernote.com/contact/).
 
+## Asio channels
+
+`BoostExtras/Channel.h` provides `awl::Channel<ExecutorOrSignature, Signatures...>`,
+a header-only alias for `boost::asio::experimental::concurrent_channel`. It accepts
+the same executor/signature template parameters as Boost.Asio. For example:
+
+```cpp
+#include "BoostExtras/Channel.h"
+
+awl::Channel<void(boost::system::error_code, int)> channel(executor, 16);
+```
+
+The caller supplies the executor and capacity. Await sends to apply backpressure;
+receive errors and cancellation retain Boost.Asio semantics. The alias creates no
+threads, pools or strands. Channel thread safety does not serialize consumer model
+state; keep that state on its required executor/strand.
+
 ## CMake library targets
 
 AWL implementations are reusable static libraries:

@@ -1,9 +1,9 @@
+#include "BoostExtras/Channel.h"
 #include "BoostExtras/StopToken.h"
 
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio.hpp>
-#include <boost/asio/experimental/concurrent_channel.hpp>
 
 #include <chrono>
 #include <exception>
@@ -18,7 +18,7 @@ namespace
     namespace asio = boost::asio;
 
     using Strand = asio::strand<asio::io_context::executor_type>;
-    using Channel = asio::experimental::concurrent_channel<void(boost::system::error_code, int)>;
+    using Channel = awl::Channel<void(boost::system::error_code, int)>;
 
     struct Outcome
     {
