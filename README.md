@@ -138,6 +138,14 @@ Running the benchmarks:
 ./AwlTest --filter=".*_Benchmark" --output=all
 ```
 
+Console output uses stdout by default. Select stderr with
+`--output_stream=stderr` (or explicitly select `--output_stream=stdout`). The
+selection also applies to command-line diagnostics, unused-option warnings and
+`--list`; it is independent of `--output=all|failed|null`, which controls when
+logs are emitted. Attributes may also be loaded through `--json=<file>`; command
+line values take precedence. For an example serving a protocol on stdout, use
+`--output=all --output_stream=stderr` and write protocol frames separately.
+
 Running the examples:
 
 ```bash

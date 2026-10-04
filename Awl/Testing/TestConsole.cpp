@@ -49,12 +49,29 @@ namespace awl::testing
             std::vector<std::shared_ptr<StdStreamLogger>> delayedLoggers;
         };
 
-        std::shared_ptr<CompositeLogger> makeStdoutLogger(const std::string& log_level)
+        template <attribute_provider Provider>
+        awl::ostream& outputStream(Provider& provider)
+        {
+            const std::string output_stream = getAttributeValue<std::string>(provider, "output_stream", "stdout");
+
+            if (output_stream == "stdout")
+            {
+                return awl::cout();
+            }
+            else if (output_stream == "stderr")
+            {
+                return awl::cerr();
+            }
+
+            throw TestException(std::format("Not a valid 'output_stream' parameter value: '{}'. Expected stdout or stderr.", output_stream));
+        }
+
+        std::shared_ptr<CompositeLogger> makeConsoleLogger(awl::ostream& output_stream, const std::string& log_level)
         {
             std::shared_ptr<CompositeLogger> logger = std::make_shared<CompositeLogger>();
             logger->addLogger(std::make_shared<StdStreamLogger>(
                 "",
-                StdStreamLogger::coutStream(),
+                StdStreamLogger::wrapStream(output_stream),
                 log_level));
             return logger;
         }
@@ -95,14 +112,15 @@ namespace awl::testing
             }
         }
 
-        void addStdoutLogger(
+        void addConsoleLogger(
             TestConsoleLogger& console_logger,
+            awl::ostream& output_stream,
             const std::string& log_level,
             bool delayed)
         {
             std::shared_ptr<StdStreamLogger> logger = std::make_shared<StdStreamLogger>(
                 "",
-                StdStreamLogger::coutStream(),
+                StdStreamLogger::wrapStream(output_stream),
                 log_level);
 
             console_logger.logger->addLogger(logger);
@@ -138,6 +156,7 @@ namespace awl::testing
         }
 
         TestConsoleLogger makeTestConsoleLogger(
+            awl::ostream& output_stream,
             TestOutput output,
             const std::string& log_level,
             const std::optional<std::string>& file_level,
@@ -148,11 +167,11 @@ namespace awl::testing
             switch (output)
             {
             case TestOutput::All:
-                addStdoutLogger(console_logger, log_level, false);
+                addConsoleLogger(console_logger, output_stream, log_level, false);
                 break;
 
             case TestOutput::Failed:
-                addStdoutLogger(console_logger, log_level, true);
+                addConsoleLogger(console_logger, output_stream, log_level, true);
                 break;
 
             case TestOutput::Null:
@@ -194,7 +213,8 @@ namespace awl::testing
 
     template <attribute_provider Provider>
     TestConsole<Provider>::TestConsole(Provider& provider, std::stop_token stop_token) :
-        _logger(makeStdoutLogger(LogLevel::Trace)),
+        _outputStream(outputStream(provider)),
+        _logger(makeConsoleLogger(_outputStream, LogLevel::Trace)),
         _ap(provider),
         _context{ _logger, std::move(stop_token), _ap, _typeProvider}
     {}
@@ -222,7 +242,7 @@ namespace awl::testing
 
         bool passed = false;
 
-        TestConsoleLogger console_logger = makeTestConsoleLogger(output, log_level, file_level, log_file);
+        TestConsoleLogger console_logger = makeTestConsoleLogger(_outputStream, output, log_level, file_level, log_file);
         _logger = console_logger.logger;
         context.logger = _logger;
 
@@ -297,11 +317,27 @@ namespace awl::testing
         return 2;
     }
 
+    awl::ostream& commandLineOutputStream(const int argc, CmdChar* argv[])
+    {
+        const CmdString stderr_option = StringConvertor<CmdChar>::convertFrom("--output_stream=stderr");
+        for (int i = 1; i < argc; ++i)
+        {
+            if (argv[i] == stderr_option)
+            {
+                return awl::cerr();
+            }
+        }
+
+        return awl::cout();
+    }
+
     int run(int argc, CmdChar* argv[], std::stop_token stop_token)
     {
+        awl::ostream* diagnostic_stream = &commandLineOutputStream(argc, argv);
         try
         {
             CommandLineProvider cl(argc, argv);
+            diagnostic_stream = &outputStream(cl);
 
             // "list" command runs without TestRunner
             {
@@ -317,10 +353,10 @@ namespace awl::testing
 
                     for (auto& p_link : test_map)
                     {
-                        awl::cout() << p_link->name() << std::endl;
+                        *diagnostic_stream << p_link->name() << std::endl;
                     }
 
-                    awl::cout() << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
+                    *diagnostic_stream << _T("Total ") << test_map.size() << _T(" tests.") << std::endl;
 
                     return 0;
                 }
@@ -340,7 +376,7 @@ namespace awl::testing
                 }
                 catch (const JsonException& e)
                 {
-                    makeStdoutLogger(LogLevel::Trace)->error(e.message());
+                    makeConsoleLogger(*diagnostic_stream, LogLevel::Trace)->error(e.message());
 
                     return 3;
                 }
@@ -354,6 +390,7 @@ namespace awl::testing
 
 #endif
 
+            diagnostic_stream = &outputStream(ap);
             TestConsole console(ap, std::move(stop_token));
 
             auto guard = make_scope_guard([&ap, logger = console.context().logger]
@@ -368,9 +405,13 @@ namespace awl::testing
 
             return console.run();
         }
-        catch (const CommandLineException& e)
+        catch (const awl::Exception& e)
         {
-            makeStdoutLogger(LogLevel::Trace)->error(_T("The following error has occurred: {}"), e.message());
+            makeConsoleLogger(*diagnostic_stream, LogLevel::Trace)->error(_T("The following error has occurred: {}"), e.message());
+        }
+        catch (const std::exception& e)
+        {
+            makeConsoleLogger(*diagnostic_stream, LogLevel::Trace)->error("The following error has occurred: {}", e.what());
         }
 
         return 2;

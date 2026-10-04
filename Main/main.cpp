@@ -49,9 +49,9 @@ int _tmain(int argc, awl::Char * argv[])
     {
         return awl::testing::run(argc, argv);
     }
-    catch (const awl::testing::TestException& e)
+    catch (const awl::Exception& e)
     {
-        awl::cout() << e.message() << std::endl;
+        awl::testing::commandLineOutputStream(argc, argv) << e.message() << std::endl;
     }
 
     return 1;

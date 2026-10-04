@@ -19,6 +19,7 @@ namespace awl
     {
         static std::istream &cin() { return std::cin; }
         static std::ostream &cout() { return std::cout; }
+        static std::ostream &cerr() { return std::cerr; }
     };
 
     template<>
@@ -26,8 +27,10 @@ namespace awl
     {
         static std::wistream &cin() { return std::wcin; }
         static std::wostream &cout() { return std::wcout; }
+        static std::wostream &cerr() { return std::wcerr; }
     };
 
     inline istream &cin() { return select_console<Char>::cin(); }
     inline ostream &cout() { return select_console<Char>::cout(); }
+    inline ostream &cerr() { return select_console<Char>::cerr(); }
 }

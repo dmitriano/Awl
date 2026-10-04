@@ -38,7 +38,9 @@ namespace awl::testing
     private:
 
         bool runTests();
-            
+
+        awl::ostream& _outputStream;
+
         std::shared_ptr<ILogger> _logger;
 
         Provider& _ap;
@@ -54,4 +56,7 @@ namespace awl::testing
     int run(int argc, CmdChar* argv[]);
 
     int run(int argc, CmdChar* argv[], std::stop_token stop_token);
+
+    // Select a diagnostic stream even when command-line parsing fails.
+    awl::ostream& commandLineOutputStream(int argc, CmdChar* argv[]);
 }
