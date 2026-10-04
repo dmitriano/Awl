@@ -28,6 +28,47 @@ Feel free to use it or fork it, report a bug by opening an issue.
 
 To leave the author a message fill the [form on his website](https://developernote.com/contact/).
 
+## CMake library targets
+
+AWL implementations are reusable static libraries:
+
+- `AWL::Core`: core implementations and native platform support.
+- `AWL::Boost`: Boost extras, including the sole Boost.JSON implementation
+  (available with `AWL_FIND_BOOST=ON`).
+- `AWL::Qt`: optional Qt extras, available with `AWL_FIND_QT=ON`.
+- `AWL::Testing`: the test runner and command-line support.
+- `AWL::TestMain`: the test executable entry point; links `AWL::Testing`.
+
+Configure feature/runtime options before adding AWL. All consumers in one build
+tree must use the same character, feature and runtime configuration. Header paths,
+C++23 and required definitions are propagated through the targets. MSVC consumers
+must use the same `MSVC_RUNTIME_LIBRARY`; `awl_apply_compiler_options(target)`
+applies AWL's development flags and selected static runtime to an explicit target.
+
+```cmake
+set(AWL_FIND_BOOST ON)
+set(AWL_FIND_QT OFF)
+set(AWL_STATIC_RUNTIME ON)
+set(AWL_ANSI_CMD_CHAR ON)
+set(AWL_BUILD_TESTS OFF)
+add_subdirectory(path/to/Awl awl)
+add_executable(MyProgram Main.cpp)
+target_link_libraries(MyProgram PRIVATE AWL::Boost)
+awl_apply_compiler_options(MyProgram)
+```
+
+`AWL_BUILD_TESTS` defaults to ON for standalone AWL builds and OFF as a subproject.
+Testing/main libraries are excluded from the default build unless used. To create
+your own test executable, compile registration sources directly into it and link
+`AWL::TestMain`. Putting registration-only objects in a static library can omit
+tests. `awl_add_test_sources(target)` adds AWL's own tests when desired.
+
+Legacy `include(CMake/AwlConfig.cmake)` and `include(CMake/AwlLink.cmake)` remain
+supported. AwlLink now links libraries instead of copying implementation sources
+into `${PROJECT_NAME}`; `AWL_COMPILE_MAIN` and `AWL_COMPILE_TESTS` select that
+consumer's main and tests. Separate build directories still compile separate
+copies; reuse targets within one tree to avoid duplicate compilation.
+
 ## Compiling on Windows with Visual Studio 18 2026:
 
 ```bat
@@ -38,7 +79,7 @@ cmake --build . --target AwlTest --config Release
 or
 
 ```bat
-msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
+cmake --build . --config Release
 ```
 
 It also builds for x86 using the following command:
