@@ -1,4 +1,5 @@
 #include "BoostExtras/Json/JsonUtil.h"
+#include "BoostExtras/JsonFormatter.h"
 #include "Tests/VtsData.h"
 
 #include "Awl/Decimal128.h"
@@ -8,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <format>
 #include <map>
 #include <optional>
 #include <set>
@@ -347,4 +349,20 @@ AWL_TEST(BoostJsonUtil)
 
     const std::string text = json::structToString(value);
     AWL_ASSERT(!text.empty());
+}
+
+AWL_TEST(BoostJsonFormatter)
+{
+    AWL_UNUSED_CONTEXT;
+    const boost::json::value value = "quote\"\n";
+    const boost::json::object object{{"value", value}, {"count", 42}};
+    const boost::json::array array{nullptr, true, object};
+
+    AWL_ASSERT_EQUAL(std::string("\"quote\\\"\\n\""), std::format("{}", value));
+    AWL_ASSERT_EQUAL(std::string("{\"value\":\"quote\\\"\\n\",\"count\":42}"), std::format("{}", object));
+    AWL_ASSERT_EQUAL(std::string("[null,true,{\"value\":\"quote\\\"\\n\",\"count\":42}]"), std::format("{}", array));
+    AWL_ASSERT_EQUAL(std::wstring(L"\"quote\\\"\\n\""), std::format(L"{}", value));
+    AWL_ASSERT_EQUAL(std::wstring(L"{\"value\":\"quote\\\"\\n\",\"count\":42}"), std::format(L"{}", object));
+    AWL_ASSERT_EQUAL(std::wstring(L"[null,true,{\"value\":\"quote\\\"\\n\",\"count\":42}]"), std::format(L"{}", array));
+    AWL_ASSERT_EQUAL(std::string("true    "), std::format("{:<8}", boost::json::value(true)));
 }
