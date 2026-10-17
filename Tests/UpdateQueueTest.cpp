@@ -36,7 +36,7 @@ namespace
     {
         TestLock lock(testMutex);
 
-        context.logger->debug(_T("Drawing the scene with the following settings: Rotation={} PerspectiveMode={}"), static_cast<int>(Rotation), PerspectiveMode);
+        context.logger->debug(_T("Drawing the scene with the following settings: Rotation={} PerspectiveMode={}"), Rotation, PerspectiveMode);
     }
 
     awl::UpdateQueue<GameScene &> updateQueue;
