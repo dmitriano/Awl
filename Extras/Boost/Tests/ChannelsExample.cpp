@@ -67,9 +67,13 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
+                {
                     context.logger->debug("Channel closed, exiting consumer");
+                }
                 else
+                {
                     context.logger->debug(_T("Receive error: {}"), awl::fromAString(e.code().message()));
+                }
             }
         }
     };

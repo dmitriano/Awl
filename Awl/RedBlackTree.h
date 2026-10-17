@@ -336,12 +336,14 @@ namespace awl::helpers
                     parent->setRight(node);
                 }
             }
+
             node->color = Color::Red;
             balanceAfterInsert(node);
             _root->color = Color::Black;
 
             //Insert newly added node to the list.
             Node * pred = predecessor(node);
+
             if (pred != nullptr)
             {
                 assert(_comp(pred->value(), node->value()));
@@ -364,7 +366,10 @@ namespace awl::helpers
                 // If right is not NULL then go right one and
                 // then keep going left until we find a node with
                 // no left pointer.
-                for (y = x->right; y->left != nullptr; y = y->left);
+                for (y = x->right; y->left != nullptr; y = y->left)
+                {
+                    ;
+                }
             }
             else
             {
@@ -372,12 +377,14 @@ namespace awl::helpers
                 // left of its parent (or the root) and then return the
                 // parent.
                 y = x->parent;
+
                 while (y != nullptr && x == y->right)
                 {
                     x = y;
                     y = y->parent;
                 }
             }
+
             return y;
         }
 
@@ -391,7 +398,10 @@ namespace awl::helpers
                 // If left is not NULL then go left one and
                 // then keep going right until we find a node with
                 // no right pointer.
-                for (y = x->left; y->right != nullptr; y = y->right);
+                for (y = x->left; y->right != nullptr; y = y->right)
+                {
+                    ;
+                }
             }
             else
             {
@@ -399,12 +409,14 @@ namespace awl::helpers
                 // right of its parent (or the root) and then return the
                 // parent.
                 y = x->parent;
+
                 while (y != nullptr && x == y->left)
                 {
                     x = y;
                     y = y->parent;
                 }
             }
+
             return y;
         }
 
@@ -430,21 +442,29 @@ namespace awl::helpers
 
             // If B is not nullptr, set it's parent to be X
             if (y->left != nullptr)
+            {
                 y->left->parent = x;
+            }
 
             // Set Y's parent to be what X's parent was
             y->parent = x->parent;
 
             // if X was the root
             if (x->parent == nullptr)
+            {
                 _root = y;
+            }
             else
             {
                 // Set X's parent's left or right pointer to be Y
                 if (x == x->parent->left)
+                {
                     x->parent->left = y;
+                }
                 else
+                {
                     x->parent->right = y;
+                }
             }
 
             // Put X on Y's left
@@ -478,21 +498,29 @@ namespace awl::helpers
 
             // If B is not nullptr, set it's parent to be Y
             if (x->right != nullptr)
+            {
                 x->right->parent = y;
+            }
 
             // Set X's parent to be what Y's parent was
             x->parent = y->parent;
 
             // if Y was the root
             if (y->parent == nullptr)
+            {
                 _root = x;
+            }
             else
             {
                 // Set Y's parent's left or right pointer to be X
                 if (y == y->parent->left)
+                {
                     y->parent->left = x;
+                }
                 else
+                {
                     y->parent->right = x;
+                }
             }
 
             // Put Y on X's right
@@ -522,6 +550,7 @@ namespace awl::helpers
                 {
                     //get the right side of our grandparent (uncle?)
                     y = x->parent->parent->right;
+
                     if (y != nullptr && y->color == Color::Red)
                     {
                         //make our parent black
@@ -556,6 +585,7 @@ namespace awl::helpers
                     //everything here is the same as above, but
                     //exchanging left for right
                     y = x->parent->parent->left;
+
                     if (y != nullptr && y->color == Color::Red)
                     {
                         x->parent->color = Color::Black;
@@ -578,6 +608,7 @@ namespace awl::helpers
                     }
                 }
             }
+
             _root->color = Color::Black;
         }
 
@@ -588,26 +619,42 @@ namespace awl::helpers
             Node * y;
 
             if (z->left == nullptr || z->right == nullptr)
+            {
                 y = z;
+            }
             else
+            {
                 y = successor(z);
+            }
 
             if (y->left != nullptr)
+            {
                 x = y->left;
+            }
             else
+            {
                 x = y->right;
+            }
 
             if (x != nullptr)
+            {
                 x->setParent(y->parent);
+            }
 
             if (y->parent == nullptr)
+            {
                 _root = x;
+            }
             else
             {
                 if (y == y->parent->left)
+                {
                     y->parent->setLeft(x);
+                }
                 else
+                {
                     y->parent->setRight(x);
+                }
             }
 
             if (y != z)
@@ -616,7 +663,9 @@ namespace awl::helpers
                 copyFrom(y, z);
 
                 if (z == _root)
+                {
                     _root = y;
+                }
 
                 //we do this all above instead of the following line in original code
                 //to provide guarantee of the persistence of the node in the tree
@@ -624,7 +673,9 @@ namespace awl::helpers
             }
 
             if (y->color == Color::Black && x != nullptr)
+            {
                 balanceAfterRemove(x);
+            }
         }
 
         // Restores the reb-black properties after a delete.
@@ -637,6 +688,7 @@ namespace awl::helpers
                 if (x == x->parent->left)
                 {
                     w = x->parent->right;
+
                     if (w == nullptr)
                     {
                         x = x->parent;
@@ -668,7 +720,10 @@ namespace awl::helpers
                         if (w->right == nullptr || w->right->color == Color::Black)
                         {
                             if (w->left != nullptr)
+                            {
                                 w->left->color = Color::Black;
+                            }
+
                             w->color = Color::Red;
                             rotateRight(w);
                             w = x->parent->right;
@@ -676,8 +731,12 @@ namespace awl::helpers
 
                         w->color = x->parent->color;
                         x->parent->color = Color::Black;
+
                         if (w->right != nullptr)
+                        {
                             w->right->color = Color::Black;
+                        }
+
                         rotateLeft(x->parent);
                         x = _root;
                     }
@@ -685,6 +744,7 @@ namespace awl::helpers
                 else
                 {
                     w = x->parent->left;
+
                     if (w == nullptr)
                     {
                         x = x->parent;
@@ -716,7 +776,10 @@ namespace awl::helpers
                         if (w->left == nullptr || w->left->color == Color::Black)
                         {
                             if (w->right != nullptr)
+                            {
                                 w->right->color = Color::Black;
+                            }
+
                             w->color = Color::Red;
                             rotateLeft(w);
                             w = x->parent->left;
@@ -724,13 +787,18 @@ namespace awl::helpers
 
                         w->color = x->parent->color;
                         x->parent->color = Color::Black;
+
                         if (w->left != nullptr)
+                        {
                             w->left->color = Color::Black;
+                        }
+
                         rotateRight(x->parent);
                         x = _root;
                     }
                 }
             }
+
             x->color = Color::Black;
         }
 

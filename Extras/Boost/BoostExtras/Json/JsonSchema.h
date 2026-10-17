@@ -150,6 +150,7 @@ namespace awl
         boost::json::object buildJsonSchemaBody(SchemaContext& context)
         {
             namespace json = boost::json;
+
             if constexpr (requires { JsonSchemaTraits<T>::schema(); })
             {
                 return JsonSchemaTraits<T>::schema();
@@ -184,6 +185,7 @@ namespace awl
                 }(std::make_index_sequence<std::tuple_size_v<T>>{});
                 json::object schema{{"type", "array"}, {"minItems", std::tuple_size_v<T>},
                     {"maxItems", std::tuple_size_v<T>}, {"items", false}};
+
                 if (!items.empty())
                 {
                     schema["prefixItems"] = std::move(items);
@@ -221,6 +223,7 @@ namespace awl
             else if constexpr (std::is_integral_v<T>)
             {
                 static_assert(sizeof(T) <= sizeof(std::uint64_t), "JSON integers support at most 64 bits.");
+
                 if constexpr (std::is_signed_v<T>)
                 {
                     return json::object{{"type", "integer"},
@@ -245,6 +248,7 @@ namespace awl
             else if constexpr (awl::sequential_enum<T>)
             {
                 json::array names;
+
                 for (const std::string& name : awl::EnumTraits<T>::names())
                 {
                     names.push_back(json::value(name));
@@ -259,6 +263,7 @@ namespace awl
                 forEachField<T>([&]<class Field>(const std::string& name)
                 {
                     properties[name] = buildJsonSchema<Field, Ancestors..., T>(context);
+
                     if constexpr (!isOptional<Field>())
                     {
                         required.push_back(json::value(name));
@@ -386,6 +391,7 @@ namespace awl
                 }
 
                 const auto& items = value.as_array();
+
                 for (std::size_t index = 0; index < items.size(); ++index)
                 {
                     validateJsonValue<typename T::value_type>(items[index], std::format("{}[{}]", path, index));
@@ -417,7 +423,8 @@ namespace awl
                 }(std::make_index_sequence<std::tuple_size_v<T>>{});
             }
             else if constexpr (std::same_as<T, boost::json::value>)
-            {}
+            {
+            }
             else if constexpr (std::same_as<T, boost::json::object> || std::same_as<T, boost::json::array>)
             {
                 if (!(std::same_as<T, boost::json::object> ? value.is_object() : value.is_array()))
@@ -451,6 +458,7 @@ namespace awl
             else if constexpr (std::is_integral_v<T>)
             {
                 static_assert(sizeof(T) <= sizeof(std::uint64_t), "JSON integers support at most 64 bits.");
+
                 if (!integerFits<T>(value))
                 {
                     invalidJson(path, "Expected an integer within the C++ type range");
@@ -465,6 +473,7 @@ namespace awl
 
                 const double number = value.is_double() ? value.as_double()
                     : value.is_int64() ? static_cast<double>(value.as_int64()) : static_cast<double>(value.as_uint64());
+
                 if (!std::isfinite(number) || number < -floatingLimit<T>() || number > floatingLimit<T>())
                 {
                     invalidJson(path, "Number is outside the C++ type range");
@@ -485,6 +494,7 @@ namespace awl
                 }
 
                 const auto& names = awl::EnumTraits<T>::names();
+
                 if (names.find(std::string(value.as_string())) == names.end())
                 {
                     invalidJson(path, "Unknown enum name");
@@ -499,9 +509,11 @@ namespace awl
 
                 const auto& object = value.as_object();
                 const auto& names = T::member_names();
+
                 for (const auto& member : object)
                 {
                     const std::string name(member.key());
+
                     if (names.find(name) == names.end())
                     {
                         invalidJson(std::format("{}.{}", path, name), "Unknown field");
@@ -511,6 +523,7 @@ namespace awl
                 forEachField<T>([&]<class Field>(const std::string& name)
                 {
                     const std::string field_path = std::format("{}.{}", path, name);
+
                     if (const boost::json::value* field = object.if_contains(name))
                     {
                         validateJsonValue<Field>(*field, field_path);
@@ -545,6 +558,7 @@ namespace awl
                     invalidJson(path, "Invalid UTF-8 string");
                 }
             };
+
             if (value.is_double() && !std::isfinite(value.as_double()))
             {
                 invalidJson(path, "JSON numbers must be finite");
@@ -576,7 +590,8 @@ namespace awl
         void normalizeJsonIntegers(boost::json::value& value)
         {
             if constexpr (requires { JsonSchemaTraits<T>::schema(); })
-            {}
+            {
+            }
             else if constexpr (WrapperTraits<T>::value)
             {
                 normalizeJsonIntegers<typename WrapperTraits<T>::Value>(value);
@@ -635,10 +650,12 @@ namespace awl
     {
         json_schema_detail::SchemaContext context;
         boost::json::object schema = json_schema_detail::buildJsonSchema<std::remove_cvref_t<T>>(context);
+
         if (!context.definitions.empty())
         {
             schema["$defs"] = std::move(context.definitions);
         }
+
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
         return schema;
     }

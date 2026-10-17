@@ -76,11 +76,18 @@ void testStopCallbackInits()
   std::function<void()> stop17;
   auto cb17 = [token] {
                 std::function<void()> f;
-                if (true) {
-                  f = [] { std::cout << "stop17a\n"; };
-                } else {
-                  f = [] { std::cout << "stop17b\n"; };
+
+                if (true)
+                {
+                    f = []
+                    { std::cout << "stop17a\n"; };
                 }
+                else
+                {
+                    f = []
+                    { std::cout << "stop17b\n"; };
+                }
+
                 return std::stop_callback{token, f};
               }();
   static_assert(std::is_same_v<decltype(cb17)::callback_type,

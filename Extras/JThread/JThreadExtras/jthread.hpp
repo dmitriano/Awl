@@ -101,16 +101,18 @@ inline jthread::jthread(Callable&& cb, Args&&... args)
  : _stopSource{},                             // initialize stop_source
    _thread{[] (stop_token st, auto&& cb, auto&&... args) {   // called lambda in the thread
                  // perform tasks of the thread:
-                 if constexpr(std::is_invocable_v<Callable, stop_token, Args...>) {
-                   // pass the stop_token as first argument to the started thread:
-                   ::std::invoke(::std::forward<decltype(cb)>(cb),
-                                 std::move(st),
-                                 ::std::forward<decltype(args)>(args)...);
+                 if constexpr (std::is_invocable_v<Callable, stop_token, Args...>)
+                 {
+                     // pass the stop_token as first argument to the started thread:
+                     ::std::invoke(::std::forward<decltype(cb)>(cb),
+                                   std::move(st),
+                                   ::std::forward<decltype(args)>(args)...);
                  }
-                 else {
-                   // started thread does not expect a stop token:
-                   ::std::invoke(::std::forward<decltype(cb)>(cb),
-                                 ::std::forward<decltype(args)>(args)...);
+                 else
+                 {
+                     // started thread does not expect a stop token:
+                     ::std::invoke(::std::forward<decltype(cb)>(cb),
+                                   ::std::forward<decltype(args)>(args)...);
                  }
                },
                _stopSource.get_token(),   // not captured due to possible races if immediately set
@@ -121,10 +123,11 @@ inline jthread::jthread(Callable&& cb, Args&&... args)
 
 // move assignment operator:
 inline jthread& jthread::operator=(jthread&& t) noexcept {
-  if (joinable()) {   // if not joined/detached, signal stop and wait for end:
-    request_stop();
-    join();
-  }
+    if (joinable())
+    { // if not joined/detached, signal stop and wait for end:
+        request_stop();
+        join();
+    }
 
   _thread = std::move(t._thread);
   _stopSource = std::move(t._stopSource);
@@ -133,10 +136,11 @@ inline jthread& jthread::operator=(jthread&& t) noexcept {
 
 // destructor:
 inline jthread::~jthread() {
-  if (joinable()) {   // if not joined/detached, signal stop and wait for end:
-    request_stop();
-    join();
-  }
+    if (joinable())
+    { // if not joined/detached, signal stop and wait for end:
+        request_stop();
+        join();
+    }
 }
 
 

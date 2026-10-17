@@ -24,25 +24,35 @@ public:
         , name(name)
         , testFunc(testFunc)
     {
-        if (last != nullptr) {
+        if (last != nullptr)
+        {
             last->next = this;
-        } else {
+        }
+        else
+        {
             first = this;
         }
+
         last = this;
     }
 
     ~test_entry()
     {
-        if (prev == nullptr) {
+        if (prev == nullptr)
+        {
             first = next;
-        } else {
+        }
+        else
+        {
             prev->next = next;
         }
 
-        if (next == nullptr) {
+        if (next == nullptr)
+        {
             last = prev;
-        } else {
+        }
+        else
+        {
             next->prev = prev;
         }
     }
@@ -75,11 +85,15 @@ public:
     static int run_all()
     {
         int failureCount = 0;
-        for (auto* entry = first; entry != nullptr; entry = entry->next) {
-            if (!entry->run()) {
+
+        for (auto* entry = first; entry != nullptr; entry = entry->next)
+        {
+            if (!entry->run())
+            {
                 ++failureCount;
             }
         }
+
         return failureCount;
     }
 
@@ -111,8 +125,15 @@ test_entry* test_entry::last = nullptr;
 // If parameter evaluates to false then causes current test to be reported as failed.
 // Does not stop the program from continuing.
 #define CHECK(X) \
-    do { \
-        if ((X)) {} else { ::test_entry::check_failed("CHECK(" #X ")"); } \
+    do \
+    { \
+        if ((X)) \
+        { \
+        } \
+        else \
+        { \
+            ::test_entry::check_failed("CHECK(" #X ")"); \
+        } \
     } while (false)
 
 #endif

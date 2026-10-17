@@ -80,8 +80,12 @@ void g() {
     m.lock();
     g_ready = true;
     cv->notify_one();
+
     while (!f_ready)
+    {
         cv->wait(m);
+    }
+
     m.unlock();
 }
 
@@ -97,8 +101,12 @@ void testCVAnyMutex()
     cv = new(raw) std::condition_variable_any2;
     std::thread th2(g);
     m.lock();
+
     while (!g_ready)
+    {
         cv->wait(m);
+    }
+
     m.unlock();
     std::thread th1(f);
     th1.join();
@@ -129,14 +137,18 @@ void testCVAnyMutex()
                     std::unique_lock ul{m};
                     g_ready = true;
                     cv->notify_one();
-                    while (!f_ready) {
+
+                    while (!f_ready)
+                    {
                         cv->wait(ul);
                     }
                  });
   {
     std::unique_lock ul{m};
-    while (!g_ready) {
-      cv->wait(ul);
+
+    while (!g_ready)
+    {
+        cv->wait(ul);
     }
   }
   std::thread t1([&] {

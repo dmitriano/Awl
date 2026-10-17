@@ -29,10 +29,12 @@ void threadB()
   cv.wait(lock, [&] {
     // Since pred() should only be called while holding lock on 'mut'
     // we should be able to assume invariants protected by the lock.
-    if (sharedStateA != sharedStateB) {
-      std::cerr << "TEST ERROR: Invariants maintained by lock not preserved." << std::endl;
-      std::abort();
+    if (sharedStateA != sharedStateB)
+    {
+        std::cerr << "TEST ERROR: Invariants maintained by lock not preserved." << std::endl;
+        std::abort();
     }
+
     return sharedStateA == 1;
   });
 }

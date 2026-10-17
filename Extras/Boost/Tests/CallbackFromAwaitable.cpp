@@ -33,26 +33,29 @@ namespace
                     ex,
                     std::move(aw),
                     // co_spawn completion for non-void: void(std::exception_ptr, T)
-                    [h = std::forward<decltype(handler)>(handler)]
-                    (std::exception_ptr ep, T value) mutable
+                    [h = std::forward<decltype(handler)>(handler)](std::exception_ptr ep, T value) mutable
                     {
-                        if (ep) {
-                            try {
+                        if (ep)
+                        {
+                            try
+                            {
                                 std::rethrow_exception(ep);
                             }
-                            catch (const boost::system::system_error& se) {
+                            catch (const boost::system::system_error& se)
+                            {
                                 std::move(h)(se.code(), T{});
                                 return;
                             }
-                            catch (...) {
+                            catch (...)
+                            {
                                 std::move(h)(
                                     make_error_code(boost::system::errc::operation_canceled), T{});
                                 return;
                             }
                         }
+
                         std::move(h)({}, std::move(value));
-                    }
-                );
+                    });
             },
             tk // pass as lvalue
         );
