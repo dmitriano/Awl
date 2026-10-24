@@ -155,55 +155,90 @@ TEST(ConcurrentCallbackRegistration)
   auto threadLoop = [](std::stop_token token)
   {
     std::atomic<bool> cancelled = false;
+
     while (!cancelled)
     {
-      std::stop_callback registration{ token, [&]
-      {
-        cancelled = true;
-      } };
+        std::stop_callback registration{token, [&]
+                                        {
+                                            cancelled = true;
+                                        }};
 
-      std::stop_callback cb0{ token, [] {} };
-      std::stop_callback cb1{ token, [] {} };
-      std::stop_callback cb2{ token, [] {} };
-      std::stop_callback cb3{ token, [] {} };
-      std::stop_callback cb4{ token, [] {} };
-      std::stop_callback cb5{ token, [] {} };
-      std::stop_callback cb6{ token, [] {} };
-      std::stop_callback cb7{ token, [] {} };
-      std::stop_callback cb8{ token, [] {} };
-      std::stop_callback cb9{ token, [] {} };
-      std::stop_callback cb10{ token, [] {} };
-      std::stop_callback cb11{ token, [] {} };
-      std::stop_callback cb12{ token, [] {} };
-      std::stop_callback cb13{ token, [] {} };
-      std::stop_callback cb14{ token, [] {} };
-      std::stop_callback cb15{ token, [] {} };
-      std::stop_callback cb16{ token, [] {} };
+        std::stop_callback cb0{token, []
+                               {
+                               }};
+        std::stop_callback cb1{token, []
+                               {
+                               }};
+        std::stop_callback cb2{token, []
+                               {
+                               }};
+        std::stop_callback cb3{token, []
+                               {
+                               }};
+        std::stop_callback cb4{token, []
+                               {
+                               }};
+        std::stop_callback cb5{token, []
+                               {
+                               }};
+        std::stop_callback cb6{token, []
+                               {
+                               }};
+        std::stop_callback cb7{token, []
+                               {
+                               }};
+        std::stop_callback cb8{token, []
+                               {
+                               }};
+        std::stop_callback cb9{token, []
+                               {
+                               }};
+        std::stop_callback cb10{token, []
+                                {
+                                }};
+        std::stop_callback cb11{token, []
+                                {
+                                }};
+        std::stop_callback cb12{token, []
+                                {
+                                }};
+        std::stop_callback cb13{token, []
+                                {
+                                }};
+        std::stop_callback cb14{token, []
+                                {
+                                }};
+        std::stop_callback cb15{token, []
+                                {
+                                }};
+        std::stop_callback cb16{token, []
+                                {
+                                }};
 
-      std::this_thread::yield();
+        std::this_thread::yield();
     }
   };
 
   // Just assert this runs and terminates without crashing.
   for (int i = 0; i < 100; ++i)
   {
-    std::stop_source source;
+      std::stop_source source;
 
-    std::thread waiter1{ threadLoop, source.get_token() };
-    std::thread waiter2{ threadLoop, source.get_token() };
-    std::thread waiter3{ threadLoop, source.get_token() };
+      std::thread waiter1{threadLoop, source.get_token()};
+      std::thread waiter2{threadLoop, source.get_token()};
+      std::thread waiter3{threadLoop, source.get_token()};
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-    std::thread canceller{ [&source] {
-                              source.request_stop();
-                            }
-                         };
+      std::thread canceller{[&source]
+                            {
+                                source.request_stop();
+                            }};
 
-    canceller.join();
-    waiter1.join();
-    waiter2.join();
-    waiter3.join();
+      canceller.join();
+      waiter1.join();
+      waiter2.join();
+      waiter3.join();
   }
 }
 
@@ -378,7 +413,7 @@ TEST(CancellationSingleThreadPerformance)
 
   for (int i = 0; i < iterationCount; ++i)
   {
-    std::stop_callback r{ s.get_token(), callback };
+      std::stop_callback r{s.get_token(), callback};
   }
 
   auto end = std::chrono::high_resolution_clock::now();
@@ -389,7 +424,7 @@ TEST(CancellationSingleThreadPerformance)
 
   for (int i = 0; i < iterationCount; ++i)
   {
-    callback_batch b{ s.get_token(), callback };
+      callback_batch b{s.get_token(), callback};
   }
 
   end = std::chrono::high_resolution_clock::now();
@@ -400,11 +435,11 @@ TEST(CancellationSingleThreadPerformance)
 
   for (int i = 0; i < iterationCount; ++i)
   {
-    callback_batch b0{ s.get_token(), callback };
-    callback_batch b1{ s.get_token(), callback };
-    callback_batch b2{ s.get_token(), callback };
-    callback_batch b3{ s.get_token(), callback };
-    callback_batch b4{ s.get_token(), callback };
+      callback_batch b0{s.get_token(), callback};
+      callback_batch b1{s.get_token(), callback};
+      callback_batch b2{s.get_token(), callback};
+      callback_batch b3{s.get_token(), callback};
+      callback_batch b4{s.get_token(), callback};
   }
 
   end = std::chrono::high_resolution_clock::now();
@@ -429,8 +464,11 @@ TEST(CancellationSingleThreadPerformance)
 int main()
 {
   auto status = test_entry::run_all();
-  if (status == 0) {
-    std::cout << "**** all OK\n";
+
+  if (status == 0)
+  {
+      std::cout << "**** all OK\n";
   }
+
   return status;
 }

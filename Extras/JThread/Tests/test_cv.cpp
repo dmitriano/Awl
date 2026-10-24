@@ -29,19 +29,25 @@ void cvIWait (std::stop_token sToken, int id,
       readyCV.wait(lg,
                    sToken,
                    [&ready] { return ready; });
-      if (sToken.stop_requested()) {
-        throw "interrupted";
+
+      if (sToken.stop_requested())
+      {
+          throw "interrupted";
       }
     }
-    if (sToken.stop_requested()) {
-      std::string msg = "\ncvIWait(" + std::to_string(id) + "): interrupted";
-      std::cout << msg << std::endl;
-      assert(false);
+
+    if (sToken.stop_requested())
+    {
+        std::string msg = "\ncvIWait(" + std::to_string(id) + "): interrupted";
+        std::cout << msg << std::endl;
+        assert(false);
     }
-    else {
-      std::string msg = "\ncvIWait(" + std::to_string(id) + "): ready";
-      std::cout << msg << std::endl;
+    else
+    {
+        std::string msg = "\ncvIWait(" + std::to_string(id) + "): ready";
+        std::cout << msg << std::endl;
     }
+
     assert(notifyCalled);
   }
   catch (const char* e) {
@@ -78,29 +84,37 @@ void testStdCV(bool callNotify)
     std::jthread t1([&ready, &readyMutex, &readyCV, callNotify] (std::stop_token it) {
                       {
                         std::unique_lock lg{readyMutex};
-                        while (!it.stop_requested() && !ready) {
-                          readyCV.wait_for(lg, 100ms);
-                          std::cout.put('.').flush();
+
+                        while (!it.stop_requested() && !ready)
+                        {
+                            readyCV.wait_for(lg, 100ms);
+                            std::cout.put('.').flush();
                         }
                       }
-                      if (it.stop_requested()) {
-                        std::cout << "t1: interrupted" << std::endl;
+
+                      if (it.stop_requested())
+                      {
+                          std::cout << "t1: interrupted" << std::endl;
                       }
-                      else {
-                        std::cout << "t1: ready" << std::endl;
+                      else
+                      {
+                          std::cout << "t1: ready" << std::endl;
                       }
+
                       assert(callNotify != it.stop_requested());
                     });
     
     std::this_thread::sleep_for(1s);
-    if (callNotify) {
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::cout << "- call notify_one()" << std::endl;
-      readyCV.notify_one();
-      t1.join();
+
+    if (callNotify)
+    {
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::cout << "- call notify_one()" << std::endl;
+        readyCV.notify_one();
+        t1.join();
     }
   } // leave scope of t1 without join() or detach() (signals cancellation)
   std::cout << "\n*** OK" << std::endl;
@@ -124,9 +138,12 @@ void testCVPred(bool callNotify)
                         readyCV.wait(lg,
                                      st,
                                      [&ready] { return ready; });
-                        if (st.stop_requested()) {
-                          throw "interrupted";
+
+                        if (st.stop_requested())
+                        {
+                            throw "interrupted";
                         }
+
                         assert(callNotify);
                       }
                       catch (const std::exception&) {  // should be no std::exception
@@ -138,24 +155,30 @@ void testCVPred(bool callNotify)
                       catch (...) {
                         assert(false);
                       }
-                      if (st.stop_requested()) {
-                        std::cout << "t1: interrupted" << std::endl;
+
+                      if (st.stop_requested())
+                      {
+                          std::cout << "t1: interrupted" << std::endl;
                       }
-                      else {
-                        std::cout << "t1: ready" << std::endl;
+                      else
+                      {
+                          std::cout << "t1: ready" << std::endl;
                       }
+
                       assert(callNotify != st.stop_requested());
                     });
     
     std::this_thread::sleep_for(1s);
-    if (callNotify) {
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::cout << "- call notify_one()" << std::endl;
-      readyCV.notify_one();
-      t1.join();
+
+    if (callNotify)
+    {
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::cout << "- call notify_one()" << std::endl;
+        readyCV.notify_one();
+        t1.join();
     }
   } // leave scope of t1 without join() or detach() (signals cancellation)
   std::cout << "\n*** OK" << std::endl;
@@ -180,12 +203,15 @@ void testCVStdThreadNoPred(bool callNotify)
                         bool ret = readyCV.wait(lg,
                                                 st,
                                                 [&ready] { return ready; });
-                        if (ret) {
+
+                        if (ret)
+                        {
                             std::cout << "t1: ready" << std::endl;
                             assert(!st.stop_requested());
                             assert(callNotify);
                         }
-                        else if (st.stop_requested()) {
+                        else if (st.stop_requested())
+                        {
                             std::cout << "t1: interrupted" << std::endl;
                             assert(!callNotify);
                         }
@@ -195,18 +221,22 @@ void testCVStdThreadNoPred(bool callNotify)
     std::this_thread::sleep_for(0.5s);
     assert(!is.stop_requested());
     std::this_thread::sleep_for(0.5s);
-    if (callNotify) {
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::cout << "- call notify_one()" << std::endl;
-      readyCV.notify_one();
+
+    if (callNotify)
+    {
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::cout << "- call notify_one()" << std::endl;
+        readyCV.notify_one();
     }
-    else {
-      std::cout << "- signal interrupt" << std::endl;
-      is.request_stop();
+    else
+    {
+        std::cout << "- signal interrupt" << std::endl;
+        is.request_stop();
     }
+
     t1.join();
   } // leave scope of t1 without join() or detach() (signals cancellation)
   std::cout << "\n*** OK" << std::endl;
@@ -232,13 +262,16 @@ void testCVStdThreadPred(bool callNotify)
                         ret = readyCV.wait(lg,
                                            st,
                                            [&ready] { return ready; });
-                        if (ret) {
-                          std::cout << "t1: ready" << std::endl;
-                          assert(!st.stop_requested());
+
+                        if (ret)
+                        {
+                            std::cout << "t1: ready" << std::endl;
+                            assert(!st.stop_requested());
                         }
-                        else {
-                          std::cout << "t1: interrupted" << std::endl;
-                          assert(st.stop_requested());
+                        else
+                        {
+                            std::cout << "t1: interrupted" << std::endl;
+                            assert(st.stop_requested());
                         }
                       }
                       assert(callNotify != st.stop_requested());
@@ -247,18 +280,22 @@ void testCVStdThreadPred(bool callNotify)
     std::this_thread::sleep_for(0.5s);
     assert(!is.stop_requested());
     std::this_thread::sleep_for(0.5s);
-    if (callNotify) {
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::cout << "- call notify_one()" << std::endl;
-      readyCV.notify_one();
+
+    if (callNotify)
+    {
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::cout << "- call notify_one()" << std::endl;
+        readyCV.notify_one();
     }
-    else {
-      std::cout << "- signal interrupt" << std::endl;
-      is.request_stop();
+    else
+    {
+        std::cout << "- signal interrupt" << std::endl;
+        is.request_stop();
     }
+
     t1.join();
   } // leave scope of t1 without join() or detach() (signals cancellation)
   std::cout << "\n*** OK" << std::endl;
@@ -384,61 +421,76 @@ void testTimedCV(bool callNotify, bool callInterrupt, Dur dur)
                       std::cout << "\n- start t1" << std::endl;
                       auto t0 = std::chrono::steady_clock::now();
                       int timesDone{0};
-                      while (timesDone < 3) {
-                        {
-                          std::unique_lock lg{readyMutex};
-                          auto ret = readyCV.wait_for(lg,
-                                                      st,
-                                                      dur,
-                                                      [&ready] { return ready; });
-                          if (dur > 5s) {
-                            assert(std::chrono::steady_clock::now() < t0 + dur);
+
+                      while (timesDone < 3)
+                      {
+                          {
+                              std::unique_lock lg{readyMutex};
+                              auto ret = readyCV.wait_for(lg,
+                                                          st,
+                                                          dur,
+                                                          [&ready]
+                                                          { return ready; });
+
+                              if (dur > 5s)
+                              {
+                                  assert(std::chrono::steady_clock::now() < t0 + dur);
+                              }
+
+                              if (ret)
+                              {
+                                  //std::cout << "t1: ready" << std::endl;
+                                  std::cout.put('r').flush();
+                                  assert(ready);
+                                  assert(!st.stop_requested());
+                                  assert(callNotify);
+                                  ++timesDone;
+                              }
+                              else if (st.stop_requested())
+                              {
+                                  //std::cout << "t1: interrupted" << std::endl;
+                                  std::cout.put('i').flush();
+                                  assert(!ready);
+                                  assert(!callNotify);
+                                  ++timesDone;
+                              }
+                              else
+                              {
+                                  //std::cout << "t1: timeout" << std::endl;
+                                  std::cout.put('t').flush();
+                              }
                           }
-                          if (ret) {
-                            //std::cout << "t1: ready" << std::endl;
-                            std::cout.put('r').flush();
-                            assert(ready);
-                            assert(!st.stop_requested());
-                            assert(callNotify);
-                            ++timesDone;
-                          }
-                          else if (st.stop_requested()) {
-                            //std::cout << "t1: interrupted" << std::endl;
-                            std::cout.put('i').flush();
-                            assert(!ready);
-                            assert(!callNotify);
-                            ++timesDone;
-                          }
-                          else {
-                            //std::cout << "t1: timeout" << std::endl;
-                            std::cout.put('t').flush();
-                          }
-                        }
                       }
+
                       std::cout << "\n- t1 done" << std::endl;
                     });
     
     std::this_thread::sleep_for(0.5s);
     assert(!t1.get_stop_source().stop_requested());
     std::this_thread::sleep_for(0.5s);
-    if (callNotify) {
-      std::cout << "\n- set ready" << std::endl;
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::this_thread::sleep_for(1.5s);
-      std::cout << "\n- call notify_one()" << std::endl;
-      readyCV.notify_one();
+
+    if (callNotify)
+    {
+        std::cout << "\n- set ready" << std::endl;
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::this_thread::sleep_for(1.5s);
+        std::cout << "\n- call notify_one()" << std::endl;
+        readyCV.notify_one();
     }
-    else if (callInterrupt) {
-      std::cout << "\n- signal interrupt" << std::endl;
-      t1.request_stop();
+    else if (callInterrupt)
+    {
+        std::cout << "\n- signal interrupt" << std::endl;
+        t1.request_stop();
     }
-    else {
-      std::cout << "-  interrupt" << std::endl;
-      t1.request_stop();
+    else
+    {
+        std::cout << "-  interrupt" << std::endl;
+        t1.request_stop();
     }
+
     std::this_thread::sleep_for(1.5s);
     std::cout << "- leave scope (should at latest signal interrupt)" << std::endl;
   } // leave scope of t1 without join() or detach() (signals cancellation)
@@ -468,96 +520,125 @@ void testTimedIWait(bool callNotify, bool callInterrupt, Dur dur)
                       std::cout << "\n- start t1" << std::endl;
                       auto t0 = std::chrono::steady_clock::now();
                       int timesDone{0};
-                      while (timesDone < 3) {
-                        try {
-                          std::unique_lock lg{readyMutex};
-                          auto ret = readyCV.wait_for(lg,
-                                                      st,
-                                                      dur,
-                                                      [&ready] { return ready; });
-                          if (st.stop_requested()) {
-                            throw "interrupted";
+
+                      while (timesDone < 3)
+                      {
+                          try
+                          {
+                              std::unique_lock lg{readyMutex};
+                              auto ret = readyCV.wait_for(lg,
+                                                          st,
+                                                          dur,
+                                                          [&ready]
+                                                          { return ready; });
+
+                              if (st.stop_requested())
+                              {
+                                  throw "interrupted";
+                              }
+
+                              if (dur > 5s)
+                              {
+                                  assert(std::chrono::steady_clock::now() < t0 + dur);
+                              }
+
+                              if (ret)
+                              {
+                                  //std::cout << "t1: ready" << std::endl;
+                                  std::cout.put('r').flush();
+                                  t1Feedback = State::ready;
+                                  assert(ready);
+                                  assert(!st.stop_requested());
+                                  assert(callNotify);
+                                  ++timesDone;
+                              }
+                              else
+                              {
+                                  // note: might also be interrupted already!
+                                  //std::cout << "t1: timeout" << std::endl;
+                                  std::cout.put(st.stop_requested() ? 'T' : 't').flush();
+                              }
                           }
-                          if (dur > 5s) {
-                            assert(std::chrono::steady_clock::now() < t0 + dur);
+                          catch (const char*)
+                          {
+                              //std::cout << "t1: interrupted" << std::endl;
+                              std::cout.put('i').flush();
+                              t1Feedback = State::interrupted;
+                              assert(!ready);
+                              assert(!callNotify);
+                              ++timesDone;
+
+                              if (timesDone >= 3)
+                              {
+                                  std::cout << "\n- t1 done" << std::endl;
+                                  return;
+                              }
                           }
-                          if (ret) {
-                            //std::cout << "t1: ready" << std::endl;
-                            std::cout.put('r').flush();
-                            t1Feedback = State::ready;
-                            assert(ready);
-                            assert(!st.stop_requested());
-                            assert(callNotify);
-                            ++timesDone;
+                          catch (const std::exception& e)
+                          {
+                              std::string msg = std::string("\nEXCEPTION: ") + e.what();
+                              std::cerr << msg << std::endl;
+                              assert(false);
                           }
-                          else {
-                            // note: might also be interrupted already!
-                            //std::cout << "t1: timeout" << std::endl;
-                            std::cout.put(st.stop_requested() ? 'T' : 't').flush();
+                          catch (...)
+                          {
+                              std::cerr << "\nEXCEPTION" << std::endl;
+                              assert(false);
                           }
-                        }
-                        catch (const char*) {
-                          //std::cout << "t1: interrupted" << std::endl;
-                          std::cout.put('i').flush();
-                          t1Feedback = State::interrupted;
-                          assert(!ready);
-                          assert(!callNotify);
-                          ++timesDone;
-                          if (timesDone >= 3) {
-                            std::cout << "\n- t1 done" << std::endl;
-                            return;
-                          }
-                        }
-                        catch (const std::exception& e) {
-                          std::string msg = std::string("\nEXCEPTION: ") + e.what();
-                          std::cerr << msg << std::endl;
-                          assert(false);
-                        }
-                        catch (...) {
-                          std::cerr << "\nEXCEPTION" << std::endl;
-                          assert(false);
-                        }
                       }
+
                       std::cout << "\n- t1 done" << std::endl;
                     });
     
     std::this_thread::sleep_for(0.5s);
     assert(!t1.get_stop_source().stop_requested());
     std::this_thread::sleep_for(0.5s);
-    if (callNotify) {
-      std::cout << "\n- set ready" << std::endl;
-      {
-        std::lock_guard lg(readyMutex);
-        ready = true;
-      } // release lock
-      std::this_thread::sleep_for(1.5s);
-      std::cout << "\n- call notify_one()" << std::endl;
-      auto t0 = std::chrono::steady_clock::now();
-      readyCV.notify_one();
-      while (t1Feedback != State::ready) {
-        std::this_thread::sleep_for(200ms);
-        assert(std::chrono::steady_clock::now() < t0 + 5s);
-      }
+
+    if (callNotify)
+    {
+        std::cout << "\n- set ready" << std::endl;
+        {
+            std::lock_guard lg(readyMutex);
+            ready = true;
+        } // release lock
+        std::this_thread::sleep_for(1.5s);
+        std::cout << "\n- call notify_one()" << std::endl;
+        auto t0 = std::chrono::steady_clock::now();
+        readyCV.notify_one();
+
+        while (t1Feedback != State::ready)
+        {
+            std::this_thread::sleep_for(200ms);
+            assert(std::chrono::steady_clock::now() < t0 + 5s);
+        }
     }
-    else if (callInterrupt) {
-      std::cout << "\n- signal interrupt" << std::endl;
-      auto t0 = std::chrono::steady_clock::now();
-      t1.request_stop();
-      while (t1Feedback != State::interrupted) {
-        std::this_thread::sleep_for(200ms);
-        assert(std::chrono::steady_clock::now() < t0 + 5s);
-      }
+    else if (callInterrupt)
+    {
+        std::cout << "\n- signal interrupt" << std::endl;
+        auto t0 = std::chrono::steady_clock::now();
+        t1.request_stop();
+
+        while (t1Feedback != State::interrupted)
+        {
+            std::this_thread::sleep_for(200ms);
+            assert(std::chrono::steady_clock::now() < t0 + 5s);
+        }
     }
-    else {
-      std::cout << "- let destructor signal interrupt" << std::endl;
+    else
+    {
+        std::cout << "- let destructor signal interrupt" << std::endl;
     }
+
     std::this_thread::sleep_for(1.5s);
     std::cout << "- leave scope (should at latest signal interrupt)" << std::endl;
   } // leave scope of t1 without join() or detach() (signals cancellation)
   auto t0 = std::chrono::steady_clock::now();
-  while (t1Feedback == State::loop) {
-        std::this_thread::sleep_for(100ms);
+
+  while (t1Feedback == State::loop)
+  {
+      std::this_thread::sleep_for(100ms);
   }
+
   assert(std::chrono::steady_clock::now() < t0 + 5s);
   std::cout << "\n*** OK" << std::endl;
 }
@@ -595,51 +676,59 @@ void testManyCV(bool callNotify, bool callInterrupt)
       std::cout << "\n- loop to start " << numExtraCV << " threads sharing the token and waiting concurently" << std::endl;
 
       std::vector<std::jthread> vThreads;
-      for (int idx = 0; idx < numExtraCV; ++idx) {
-        std::this_thread::sleep_for(0.1ms);
-        std::jthread t([idx, t0stoken=t0ssource.get_token(), &arrReady, &arrReadyMutex, &arrReadyCV, callNotify] {
+
+      for (int idx = 0; idx < numExtraCV; ++idx)
+      {
+          std::this_thread::sleep_for(0.1ms);
+          std::jthread t([idx, t0stoken = t0ssource.get_token(), &arrReady, &arrReadyMutex, &arrReadyCV, callNotify]
+                         {
                          // use interrupt token of t0 instead
                          // NOTE: disables signaling interrupts directly to the thread
                          cvIWait(t0stoken, idx+1,
                                  arrReady[idx], arrReadyMutex[idx], arrReadyCV[idx],
-                                 callNotify);
-                       });
-        vThreads.push_back(std::move(t));
+                                 callNotify); });
+          vThreads.push_back(std::move(t));
       }
 
       std::cout << "\n- sleep" << std::endl;
       std::this_thread::sleep_for(2s);
 
-      if (callNotify) {
-        std::cout << "\n- set predicate and call notify on t0" << std::endl;
-        {
-          std::lock_guard lg(readyMutex);
-          ready = true;
-        } // release lock
-        readyCV.notify_one();
-        t0.join();
-
-        std::cout << "\n- call notify_one() on other threads" << std::endl;
-        for (int idx = 0; idx < numExtraCV; ++idx) {
+      if (callNotify)
+      {
+          std::cout << "\n- set predicate and call notify on t0" << std::endl;
           {
-            std::lock_guard lg(arrReadyMutex[idx]);
-            arrReady[idx] = true;
-            arrReadyCV[idx].notify_one();
+              std::lock_guard lg(readyMutex);
+              ready = true;
           } // release lock
-        }
+          readyCV.notify_one();
+          t0.join();
+
+          std::cout << "\n- call notify_one() on other threads" << std::endl;
+
+          for (int idx = 0; idx < numExtraCV; ++idx)
+          {
+              {
+                  std::lock_guard lg(arrReadyMutex[idx]);
+                  arrReady[idx] = true;
+                  arrReadyCV[idx].notify_one();
+              } // release lock
+          }
       }
-      else if (callInterrupt) {
-        std::cout << "\n- signal interrupt" << std::endl;
-        t0.request_stop();
+      else if (callInterrupt)
+      {
+          std::cout << "\n- signal interrupt" << std::endl;
+          t0.request_stop();
       }
-      else {
-        // Move ownership of the threads to a scope that will
-        // destruct after thread t0 has destructed (and thus
-        // signalled cancellation and joined) but before the
-        // condition_variable/mutex/ready-flag objects that
-        // they reference have been destroyed.
-        vThreadsDeferred = std::move(vThreads);
+      else
+      {
+          // Move ownership of the threads to a scope that will
+          // destruct after thread t0 has destructed (and thus
+          // signalled cancellation and joined) but before the
+          // condition_variable/mutex/ready-flag objects that
+          // they reference have been destroyed.
+          vThreadsDeferred = std::move(vThreads);
       }
+
       std::cout << "\n- leaving scope of additional threads" << std::endl;
     } // leave scope of additional threads (already notified/interrupted or detached)
     std::cout << "\n- join thread t0 by leaving scope" << std::endl;
@@ -736,4 +825,3 @@ int main()
    std::cerr << "EXCEPTION" << std::endl;
  }
 }
-

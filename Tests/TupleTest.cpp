@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Helpers/NonCopyable.h"
+#include "Helpers/NonCopyableInt.h"
 
 #include "Awl/TupleHelpers.h"
 #include "Awl/Testing/UnitTest.h"
@@ -255,7 +255,7 @@ AWL_TEST(TupleMakeSimilar)
     }
 }
 
-AWL_TEST(TupleNonCopyable)
+AWL_TEST(TupleNonCopyableInt)
 {
     AWL_UNUSED_CONTEXT;
 
@@ -269,7 +269,7 @@ AWL_TEST(TupleNonCopyable)
     // This is why the serilaization uses tuples of refereces, but not values.
     // using A = std::atomic<int>;
 
-    using A = awl::testing::helpers::NonCopyable;
+    using A = awl::testing::helpers::NonCopyableInt;
 
     A a(5);
 

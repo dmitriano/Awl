@@ -9,7 +9,7 @@
 
 #include <format>
 #include <string>
-#include <vector>
+#include <string_view>
 
 namespace awl
 {
@@ -27,36 +27,13 @@ namespace awl
         using GeneralException::GeneralException;
 
         JsonException(awl::String message, ValueInfo info) :
-            GeneralException(std::move(message))
-        {
-            append(std::move(info));
-        }
+            JsonException(JsonException(std::move(message)), std::move(info))
+        {}
 
-        void append(ValueInfo info)
-        {
-            _path.push_back(std::move(info));
-        }
-
-        awl::String message() const override
-        {
-            awl::String text = GeneralException::message();
-
-            if (!_path.empty())
-            {
-                text += _T("\nDetails:");
-
-                for (auto i = _path.rbegin(); i != _path.rend(); ++i)
-                {
-                    text += std::format(
-                        _T("\n    [{}] ({} / {})"),
-                        i->key,
-                        kindToString(i->jsonType),
-                        i->cppType);
-                }
-            }
-
-            return text;
-        }
+        JsonException(const JsonException& cause, ValueInfo info) :
+            GeneralException(addContext(cause, info)),
+            _detailsPos(cause._detailsPos == std::string::npos ? cause._message.size() : cause._detailsPos)
+        {}
 
         static awl::String kindToString(boost::json::kind kind)
         {
@@ -77,6 +54,26 @@ namespace awl
 
     private:
 
-        std::vector<ValueInfo> _path;
+        static std::string addContext(const JsonException& cause, const ValueInfo& info)
+        {
+            std::string text = cause._message;
+            constexpr std::string_view details = "\nDetails:";
+            std::size_t pos = cause._detailsPos;
+
+            if (pos == std::string::npos)
+            {
+                pos = text.size();
+                text += details;
+            }
+
+            // Each new outer context precedes the existing inner contexts.
+            text.insert(pos + details.size(), std::format("\n    [{}] ({} / {})",
+                info.key, toAString(kindToString(info.jsonType)), info.cppType));
+
+            return text;
+        }
+
+        // Byte offset of the details section, so the full text is stored only once.
+        std::size_t _detailsPos = std::string::npos;
     };
 }

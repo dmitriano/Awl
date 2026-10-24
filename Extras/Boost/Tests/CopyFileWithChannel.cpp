@@ -105,9 +105,13 @@ namespace
             {
                 // Check if the channel was closed gracefully
                 if (e.code() == boost::asio::experimental::error::channel_closed)
+                {
                     print("VectorChannel closed, exiting handler");
+                }
                 else
+                {
                     print(std::format(_T("Receive error: {}"), awl::fromAString(e.code().message())));
+                }
             }
 
             _outputChan.close();

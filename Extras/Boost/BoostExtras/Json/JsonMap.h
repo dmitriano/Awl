@@ -36,17 +36,18 @@ namespace awl
                 {
                     formatter.fromJson(item_jv, val);
                 }
-                catch (JsonException& e)
+                catch (const JsonException& e)
                 {
-                    e.append({ item_jv.kind(), type_hint<T>(), std::string(item.key()) });
-                    throw;
+                    throw JsonException(e, { item_jv.kind(), type_hint<T>(), std::string(item.key()) });
                 }
 
-                const bool new_key = map.insert(pair(std::string(item.key()), std::move(val))).second;
-
-                if (!new_key)
+                const auto result = map.insert(pair(std::string(item.key()), std::move(val)));
+                if constexpr (requires { result.second; })
                 {
-                    throw JsonException(std::format(_T("Duplicate map key {}."), std::string(item.key())));
+                    if (!result.second)
+                    {
+                        throw JsonException(std::format("Duplicate map key {}.", std::string(item.key())));
+                    }
                 }
             }
         }
@@ -60,7 +61,10 @@ namespace awl
             {
                 boost::json::value item_jv;
                 formatter.toJson(item.second, item_jv);
-                jo[item.first] = std::move(item_jv);
+                if (!jo.emplace(item.first, std::move(item_jv)).second)
+                {
+                    throw JsonException(std::format("Duplicate map key {}.", item.first));
+                }
             }
 
             jv = std::move(jo);

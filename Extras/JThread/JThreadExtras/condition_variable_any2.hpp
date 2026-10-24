@@ -90,11 +90,13 @@ class condition_variable_any2
         // have to manually implement the loop so that the user-provided lock is reacquired before calling pred().
         // (otherwise the test_cvrace_pred test case fails)
         auto local_internals=internals;
-        while (!pred()) {
-          std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
-          unlock_guard<Lockable> unlocker(lock);
-          std::unique_lock<std::mutex> second_internal_lock(std::move(first_internal_lock));
-          local_internals->cv.wait(second_internal_lock);
+
+        while (!pred())
+        {
+            std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
+            unlock_guard<Lockable> unlocker(lock);
+            std::unique_lock<std::mutex> second_internal_lock(std::move(first_internal_lock));
+            local_internals->cv.wait(second_internal_lock);
         }
     }
 
@@ -117,7 +119,9 @@ class condition_variable_any2
         // have to manually implement the loop so that the user-provided lock is reacquired before calling pred().
         // (otherwise the test_cvrace_pred test case fails)
         auto local_internals=internals;
-        while (!pred()) {
+
+        while (!pred())
+        {
             bool shouldStop;
             {
                 std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
@@ -125,10 +129,13 @@ class condition_variable_any2
                 std::unique_lock<std::mutex> second_internal_lock(std::move(first_internal_lock));
                 shouldStop = (local_internals->cv.wait_until(second_internal_lock, abs_time) == std::cv_status::timeout);
             }
-            if (shouldStop) {
+
+            if (shouldStop)
+            {
                 return pred();
             }
         }
+
         return true;
     }
 
@@ -221,17 +228,24 @@ inline bool condition_variable_any2::wait(Lockable& lock,
                                           stop_token stoken,
                                           Predicate pred)
 {
-    if (stoken.stop_requested()) {
-      return pred();
+    if (stoken.stop_requested())
+    {
+        return pred();
     }
+
     auto local_internals=internals;
     stop_callback cb(stoken, [&local_internals] { local_internals->notify_all(); });
-    while (!pred()) {
+
+    while (!pred())
+    {
         std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
-        if (stoken.stop_requested()) {
+
+        if (stoken.stop_requested())
+        {
             // pred() has already evaluated to 'false' since we last a acquired 'lock'
             return false;
         }
+
         unlock_guard<Lockable> unlocker(lock);
         std::unique_lock<std::mutex> second_internal_lock(std::move(first_internal_lock));
         local_internals->cv.wait(second_internal_lock);
@@ -251,30 +265,39 @@ inline bool condition_variable_any2::wait_until(Lockable& lock,
                                                 const chrono::time_point<Clock, Duration>& abs_time,
                                                 Predicate pred)
 {
-    if (stoken.stop_requested()) {
-      return pred();
+    if (stoken.stop_requested())
+    {
+        return pred();
     }
     // have to manually implement the loop so that the user-provided lock is reacquired before calling pred().
     // (otherwise the test_cvrace_pred test case fails)
     auto local_internals=internals;
     stop_callback cb(stoken, [&local_internals] { local_internals->notify_all(); });
-    while (!pred()) {
+
+    while (!pred())
+    {
         bool shouldStop;
         {
             std::unique_lock<std::mutex> first_internal_lock(local_internals->m);
-            if (stoken.stop_requested()) {
+
+            if (stoken.stop_requested())
+            {
                 // pred() has already evaluated to 'false' since we last acquired 'lock'.
                 return false;
             }
+
             unlock_guard<Lockable> unlocker(lock);
             std::unique_lock<std::mutex> second_internal_lock(std::move(first_internal_lock));
             const auto status = local_internals->cv.wait_until(second_internal_lock, abs_time);
             shouldStop = (status == std::cv_status::timeout) || stoken.stop_requested();
         }
-        if (shouldStop) {
+
+        if (shouldStop)
+        {
             return pred();
         }
     }
+
     return true;
 }
 

@@ -13,7 +13,12 @@ AWL is a small cross-platform C++ library that includes:
 8. Other simple classes like CompositeCompare, ReverseCompare, scope_guard, etc...
 9. A simple [testing framework](https://github.com/dmitriano/Awl/tree/master/Awl/Testing).
 
-Theoretically, the master branch should compile with C++20 and work, at least it is periodically built with `MSVC 19.51.36256.0 (Visual Studio 18 2026)`, `GCC 13.3.0`, `Android CLang 21.0.0 (from NDK 29.0.14206865)` and `Apple Clang 1700.0.13.5 (on MacOS Sonoma with Xcode 16.4)`.
+Theoretically, the master branch should compile with C++23 and work. It is periodically built with the following compilers:
+
+- `MSVC 19.51.36256.0` (Visual Studio 18 2026).
+- `GCC 16.2.0` (Ubuntu package `16.2.0-3ubuntu1`).
+- `Android Clang 21.0.0` (from NDK 29.0.14206865).
+- `Apple Clang 1700.0.13.5` (on macOS Sonoma with Xcode 16.4).
 
 There is also cpp17 branch that partially compiles with C++17.
 
@@ -22,6 +27,64 @@ Version compatibility is not guaranteed and there is no warranty of any kind.
 Feel free to use it or fork it, report a bug by opening an issue.
 
 To leave the author a message fill the [form on his website](https://developernote.com/contact/).
+
+## Asio channels
+
+`BoostExtras/Channel.h` provides `awl::Channel<ExecutorOrSignature, Signatures...>`,
+a header-only alias for `boost::asio::experimental::concurrent_channel`. It accepts
+the same executor/signature template parameters as Boost.Asio. For example:
+
+```cpp
+#include "BoostExtras/Channel.h"
+
+awl::Channel<void(boost::system::error_code, int)> channel(executor, 16);
+```
+
+The caller supplies the executor and capacity. Await sends to apply backpressure;
+receive errors and cancellation retain Boost.Asio semantics. The alias creates no
+threads, pools or strands. Channel thread safety does not serialize consumer model
+state; keep that state on its required executor/strand.
+
+## CMake library targets
+
+AWL implementations are reusable static libraries:
+
+- `AWL::Core`: core implementations and native platform support.
+- `AWL::Boost`: Boost extras, including the sole Boost.JSON implementation
+  (available with `AWL_FIND_BOOST=ON`).
+- `AWL::Qt`: optional Qt extras, available with `AWL_FIND_QT=ON`.
+- `AWL::Testing`: the test runner and command-line support.
+- `AWL::TestMain`: the test executable entry point; links `AWL::Testing`.
+
+Configure feature/runtime options before adding AWL. All consumers in one build
+tree must use the same character, feature and runtime configuration. Header paths,
+C++23 and required definitions are propagated through the targets. MSVC consumers
+must use the same `MSVC_RUNTIME_LIBRARY`; `awl_apply_compiler_options(target)`
+applies AWL's development flags and selected static runtime to an explicit target.
+
+```cmake
+set(AWL_FIND_BOOST ON)
+set(AWL_FIND_QT OFF)
+set(AWL_STATIC_RUNTIME ON)
+set(AWL_ANSI_CMD_CHAR ON)
+set(AWL_BUILD_TESTS OFF)
+add_subdirectory(path/to/Awl awl)
+add_executable(MyProgram Main.cpp)
+target_link_libraries(MyProgram PRIVATE AWL::Boost)
+awl_apply_compiler_options(MyProgram)
+```
+
+`AWL_BUILD_TESTS` defaults to ON for standalone AWL builds and OFF as a subproject.
+Testing/main libraries are excluded from the default build unless used. To create
+your own test executable, compile registration sources directly into it and link
+`AWL::TestMain`. Putting registration-only objects in a static library can omit
+tests. `awl_add_test_sources(target)` adds AWL's own tests when desired.
+
+Legacy `include(CMake/AwlConfig.cmake)` and `include(CMake/AwlLink.cmake)` remain
+supported. AwlLink now links libraries instead of copying implementation sources
+into `${PROJECT_NAME}`; `AWL_COMPILE_MAIN` and `AWL_COMPILE_TESTS` select that
+consumer's main and tests. Separate build directories still compile separate
+copies; reuse targets within one tree to avoid duplicate compilation.
 
 ## Compiling on Windows with Visual Studio 18 2026:
 
@@ -33,7 +96,7 @@ cmake --build . --target AwlTest --config Release
 or
 
 ```bat
-msbuild AwlTest.sln /p:Configuration=Release /p:Platform=x64
+cmake --build . --config Release
 ```
 
 It also builds for x86 using the following command:
@@ -132,6 +195,14 @@ Running the benchmarks:
 ```bash
 ./AwlTest --filter=".*_Benchmark" --output=all
 ```
+
+Console output uses stdout by default. Select stderr with
+`--output_stream=stderr` (or explicitly select `--output_stream=stdout`). The
+selection also applies to command-line diagnostics, unused-option warnings and
+`--list`; it is independent of `--output=all|failed|null`, which controls when
+logs are emitted. Attributes may also be loaded through `--json=<file>`; command
+line values take precedence. For an example serving a protocol on stdout, use
+`--output=all --output_stream=stderr` and write protocol frames separately.
 
 Running the examples:
 

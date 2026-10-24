@@ -40,36 +40,42 @@ void exampleProducerConsumer(double prodSec, double consSec, bool interrupt)
 
       //std::cout << "\nP: lock " << std::endl;
       std::unique_lock lock{itemsMx};
-      while (!stoken.stop_requested()) {
-        ////std::cout << "\nP: wait " << std::endl;
-        if (!itemsCV.wait(lock, stoken, [&] { return items.size() < maxQueueSize; })) {
-         //std::cout << "\nP: wait returned false " << std::endl;
-         return;
-        }
-        //// OOPS: NOTE: true does NOT necessarily meant that we have no interrupt !!!
-        ////std::cout << "\nP: wait returned true " << std::endl;
 
-        while (items.size() < maxQueueSize && !stoken.stop_requested()) {
-          // Ok to produce a value.
-
-          // Don't hold mutex while working to allow consumer to run.
-          lock.unlock();
-
-          int item = nextValue();
-          //do_work();
-          if (prodSec > 0) {
-            std::this_thread::sleep_for(prodSleep);
+      while (!stoken.stop_requested())
+      {
+          ////std::cout << "\nP: wait " << std::endl;
+          if (!itemsCV.wait(lock, stoken, [&]
+                            { return items.size() < maxQueueSize; }))
+          {
+              //std::cout << "\nP: wait returned false " << std::endl;
+              return;
           }
+          //// OOPS: NOTE: true does NOT necessarily meant that we have no interrupt !!!
+          ////std::cout << "\nP: wait returned true " << std::endl;
 
-          std::ostringstream strm;
-          strm <<"\nP: produce " << item << "\n";
-          std::cout << strm.str() << std::flush;
+          while (items.size() < maxQueueSize && !stoken.stop_requested())
+          {
+              // Ok to produce a value.
 
-          // Enqueue a value
-          lock.lock();
-          items.push_back(item);
-          itemsCV.notify_all(); // notify that items were added
-        }
+              // Don't hold mutex while working to allow consumer to run.
+              lock.unlock();
+
+              int item = nextValue();
+              //do_work();
+              if (prodSec > 0)
+              {
+                  std::this_thread::sleep_for(prodSleep);
+              }
+
+              std::ostringstream strm;
+              strm << "\nP: produce " << item << "\n";
+              std::cout << strm.str() << std::flush;
+
+              // Enqueue a value
+              lock.lock();
+              items.push_back(item);
+              itemsCV.notify_all(); // notify that items were added
+          }
       }
    
     }};
@@ -79,48 +85,61 @@ void exampleProducerConsumer(double prodSec, double consSec, bool interrupt)
     [&]{
       //std::cout << "\nC: lock " << std::endl;
       std::unique_lock lock{itemsMx};
-      for(;;) {
-        lock.unlock();
-        if (consSec > 0) {
-          std::this_thread::sleep_for(consSleep);
-        }
-        lock.lock();
 
-        //std::cout << "\nC: wait " << std::endl;
-        if (!itemsCV.wait(lock, stoken, [&] { return !items.empty(); })) {
-          // returned false, so it was interrupted
-          //std::cout << "\nC: wait returned false " << std::endl;
-          return;
-        }
-        //std::cout << "\nC: wait returned true " << std::endl;
-  
-        // process current items (note: itemsMx is locked):
-        std::ostringstream strm;
-        strm <<"\nC: consume ";
-        for (int item : items) {
-          strm << " " << item;
-          if (item == 42) {
-            // Found the item I'm looking for. Cancel producer.
-            // Whoops, this is being called while holding a lock on mutex 'itemMx'!
-            strm << " INTERRUPT";
-            assert(ssource.request_stop() == true);
-            return;
+      for (;;)
+      {
+          lock.unlock();
+
+          if (consSec > 0)
+          {
+              std::this_thread::sleep_for(consSleep);
           }
-        }
-        std::cout << '\n';
-        std::cout << strm.str() << std::flush;
 
-        items.clear();
-        itemsCV.notify_all();  // notify that items were removed
+          lock.lock();
+
+          //std::cout << "\nC: wait " << std::endl;
+          if (!itemsCV.wait(lock, stoken, [&]
+                            { return !items.empty(); }))
+          {
+              // returned false, so it was interrupted
+              //std::cout << "\nC: wait returned false " << std::endl;
+              return;
+          }
+          //std::cout << "\nC: wait returned true " << std::endl;
+
+          // process current items (note: itemsMx is locked):
+          std::ostringstream strm;
+          strm << "\nC: consume ";
+
+          for (int item : items)
+          {
+              strm << " " << item;
+
+              if (item == 42)
+              {
+                  // Found the item I'm looking for. Cancel producer.
+                  // Whoops, this is being called while holding a lock on mutex 'itemMx'!
+                  strm << " INTERRUPT";
+                  assert(ssource.request_stop() == true);
+                  return;
+              }
+          }
+
+          std::cout << '\n';
+          std::cout << strm.str() << std::flush;
+
+          items.clear();
+          itemsCV.notify_all(); // notify that items were removed
       }
     }};
 
   // Let the producer/consumer run for a little while
   // Interrupt if they don't find a result quickly enough.
 
-  if (interrupt) {
-    std::this_thread::sleep_for(prodSleep*10);
-    assert(ssource.request_stop() == true);
+  if (interrupt)
+  {
+      std::this_thread::sleep_for(prodSleep * 10);
+      assert(ssource.request_stop() == true);
   }
 #ifdef QQQ
   {
@@ -186,4 +205,3 @@ int main()
  }
  std::cout << "**** all OK\n";
 }
-

@@ -41,11 +41,16 @@ void testCVDeadlock()
                       readyCV.wait(lg,
                                    st,
                                    [&ready] { return ready; });
-                      if (st.stop_requested()) {
-                        std::cout << "\n" <<std::this_thread::get_id()<<": t1: signal stop" << std::endl;
+
+                      if (st.stop_requested())
+                      {
+                          std::cout << "\n"
+                                    << std::this_thread::get_id() << ": t1: signal stop" << std::endl;
                       }
-                      else {
-                        std::cout << "\n" <<std::this_thread::get_id()<<": t1: ready" << std::endl;
+                      else
+                      {
+                          std::cout << "\n"
+                                    << std::this_thread::get_id() << ": t1: ready" << std::endl;
                       }
                     });
 
@@ -100,4 +105,3 @@ int main()
    std::cerr << "EXCEPTION" << std::endl;
  }
 }
-

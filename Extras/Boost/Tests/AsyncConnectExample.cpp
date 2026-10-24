@@ -98,10 +98,12 @@ AWL_EXAMPLE(AsyncConnect)
         context.logger->debug("Custom completion token with adaptors");
         auto f = w.asyncConnect(eps, asio::as_tuple(asio::use_future));
 
-        if (f.wait_for(20ms) == std::future_status::ready) {
+        if (f.wait_for(20ms) == std::future_status::ready)
+        {
             auto [ec] = f.get();
             context.logger->debug(_T("Future resolved within 20ms: {}"), awl::fromAString(ec.message()));
         }
+
         break;
     }
     };

@@ -32,7 +32,7 @@ namespace awl::coro::detail
             }
             catch (const awl::Exception& e)
             {
-                out << "of type '" << e.what() << "', Message: " << e.message();
+                out << "failed: " << e.message();
             }
             catch (const std::exception& e)
             {

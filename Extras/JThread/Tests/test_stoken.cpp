@@ -292,10 +292,11 @@ void testStopTokenAPI()
 template<typename D>
 void sleep(D dur)
 {
-   if (dur > std::chrono::milliseconds{0}) {
-     //std::cout << "- sleep " << std::chrono::duration<double,std::milli>(dur).count() << "ms\n";
-     std::this_thread::sleep_for(dur);
-   }
+    if (dur > std::chrono::milliseconds{0})
+    {
+        //std::cout << "- sleep " << std::chrono::duration<double,std::milli>(dur).count() << "ms\n";
+        std::this_thread::sleep_for(dur);
+    }
 }
 
 template<typename D>
@@ -363,4 +364,3 @@ int main()
   testSToken(::std::chrono::seconds{0});
   testSToken(::std::chrono::milliseconds{500});
 }
-

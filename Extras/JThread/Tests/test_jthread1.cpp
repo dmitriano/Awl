@@ -26,16 +26,19 @@ void testJThreadWithout()
                    t1ID = std::this_thread::get_id();
                    t1AllSet.store(true);
                    // wait until loop is done (no interrupt checked)
-                   for (int c='9'; c>='0'; --c) {
-                      std::this_thread::sleep_for(222ms);
-                      std::cout.put(static_cast<char>(c)).flush();
+                   for (int c = '9'; c >= '0'; --c)
+                   {
+                       std::this_thread::sleep_for(222ms);
+                       std::cout.put(static_cast<char>(c)).flush();
                    }
+
                    std::cout << "END t1" << std::endl;
                  });
     // wait until t1 has set all initial values:
-    for (int i=0; !t1AllSet.load(); ++i) {
-      std::this_thread::sleep_for(10ms);
-      std::cout.put('o').flush();
+    for (int i = 0; !t1AllSet.load(); ++i)
+    {
+        std::this_thread::sleep_for(10ms);
+        std::cout.put('o').flush();
     }
     // and check all values:
     assert(t1.joinable());
@@ -67,18 +70,21 @@ void testThreadWithToken()
                        t1ID = std::this_thread::get_id();
                        t1AllSet.store(true);
                        // wait until interrupt is signaled (due to destructor of t1):
-                       for (int i=0; !st.stop_requested(); ++i) {
-                          std::this_thread::sleep_for(100ms);
-                          std::cout.put('.').flush();
+                       for (int i = 0; !st.stop_requested(); ++i)
+                       {
+                           std::this_thread::sleep_for(100ms);
+                           std::cout.put('.').flush();
                        }
+
                        t1done.store(true);
                        std::cout << "END t1" << std::endl;
                      },
                      ssource.get_token());
     // wait until t1 has set all initial values:
-    for (int i=0; !t1AllSet.load(); ++i) {
-      std::this_thread::sleep_for(10ms);
-      std::cout.put('o').flush();
+    for (int i = 0; !t1AllSet.load(); ++i)
+    {
+        std::this_thread::sleep_for(10ms);
+        std::cout.put('o').flush();
     }
     // and check all values:
     assert(t1.joinable());
@@ -116,23 +122,27 @@ void testJoin()
   {
     std::jthread t1([](std::stop_token stoken) {
                       // wait until interrupt is signaled (due to calling request_stop() for the token):
-                      for (int i=0; !stoken.stop_requested(); ++i) {
-                         std::this_thread::sleep_for(100ms);
-                         std::cout.put('.').flush();
+                      for (int i = 0; !stoken.stop_requested(); ++i)
+                      {
+                          std::this_thread::sleep_for(100ms);
+                          std::cout.put('.').flush();
                       }
+
                       std::cout << "END t1" << std::endl;
                  });
     ssource = t1.get_stop_source();
     // let nother thread signal cancellation after some time:
-    std::jthread t2([ssource] () mutable {
-                     for (int i=0; i < 10; ++i) {
-                       std::this_thread::sleep_for(70ms);
-                       std::cout.put('x').flush();
-                     }
-                     // signal interrupt to other thread:
-                     ssource.request_stop();
-                     std::cout << "END t2" << std::endl;
-                   });
+    std::jthread t2([ssource]() mutable
+                    {
+                        for (int i = 0; i < 10; ++i)
+                        {
+                            std::this_thread::sleep_for(70ms);
+                            std::cout.put('x').flush();
+                        }
+                        // signal interrupt to other thread:
+                        ssource.request_stop();
+                        std::cout << "END t2" << std::endl;
+                    });
     // wait for all thread to finish:
     t2.join();
     assert(!t2.joinable());
@@ -169,17 +179,20 @@ void testDetach()
                    assert(!stoken.stop_requested());
                    t1AllSet.store(true);
                    // wait until interrupt is signaled (due to calling request_stop() for the token):
-                   for (int i=0; !stoken.stop_requested(); ++i) {
-                      std::this_thread::sleep_for(100ms);
-                      std::cout.put('.').flush();
+                   for (int i = 0; !stoken.stop_requested(); ++i)
+                   {
+                       std::this_thread::sleep_for(100ms);
+                       std::cout.put('.').flush();
                    }
+
                    t1FinallyInterrupted.store(true);
                    std::cout << "END t1" << std::endl;
                  });
     // wait until t1 has set all initial values:
-    for (int i=0; !t1AllSet.load(); ++i) {
-      std::this_thread::sleep_for(10ms);
-      std::cout.put('o').flush();
+    for (int i = 0; !t1AllSet.load(); ++i)
+    {
+        std::this_thread::sleep_for(10ms);
+        std::cout.put('o').flush();
     }
     // and check all values:
     assert(!t0.joinable());
@@ -201,10 +214,13 @@ void testDetach()
   ssource.request_stop();
   // and check consequences:
   assert(ssource.stop_requested());
-  for (int i=0; !t1FinallyInterrupted.load() && i < 100; ++i) {
-    std::this_thread::sleep_for(100ms);
-    std::cout.put('o').flush();
+
+  for (int i = 0; !t1FinallyInterrupted.load() && i < 100; ++i)
+  {
+      std::this_thread::sleep_for(100ms);
+      std::cout.put('o').flush();
   }
+
   assert(t1FinallyInterrupted.load());
   std::cout << "\n*** OK" << std::endl;
 }
@@ -220,10 +236,12 @@ void testAssign()
   {
     std::jthread t1([](std::stop_token stoken) {
                       // wait until interrupt is signaled (due to calling request_stop() for the token):
-                      for (int i=0; !stoken.stop_requested(); ++i) {
-                         std::this_thread::sleep_for(100ms);
-                         std::cout.put('.').flush();
+                      for (int i = 0; !stoken.stop_requested(); ++i)
+                      {
+                          std::this_thread::sleep_for(100ms);
+                          std::cout.put('.').flush();
                       }
+
                       std::cout << "END t1" << std::endl;
                  });
     stoken = t1.get_stop_token();
@@ -253,13 +271,17 @@ void testStdThread()
                    t1AllSet.store(true);
                    // and wait until cancellation is signaled via passed token:
                    try {
-                     for (int i=0; ; ++i) {
-                        if (t1ShallDie.stop_requested()) {
-                          throw "interrupted";
-                        }
-                        std::this_thread::sleep_for(100ms);
-                        std::cout.put('.').flush();
-                     }
+                       for (int i = 0;; ++i)
+                       {
+                           if (t1ShallDie.stop_requested())
+                           {
+                               throw "interrupted";
+                           }
+
+                           std::this_thread::sleep_for(100ms);
+                           std::cout.put('.').flush();
+                       }
+
                      assert(false);
                    }
                    catch (std::exception&) { // interrupted not derived from std::exception
@@ -275,9 +297,10 @@ void testStdThread()
                    std::cout << "END t1" << std::endl;
                  });
   // wait until t1 has set all initial values:
-  for (int i=0; !t1AllSet.load(); ++i) {
-    std::this_thread::sleep_for(10ms);
-    std::cout.put('o').flush();
+  for (int i = 0; !t1AllSet.load(); ++i)
+  {
+      std::this_thread::sleep_for(10ms);
+      std::cout.put('o').flush();
   }
   // and check all values:
   assert(t1ID == t1.get_id());
@@ -304,13 +327,16 @@ void testTemporarilyDisableToken()
                    // just loop (no interrupt should occur):
                    state.store(State::loop); 
                    try {
-                     for (int i=0; i < 10; ++i) {
-                        if (actToken.stop_requested()) {
-                          throw "interrupted";
-                        }
-                        std::this_thread::sleep_for(100ms);
-                        std::cout.put('.').flush();
-                     }
+                       for (int i = 0; i < 10; ++i)
+                       {
+                           if (actToken.stop_requested())
+                           {
+                               throw "interrupted";
+                           }
+
+                           std::this_thread::sleep_for(100ms);
+                           std::cout.put('.').flush();
+                       }
                    }
                    catch (...) {
                      assert(false);
@@ -321,17 +347,22 @@ void testTemporarilyDisableToken()
                    state.store(State::disabled); 
                    // loop again until interrupt signaled to original interrupt token:
                    try {
-                     while (!actToken.stop_requested()) {
-                        if (stoken.stop_requested()) {
-                          throw "interrupted";
-                        }
-                        std::this_thread::sleep_for(100ms);
-                        std::cout.put('d').flush();
-                     }
-                     for (int i=0; i < 10; ++i) {
-                        std::this_thread::sleep_for(100ms);
-                        std::cout.put('D').flush();
-                     }
+                       while (!actToken.stop_requested())
+                       {
+                           if (stoken.stop_requested())
+                           {
+                               throw "interrupted";
+                           }
+
+                           std::this_thread::sleep_for(100ms);
+                           std::cout.put('d').flush();
+                       }
+
+                       for (int i = 0; i < 10; ++i)
+                       {
+                           std::this_thread::sleep_for(100ms);
+                           std::cout.put('D').flush();
+                       }
                    }
                    catch (...) {
                      assert(false);
@@ -342,9 +373,10 @@ void testTemporarilyDisableToken()
                    // loop again (should immediately throw):
                    assert(!interruptDisabled.stop_requested());
                    try {
-                     if (actToken.stop_requested()) {
-                       throw "interrupted";
-                     }
+                       if (actToken.stop_requested())
+                       {
+                           throw "interrupted";
+                       }
                    }
                    catch (const char*) {
                      std::cout.put('i').flush();
@@ -352,10 +384,13 @@ void testTemporarilyDisableToken()
                    }
                    std::cout << "\n- end t1" << std::endl;
                  });
-    while (state.load() != State::disabled) {
-      std::this_thread::sleep_for(100ms);
-      std::cout.put('m').flush();
+
+    while (state.load() != State::disabled)
+    {
+        std::this_thread::sleep_for(100ms);
+        std::cout.put('m').flush();
     }
+
     std::this_thread::sleep_for(500ms);
     std::cout << "\n- leave scope (should interrupt started thread)" << std::endl;
     t1is = t1.get_stop_source();
@@ -402,16 +437,19 @@ void testJThreadAPI()
                    assert(!stoken.stop_requested());
                    t1AllSet.store(true);
                    // wait until interrupt is signaled (due to destructor of t1):
-                   for (int i=0; !stoken.stop_requested(); ++i) {
-                      std::this_thread::sleep_for(100ms);
-                      std::cout.put('.').flush();
+                   for (int i = 0; !stoken.stop_requested(); ++i)
+                   {
+                       std::this_thread::sleep_for(100ms);
+                       std::cout.put('.').flush();
                    }
+
                    std::cout << "END t1" << std::endl;
                  });
     // wait until t1 has set all initial values:
-    for (int i=0; !t1AllSet.load(); ++i) {
-      std::this_thread::sleep_for(10ms);
-      std::cout.put('o').flush();
+    for (int i = 0; !t1AllSet.load(); ++i)
+    {
+        std::this_thread::sleep_for(10ms);
+        std::cout.put('o').flush();
     }
     // and check all values:
     assert(t1.joinable());
@@ -476,4 +514,3 @@ int main()
   testJThreadAPI();
   std::cout << "\n\n**************************\n";
 }
-

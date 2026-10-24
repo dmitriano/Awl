@@ -56,8 +56,10 @@ struct __stop_state {
   void __remove_token_reference() noexcept {
     auto __oldState =
         __state_.fetch_sub(__token_ref_increment, std::memory_order_acq_rel);
-    if (__oldState < (__token_ref_increment + __source_ref_increment)) {
-      delete this;
+
+    if (__oldState < (__token_ref_increment + __source_ref_increment))
+    {
+        delete this;
     }
   }
 
@@ -68,64 +70,72 @@ struct __stop_state {
   void __remove_source_reference() noexcept {
     auto __oldState =
         __state_.fetch_sub(__source_ref_increment, std::memory_order_acq_rel);
-    if (__oldState < (__token_ref_increment + __source_ref_increment)) {
-      delete this;
+
+    if (__oldState < (__token_ref_increment + __source_ref_increment))
+    {
+        delete this;
     }
   }
 
   bool __request_stop() noexcept {
 
-    if (!__try_lock_and_signal_until_signalled()) {
-      // Stop has already been requested.
-      return false;
-    }
+      if (!__try_lock_and_signal_until_signalled())
+      {
+          // Stop has already been requested.
+          return false;
+      }
 
     // Set the 'stop_requested' signal and acquired the lock.
 
     __signallingThread_ = std::this_thread::get_id();
 
-    while (__head_ != nullptr) {
-      // Dequeue the head of the queue
-      auto* __cb = __head_;
-      __head_ = __cb->__next_;
-      const bool anyMore = __head_ != nullptr;
-      if (anyMore) {
-        __head_->__prev_ = &__head_;
-      }
-      // Mark this item as removed from the list.
-      __cb->__prev_ = nullptr;
+    while (__head_ != nullptr)
+    {
+        // Dequeue the head of the queue
+        auto* __cb = __head_;
+        __head_ = __cb->__next_;
+        const bool anyMore = __head_ != nullptr;
 
-      // Don't hold lock while executing callback
-      // so we don't block other threads from deregistering callbacks.
-      __unlock();
+        if (anyMore)
+        {
+            __head_->__prev_ = &__head_;
+        }
+        // Mark this item as removed from the list.
+        __cb->__prev_ = nullptr;
 
-      // TRICKY: Need to store a flag on the stack here that the callback
-      // can use to signal that the destructor was executed inline
-      // during the call. If the destructor was executed inline then
-      // it's not safe to dereference __cb after __execute() returns.
-      // If the destructor runs on some other thread then the other
-      // thread will block waiting for this thread to signal that the
-      // callback has finished executing.
-      bool __isRemoved = false;
-      __cb->__isRemoved_ = &__isRemoved;
+        // Don't hold lock while executing callback
+        // so we don't block other threads from deregistering callbacks.
+        __unlock();
 
-      __cb->__execute();
+        // TRICKY: Need to store a flag on the stack here that the callback
+        // can use to signal that the destructor was executed inline
+        // during the call. If the destructor was executed inline then
+        // it's not safe to dereference __cb after __execute() returns.
+        // If the destructor runs on some other thread then the other
+        // thread will block waiting for this thread to signal that the
+        // callback has finished executing.
+        bool __isRemoved = false;
+        __cb->__isRemoved_ = &__isRemoved;
 
-      if (!__isRemoved) {
-        __cb->__isRemoved_ = nullptr;
-        __cb->__callbackFinishedExecuting_.store(
-            true, std::memory_order_release);
-      }
+        __cb->__execute();
 
-      if (!anyMore) {
-        // This was the last item in the queue when we dequeued it.
-        // No more items should be added to the queue after we have
-        // marked the state as interrupted, only removed from the queue.
-        // Avoid acquring/releasing the lock in this case.
-        return true;
-      }
+        if (!__isRemoved)
+        {
+            __cb->__isRemoved_ = nullptr;
+            __cb->__callbackFinishedExecuting_.store(
+                true, std::memory_order_release);
+        }
 
-      __lock();
+        if (!anyMore)
+        {
+            // This was the last item in the queue when we dequeued it.
+            // No more items should be added to the queue after we have
+            // marked the state as interrupted, only removed from the queue.
+            // Avoid acquring/releasing the lock in this case.
+            return true;
+        }
+
+        __lock();
     }
 
     __unlock();
@@ -146,35 +156,49 @@ struct __stop_state {
       bool __incrementRefCountIfSuccessful) noexcept {
     std::uint64_t __oldState;
     goto __load_state;
-    do {
-      goto __check_state;
-      do {
-        __spin_yield();
-      __load_state:
-        __oldState = __state_.load(std::memory_order_acquire);
-      __check_state:
-        if (__is_stop_requested(__oldState)) {
-          __cb->__execute();
-          return false;
-        } else if (!__is_stop_requestable(__oldState)) {
-          return false;
-        }
-      } while (__is_locked(__oldState));
+
+    do
+    {
+        goto __check_state;
+
+        do
+        {
+            __spin_yield();
+        __load_state:
+            __oldState = __state_.load(std::memory_order_acquire);
+        __check_state:
+
+            if (__is_stop_requested(__oldState))
+            {
+                __cb->__execute();
+                return false;
+            }
+            else if (!__is_stop_requestable(__oldState))
+            {
+                return false;
+            }
+        } while (__is_locked(__oldState));
     } while (!__state_.compare_exchange_weak(
         __oldState, __oldState | __locked_flag, std::memory_order_acquire));
 
     // Push callback onto callback list.
     __cb->__next_ = __head_;
-    if (__cb->__next_ != nullptr) {
-      __cb->__next_->__prev_ = &__cb->__next_;
+
+    if (__cb->__next_ != nullptr)
+    {
+        __cb->__next_->__prev_ = &__cb->__next_;
     }
+
     __cb->__prev_ = &__head_;
     __head_ = __cb;
 
-    if (__incrementRefCountIfSuccessful) {
-      __unlock_and_increment_token_ref_count();
-    } else {
-      __unlock();
+    if (__incrementRefCountIfSuccessful)
+    {
+        __unlock_and_increment_token_ref_count();
+    }
+    else
+    {
+        __unlock();
     }
 
     // Successfully added the callback.
@@ -184,17 +208,19 @@ struct __stop_state {
   void __remove_callback(__stop_callback_base* __cb) noexcept {
     __lock();
 
-    if (__cb->__prev_ != nullptr) {
-      // Still registered, not yet executed
-      // Just remove from the list.
-      *__cb->__prev_ = __cb->__next_;
-      if (__cb->__next_ != nullptr) {
-        __cb->__next_->__prev_ = __cb->__prev_;
-      }
+    if (__cb->__prev_ != nullptr)
+    {
+        // Still registered, not yet executed
+        // Just remove from the list.
+        *__cb->__prev_ = __cb->__next_;
+        if (__cb->__next_ != nullptr)
+        {
+            __cb->__next_->__prev_ = __cb->__prev_;
+        }
 
-      __unlock_and_decrement_token_ref_count();
+        __unlock_and_decrement_token_ref_count();
 
-      return;
+        return;
     }
 
     __unlock();
@@ -202,22 +228,27 @@ struct __stop_state {
     // Callback has either already executed or is executing
     // concurrently on another thread.
 
-    if (__signallingThread_ == std::this_thread::get_id()) {
-      // Callback executed on this thread or is still currently executing
-      // and is deregistering itself from within the callback.
-      if (__cb->__isRemoved_ != nullptr) {
-        // Currently inside the callback, let the __request_stop() method
-        // know the object is about to be destructed and that it should
-        // not try to access the object when the callback returns.
-        *__cb->__isRemoved_ = true;
-      }
-    } else {
-      // Callback is currently executing on another thread,
-      // block until it finishes executing.
-      while (
-          !__cb->__callbackFinishedExecuting_.load(std::memory_order_acquire)) {
-        __spin_yield();
-      }
+    if (__signallingThread_ == std::this_thread::get_id())
+    {
+        // Callback executed on this thread or is still currently executing
+        // and is deregistering itself from within the callback.
+        if (__cb->__isRemoved_ != nullptr)
+        {
+            // Currently inside the callback, let the __request_stop() method
+            // know the object is about to be destructed and that it should
+            // not try to access the object when the callback returns.
+            *__cb->__isRemoved_ = true;
+        }
+    }
+    else
+    {
+        // Callback is currently executing on another thread,
+        // block until it finishes executing.
+        while (
+            !__cb->__callbackFinishedExecuting_.load(std::memory_order_acquire))
+        {
+            __spin_yield();
+        }
     }
 
     __remove_token_reference();
@@ -241,30 +272,43 @@ struct __stop_state {
 
   bool __try_lock_and_signal_until_signalled() noexcept {
     std::uint64_t __oldState = __state_.load(std::memory_order_acquire);
-    do {
-      if (__is_stop_requested(__oldState))
-        return false;
-      while (__is_locked(__oldState)) {
-        __spin_yield();
-        __oldState = __state_.load(std::memory_order_acquire);
+
+    do
+    {
         if (__is_stop_requested(__oldState))
-          return false;
-      }
+        {
+            return false;
+        }
+
+        while (__is_locked(__oldState))
+        {
+            __spin_yield();
+            __oldState = __state_.load(std::memory_order_acquire);
+
+            if (__is_stop_requested(__oldState))
+            {
+                return false;
+            }
+        }
     } while (!__state_.compare_exchange_weak(
         __oldState,
         __oldState | __stop_requested_flag | __locked_flag,
         std::memory_order_acq_rel,
         std::memory_order_acquire));
+
     return true;
   }
 
   void __lock() noexcept {
     auto __oldState = __state_.load(std::memory_order_relaxed);
-    do {
-      while (__is_locked(__oldState)) {
-        __spin_yield();
-        __oldState = __state_.load(std::memory_order_relaxed);
-      }
+
+    do
+    {
+        while (__is_locked(__oldState))
+        {
+            __spin_yield();
+            __oldState = __state_.load(std::memory_order_relaxed);
+        }
     } while (!__state_.compare_exchange_weak(
         __oldState,
         __oldState | __locked_flag,
@@ -287,8 +331,9 @@ struct __stop_state {
     // Check if new state is less than __token_ref_increment which would
     // indicate that this was the last reference.
     if (__oldState <
-        (__locked_flag + __token_ref_increment + __token_ref_increment)) {
-      delete this;
+        (__locked_flag + __token_ref_increment + __token_ref_increment))
+    {
+        delete this;
     }
   }
 
@@ -338,9 +383,10 @@ class stop_token {
   // copy/move/assign/destroy:
   stop_token(const stop_token& __it) noexcept
    : __state_(__it.__state_) {
-    if (__state_ != nullptr) {
-      __state_->__add_token_reference();
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__add_token_reference();
+      }
   }
 
   stop_token(stop_token&& __it) noexcept
@@ -348,16 +394,19 @@ class stop_token {
   }
 
   ~stop_token() {
-    if (__state_ != nullptr) {
-      __state_->__remove_token_reference();
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__remove_token_reference();
+      }
   }
 
   stop_token& operator=(const stop_token& __it) noexcept {
-    if (__state_ != __it.__state_) {
-      stop_token __tmp{__it};
-      swap(__tmp);
-    }
+      if (__state_ != __it.__state_)
+      {
+          stop_token __tmp{__it};
+          swap(__tmp);
+      }
+
     return *this;
   }
 
@@ -398,9 +447,10 @@ class stop_token {
   friend class stop_callback;
 
   explicit stop_token(__stop_state* __state) noexcept : __state_(__state) {
-    if (__state_ != nullptr) {
-      __state_->__add_token_reference();
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__add_token_reference();
+      }
   }
 
   __stop_state* __state_;
@@ -419,16 +469,18 @@ class stop_source {
   explicit stop_source(nostopstate_t) noexcept : __state_(nullptr) {}
 
   ~stop_source() {
-    if (__state_ != nullptr) {
-      __state_->__remove_source_reference();
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__remove_source_reference();
+      }
   }
 
   stop_source(const stop_source& __other) noexcept
       : __state_(__other.__state_) {
-    if (__state_ != nullptr) {
-      __state_->__add_source_reference();
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__add_source_reference();
+      }
   }
 
   stop_source(stop_source&& __other) noexcept
@@ -441,10 +493,12 @@ class stop_source {
   }
 
   stop_source& operator=(const stop_source& __other) noexcept {
-    if (__state_ != __other.__state_) {
-      stop_source __tmp{__other};
-      swap(__tmp);
-    }
+      if (__state_ != __other.__state_)
+      {
+          stop_source __tmp{__other};
+          swap(__tmp);
+      }
+
     return *this;
   }
 
@@ -457,9 +511,11 @@ class stop_source {
   }
 
   bool request_stop() noexcept {
-    if (__state_ != nullptr) {
-      return __state_->__request_stop();
-    }
+      if (__state_ != nullptr)
+      {
+          return __state_->__request_stop();
+      }
+
     return false;
   }
 
@@ -510,10 +566,11 @@ class [[nodiscard]] stop_callback : private __stop_callback_base {
         }},
         __state_(nullptr),
         __cb_(static_cast<_CB&&>(__cb)) {
-    if (__token.__state_ != nullptr &&
-        __token.__state_->__try_add_callback(this, true)) {
-      __state_ = __token.__state_;
-    }
+      if (__token.__state_ != nullptr &&
+          __token.__state_->__try_add_callback(this, true))
+      {
+          __state_ = __token.__state_;
+      }
   }
 
   template <
@@ -527,21 +584,24 @@ class [[nodiscard]] stop_callback : private __stop_callback_base {
         }},
         __state_(nullptr),
         __cb_(static_cast<_CB&&>(__cb)) {
-    if (__token.__state_ != nullptr &&
-        __token.__state_->__try_add_callback(this, false)) {
-      __state_ = std::exchange(__token.__state_, nullptr);
-    }
+      if (__token.__state_ != nullptr &&
+          __token.__state_->__try_add_callback(this, false))
+      {
+          __state_ = std::exchange(__token.__state_, nullptr);
+      }
   }
 
   ~stop_callback() {
 #ifdef SAFE
-    if (__inExecute_.load()) {
-      std::cerr << "*** OOPS: ~stop_callback() while callback executed\n";
-    }
+      if (__inExecute_.load())
+      {
+          std::cerr << "*** OOPS: ~stop_callback() while callback executed\n";
+      }
 #endif
-    if (__state_ != nullptr) {
-      __state_->__remove_callback(this);
-    }
+      if (__state_ != nullptr)
+      {
+          __state_->__remove_callback(this);
+      }
   }
 
   stop_callback& operator=(const stop_callback&) = delete;

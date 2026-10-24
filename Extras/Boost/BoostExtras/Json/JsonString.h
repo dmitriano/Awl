@@ -3,6 +3,7 @@
 #include "BoostExtras/Json/JsonHelpers.h"
 #include "BoostExtras/Json/JsonSerializer.h"
 
+#include <boost/locale/encoding_utf.hpp>
 #include <string>
 
 namespace awl
@@ -30,13 +31,27 @@ namespace awl
 
         void fromJson(const boost::json::value& jv, std::wstring& val)
         {
-            const std::string text(asString(jv));
-            val.assign(text.begin(), text.end());
+            const std::string_view text = asString(jv);
+            try
+            {
+                val = boost::locale::conv::utf_to_utf<wchar_t>(text.data(), text.data() + text.size(), boost::locale::conv::stop);
+            }
+            catch (const boost::locale::conv::conversion_error&)
+            {
+                throw JsonException("Invalid UTF-8 string.");
+            }
         }
 
         void toJson(const std::wstring& val, boost::json::value& jv)
         {
-            jv = std::string(val.begin(), val.end());
+            try
+            {
+                jv = boost::locale::conv::utf_to_utf<char>(val.data(), val.data() + val.size(), boost::locale::conv::stop);
+            }
+            catch (const boost::locale::conv::conversion_error&)
+            {
+                throw JsonException("Invalid wide Unicode string.");
+            }
         }
     };
 }

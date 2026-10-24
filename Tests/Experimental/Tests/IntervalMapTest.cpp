@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Tests/Experimental/IntervalMap.h"
-#include "Tests/Helpers/NonCopyable.h"
+#include "Tests/Helpers/NonCopyableInt.h"
 
 #include "Awl/Testing/UnitTest.h"
 #include "Awl/Random.h"

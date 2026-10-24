@@ -3,8 +3,9 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Tests/Helpers/NonCopyable.h"
+#include "Tests/Helpers/NonCopyableInt.h"
 
+#include "Awl/NoCopyMove.h"
 #include "Awl/SharedSingleton.h"
 #include "Awl/Testing/UnitTest.h"
 
@@ -12,23 +13,44 @@
 
 namespace
 {
-    constexpr int value = 5;
+    constexpr int shared_value = 5;
+    constexpr int weak_value = 7;
 
-    using A = awl::testing::helpers::NonCopyable;
+    class A : public awl::testing::helpers::NonCopyableInt, private awl::NoCopyMove
+    {
+    private:
+
+        friend std::shared_ptr<A> awl::make_shared_instance<A>();
+
+        // Instances can only be created as shared singletons.
+        explicit A(const int value) : NonCopyableInt(value)
+        {}
+    };
+
+    class B : public awl::testing::helpers::NonCopyableInt, private awl::NoCopyMove
+    {
+    private:
+
+        friend std::shared_ptr<B> awl::make_weak_instance<B>();
+
+        // Instances can only be created as weak singletons.
+        explicit B(const int value) : NonCopyableInt(value)
+        {}
+    };
 }
 
 namespace awl
 {
     template <>
-    std::shared_ptr<A> make_singleton_instance<>()
+    std::shared_ptr<A> make_shared_instance<>()
     {
-        return std::make_shared<A>(value);
+        return std::shared_ptr<A>(new A(shared_value));
     }
 
     template <>
-    std::shared_ptr<int> make_singleton_instance<>()
+    std::shared_ptr<B> make_weak_instance<>()
     {
-        return std::make_shared<int>(23);
+        return std::shared_ptr<B>(new B(weak_value));
     }
 }
 
@@ -39,16 +61,16 @@ AWL_TEST(SharedSingleton)
     AWL_ASSERT_EQUAL(0, A::count);
 
     {
-        auto p1 = awl::shared_singleton<A>();
+        std::shared_ptr<A> p1 = awl::shared_singleton<A>();
 
         AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(value));
+        AWL_ASSERT(*p1 == shared_value);
 
         {
-            auto p2 = awl::shared_singleton<A>();
+            std::shared_ptr<A> p2 = awl::shared_singleton<A>();
 
             AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(value));
+            AWL_ASSERT(*p2 == shared_value);
         }
 
         AWL_ASSERT_EQUAL(1, A::count);
@@ -59,45 +81,45 @@ AWL_TEST(SharedSingleton)
     AWL_ASSERT_EQUAL(0, A::count);
 }
 
-AWL_TEST(OnDemandSingleton)
+AWL_TEST(WeakSingleton)
 {
     AWL_UNUSED_CONTEXT;
 
-    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, B::count);
 
     {
-        auto p1 = awl::ondemand_singleton<A>();
+        std::shared_ptr<B> p1 = awl::weak_singleton<B>();
 
-        AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(value));
+        AWL_ASSERT_EQUAL(1, B::count);
+        AWL_ASSERT(*p1 == weak_value);
 
         {
-            auto p2 = awl::ondemand_singleton<A>();
+            std::shared_ptr<B> p2 = awl::weak_singleton<B>();
 
-            AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(value));
+            AWL_ASSERT_EQUAL(1, B::count);
+            AWL_ASSERT(*p2 == weak_value);
         }
 
-        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, B::count);
     }
 
-    AWL_ASSERT_EQUAL(0, A::count);
-    AWL_ASSERT(awl::ondemand_singleton<A>() != nullptr);
-    AWL_ASSERT_EQUAL(0, A::count);
+    AWL_ASSERT_EQUAL(0, B::count);
+    AWL_ASSERT(awl::weak_singleton<B>() != nullptr);
+    AWL_ASSERT_EQUAL(0, B::count);
 
     {
-        auto p1 = awl::ondemand_singleton<A>();
+        std::shared_ptr<B> p1 = awl::weak_singleton<B>();
 
-        AWL_ASSERT_EQUAL(1, A::count);
-        AWL_ASSERT(*p1 == A(value));
+        AWL_ASSERT_EQUAL(1, B::count);
+        AWL_ASSERT(*p1 == weak_value);
 
         {
-            auto p2 = awl::ondemand_singleton<A>();
+            std::shared_ptr<B> p2 = awl::weak_singleton<B>();
 
-            AWL_ASSERT_EQUAL(1, A::count);
-            AWL_ASSERT(*p2 == A(value));
+            AWL_ASSERT_EQUAL(1, B::count);
+            AWL_ASSERT(*p2 == weak_value);
         }
 
-        AWL_ASSERT_EQUAL(1, A::count);
+        AWL_ASSERT_EQUAL(1, B::count);
     }
 }

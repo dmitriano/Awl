@@ -25,13 +25,16 @@ template<typename Duration>
 std::string asString(const Duration& dur)
 {
   auto durMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
-  if (durMilliseconds > 100ms) {
-    auto value = std::chrono::duration<double, std::ratio<1>>(dur);
-    return std::to_string(value.count()) + "s";
+
+  if (durMilliseconds > 100ms)
+  {
+      auto value = std::chrono::duration<double, std::ratio<1>>(dur);
+      return std::to_string(value.count()) + "s";
   }
-  else {
-    auto value = std::chrono::duration<double, std::milli>(dur);
-    return std::to_string(value.count()) + "ms";
+  else
+  {
+      auto value = std::chrono::duration<double, std::milli>(dur);
+      return std::to_string(value.count()) + "ms";
   }
 }
 
@@ -50,13 +53,17 @@ void interruptByDestructor()
                      assert(!stoken.stop_requested());
                      try {
                        // loop until interrupted (at most 40 times the interval)
-                       for (int i=0; i < 40; ++i) {
-                          if (stoken.stop_requested()) {
-                            throw "interrupted";
-                          }
-                          std::this_thread::sleep_for(interval);
-                          std::cout.put('.').flush();
+                       for (int i = 0; i < 40; ++i)
+                       {
+                           if (stoken.stop_requested())
+                           {
+                               throw "interrupted";
+                           }
+
+                           std::this_thread::sleep_for(interval);
+                           std::cout.put('.').flush();
                        }
+
                        assert(false);
                      }
                      catch (std::exception&) { // interrupted not derived from std::exception
@@ -97,13 +104,17 @@ void interruptStartedThread()
                      printID("t1 STARTED with interval " + asString(interval) + " with id");
                      try {
                        // loop until interrupted (at most 40 times the interval)
-                       for (int i=0; i < 40; ++i) {
-                          if (stoken.stop_requested()) {
-                            throw "interrupted";
-                          }
-                          std::this_thread::sleep_for(interval);
-                          std::cout.put('.').flush();
+                       for (int i = 0; i < 40; ++i)
+                       {
+                           if (stoken.stop_requested())
+                           {
+                               throw "interrupted";
+                           }
+
+                           std::this_thread::sleep_for(interval);
+                           std::cout.put('.').flush();
                        }
+
                        assert(false);
                      }
                      catch (...) {
@@ -136,16 +147,22 @@ void interruptStartedThreadWithSubthread()
                      printID("t1 STARTED with id");
                      std::jthread t2([interval, stoken] {
                                        printID("t2 STARTED with id");
-                                       while(!stoken.stop_requested()) {
-                                         std::cout.put('2').flush();
-                                         std::this_thread::sleep_for(interval/2.3);
+
+                                       while (!stoken.stop_requested())
+                                       {
+                                           std::cout.put('2').flush();
+                                           std::this_thread::sleep_for(interval / 2.3);
                                        }
+
                                        std::cout << "\nt2 INTERRUPTED" << std::endl;
                                      });
-                     while(!stoken.stop_requested()) {
-                        std::cout.put('1').flush();
-                        std::this_thread::sleep_for(interval);
+
+                     while (!stoken.stop_requested())
+                     {
+                         std::cout.put('1').flush();
+                         std::this_thread::sleep_for(interval);
                      }
+
                      std::cout << "\nt1 INTERRUPTED" << std::endl;
                    });
 
@@ -208,25 +225,32 @@ void testExchangeToken()
                       int numInterrupts = 0;
                       try {
                         char c = ' ';
-                        for (int i=0; numInterrupts < 2 && i < 500; ++i) {
-		            // if we get a new interrupt token from the caller, take it:
-                            if (itPtr.load()) {
-			      actToken = *itPtr;
-                              itPtr.store(nullptr);
+
+                        for (int i = 0; numInterrupts < 2 && i < 500; ++i)
+                        {
+                            // if we get a new interrupt token from the caller, take it:
+                            if (itPtr.load())
+                            {
+                                actToken = *itPtr;
+                                itPtr.store(nullptr);
                             }
-		            // print character according to current interrupt token state:
-		            // - '.' if stoppable and not interrupted,
-		            // - 's' if stoppable and stop signaled
-		            // - '-' if not stoppable
-		            if (actToken.stop_requested()) {
-                              if (c != 's') {
-                                c = 's';
-                                ++numInterrupts;
-                              }
-		            }
-		            else {
-		              c = actToken.stop_possible() ?  '.' : '-';
+                            // print character according to current interrupt token state:
+                            // - '.' if stoppable and not interrupted,
+                            // - 's' if stoppable and stop signaled
+                            // - '-' if not stoppable
+                            if (actToken.stop_requested())
+                            {
+                                if (c != 's')
+                                {
+                                    c = 's';
+                                    ++numInterrupts;
+                                }
                             }
+                            else
+                            {
+                                c = actToken.stop_possible() ? '.' : '-';
+                            }
+
                             std::cout.put(c).flush();
                             std::this_thread::sleep_for(0.1ms);
                         }
@@ -276,19 +300,24 @@ void testConcurrentInterrupt()
               printID("t1 STARTED (id: ", ") printing . or - or i");
               try {
                 char c = ' ';
-                for (int i=0; !it.stop_requested(); ++i) {
-		    // print character according to current interrupt token state:
-		    // - '.' if stoppable and not interrupted,
-		    // - 's' if stoppable and stop signaled
-		    // - '-' if not stoppable
-		    if (stoken.stop_requested()) {
-                      c = 's';
-		    }
-		    else {
-		      // should never switch back to not interrupted:
-                      assert(c != 's');
-		      c = stoken.stop_possible() ?  '.' : '-';
+
+                for (int i = 0; !it.stop_requested(); ++i)
+                {
+                    // print character according to current interrupt token state:
+                    // - '.' if stoppable and not interrupted,
+                    // - 's' if stoppable and stop signaled
+                    // - '-' if not stoppable
+                    if (stoken.stop_requested())
+                    {
+                        c = 's';
                     }
+                    else
+                    {
+                        // should never switch back to not interrupted:
+                        assert(c != 's');
+                        c = stoken.stop_possible() ? '.' : '-';
+                    }
+
                     std::cout.put(c).flush();
                     std::this_thread::sleep_for(0.1ms);
                 }
@@ -305,21 +334,29 @@ void testConcurrentInterrupt()
    std::cout << "\n- loop over " << numThreads << " threads that request_stop() concurrently" << std::endl;
    std::vector<std::jthread> tv;
    int requestStopNumTrue = 0;
-   for (int i = 0; i < numThreads; ++i) {
+
+   for (int i = 0; i < numThreads; ++i)
+   {
        std::this_thread::sleep_for(0.1ms);
-       std::jthread t([&t1, &requestStopNumTrue] {
-                        printID("- interrupting thread started with id:");
-                        for (int i = 0; i < 13; ++i) {
-                          std::cout.put('x').flush();
-                          requestStopNumTrue += (t1.request_stop() == true);
-                          assert(t1.request_stop() == false);
-                          std::this_thread::sleep_for(0.001ms);
-                        }
+       std::jthread t([&t1, &requestStopNumTrue]
+                      {
+                          printID("- interrupting thread started with id:");
+
+                          for (int i = 0; i < 13; ++i)
+                          {
+                              std::cout.put('x').flush();
+                              requestStopNumTrue += (t1.request_stop() == true);
+                              assert(t1.request_stop() == false);
+                              std::this_thread::sleep_for(0.001ms);
+                          }
                       });
        tv.push_back(std::move(t));
    }
+
    std::cout << "\n- join interrupting threads" << std::endl;
-   for (auto& t : tv) {
+
+   for (auto& t : tv)
+   {
        t.join();
    }
    // only one request to request_stop() should have returned true:
@@ -339,13 +376,17 @@ void testJthreadMove()
   std::cout << "\n*** start testJthreadMove()" << std::endl;
   {
     bool interruptSignaled = false;
-    std::jthread t1{[&interruptSignaled] (std::stop_token st) {
-                      while (!st.stop_requested()) {
-                        std::this_thread::sleep_for(0.1s);
-                      }
-                      if(st.stop_requested()) {
-                        interruptSignaled = true;
-                      }
+    std::jthread t1{[&interruptSignaled](std::stop_token st)
+                    {
+                        while (!st.stop_requested())
+                        {
+                            std::this_thread::sleep_for(0.1s);
+                        }
+
+                        if (st.stop_requested())
+                        {
+                            interruptSignaled = true;
+                        }
                     }};
     std::jthread t2{std::move(t1)};  // should compile
 
@@ -408,4 +449,3 @@ int main()
   testEnabledIfForCopyConstructor_CompileTimeOnly();
   std::cout << "\n**************************\n\n";
 }
-

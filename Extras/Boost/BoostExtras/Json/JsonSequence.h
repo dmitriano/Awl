@@ -38,10 +38,9 @@ namespace awl
                 {
                     formatter.fromJson(elem_jv, val);
                 }
-                catch (JsonException& e)
+                catch (const JsonException& e)
                 {
-                    e.append({ elem_jv.kind(), type_hint<T>(), std::to_string(index) });
-                    throw;
+                    throw JsonException(e, { elem_jv.kind(), type_hint<T>(), std::to_string(index) });
                 }
 
                 awl::inserter<Container>::insert(v, std::move(val));

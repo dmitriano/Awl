@@ -50,7 +50,9 @@ AWL_TEST(AsioAwaitableOperators)
                 try
                 {
                     if (e)
+                    {
                         std::rethrow_exception(e);
+                    }
                 }
                 catch (std::exception const&)
                 {

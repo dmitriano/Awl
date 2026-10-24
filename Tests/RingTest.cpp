@@ -3,7 +3,7 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Helpers/NonCopyable.h"
+#include "Helpers/NonCopyableInt.h"
 
 #include "Awl/Ring.h"
 #include "Awl/Testing/UnitTest.h"
@@ -99,7 +99,7 @@ namespace
         awl::ring<T> _r;
     };
 
-    using A = awl::testing::helpers::NonCopyable;
+    using A = awl::testing::helpers::NonCopyableInt;
 }
 
 AWL_TEST(RingInt)

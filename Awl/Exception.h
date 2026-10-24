@@ -9,7 +9,6 @@
 
 #include <exception>
 #include <string>
-#include <typeinfo>
 #include <utility>
 
 namespace awl
@@ -18,23 +17,11 @@ namespace awl
     {
     public:
 
-        String className() const
-        {
-            return fromACString(what());
-        }
-        
+        const char* what() const noexcept override = 0;
+
         virtual String message() const
         {
-            return className();
-        }
-
-        const char * what() const noexcept override
-        {
-            #if !defined(AWL_NO_RTTI)
-                return typeid(*this).name();
-            #else
-                return "AWL Exception";
-            #endif
+            return fromACString(what());
         }
     };
 
@@ -42,21 +29,21 @@ namespace awl
     {
     protected:
 
-        const String _message;
+        const std::string _message;
 
     public:
 
         explicit GeneralException(std::string message) :
-            _message(fromAString(std::move(message)))
+            _message(std::move(message))
         {}
 
         explicit GeneralException(std::wstring message) :
-            _message(fromWString(std::move(message)))
+            _message(encodeString(message.c_str()))
         {}
 
-        String message() const override
+        const char* what() const noexcept override
         {
-            return _message;
+            return _message.c_str();
         }
     };
 }

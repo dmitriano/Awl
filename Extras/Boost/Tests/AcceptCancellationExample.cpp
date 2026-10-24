@@ -67,9 +67,13 @@ namespace
         {
             // async_accept completes with operation_aborted when cancelled
             if (e.code() == asio::error::operation_aborted)
+            {
                 context.logger->debug("Accept operation was cancelled.");
+            }
             else
+            {
                 throw;
+            }
         }
     }
 }

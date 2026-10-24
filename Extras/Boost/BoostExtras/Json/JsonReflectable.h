@@ -32,10 +32,9 @@ namespace awl
                 {
                     formatter.fromJson(field_jv, field_val);
                 }
-                catch (JsonException& e)
+                catch (const JsonException& e)
                 {
-                    e.append({ field_jv.kind(), type_hint<FieldType>(), key });
-                    throw;
+                    throw JsonException(e, { field_jv.kind(), type_hint<FieldType>(), key });
                 }
             });
         }
