@@ -174,7 +174,7 @@ function(awl_add_test_sources target)
     file(GLOB_RECURSE test_sources CONFIGURE_DEPENDS "${root}/Tests/*.cpp")
     if(NOT AWL_HAS_STD_MOVE_ONLY_FUNCTION)
         list(REMOVE_ITEM test_sources "${root}/Tests/EquatableFunctionTest.cpp"
-            "${root}/Tests/SignalAwaitableTest.cpp" "${root}/Tests/SignalTest.cpp")
+            "${root}/Tests/SignalTest.cpp")
     endif()
     if(WIN32 OR UNIX)
         file(GLOB_RECURSE platform_tests CONFIGURE_DEPENDS "${root}/PlatformTests/*.cpp")

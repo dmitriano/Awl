@@ -36,3 +36,18 @@ is unnecessary. Timer cancellation is only the wake mechanism; no signal corouti
 resumed inline. No persistent storage or cross-process recovery is provided.
 
 Tests are in `Extras/Boost/Tests/SignalAccumulatorTest.cpp` and run with AWL Boost tests.
+
+## One-shot signal waits
+
+Include `BoostExtras/SignalAwaitable.h` and use
+`co_await awl::asyncWaitSignal(executor, signal)`. This returns a Boost.Asio
+awaitable with the same value/tuple/void result rules as SignalAccumulator.
+The old `Awl/Coro/SignalAwaitable.h`, `SignalAwaitable` class and
+`awl::coro::wait_signal` helper have been removed without compatibility wrappers.
+
+A one-shot wait subscribes only when awaited. Earlier emissions are ignored.
+It unsubscribes on the first signal, before the awaiting coroutine resumes;
+subsequent emissions cannot replace the result. Cancellation also unsubscribes.
+Independent waits have independent subscriptions/cancellation. As with accumulators,
+the signal must outlive the operation and delivery/subscription lifetime must stay
+on the supplied strand. Tests live in `Extras/Boost/Tests/SignalAwaitableTest.cpp`.
