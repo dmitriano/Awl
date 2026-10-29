@@ -277,3 +277,23 @@ to no options. The AWL test console explicitly enables `RejectUnknownFields` for
 JSON attributes, including structured values read by `AWL_ATTRIBUTE`. This checks
 fields inside each consumed reflected attribute, not the set of top-level test
 attribute names.
+
+## Test timeouts
+
+The common runner `timeout` attribute has type `std::chrono::milliseconds`.
+Supply a duration string through the CLI or JSON:
+
+```bash
+./AwlTest --run=CommandLineProvider_Duration_Test --timeout=30s
+```
+
+```json
+{ "run": "CommandLineProvider_Duration_Test", "timeout": "30s" }
+```
+
+Use `1m` for a minute or `0.3` for 300 milliseconds. Values must be exactly
+representable in milliseconds. The default is a negative duration, which disables
+the deadline; any explicit negative duration (for example `--timeout=-1s`) does
+the same. Zero requests cancellation immediately. The existing `--terminate`
+flag still terminates the process when an enabled deadline expires. Old numeric
+millisecond counts such as `--timeout=30000` or `"timeout": 30000` are rejected.

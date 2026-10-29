@@ -27,10 +27,10 @@ namespace
         return out.str();
     }
 
-    awl::String toString(std::chrono::milliseconds t)
+    awl::String toString(const std::chrono::milliseconds timeout)
     {
         awl::ostringstream out;
-        awl::format_duration(out, std::chrono::duration_cast<std::chrono::nanoseconds>(t));
+        awl::format_duration(out, timeout);
         return out.str();
     }
 }
@@ -47,8 +47,9 @@ namespace awl::testing
         const TestContext& context,
         std::shared_ptr<ILogger> test_logger)
     {
+        using namespace std::chrono_literals;
         AWL_ATTRIBUTE(size_t, loop, 0);
-        AWL_ATTRIBUTE(std::chrono::milliseconds::rep, timeout, -1);
+        AWL_ATTRIBUTE(std::chrono::milliseconds, timeout, -1ms);
 
         // Call std::terminate() when timeout has elapsed.
         // Used for simulating an app crash.
@@ -77,22 +78,20 @@ namespace awl::testing
 
             std::stop_token test_token;
 
-            if (timeout >= 0)
+            if (timeout >= 0ms)
             {
-                std::chrono::milliseconds t(timeout);
-                
-                watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, t,
-                    [logger = test_logger, t, terminate]()
+                watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, timeout,
+                    [logger = test_logger, timeout, terminate]()
                     {
                         if (terminate)
                         {
-                            logger->warning(_T("The timeout of {} has elapsed, terminating the app."), toString(t));
+                            logger->warning(_T("The timeout of {} has elapsed, terminating the app."), toString(timeout));
 
                             std::terminate();
                         }
                         else
                         {
-                            logger->warning(_T("The timeout of {} has elapsed, requesting the test to stop."), toString(t));
+                            logger->warning(_T("The timeout of {} has elapsed, requesting the test to stop."), toString(timeout));
                         }
                     });
 
