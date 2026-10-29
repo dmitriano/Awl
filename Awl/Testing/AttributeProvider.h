@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include "Awl/Testing/TestException.h"
+
+#include <format>
 #include <string>
 
 namespace awl::testing
@@ -38,6 +41,20 @@ namespace awl::testing
     {
         Provider& attributeProvider;
     };
+
+    // Without a default, the attribute must be supplied by the provider.
+    template <class T, attribute_provider Provider>
+    T getAttributeValue(Provider& provider, const char* name)
+    {
+        T val;
+
+        if (!provider.tryGet(name, val))
+        {
+            throw TestException(std::format("Required attribute '{}' is missing.", name));
+        }
+
+        return val;
+    }
 
     template <class T, attribute_provider Provider>
     T getAttributeValue(Provider& provider, const char* name, T default_val)

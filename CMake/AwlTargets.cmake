@@ -46,6 +46,8 @@ function(awl_add_libraries)
         "$<$<COMPILE_LANG_AND_ID:CXX,GNU>:-Wno-mismatched-new-delete>")
     target_include_directories(AwlOptions INTERFACE "${root}")
     if(MSVC)
+        # Required by __VA_OPT__ in the attribute macros.
+        target_compile_options(AwlOptions INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>")
         target_compile_definitions(AwlOptions INTERFACE _UNICODE NOMINMAX)
     else()
         target_compile_definitions(AwlOptions INTERFACE AWL_THREAD_ID_FORMATTER)
