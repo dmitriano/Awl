@@ -63,6 +63,86 @@ AWL_TEST(CommandLineProvider_EqualsSyntax)
     AWL_ASSERT(flag);
 }
 
+AWL_TEST(CommandLineProvider_Duration)
+{
+    AWL_UNUSED_CONTEXT;
+    using namespace std::chrono_literals;
+
+    CommandLineProvider provider = makeCommandLineProvider({
+        AWL_CMD_TEXT("AwlTest"),
+        AWL_CMD_TEXT("--read_timeout=10s"),
+        AWL_CMD_TEXT("--request_timeout=3m"),
+        AWL_CMD_TEXT("--precise=2d.3h.4m.5s.006"),
+        AWL_CMD_TEXT("--optional_timeout=0.1"),
+        AWL_CMD_TEXT("--no_timeout=null")
+    });
+
+    std::chrono::milliseconds read_timeout{};
+    std::chrono::milliseconds request_timeout{};
+    std::chrono::milliseconds precise{};
+    std::optional<std::chrono::milliseconds> optional_timeout;
+    std::optional<std::chrono::milliseconds> no_timeout = 1s;
+    AWL_ASSERT(provider.tryGet("read_timeout", read_timeout));
+    AWL_ASSERT(provider.tryGet("request_timeout", request_timeout));
+    AWL_ASSERT(provider.tryGet("precise", precise));
+    AWL_ASSERT(provider.tryGet("optional_timeout", optional_timeout));
+    AWL_ASSERT(provider.tryGet("no_timeout", no_timeout));
+    AWL_ASSERT(read_timeout == 10s);
+    AWL_ASSERT(request_timeout == 3min);
+    AWL_ASSERT(precise == std::chrono::days(2) + 3h + 4min + 5s + 6ms);
+    AWL_ASSERT(optional_timeout == 100ms);
+    AWL_ASSERT_FALSE(no_timeout.has_value());
+
+    // Both console character types use the same exact duration representation.
+    using Narrow = BasicFormatter<char, std::chrono::milliseconds>;
+    using Wide = BasicFormatter<wchar_t, std::chrono::milliseconds>;
+    AWL_ASSERT_EQUAL(std::string("2d.3h.4m.5s.006"), Narrow::toString(precise));
+    AWL_ASSERT_EQUAL(std::wstring(L"2d.3h.4m.5s.006"), Wide::toString(precise));
+    AWL_ASSERT(Narrow::fromString(Narrow::toString(precise)) == precise);
+    AWL_ASSERT(Wide::fromString(Wide::toString(precise)) == precise);
+    AWL_ASSERT(Narrow::fromString("-1s") == -1s);
+}
+
+AWL_TEST(CommandLineProvider_DurationErrors)
+{
+    AWL_UNUSED_CONTEXT;
+
+    const auto check_rejected = [](const auto action)
+    {
+        bool caught = false;
+
+        try
+        {
+            action();
+        }
+        catch (const awl::GeneralException&)
+        {
+            caught = true;
+        }
+
+        AWL_ASSERT(caught);
+    };
+
+    for (const CmdChar* option : {
+        AWL_CMD_TEXT("--duration=10000"),
+        AWL_CMD_TEXT("--duration=bad"),
+        AWL_CMD_TEXT("--duration=0.000000001"),
+        AWL_CMD_TEXT("--duration=999999999999999999999s") })
+    {
+        CommandLineProvider provider = makeCommandLineProvider({ AWL_CMD_TEXT("AwlTest"), option });
+        std::chrono::milliseconds duration{};
+        check_rejected([&]
+        {
+            provider.tryGet("duration", duration);
+        });
+    }
+
+    check_rejected([]
+    {
+        BasicFormatter<wchar_t, std::chrono::milliseconds>::fromString(L"bad");
+    });
+}
+
 AWL_TEST(CommandLineProvider_RejectsSpaceSeparatedValue)
 {
     AWL_UNUSED_CONTEXT;

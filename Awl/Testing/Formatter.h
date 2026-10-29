@@ -13,6 +13,7 @@
 #include "Awl/TypeTraits.h"
 #include "Awl/Inserter.h"
 #include "Awl/EnumTraits.h"
+#include "Awl/Duration.h"
 #include "Awl/String.h"
 
 #include <optional>
@@ -41,6 +42,25 @@ namespace awl::testing
             BasicScalarFormatter<C>::fromString(s, val);
 
             return val;
+        }
+    };
+
+    template <typename C, class Rep, class Period>
+    class BasicFormatter<C, std::chrono::duration<Rep, Period>> : public std::true_type
+    {
+    public:
+
+        using String = std::basic_string<C>;
+        using Duration = std::chrono::duration<Rep, Period>;
+
+        static String toString(const Duration val)
+        {
+            return awl::duration_to_string<C>(val);
+        }
+
+        static Duration fromString(const String& s)
+        {
+            return awl::parse_duration<Duration>(std::basic_string_view<C>(s));
         }
     };
 
