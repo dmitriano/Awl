@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <optional>
 
 namespace
 {
@@ -49,7 +50,12 @@ namespace awl::testing
     {
         using namespace std::chrono_literals;
         AWL_ATTRIBUTE(size_t, loop, 0);
-        AWL_ATTRIBUTE(std::chrono::milliseconds, timeout, -1ms);
+        AWL_ATTRIBUTE(std::optional<std::chrono::milliseconds>, timeout, std::nullopt);
+
+        if (timeout && *timeout < 0ms)
+        {
+            throw TestException("Timeout must be non-negative or null.");
+        }
 
         // Call std::terminate() when timeout has elapsed.
         // Used for simulating an app crash.
@@ -78,20 +84,21 @@ namespace awl::testing
 
             std::stop_token test_token;
 
-            if (timeout >= 0ms)
+            if (timeout)
             {
-                watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, timeout,
-                    [logger = test_logger, timeout, terminate]()
+                const std::chrono::milliseconds duration = *timeout;
+                watch_dog = std::make_unique<awl::watch_dog>(context.stopToken, duration,
+                    [logger = test_logger, duration, terminate]()
                     {
                         if (terminate)
                         {
-                            logger->warning(_T("The timeout of {} has elapsed, terminating the app."), toString(timeout));
+                            logger->warning(_T("The timeout of {} has elapsed, terminating the app."), toString(duration));
 
                             std::terminate();
                         }
                         else
                         {
-                            logger->warning(_T("The timeout of {} has elapsed, requesting the test to stop."), toString(timeout));
+                            logger->warning(_T("The timeout of {} has elapsed, requesting the test to stop."), toString(duration));
                         }
                     });
 

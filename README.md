@@ -280,7 +280,8 @@ attribute names.
 
 ## Test timeouts
 
-The common runner `timeout` attribute has type `std::chrono::milliseconds`.
+The common runner `timeout` attribute has type `std::optional<std::chrono::milliseconds>`
+and defaults to `std::nullopt` (no deadline).
 Supply a duration string through the CLI or JSON:
 
 ```bash
@@ -292,8 +293,9 @@ Supply a duration string through the CLI or JSON:
 ```
 
 Use `1m` for a minute or `0.3` for 300 milliseconds. Values must be exactly
-representable in milliseconds. The default is a negative duration, which disables
-the deadline; any explicit negative duration (for example `--timeout=-1s`) does
-the same. Zero requests cancellation immediately. The existing `--terminate`
+representable in milliseconds. Omit `timeout`, pass `--timeout=null`, or use
+`"timeout": null` in JSON to disable the deadline. CLI `null` can override an enabled
+deadline from JSON. Negative durations are rejected; zero requests cancellation
+immediately. The existing `--terminate`
 flag still terminates the process when an enabled deadline expires. Old numeric
 millisecond counts such as `--timeout=30000` or `"timeout": 30000` are rejected.
