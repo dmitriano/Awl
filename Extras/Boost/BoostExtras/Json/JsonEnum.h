@@ -25,7 +25,8 @@ namespace awl
 
             try
             {
-                val = awl::enum_from_string<T>(str_val);
+                // Accept enum names case-insensitively, like AWL command-line attributes.
+                val = awl::enum_from_string_i<T>(str_val);
             }
             catch (const std::runtime_error&)
             {

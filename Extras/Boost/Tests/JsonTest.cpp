@@ -249,8 +249,26 @@ AWL_TEST(BoostJsonEnumSerializer)
     AWL_ASSERT(jv.as_string() == "second");
 
     TestEnum value{};
-    json::fromJson(jv, value);
-    AWL_ASSERT(value == TestEnum::second);
+
+    for (const char* name : { "second", "SECOND", "SeCoNd" })
+    {
+        json::fromJson(boost::json::value(name), value);
+        AWL_ASSERT(value == TestEnum::second);
+        AWL_ASSERT(json::toJson(value).as_string() == "second");
+    }
+
+    bool rejected = false;
+
+    try
+    {
+        json::fromJson(boost::json::value("unknown"), value);
+    }
+    catch (const json::JsonException&)
+    {
+        rejected = true;
+    }
+
+    AWL_ASSERT(rejected && value == TestEnum::second);
 }
 
 AWL_TEST(BoostJsonTupleSerializer)
