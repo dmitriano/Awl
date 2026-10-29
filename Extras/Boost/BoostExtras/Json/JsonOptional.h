@@ -14,7 +14,8 @@ namespace awl
 
         using value_type = std::optional<T>;
 
-        void fromJson(const boost::json::value& jv, value_type& opt)
+        void fromJson(const boost::json::value& jv, value_type& opt,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             if (isNull(jv))
             {
@@ -24,7 +25,7 @@ namespace awl
 
             JsonSerializer<T> formatter;
             T val;
-            formatter.fromJson(jv, val);
+            formatter.fromJson(jv, val, options);
             opt = std::move(val);
         }
 

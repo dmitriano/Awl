@@ -18,7 +18,8 @@ namespace awl
 
         using Decimal = awl::decimal<UInt, exp_len, DataTemplate>;
 
-        void fromJson(const boost::json::value& jv, Decimal& val)
+        void fromJson(const boost::json::value& jv, Decimal& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             if (jv.is_string())
             {

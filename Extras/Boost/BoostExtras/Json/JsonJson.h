@@ -10,7 +10,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, boost::json::value& val)
+        void fromJson(const boost::json::value& jv, boost::json::value& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             val = jv;
         }
@@ -26,7 +27,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, boost::json::object& val)
+        void fromJson(const boost::json::value& jv, boost::json::object& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             val = asObject(jv);
         }
@@ -42,7 +44,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, boost::json::array& val)
+        void fromJson(const boost::json::value& jv, boost::json::array& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             val = asArray(jv);
         }

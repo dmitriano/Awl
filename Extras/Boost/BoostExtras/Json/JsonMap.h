@@ -21,7 +21,8 @@ namespace awl
         using T = typename Container::mapped_type;
         using pair = typename Container::value_type;
 
-        void fromJson(const boost::json::value& jv, value_type& map)
+        void fromJson(const boost::json::value& jv, value_type& map,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             const boost::json::object& jo = asObject(jv);
             JsonSerializer<T> formatter;
@@ -34,7 +35,7 @@ namespace awl
 
                 try
                 {
-                    formatter.fromJson(item_jv, val);
+                    formatter.fromJson(item_jv, val, options);
                 }
                 catch (const JsonException& e)
                 {

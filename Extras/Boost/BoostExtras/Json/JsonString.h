@@ -13,7 +13,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, std::string& val)
+        void fromJson(const boost::json::value& jv, std::string& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             val = std::string(asString(jv));
         }
@@ -29,7 +30,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, std::wstring& val)
+        void fromJson(const boost::json::value& jv, std::wstring& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             const std::string_view text = asString(jv);
             try

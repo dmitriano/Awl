@@ -251,3 +251,29 @@ and run it as with the following command:
 ```bash
 adb shell "cd /data/local/tmp && export LD_LIBRARY_PATH=/data/local/tmp && chmod a+x AwlTest && ./AwlTest"
 ```
+
+## JSON reading options
+
+`awl::fromJson` and `awl::structFromString` accept an optional
+`awl::bitmap<awl::JsonSerializationOptions>`, empty by default:
+
+```cpp
+awl::fromJson(json, value);
+awl::fromJson(json, value, { awl::JsonSerializationOptions::RejectUnknownFields });
+```
+
+`RejectUnknownFields` throws `awl::JsonException` if a JSON object contains a
+field absent from its target's `AWL_REFLECT` list. The option propagates through
+nested structures, containers, tuples, optionals and reference/atomic wrappers.
+Map keys and raw Boost.JSON objects remain unrestricted. Existing rules for
+missing fields, numeric conversions and value parsing do not change.
+
+Each custom `JsonSerializer<T>::fromJson` accepts the same bitmap as its third
+parameter (default `{}`) and forwards it when reading nested values. Scalar
+serializers accept the parameter without applying reflected-field checks.
+
+`awl::testing::JsonProvider` accepts the bitmap after its JSON object; it defaults
+to no options. The AWL test console explicitly enables `RejectUnknownFields` for
+JSON attributes, including structured values read by `AWL_ATTRIBUTE`. This checks
+fields inside each consumed reflected attribute, not the set of top-level test
+attribute names.

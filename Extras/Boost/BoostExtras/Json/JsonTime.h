@@ -23,7 +23,8 @@ namespace awl
 
         using value_type = std::chrono::time_point<Clock, Duration>;
 
-        void fromJson(const boost::json::value& jv, value_type& v)
+        void fromJson(const boost::json::value& jv, value_type& v,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             using Milliseconds = std::chrono::milliseconds;
             std::int64_t ms{};
@@ -103,7 +104,8 @@ namespace awl
 
         using value_type = std::chrono::duration<Rep, Period>;
 
-        void fromJson(const boost::json::value& jv, value_type& v)
+        void fromJson(const boost::json::value& jv, value_type& v,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             const std::string_view text = asString(jv);
             try

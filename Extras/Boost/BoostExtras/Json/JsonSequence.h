@@ -21,7 +21,8 @@ namespace awl
         using value_type = Container;
         using T = typename Container::value_type;
 
-        void fromJson(const boost::json::value& jv, value_type& v)
+        void fromJson(const boost::json::value& jv, value_type& v,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             const boost::json::array& ja = asArray(jv);
             awl::inserter<Container>::reserve(v, ja.size());
@@ -36,7 +37,7 @@ namespace awl
 
                 try
                 {
-                    formatter.fromJson(elem_jv, val);
+                    formatter.fromJson(elem_jv, val, options);
                 }
                 catch (const JsonException& e)
                 {

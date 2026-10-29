@@ -13,10 +13,11 @@ namespace awl
 
         using value_type = std::reference_wrapper<T>;
 
-        void fromJson(const boost::json::value& jv, value_type& v)
+        void fromJson(const boost::json::value& jv, value_type& v,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             JsonSerializer<T> formatter;
-            formatter.fromJson(jv, v.get());
+            formatter.fromJson(jv, v.get(), options);
         }
 
         void toJson(const value_type& v, boost::json::value& jv)

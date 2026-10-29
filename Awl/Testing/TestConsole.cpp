@@ -382,7 +382,8 @@ namespace awl::testing
                 }
             }
 
-            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl), JsonProvider(std::move(jo)));
+            CompositeProvider<CommandLineProvider, JsonProvider> ap(std::move(cl),
+                JsonProvider(std::move(jo), { JsonSerializationOptions::RejectUnknownFields }));
 
 #else
 

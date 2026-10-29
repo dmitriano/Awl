@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BoostExtras/Json/Json.h"
+#include "BoostExtras/Json/JsonUtil.h"
 
 #include "Awl/Testing/AttributeProvider.h"
 #include "Awl/StringFormat.h"
@@ -13,18 +13,18 @@ namespace awl::testing
 
         JsonProvider() = default;
 
-        explicit JsonProvider(boost::json::object jo) : _jo(std::move(jo)) {}
+        explicit JsonProvider(boost::json::object jo, const awl::bitmap<JsonSerializationOptions> options = {}) :
+            _jo(std::move(jo)), _options(options)
+        {}
 
         template <class T>
         bool tryGet(const char* name, T& val)
         {
             auto i = _jo.find(name);
 
-            JsonSerializer<T> serializer;
-
             if (i != _jo.end())
             {
-                serializer.fromJson(i->value(), val);
+                awl::fromJson(i->value(), val, _options);
 
                 return true;
             }
@@ -64,6 +64,7 @@ namespace awl::testing
     private:
 
         boost::json::object _jo;
+        awl::bitmap<JsonSerializationOptions> _options;
 
         bool _dirty = false;
     };

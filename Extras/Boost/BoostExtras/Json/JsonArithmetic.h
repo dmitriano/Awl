@@ -19,7 +19,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, bool& val)
+        void fromJson(const boost::json::value& jv, bool& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             ensureType(jv, boost::json::kind::bool_);
             val = jv.as_bool();
@@ -36,7 +37,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, T& val)
+        void fromJson(const boost::json::value& jv, T& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             if (jv.is_int64())
             {
@@ -130,7 +132,8 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, T& val)
+        void fromJson(const boost::json::value& jv, T& val,
+            awl::bitmap<JsonSerializationOptions> = {})
         {
             if (jv.is_double())
             {

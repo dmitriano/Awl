@@ -6,6 +6,8 @@
 
 #include "Awl/Reflection.h"
 
+#include <format>
+#include <string>
 #include <type_traits>
 
 namespace awl
@@ -15,11 +17,27 @@ namespace awl
     {
     public:
 
-        void fromJson(const boost::json::value& jv, T& obj)
+        void fromJson(const boost::json::value& jv, T& obj,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             const boost::json::object& jo = asObject(jv);
 
-            awl::for_each_index(obj.as_tuple(), [&obj, &jo](auto& field_val, size_t index)
+            if (options[JsonSerializationOptions::RejectUnknownFields])
+            {
+                const auto& names = T::member_names();
+
+                for (const auto& member : jo)
+                {
+                    const std::string key(member.key());
+
+                    if (names.find(key) == names.end())
+                    {
+                        throw JsonException(std::format("Unknown JSON field '{}'.", key));
+                    }
+                }
+            }
+
+            awl::for_each_index(obj.as_tuple(), [&obj, &jo, options](auto& field_val, size_t index)
             {
                 using FieldType = std::decay_t<decltype(field_val)>;
                 JsonSerializer<FieldType> formatter;
@@ -30,7 +48,7 @@ namespace awl
 
                 try
                 {
-                    formatter.fromJson(field_jv, field_val);
+                    formatter.fromJson(field_jv, field_val, options);
                 }
                 catch (const JsonException& e)
                 {

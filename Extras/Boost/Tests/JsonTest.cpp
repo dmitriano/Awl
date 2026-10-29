@@ -5,6 +5,7 @@
 #include "Awl/Decimal128.h"
 #include "Awl/EnumTraits.h"
 #include "Awl/Testing/UnitTest.h"
+#include "Awl/Testing/JsonProvider.h"
 
 #include <atomic>
 #include <chrono>
@@ -30,6 +31,43 @@ namespace json = awl;
 
 namespace
 {
+    struct OrderCount
+    {
+        int value{};
+        std::optional<int> limit;
+
+        AWL_REFLECT(value, limit)
+    };
+
+    struct AtomicCount
+    {
+        int value{};
+
+        AWL_REFLECT(value)
+    };
+
+    template <class T>
+    void checkUnknownField(const boost::json::value& jv, T& value, const std::string_view path = {})
+    {
+        // Default reading still accepts the extra field throughout the hierarchy.
+        json::fromJson(jv, value);
+        bool caught = false;
+
+        try
+        {
+            json::fromJson(jv, value, { json::JsonSerializationOptions::RejectUnknownFields });
+        }
+        catch (const json::JsonException& error)
+        {
+            caught = true;
+            const std::string_view message(error.what());
+            AWL_ASSERT(message.find("Unknown JSON field 'extra'.") != std::string_view::npos);
+            AWL_ASSERT(message.find(path) != std::string_view::npos);
+        }
+
+        AWL_ASSERT(caught);
+    }
+
     boost::json::object makeAJson()
     {
         boost::json::object jo;
@@ -160,6 +198,91 @@ AWL_TEST(BoostJsonReflectableSerializer)
     B b;
     json::fromJson(makeBJson(), b);
     AWL_ASSERT(b == b_expected);
+}
+
+AWL_TEST(BoostJsonRejectUnknownFields)
+{
+    AWL_UNUSED_CONTEXT;
+    boost::json::object object = makeAJson();
+    object["extra"] = true;
+    A value{};
+    checkUnknownField(object, value);
+    AWL_ASSERT(value == a_expected);
+
+    // Check unknown names before changing fields of the current object.
+    value.a = 99;
+    awl::testing::Assert::throws<json::JsonException>([&]
+    {
+        json::fromJson(object, value, { json::JsonSerializationOptions::RejectUnknownFields });
+    });
+    AWL_ASSERT_EQUAL(99, value.a);
+
+    // This option does not change missing optional fields or numeric-string conversion.
+    OrderCount count;
+    json::fromJson(boost::json::object{ { "value", "42" } }, count,
+        { json::JsonSerializationOptions::RejectUnknownFields });
+    AWL_ASSERT_EQUAL(42, count.value);
+    AWL_ASSERT_FALSE(count.limit.has_value());
+
+    awl::testing::Assert::throws<json::JsonException>([&]
+    {
+        json::structFromString(json::jsonToString(object), value,
+            { json::JsonSerializationOptions::RejectUnknownFields });
+    });
+}
+
+AWL_TEST(BoostJsonNestedSerializationOptions)
+{
+    AWL_UNUSED_CONTEXT;
+    boost::json::object object = makeAJson();
+    object["extra"] = true;
+    const boost::json::object nested{ { "x", 7 }, { "a", object } };
+
+    C direct{};
+    checkUnknownField(nested, direct, "[a]");
+
+    // Exercise map -> sequence -> optional -> tuple -> reflectable -> reflectable.
+    using Records = std::map<std::string, std::vector<std::optional<std::tuple<C>>>>;
+    const boost::json::object container{
+        { "items", boost::json::array{ boost::json::array{ nested } } }
+    };
+    Records records;
+    checkUnknownField(container, records, "[items]");
+
+    auto ref = std::ref(direct);
+    checkUnknownField(nested, ref, "[a]");
+
+    std::atomic<AtomicCount> atomic_count{};
+    checkUnknownField(boost::json::object{ { "value", 3 }, { "extra", true } }, atomic_count);
+    AWL_ASSERT_EQUAL(3, atomic_count.load().value);
+
+    // Map keys and raw JSON objects have no reflected list of allowed fields.
+    std::map<std::string, int> map;
+    json::fromJson(boost::json::object{ { "extra", 3 } }, map,
+        { json::JsonSerializationOptions::RejectUnknownFields });
+    AWL_ASSERT_EQUAL(3, map.at("extra"));
+    boost::json::value raw;
+    json::fromJson(object, raw, { json::JsonSerializationOptions::RejectUnknownFields });
+    AWL_ASSERT(raw.as_object() == object);
+}
+
+AWL_TEST(BoostJsonProviderSerializationOptions)
+{
+    AWL_UNUSED_CONTEXT;
+    boost::json::object object = makeAJson();
+    object["extra"] = true;
+    const boost::json::object attributes{ { "config", object } };
+    awl::testing::JsonProvider ordinary(attributes);
+    A config{};
+    AWL_ASSERT(ordinary.tryGet("config", config));
+    AWL_ASSERT(config == a_expected);
+
+    awl::testing::JsonProvider rejecting(attributes, { json::JsonSerializationOptions::RejectUnknownFields });
+    awl::testing::Assert::throws<json::JsonException>([&]
+    {
+        rejecting.tryGet("config", config);
+    });
+    AWL_ASSERT_FALSE(rejecting.tryGet("missing", config));
 }
 
 AWL_TEST(BoostJsonReflectableExceptionPath)

@@ -17,11 +17,12 @@ namespace awl
 
         using value_type = std::tuple<Args...>;
 
-        void fromJson(const boost::json::value& jv, value_type& val)
+        void fromJson(const boost::json::value& jv, value_type& val,
+            const awl::bitmap<JsonSerializationOptions> options = {})
         {
             const boost::json::array& ja = asArray(jv);
 
-            awl::for_each_index(val, [&ja](auto& field_val, size_t index)
+            awl::for_each_index(val, [&ja, options](auto& field_val, size_t index)
             {
                 if (index >= ja.size())
                 {
@@ -29,7 +30,7 @@ namespace awl
                 }
 
                 JsonSerializer<std::decay_t<decltype(field_val)>> formatter;
-                formatter.fromJson(ja[index], field_val);
+                formatter.fromJson(ja[index], field_val, options);
             });
         }
 

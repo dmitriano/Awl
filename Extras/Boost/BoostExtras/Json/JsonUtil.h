@@ -14,9 +14,10 @@
 namespace awl
 {
     template <class T>
-    void fromJson(const boost::json::value& jv, T& val)
+    void fromJson(const boost::json::value& jv, T& val,
+        const awl::bitmap<JsonSerializationOptions> options = {})
     {
-        JsonSerializer<T>().fromJson(jv, val);
+        JsonSerializer<T>().fromJson(jv, val, options);
     }
 
     template <class T>
@@ -34,10 +35,11 @@ namespace awl
     }
 
     template <class Struct>
-    void structFromString(std::string_view text, Struct& val)
+    void structFromString(std::string_view text, Struct& val,
+        const awl::bitmap<JsonSerializationOptions> options = {})
     {
         boost::json::value jv = boost::json::parse(text);
-        fromJson(jv, val);
+        fromJson(jv, val, options);
     }
 
     inline std::string jsonToString(const boost::json::value& jv)
