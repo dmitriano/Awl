@@ -40,6 +40,8 @@ AWL_TEST(CommandLineProvider_EqualsSyntax)
         AWL_CMD_TEXT("--run=ILogger_Test"),
         AWL_CMD_TEXT("--output=all"),
         AWL_CMD_TEXT("--thread_count=10"),
+        AWL_CMD_TEXT("--signed_short=-32768"),
+        AWL_CMD_TEXT("--unsigned_short=65535"),
         AWL_CMD_TEXT("--empty="),
         AWL_CMD_TEXT("--flag")
     });
@@ -48,17 +50,23 @@ AWL_TEST(CommandLineProvider_EqualsSyntax)
     std::string output;
     std::string empty;
     size_t thread_count = 0;
+    signed short signed_short = 0;
+    unsigned short unsigned_short = 0;
     bool flag = false;
 
     AWL_ASSERT(provider.tryGet("run", run));
     AWL_ASSERT(provider.tryGet("output", output));
     AWL_ASSERT(provider.tryGet("thread_count", thread_count));
+    AWL_ASSERT(provider.tryGet("signed_short", signed_short));
+    AWL_ASSERT(provider.tryGet("unsigned_short", unsigned_short));
     AWL_ASSERT(provider.tryGet("empty", empty));
     AWL_ASSERT(provider.tryGet("flag", flag));
 
     AWL_ASSERT(run == "ILogger_Test");
     AWL_ASSERT(output == "all");
     AWL_ASSERT(thread_count == 10);
+    AWL_ASSERT_EQUAL(-32768, signed_short);
+    AWL_ASSERT_EQUAL(65535, unsigned_short);
     AWL_ASSERT(empty.empty());
     AWL_ASSERT(flag);
 }

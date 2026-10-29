@@ -7,6 +7,8 @@
 
 #include "Awl/String.h"
 
+#include <limits>
+#include <stdexcept>
 #include <type_traits>
 
 namespace awl
@@ -53,6 +55,30 @@ namespace awl
             static void fromString(const String &, bool & val)
             {
                 val = true;
+            }
+
+            static void fromString(const String& s, signed short& val)
+            {
+                const int parsed = std::stoi(s);
+
+                if (parsed < std::numeric_limits<signed short>::min() || parsed > std::numeric_limits<signed short>::max())
+                {
+                    throw std::out_of_range("Value is out of range for signed short.");
+                }
+
+                val = static_cast<signed short>(parsed);
+            }
+
+            static void fromString(const String& s, unsigned short& val)
+            {
+                const int parsed = std::stoi(s);
+
+                if (parsed < 0 || parsed > std::numeric_limits<unsigned short>::max())
+                {
+                    throw std::out_of_range("Value is out of range for unsigned short.");
+                }
+
+                val = static_cast<unsigned short>(parsed);
             }
 
             static void fromString(const String & s, int & val)
