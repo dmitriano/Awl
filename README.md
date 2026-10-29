@@ -34,6 +34,7 @@ AWL implementations are reusable static libraries:
 
 - `AWL::Core`: core implementations and native platform support.
 - `AWL::Boost`: Boost extras, including the sole Boost.JSON implementation
+  and [AsyncMutex](Extras/Boost/AsyncMutex.md) for coroutine mutual exclusion
   (available with `AWL_FIND_BOOST=ON`).
 - `AWL::Qt`: optional Qt extras, available with `AWL_FIND_QT=ON`.
 - `AWL::Testing`: the test runner and command-line support.
