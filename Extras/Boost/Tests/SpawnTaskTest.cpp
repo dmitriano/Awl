@@ -88,7 +88,7 @@ AWL_TEST(SpawnTask_EagerExecutionAndMoveOnlyResult)
         }
 
         AWL_ASSERT(started);
-        const std::unique_ptr<int> value = co_await task(asio::use_awaitable);
+        const std::unique_ptr<int> value = co_await std::move(task);
         AWL_ASSERT_EQUAL(42, *value);
     });
 }
@@ -99,15 +99,15 @@ AWL_TEST(SpawnTask_VoidResultAndException)
     runScenario([](const asio::any_io_executor executor) -> asio::awaitable<void>
     {
         bool completed = false;
-        auto task = awl::spawnTask(executor, asyncMarkCompleted(completed));
-        co_await task(asio::use_awaitable);
+        auto task = co_await awl::spawnTask(asyncMarkCompleted(completed));
+        co_await std::move(task);
         AWL_ASSERT(completed);
         auto failed_task = awl::spawnTask(executor, asyncFail());
         bool caught = false;
 
         try
         {
-            co_await failed_task(asio::use_awaitable);
+            co_await std::move(failed_task);
         }
         catch (const std::runtime_error& error)
         {
@@ -133,7 +133,7 @@ AWL_TEST(SpawnTask_CancelAndJoin)
 
         try
         {
-            co_await task(asio::use_awaitable);
+            co_await std::move(task);
         }
         catch (const boost::system::system_error& error)
         {
@@ -141,5 +141,26 @@ AWL_TEST(SpawnTask_CancelAndJoin)
         }
 
         AWL_ASSERT(cancelled && finished && task.completed());
+    });
+}
+
+AWL_TEST(SpawnTask_DestructorCancelsOnCurrentExecutor)
+{
+    AWL_UNUSED_CONTEXT;
+    runScenario([](const asio::any_io_executor executor) -> asio::awaitable<void>
+    {
+        asio::steady_timer timer(executor, asio::steady_timer::time_point::max());
+        bool finished = false;
+
+        {
+            auto task = co_await awl::spawnTask(asyncWait(timer, finished));
+            co_await asio::post(asio::use_awaitable);
+            AWL_ASSERT(!task.completed());
+        }
+
+        while (!finished)
+        {
+            co_await asio::post(asio::use_awaitable);
+        }
     });
 }

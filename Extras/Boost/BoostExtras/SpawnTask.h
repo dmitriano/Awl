@@ -5,6 +5,7 @@
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/experimental/promise.hpp>
 #include <boost/asio/experimental/use_promise.hpp>
+#include <boost/asio/this_coro.hpp>
 
 #include <utility>
 
@@ -19,5 +20,17 @@ namespace awl
     {
         return boost::asio::co_spawn(executor, std::move(task),
             boost::asio::experimental::use_promise);
+    }
+
+    template <class T>
+    using SpawnedTask = decltype(spawnTask(std::declval<boost::asio::any_io_executor>(),
+        std::declval<boost::asio::awaitable<T>>()));
+
+    // Await only the launch on the current executor; await the returned promise separately.
+    template <class T>
+    [[nodiscard]] boost::asio::awaitable<SpawnedTask<T>> spawnTask(boost::asio::awaitable<T> task)
+    {
+        const auto executor = co_await boost::asio::this_coro::executor;
+        co_return spawnTask(executor, std::move(task));
     }
 }
