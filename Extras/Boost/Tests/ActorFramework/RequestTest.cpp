@@ -2,12 +2,14 @@
 #include "BoostExtras/ActorFramework/Request.h"
 #include "BoostExtras/SpawnTask.h"
 
+#include "Awl/ScopeGuard.h"
 #include "Awl/Testing/UnitTest.h"
 
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/cancellation_signal.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/redirect_error.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/strand.hpp>
 
@@ -79,6 +81,56 @@ namespace
 
     struct StopMessage {};
 
+    template <class Message>
+    void failRequest(Message& message, const std::exception_ptr error)
+    {
+        std::visit([error](auto& request)
+        {
+            if constexpr (requires { request.completion; })
+            {
+                request.completion.fail(error);
+            }
+        }, message);
+    }
+
+    // The test components treat an unknown market as an ordinary request error.
+    // Other failures stop the component instead of continuing with suspect state.
+    bool isFatal(const std::exception_ptr error)
+    {
+        try
+        {
+            std::rethrow_exception(error);
+        }
+        catch (const std::out_of_range&)
+        {
+            return false;
+        }
+        catch (...)
+        {
+            return true;
+        }
+    }
+
+    template <class Inbox>
+    void failInbox(const std::shared_ptr<Inbox>& inbox, const std::exception_ptr error)
+    {
+        inbox->close();
+        bool received = true;
+
+        while (received)
+        {
+            received = false;
+            inbox->try_receive([&](const boost::system::error_code channel_error, auto message)
+            {
+                if (!channel_error)
+                {
+                    received = true;
+                    failRequest(message, error);
+                }
+            });
+        }
+    }
+
     class MarketModel
     {
     public:
@@ -104,7 +156,14 @@ namespace
 
         asio::awaitable<void> asyncStop()
         {
-            co_await _inbox->async_send(boost::system::error_code{}, StopMessage{}, asio::use_awaitable);
+            boost::system::error_code error;
+            co_await _inbox->async_send(boost::system::error_code{}, StopMessage{},
+                asio::redirect_error(asio::use_awaitable, error));
+
+            if (error && error != asio::experimental::error::channel_closed)
+            {
+                throw boost::system::system_error(error);
+            }
         }
 
         asio::awaitable<void> asyncRun()
@@ -118,66 +177,104 @@ namespace
                     break;
                 }
 
-                co_await asio::post(asio::use_awaitable);
-                AWL_ASSERT((co_await asio::this_coro::executor) == _executor);
-                std::visit([this](auto& request) { handle(request); }, message);
+                AWL_ASSERT(_active++ == 0);
+                const auto guard = awl::make_scope_guard([this] { --_active; });
+
+                try
+                {
+                    co_await std::visit([this](auto& request)
+                    {
+                        return asyncHandle(request);
+                    }, message);
+                }
+                catch (...)
+                {
+                    const std::exception_ptr error = std::current_exception();
+                    failRequest(message, error);
+
+                    if (isFatal(error))
+                    {
+                        failInbox(_inbox, error);
+
+                        if (_hasDeferred)
+                        {
+                            _deferred.fail(error);
+                            _hasDeferred = false;
+                        }
+
+                        throw;
+                    }
+                }
             }
         }
 
     private:
 
-        void handle(MarketRequest& request)
+        asio::awaitable<void> asyncHandle(MarketRequest& request)
         {
             ++_marketCalls;
+            co_await asio::post(asio::use_awaitable);
+            AWL_ASSERT((co_await asio::this_coro::executor) == _executor);
+            AWL_ASSERT(_active == 1);
 
             if (request.symbol == "missing")
             {
-                AWL_ASSERT(request.completion.fail(
-                    std::make_exception_ptr(std::out_of_range("Unknown market."))));
+                throw std::out_of_range("Unknown market.");
             }
-            else
+
+            if (request.symbol == "fatal")
             {
-                AWL_ASSERT(request.completion.complete(Market{request.symbol, 123}));
-                AWL_ASSERT(!request.completion.complete(Market{request.symbol, 999}));
+                throw std::runtime_error("Market storage failed.");
             }
+
+            AWL_ASSERT(request.completion.complete(Market{request.symbol, 123}));
+            AWL_ASSERT(!request.completion.complete(Market{request.symbol, 999}));
         }
 
-        void handle(ValueRequest& request)
+        asio::awaitable<void> asyncHandle(ValueRequest& request)
         {
             AWL_ASSERT(request.completion.complete(std::move(request.value)));
+            co_return;
         }
 
-        void handle(PingRequest& request)
+        asio::awaitable<void> asyncHandle(PingRequest& request)
         {
             AWL_ASSERT(request.completion.complete({}));
+            co_return;
         }
 
-        void handle(DropRequest&)
+        asio::awaitable<void> asyncHandle(DropRequest&)
         {
             // Destroy the unanswered request to exercise the broken-reply path.
+            co_return;
         }
 
-        void handle(DeferredRequest& request)
+        asio::awaitable<void> asyncHandle(DeferredRequest& request)
         {
             _deferred = request.completion;
             _hasDeferred = true;
+            co_return;
         }
 
-        void handle(FinishRequest& request)
+        asio::awaitable<void> asyncHandle(FinishRequest& request)
         {
             AWL_ASSERT(_deferred.complete(42));
             _hasDeferred = false;
             AWL_ASSERT(request.completion.complete({}));
+            co_return;
         }
 
-        void handle(StopMessage&)
-        {}
+        asio::awaitable<void> asyncHandle(StopMessage&)
+        {
+            co_return;
+        }
 
         const asio::any_io_executor _executor;
         const std::shared_ptr<Inbox> _inbox;
         std::atomic<int> _marketCalls = 0;
         awl::RequestCompletion<int> _deferred;
         std::atomic<bool> _hasDeferred = false;
+        int _active = 0;
     };
 
     // The bot has its own inbox and exactly one consumer. It can await the model
@@ -200,7 +297,14 @@ namespace
 
         asio::awaitable<void> asyncStop()
         {
-            co_await _inbox->async_send(boost::system::error_code{}, StopMessage{}, asio::use_awaitable);
+            boost::system::error_code error;
+            co_await _inbox->async_send(boost::system::error_code{}, StopMessage{},
+                asio::redirect_error(asio::use_awaitable, error));
+
+            if (error && error != asio::experimental::error::channel_closed)
+            {
+                throw boost::system::system_error(error);
+            }
         }
 
         asio::awaitable<void> asyncRun()
@@ -215,25 +319,44 @@ namespace
                 }
 
                 AWL_ASSERT(_active++ == 0);
-                MarketRequest& request = std::get<MarketRequest>(message);
+                const auto guard = awl::make_scope_guard([this] { --_active; });
 
                 try
                 {
-                    Market market = co_await _model.asyncGetMarket(request.symbol);
-                    AWL_ASSERT((co_await asio::this_coro::executor) == _executor);
-                    AWL_ASSERT(_active == 1);
-                    AWL_ASSERT(request.completion.complete(std::move(market)));
+                    co_await std::visit([this](auto& request)
+                    {
+                        return asyncHandle(request);
+                    }, message);
                 }
                 catch (...)
                 {
-                    request.completion.fail(std::current_exception());
-                }
+                    const std::exception_ptr error = std::current_exception();
+                    failRequest(message, error);
 
-                --_active;
+                    if (isFatal(error))
+                    {
+                        failInbox(_inbox, error);
+
+                        throw;
+                    }
+                }
             }
         }
 
     private:
+
+        asio::awaitable<void> asyncHandle(MarketRequest& request)
+        {
+            Market market = co_await _model.asyncGetMarket(request.symbol);
+            AWL_ASSERT((co_await asio::this_coro::executor) == _executor);
+            AWL_ASSERT(_active == 1);
+            AWL_ASSERT(request.completion.complete(std::move(market)));
+        }
+
+        asio::awaitable<void> asyncHandle(StopMessage&)
+        {
+            co_return;
+        }
 
         const asio::any_io_executor _executor;
         MarketModel& _model;
@@ -271,7 +394,7 @@ namespace
         }
     }
 
-    void runComponents(const bool separate_strands, Scenario scenario)
+    void runComponents(const bool separate_strands, Scenario scenario, const bool expect_fatal = false)
     {
         asio::io_context io;
         const auto model_executor = asio::make_strand(io);
@@ -317,7 +440,20 @@ namespace
 
         for (std::size_t i = 0; i != failures.size(); ++i)
         {
-            if (failures[i])
+            if (expect_fatal && i < 2)
+            {
+                AWL_ASSERT(failures[i] != nullptr);
+
+                try
+                {
+                    std::rethrow_exception(failures[i]);
+                }
+                catch (const std::runtime_error& error)
+                {
+                    AWL_ASSERT_EQUAL(std::string("Market storage failed."), std::string(error.what()));
+                }
+            }
+            else if (failures[i])
             {
                 std::rethrow_exception(failures[i]);
             }
@@ -392,6 +528,86 @@ AWL_TEST(Request_ExceptionAndContinuedProcessing)
         const Market market = co_await bot.asyncGetMarket("XRPFDUSD");
         AWL_ASSERT_EQUAL(123, market.price);
     });
+}
+
+AWL_TEST(Request_ModelHandlersSerializeAcrossSuspension)
+{
+    AWL_UNUSED_CONTEXT;
+    runComponents(true, [](MarketModel& model, MarketBot& bot) -> asio::awaitable<void>
+    {
+        const asio::any_io_executor executor = co_await asio::this_coro::executor;
+        std::vector<awl::SpawnedTask<Market>> tasks;
+
+        for (int i = 0; i != 20; ++i)
+        {
+            tasks.push_back(awl::spawnTask(executor, model.asyncGetMarket(std::to_string(i))));
+        }
+
+        const Market from_bot = co_await bot.asyncGetMarket("XRPFDUSD");
+        AWL_ASSERT_EQUAL(std::string("XRPFDUSD"), from_bot.symbol);
+
+        for (int i = 0; i != 20; ++i)
+        {
+            const Market market = co_await std::move(tasks[i]);
+            AWL_ASSERT_EQUAL(std::to_string(i), market.symbol);
+            AWL_ASSERT_EQUAL(123, market.price);
+        }
+
+        AWL_ASSERT_EQUAL(21, model.marketCalls());
+    });
+}
+
+AWL_TEST(Request_FatalHandlerStopsComponentsAndFailsDeferredReply)
+{
+    AWL_UNUSED_CONTEXT;
+    runComponents(true, [](MarketModel& model, MarketBot& bot) -> asio::awaitable<void>
+    {
+        auto deferred = co_await awl::spawnTask(awl::asyncRequest(model.inbox(), DeferredRequest{}));
+
+        while (!model.hasDeferredRequest())
+        {
+            co_await asio::post(asio::use_awaitable);
+        }
+
+        bool caught = false;
+
+        try
+        {
+            co_await bot.asyncGetMarket("fatal");
+        }
+        catch (const std::runtime_error& error)
+        {
+            caught = true;
+            AWL_ASSERT_EQUAL(std::string("Market storage failed."), std::string(error.what()));
+        }
+
+        AWL_ASSERT(caught);
+        caught = false;
+
+        try
+        {
+            co_await std::move(deferred);
+        }
+        catch (const std::runtime_error& error)
+        {
+            caught = true;
+            AWL_ASSERT_EQUAL(std::string("Market storage failed."), std::string(error.what()));
+        }
+
+        AWL_ASSERT(caught);
+        caught = false;
+
+        try
+        {
+            co_await bot.asyncGetMarket("XRPFDUSD");
+        }
+        catch (const boost::system::system_error& error)
+        {
+            caught = error.code() == asio::experimental::error::channel_closed;
+        }
+
+        AWL_ASSERT(caught);
+    }, true);
 }
 
 AWL_TEST(Request_MoveOnlyPayloadAndVoidReply)

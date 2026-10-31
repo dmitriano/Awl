@@ -44,6 +44,49 @@ directly or as an alternative of its message variant. Results are owned values;
 move-only requests/results and `void` results are supported. To acknowledge a
 `void` request, call `completion.complete({})`.
 
+## Coroutine handlers and errors
+
+Every message handler may return `boost::asio::awaitable<void>`, including
+handlers that currently only acknowledge a request. The consumer awaits the
+selected handler instead of spawning it as an independent job:
+
+```cpp
+try
+{
+    co_await std::visit([this](auto& request)
+    {
+        return asyncHandle(request);
+    }, message);
+}
+catch (...)
+{
+    const std::exception_ptr error = std::current_exception();
+    failRequest(message, error);
+
+    if (isFatal(error))
+    {
+        failInbox(_inbox, error);
+
+        throw;
+    }
+}
+```
+
+`message` stays alive until its handler finishes, so the handler may borrow the
+request by reference across awaits. Other components can run during an await,
+but the same consumer does not start its next message. Successful handlers send
+their result after their asynchronous work has finished. Exceptions are caught
+at the queue boundary and returned through the message's completion address.
+
+`failRequest`, `failInbox` and `isFatal` above belong to the component/example,
+not the request transport API. The test components regard an unknown market
+(`std::out_of_range`) as a nonfatal request error. Other exceptions terminate
+the consumer after closing its inbox and failing buffered/deferred requests;
+requests still waiting for admission get the channel's close error. Production
+components must define their own policy; fatal SQL errors must not become
+log-and-continue request failures. Forwarding an exception does not roll back
+partially changed state. Stop messages are handled separately from requests.
+
 ## Execution and lifetime
 
 `asyncRequest` owns its inbox and request in the coroutine frame and is lazy until
@@ -92,4 +135,6 @@ and `MarketBot`) with separate variant inboxes. Tests cover a shared strand,
 different strands on multiple threads, concurrent callers, lazy initiation,
 snapshot values, exception propagation, duplicate/abandoned replies, a closed
 inbox, move-only payloads, void replies, admitted cancellation, and independent
-caller/receiver execution contexts.
+caller/receiver execution contexts. Coroutine handler tests verify serialization
+across suspension, central exception forwarding, continued processing after an
+ordinary request error, and propagation/cleanup of a fatal consumer failure.
