@@ -33,7 +33,7 @@ namespace awl
 
             for (const boost::json::value& elem_jv : ja)
             {
-                T val;
+                T val{};
 
                 try
                 {

@@ -17,7 +17,7 @@ namespace awl
             const awl::bitmap<JsonSerializationOptions> options = {})
         {
             JsonSerializer<T> formatter;
-            T val;
+            T val{};
             formatter.fromJson(jv, val, options);
             atomic_val = val;
         }

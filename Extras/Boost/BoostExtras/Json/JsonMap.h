@@ -30,7 +30,7 @@ namespace awl
 
             for (const auto& item : jo)
             {
-                T val;
+                T val{};
                 const boost::json::value& item_jv = item.value();
 
                 try

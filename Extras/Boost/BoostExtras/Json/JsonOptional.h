@@ -24,7 +24,7 @@ namespace awl
             }
 
             JsonSerializer<T> formatter;
-            T val;
+            T val{};
             formatter.fromJson(jv, val, options);
             opt = std::move(val);
         }
