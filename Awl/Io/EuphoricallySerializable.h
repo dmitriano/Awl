@@ -20,33 +20,33 @@ namespace awl::io
     namespace helpers
     {
         // A trink to initialize VersionTolerantSerializable before HashingSerializable.
-        template <class T, class IStream, class OStream, class Hash, class V>
+        template <class T, class IStream, class OStream, class Hash, class V, class Context>
         class VtsOwner
         {
         protected:
 
-            VtsOwner(T& val) : _vts(val) {}
+            VtsOwner(T& val, Context read_context) : _vts(val, std::move(read_context)) {}
 
-            VersionTolerantSerializable<T, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>, true, V> _vts;
+            VersionTolerantSerializable<T, HashInputStream<Hash, IStream>, HashOutputStream<Hash, OStream>, true, V, Context> _vts;
         };
     }
 
     template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
-        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
+        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>, class Context = FakeContext>
     class EuphoricallySerializable :
-        private helpers::VtsOwner<T, IStream, OStream, Hash, V>,
+        private helpers::VtsOwner<T, IStream, OStream, Hash, V, Context>,
         public HashingSerializable<IStream, OStream, Hash>,
         public Snapshotable
     {
     private:
 
-        using BaseVts = helpers::VtsOwner<T, IStream, OStream, Hash, V>;
+        using BaseVts = helpers::VtsOwner<T, IStream, OStream, Hash, V, Context>;
         using BaseHashing = HashingSerializable<IStream, OStream, Hash>;
 
     public:
 
-        EuphoricallySerializable(T& val, size_t block_size = defaultBlockSize, Hash hash = {}) :
-            BaseVts(val),
+        EuphoricallySerializable(T& val, size_t block_size = defaultBlockSize, Hash hash = {}, Context read_context = {}) :
+            BaseVts(val, std::move(read_context)),
             BaseHashing(BaseVts::_vts, block_size, hash),
             vector_vts(val),
             measure_vts(val)

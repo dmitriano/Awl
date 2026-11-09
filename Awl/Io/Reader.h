@@ -125,6 +125,8 @@ namespace awl::io
 
         using Context::Context;
 
+        explicit Reader(const Context& ctx) : Context(ctx) {}
+
         Reader() requires std::default_initializable<Context> = default;
 
         //Makes the new and old prototypes identical.

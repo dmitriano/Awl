@@ -12,20 +12,23 @@
 #include "Awl/Io/IoException.h"
 #include "Awl/Mp/Mp.h"
 
+#include <utility>
+
 namespace awl::io
 {
     template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
-        bool atomic = true, class V = mp::variant_from_struct<T>>
+        bool atomic = true, class V = mp::variant_from_struct<T>, class Context = FakeContext>
     class VersionTolerantSerializable : public Serializable<IStream, OStream>
     {
     private:
 
-        using Reader = awl::io::Reader<V, IStream>;
+        using Reader = awl::io::Reader<V, IStream, Context>;
         using Writer = awl::io::Writer<V, OStream>;
 
     public:
 
-        VersionTolerantSerializable(T& val) : _val(val) {}
+        VersionTolerantSerializable(T& val, Context read_context = {}) :
+            _val(val), _readContext(std::move(read_context)) {}
 
         void read(IStream& in) override
         {
@@ -103,12 +106,16 @@ namespace awl::io
 
         void read(IStream& in, T& val)
         {
-            Reader ctx;
+            Reader ctx(_readContext);
             ctx.readOldPrototypes(in);
 
             ctx.readV(in, val);
         }
 
         T& _val;
+
+    private:
+
+        [[no_unique_address]] Context _readContext;
     };
 }

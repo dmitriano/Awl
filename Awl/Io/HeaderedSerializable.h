@@ -16,20 +16,20 @@ namespace awl::io
     };
 
     template <class T, class IStream = SequentialInputStream, class OStream = SequentialOutputStream,
-        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>>
-    class HeaderedSerializable : public EuphoricallySerializable<T, IStream, OStream, Hash, V>
+        class Hash = awl::crypto::Crc64, class V = mp::variant_from_struct<T>, class Context = FakeContext>
+    class HeaderedSerializable : public EuphoricallySerializable<T, IStream, OStream, Hash, V, Context>
     {
     private:
 
-        using Base = EuphoricallySerializable<T, IStream, OStream, Hash, V>;
+        using Base = EuphoricallySerializable<T, IStream, OStream, Hash, V, Context>;
 
     public:
 
         // Default budget: length + version + 64 format bytes + 64 bytes of string storage.
         HeaderedSerializable(Header header, T& val, size_t block_size = defaultBlockSize, 
-            Hash hash = {}, size_t header_limit = 2 * sizeof(size_t) + 2 * 64u)
+            Hash hash = {}, size_t header_limit = 2 * sizeof(size_t) + 2 * 64u, Context read_context = {})
         :
-            Base(val, block_size, std::move(hash)),
+            Base(val, block_size, std::move(hash), std::move(read_context)),
             expectedHeader(std::move(header)),
             headerLimit(header_limit)
         {}
