@@ -25,12 +25,13 @@ namespace awl::io
 
     public:
 
+        // Default budget: length + version + 64 format bytes + 64 resized elements.
         HeaderedSerializable(Header header, T& val, size_t block_size = defaultBlockSize, 
-            Hash hash = {}, size_t format_name_limit = 64u)
+            Hash hash = {}, size_t header_limit = 2 * sizeof(size_t) + 2 * 64u)
         :
             Base(val, block_size, std::move(hash)),
             expectedHeader(std::move(header)),
-            formatNameLimit(format_name_limit)
+            headerLimit(header_limit)
         {}
 
     protected:
@@ -39,7 +40,7 @@ namespace awl::io
         {
             Header actual_header;
 
-            read(in, actual_header, LimitedContext{ formatNameLimit });
+            read(in, actual_header, LimitedContext{ headerLimit });
 
             return validateHeader(in, actual_header);
         }
@@ -69,7 +70,7 @@ namespace awl::io
 
         void writeHeader(awl::io::SequentialOutputStream& out) const override
         {
-            write(out, expectedHeader, LimitedContext{ formatNameLimit });
+            write(out, expectedHeader);
         }
 
         virtual void readOldVersion(awl::io::SequentialInputStream& in, size_t version)
@@ -83,6 +84,6 @@ namespace awl::io
 
         Header expectedHeader;
 
-        const size_t formatNameLimit;
+        const size_t headerLimit;
     };
 }

@@ -9,6 +9,7 @@
 #include "Awl/Mp/TypeDescriptor.h"
 
 #include <QByteArray>
+#include <limits>
 
 namespace awl::mp
 {
@@ -32,15 +33,18 @@ namespace awl::io
         size_t std_size;
         read(s, std_size, ctx);
 
-        const int size = static_cast<int>(std_size);
-        
-        if (size < 0)
+        if (std_size > static_cast<size_t>(std::numeric_limits<int>::max()))
         {
-            throw awl::io::IoError(_T("A negative size of QByteArray."));
+            throw awl::io::IoError(_T("QByteArray size exceeds the supported range."));
         }
 
-        val.resize(size);
-        readRaw(s, byte_cast(val.data()), std_size);
+        if constexpr (limited_context<Context>)
+        {
+            ctx.consume(std_size);
+        }
+
+        val.resize(static_cast<int>(std_size));
+        readRaw(s, byte_cast(val.data()), std_size, ctx);
     }
 
     template <class Stream, class Context = FakeContext>

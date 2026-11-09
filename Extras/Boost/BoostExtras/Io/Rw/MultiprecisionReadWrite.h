@@ -32,6 +32,11 @@ namespace awl::io
 
         size &= ~detail::signMask;
 
+        if constexpr (limited_context<Context>)
+        {
+            ctx.consume(size);
+        }
+
         //Floating point number may require variable size buffer, so we do not use boost::container::static_vector.
         boost::container::small_vector<std::uint8_t, awl::helpers::multiprecision_descriptor<Number>::size> v(size);
 

@@ -3,16 +3,20 @@
 // Author: Dmitriano
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <utility>
-
 #pragma once
+
+#include "Awl/Io/IoException.h"
+
+#include <concepts>
+#include <cstddef>
+#include <utility>
 
 namespace awl::io
 {
     template <class T>
-    concept limited_context = requires(T& t)
+    concept limited_context = requires(const T& ctx, size_t byte_count)
     {
-        { std::as_const(t).max_length() } -> std::convertible_to<size_t>;
+        { ctx.consume(byte_count) } -> std::same_as<void>;
     };
 
     template <class T, class Stream, typename Val>
@@ -33,16 +37,25 @@ namespace awl::io
     {
     public:
 
-        LimitedContext(size_t len) : _len(len) {}
+        explicit LimitedContext(size_t limit) : _limit(limit) {}
 
-        size_t max_length() const
+        // Budget units include requested bytes and elements created by resize.
+        // Failed reads do not refund the budget; use a new context for a retry.
+        void consume(size_t byte_count) const
         {
-            return _len;
+            if (byte_count > _limit - _consumed)
+            {
+                throw IoError(std::format(_T("Deserialization budget exceeded. Limit: {}, consumed: {}, requested: {}."),
+                    _limit, _consumed, byte_count));
+            }
+
+            _consumed += byte_count;
         }
 
     private:
 
-        size_t _len;
+        const size_t _limit;
+        mutable size_t _consumed = 0;
     };
 
     static_assert(limited_context<LimitedContext>);

@@ -13,11 +13,11 @@
 
 namespace awl::io
 {
-    template <class Stream, size_t N>
+    template <class Stream, size_t N, class Context = FakeContext>
         requires sequential_input_stream<Stream>
-    constexpr void readBuffer(Stream& s, std::array<std::byte, N>& a)
+    constexpr void readBuffer(Stream& s, std::array<std::byte, N>& a, const Context& ctx = {})
     {
-        readRaw(s, a.data(), a.size());
+        readRaw(s, a.data(), a.size(), ctx);
     }
 
     template <class Stream, size_t N>
@@ -31,11 +31,9 @@ namespace awl::io
         requires (sequential_input_stream<Stream> && std::is_arithmetic_v<T> && !std::is_same<T, bool>::value)
     void read(Stream & s, T & val, const Context & ctx = {})
     {
-        static_cast<void>(ctx);
-
         std::array<std::byte, sizeof(T)> a;
 
-        readBuffer(s, a);
+        readBuffer(s, a, ctx);
 
         val = from_buffer<T>(a);
     }
@@ -56,9 +54,7 @@ namespace awl::io
         requires sequential_input_stream<Stream>
     void read(Stream & s, std::byte & val, const Context & ctx = {})
     {
-        static_cast<void>(ctx);
-
-        readRaw(s, &val, 1);
+        readRaw(s, &val, 1, ctx);
     }
 
     template <class Stream, class Context = FakeContext>

@@ -20,8 +20,8 @@ namespace awl::io
             !std::is_same<typename Container::value_type, bool>::value)
     void readVector(Stream & s, Container & v, const Context & ctx = {})
     {
-        static_cast<void>(ctx);
-        readRaw(s, byte_cast(v.data()), v.size() * sizeof(typename Container::value_type));
+        const size_t byte_count = checkedByteCount(v.size(), sizeof(typename Container::value_type));
+        readRaw(s, byte_cast(v.data()), byte_count, ctx);
     }
 
     template <class Stream, class Container, class Context = FakeContext>
@@ -100,11 +100,21 @@ namespace awl::io
         requires sequential_input_stream<Stream>
     void read(Stream & s, std::vector<T, Allocator> & v, const Context & ctx = {})
     {
-        typename std::vector<T, Allocator>::size_type size;
+        typename std::vector<T, Allocator>::size_type element_count;
 
-        read(s, size, ctx);
+        read(s, element_count, ctx);
 
-        v.resize(size);
+        if constexpr (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+        {
+            static_cast<void>(checkedByteCount(element_count, sizeof(T)));
+        }
+
+        if constexpr (limited_context<Context>)
+        {
+            ctx.consume(element_count);
+        }
+
+        v.resize(element_count);
 
         readVector(s, v, ctx);
     }
