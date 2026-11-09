@@ -1,6 +1,9 @@
 #include "Awl/Io/ReadWrite.h"
 #include "Awl/Io/HeaderedSerializable.h"
 #include "Awl/Io/VectorStream.h"
+#include "Awl/Io/Reader.h"
+#include "Awl/Io/PlainReader.h"
+#include "Awl/Io/Writer.h"
 #include "Awl/Testing/UnitTest.h"
 
 #ifdef AWL_QT
@@ -54,6 +57,156 @@ namespace
 
     static_assert(limited_context<BudgetAdapter>);
     static_assert(!limited_context<FakeContext>);
+
+    struct BudgetRecord
+    {
+        std::string name;
+        std::vector<int> values;
+        AWL_REFLECT(name, values)
+    };
+
+    struct OldBudgetRecord
+    {
+        std::string removed;
+        int value;
+        AWL_REFLECT(removed, value)
+    };
+
+    struct NewBudgetRecord
+    {
+        int value;
+        AWL_REFLECT(value)
+    };
+
+    using BudgetVariant = awl::mp::variant_from_struct<BudgetRecord>;
+    using DefaultBudgetReader = Reader<BudgetVariant, VectorInputStream>;
+    using LimitedBudgetReader = Reader<BudgetVariant, VectorInputStream, LimitedContext>;
+    using LimitedPlainBudgetReader = PlainReader<BudgetVariant, VectorInputStream, LimitedContext>;
+
+    static_assert(std::default_initializable<DefaultBudgetReader>);
+    static_assert(!std::default_initializable<LimitedBudgetReader>);
+    static_assert(std::constructible_from<LimitedBudgetReader, size_t>);
+    static_assert(!limited_context<DefaultBudgetReader>);
+    static_assert(limited_context<LimitedBudgetReader>);
+
+    struct BudgetCounter
+    {
+        explicit BudgetCounter(size_t& byte_count) : count(byte_count) {}
+        void consume(size_t byte_count) const { count += byte_count; }
+        size_t& count;
+    };
+
+    template <class T>
+    std::vector<std::byte> serializeBudgetRecord(const T& value, bool with_metadata = true)
+    {
+        std::vector<std::byte> bytes;
+        VectorOutputStream out(bytes);
+        Writer<awl::mp::variant_from_struct<T>, VectorOutputStream> writer;
+        if (with_metadata)
+        {
+            writer.writeNewPrototypes(out);
+        }
+        writer.writeV(out, value);
+        return bytes;
+    }
+}
+
+AWL_TEST(SerializationBudgetReader)
+{
+    AWL_UNUSED_CONTEXT;
+    const BudgetRecord expected{"budget", {1, 2, 3}};
+    const auto bytes = serializeBudgetRecord(expected);
+    size_t consumed = 0;
+    Reader<BudgetVariant, VectorInputStream, BudgetCounter> counter(consumed);
+    VectorInputStream count_in(bytes);
+    counter.readOldPrototypes(count_in);
+    const size_t metadata_cost = consumed;
+    BudgetRecord counted;
+    read(count_in, counted, counter); // Dispatch through the versioned context.
+    AWL_ASSERT(counted.name == expected.name && counted.values == expected.values);
+    AWL_ASSERT(metadata_cost > 0 && consumed > metadata_cost);
+
+    VectorInputStream in(bytes);
+    LimitedBudgetReader reader(consumed);
+    reader.readOldPrototypes(in);
+    BudgetRecord actual;
+    read(in, actual, reader);
+    AWL_ASSERT(actual.name == expected.name && actual.values == expected.values);
+    AWL_ASSERT(in.end());
+    awl::testing::Assert::throws<IoError>([&] { reader.consume(1); });
+
+    VectorInputStream metadata_in(bytes);
+    LimitedBudgetReader short_metadata(metadata_cost - 1);
+    awl::testing::Assert::throws<IoError>([&] { short_metadata.readOldPrototypes(metadata_in); });
+
+    VectorInputStream short_in(bytes);
+    LimitedBudgetReader short_reader(consumed - 1);
+    short_reader.readOldPrototypes(short_in);
+    awl::testing::Assert::throws<IoError>([&] { short_reader.readV(short_in, actual); });
+
+    VectorInputStream index_in(bytes);
+    LimitedBudgetReader index_reader(metadata_cost);
+    index_reader.readOldPrototypes(index_in);
+    awl::testing::Assert::throws<IoError>([&] { index_reader.readV(index_in, actual); });
+    uint16_t first_index;
+    read(index_in, first_index); // The rejected index read must not advance the stream.
+    AWL_ASSERT(first_index == 0);
+
+    VectorInputStream unlimited_in(bytes);
+    DefaultBudgetReader unlimited_reader;
+    unlimited_reader.readOldPrototypes(unlimited_in);
+    unlimited_reader.readV(unlimited_in, actual);
+    AWL_ASSERT(actual.name == expected.name && actual.values == expected.values);
+    AWL_ASSERT(unlimited_in.end());
+}
+
+AWL_TEST(SerializationBudgetPlainReader)
+{
+    AWL_UNUSED_CONTEXT;
+    const BudgetRecord expected{"plain", {4, 5}};
+    const auto bytes = serializeBudgetRecord(expected, false);
+    const size_t limit = bytes.size() + expected.name.size() + expected.values.size() * sizeof(int);
+    VectorInputStream in(bytes);
+    LimitedPlainBudgetReader reader(limit);
+    BudgetRecord actual;
+    read(in, actual, reader);
+    AWL_ASSERT(actual.name == expected.name && actual.values == expected.values);
+    AWL_ASSERT(in.end());
+    awl::testing::Assert::throws<IoError>([&] { reader.consume(1); });
+
+    VectorInputStream index_in(bytes);
+    LimitedPlainBudgetReader index_reader(0);
+    awl::testing::Assert::throws<IoError>([&] { index_reader.readV(index_in, actual); });
+    uint16_t first_index;
+    read(index_in, first_index);
+    AWL_ASSERT(first_index == 0);
+}
+
+AWL_TEST(SerializationBudgetSkippedField)
+{
+    AWL_UNUSED_CONTEXT;
+    const OldBudgetRecord expected{"discarded", 42};
+    const auto bytes = serializeBudgetRecord(expected, false);
+    using Versions = awl::mp::variant_from_structs<OldBudgetRecord, NewBudgetRecord>;
+    const size_t limit = bytes.size() + expected.removed.size();
+
+    // Use the old writer's metadata, while reading into the new structure.
+    const auto metadata = serializeBudgetRecord(expected);
+    VectorInputStream in(metadata);
+    Reader<Versions, VectorInputStream, LimitedContext> reader(limit);
+    Metadata old_metadata;
+    read(in, old_metadata);
+    reader.attachMetadata(old_metadata);
+    NewBudgetRecord actual{};
+    reader.readV(in, actual);
+    AWL_ASSERT(actual.value == expected.value);
+    AWL_ASSERT(in.end());
+    awl::testing::Assert::throws<IoError>([&] { reader.consume(1); });
+
+    VectorInputStream short_in(bytes);
+    Reader<Versions, VectorInputStream, LimitedContext> short_reader(limit - 1);
+    short_reader.attachMetadata(old_metadata);
+    awl::testing::Assert::throws<IoError>([&] { short_reader.readV(short_in, actual); });
 }
 
 AWL_TEST(SerializationBudgetCumulative)

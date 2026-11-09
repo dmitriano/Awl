@@ -27,10 +27,11 @@ namespace awl::io
 
     protected:
 
-        typename Base::StructIndexType readStructIndex(InputStream & s) const
+        template <class Context = FakeContext>
+        typename Base::StructIndexType readStructIndex(InputStream & s, const Context& ctx = {}) const
         {
             typename Base::StructIndexType index;
-            read(s, index);
+            read(s, index, ctx);
             return index;
         }
     };

@@ -19,8 +19,8 @@
 
 namespace awl::io
 {
-    template <class V, class IStream = SequentialInputStream>
-    class Reader : public BasicReader<V, IStream>
+    template <class V, class IStream = SequentialInputStream, class Context = FakeContext>
+    class Reader : public BasicReader<V, IStream>, public Context
     {
     public:
 
@@ -123,13 +123,9 @@ namespace awl::io
         
     public:
 
-        Reader() :
-            readerTuples(transform_v2t<typename Base::StructV, FieldReaderTuple>()),
-            readerArrays(transform_t2ti<FieldReaderArrayHolder>(readerTuples)),
-            skipperTuple(transform_v2t<typename Base::FieldV, FieldSkipperImpl>()),
-            skipperArray(tuple_cast<FieldSkipper>(skipperTuple)),
-            typeMap(Base::TypeMapBuilder::buildI2nMap())
-        {}
+        using Context::Context;
+
+        Reader() requires std::default_initializable<Context> = default;
 
         //Makes the new and old prototypes identical.
         void initialize()
@@ -152,7 +148,8 @@ namespace awl::io
         {
             Metadata meta;
             
-            read(s, meta);
+            // Metadata uses plain serialization with the same budget as the object tree.
+            read(s, meta, static_cast<const Context&>(*this));
 
             for (std::string& type_name : meta.typeNames)
             {
@@ -335,7 +332,7 @@ namespace awl::io
 
         typename Base::StructIndexType readStructIndex(InputStream & s) const
         {
-            typename Base::StructIndexType index = Base::readStructIndex(s);
+            typename Base::StructIndexType index = Base::readStructIndex(s, static_cast<const Context&>(*this));
             assert(index < oldPrototypes.size());
             return index;
         }
@@ -475,15 +472,15 @@ namespace awl::io
             return old_name == new_name;
         }
 
-        TupleOfFieldReaderTuple readerTuples;
-        TupleOfFieldReaderArray readerArrays;
+        TupleOfFieldReaderTuple readerTuples = transform_v2t<typename Base::StructV, FieldReaderTuple>();
+        TupleOfFieldReaderArray readerArrays = transform_t2ti<FieldReaderArrayHolder>(readerTuples);
 
-        SkipperTuple skipperTuple;
-        SkipperArray skipperArray;
+        SkipperTuple skipperTuple = transform_v2t<typename Base::FieldV, FieldSkipperImpl>();
+        SkipperArray skipperArray = tuple_cast<FieldSkipper>(skipperTuple);
 
         PrototypeVector oldPrototypes;
         mutable std::vector<std::optional<ProtoMap>> protoMaps;
 
-        typename Base::I2nMap typeMap;
+        typename Base::I2nMap typeMap = Base::TypeMapBuilder::buildI2nMap();
     };
 }
