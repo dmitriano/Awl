@@ -25,7 +25,7 @@ namespace awl::io
 
     public:
 
-        // Default budget: length + version + 64 format bytes + 64 resized elements.
+        // Default budget: length + version + 64 format bytes + 64 bytes of string storage.
         HeaderedSerializable(Header header, T& val, size_t block_size = defaultBlockSize, 
             Hash hash = {}, size_t header_limit = 2 * sizeof(size_t) + 2 * 64u)
         :

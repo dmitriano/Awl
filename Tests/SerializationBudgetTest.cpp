@@ -93,14 +93,16 @@ AWL_TEST(SerializationBudgetContainers)
 {
     AWL_UNUSED_CONTEXT;
     checkBudgetRoundTrip(std::string("abc"), sizeof(size_t) + 3 + 3);
-    checkBudgetRoundTrip(std::wstring(L"abc"), sizeof(size_t) + 3 + 3 * sizeof(wchar_t));
-    checkBudgetRoundTrip(std::vector<int>{1, 2, 3}, sizeof(size_t) + 3 + 3 * sizeof(int));
+    checkBudgetRoundTrip(std::wstring(L"abc"), sizeof(size_t) + 2 * 3 * sizeof(wchar_t));
+    checkBudgetRoundTrip(std::vector<int>{1, 2, 3}, sizeof(size_t) + 2 * 3 * sizeof(int));
+    checkBudgetRoundTrip(std::vector<bool>(8, true), sizeof(size_t) + 2);
     checkBudgetRoundTrip(std::vector<bool>{true, false, true, false, true, false, true, false, true},
-        sizeof(size_t) + 9 + 2);
+        sizeof(size_t) + 2 + 2);
+    checkBudgetRoundTrip(std::vector<bool>{}, sizeof(size_t));
     checkBudgetRoundTrip(std::vector<std::string>{"", "abc", "d"},
-        sizeof(size_t) + 3 + 3 * sizeof(size_t) + 4 + 4);
+        sizeof(size_t) + 3 * sizeof(std::string) + 3 * sizeof(size_t) + 4 + 4);
     checkBudgetRoundTrip(std::vector<std::vector<int>>{{1, 2}, {}, {3}},
-        sizeof(size_t) + 3 + 3 * sizeof(size_t) + 3 + 3 * sizeof(int));
+        sizeof(size_t) + 3 * sizeof(std::vector<int>) + 3 * sizeof(size_t) + 2 * 3 * sizeof(int));
     checkBudgetRoundTrip(std::vector<std::string>{}, sizeof(size_t));
 }
 
@@ -144,6 +146,22 @@ AWL_TEST(SerializationBudgetBeforeResize)
     AWL_ASSERT(wide == L"unchanged");
     std::vector<int> numbers{42};
     reject_resize(numbers);
+    AWL_ASSERT(numbers == std::vector<int>{42});
+
+    // Element count fits, but the estimated storage does not. Reject before resize.
+    const auto small_bytes = serializeBudgetSample(size_t{3});
+    VectorInputStream strings_in(small_bytes);
+    awl::testing::Assert::throws<IoError>([&]
+    {
+        read(strings_in, strings, LimitedContext(sizeof(size_t) + 3));
+    });
+    AWL_ASSERT(strings == std::vector<std::string>{"unchanged"});
+
+    VectorInputStream numbers_in(small_bytes);
+    awl::testing::Assert::throws<IoError>([&]
+    {
+        read(numbers_in, numbers, LimitedContext(sizeof(size_t) + 3));
+    });
     AWL_ASSERT(numbers == std::vector<int>{42});
 }
 

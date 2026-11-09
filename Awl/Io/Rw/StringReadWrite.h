@@ -32,7 +32,7 @@ namespace awl::io
 
         if constexpr (limited_context<Context>)
         {
-            ctx.consume(element_count);
+            ctx.consume(byte_count);
         }
 
         val.resize(element_count);

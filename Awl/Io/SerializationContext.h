@@ -39,7 +39,7 @@ namespace awl::io
 
         explicit LimitedContext(size_t limit) : _limit(limit) {}
 
-        // Budget units include requested bytes and elements created by resize.
+        // Budget units include requested bytes and estimated storage created by resize.
         // Failed reads do not refund the budget; use a new context for a retry.
         void consume(size_t byte_count) const
         {

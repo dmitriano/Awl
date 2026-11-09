@@ -104,14 +104,19 @@ namespace awl::io
 
         read(s, element_count, ctx);
 
-        if constexpr (std::is_arithmetic_v<T> && !std::is_same_v<T, bool>)
+        size_t allocation_size;
+        if constexpr (std::is_same_v<T, bool>)
         {
-            static_cast<void>(checkedByteCount(element_count, sizeof(T)));
+            allocation_size = element_count / 8 + (element_count % 8 != 0);
+        }
+        else
+        {
+            allocation_size = checkedByteCount(element_count, sizeof(T));
         }
 
         if constexpr (limited_context<Context>)
         {
-            ctx.consume(element_count);
+            ctx.consume(allocation_size);
         }
 
         v.resize(element_count);
