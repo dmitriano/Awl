@@ -18,7 +18,7 @@ function(awl_add_libraries)
     endif()
     # A build tree has one AWL configuration. Per-consumer MAIN/TESTS are separate.
     set(configuration "${root}")
-    foreach(setting AWL_FIND_BOOST AWL_FIND_OPENSSL AWL_FIND_QT AWL_STATIC_RUNTIME
+    foreach(setting AWL_FIND_BOOST AWL_BOOST_HEADER_ONLY AWL_FIND_OPENSSL AWL_FIND_QT AWL_STATIC_RUNTIME
             AWL_ANSI_CMD_CHAR AWL_JTHREAD_EXTRAS AWL_DEBUG_IMMUTABLE
             AWL_HAS_STD_MOVE_ONLY_FUNCTION AWL_SANITIZE_THREAD
             AWL_SANITIZE_UNDEFINED AWL_SANITIZE_ADDRESS)
@@ -89,21 +89,30 @@ function(awl_add_libraries)
         target_include_directories(AwlOptions INTERFACE "${platform}")
     endif()
     if(AWL_FIND_BOOST)
-        if(POLICY CMP0167)
-            cmake_policy(SET CMP0167 NEW)
+        if(AWL_BOOST_HEADER_ONLY)
+            # Boost.JSON's implementation is compiled into AwlBoost from Json.cpp.
+            # This mode needs no installed Boost package or compiled components.
+            find_path(AWL_BOOST_INCLUDE_DIR boost/json.hpp
+                HINTS "$ENV{BOOST_DIR}" PATH_SUFFIXES include
+                REQUIRED NO_CMAKE_FIND_ROOT_PATH)
+            target_include_directories(AwlOptions INTERFACE "${AWL_BOOST_INCLUDE_DIR}")
+        else()
+            if(POLICY CMP0167)
+                cmake_policy(SET CMP0167 NEW)
+            endif()
+            set(Boost_USE_STATIC_LIBS ON)
+            set(Boost_USE_MULTITHREADED ON)
+            set(Boost_USE_STATIC_RUNTIME ${AWL_STATIC_RUNTIME})
+            find_package(Boost COMPONENTS atomic thread container exception REQUIRED)
+            target_link_libraries(AwlOptions INTERFACE Boost::headers
+                Boost::atomic Boost::thread Boost::container Boost::exception)
         endif()
-        set(Boost_USE_STATIC_LIBS ON)
-        set(Boost_USE_MULTITHREADED ON)
-        set(Boost_USE_STATIC_RUNTIME ${AWL_STATIC_RUNTIME})
-        find_package(Boost COMPONENTS atomic thread container exception REQUIRED)
         # Unicode conversion uses Boost.Locale's header-only UTF utilities.
         target_compile_definitions(AwlOptions INTERFACE AWL_BOOST BOOST_JSON_NO_LIB BOOST_LOCALE_NO_LIB)
         target_include_directories(AwlOptions INTERFACE "${root}/Extras/Boost")
-        target_link_libraries(AwlOptions INTERFACE Boost::headers
-            Boost::atomic Boost::thread Boost::container Boost::exception)
         if(WIN32)
             target_link_libraries(AwlOptions INTERFACE crypt32 ws2_32)
-        elseif(UNIX)
+        elseif(UNIX AND NOT AWL_BOOST_HEADER_ONLY)
             target_compile_definitions(AwlOptions INTERFACE BOOST_ASIO_HAS_IO_URING)
             find_library(URING_LIB uring REQUIRED)
             target_link_libraries(AwlOptions INTERFACE "${URING_LIB}")
